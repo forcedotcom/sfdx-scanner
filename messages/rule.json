@@ -1,0 +1,6 @@
+{
+  "activate": {
+    "commandDescription": "Description of 'activate' command",
+    "rulenameDescription": "Description of 'rulename' parameter"
+  }
+}
