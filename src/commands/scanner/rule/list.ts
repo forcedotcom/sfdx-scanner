@@ -9,9 +9,9 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'rule');
 
-export default class Activate extends SfdxCommand {
+export default class List extends SfdxCommand {
 
-  public static description = messages.getMessage('activate.commandDescription');
+  public static description = messages.getMessage('list.commandDescription');
 
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
@@ -27,33 +27,37 @@ export default class Activate extends SfdxCommand {
 
   protected static flagsConfig = {
     // flag with a value (-n, --name=VALUE)
-    rulename: flags.string({
-      char: 'n',
-      description: messages.getMessage('activate.flags.rulenameDescription'),
-      required: true
-    })
+    type: flags.string({
+      char: 't',
+      description: messages.getMessage('list.flags.typeDescription')
+    }),
+    severity: flags.string({
+      char: 's',
+      description: messages.getMessage('list.flags.severityDescription')
+    }),
+    languages: flags.array({
+      char: 'l',
+      description: messages.getMessage('list.flags.languagesDescription')
+    }),
+    standard: flags.boolean({
+      char: 'd',
+      description: messages.getMessage('list.flags.standardDescription')
+    }),
+    custom: flags.boolean({
+      char: 'c',
+      description: messages.getMessage('list.flags.customDescription')
+    }),
+    active: flags.boolean({
+      char: 'a',
+      description: messages.getMessage('list.flags.activeDescription')
+    }),
+    inactive: flags.boolean({
+      char: 'i',
+      description: messages.getMessage('list.flags.inactiveDescription')
+    }),
   };
 
-  private performActivation(name: String) : Promise<boolean> {
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        res(name === 'passingval');
-      }, 2500);
-    });
-  }
-
   public async run(): Promise<AnyJson> {
-    const rulename = this.flags.rulename;
-    this.ux.log("Preparing to activate this rule: '" + rulename + "'. Here's hoping that works out for you.");
-
-    let ruleState;
-    if (await this.performActivation(rulename)) {
-      this.ux.log("Successfully activated rule: '" + rulename + "'. I'm glad that worked out so well for you.");
-      ruleState = 'active';
-    } else {
-      this.ux.log("Failed to activate rule: '" + rulename + "'. Sucks to suck.");
-      ruleState = 'inactive';
-    }
-    return {rulestate: ruleState};
+    return {};
   }
 }

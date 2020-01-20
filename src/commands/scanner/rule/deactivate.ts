@@ -29,7 +29,7 @@ export default class Deactivate extends SfdxCommand {
     // flag with a value (-n, --name=VALUE)
     rulename: flags.string({
       char: 'n',
-      description: messages.getMessage('deactivate.rulenameDescription'),
+      description: messages.getMessage('deactivate.flags.rulenameDescription'),
       required: true
     })
   };
