@@ -2,5 +2,9 @@
   "activate": {
     "commandDescription": "Description of 'activate' command",
     "rulenameDescription": "Description of 'rulename' parameter"
+  },
+  "deactivate": {
+    "commandDescription": "Description of 'deactitvate' command",
+    "rulenameDescription": "Description of 'rulename' parameter"
   }
 }
