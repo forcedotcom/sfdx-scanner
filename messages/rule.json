@@ -1,0 +1,42 @@
+{
+  "activate": {
+    "commandDescription": "[Description of 'activate' command]",
+    "flags": {
+      "rulenameDescription": "[Description of 'rulename' parameter]"
+    }
+  },
+  "deactivate": {
+    "commandDescription": "[Description of 'deactivate' command]",
+    "flags": {
+      "rulenameDescription": "[Description of 'rulename' parameter]"
+    }
+  },
+  "describe": {
+    "commandDescription": "[Description of 'describe' command]",
+    "flags": {
+      "rulenameDescription": "[Description of 'rulename' parameter]"
+    }
+  },
+  "create": {
+    "commandDescription": "[Description of 'create' command]",
+    "flags": {
+      "rulenameDescription": "[Description of 'rulename' parameter]",
+      "typeDescription": "[Description of 'type' parameter]",
+      "severityDescription": "[Description of 'severity' parameter]",
+      "languagesDescription": "[Description of 'languages' parameter]",
+      "originalDescription": "[Description of 'original' parameter]"
+    }
+  },
+  "list": {
+    "commandDescription": "[Description of 'list' command]",
+    "flags": {
+      "languagesDescription": "[Description of 'languages' parameter]",
+      "typeDescription": "[Description of 'type' parameter]",
+      "severityDescription": "[Description of 'severity' parameter]",
+      "standardDescription": "[Description of 'standard' parameter]",
+      "customDescription": "[Description of 'custom' parameter]",
+      "activeDescription": "[Description of 'active' parameter]",
+      "inactiveDescription": "[Description of 'inactive' parameter]"
+    }
+  }
+}
