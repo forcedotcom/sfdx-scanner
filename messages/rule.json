@@ -21,7 +21,7 @@
       "preparing": "[Message displayed while preparing to deactivate rule '{0}']",
       "success": "[Message for successful deactivation of rule '{0}']",
       "nosuchrule": "[Message for failed deactivation of non-existent rule '{0}']",
-      "alreadyinactive": "[Message for failed deactivation of already-active rule '{0}']",
+      "alreadyinactive": "[Message for failed deactivation of already-inactive rule '{0}']",
       "otherfailure": "[Message for weirdly-failed deactivation of rule '{0}']"
     }
   },
