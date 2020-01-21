@@ -17,9 +17,9 @@ enum DeactivationResult {
 }
 
 export default class Deactivate extends SfdxCommand {
-
+  // These determine what is printed when the -h/--help flag is supplied.
   public static description = messages.getMessage('deactivate.commandDescription');
-
+  // TODO: REWRITE THESE EXAMPLES TO BE LEGITIMATE.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
@@ -32,8 +32,9 @@ export default class Deactivate extends SfdxCommand {
 
   public static args = [{name: 'file'}];
 
+  // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
+  // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
-    // flag with a value (-n, --name=VALUE)
     rulename: flags.string({
       char: 'n',
       description: messages.getMessage('deactivate.flags.rulenameDescription'),
@@ -41,6 +42,13 @@ export default class Deactivate extends SfdxCommand {
     })
   };
 
+  /**
+   * Constructs the string logged to the console.
+   * @param {string} name - The name of the rule being targeted.
+   * @param {DeactivationResult} status - The result of the action.
+   * @returns {string} - The message describing the outcome.
+   * @private
+   */
   private buildOutputString(name : string, status : DeactivationResult) : string {
     let msgTemplate : string;
     switch (status) {
@@ -59,6 +67,12 @@ export default class Deactivate extends SfdxCommand {
     return msgTemplate.replace('{0}', name);
   }
 
+  /**
+   * Deactivates the specified rule.
+   * @param {string} name - The name of the rule being targeted.
+   * @returns {Promise<DeactivationResult>} Resolves to a successful result or rejects with a failing result.
+   * @private
+   */
   private performDeactivation(name: String) : Promise<DeactivationResult> {
     return new Promise((res, rej) => {
       setTimeout(() => {
@@ -81,6 +95,8 @@ export default class Deactivate extends SfdxCommand {
     return this.performDeactivation(rulename)
       .then((state: DeactivationResult) => {
         this.ux.log(this.buildOutputString(rulename, state));
+        // The returned JSON is used if the universally-supported --json parameter was supplied.
+        // TODO: The exact form of this JSON will probably need to change.
         return {rulestate: state};
       }, (state: DeactivationResult) => {
         throw Error(this.buildOutputString(rulename, state));

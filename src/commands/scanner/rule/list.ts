@@ -22,9 +22,9 @@ enum ActivationFilter {
 }
 
 export default class List extends SfdxCommand {
-
+  // These determine what's displayed when the --help/-h flag is supplied.
   public static description = messages.getMessage('list.commandDescription');
-
+  // TODO: WRITE LEGITIMATE EXAMPLES.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
@@ -37,8 +37,9 @@ export default class List extends SfdxCommand {
 
   public static args = [{name: 'file'}];
 
+  // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
+  // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
-    // flag with a value (-n, --name=VALUE)
     type: flags.string({
       char: 't',
       description: messages.getMessage('list.flags.typeDescription')
@@ -69,7 +70,17 @@ export default class List extends SfdxCommand {
     }),
   };
 
-  private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter, activation : ActivationFilter) : Promise<Object[]> {
+  /**
+   * Get high-level information about the rules that match the provided filter criteria.
+   * @param {string|null} type - If non-null, only rules of the specified type will be returned.
+   * @param {string|null} sev - If non-null, only rules of the specified severity will be returned.
+   * @param {string[]|null} langs - If non-null and non-empty, only rules targeting the specified languages will be returned.
+   * @param {AuthorFilter} author - Only rules authored by the specified author will be returned.
+   * @param {ActivationFilter} activation - Only rules with the specified activation status will be returned.
+   * @returns {Promise<Object[]|string>} Resolves to a list of rules, or rejects with an error message.
+   * @private
+   */
+  private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter, activation : ActivationFilter) : Promise<Object[]|string> {
     let rules = [
       {
         name: 'Rule 1',
@@ -93,6 +104,10 @@ export default class List extends SfdxCommand {
     });
   }
 
+  /**
+   * Verifies that the flags passed into this command are valid.
+   * @private
+   */
   private validateFlags() : void {
     if (this.flags.standard && this.flags.custom) {
       throw Error(messages.getMessage('list.flagValidations.authorFlagsMutex'));
@@ -103,6 +118,7 @@ export default class List extends SfdxCommand {
   }
 
   public async run(): Promise<AnyJson> {
+    // Before we do anything, make sure our flags aren't screwy.
     this.validateFlags();
 
     const type = this.flags.type;
@@ -111,11 +127,16 @@ export default class List extends SfdxCommand {
     const author = this.flags.standard ? AuthorFilter.StandardOnly : this.flags.custom ? AuthorFilter.CustomOnly : AuthorFilter.All;
     const activation = this.flags.active ? ActivationFilter.ActiveOnly : this.flags.inactive ? ActivationFilter.InactiveOnly : ActivationFilter.All;
 
+    // Since loading the rules might take a while, log something at the start so the user doesn't think we're hanging.
+    this.ux.log(messages.getMessage('list.outputTemplates.preparing'));
+
     return this.getRules(type, sev, langs, author, activation)
       .then((res : Object[]) => {
         this.ux.table(res, ['name', 'type', 'languages', 'author', 'active']);
-        return {};
-      }, (rej) => {
+        // This JSON is displayed when the --json flag is provided.
+        // TODO: The shape of this JSON will need to change.
+        return res;
+      }, (rej : string) => {
         return {};
       });
   }
