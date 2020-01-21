@@ -54,10 +54,6 @@
     },
     "outputTemplates": {
       "preparing": "[Message displayed while preparing to query rules]"
-    },
-    "flagValidations": {
-      "authorFlagsMutex": "[tentative msg: --standard/-d and --custom/-c are mutually exclusive]",
-      "activationFlagsMutex": "[tentative msg: --active/-a and --inactive/-i are mutually exclusive]"
     }
   }
 }

@@ -54,19 +54,23 @@ export default class List extends SfdxCommand {
     }),
     standard: flags.boolean({
       char: 'd',
-      description: messages.getMessage('list.flags.standardDescription')
+      description: messages.getMessage('list.flags.standardDescription'),
+      exclusive: ['custom']
     }),
     custom: flags.boolean({
       char: 'c',
-      description: messages.getMessage('list.flags.customDescription')
+      description: messages.getMessage('list.flags.customDescription'),
+      exclusive: ['standard']
     }),
     active: flags.boolean({
       char: 'a',
-      description: messages.getMessage('list.flags.activeDescription')
+      description: messages.getMessage('list.flags.activeDescription'),
+      exclusive: ['inactive']
     }),
     inactive: flags.boolean({
       char: 'i',
-      description: messages.getMessage('list.flags.inactiveDescription')
+      description: messages.getMessage('list.flags.inactiveDescription'),
+      exclusive: ['active']
     }),
   };
 
@@ -104,23 +108,7 @@ export default class List extends SfdxCommand {
     });
   }
 
-  /**
-   * Verifies that the flags passed into this command are valid.
-   * @private
-   */
-  private validateFlags() : void {
-    if (this.flags.standard && this.flags.custom) {
-      throw Error(messages.getMessage('list.flagValidations.authorFlagsMutex'));
-    }
-    if (this.flags.active && this.flags.inactive) {
-      throw Error(messages.getMessage('list.flagValidations.activationFlagsMutex'));
-    }
-  }
-
   public async run(): Promise<AnyJson> {
-    // Before we do anything, make sure our flags aren't screwy.
-    this.validateFlags();
-
     const type = this.flags.type;
     const sev = this.flags.severity;
     const langs = this.flags.languages;

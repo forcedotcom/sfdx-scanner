@@ -10,9 +10,9 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('scanner', 'rule');
 
 export default class Describe extends SfdxCommand {
-
+  // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('describe.commandDescription');
-
+  // TODO: Write real examples.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
@@ -25,8 +25,9 @@ export default class Describe extends SfdxCommand {
 
   public static args = [{name: 'file'}];
 
+  // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
+  // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
-    // flag with a value (-n, --name=VALUE)
     rulename: flags.string({
       char: 'n',
       description: messages.getMessage('describe.flags.rulenameDescription'),
