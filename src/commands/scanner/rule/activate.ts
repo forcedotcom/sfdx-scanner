@@ -9,6 +9,13 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'rule');
 
+enum ActivationResult {
+  Success = 1,
+  NoSuchRule,
+  AlreadyActive,
+  OtherFailure
+}
+
 export default class Activate extends SfdxCommand {
 
   public static description = messages.getMessage('activate.commandDescription');
@@ -34,26 +41,49 @@ export default class Activate extends SfdxCommand {
     })
   };
 
-  private performActivation(name: String) : Promise<boolean> {
+  private buildOutputString(name : string, status : ActivationResult) : string {
+    let msgTemplate : string;
+    switch (status) {
+      case ActivationResult.Success:
+        msgTemplate = messages.getMessage('activate.outputTemplates.success');
+        break;
+      case ActivationResult.NoSuchRule:
+        msgTemplate = messages.getMessage('activate.outputTemplates.nosuchrule');
+        break;
+      case ActivationResult.AlreadyActive:
+        msgTemplate = messages.getMessage('activate.outputTemplates.alreadyactive');
+        break;
+      default:
+        msgTemplate = messages.getMessage('activate.outputTemplates.otherfailure');
+    }
+    return msgTemplate.replace('{0}', name);
+  }
+
+  private async performActivation(name: string) : Promise<ActivationResult> {
     return new Promise((res, rej) => {
       setTimeout(() => {
-        res(name === 'passingval');
+        if (name === 'valid-rule') {
+          res(ActivationResult.Success);
+        } else if (name === 'non-existent-rule') {
+          rej(ActivationResult.NoSuchRule);
+        } else if (name === 'already-active-rule') {
+          rej(ActivationResult.AlreadyActive);
+        } else {
+          rej(ActivationResult.OtherFailure);
+        }
       }, 2500);
     });
   }
 
   public async run(): Promise<AnyJson> {
     const rulename = this.flags.rulename;
-    this.ux.log("Preparing to activate this rule: '" + rulename + "'. Here's hoping that works out for you.");
-
-    let ruleState;
-    if (await this.performActivation(rulename)) {
-      this.ux.log("Successfully activated rule: '" + rulename + "'. I'm glad that worked out so well for you.");
-      ruleState = 'active';
-    } else {
-      this.ux.log("Failed to activate rule: '" + rulename + "'. Sucks to suck.");
-      ruleState = 'inactive';
-    }
-    return {rulestate: ruleState};
+    this.ux.log(messages.getMessage('activate.outputTemplates.preparing').replace('{0}', rulename));
+    return this.performActivation(rulename)
+      .then((state: ActivationResult) => {
+        this.ux.log(this.buildOutputString(rulename, state));
+        return {rulestate: state};
+      }, (state: ActivationResult) => {
+        throw Error(this.buildOutputString(rulename, state));
+      });
   }
 }

@@ -9,6 +9,13 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'rule');
 
+enum DeactivationResult {
+  Success = 1,
+  NoSuchRule,
+  AlreadyInactive,
+  OtherFailure
+}
+
 export default class Deactivate extends SfdxCommand {
 
   public static description = messages.getMessage('deactivate.commandDescription');
@@ -34,26 +41,49 @@ export default class Deactivate extends SfdxCommand {
     })
   };
 
-  private performDeactivation(name: String) : Promise<boolean> {
+  private buildOutputString(name : string, status : DeactivationResult) : string {
+    let msgTemplate : string;
+    switch (status) {
+      case DeactivationResult.Success:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.success');
+        break;
+      case DeactivationResult.NoSuchRule:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.nosuchrule');
+        break;
+      case DeactivationResult.AlreadyInactive:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.alreadyactive');
+        break;
+      default:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.otherfailure');
+    }
+    return msgTemplate.replace('{0}', name);
+  }
+
+  private performDeactivation(name: String) : Promise<DeactivationResult> {
     return new Promise((res, rej) => {
       setTimeout(() => {
-        res(name === 'passingval');
+        if (name === 'valid-rule') {
+          res(DeactivationResult.Success);
+        } else if (name === 'non-existent-rule') {
+          rej(DeactivationResult.NoSuchRule);
+        } else if (name === 'already-inactive-rule') {
+          rej(DeactivationResult.AlreadyActive);
+        } else {
+          rej(DeactivationResult.OtherFailure);
+        }
       }, 2500);
     });
   }
 
   public async run(): Promise<AnyJson> {
     const rulename = this.flags.rulename;
-    this.ux.log("Preparing to deactivate this rule: '" + rulename + "'. Here's hoping that works out for you.");
-
-    let ruleState;
-    if (await this.performDeactivation(rulename)) {
-      this.ux.log("Successfully deactivated rule: '" + rulename + "'. I'm glad that worked out so well for you.");
-      ruleState = 'inactive';
-    } else {
-      this.ux.log("Failed to deactivate rule: '" + rulename + "'. Sucks to suck.");
-      ruleState = 'active';
-    }
-    return {rulestate: ruleState};
+    this.ux.log(messages.getMessage('deactivate.outputTemplates.preparing').replace('{0}', rulename));
+    return this.performDeactivation(rulename)
+      .then((state: DeactivationResult) => {
+        this.ux.log(this.buildOutputString(rulename, state));
+        return {rulestate: state};
+      }, (state: DeactivationResult) => {
+        throw Error(this.buildOutputString(rulename, state));
+      });
   }
 }
