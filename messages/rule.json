@@ -51,6 +51,10 @@
       "customDescription": "[Description of 'custom' parameter]",
       "activeDescription": "[Description of 'active' parameter]",
       "inactiveDescription": "[Description of 'inactive' parameter]"
+    },
+    "flagValidations": {
+      "authorFlagsMutex": "[tentative msg: --standard/-d and --custom/-c are mutually exclusive]",
+      "activationFlagsMutex": "[tentative msg: --active/-a and --inactive/-i are mutually exclusive]"
     }
   }
 }
