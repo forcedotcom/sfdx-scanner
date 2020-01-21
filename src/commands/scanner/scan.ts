@@ -1,7 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 
-import PMD, { Format } from '../../../src/lib/pmd/pmd';
+import PmdWrapper, { Format } from '../../lib/pmd/PmdWrapper';
 
 // import { AnyJson } from '@salesforce/ts-types';
 
@@ -28,20 +28,23 @@ export default class Scan extends SfdxCommand {
 
   protected static flagsConfig = {
     ruleset: flags.string({ char: 'R', description: messages.getMessage('rulesetFlagDescription') }),
-    filepath: flags.string({ char: 'd', description: messages.getMessage('filepathFlagDescription') })
+    filepath: flags.string({ char: 'd', description: messages.getMessage('filepathFlagDescription') }),
+    report: flags.string({ char: 'r', description: messages.getMessage('reportFlagDescription') })
   };
 
   public async run(): Promise<any> {
     const rulesetFiles = this.flags.ruleset;
     const filepathName = this.flags.filepath;
+    const report = this.flags.report;
 
 
     this.ux.log(`Location of ruleset is ${rulesetFiles}`);
     this.ux.log(`File path is ${filepathName}`);
 
+
     this.ux.log('Handing off to PMD');
-    PMD.execute(filepathName, rulesetFiles, Format.JSON);
-    this.ux.log('Completed PMD execution');
+    PmdWrapper.execute(filepathName, rulesetFiles, Format.CSV, report);
+
 
     return { ruleset: rulesetFiles, filepath: filepathName };
   }

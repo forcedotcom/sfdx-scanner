@@ -10,8 +10,6 @@
     "@oclif/errors": "^1",
     "@salesforce/command": "^2.1.4",
     "@salesforce/core": "^2.1.6",
-    "java": "0.12.0",
-    "node-unzip-2": "0.2.8",
     "tslib": "^1"
   },
   "devDependencies": {
@@ -69,6 +67,7 @@
     "posttest": "tslint -p test -t stylish",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif-dev readme && git add README.md"
+    "version": "oclif-dev readme && git add README.md",
+    "postinstall": "./download-pmd.sh"
   }
 }
