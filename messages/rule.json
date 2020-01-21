@@ -3,12 +3,26 @@
     "commandDescription": "[Description of 'activate' command]",
     "flags": {
       "rulenameDescription": "[Description of 'rulename' parameter]"
+    },
+    "outputTemplates": {
+      "preparing": "[Message displayed while preparing to activate rule '{0}']",
+      "success": "[Message for successful activation of rule '{0}']",
+      "nosuchrule": "[Message for failed activation of non-existent rule '{0}']",
+      "alreadyactive": "[Message for failed activation of already-active rule '{0}']",
+      "otherfailure": "[Message for weirdly-failed activation of rule '{0}']"
     }
   },
   "deactivate": {
     "commandDescription": "[Description of 'deactivate' command]",
     "flags": {
       "rulenameDescription": "[Description of 'rulename' parameter]"
+    },
+    "outputTemplates": {
+      "preparing": "[Message displayed while preparing to deactivate rule '{0}']",
+      "success": "[Message for successful deactivation of rule '{0}']",
+      "nosuchrule": "[Message for failed deactivation of non-existent rule '{0}']",
+      "alreadyinactive": "[Message for failed deactivation of already-inactive rule '{0}']",
+      "otherfailure": "[Message for weirdly-failed deactivation of rule '{0}']"
     }
   },
   "describe": {
@@ -37,6 +51,9 @@
       "customDescription": "[Description of 'custom' parameter]",
       "activeDescription": "[Description of 'active' parameter]",
       "inactiveDescription": "[Description of 'inactive' parameter]"
+    },
+    "outputTemplates": {
+      "preparing": "[Message displayed while preparing to query rules]"
     }
   }
 }

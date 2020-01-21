@@ -9,10 +9,17 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'rule');
 
+enum DeactivationResult {
+  Success = 1,
+  NoSuchRule,
+  AlreadyInactive,
+  OtherFailure
+}
+
 export default class Deactivate extends SfdxCommand {
-
+  // These determine what is printed when the -h/--help flag is supplied.
   public static description = messages.getMessage('deactivate.commandDescription');
-
+  // TODO: REWRITE THESE EXAMPLES TO BE LEGITIMATE.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
@@ -25,8 +32,9 @@ export default class Deactivate extends SfdxCommand {
 
   public static args = [{name: 'file'}];
 
+  // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
+  // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
-    // flag with a value (-n, --name=VALUE)
     rulename: flags.string({
       char: 'n',
       description: messages.getMessage('deactivate.flags.rulenameDescription'),
@@ -34,26 +42,64 @@ export default class Deactivate extends SfdxCommand {
     })
   };
 
-  private performDeactivation(name: String) : Promise<boolean> {
+  /**
+   * Constructs the string logged to the console.
+   * @param {string} name - The name of the rule being targeted.
+   * @param {DeactivationResult} status - The result of the action.
+   * @returns {string} - The message describing the outcome.
+   * @private
+   */
+  private buildOutputString(name : string, status : DeactivationResult) : string {
+    let msgTemplate : string;
+    switch (status) {
+      case DeactivationResult.Success:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.success');
+        break;
+      case DeactivationResult.NoSuchRule:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.nosuchrule');
+        break;
+      case DeactivationResult.AlreadyInactive:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.alreadyactive');
+        break;
+      default:
+        msgTemplate = messages.getMessage('deactivate.outputTemplates.otherfailure');
+    }
+    return msgTemplate.replace('{0}', name);
+  }
+
+  /**
+   * Deactivates the specified rule.
+   * @param {string} name - The name of the rule being targeted.
+   * @returns {Promise<DeactivationResult>} Resolves to a successful result or rejects with a failing result.
+   * @private
+   */
+  private performDeactivation(name: String) : Promise<DeactivationResult> {
     return new Promise((res, rej) => {
       setTimeout(() => {
-        res(name === 'passingval');
+        if (name === 'valid-rule') {
+          res(DeactivationResult.Success);
+        } else if (name === 'non-existent-rule') {
+          rej(DeactivationResult.NoSuchRule);
+        } else if (name === 'already-inactive-rule') {
+          rej(DeactivationResult.AlreadyActive);
+        } else {
+          rej(DeactivationResult.OtherFailure);
+        }
       }, 2500);
     });
   }
 
   public async run(): Promise<AnyJson> {
     const rulename = this.flags.rulename;
-    this.ux.log("Preparing to deactivate this rule: '" + rulename + "'. Here's hoping that works out for you.");
-
-    let ruleState;
-    if (await this.performDeactivation(rulename)) {
-      this.ux.log("Successfully deactivated rule: '" + rulename + "'. I'm glad that worked out so well for you.");
-      ruleState = 'inactive';
-    } else {
-      this.ux.log("Failed to deactivate rule: '" + rulename + "'. Sucks to suck.");
-      ruleState = 'active';
-    }
-    return {rulestate: ruleState};
+    this.ux.log(messages.getMessage('deactivate.outputTemplates.preparing').replace('{0}', rulename));
+    return this.performDeactivation(rulename)
+      .then((state: DeactivationResult) => {
+        this.ux.log(this.buildOutputString(rulename, state));
+        // The returned JSON is used if the universally-supported --json parameter was supplied.
+        // TODO: The exact form of this JSON will probably need to change.
+        return {rulestate: state};
+      }, (state: DeactivationResult) => {
+        throw Error(this.buildOutputString(rulename, state));
+      });
   }
 }
