@@ -81,7 +81,7 @@ export default class List extends SfdxCommand {
    * @param {string[]|null} langs - If non-null and non-empty, only rules targeting the specified languages will be returned.
    * @param {AuthorFilter} author - Only rules authored by the specified author will be returned.
    * @param {ActivationFilter} activation - Only rules with the specified activation status will be returned.
-   * @returns {Promise<Object[]|string>} Resolves to a list of rules, or rejects with an error message.
+   * @returns {Promise<AnyJson[]|string>} Resolves to a list of rules, or rejects with an error message.
    * @private
    */
   private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter, activation : ActivationFilter) : Promise<AnyJson[]|string> {
