@@ -84,7 +84,7 @@ export default class List extends SfdxCommand {
    * @returns {Promise<Object[]|string>} Resolves to a list of rules, or rejects with an error message.
    * @private
    */
-  private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter, activation : ActivationFilter) : Promise<Object[]|string> {
+  private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter, activation : ActivationFilter) : Promise<AnyJson[]|string> {
     let rules = [
       {
         name: 'Rule 1',
@@ -119,7 +119,7 @@ export default class List extends SfdxCommand {
     this.ux.log(messages.getMessage('list.outputTemplates.preparing'));
 
     return this.getRules(type, sev, langs, author, activation)
-      .then((res : Object[]) => {
+      .then((res : AnyJson[]) => {
         this.ux.table(res, ['name', 'type', 'languages', 'author', 'active']);
         // This JSON is displayed when the --json flag is provided.
         // TODO: The shape of this JSON will need to change.

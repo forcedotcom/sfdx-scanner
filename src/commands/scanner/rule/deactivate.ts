@@ -81,7 +81,7 @@ export default class Deactivate extends SfdxCommand {
         } else if (name === 'non-existent-rule') {
           rej(DeactivationResult.NoSuchRule);
         } else if (name === 'already-inactive-rule') {
-          rej(DeactivationResult.AlreadyActive);
+          rej(DeactivationResult.AlreadyInactive);
         } else {
           rej(DeactivationResult.OtherFailure);
         }
