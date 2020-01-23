@@ -1,0 +1,6 @@
+{
+  "commandDescription": "[Description of 'run' command]",
+  "flags": {
+    "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]"
+  }
+}

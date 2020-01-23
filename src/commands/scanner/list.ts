@@ -7,7 +7,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('scanner', 'rule');
+const messages = Messages.loadMessages('scanner', 'list');
 
 enum AuthorFilter {
   All = 1,
@@ -23,7 +23,7 @@ enum ActivationFilter {
 
 export default class List extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
-  public static description = messages.getMessage('list.commandDescription');
+  public static description = messages.getMessage('commandDescription');
   // TODO: WRITE LEGITIMATE EXAMPLES.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
@@ -42,34 +42,34 @@ export default class List extends SfdxCommand {
   protected static flagsConfig = {
     type: flags.string({
       char: 't',
-      description: messages.getMessage('list.flags.typeDescription')
+      description: messages.getMessage('flags.typeDescription')
     }),
     severity: flags.string({
       char: 's',
-      description: messages.getMessage('list.flags.severityDescription')
+      description: messages.getMessage('flags.severityDescription')
     }),
     languages: flags.array({
       char: 'l',
-      description: messages.getMessage('list.flags.languagesDescription')
+      description: messages.getMessage('flags.languagesDescription')
     }),
     standard: flags.boolean({
       char: 'd',
-      description: messages.getMessage('list.flags.standardDescription'),
+      description: messages.getMessage('flags.standardDescription'),
       exclusive: ['custom']
     }),
     custom: flags.boolean({
       char: 'c',
-      description: messages.getMessage('list.flags.customDescription'),
+      description: messages.getMessage('flags.customDescription'),
       exclusive: ['standard']
     }),
     active: flags.boolean({
       char: 'a',
-      description: messages.getMessage('list.flags.activeDescription'),
+      description: messages.getMessage('flags.activeDescription'),
       exclusive: ['inactive']
     }),
     inactive: flags.boolean({
       char: 'i',
-      description: messages.getMessage('list.flags.inactiveDescription'),
+      description: messages.getMessage('flags.inactiveDescription'),
       exclusive: ['active']
     }),
   };
@@ -116,7 +116,7 @@ export default class List extends SfdxCommand {
     const activation = this.flags.active ? ActivationFilter.ActiveOnly : this.flags.inactive ? ActivationFilter.InactiveOnly : ActivationFilter.All;
 
     // Since loading the rules might take a while, log something at the start so the user doesn't think we're hanging.
-    this.ux.log(messages.getMessage('list.outputTemplates.preparing'));
+    this.ux.log(messages.getMessage('outputTemplates.preparing'));
 
     return this.getRules(type, sev, langs, author, activation)
       .then((res : AnyJson[]) => {

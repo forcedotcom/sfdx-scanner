@@ -7,12 +7,12 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('scanner', 'rule');
+const messages = Messages.loadMessages('scanner', 'run');
 
-export default class Create extends SfdxCommand {
-
-  public static description = messages.getMessage('create.commandDescription');
-
+export default class Run extends SfdxCommand {
+  // These determine what's displayed when the --help/-h flag is provided.
+  public static description = messages.getMessage('commandDescription');
+  // TODO: Write real examples.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
@@ -25,28 +25,10 @@ export default class Create extends SfdxCommand {
 
   public static args = [{name: 'file'}];
 
+  // This defines the flags accepted by this command.
   protected static flagsConfig = {
-    // flag with a value (-n, --name=VALUE)
-    rulename: flags.string({
-      char: 'n',
-      description: messages.getMessage('create.flags.rulenameDescription'),
-      required: true
-    }),
-    type: flags.string({
-      char: 't',
-      description: messages.getMessage('create.flags.typeDescription')
-    }),
-    severity: flags.string({
-      char: 's',
-      description: messages.getMessage('create.flags.severityDescription')
-    }),
-    languages: flags.array({
-      char: 'l',
-      description: messages.getMessage('create.flags.languagesDescription')
-    }),
-    original: flags.filepath({
-      char: 'o',
-      description: messages.getMessage('create.flags.originalDescription')
+    "suppress-warnings": flags.boolean({
+      description: messages.getMessage('flags.suppresswarningsDescription')
     })
   };
 

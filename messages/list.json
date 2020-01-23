@@ -1,0 +1,15 @@
+{
+  "commandDescription": "[Description of 'list' command]",
+  "flags": {
+    "languagesDescription": "[Description of 'languages' parameter]",
+    "typeDescription": "[Description of 'type' parameter]",
+    "severityDescription": "[Description of 'severity' parameter]",
+    "standardDescription": "[Description of 'standard' parameter]",
+    "customDescription": "[Description of 'custom' parameter]",
+    "activeDescription": "[Description of 'active' parameter]",
+    "inactiveDescription": "[Description of 'inactive' parameter]"
+  },
+  "outputTemplates": {
+    "preparing": "[Message displayed while preparing to query rules]"
+  }
+}

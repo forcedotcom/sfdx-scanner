@@ -7,11 +7,11 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('scanner', 'rule');
+const messages = Messages.loadMessages('scanner', 'describe');
 
 export default class Describe extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is provided.
-  public static description = messages.getMessage('describe.commandDescription');
+  public static description = messages.getMessage('commandDescription');
   // TODO: Write real examples.
   public static examples = [
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
@@ -30,7 +30,7 @@ export default class Describe extends SfdxCommand {
   protected static flagsConfig = {
     rulename: flags.string({
       char: 'n',
-      description: messages.getMessage('describe.flags.rulenameDescription'),
+      description: messages.getMessage('flags.rulenameDescription'),
       required: true
     })
   };
