@@ -32,7 +32,7 @@ export default class Run extends SfdxCommand {
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
       // If you're specifying by name, it doesn't make sense to let you specify by any other means.
-      exclusive: ['type', 'severity']
+      exclusive: ['type', 'severity', 'exclude-rule']
     }),
     type: flags.string({
       char: 't',
@@ -42,22 +42,27 @@ export default class Run extends SfdxCommand {
       char: 's',
       description: messages.getMessage('flags.severityDescription')
     }),
-    // These flags are how you choose which files you're targeting.
-    file: flags.string({
-      char: 'f',
-      description: messages.getMessage('flags.fileDescription'),
-      exclusive: ['directory', 'org']
+    "exclude-rule": flags.array({
+      description: messages.getMessage('flags.excluderuleDescription')
     }),
-    directory: flags.string({
+    // These flags are how you choose which files you're targeting.
+    file: flags.array({
+      char: 'f',
+      description: messages.getMessage('flags.fileDescription')
+    }),
+    directory: flags.array({
       char: 'd',
-      description: messages.getMessage('flags.directoryDescription'),
-      exclusive: ['file', 'org']
+      description: messages.getMessage('flags.directoryDescription')
+    }),
+    exclude: flags.array({
+      char: 'x',
+      description: messages.getMessage('flags.excludeDescription')
     }),
     org: flags.string({
       char: 'a',
       description: messages.getMessage('flags.orgDescription'),
       // If you're specifying an org, it doesn't make sense to let you specify anything else.
-      exclusive: ['file', 'directory']
+      exclusive: ['file', 'directory', 'exclude']
     }),
     "suppress-warnings": flags.boolean({
       description: messages.getMessage('flags.suppresswarningsDescription')
