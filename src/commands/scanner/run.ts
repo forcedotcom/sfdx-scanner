@@ -27,6 +27,38 @@ export default class Run extends SfdxCommand {
 
   // This defines the flags accepted by this command.
   protected static flagsConfig = {
+    // These flags are how you choose which rules you're running.
+    rulename: flags.string({
+      char: 'n',
+      description: messages.getMessage('flags.rulenameDescription'),
+      // If you're specifying by name, it doesn't make sense to let you specify by any other means.
+      exclusive: ['type', 'severity']
+    }),
+    type: flags.string({
+      char: 't',
+      description: messages.getMessage('flags.typeDescription')
+    }),
+    severity: flags.string({
+      char: 's',
+      description: messages.getMessage('flags.severityDescription')
+    }),
+    // These flags are how you choose which files you're targeting.
+    file: flags.string({
+      char: 'f',
+      description: messages.getMessage('flags.fileDescription'),
+      exclusive: ['directory', 'org']
+    }),
+    directory: flags.string({
+      char: 'd',
+      description: messages.getMessage('flags.directoryDescription'),
+      exclusive: ['file', 'org']
+    }),
+    org: flags.string({
+      char: 'a',
+      description: messages.getMessage('flags.orgDescription'),
+      // If you're specifying an org, it doesn't make sense to let you specify anything else.
+      exclusive: ['file', 'directory']
+    }),
     "suppress-warnings": flags.boolean({
       description: messages.getMessage('flags.suppresswarningsDescription')
     })

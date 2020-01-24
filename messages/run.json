@@ -1,6 +1,12 @@
 {
   "commandDescription": "[Description of 'run' command]",
   "flags": {
+    "rulenameDescription": "[Description of 'rulename' parameter]",
+    "typeDescription": "[Description of 'type' parameter]",
+    "severityDescription": "[Description of 'severity' parameter]",
+    "fileDescription": "[Description of 'file' parameter]",
+    "directoryDescription": "[Description of 'directory' parameter]",
+    "orgDescription": "[Description of 'org' parameter]",
     "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]"
   }
 }

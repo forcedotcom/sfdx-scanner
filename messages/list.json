@@ -5,9 +5,7 @@
     "typeDescription": "[Description of 'type' parameter]",
     "severityDescription": "[Description of 'severity' parameter]",
     "standardDescription": "[Description of 'standard' parameter]",
-    "customDescription": "[Description of 'custom' parameter]",
-    "activeDescription": "[Description of 'active' parameter]",
-    "inactiveDescription": "[Description of 'inactive' parameter]"
+    "customDescription": "[Description of 'custom' parameter]"
   },
   "outputTemplates": {
     "preparing": "[Message displayed while preparing to query rules]"
