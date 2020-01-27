@@ -32,11 +32,15 @@ export default class Run extends SfdxCommand {
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
       // If you're specifying by name, it doesn't make sense to let you specify by any other means.
-      exclusive: ['type', 'severity', 'exclude-rule']
+      exclusive: ['category', 'ruleset', 'severity', 'exclude-rule']
     }),
-    type: flags.string({
-      char: 't',
-      description: messages.getMessage('flags.typeDescription')
+    category: flags.array({
+      char: 'c',
+      description: messages.getMessage('flags.categoryDescription')
+    }),
+    ruleset: flags.array({
+      char: 'r',
+      description: messages.getMessage('flags.rulesetDescription')
     }),
     severity: flags.string({
       char: 's',
@@ -64,6 +68,7 @@ export default class Run extends SfdxCommand {
       // If you're specifying an org, it doesn't make sense to let you specify anything else.
       exclusive: ['file', 'directory', 'exclude']
     }),
+    // These flags modify how the process runs, rather than what it consumes.
     "suppress-warnings": flags.boolean({
       description: messages.getMessage('flags.suppresswarningsDescription')
     })

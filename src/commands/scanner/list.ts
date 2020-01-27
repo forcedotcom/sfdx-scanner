@@ -33,17 +33,21 @@ export default class List extends SfdxCommand {
   // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
   // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
-    type: flags.string({
-      char: 't',
-      description: messages.getMessage('flags.typeDescription')
+    category: flags.array({
+      char: 'c',
+      description: messages.getMessage('flags.categoryDescription')
+    }),
+    ruleset: flags.array({
+      char: 'r',
+      description: messages.getMessage('flags.rulesetDescription')
     }),
     severity: flags.string({
       char: 's',
       description: messages.getMessage('flags.severityDescription')
     }),
-    languages: flags.array({
+    language: flags.array({
       char: 'l',
-      description: messages.getMessage('flags.languagesDescription')
+      description: messages.getMessage('flags.languageDescription')
     }),
     standard: flags.boolean({
       description: messages.getMessage('flags.standardDescription'),
@@ -57,24 +61,27 @@ export default class List extends SfdxCommand {
 
   /**
    * Get high-level information about the rules that match the provided filter criteria.
-   * @param {string|null} type - If non-null, only rules of the specified type will be returned.
+   * @param {string[]|null} cats - If non-null and non-empty, only rules with a matching category tag will be returned.
+   * @param {string[]|null} rulesets - If non-null and non-empty, only rules in the given ruleset will be returned.
    * @param {string|null} sev - If non-null, only rules of the specified severity will be returned.
    * @param {string[]|null} langs - If non-null and non-empty, only rules targeting the specified languages will be returned.
    * @param {AuthorFilter} author - Only rules authored by the specified author will be returned.
    * @returns {Promise<AnyJson[]|string>} Resolves to a list of rules, or rejects with an error message.
    * @private
    */
-  private async getRules(type : string, sev : string, langs : string[], author : AuthorFilter) : Promise<AnyJson[]|string> {
+  private async getRules(cats : string[], rulesets : string[], sev : string, langs : string[], author : AuthorFilter) : Promise<AnyJson[]|string> {
     let rules = [
       {
         name: 'Rule 1',
-        type: 'Security',
+        categories: ['Best Practice', 'Code Styling'],
+        rulesets: ['core/best-practice'],
         languages: ['JS', 'Apex', 'Java'],
         author: 'Salesforce'
       },
       {
         name: 'Rule 2',
-        type: 'Best Practice',
+        categories: ['Security', 'XSS'],
+        rulesets: ['lib/security'],
         languages: ['JS'],
         author: 'Doofenshmirtz Evil Inc'
       }
@@ -87,17 +94,18 @@ export default class List extends SfdxCommand {
   }
 
   public async run(): Promise<AnyJson> {
-    const type = this.flags.type;
+    const cats = this.flags.category;
+    const rulesets = this.flags.ruleset;
     const sev = this.flags.severity;
-    const langs = this.flags.languages;
+    const langs = this.flags.language;
     const author = this.flags.standard ? AuthorFilter.StandardOnly : this.flags.custom ? AuthorFilter.CustomOnly : AuthorFilter.All;
 
     // Since loading the rules might take a while, log something at the start so the user doesn't think we're hanging.
     this.ux.log(messages.getMessage('outputTemplates.preparing'));
 
-    return this.getRules(type, sev, langs, author)
+    return this.getRules(cats, rulesets, sev, langs, author)
       .then((res : AnyJson[]) => {
-        this.ux.table(res, ['name', 'type', 'languages', 'author']);
+        this.ux.table(res, ['name', 'categories', 'rulesets', 'languages', 'author']);
         // This JSON is displayed when the --json flag is provided.
         // TODO: The shape of this JSON will need to change.
         return res;

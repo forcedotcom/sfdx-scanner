@@ -1,8 +1,9 @@
 {
   "commandDescription": "[Description of 'list' command]",
   "flags": {
-    "languagesDescription": "[Description of 'languages' parameter]",
-    "typeDescription": "[Description of 'type' parameter]",
+    "languageDescription": "[Description of 'language' parameter]",
+    "categoryDescription": "[Description of 'category' parameter]",
+    "rulesetDescription": "[Description of 'ruleset' parameter]",
     "severityDescription": "[Description of 'severity' parameter]",
     "standardDescription": "[Description of 'standard' parameter]",
     "customDescription": "[Description of 'custom' parameter]"

@@ -2,7 +2,8 @@
   "commandDescription": "[Description of 'run' command]",
   "flags": {
     "rulenameDescription": "[Description of 'rulename' parameter]",
-    "typeDescription": "[Description of 'type' parameter]",
+    "categoryDescription": "[Description of 'category' parameter]",
+    "rulesetDescription": "[Description of 'ruleset' parameter]",
     "severityDescription": "[Description of 'severity' parameter]",
     "excluderuleDescription": "[Description of 'exclude-rule' parameter]",
     "fileDescription": "[Description of 'file' parameter]",
