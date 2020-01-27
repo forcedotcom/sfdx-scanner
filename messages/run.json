@@ -1,0 +1,15 @@
+{
+  "commandDescription": "[Description of 'run' command]",
+  "flags": {
+    "rulenameDescription": "[Description of 'rulename' parameter]",
+    "categoryDescription": "[Description of 'category' parameter]",
+    "rulesetDescription": "[Description of 'ruleset' parameter]",
+    "severityDescription": "[Description of 'severity' parameter]",
+    "excluderuleDescription": "[Description of 'exclude-rule' parameter]",
+    "fileDescription": "[Description of 'file' parameter]",
+    "directoryDescription": "[Description of 'directory' parameter]",
+    "orgDescription": "[Description of 'org' parameter]",
+    "excludeDescription": "[Description of 'exclude' parameter]",
+    "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]"
+  }
+}

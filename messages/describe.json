@@ -1,0 +1,6 @@
+{
+  "commandDescription": "[Description of 'describe' command]",
+  "flags": {
+    "rulenameDescription": "[Description of 'rulename' parameter]"
+  }
+}

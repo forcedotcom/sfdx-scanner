@@ -49,12 +49,7 @@
         "description": "Commands to say hello."
       },
       "scanner": {
-        "description": "[Description of scanner plugin goes here]",
-        "subtopics": {
-          "rule": {
-            "description": "[Description of 'rule' subtopic goes here]"
-          }
-        }
+        "description": "[Description of scanner plugin goes here]"
       }
     },
     "devPlugins": [
