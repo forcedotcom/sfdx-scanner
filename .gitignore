@@ -8,6 +8,7 @@
 /package-lock.json
 /tmp
 node_modules
+/out
 # Logs
 logs
 *.log
