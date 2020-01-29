@@ -9,10 +9,10 @@
 usage(){
 	echo "
 	usage: $0 [options]
-	$0 downloads and installs PMD
+	$0 downloads and sets up PMD
 	OPTIONS:
-    -h | --help 		Shows the usage information
-    -f | --force        Forces download of PMD. Default behavior is to download/install PMD only if needed  
+    -h | --help         Shows the usage information
+    -f | --force        Forces download of PMD. Default behavior is to download/setup PMD only if needed  
 	"
 }
 
@@ -59,7 +59,7 @@ if [ -d "${PMD_DIR}" ]; then
         echo "PMD contents look unchanged"
         REQUIRES_SETUP=false
     else
-        echo "PMD contents appear to have been modified"
+        echo "Information missing or PMD contents appear to have been modified"
     fi
 else
     echo "No PMD setup found."
