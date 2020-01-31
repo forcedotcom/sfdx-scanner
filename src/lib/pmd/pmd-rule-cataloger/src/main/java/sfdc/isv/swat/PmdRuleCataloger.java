@@ -73,10 +73,10 @@ class PmdRuleCataloger {
       linkRulesToRulesets(rules, rulesets);
     }
 
-    // STEP X: Build a JSON using all of our objects.
-    // TODO: REPLACE THE EMPTY LISTS IN THE CONSTRUCTOR.
-    CatalogJson json = new CatalogJson(new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+    // STEP 5: Build a JSON using all of our objects.
+    CatalogJson json = new CatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
 
+    System.out.println(json.constructJson().toJSONString());
 
     // STEP Y: Write the JSON to a file.
     // TODO: IMPLEMENT THAT.
@@ -227,7 +227,16 @@ class PmdRuleCataloger {
   }
 
   private void linkDependentRulesets(List<CatalogRuleset> rulesets) {
-    // TODO: FILL THIS IN ONCE YOU'VE FIGURED OUT THE REST.
+    // Map the rulesets by their path.
+    Map<String,CatalogRuleset> rulesetsByPath = new HashMap<>();
+    for (CatalogRuleset ruleset : rulesets) {
+      rulesetsByPath.put(ruleset.getPath(), ruleset);
+    }
+
+    // Next, feed the map into each ruleset to see which ones it depends on.
+    for (CatalogRuleset ruleset : rulesets) {
+      ruleset.processDependencies(rulesetsByPath);
+    }
   }
 
   private void linkRulesToRulesets(List<CatalogRule> rules, List<CatalogRuleset> rulesets) {

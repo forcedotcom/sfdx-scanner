@@ -21,8 +21,16 @@ class CatalogRuleset {
    */
   private Map<String,Set<String>> bulkCategoryReferences = new HashMap<>();
   private Map<String,Set<String>> bulkRulesetReferences = new HashMap<>();
-
-  private List<CatalogRuleset> dependentRulesets = new ArrayList<>();
+  /**
+   * This is going to be a set of all rulesets that reference this one. We'll walk up the dependency chain when we're
+   * assigning rules to rulesets.
+   */
+  private Set<CatalogRuleset> dependentRulesets = new HashSet<>();
+  /**
+   * This is going to be a set of the paths to every ruleset that this one references. We'll use it when we're building
+   * the dependentRulesets set above.
+   */
+  private Set<String> referencedRulesets = new HashSet<>();
 
   CatalogRuleset(Element root, String path) {
     this.name = root.getAttribute("name");
@@ -48,6 +56,16 @@ class CatalogRuleset {
 
   void processRule(CatalogRule rule) {
     recursivelyProcessRule(rule, null, 0);
+  }
+
+  void processDependencies(Map<String,CatalogRuleset> rulesetsByPath) {
+    for (String ref : referencedRulesets) {
+      rulesetsByPath.get(ref).addDependent(this);
+    }
+  }
+
+  private void addDependent(CatalogRuleset ruleset) {
+    dependentRulesets.add(ruleset);
   }
 
   private void recursivelyProcessRule(CatalogRule rule, CatalogRuleset caller, int recursionDepth) {
@@ -105,10 +123,20 @@ class CatalogRuleset {
       // Determine which map we'll want to put these references in.
       Map<String,Set<String>> targetMap = isCat? bulkCategoryReferences : bulkRulesetReferences;
       handleBulkReference(targetMap, ruleRef);
+      // If this is a reference to a ruleset, add it to our unique set.
+      if (!isCat) {
+        referencedRulesets.add(ruleRef.getAttribute("ref"));
+      }
     } else {
       // Determine which set we'll want to put this reference in.
       Set<String> targetSet = isCat ? singleCategoryReferences : singleRulesetReferences;
       targetSet.add(ruleRef.getAttribute("ref"));
+      // If this is a reference to a rule in a ruleset, add it to our unique set.
+      if (!isCat) {
+        String ref = ruleRef.getAttribute("ref");
+        String path = ref.substring(0, ref.indexOf(".xml") + 4);
+        referencedRulesets.add(path);
+      }
     }
   }
 
