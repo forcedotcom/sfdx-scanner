@@ -15,16 +15,14 @@ class PmdRuleCataloger {
   private Map<String,List<String>> categoryPathsByLanguage = new HashMap<>();
   private Map<String,List<String>> rulesetPathsByLanguage = new HashMap<>();
 
-  private List<CatalogCategory> masterCategoryList = new ArrayList<>();
+  // These maps are going to help us store intermediate objects in an easy-to-reference way.
   private Map<String,List<CatalogRule>> rulesByLanguage = new HashMap<>();
+  private Map<String,List<CatalogRuleset>> rulesetsByLanguage = new HashMap<>();
 
-  // Since it's possible (and indeed expected) for rulesets or categories in multiple languages to have the same name,
-  // the solution is to treat the name as an alias for all matching entities at the same time. So we'll need to map
-  // paths by their names.
-  private Map<String,List<String>> categoryPathsByAlias = new HashMap<>();
-  private Map<String,List<String>> rulesetPathsByAlias = new HashMap<>();
-
-  private Map<String,List<CatalogRuleset>> rulesetsByLanguage = new HashMap();
+  // These lists are going to be the master lists that we ultimately use to build our JSON at the end.
+  private List<CatalogCategory> masterCategoryList = new ArrayList<>();
+  private List<CatalogRule> masterRuleList = new ArrayList<>();
+  private List<CatalogRuleset> masterRulesetList = new ArrayList<>();
 
 
   /**
@@ -55,6 +53,24 @@ class PmdRuleCataloger {
       for (String categoryPath : categoryPaths) {
         processCategoryFile(language, categoryPath);
       }
+    }
+
+    // STEP 3: Process the ruleset files.
+    for (String language : this.rulesetPathsByLanguage.keySet()) {
+      List<String> rulesetPaths = this.rulesetPathsByLanguage.get(language);
+      // STEP 3A: For each ruleset, generate a representation.
+      for (String rulesetPath : rulesetPaths) {
+        generateRulesetRepresentation(language, rulesetPath);
+      }
+      // STEP 3B: Create links between dependent rulesets.
+      linkDependentRulesets(rulesetsByLanguage.get(language));
+    }
+
+    // STEP 4: Link rules to the rulesets that reference them.
+    for (String language : rulesetsByLanguage.keySet()) {
+      List<CatalogRuleset> rulesets = rulesetsByLanguage.get(language);
+      List<CatalogRule> rules = rulesByLanguage.get(language);
+      linkRulesToRulesets(rules, rulesets);
     }
 
     // STEP X: Build a JSON using all of our objects.
@@ -179,7 +195,7 @@ class PmdRuleCataloger {
     this.masterCategoryList.add(category);
 
     // STEP 3: Get the "rule"-type nodes and use them to create Rule representations, which we should map to the target
-    // language.
+    // language and also put in the master list.
     NodeList ruleNodes = root.getElementsByTagName("rule");
     List<CatalogRule> rules = new ArrayList<>();
     int ruleCount = ruleNodes.getLength();
@@ -192,17 +208,33 @@ class PmdRuleCataloger {
       this.rulesByLanguage.put(language, new ArrayList<>());
     }
     this.rulesByLanguage.get(language).addAll(rules);
+    this.masterRuleList.addAll(rules);
   }
 
-  private CatalogRuleset deriveRulesetFromFile(String language, String path) {
-    System.out.println("======");
-    System.out.println("Parsing ruleset file: " + path);
-
-    // The ruleset file is an XML, so we'll need to parse that into a Document for us to analyze, and pull off the root element.
+  private void generateRulesetRepresentation(String language, String path) {
+    // STEP 1: Turn the ruleset file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();
 
-    // Now create a representation of the ruleset.
-    return new CatalogRuleset(root, language, path);
+    // STEP 2: Use the root element to derive a Ruleset representation, which we should map to the target language and
+    // also put in the master list.
+    CatalogRuleset ruleset = new CatalogRuleset(root, path);
+    if (!this.rulesetsByLanguage.containsKey(language)) {
+      this.rulesetsByLanguage.put(language, new ArrayList<>());
+    }
+    this.rulesetsByLanguage.get(language).add(ruleset);
+    masterRulesetList.add(ruleset);
+  }
+
+  private void linkDependentRulesets(List<CatalogRuleset> rulesets) {
+    // TODO: FILL THIS IN ONCE YOU'VE FIGURED OUT THE REST.
+  }
+
+  private void linkRulesToRulesets(List<CatalogRule> rules, List<CatalogRuleset> rulesets) {
+    for (CatalogRule rule : rules) {
+      for (CatalogRuleset ruleset : rulesets) {
+        ruleset.processRule(rule);
+      }
+    }
   }
 }

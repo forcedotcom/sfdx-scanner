@@ -1,6 +1,5 @@
 package sfdc.isv.swat;
 
-import java.nio.file.Path;
 import java.util.*;
 
 import org.w3c.dom.*;
@@ -23,11 +22,23 @@ class CatalogRule {
 
   // TODO: COMPLETE THIS CONSTRUCTOR.
   CatalogRule(Element element, CatalogCategory category, String language) {
-    name = element.getAttribute("name");
-    message = element.getAttribute("message");
-    description = getDescription(element);
-    language = language;
-    category = category;
+    this.name = element.getAttribute("name");
+    this.message = element.getAttribute("message");
+    this.description = getDescription(element);
+    this.language = language;
+    this.category = category;
+  }
+
+  String getName() {
+    return name;
+  }
+
+  String getCategoryPath() {
+    return category.getPath();
+  }
+
+  void addRuleset(CatalogRuleset ruleset) {
+    rulesets.add(ruleset);
   }
 
   private String getDescription(Element element) {
@@ -55,26 +66,26 @@ class CatalogRule {
 
 
   JSONObject toJson() {
-    JSONObject res = new JSONObject();
-    res.put("name", this.name);
-    res.put("message", this.message);
-    res.put("description", this.description);
+    Map<String,Object> m = new HashMap<>();
+    m.put("name", this.name);
+    m.put("message", this.message);
+    m.put("description", this.description);
 
     // We want 'languages' to be represented as an array even though PMD rules only run against one language, because
     // this way it's easier to integrate with the language-agnostic framework that we ultimately want.
-    List<String> langs = new ArrayList<>(Arrays.asList(this.language));
-    res.put("languages", langs);
+    List<String> langs = new ArrayList<>(Collections.singletonList((this.language)));
+    m.put("languages", langs);
 
     // We also want 'categories' to be an array for the same reason.
-    List<String> categoryNames = new ArrayList<>(Arrays.asList(this.category.getName()));
-    res.put("categories", categoryNames);
+    List<String> categoryNames = new ArrayList<>(Collections.singletonList(this.category.getName()));
+    m.put("categories", categoryNames);
 
     List<String> rulesetNames = new ArrayList<>();
     for (CatalogRuleset ruleset : rulesets) {
       rulesetNames.add(ruleset.getName());
     }
-    res.put("rulesets", rulesetNames);
+    m.put("rulesets", rulesetNames);
 
-    return res;
+    return new JSONObject(m);
   }
 }
