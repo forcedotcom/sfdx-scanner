@@ -76,6 +76,9 @@ class PmdRuleCataloger {
     // STEP 5: Build a JSON using all of our objects.
     CatalogJson json = new CatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
 
+    // STEP 6: Write the JSON to a file.
+    writeJsonToFile(json);
+
     System.out.println(json.constructJson().toJSONString());
 
     // STEP Y: Write the JSON to a file.
@@ -244,6 +247,20 @@ class PmdRuleCataloger {
       for (CatalogRuleset ruleset : rulesets) {
         ruleset.processRule(rule);
       }
+    }
+  }
+
+  private void writeJsonToFile(CatalogJson json) {
+    File catalogDirectory = new File("./catalogs");
+    catalogDirectory.mkdir();
+    try (
+      FileWriter file = new FileWriter("./catalogs/PmdCatalog.json")
+    ) {
+      file.write(json.constructJson().toString());
+    } catch (IOException ioe) {
+      // TODO: Improve the error handling here.
+      System.out.println("Failed to write json to file: " + ioe.getMessage());
+      System.exit(1);
     }
   }
 }
