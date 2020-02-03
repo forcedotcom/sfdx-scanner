@@ -1,6 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
+import PmdCatalogWrapper from '../../../lib/pmd/PmdCatalogWrapper';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -93,7 +94,24 @@ export default class List extends SfdxCommand {
     });
   }
 
+  private async getPmdRules() : Promise<AnyJson> {
+    // We'll use a PmdCatalogWrapper object as a layer of abstraction between our engine and PMD, so declare that now.
+    const catalogWrapper = new PmdCatalogWrapper();
+
+    // Check whether the catalog needs to be rebuilt, and do so if needed.
+    if (catalogWrapper.catalogIsStale()) {
+      try {
+        await catalogWrapper.rebuildCatalog();
+        return Promise.resolve({});
+      } catch (e) {
+        this.ux.error('uxerr: ' + (e.message || e));
+        return Promise.resolve({});
+      }
+    }
+  }
+
   public async run(): Promise<AnyJson> {
+    await this.getPmdRules();
     const cats = this.flags.category;
     const rulesets = this.flags.ruleset;
     const sev = this.flags.severity;
