@@ -8,8 +8,9 @@ public class Main {
   public static void main(String[] args) {
     // We need there to be exactly three arguments, so throw an error if we didn't get them.
     if (args.length != 3) {
-      // TODO: IMPROVE ERROR HANDLING HERE.
-      System.out.println("We need three arguments. Instead we got " + args.length);
+      // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
+      // outside of the ISV SWAT team.
+      System.err.println("We needed three arguments. Instead, we got " + args.length);
       System.exit(1);
     }
     String pmdPath = args[0];
