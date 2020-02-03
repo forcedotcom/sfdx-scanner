@@ -60,57 +60,30 @@ export default class List extends SfdxCommand {
     })
   };
 
-  /**
-   * Get high-level information about the rules that match the provided filter criteria.
-   * @param {string[]|null} cats - If non-null and non-empty, only rules with a matching category tag will be returned.
-   * @param {string[]|null} rulesets - If non-null and non-empty, only rules in the given ruleset will be returned.
-   * @param {string|null} sev - If non-null, only rules of the specified severity will be returned.
-   * @param {string[]|null} langs - If non-null and non-empty, only rules targeting the specified languages will be returned.
-   * @param {AuthorFilter} author - Only rules authored by the specified author will be returned.
-   * @returns {Promise<AnyJson[]|string>} Resolves to a list of rules, or rejects with an error message.
-   * @private
-   */
-  private async getRules(cats : string[], rulesets : string[], sev : string, langs : string[], author : AuthorFilter) : Promise<AnyJson[]|string> {
-    let rules = [
-      {
-        name: 'Rule 1',
-        categories: ['Best Practice', 'Code Styling'],
-        rulesets: ['core/best-practice'],
-        languages: ['JS', 'Apex', 'Java'],
-        author: 'Salesforce'
-      },
-      {
-        name: 'Rule 2',
-        categories: ['Security', 'XSS'],
-        rulesets: ['lib/security'],
-        languages: ['JS'],
-        author: 'Doofenshmirtz Evil Inc'
-      }
-    ];
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        res(rules);
-      }, 2500);
-    });
+  public async run() : Promise<AnyJson> {
+    // Get the filter criteria from the input flags.
+    const cats = this.flags.category;
+    const rulesets = this.flags.ruleset;
+    const sev = this.flags.severity;
+    const langs = this.flags.language;
+    const author = this.flags.standard ? AuthorFilter.StandardOnly : this.flags.custom ? AuthorFilter.CustomOnly : AuthorFilter.All;
+
+    let pmdPromise = this.getPmdRules();
+    return Promise.all([pmdPromise])
+      .then((res : any[]) => {
+        this.ux.table(res[0], ['name', 'categories', 'rulesets', 'languages', 'author']);
+        return {};
+      }, (rej : any) => {
+        return {};
+      })
   }
 
   private async getPmdRules() : Promise<AnyJson> {
     // We'll use a PmdCatalogWrapper object as a layer of abstraction between our engine and PMD, so declare that now.
-    const catalogWrapper = new PmdCatalogWrapper();
-
-    // Check whether the catalog needs to be rebuilt, and do so if needed.
-    if (catalogWrapper.catalogIsStale()) {
-      try {
-        await catalogWrapper.rebuildCatalog();
-        return Promise.resolve({});
-      } catch (e) {
-        this.ux.error('uxerr: ' + (e.message || e));
-        return Promise.resolve({});
-      }
-    }
+    return new PmdCatalogWrapper().getCatalog();
   }
-
-  public async run(): Promise<AnyJson> {
+/*
+  public async run_old(): Promise<AnyJson> {
     await this.getPmdRules();
     const cats = this.flags.category;
     const rulesets = this.flags.ruleset;
@@ -131,4 +104,6 @@ export default class List extends SfdxCommand {
         return {};
       });
   }
+
+ */
 }
