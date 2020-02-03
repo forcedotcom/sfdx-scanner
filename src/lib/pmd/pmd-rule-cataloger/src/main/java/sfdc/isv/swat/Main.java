@@ -6,15 +6,17 @@ import java.util.List;
 
 public class Main {
   public static void main(String[] args) {
+    // We need there to be exactly three arguments, so throw an error if we didn't get them.
+    if (args.length != 3) {
+      // TODO: IMPROVE ERROR HANDLING HERE.
+      System.out.println("We need three arguments. Instead we got " + args.length);
+      System.exit(1);
+    }
+    String pmdPath = args[0];
+    String pmdVersion = args[1];
+    List<String> supportedLangs = new ArrayList<>(Arrays.asList(args[2].split(",")));
 
-
-
-
-    // TODO: We want the set of languages to be configurable in some way. So this should be dynamically populated either
-    //  through arguments or by reading a file.
-    List<String> supportedLangs = new ArrayList<>(Arrays.asList("javascript", "apex"));
-
-    PmdRuleCataloger prc = new PmdRuleCataloger("6.20.0", "./dist/pmd/lib", supportedLangs);
+    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs);
     prc.catalogRules();
   }
 }

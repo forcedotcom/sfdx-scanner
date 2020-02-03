@@ -54,20 +54,39 @@ class CatalogRuleset {
     return false;
   }
 
+  /**
+   * If the provided rule is referenced by this ruleset or any rulesets that depend on this one, the rule is added to
+   * matching rulesets.
+   * @param rule - A rule that may or may not be a part of this ruleset.
+   */
   void processRule(CatalogRule rule) {
     recursivelyProcessRule(rule, null, 0);
   }
 
+  /**
+   * Identifies rulesets that reference this one and creates a link to those dependents.
+   * @param rulesetsByPath - A map whose keys are paths to ruleset files, and whose values are objects representing those rulesets.
+   */
   void processDependencies(Map<String,CatalogRuleset> rulesetsByPath) {
     for (String ref : referencedRulesets) {
       rulesetsByPath.get(ref).addDependent(this);
     }
   }
 
+  /**
+   * Marks the provided ruleset as a dependent of this ruleset.
+   * @param ruleset - A ruleset that references rules defined in this ruleset.
+   */
   private void addDependent(CatalogRuleset ruleset) {
     dependentRulesets.add(ruleset);
   }
 
+  /**
+   * Recursively processes this ruleset and any dependent sets to see if the provided rule is a member.
+   * @param rule - A rule that may or may not be a member of this set or a dependent.
+   * @param caller - The ruleset that invoked this method. Null for the initial call, non-null for recursive calls.
+   * @param recursionDepth - Counter to track how deeply we've recursed, so we know when to give up.
+   */
   private void recursivelyProcessRule(CatalogRule rule, CatalogRuleset caller, int recursionDepth) {
     // Before we do anything else, check our recursion depth. Rather than implement any sophisticated logic to check
     // for circular references, we're just going to forcibly exit if we go deeper than 10 layers of recursion, which is
@@ -94,6 +113,14 @@ class CatalogRuleset {
     }
   }
 
+  /**
+   *
+   * @param ruleName - The name of a rule.
+   * @param rulePath - The path to the file where the rule is defined.
+   * @param singleRefs - A set of rules that are individually included. (either singleCategoryReferences or singleRulesetReferences.)
+   * @param bulkRefs - A map of bulk inclusions. (either bulkCategoryReferences or bulkRulesetReferences.)
+   * @return - True if the provided map or set reference the provided rule.
+   */
   private boolean containsReferenceToRule(String ruleName, String rulePath, Set<String> singleRefs, Map<String,Set<String>> bulkRefs) {
     // If the rule is bulk-referenced, then the path will be a key in the map, and the mapped set won't include the rule's
     // name.
@@ -104,6 +131,10 @@ class CatalogRuleset {
     return singleRefs.contains(rulePath + "/" + ruleName);
   }
 
+  /**
+   * Invoked by the constructor. Parses all of the rule references nested under the provided root.
+   * @param root - The root element in a document model.
+   */
   private void processRoot(Element root) {
     // First, get all of the Rule-type child nodes.
     NodeList ruleRefs = root.getElementsByTagName("rule");
@@ -116,6 +147,10 @@ class CatalogRuleset {
     }
   }
 
+  /**
+   * Processes a single rule node, adding its references to the appropriate map.
+   * @param ruleRef - A 'rule'-type node from the document defining this ruleset.
+   */
   private void processRuleNode(Element ruleRef) {
     // Nodes are handled differently depending on whether they're individual- or bulk-references.
     boolean isCat = isCategoryReference(ruleRef);
@@ -140,14 +175,29 @@ class CatalogRuleset {
     }
   }
 
+  /**
+   *
+   * @param ruleRef - A rule-type node.
+   * @return - True if the rule node references a rule defined in a category, else false.
+   */
   private boolean isCategoryReference(Element ruleRef) {
     return ruleRef.getAttribute("ref").startsWith("category");
   }
 
+  /**
+   *
+   * @param ruleRef - A rule-type node.
+   * @return - True if the rule node is a bulk reference to multiple rules, else false.
+   */
   private boolean isBulkReference(Element ruleRef) {
     return ruleRef.getAttribute("ref").endsWith(".xml");
   }
 
+  /**
+   * Adds all exclusions indicated by the given bulk-reference node to the specified reference map.
+   * @param targetMap - A map into which bulk references will be placed.
+   * @param ruleRef - A bulk-reference rule node.
+   */
   private void handleBulkReference(Map<String,Set<String>> targetMap, Element ruleRef) {
     String key = ruleRef.getAttribute("ref");
     Set<String> exclusionSet= new HashSet<>();

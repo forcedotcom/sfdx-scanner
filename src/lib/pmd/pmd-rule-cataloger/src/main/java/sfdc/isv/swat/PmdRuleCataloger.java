@@ -39,7 +39,8 @@ class PmdRuleCataloger {
 
 
   /**
-   * TODO: WRITE A REAL HEADER FOR THIS FUNCTION.
+   * Builds a catalog describing all of the rules, rulesets, and categories defined by PMD for the used languages, and
+   * stores them in a JSON file.
    */
   void catalogRules() {
     // STEP 1: Identify all of the ruleset and category files for each language we're looking at.
@@ -78,51 +79,6 @@ class PmdRuleCataloger {
 
     // STEP 6: Write the JSON to a file.
     writeJsonToFile(json);
-
-    System.out.println(json.constructJson().toJSONString());
-
-    // STEP Y: Write the JSON to a file.
-    // TODO: IMPLEMENT THAT.
-
-
-    // TODO: REPLACE THIS LOG WITH THE REST.
-    System.out.println("Category map");
-    System.out.println(this.categoryPathsByLanguage.toString());
-    System.out.println("Ruleset map");
-    System.out.println(this.rulesetPathsByLanguage.toString());
-
-// ====== IGNORE THIS CRAP ======
-
-
-/*
-
-    // STEP 2: Process the ruleset files associated with each language.
-    for (String lang : this.rulesetPathsByLanguage.keySet()) {
-      List<String> rulesetPaths = this.rulesetPathsByLanguage.get(lang);
-      List<CatalogRuleset> rulesets = new ArrayList<>();
-      for (String rulesetPath : rulesetPaths) {
-        // For each ruleset, we want to generate a CatalogRuleset object and add it to our list.
-        CatalogRuleset ruleset = deriveRulesetFromFile(lang, rulesetPath);
-        rulesets.add(deriveRulesetFromFile(lang, rulesetPath));
-
-        // We also want to map the ruleset's path by its name, so we can use it as an alias for all rulesets with that name.
-        String alias = ruleset.getName();
-        List<String> matchingPaths = this.rulesetPathsByAlias.containsKey(alias) ? this.rulesetPathsByAlias.get(alias) : new ArrayList<>();
-        matchingPaths.add(ruleset.getPath());
-        rulesetPathsByAlias.put(alias, matchingPaths);
-      }
-      this.rulesetsByLanguage.put(lang, rulesets);
-    }
-
-    // STEP 3: Process the category files associated with each language.
-    for (String lang : this.categoryPathsByLanguage.keySet()) {
-      List<String> categoryPaths = this.categoryPathsByLanguage.get(lang);
-      for (String categoryPath : categoryPaths) {
-      }
-    }
-
- */
-
   }
 
 

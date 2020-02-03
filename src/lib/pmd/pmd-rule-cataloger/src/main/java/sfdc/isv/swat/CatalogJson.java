@@ -18,6 +18,9 @@ class CatalogJson {
     this.rulesets = rulesets;
   }
 
+  /**
+   * @return - A JSONObject describing the catalog's rules, rulesets, and categories.
+   */
   JSONObject constructJson() {
     JSONObject result = new JSONObject();
 
@@ -28,6 +31,10 @@ class CatalogJson {
     return result;
   }
 
+  /**
+   *
+   * @return - A list of JSONs representing rules.
+   */
   private List<JSONObject> constructRulesList() {
     List<JSONObject> ruleJsons = new ArrayList<>();
     for (CatalogRule rule : this.rules) {
@@ -36,6 +43,10 @@ class CatalogJson {
     return ruleJsons;
   }
 
+  /**
+   *
+   * @return - A JSON mapping category names by matching paths.
+   */
   private JSONObject constructCategoriesMap() {
     // We're going to iterate over every category we've got, and combine all categories with the same name into a single
     // entity in the catalog.
@@ -51,6 +62,10 @@ class CatalogJson {
     return new JSONObject(categoryPathsByAlias);
   }
 
+  /**
+   *
+   * @return - A JSON mapping ruleset names to matching paths.
+   */
   private JSONObject constructRulesetsMap() {
     // We're going to iterate over every category we've got, and combine all categories with the same name into a single
     // entity in the catalog.

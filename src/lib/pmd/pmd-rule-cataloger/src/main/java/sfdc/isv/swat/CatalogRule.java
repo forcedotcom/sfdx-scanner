@@ -20,7 +20,7 @@ class CatalogRule {
    */
   private Set<CatalogRuleset> rulesets = new HashSet<>();
 
-  // TODO: COMPLETE THIS CONSTRUCTOR.
+
   CatalogRule(Element element, CatalogCategory category, String language) {
     this.name = element.getAttribute("name");
     this.message = element.getAttribute("message");
@@ -37,10 +37,19 @@ class CatalogRule {
     return category.getPath();
   }
 
+  /**
+   * Adds the provided ruleset to the list of rulesets of which this rule is a member.
+   * @param ruleset - A ruleset of which this rule should be a member.
+   */
   void addRuleset(CatalogRuleset ruleset) {
     rulesets.add(ruleset);
   }
 
+  /**
+   *
+   * @param element - A 'rule'-type node.
+   * @return - A (possibly multi-line) string pulled from the input node's description-type child.
+   */
   private String getDescription(Element element) {
     // The rule node should have at most one "description" node, so get that.
     NodeList nl = element.getElementsByTagName("description");
@@ -64,7 +73,10 @@ class CatalogRule {
     return res;
   }
 
-
+  /**
+   * Converts this rule into a JSONObject.
+   * @return - A JSONObject representing this rule.
+   */
   JSONObject toJson() {
     Map<String,Object> m = new HashMap<>();
     m.put("name", this.name);
