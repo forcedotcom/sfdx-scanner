@@ -54,7 +54,7 @@ if [ -d "${JSON_DIR}" ]; then
     echo "json-simple setup exists: ${JSON_DIR}"
 
     # Make sure the file isn't corrupted.
-    if [[ -f "${JSON_CHECKSUM}" && `cat "${JSON_CHECKSUM}"` == `eval ${CHECKSUM_CALC}"` ]]; then
+    if [[ -f "${JSON_CHECKSUM}" && `cat "${JSON_CHECKSUM}"` == `eval "${CHECKSUM_CALC}"` ]]; then
         echo "JAR contents look unchanged"
         REQUIRES_SETUP=false
     else
@@ -91,7 +91,7 @@ else
 fi
 
 # Create checksum for verification later
-echo `eval "{CHECKSUM_CALC}"` > "${JSON_CHECKSUM}"
+echo `eval "${CHECKSUM_CALC}"` > "${JSON_CHECKSUM}"
 
 # Check JAVA_HOME
 echo "Checking if JAVA_HOME has been set..."
