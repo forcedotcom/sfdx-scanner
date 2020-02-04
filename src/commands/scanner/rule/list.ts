@@ -2,7 +2,6 @@ import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import PmdCatalogWrapper from '../../../lib/pmd/PmdCatalogWrapper';
-import {filter} from "minimatch";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
