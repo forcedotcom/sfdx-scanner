@@ -51,8 +51,8 @@ export default class PmdCatalogWrapper {
   }
 
   private buildClasspath() : string {
-    // TODO: Update this once we build the cataloger to a big-boy path.
-    const catalogerPath = './out/production/main';
+    // TODO: This probably isn't where the JAR ought to live. Once the JAR's home is finalized, come back to this.
+    const catalogerPath = './pmd-rule-cataloger.jar';
     const pmdPath = PMD_LIB + "/*";
     const jsonPath = './dist/json-simple/*';
 
