@@ -124,7 +124,7 @@ class PmdRuleCataloger {
         }
       }
     } catch (FileNotFoundException fnf) {
-      System.err.println("No PMD JAR exists for language " + language + ".");
+      System.err.println("No PMD JAR found for language " + language + ". Please check the classpath.");
       System.exit(ExitCode.NO_SUCH_JAR.getCode());
     } catch (IOException io) {
       System.err.println("Failed to read PMD JAR for language " + language + ".");

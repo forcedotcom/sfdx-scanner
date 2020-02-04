@@ -10,7 +10,7 @@ public class Main {
     if (args.length != 3) {
       // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
       // outside of the ISV SWAT team.
-      System.err.println("We needed three arguments. Instead, we got " + args.length);
+      System.err.println("Catalog build command received " + args.length + " argument(s) instead of the required three.");
       System.exit(ExitCode.WRONG_ARG_COUNT.getCode());
     }
     String pmdPath = args[0];
