@@ -11,7 +11,7 @@ public class Main {
       // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
       // outside of the ISV SWAT team.
       System.err.println("We needed three arguments. Instead, we got " + args.length);
-      System.exit(1);
+      System.exit(ExitCode.WRONG_ARG_COUNT.getCode());
     }
     String pmdPath = args[0];
     String pmdVersion = args[1];

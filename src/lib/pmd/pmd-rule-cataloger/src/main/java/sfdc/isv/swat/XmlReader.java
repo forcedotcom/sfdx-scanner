@@ -43,17 +43,14 @@ class XmlReader {
       DocumentBuilder db = dbf.newDocumentBuilder();
       doc = db.parse(in);
     } catch (IOException ioe) {
-      // TODO: Better error handling here.
-      System.out.println("IOException: " + ioe.getMessage());
-      System.exit(1);
+      System.err.println("Error occurred while reading file [" + path + "]: " + ioe.getMessage());
+      System.exit(ExitCode.XML_IO_EXCEPTION.getCode());
     } catch (ParserConfigurationException pce) {
-      // TODO: Better error handling here.
-      System.out.println("ParserConfigurationException: " + pce.getMessage());
-      System.exit(1);
+      System.err.println("Could not construct XML Parser: " + pce.getMessage());
+      System.exit(ExitCode.XML_PARSER_EXCEPTION.getCode());
     } catch (SAXException saxe) {
-      // TODO: Better error handling here.
-      System.out.println("SAXException: " + saxe.getMessage());
-      System.exit(1);
+      System.err.println("Could not parse XML file [" + path + "]: " + saxe.getMessage());
+      System.exit(ExitCode.XML_SAXE_EXCEPTION.getCode());
     }
     return doc;
   }

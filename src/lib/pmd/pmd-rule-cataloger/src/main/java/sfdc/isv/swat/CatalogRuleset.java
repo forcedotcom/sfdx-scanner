@@ -92,9 +92,8 @@ class CatalogRuleset {
     // for circular references, we're just going to forcibly exit if we go deeper than 10 layers of recursion, which is
     // way more than anyone could possibly want or need.
     if (recursionDepth > 10) {
-      // TODO: Improve the error handling here.
-      System.out.println("Recursive processing of rule " + rule.getName() + " went deeper than 10 layers. Your rules are bad and you should feel bad.");
-      System.exit(1);
+      System.err.println("PMD Ruleset [" + caller.getPath() + "] references rule [" + rule.getFullName() + "] through 10 or more layers of indirection. Please reduce this number.");
+      System.exit(ExitCode.RULESET_RECURSION_LIMIT_REACHED.getCode());
     }
     // Depending on whether this method was invoked by another ruleset, we'll either look for references to the rule's
     // category or references to the ruleset that invoked this method.

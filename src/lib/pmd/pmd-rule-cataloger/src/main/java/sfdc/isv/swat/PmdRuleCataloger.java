@@ -124,11 +124,11 @@ class PmdRuleCataloger {
         }
       }
     } catch (FileNotFoundException fnf) {
-      // TODO: Better error handling here.
-      System.out.println("FileNotFound exception: " + fnf.getMessage());
+      System.err.println("No PMD JAR exists for language " + language + ".");
+      System.exit(ExitCode.NO_SUCH_JAR.getCode());
     } catch (IOException io) {
-      // TODO: Better error handling here.
-      System.out.println("IOException: " + io.getMessage());
+      System.err.println("Failed to read PMD JAR for language " + language + ".");
+      System.exit(ExitCode.JAR_READ_FAILED.getCode());
     }
 
     // Finally, map the files we found by the language name.
@@ -214,9 +214,8 @@ class PmdRuleCataloger {
     ) {
       file.write(json.constructJson().toString());
     } catch (IOException ioe) {
-      // TODO: Improve the error handling here.
-      System.out.println("Failed to write json to file: " + ioe.getMessage());
-      System.exit(1);
+      System.err.println("Failed to write JSON to file: " + ioe.getMessage());
+      System.exit(ExitCode.JSON_WRITE_EXCEPTION.getCode());
     }
   }
 }

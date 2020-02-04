@@ -24,9 +24,13 @@ class CatalogRule {
   CatalogRule(Element element, CatalogCategory category, String language) {
     this.name = element.getAttribute("name");
     this.message = element.getAttribute("message");
-    this.description = getDescription(element);
     this.language = language;
     this.category = category;
+    this.description = getDescription(element);
+  }
+
+  String getFullName() {
+    return getCategoryPath() + "/" + getName();
   }
 
   String getName() {
@@ -66,9 +70,8 @@ class CatalogRule {
       default:
         // If there was more than one description node, then something's gone crazy wrong and we should exit as gracefully
         // as possible.
-        // TODO: IMPROVE THE ERROR HANDLING HERE.
-        System.out.println("Instead of one description node, rule " + this.name + " has this many: " + nl.getLength() + ". Burn it all down");
-        System.exit(1);
+        System.err.println("PMD Rule [" + getFullName() + "] has " + nl.getLength() + " 'description' elements. Please reduce this number to 1.");
+        System.exit(ExitCode.MULTIPLE_RULE_DESCRIPTIONS.getCode());
     }
     return res;
   }
