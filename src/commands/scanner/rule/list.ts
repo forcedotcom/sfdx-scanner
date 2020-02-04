@@ -2,6 +2,7 @@ import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import PmdCatalogWrapper from '../../../lib/pmd/PmdCatalogWrapper';
+import {filter} from "minimatch";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -62,18 +63,15 @@ export default class List extends SfdxCommand {
   };
 
   public async run() : Promise<AnyJson> {
-    // Get the filter criteria from the input flags.
-    const cats = this.flags.category;
-    const rulesets = this.flags.ruleset;
-    const sev = this.flags.severity;
-    const langs = this.flags.language;
-    const author = this.flags.standard ? AuthorFilter.StandardOnly : this.flags.custom ? AuthorFilter.CustomOnly : AuthorFilter.All;
-
+    // We'll have a bunch of promises to load rules from their source files.
     let pmdPromise = this.getPmdRules();
+
+    // Once all of those promises are done, we'll filter all of the results.
     return Promise.all([pmdPromise])
       .then((res : any[]) => {
-        this.ux.table(res[0], columns);
-        return {};
+        let filteredPmdRules = res[0].filter((rule) => {return this.ruleSatisfiesFilterConstraints(rule);});
+        this.ux.table(filteredPmdRules, columns);
+        return filteredPmdRules;
       }, (rej : string) => {
         throw new SfdxError(rej);
       })
@@ -97,5 +95,38 @@ export default class List extends SfdxCommand {
           return cleanedRule;
         });
       });
+  }
+
+  private ruleSatisfiesFilterConstraints(rule : {categories; rulesets; languages}) : boolean {
+    // Get the filter criteria from the input flags.
+    const filterCats = this.flags.category || [];
+    const filterRulesets =  this.flags.ruleset || [];
+    const filterLangs = this.flags.language || [];
+
+    // If the user specified one or more categories, this rule must be a member of at least one of those categories.
+    if (filterCats.length > 0 && !this.listContentsOverlap(filterCats, rule.categories)) {
+      return false;
+    }
+
+    // If the user specified one or more rulesets, this rule must be a member of at least one of those rulesets.
+    if (filterRulesets.length > 0 && !this.listContentsOverlap(filterRulesets, rule.rulesets)) {
+      return false;
+    }
+
+    // If the user specified one or more languages, this rule must apply to at least one of those languages.
+    if (filterLangs.length > 0 && ! this.listContentsOverlap(filterLangs, rule.languages)) {
+      return false;
+    }
+
+    // If we didn't find any reasons to disqualify the rule, it's good.
+    return true;
+  }
+
+  private listContentsOverlap(list1 : string[], list2 : string[]) : boolean {
+    let matchFound = false;
+    for (let i = 0; i < list1.length && !matchFound; i++) {
+      matchFound = list2.includes(list1[i]);
+    }
+    return matchFound;
   }
 }
