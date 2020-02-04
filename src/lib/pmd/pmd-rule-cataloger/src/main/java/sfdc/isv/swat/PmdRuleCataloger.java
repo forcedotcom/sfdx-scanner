@@ -141,9 +141,6 @@ class PmdRuleCataloger {
   }
 
   private void processCategoryFile(String language, String path) {
-    System.out.println("======");
-    System.out.println("Parsing category " + path + " in language " + language);
-
     // STEP 1: Turn the category file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();

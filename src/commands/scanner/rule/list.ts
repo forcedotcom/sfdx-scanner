@@ -9,6 +9,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'list');
+const columns = ['name', 'languages', 'categories', 'rulesets', 'author'];
 
 enum AuthorFilter {
   All = 1,
@@ -71,39 +72,30 @@ export default class List extends SfdxCommand {
     let pmdPromise = this.getPmdRules();
     return Promise.all([pmdPromise])
       .then((res : any[]) => {
-        this.ux.table(res[0], ['name', 'categories', 'rulesets', 'languages', 'author']);
+        this.ux.table(res[0], columns);
         return {};
-      }, (rej : any) => {
-        return {};
+      }, (rej : string) => {
+        throw new SfdxError(rej);
       })
   }
 
   private async getPmdRules() : Promise<AnyJson> {
-    // We'll use a PmdCatalogWrapper object as a layer of abstraction between our engine and PMD, so declare that now.
-    return new PmdCatalogWrapper().getCatalog();
-  }
-/*
-  public async run_old(): Promise<AnyJson> {
-    await this.getPmdRules();
-    const cats = this.flags.category;
-    const rulesets = this.flags.ruleset;
-    const sev = this.flags.severity;
-    const langs = this.flags.language;
-    const author = this.flags.standard ? AuthorFilter.StandardOnly : this.flags.custom ? AuthorFilter.CustomOnly : AuthorFilter.All;
-
-    // Since loading the rules might take a while, log something at the start so the user doesn't think we're hanging.
-    this.ux.log(messages.getMessage('outputTemplates.preparing'));
-
-    return this.getRules(cats, rulesets, sev, langs, author)
-      .then((res : AnyJson[]) => {
-        this.ux.table(res, ['name', 'categories', 'rulesets', 'languages', 'author']);
-        // This JSON is displayed when the --json flag is provided.
-        // TODO: The shape of this JSON will need to change.
-        return res;
-      }, (rej : string) => {
-        return {};
+    // PmdCatalogWrapper is a layer of abstraction between the plugin and PMD, facilitating code reuse and other goodness.
+    return new PmdCatalogWrapper().getCatalog()
+      .then((catalog : {rules}) => {
+        // The catalog has a bunch of information on it, but we only need the 'rules' property.
+        const rules = catalog.rules;
+        // We'll want to do some light tampering with the JSON in order to make sure it displays cleanly on the list.
+        return rules.map((rule : {rulesets : string[]}) => {
+          // If any of the rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
+          // so it doesn't overflow horizontally.
+          let truncatedRulesets = rule.rulesets.map((ruleset : string) => {
+            return ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset;
+          });
+          const cleanedRule = JSON.parse(JSON.stringify(rule));
+          cleanedRule.rulesets = truncatedRulesets;
+          return cleanedRule;
+        });
       });
   }
-
- */
 }
