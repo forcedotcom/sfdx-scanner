@@ -1,5 +1,6 @@
 import { AnyJson } from '@salesforce/ts-types';
 import child_process = require('child_process');
+import fs = require('fs');
 
 // TODO: Make these OS-agnostic and dynamic.
 const PMD_LIB = "./dist/pmd/lib";
@@ -60,28 +61,8 @@ export default class PmdCatalogWrapper {
     return [catalogerPath, pmdPath, jsonPath].join(':');
   }
 
-  private async readCatalogFromFile() : Promise<AnyJson> {
-    // TODO: Replace this hardcoded crap with real results.
-    let rules = [
-      {
-        name: 'Rule 1',
-        categories: ['Best Practice', 'Code Styling'],
-        rulesets: ['core/best-practice'],
-        languages: ['JS', 'Apex', 'Java'],
-        author: 'Salesforce'
-      },
-      {
-        name: 'Rule 2',
-        categories: ['Security', 'XSS'],
-        rulesets: ['lib/security'],
-        languages: ['JS'],
-        author: 'Doofenshmirtz Evil Inc'
-      }
-    ];
-    return new Promise((res, rej) => {
-      setTimeout(() => {
-        res(rules);
-      }, 2500);
-    });
+  private readCatalogFromFile() : AnyJson {
+    const rawCatalog = fs.readFileSync('./catalogs/PmdCatalog.json');
+    return JSON.parse(rawCatalog.toString());
   }
 }
