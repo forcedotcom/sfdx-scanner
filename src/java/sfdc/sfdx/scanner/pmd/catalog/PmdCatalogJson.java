@@ -1,4 +1,4 @@
-package sfdc.sfdx.scanner.catalog;
+package sfdc.sfdx.scanner.pmd.catalog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,12 +7,12 @@ import java.util.Map;
 
 import org.json.simple.*;
 
-public class CatalogJson {
-  private List<CatalogRule> rules;
-  private List<CatalogCategory> categories;
-  private List<CatalogRuleset> rulesets;
+public class PmdCatalogJson {
+  private List<PmdCatalogRule> rules;
+  private List<PmdCatalogCategory> categories;
+  private List<PmdCatalogRuleset> rulesets;
 
-  public CatalogJson(List<CatalogRule> rules, List<CatalogCategory> categories, List<CatalogRuleset> rulesets) {
+  public PmdCatalogJson(List<PmdCatalogRule> rules, List<PmdCatalogCategory> categories, List<PmdCatalogRuleset> rulesets) {
     this.rules = rules;
     this.categories = categories;
     this.rulesets = rulesets;
@@ -37,7 +37,7 @@ public class CatalogJson {
    */
   private List<JSONObject> constructRulesList() {
     List<JSONObject> ruleJsons = new ArrayList<>();
-    for (CatalogRule rule : this.rules) {
+    for (PmdCatalogRule rule : this.rules) {
       ruleJsons.add(rule.toJson());
     }
     return ruleJsons;
@@ -52,7 +52,7 @@ public class CatalogJson {
     // entity in the catalog.
     Map<String,List<String>> categoryPathsByAlias = new HashMap<>();
 
-    for (CatalogCategory category : this.categories) {
+    for (PmdCatalogCategory category : this.categories) {
       String alias = category.getName();
       List<String> matchingPaths = categoryPathsByAlias.containsKey(alias) ? categoryPathsByAlias.get(alias) : new ArrayList<>();
       matchingPaths.add(category.getPath());
@@ -71,7 +71,7 @@ public class CatalogJson {
     // entity in the catalog.
     Map<String,List<String>> rulesetPathsByAlias = new HashMap<>();
 
-    for (CatalogRuleset ruleset : this.rulesets) {
+    for (PmdCatalogRuleset ruleset : this.rulesets) {
       String alias = ruleset.getName();
       List<String> matchingPaths = rulesetPathsByAlias.containsKey(alias) ? rulesetPathsByAlias.get(alias) : new ArrayList<>();
       matchingPaths.add(ruleset.getPath());

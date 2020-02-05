@@ -6,7 +6,7 @@ import fs = require('fs');
 const PMD_LIB = "./dist/pmd/lib";
 const PMD_VERSION = "6.20.0";
 const SUPPORTED_LANGUAGES = ["apex", "javascript"];
-const MAIN_CLASS = "sfdc.isv_swat.scanner.Main";
+const MAIN_CLASS = "sfdc.sfdx.scanner.pmd.Main";
 
 export type PmdCatalog = {
   rules: AnyJson[];
