@@ -1,6 +1,6 @@
-package sfdc.sfdx.scanner.catalog;
+package sfdc.sfdx.scanner.pmd.catalog;
 
-public class CatalogCategory {
+public class PmdCatalogCategory {
   /**
    * The name of the category, e.g. "error prone", "performance", etc.
    */
@@ -15,7 +15,7 @@ public class CatalogCategory {
    * @param name - The name for this category.
    * @param path - The path to the category's definition file.
    */
-  public CatalogCategory(String name, String path) {
+  public PmdCatalogCategory(String name, String path) {
     this.name = name;
     this.path = path;
   }

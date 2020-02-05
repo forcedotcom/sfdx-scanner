@@ -1,8 +1,10 @@
-package sfdc.sfdx.scanner;
+package sfdc.sfdx.scanner.pmd;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import sfdc.sfdx.scanner.ExitCode;
 
 public class Main {
   public static void main(String[] args) {
@@ -11,7 +13,7 @@ public class Main {
       // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
       // outside of the ISV SWAT team.
       System.err.println("Catalog build command received " + args.length + " argument(s) instead of the required three.");
-      System.exit(ExitCode.WRONG_ARG_COUNT.getCode());
+      System.exit(ExitCode.PMD_WRONG_ARG_COUNT.getCode());
     }
     String pmdPath = args[0];
     String pmdVersion = args[1];

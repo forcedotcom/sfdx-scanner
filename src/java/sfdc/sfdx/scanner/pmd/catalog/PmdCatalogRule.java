@@ -1,4 +1,4 @@
-package sfdc.sfdx.scanner.catalog;
+package sfdc.sfdx.scanner.pmd.catalog;
 
 import java.util.*;
 
@@ -6,7 +6,7 @@ import org.w3c.dom.*;
 import org.json.simple.*;
 import sfdc.sfdx.scanner.ExitCode;
 
-public class CatalogRule {
+public class PmdCatalogRule {
   private String name;
   private String message;
   private String description;
@@ -15,14 +15,14 @@ public class CatalogRule {
    * Seemingly all rules are defined in category XML files, so we can reasonably assume that each rule is a member of only
    * one category.
    */
-  private CatalogCategory category;
+  private PmdCatalogCategory category;
   /**
    * Rules can be included in an arbitrary number of rulesets.
    */
-  private Set<CatalogRuleset> rulesets = new HashSet<>();
+  private Set<PmdCatalogRuleset> rulesets = new HashSet<>();
 
 
-  public CatalogRule(Element element, CatalogCategory category, String language) {
+  public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
     this.name = element.getAttribute("name");
     this.message = element.getAttribute("message");
     this.language = language;
@@ -46,7 +46,7 @@ public class CatalogRule {
    * Adds the provided ruleset to the list of rulesets of which this rule is a member.
    * @param ruleset - A ruleset of which this rule should be a member.
    */
-  void addRuleset(CatalogRuleset ruleset) {
+  void addRuleset(PmdCatalogRuleset ruleset) {
     rulesets.add(ruleset);
   }
 
@@ -72,7 +72,7 @@ public class CatalogRule {
         // If there was more than one description node, then something's gone crazy wrong and we should exit as gracefully
         // as possible.
         System.err.println("PMD Rule [" + getFullName() + "] has " + nl.getLength() + " 'description' elements. Please reduce this number to 1.");
-        System.exit(ExitCode.MULTIPLE_RULE_DESCRIPTIONS.getCode());
+        System.exit(ExitCode.PMD_MULTIPLE_RULE_DESCRIPTIONS.getCode());
     }
     return res;
   }
@@ -97,7 +97,7 @@ public class CatalogRule {
     m.put("categories", categoryNames);
 
     List<String> rulesetNames = new ArrayList<>();
-    for (CatalogRuleset ruleset : rulesets) {
+    for (PmdCatalogRuleset ruleset : rulesets) {
       rulesetNames.add(ruleset.getName());
     }
     m.put("rulesets", rulesetNames);

@@ -1,4 +1,4 @@
-package sfdc.sfdx.scanner.catalog;
+package sfdc.sfdx.scanner.pmd.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -6,7 +6,7 @@ import sfdc.sfdx.scanner.ExitCode;
 
 import java.util.*;
 
-public class CatalogRuleset {
+public class PmdCatalogRuleset {
   private String name;
   private String path;
   /**
@@ -26,14 +26,14 @@ public class CatalogRuleset {
    * This is going to be a set of all rulesets that reference this one. We'll walk up the dependency chain when we're
    * assigning rules to rulesets.
    */
-  private Set<CatalogRuleset> dependentRulesets = new HashSet<>();
+  private Set<PmdCatalogRuleset> dependentRulesets = new HashSet<>();
   /**
    * This is going to be a set of the paths to every ruleset that this one references. We'll use it when we're building
    * the dependentRulesets set above.
    */
   private Set<String> referencedRulesets = new HashSet<>();
 
-  public CatalogRuleset(Element root, String path) {
+  public PmdCatalogRuleset(Element root, String path) {
     this.name = root.getAttribute("name");
     this.path = path;
     processRoot(root);
@@ -49,8 +49,8 @@ public class CatalogRuleset {
 
   @Override
   public boolean equals(Object other) {
-    if (other instanceof CatalogRuleset) {
-      return ((CatalogRuleset) other).getPath().equals(path);
+    if (other instanceof PmdCatalogRuleset) {
+      return ((PmdCatalogRuleset) other).getPath().equals(path);
     }
     return false;
   }
@@ -60,7 +60,7 @@ public class CatalogRuleset {
    * matching rulesets.
    * @param rule - A rule that may or may not be a part of this ruleset.
    */
-  public void processRule(CatalogRule rule) {
+  public void processRule(PmdCatalogRule rule) {
     recursivelyProcessRule(rule, null, 0);
   }
 
@@ -68,7 +68,7 @@ public class CatalogRuleset {
    * Identifies rulesets that reference this one and creates a link to those dependents.
    * @param rulesetsByPath - A map whose keys are paths to ruleset files, and whose values are objects representing those rulesets.
    */
-  public void processDependencies(Map<String,CatalogRuleset> rulesetsByPath) {
+  public void processDependencies(Map<String,PmdCatalogRuleset> rulesetsByPath) {
     for (String ref : referencedRulesets) {
       rulesetsByPath.get(ref).addDependent(this);
     }
@@ -78,7 +78,7 @@ public class CatalogRuleset {
    * Marks the provided ruleset as a dependent of this ruleset.
    * @param ruleset - A ruleset that references rules defined in this ruleset.
    */
-  private void addDependent(CatalogRuleset ruleset) {
+  private void addDependent(PmdCatalogRuleset ruleset) {
     dependentRulesets.add(ruleset);
   }
 
@@ -88,13 +88,13 @@ public class CatalogRuleset {
    * @param caller - The ruleset that invoked this method. Null for the initial call, non-null for recursive calls.
    * @param recursionDepth - Counter to track how deeply we've recursed, so we know when to give up.
    */
-  private void recursivelyProcessRule(CatalogRule rule, CatalogRuleset caller, int recursionDepth) {
+  private void recursivelyProcessRule(PmdCatalogRule rule, PmdCatalogRuleset caller, int recursionDepth) {
     // Before we do anything else, check our recursion depth. Rather than implement any sophisticated logic to check
     // for circular references, we're just going to forcibly exit if we go deeper than 10 layers of recursion, which is
     // way more than anyone could possibly want or need.
     if (recursionDepth > 10) {
       System.err.println("PMD Ruleset [" + caller.getPath() + "] references rule [" + rule.getFullName() + "] through 10 or more layers of indirection. Please reduce this number.");
-      System.exit(ExitCode.RULESET_RECURSION_LIMIT_REACHED.getCode());
+      System.exit(ExitCode.PMD_RULESET_RECURSION_LIMIT_REACHED.getCode());
     }
     // Depending on whether this method was invoked by another ruleset, we'll either look for references to the rule's
     // category or references to the ruleset that invoked this method.
@@ -107,7 +107,7 @@ public class CatalogRuleset {
     // depending on this one.
     if (containsReferenceToRule(ruleName, referencePath, singleReferences, bulkReferenceMap)) {
       rule.addRuleset(this);
-      for (CatalogRuleset dep : dependentRulesets) {
+      for (PmdCatalogRuleset dep : dependentRulesets) {
         dep.recursivelyProcessRule(rule, this, recursionDepth + 1);
       }
     }

@@ -1,16 +1,16 @@
-package sfdc.sfdx.scanner;
+package sfdc.sfdx.scanner.pmd;
 
 import java.io.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import org.w3c.dom.*;
-import sfdc.sfdx.scanner.catalog.CatalogCategory;
-import sfdc.sfdx.scanner.catalog.CatalogJson;
-import sfdc.sfdx.scanner.catalog.CatalogRule;
-import sfdc.sfdx.scanner.catalog.CatalogRuleset;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRuleset;
 import sfdc.sfdx.scanner.xml.XmlReader;
-
+import sfdc.sfdx.scanner.ExitCode;
 
 class PmdRuleCataloger {
   private String pmdVersion;
@@ -21,13 +21,13 @@ class PmdRuleCataloger {
   private Map<String,List<String>> rulesetPathsByLanguage = new HashMap<>();
 
   // These maps are going to help us store intermediate objects in an easy-to-reference way.
-  private Map<String,List<CatalogRule>> rulesByLanguage = new HashMap<>();
-  private Map<String,List<CatalogRuleset>> rulesetsByLanguage = new HashMap<>();
+  private Map<String,List<PmdCatalogRule>> rulesByLanguage = new HashMap<>();
+  private Map<String,List<PmdCatalogRuleset>> rulesetsByLanguage = new HashMap<>();
 
   // These lists are going to be the master lists that we ultimately use to build our JSON at the end.
-  private List<CatalogCategory> masterCategoryList = new ArrayList<>();
-  private List<CatalogRule> masterRuleList = new ArrayList<>();
-  private List<CatalogRuleset> masterRulesetList = new ArrayList<>();
+  private List<PmdCatalogCategory> masterCategoryList = new ArrayList<>();
+  private List<PmdCatalogRule> masterRuleList = new ArrayList<>();
+  private List<PmdCatalogRuleset> masterRulesetList = new ArrayList<>();
 
 
   /**
@@ -74,13 +74,13 @@ class PmdRuleCataloger {
 
     // STEP 4: Link rules to the rulesets that reference them.
     for (String language : rulesetsByLanguage.keySet()) {
-      List<CatalogRuleset> rulesets = rulesetsByLanguage.get(language);
-      List<CatalogRule> rules = rulesByLanguage.get(language);
+      List<PmdCatalogRuleset> rulesets = rulesetsByLanguage.get(language);
+      List<PmdCatalogRule> rules = rulesByLanguage.get(language);
       linkRulesToRulesets(rules, rulesets);
     }
 
     // STEP 5: Build a JSON using all of our objects.
-    CatalogJson json = new CatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
+    PmdCatalogJson json = new PmdCatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
 
     // STEP 6: Write the JSON to a file.
     writeJsonToFile(json);
@@ -130,10 +130,10 @@ class PmdRuleCataloger {
       }
     } catch (FileNotFoundException fnf) {
       System.err.println("No PMD JAR found for language " + language + ". Please check the classpath.");
-      System.exit(ExitCode.NO_SUCH_JAR.getCode());
+      System.exit(ExitCode.PMD_NO_SUCH_JAR.getCode());
     } catch (IOException io) {
       System.err.println("Failed to read PMD JAR for language " + language + ".");
-      System.exit(ExitCode.JAR_READ_FAILED.getCode());
+      System.exit(ExitCode.PMD_JAR_READ_FAILED.getCode());
     }
 
     // Finally, map the files we found by the language name.
@@ -152,17 +152,17 @@ class PmdRuleCataloger {
 
     // STEP 2: Use the root element to derive a Category representation, and put it in the master list.
     String categoryName = root.getAttribute("name");
-    CatalogCategory category = new CatalogCategory(categoryName, path);
+    PmdCatalogCategory category = new PmdCatalogCategory(categoryName, path);
     this.masterCategoryList.add(category);
 
     // STEP 3: Get the "rule"-type nodes and use them to create Rule representations, which we should map to the target
     // language and also put in the master list.
     NodeList ruleNodes = root.getElementsByTagName("rule");
-    List<CatalogRule> rules = new ArrayList<>();
+    List<PmdCatalogRule> rules = new ArrayList<>();
     int ruleCount = ruleNodes.getLength();
     for (int i = 0; i < ruleCount; i++) {
       Element ruleNode = (Element) ruleNodes.item(i);
-      CatalogRule rule = new CatalogRule(ruleNode, category, language);
+      PmdCatalogRule rule = new PmdCatalogRule(ruleNode, category, language);
       rules.add(rule);
     }
     if (!this.rulesByLanguage.containsKey(language)) {
@@ -179,7 +179,7 @@ class PmdRuleCataloger {
 
     // STEP 2: Use the root element to derive a Ruleset representation, which we should map to the target language and
     // also put in the master list.
-    CatalogRuleset ruleset = new CatalogRuleset(root, path);
+    PmdCatalogRuleset ruleset = new PmdCatalogRuleset(root, path);
     if (!this.rulesetsByLanguage.containsKey(language)) {
       this.rulesetsByLanguage.put(language, new ArrayList<>());
     }
@@ -187,28 +187,28 @@ class PmdRuleCataloger {
     masterRulesetList.add(ruleset);
   }
 
-  private void linkDependentRulesets(List<CatalogRuleset> rulesets) {
+  private void linkDependentRulesets(List<PmdCatalogRuleset> rulesets) {
     // Map the rulesets by their path.
-    Map<String,CatalogRuleset> rulesetsByPath = new HashMap<>();
-    for (CatalogRuleset ruleset : rulesets) {
+    Map<String,PmdCatalogRuleset> rulesetsByPath = new HashMap<>();
+    for (PmdCatalogRuleset ruleset : rulesets) {
       rulesetsByPath.put(ruleset.getPath(), ruleset);
     }
 
     // Next, feed the map into each ruleset to see which ones it depends on.
-    for (CatalogRuleset ruleset : rulesets) {
+    for (PmdCatalogRuleset ruleset : rulesets) {
       ruleset.processDependencies(rulesetsByPath);
     }
   }
 
-  private void linkRulesToRulesets(List<CatalogRule> rules, List<CatalogRuleset> rulesets) {
-    for (CatalogRule rule : rules) {
-      for (CatalogRuleset ruleset : rulesets) {
+  private void linkRulesToRulesets(List<PmdCatalogRule> rules, List<PmdCatalogRuleset> rulesets) {
+    for (PmdCatalogRule rule : rules) {
+      for (PmdCatalogRuleset ruleset : rulesets) {
         ruleset.processRule(rule);
       }
     }
   }
 
-  private void writeJsonToFile(CatalogJson json) {
+  private void writeJsonToFile(PmdCatalogJson json) {
     File catalogDirectory = new File("./catalogs");
     catalogDirectory.mkdir();
     try (
