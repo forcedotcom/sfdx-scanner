@@ -1,8 +1,8 @@
-package sfdc.isv_swat.scanner.xml;
+package sfdc.sfdx.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import sfdc.isv_swat.scanner.ExitCode;
+import sfdc.sfdx.scanner.ExitCode;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

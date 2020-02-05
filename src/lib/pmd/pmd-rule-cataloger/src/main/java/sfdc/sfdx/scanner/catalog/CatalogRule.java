@@ -1,10 +1,10 @@
-package sfdc.isv_swat.scanner.catalog;
+package sfdc.sfdx.scanner.catalog;
 
 import java.util.*;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
-import sfdc.isv_swat.scanner.ExitCode;
+import sfdc.sfdx.scanner.ExitCode;
 
 public class CatalogRule {
   private String name;

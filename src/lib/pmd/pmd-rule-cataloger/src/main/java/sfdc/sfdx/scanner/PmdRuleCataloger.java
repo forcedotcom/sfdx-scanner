@@ -1,15 +1,15 @@
-package sfdc.isv_swat.scanner;
+package sfdc.sfdx.scanner;
 
 import java.io.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import org.w3c.dom.*;
-import sfdc.isv_swat.scanner.catalog.CatalogCategory;
-import sfdc.isv_swat.scanner.catalog.CatalogJson;
-import sfdc.isv_swat.scanner.catalog.CatalogRule;
-import sfdc.isv_swat.scanner.catalog.CatalogRuleset;
-import sfdc.isv_swat.scanner.xml.XmlReader;
+import sfdc.sfdx.scanner.catalog.CatalogCategory;
+import sfdc.sfdx.scanner.catalog.CatalogJson;
+import sfdc.sfdx.scanner.catalog.CatalogRule;
+import sfdc.sfdx.scanner.catalog.CatalogRuleset;
+import sfdc.sfdx.scanner.xml.XmlReader;
 
 
 class PmdRuleCataloger {

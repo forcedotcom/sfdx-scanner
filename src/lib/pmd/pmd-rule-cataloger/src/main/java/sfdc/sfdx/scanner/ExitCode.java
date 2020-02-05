@@ -1,4 +1,4 @@
-package sfdc.isv_swat.scanner;
+package sfdc.sfdx.scanner;
 
 public enum ExitCode {
   WRONG_ARG_COUNT (1),

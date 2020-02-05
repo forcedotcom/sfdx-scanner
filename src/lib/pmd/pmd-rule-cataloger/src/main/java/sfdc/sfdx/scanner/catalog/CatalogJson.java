@@ -1,4 +1,4 @@
-package sfdc.isv_swat.scanner.catalog;
+package sfdc.sfdx.scanner.catalog;
 
 import java.util.ArrayList;
 import java.util.HashMap;

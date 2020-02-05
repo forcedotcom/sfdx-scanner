@@ -1,8 +1,8 @@
-package sfdc.isv_swat.scanner.catalog;
+package sfdc.sfdx.scanner.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import sfdc.isv_swat.scanner.ExitCode;
+import sfdc.sfdx.scanner.ExitCode;
 
 import java.util.*;
 
