@@ -1,7 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import PmdCatalogWrapper from '../../../lib/pmd/PmdCatalogWrapper';
+import { PmdCatalogWrapper } from '../../../lib/pmd/PmdCatalogWrapper';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -62,38 +62,29 @@ export default class List extends SfdxCommand {
   };
 
   public async run() : Promise<AnyJson> {
-    // We'll have a bunch of promises to load rules from their source files.
-    let pmdPromise = this.getPmdRules();
-
-    // Once all of those promises are done, we'll filter all of the results.
-    return Promise.all([pmdPromise])
-      .then((res : any[]) => {
-        let filteredPmdRules = res[0].filter((rule) => {return this.ruleSatisfiesFilterConstraints(rule);});
-        this.ux.table(filteredPmdRules, columns);
-        return filteredPmdRules;
-      }, (rej : string) => {
-        throw new SfdxError(rej);
-      })
+    try {
+      const allRules = await this.getAllRules();
+      const filteredRules = allRules.filter((rule) => {return this.ruleSatisfiesFilterConstraints(rule);});
+      const formattedRules = this.formatRulesForDisplay(filteredRules);
+      this.ux.table(formattedRules, columns);
+      // If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
+      // just return the filtered list instead of the formatted list.
+      return filteredRules;
+    } catch (err) {
+      throw new SfdxError(err);
+    }
   }
 
-  private async getPmdRules() : Promise<AnyJson> {
-    // PmdCatalogWrapper is a layer of abstraction between the plugin and PMD, facilitating code reuse and other goodness.
-    return new PmdCatalogWrapper().getCatalog()
-      .then((catalog : {rules}) => {
-        // The catalog has a bunch of information on it, but we only need the 'rules' property.
-        const rules = catalog.rules;
-        // We'll want to do some light tampering with the JSON in order to make sure it displays cleanly on the list.
-        return rules.map((rule : {rulesets : string[]}) => {
-          // If any of the rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
-          // so it doesn't overflow horizontally.
-          let truncatedRulesets = rule.rulesets.map((ruleset : string) => {
-            return ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset;
-          });
-          const cleanedRule = JSON.parse(JSON.stringify(rule));
-          cleanedRule.rulesets = truncatedRulesets;
-          return cleanedRule;
-        });
-      });
+  private async getAllRules() : Promise<any> {
+    // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
+    const [pmdRules] : AnyJson[] = await Promise.all([this.getPmdRules()]);
+    return [...pmdRules];
+  }
+
+  private async getPmdRules() : Promise<AnyJson[]> {
+    // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
+    const catalog = await new PmdCatalogWrapper().getCatalog();
+    return catalog.rules;
   }
 
   private ruleSatisfiesFilterConstraints(rule : {categories; rulesets; languages}) : boolean {
@@ -122,10 +113,19 @@ export default class List extends SfdxCommand {
   }
 
   private listContentsOverlap(list1 : string[], list2 : string[]) : boolean {
-    let matchFound = false;
-    for (let i = 0; i < list1.length && !matchFound; i++) {
-      matchFound = list2.includes(list1[i]);
-    }
-    return matchFound;
+    return list1.some((x) => {return list2.includes(x)});
+  }
+
+  private formatRulesForDisplay(rules : AnyJson[]) : AnyJson[] {
+    return rules.map((rule) => {
+      const clonedRule = JSON.parse(JSON.stringify(rule));
+
+      // If any of the rule's rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
+      // so it doesn't overflow horizonatally.
+      clonedRule.rulesets = rule.rulesets.map((ruleset) => {
+        return ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset;
+      });
+      return clonedRule;
+    });
   }
 }

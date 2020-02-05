@@ -8,12 +8,18 @@ const PMD_VERSION = "6.20.0";
 const SUPPORTED_LANGUAGES = ["apex", "javascript"];
 const MAIN_CLASS = "sfdc.isv_swat.scanner.Main";
 
-export default class PmdCatalogWrapper {
+export type PmdCatalog = {
+  rules: AnyJson[];
+  categories: AnyJson[];
+  rulesets: AnyJson[];
+};
+
+export class PmdCatalogWrapper {
   constructor() {
 
   }
 
-  public async getCatalog() : Promise<AnyJson> {
+  public async getCatalog() : Promise<PmdCatalog> {
     return this.rebuildCatalogIfNecessary()
       .then(() => {
         return this.readCatalogFromFile();
@@ -47,6 +53,7 @@ export default class PmdCatalogWrapper {
   }
 
   private buildCommand() : string {
+    // TODO: We'll need to make sure this works on Windows.
     return `java -cp "${this.buildClasspath()}" ${MAIN_CLASS} ${PMD_LIB} ${PMD_VERSION} ${SUPPORTED_LANGUAGES.join(',')}`;
   }
 
@@ -55,13 +62,13 @@ export default class PmdCatalogWrapper {
     const catalogerPath = './pmd-rule-cataloger.jar';
     const pmdPath = PMD_LIB + "/*";
     const jsonPath = './dist/json-simple/*';
+    // TODO: We want to allow users to add their own PMD rules, so we'll need some way for them to submit them.
 
-    // TODO: Classpaths might be formatted differently in Windows. Change this to something that will work in both Windows
-    // and Unix.
+    // Because the classpath is a Java convention, we can use the same syntax across platforms, which is nice.
     return [catalogerPath, pmdPath, jsonPath].join(':');
   }
 
-  private readCatalogFromFile() : AnyJson {
+  private readCatalogFromFile() : PmdCatalog {
     const rawCatalog = fs.readFileSync('./catalogs/PmdCatalog.json');
     return JSON.parse(rawCatalog.toString());
   }
