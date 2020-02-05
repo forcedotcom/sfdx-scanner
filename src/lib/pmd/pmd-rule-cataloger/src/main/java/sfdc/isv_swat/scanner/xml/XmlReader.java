@@ -1,7 +1,8 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import sfdc.isv_swat.scanner.ExitCode;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -9,9 +10,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 
-class XmlReader {
+public class XmlReader {
   private static XmlReader INSTANCE = null;
-  static XmlReader getInstance() {
+  public static XmlReader getInstance() {
     if (INSTANCE == null) {
       INSTANCE = new XmlReader();
     }
@@ -34,7 +35,7 @@ class XmlReader {
    * @param path - The path to an XMML resource.
    * @return     - A Document object representing the parsed resource.
    */
-  Document getDocumentFromPath(String path) {
+  public Document getDocumentFromPath(String path) {
     Document doc = null;
     try (
       InputStream in = getResourceAsStream(path)

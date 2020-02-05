@@ -1,11 +1,12 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner.catalog;
 
 import java.util.*;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
+import sfdc.isv_swat.scanner.ExitCode;
 
-class CatalogRule {
+public class CatalogRule {
   private String name;
   private String message;
   private String description;
@@ -21,7 +22,7 @@ class CatalogRule {
   private Set<CatalogRuleset> rulesets = new HashSet<>();
 
 
-  CatalogRule(Element element, CatalogCategory category, String language) {
+  public CatalogRule(Element element, CatalogCategory category, String language) {
     this.name = element.getAttribute("name");
     this.message = element.getAttribute("message");
     this.language = language;

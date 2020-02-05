@@ -6,7 +6,7 @@ import fs = require('fs');
 const PMD_LIB = "./dist/pmd/lib";
 const PMD_VERSION = "6.20.0";
 const SUPPORTED_LANGUAGES = ["apex", "javascript"];
-const MAIN_CLASS = "sfdc.isv.swat.Main";
+const MAIN_CLASS = "sfdc.isv_swat.scanner.Main";
 
 export default class PmdCatalogWrapper {
   constructor() {

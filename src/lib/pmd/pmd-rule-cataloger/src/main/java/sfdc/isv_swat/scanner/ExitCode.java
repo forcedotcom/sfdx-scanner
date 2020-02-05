@@ -1,6 +1,6 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner;
 
-enum ExitCode {
+public enum ExitCode {
   WRONG_ARG_COUNT (1),
   MULTIPLE_RULE_DESCRIPTIONS (2),
   RULESET_RECURSION_LIMIT_REACHED (3),
@@ -18,7 +18,7 @@ enum ExitCode {
     this.code = code;
   }
 
-  int getCode() {
+  public int getCode() {
     return this.code;
   }
 }

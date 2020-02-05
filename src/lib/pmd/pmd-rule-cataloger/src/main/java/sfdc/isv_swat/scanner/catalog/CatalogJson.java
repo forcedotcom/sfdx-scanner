@@ -1,4 +1,4 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner.catalog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,12 +7,12 @@ import java.util.Map;
 
 import org.json.simple.*;
 
-class CatalogJson {
+public class CatalogJson {
   private List<CatalogRule> rules;
   private List<CatalogCategory> categories;
   private List<CatalogRuleset> rulesets;
 
-  CatalogJson(List<CatalogRule> rules, List<CatalogCategory> categories, List<CatalogRuleset> rulesets) {
+  public CatalogJson(List<CatalogRule> rules, List<CatalogCategory> categories, List<CatalogRuleset> rulesets) {
     this.rules = rules;
     this.categories = categories;
     this.rulesets = rulesets;
@@ -21,7 +21,7 @@ class CatalogJson {
   /**
    * @return - A JSONObject describing the catalog's rules, rulesets, and categories.
    */
-  JSONObject constructJson() {
+  public JSONObject constructJson() {
     JSONObject result = new JSONObject();
 
     result.put("rules", constructRulesList());

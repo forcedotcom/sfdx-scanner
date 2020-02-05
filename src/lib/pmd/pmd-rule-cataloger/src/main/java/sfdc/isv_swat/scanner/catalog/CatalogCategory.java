@@ -1,6 +1,6 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner.catalog;
 
-class CatalogCategory {
+public class CatalogCategory {
   /**
    * The name of the category, e.g. "error prone", "performance", etc.
    */
@@ -15,7 +15,7 @@ class CatalogCategory {
    * @param name - The name for this category.
    * @param path - The path to the category's definition file.
    */
-  CatalogCategory(String name, String path) {
+  public CatalogCategory(String name, String path) {
     this.name = name;
     this.path = path;
   }

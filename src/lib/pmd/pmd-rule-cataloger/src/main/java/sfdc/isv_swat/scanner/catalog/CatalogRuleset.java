@@ -1,11 +1,12 @@
-package sfdc.isv.swat;
+package sfdc.isv_swat.scanner.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import sfdc.isv_swat.scanner.ExitCode;
 
 import java.util.*;
 
-class CatalogRuleset {
+public class CatalogRuleset {
   private String name;
   private String path;
   /**
@@ -32,7 +33,7 @@ class CatalogRuleset {
    */
   private Set<String> referencedRulesets = new HashSet<>();
 
-  CatalogRuleset(Element root, String path) {
+  public CatalogRuleset(Element root, String path) {
     this.name = root.getAttribute("name");
     this.path = path;
     processRoot(root);
@@ -42,7 +43,7 @@ class CatalogRuleset {
     return name;
   }
 
-  String getPath() {
+  public String getPath() {
     return path;
   }
 
@@ -59,7 +60,7 @@ class CatalogRuleset {
    * matching rulesets.
    * @param rule - A rule that may or may not be a part of this ruleset.
    */
-  void processRule(CatalogRule rule) {
+  public void processRule(CatalogRule rule) {
     recursivelyProcessRule(rule, null, 0);
   }
 
@@ -67,7 +68,7 @@ class CatalogRuleset {
    * Identifies rulesets that reference this one and creates a link to those dependents.
    * @param rulesetsByPath - A map whose keys are paths to ruleset files, and whose values are objects representing those rulesets.
    */
-  void processDependencies(Map<String,CatalogRuleset> rulesetsByPath) {
+  public void processDependencies(Map<String,CatalogRuleset> rulesetsByPath) {
     for (String ref : referencedRulesets) {
       rulesetsByPath.get(ref).addDependent(this);
     }
