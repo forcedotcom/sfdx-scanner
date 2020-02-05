@@ -8,6 +8,7 @@
 /package-lock.json
 /tmp
 node_modules
+/out
 # Logs
 logs
 *.log
@@ -112,6 +113,9 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Pmd Rule Catalog representations
+/catalogs
 
 # IntelliJ files
 *.iml
