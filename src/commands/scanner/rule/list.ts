@@ -1,5 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
+import {Messages, SfdxError} from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import { PmdCatalogWrapper } from '../../../lib/pmd/PmdCatalogWrapper';
 
@@ -11,11 +11,6 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('scanner', 'list');
 const columns = ['name', 'languages', 'categories', 'rulesets', 'author'];
 
-enum AuthorFilter {
-  All = 1,
-  StandardOnly,
-  CustomOnly
-}
 export default class List extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
   public static description = messages.getMessage('commandDescription');
@@ -64,7 +59,7 @@ export default class List extends SfdxCommand {
   public async run() : Promise<AnyJson> {
     try {
       const allRules = await this.getAllRules();
-      const filteredRules = allRules.filter((rule) => {return this.ruleSatisfiesFilterConstraints(rule);});
+      const filteredRules = allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule));
       const formattedRules = this.formatRulesForDisplay(filteredRules);
       this.ux.table(formattedRules, columns);
       // If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
@@ -113,18 +108,17 @@ export default class List extends SfdxCommand {
   }
 
   private listContentsOverlap(list1 : string[], list2 : string[]) : boolean {
-    return list1.some((x) => {return list2.includes(x)});
+    return list1.some(x => list2.includes(x));
   }
 
   private formatRulesForDisplay(rules : AnyJson[]) : AnyJson[] {
-    return rules.map((rule) => {
+    return rules.map(rule => {
       const clonedRule = JSON.parse(JSON.stringify(rule));
 
       // If any of the rule's rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
-      // so it doesn't overflow horizonatally.
-      clonedRule.rulesets = rule.rulesets.map((ruleset) => {
-        return ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset;
-      });
+      // so it doesn't overflow horizontally.
+      clonedRule.rulesets = rule['rulesets'].map(ruleset =>
+        ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset);
       return clonedRule;
     });
   }

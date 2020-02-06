@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.json.simple.*;
 
+@SuppressWarnings("unchecked")
 public class PmdCatalogJson {
   private List<PmdCatalogRule> rules;
   private List<PmdCatalogCategory> categories;

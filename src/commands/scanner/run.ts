@@ -1,5 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
+import { Messages } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 
 // Initialize Messages with the current plugin directory
@@ -17,11 +17,7 @@ export default class Run extends SfdxCommand {
     `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
   Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
   My hub org id is: 00Dxx000000001234
-  `,
-    `$ sfdx hello:org --name myname --targetusername myOrg@example.com
-  Hello myname! This is org: MyOrg and I will be around until Tue Mar 20 2018!
-  `
-  ];
+  `];
 
   public static args = [{name: 'file'}];
 
@@ -46,7 +42,7 @@ export default class Run extends SfdxCommand {
       char: 's',
       description: messages.getMessage('flags.severityDescription')
     }),
-    "exclude-rule": flags.array({
+    'exclude-rule': flags.array({
       description: messages.getMessage('flags.excluderuleDescription')
     }),
     // These flags are how you choose which files you're targeting.
@@ -69,7 +65,7 @@ export default class Run extends SfdxCommand {
       exclusive: ['file', 'directory', 'exclude']
     }),
     // These flags modify how the process runs, rather than what it consumes.
-    "suppress-warnings": flags.boolean({
+    'suppress-warnings': flags.boolean({
       description: messages.getMessage('flags.suppresswarningsDescription')
     })
   };
