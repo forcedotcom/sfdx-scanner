@@ -1,49 +1,34 @@
-import child_process = require('child_process');
+import {Format, PmdSupport} from './PmdSupport';
 
+const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
+const HEAP_SIZE = '-Xmx1024m';
 
+export default class PmdWrapper extends PmdSupport {
 
-/**
- * Output format supported by PMD
- */
-export enum Format {
-    XML = "xml",
-    CSV = "csv",
-    TEXT = "txt"
-}
+  path: string;
+  rules: string;
+  reportFormat: Format;
+  reportFile: string;
 
-export default class PmdWrapper {
+  public static async execute(path: string, rules: string, reportFormat: Format, reportFile: string) {
+    const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile);
+    return myPmd.execute();
+  }
 
-    path: string;
-    rules: string;
-    reportFormat: Format;
-    reportFile: string;
+  private async execute() {
+    return super.runCommand();
+  }
 
+  constructor(path: string, rules: string, reportFormat: Format, reportFile: string) {
+    super();
+    this.path = path;
+    this.rules = rules;
+    this.reportFormat = reportFormat;
+    this.reportFile = reportFile;
+  }
 
-    constructor(path: string, rules: string, reportFormat: Format, reportFile: string) {
-        this.path = path;
-        this.rules = rules;
-        this.reportFormat = reportFormat;
-        this.reportFile = reportFile;
-    }
-
-    public static async execute(path: string, rules: string, reportFormat: Format, reportFile: string) {
-        const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile);
-        myPmd.runShellCommand();
-    }
-
-    async runShellCommand() {
-        const runCommand: string = `bash execute-pmd.sh --rulesets ${this.rules} --dir ${this.path} --format ${this.reportFormat} --reportfile ${this.reportFile}`;
-        child_process.exec(runCommand, (err, stdout, stderr) => {
-            //TODO: revisit this and decide how we want to handle and surface errors
-            if (err) {
-                console.log(`Error occurred while running pmd: ${err.message}`);
-            }
-            if (stderr) {
-                console.log(`stderr from PMD: ${stderr}`);
-            }
-            if (stdout) {
-                console.log(`Script had something to say: ${stdout}`);
-            }
-        });
-    }
+  protected buildCommand(): string {
+    return `java -cp "${super.buildClasspath().join(':')}" ${HEAP_SIZE} ${MAIN_CLASS}
+                --rulesets ${this.rules} --dir ${this.path} --format ${this.reportFormat} --reportfile ${this.reportFile}`;
+  }
 }
