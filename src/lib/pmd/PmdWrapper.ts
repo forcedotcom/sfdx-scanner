@@ -29,6 +29,6 @@ export default class PmdWrapper extends PmdSupport {
 
   protected buildCommand(): string {
     return `java -cp "${super.buildClasspath().join(':')}" ${HEAP_SIZE} ${MAIN_CLASS}
-                --rulesets ${this.rules} --dir ${this.path} --format ${this.reportFormat} --reportfile ${this.reportFile}`;
+                -rulesets ${this.rules} -dir ${this.path} -format ${this.reportFormat} -reportfile ${this.reportFile}`;
   }
 }
