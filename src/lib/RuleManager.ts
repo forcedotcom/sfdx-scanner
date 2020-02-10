@@ -19,25 +19,37 @@ export class RuleFilter {
 }
 
 export class RuleManager {
+  private pmdCatalogWrapper : PmdCatalogWrapper;
+
+  constructor() {
+    this.pmdCatalogWrapper = new PmdCatalogWrapper();
+  }
 
   public async getRulesMatchingCriteria(filters: RuleFilter[]) : Promise<Rule[]> {
     try {
-      const allRules = await RuleManager.getAllRules();
+      const allRules = await this.getAllRules();
       return allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));
     } catch (e) {
       throw new SfdxError(e);
     }
   }
 
-  private static async getAllRules() : Promise<Rule[]> {
+  public async runRulesMatchingCriteria(filters: RuleFilter[]) : Promise<any> {
+    try {
+    } catch (e) {
+      throw new SfdxError(e);
+    }
+  }
+
+  private async getAllRules() : Promise<Rule[]> {
     // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
-    const [pmdRules] : Rule[][] = await Promise.all([RuleManager.getPmdRules()]);
+    const [pmdRules] : Rule[][] = await Promise.all([this.getPmdRules()]);
     return [...pmdRules];
   }
 
-  private static async getPmdRules(): Promise<Rule[]> {
+  private async getPmdRules(): Promise<Rule[]> {
     // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
-    const catalog = await new PmdCatalogWrapper().getCatalog();
+    const catalog = await this.pmdCatalogWrapper.getCatalog();
     return catalog.rules;
   }
 

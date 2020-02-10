@@ -1,6 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
+import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../lib/RuleManager";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -71,6 +72,32 @@ export default class Run extends SfdxCommand {
   };
 
   public async run(): Promise<AnyJson> {
+    const filters = this.buildRuleFilters();
+    const ruleManager = new RuleManager();
+    // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
+    // allow to boil over.
+    // TODO: Once we know what the output should look like, process the output in some way.
+    let output = await ruleManager.runRulesMatchingCriteria(filters);
     return {};
+  }
+
+  private buildRuleFilters() : RuleFilter[] {
+    let filters : RuleFilter[] = [];
+    // Create a filter for any provided categories.
+    if ((this.flags.category || []).length > 0) {
+      filters.push(new RuleFilter(RULE_FILTER_TYPE.CATEGORY, this.flags.category));
+    }
+
+    // Create a filter for any provided rulesets.
+    if ((this.flags.ruleset || []).length > 0) {
+      filters.push(new RuleFilter(RULE_FILTER_TYPE.RULESET, this.flags.ruleset));
+    }
+
+    // Create a filter for any provided languages.
+    if ((this.flags.language || []).length > 0) {
+      filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, this.flags.language));
+    }
+
+    return filters;
   }
 }

@@ -15,13 +15,18 @@ export type PmdCatalog = {
 };
 
 export class PmdCatalogWrapper extends PmdSupport {
+  private catalogJson : PmdCatalog;
   constructor() {
     super();
   }
 
   public async getCatalog() : Promise<PmdCatalog> {
-    await this.rebuildCatalogIfNecessary();
-    return PmdCatalogWrapper.readCatalogFromFile();
+    // If we haven't read in a catalog yet, do so now.
+    if (!this.catalogJson) {
+      await this.rebuildCatalogIfNecessary();
+      this.catalogJson = PmdCatalogWrapper.readCatalogFromFile();
+    }
+    return Promise.resolve(this.catalogJson);
   }
 
   private async rebuildCatalogIfNecessary(): Promise<string> {
