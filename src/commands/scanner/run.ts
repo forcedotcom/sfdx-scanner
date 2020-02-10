@@ -1,5 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { Messages } from '@salesforce/core';
+import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../lib/RuleManager";
 
@@ -73,11 +73,12 @@ export default class Run extends SfdxCommand {
 
   public async run(): Promise<AnyJson> {
     const filters = this.buildRuleFilters();
+    const pathString = this.buildTargetPathString();
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
     // TODO: Once we know what the output should look like, process the output in some way.
-    let output = await ruleManager.runRulesMatchingCriteria(filters);
+    let output = await ruleManager.runRulesMatchingCriteria(filters, pathString);
     return {};
   }
 
@@ -99,5 +100,21 @@ export default class Run extends SfdxCommand {
     }
 
     return filters;
+  }
+
+  private buildTargetPathString() : string {
+    let paths = [];
+    if ((this.flags.directory || []).length > 0) {
+       paths = [...paths, ...this.flags.directory];
+    }
+    if ((this.flags.file || []).length > 0) {
+      paths = [...paths, ...this.flags.file];
+    }
+    // If no paths were specified, we should just throw an error, because you need to target something.
+    if (paths.length === 0) {
+      // TODO: This error message should probably be defined in run.json.
+      throw new SfdxError('You need to target something, champ.');
+    }
+    return paths.join(',');
   }
 }

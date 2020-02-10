@@ -12,6 +12,8 @@ export enum Format {
   TEXT = 'txt'
 }
 
+export type PmdSupportCallback = (err: child_process.ExecException, stdout: string, stderr: string) => void;
+
 export abstract class PmdSupport {
 
   protected buildClasspath(): string[] {
@@ -20,20 +22,25 @@ export abstract class PmdSupport {
     return [pmdLibs];
   }
 
+  protected getCallback(res, rej) : PmdSupportCallback {
+    return (err, stdout, stderr) => {
+      if (err) {
+        rej(stderr);
+      } else if (stdout) {
+        res(stdout);
+      } else {
+        res('success');
+      }
+    };
+  }
+
   protected abstract buildCommand(): string;
 
   protected async runCommand(): Promise<string> {
     const command = this.buildCommand();
     return new Promise((res, rej) => {
-      child_process.exec(command, (err, stdout, stderr) => {
-        if (err) {
-          rej(stderr);
-        } else if (stdout) {
-          res(stdout);
-        } else {
-          res('success');
-        }
-      });
+      const callback = this.getCallback(res, rej);
+      child_process.exec(command, callback);
     });
   }
 }

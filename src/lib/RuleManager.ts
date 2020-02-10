@@ -1,5 +1,6 @@
 import {Rule} from '../types';
 import {SfdxError} from '@salesforce/core';
+import PmdWrapper from './pmd/PmdWrapper';
 import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
 
 export enum RULE_FILTER_TYPE {
@@ -34,11 +35,8 @@ export class RuleManager {
     }
   }
 
-  public async runRulesMatchingCriteria(filters: RuleFilter[]) : Promise<any> {
-    try {
-    } catch (e) {
-      throw new SfdxError(e);
-    }
+  public async runRulesMatchingCriteria(filters: RuleFilter[], target: string) : Promise<any> {
+    return await Promise.all([this.runPmdRulesMatchingCriteria(filters, target)]);
   }
 
   private async getAllRules() : Promise<Rule[]> {
@@ -51,6 +49,23 @@ export class RuleManager {
     // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
     const catalog = await this.pmdCatalogWrapper.getCatalog();
     return catalog.rules;
+  }
+
+  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], target: string) {
+    try {
+      // Convert our filters into paths that we can feed back into PMD.
+      let paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
+      // If we didn't find any paths, we're done.
+      if (paths == null || paths.length === 0) {
+        return;
+      }
+      // Otherwise, run PMD and see what we get.
+      let [violationsFound, stdout] = await PmdWrapper.execute(target, paths.join(','));
+      console.log('found violations? ' + violationsFound);
+      console.log('we got: '+ stdout);
+    } catch (e) {
+      throw new SfdxError(e);
+    }
   }
 
 
