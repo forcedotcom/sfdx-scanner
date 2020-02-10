@@ -1,7 +1,6 @@
-import { flags, SfdxCommand } from '@salesforce/command';
+import {flags, SfdxCommand} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
-import { AnyJson } from '@salesforce/ts-types';
-import { PmdCatalogWrapper } from '../../../lib/pmd/PmdCatalogWrapper';
+import {PmdCatalogWrapper} from '../../../lib/pmd/PmdCatalogWrapper';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -10,6 +9,12 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'list');
 const columns = ['name', 'languages', 'categories', 'rulesets', 'author'];
+
+interface Rule {
+  categories: string[],
+  rulesets: string[],
+  languages: string[]
+}
 
 export default class List extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
@@ -56,9 +61,9 @@ export default class List extends SfdxCommand {
     })
   };
 
-  public async run() : Promise<AnyJson> {
+  public async run(): Promise<Rule[]> {
     try {
-      const allRules = await this.getAllRules();
+      const allRules = await List.getAllRules();
       const filteredRules = allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule));
       const formattedRules = this.formatRulesForDisplay(filteredRules);
       this.ux.table(formattedRules, columns);
@@ -70,22 +75,22 @@ export default class List extends SfdxCommand {
     }
   }
 
-  private async getAllRules() : Promise<any> {
+  private static async getAllRules(): Promise<Rule[]> {
     // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
-    const [pmdRules] : AnyJson[] = await Promise.all([this.getPmdRules()]);
+    const [pmdRules] = await Promise.all([List.getPmdRules()]);
     return [...pmdRules];
   }
 
-  private async getPmdRules() : Promise<AnyJson[]> {
+  private static async getPmdRules(): Promise<Rule[]> {
     // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
     const catalog = await new PmdCatalogWrapper().getCatalog();
     return catalog.rules;
   }
 
-  private ruleSatisfiesFilterConstraints(rule : {categories; rulesets; languages}) : boolean {
+  private ruleSatisfiesFilterConstraints(rule: { categories; rulesets; languages }): boolean {
     // Get the filter criteria from the input flags.
     const filterCats = this.flags.category || [];
-    const filterRulesets =  this.flags.ruleset || [];
+    const filterRulesets = this.flags.ruleset || [];
     const filterLangs = this.flags.language || [];
 
     // If the user specified one or more categories, this rule must be a member of at least one of those categories.
@@ -99,7 +104,7 @@ export default class List extends SfdxCommand {
     }
 
     // If the user specified one or more languages, this rule must apply to at least one of those languages.
-    if (filterLangs.length > 0 && ! this.listContentsOverlap(filterLangs, rule.languages)) {
+    if (filterLangs.length > 0 && !this.listContentsOverlap(filterLangs, rule.languages)) {
       return false;
     }
 
@@ -107,11 +112,11 @@ export default class List extends SfdxCommand {
     return true;
   }
 
-  private listContentsOverlap(list1 : string[], list2 : string[]) : boolean {
+  private listContentsOverlap(list1: string[], list2: string[]): boolean {
     return list1.some(x => list2.includes(x));
   }
 
-  private formatRulesForDisplay(rules : AnyJson[]) : AnyJson[] {
+  private formatRulesForDisplay(rules: Rule[]): Rule[] {
     return rules.map(rule => {
       const clonedRule = JSON.parse(JSON.stringify(rule));
 

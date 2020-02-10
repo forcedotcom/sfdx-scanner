@@ -1,7 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
-
-import PmdWrapper, { Format } from '../../lib/pmd/PmdWrapper';
+import {Format} from '../../lib/pmd/PmdSupport';
+import PmdWrapper from '../../lib/pmd/PmdWrapper';
 
 // import { AnyJson } from '@salesforce/ts-types';
 
@@ -43,7 +43,7 @@ export default class Scan extends SfdxCommand {
 
 
     this.ux.log('Handing off to PMD');
-    PmdWrapper.execute(filepathName, rulesetFiles, Format.CSV, report);
+    await PmdWrapper.execute(filepathName, rulesetFiles, Format.CSV, report);
 
 
     return { ruleset: rulesetFiles, filepath: filepathName };
