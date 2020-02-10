@@ -24,7 +24,7 @@ export abstract class PmdSupport {
 
   protected async runCommand(): Promise<string> {
     const command = this.buildCommand();
-    return new Promise((res, rej) => {
+    return new Promise<string>((res, rej) => {
       child_process.exec(command, (err, stdout, stderr) => {
         if (err) {
           rej(stderr);
