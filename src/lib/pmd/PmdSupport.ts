@@ -22,6 +22,12 @@ export abstract class PmdSupport {
     return [pmdLibs];
   }
 
+  /**
+   * Provides the default callback that should be provided for calls to child_process.exec. Extensions of this class can
+   * override to add more nuanced behavior.
+   * @param {Function} res - The 'resolve' method for a Promise.
+   * @param {Function} rej - The 'reject' method for a Promise.
+   */
   protected getCallback(res, rej) : PmdSupportCallback {
     return (err, stdout, stderr) => {
       if (err) {

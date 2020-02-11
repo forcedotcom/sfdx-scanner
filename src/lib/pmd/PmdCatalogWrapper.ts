@@ -30,6 +30,10 @@ export class PmdCatalogWrapper extends PmdSupport {
     return Promise.resolve(this.catalogJson);
   }
 
+  /**
+   * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
+   * @param {RuleFilter[]} filters
+   */
   public async getPathsMatchingFilters(filters: RuleFilter[]) : Promise<string[]> {
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {

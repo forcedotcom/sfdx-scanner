@@ -41,6 +41,12 @@ export default class PmdWrapper extends PmdSupport {
     return command;
   }
 
+  /**
+   * The callback to handle the results of child_process.exec().
+   * @param {Function} res - The 'resolve' method of a Promise.
+   * @param {Function} rej - The 'reject' method of a Promise.
+   * @override
+   */
   protected getCallback(res, rej): PmdSupportCallback {
     return (err, stdout, stderr) => {
       // In addition to the case where err is null, which obviously indicates a successful run, we need to check whether
