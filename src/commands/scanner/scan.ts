@@ -20,8 +20,11 @@ export default class Scan extends SfdxCommand {
   public static examples = [
     `$ sfdx scanner:scan --ruleset "/my/ruleset/file/location" --filepath "/my/code/files/to/be/scanned"
         (todo: add sample output here)
-
+        
         $ sfdx scanner:scan -R "/my/ruleset/file/location" -d "/my/code/files/to/be/scanned"
+        (todo: add sample output here)
+
+        $ sfdx scanner:scan --ruleset "/my/ruleset/file/location" --filepath "/my/code/files/to/be/scanned" --customjar "/a/jar/file/with/custom/rule/definition.jar"
         (todo: add sample output here)
         `
   ];
@@ -29,21 +32,24 @@ export default class Scan extends SfdxCommand {
   protected static flagsConfig = {
     ruleset: flags.string({ char: 'R', description: messages.getMessage('rulesetFlagDescription') }),
     filepath: flags.string({ char: 'd', description: messages.getMessage('filepathFlagDescription') }),
-    report: flags.string({ char: 'r', description: messages.getMessage('reportFlagDescription') })
+    report: flags.string({ char: 'r', description: messages.getMessage('reportFlagDescription') }),
+    customjar: flags.string({ description: messages.getMessage('customJarDescription')})
   };
 
   public async run(): Promise<any> {
     const rulesetFiles = this.flags.ruleset;
     const filepathName = this.flags.filepath;
     const report = this.flags.report;
+    const customJar = this.flags.customjar;
 
 
     this.ux.log(`Location of ruleset is ${rulesetFiles}`);
     this.ux.log(`File path is ${filepathName}`);
+    this.ux.log(`Custom rules provided in ${customJar}`);
 
 
     this.ux.log('Handing off to PMD');
-    await PmdWrapper.execute(filepathName, rulesetFiles, Format.CSV, report);
+    await PmdWrapper.execute(filepathName, rulesetFiles, Format.CSV, report, customJar);
 
 
     return { ruleset: rulesetFiles, filepath: filepathName };
