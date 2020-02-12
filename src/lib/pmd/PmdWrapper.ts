@@ -23,7 +23,7 @@ export default class PmdWrapper extends PmdSupport {
     super();
     this.path = path;
     this.rules = rules;
-    this.reportFormat = reportFormat || Format.CSV;
+    this.reportFormat = reportFormat || Format.XML;
     this.reportFile = reportFile || null;
   }
 

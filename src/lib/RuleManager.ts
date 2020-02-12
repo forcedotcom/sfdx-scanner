@@ -35,8 +35,13 @@ export class RuleManager {
     }
   }
 
-  public async runRulesMatchingCriteria(filters: RuleFilter[], target: string) : Promise<any> {
-    return await Promise.all([this.runPmdRulesMatchingCriteria(filters, target)]);
+  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string) : Promise<any> {
+    // If source is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
+    // running rules against an org yet, so we'll just throw an error for now.
+    if (typeof source === 'string') {
+      throw new SfdxError('Running rules against orgs is not yet supported');
+    }
+    return await Promise.all([this.runPmdRulesMatchingCriteria(filters, source)]);
   }
 
   private async getAllRules() : Promise<Rule[]> {
@@ -51,7 +56,7 @@ export class RuleManager {
     return catalog.rules;
   }
 
-  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], target: string) {
+  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]) {
     try {
       // Convert our filters into paths that we can feed back into PMD.
       let paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
@@ -60,7 +65,7 @@ export class RuleManager {
         return;
       }
       // Otherwise, run PMD and see what we get.
-      let [violationsFound, stdout] = await PmdWrapper.execute(target, paths.join(','));
+      let [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
       console.log('found violations? ' + violationsFound);
       console.log('we got: '+ stdout);
     } catch (e) {

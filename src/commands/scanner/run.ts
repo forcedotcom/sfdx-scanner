@@ -10,6 +10,21 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'run');
 
+export enum OUTPUT_FORMAT {
+  XML = 'xml',
+  CSV = 'csv'
+}
+
+export class OutfileDescriptor {
+  readonly path : string;
+  readonly filetype : OUTPUT_FORMAT;
+
+  constructor(path : string, filetype : OUTPUT_FORMAT) {
+    this.path = path;
+    this.filetype = filetype;
+  }
+}
+
 export default class Run extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
@@ -39,6 +54,8 @@ export default class Run extends SfdxCommand {
       char: 'r',
       description: messages.getMessage('flags.rulesetDescription')
     }),
+    // TODO: IMPLEMENT THESE FLAGS IN A MEANINGFUL WAY.
+    /*
     severity: flags.string({
       char: 's',
       description: messages.getMessage('flags.severityDescription')
@@ -46,39 +63,49 @@ export default class Run extends SfdxCommand {
     'exclude-rule': flags.array({
       description: messages.getMessage('flags.excluderuleDescription')
     }),
+     */
     // These flags are how you choose which files you're targeting.
-    file: flags.array({
-      char: 'f',
-      description: messages.getMessage('flags.fileDescription')
-    }),
-    directory: flags.array({
-      char: 'd',
-      description: messages.getMessage('flags.directoryDescription')
-    }),
-    exclude: flags.array({
-      char: 'x',
-      description: messages.getMessage('flags.excludeDescription')
+    source: flags.array({
+      char: 's',
+      description: messages.getMessage('flags.sourceDescription'),
+      // If you're specifying local files, it doesn't make much sense to let you specify anything else.
+      exclusive: ['org']
     }),
     org: flags.string({
       char: 'a',
       description: messages.getMessage('flags.orgDescription'),
       // If you're specifying an org, it doesn't make sense to let you specify anything else.
-      exclusive: ['file', 'directory', 'exclude']
+      exclusive: ['source']
     }),
     // These flags modify how the process runs, rather than what it consumes.
     'suppress-warnings': flags.boolean({
       description: messages.getMessage('flags.suppresswarningsDescription')
+    }),
+    format: flags.enum({
+      char: 'f',
+      description: messages.getMessage('flags.formatDescription'),
+      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.CSV],
+      exclusive: ['outfile']
+    }),
+    outfile: flags.string({
+      char: 'o',
+      description: messages.getMessage('flags.outfileDescription'),
+      exclusive: ['format']
     })
   };
 
   public async run(): Promise<AnyJson> {
+    // First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
+    this.validateFlags();
+
+    // Next, we need to build our input.
     const filters = this.buildRuleFilters();
-    const pathString = this.buildTargetPathString();
+    const source : string[]|string = this.flags.source || this.flags.org;
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
     // TODO: Once we know what the output should look like, process the output in some way.
-    let output = await ruleManager.runRulesMatchingCriteria(filters, pathString);
+    let output = await ruleManager.runRulesMatchingCriteria(filters, source);
     return {};
   }
 
@@ -102,19 +129,14 @@ export default class Run extends SfdxCommand {
     return filters;
   }
 
-  private buildTargetPathString() : string {
-    let paths = [];
-    if ((this.flags.directory || []).length > 0) {
-       paths = [...paths, ...this.flags.directory];
+  private validateFlags() : void {
+    // --target and --org are mutually exclusive, but they can't both be null.
+    if (!this.flags.source && !this.flags.org) {
+      throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
     }
-    if ((this.flags.file || []).length > 0) {
-      paths = [...paths, ...this.flags.file];
+    // If an output file was specified, it needs to be of a type we support.
+    if (this.flags.outfile && !(this.flags.outfile.endsWith(OUTPUT_FORMAT.XML) || this.flags.outfile.endsWith(OUTPUT_FORMAT.CSV))) {
+      throw new SfdxError(messages.getMessage('validations.unsupportedOutfileType'));
     }
-    // If no paths were specified, we should just throw an error, because you need to target something.
-    if (paths.length === 0) {
-      // TODO: This error message should probably be defined in run.json.
-      throw new SfdxError('You need to target something, champ.');
-    }
-    return paths.join(',');
   }
 }

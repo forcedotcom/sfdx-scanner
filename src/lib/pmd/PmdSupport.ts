@@ -9,7 +9,7 @@ export const PMD_LIB = './dist/pmd/lib';
 export enum Format {
   XML = 'xml',
   CSV = 'csv',
-  TEXT = 'txt'
+  TEXT = 'text'
 }
 
 export type PmdSupportCallback = (err: child_process.ExecException, stdout: string, stderr: string) => void;
