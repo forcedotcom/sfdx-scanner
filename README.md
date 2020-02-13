@@ -12,6 +12,7 @@ Static code scanner that applies quality and security rules to Apex code, and pr
 
 <!-- toc -->
 * [Debugging your plugin](#debugging-your-plugin)
+* [sfdx-scanner](#sfdx-scanner)
 <!-- tocstop -->
 <!-- install -->
 <!-- usage -->
@@ -20,7 +21,7 @@ $ npm install -g scanner
 $ sfdx COMMAND
 running command...
 $ sfdx (-v|--version|version)
-scanner/0.0.0 darwin-x64 node-v12.13.0
+scanner/0.0.0 darwin-x64 node-v12.14.1
 $ sfdx --help [COMMAND]
 USAGE
   $ sfdx COMMAND
@@ -28,27 +29,23 @@ USAGE
 ```
 <!-- usagestop -->
 <!-- commands -->
-* TODO doc commands
+* [`sfdx scanner:rule:describe -n <string> [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerruledescribe--n-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx scanner:rule:list [-c <array>] [-r <array>] [-s <string>] [-l <array>] [--standard | --custom] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerrulelist--c-array--r-array--s-string--l-array---standard----custom---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx scanner:run [-n <string> | -c <array> | -r <array> | -s <string> | --exclude-rule <array>] [-a <string> | -f <array> | -d <array> | -x <array>] [--suppress-warnings] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerrun--n-string---c-array---r-array---s-string----exclude-rule-array--a-string---f-array---d-array---x-array---suppress-warnings---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
+* [`sfdx scanner:scan [-R <string>] [-d <string>] [-r <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerscan--r-string--d-string--r-string---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 
-TODO describe
+## `sfdx scanner:rule:describe -n <string> [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+[Description of 'describe' command]
 
 ```
 USAGE
-  $ sfdx hello:org [-n <string>] [-f] [-v <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  $ sfdx scanner:rule:describe -n <string> [--json] [--loglevel 
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
-  -f, --force                                                                       example boolean flag
-  -n, --name=name                                                                   name to print
-
-  -u, --targetusername=targetusername                                               username or alias for the target
-                                                                                    org; overrides default target org
-
-  -v, --targetdevhubusername=targetdevhubusername                                   username or alias for the dev hub
-                                                                                    org; overrides default dev hub org
-
-  --apiversion=apiversion                                                           override the api version used for
-                                                                                    api requests made by this command
+  -n, --rulename=rulename                                                           (required) [Description of
+                                                                                    'rulename' parameter]
 
   --json                                                                            format output as json
 
@@ -63,6 +60,128 @@ EXAMPLES
   $ sfdx hello:org --name myname --targetusername myOrg@example.com
      Hello myname! This is org: MyOrg and I will be around until Tue Mar 20 2018!
 ```
+
+_See code: [lib/commands/scanner/rule/describe.js](https://github.com/forcedotcom/sfdx-scanner/blob/v0.0.0/lib/commands/scanner/rule/describe.js)_
+
+## `sfdx scanner:rule:list [-c <array>] [-r <array>] [-s <string>] [-l <array>] [--standard | --custom] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+[Description of 'list' command]
+
+```
+USAGE
+  $ sfdx scanner:rule:list [-c <array>] [-r <array>] [-s <string>] [-l <array>] [--standard | --custom] [--json] 
+  [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+
+OPTIONS
+  -c, --category=category                                                           [Description of 'category'
+                                                                                    parameter]
+
+  -l, --language=language                                                           [Description of 'language'
+                                                                                    parameter]
+
+  -r, --ruleset=ruleset                                                             [Description of 'ruleset' parameter]
+
+  -s, --severity=severity                                                           [Description of 'severity'
+                                                                                    parameter]
+
+  --custom                                                                          [Description of 'custom' parameter]
+
+  --json                                                                            format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
+                                                                                    this command invocation
+
+  --standard                                                                        [Description of 'standard'
+                                                                                    parameter]
+
+EXAMPLES
+  $ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
+     Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
+     My hub org id is: 00Dxx000000001234
+  
+  $ sfdx hello:org --name myname --targetusername myOrg@example.com
+     Hello myname! This is org: MyOrg and I will be around until Tue Mar 20 2018!
+```
+
+_See code: [lib/commands/scanner/rule/list.js](https://github.com/forcedotcom/sfdx-scanner/blob/v0.0.0/lib/commands/scanner/rule/list.js)_
+
+## `sfdx scanner:run [-n <string> | -c <array> | -r <array> | -s <string> | --exclude-rule <array>] [-a <string> | -f <array> | -d <array> | -x <array>] [--suppress-warnings] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+[Description of 'run' command]
+
+```
+USAGE
+  $ sfdx scanner:run [-n <string> | -c <array> | -r <array> | -s <string> | --exclude-rule <array>] [-a <string> | -f 
+  <array> | -d <array> | -x <array>] [--suppress-warnings] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+
+OPTIONS
+  -a, --org=org                                                                     [Description of 'org' parameter]
+
+  -c, --category=category                                                           [Description of 'category'
+                                                                                    parameter]
+
+  -d, --directory=directory                                                         [Description of 'directory'
+                                                                                    parameter]
+
+  -f, --file=file                                                                   [Description of 'file' parameter]
+
+  -n, --rulename=rulename                                                           [Description of 'rulename'
+                                                                                    parameter]
+
+  -r, --ruleset=ruleset                                                             [Description of 'ruleset' parameter]
+
+  -s, --severity=severity                                                           [Description of 'severity'
+                                                                                    parameter]
+
+  -x, --exclude=exclude                                                             [Description of 'exclude' parameter]
+
+  --exclude-rule=exclude-rule                                                       [Description of 'exclude-rule'
+                                                                                    parameter]
+
+  --json                                                                            format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
+                                                                                    this command invocation
+
+  --suppress-warnings                                                               [Description of 'suppress-warnings'
+                                                                                    parameter]
+
+EXAMPLE
+  $ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
+     Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
+     My hub org id is: 00Dxx000000001234
+```
+
+_See code: [lib/commands/scanner/run.js](https://github.com/forcedotcom/sfdx-scanner/blob/v0.0.0/lib/commands/scanner/run.js)_
+
+## `sfdx scanner:scan [-R <string>] [-d <string>] [-r <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
+
+scan local code for violations of rules
+
+```
+USAGE
+  $ sfdx scanner:scan [-R <string>] [-d <string>] [-r <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+
+OPTIONS
+  -R, --ruleset=ruleset                                                             ruleset to use for scanning
+  -d, --filepath=filepath                                                           file path to examine
+  -r, --report=report                                                               file to save output report
+  --json                                                                            format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
+                                                                                    this command invocation
+
+EXAMPLE
+  $ sfdx scanner:scan --ruleset "/my/ruleset/file/location" --filepath "/my/code/files/to/be/scanned"
+           (todo: add sample output here)
+
+           $ sfdx scanner:scan -R "/my/ruleset/file/location" -d "/my/code/files/to/be/scanned"
+           (todo: add sample output here)
+```
+
+_See code: [lib/commands/scanner/scan.js](https://github.com/forcedotcom/sfdx-scanner/blob/v0.0.0/lib/commands/scanner/scan.js)_
 <!-- commandsstop -->
 <!-- debugging-your-plugin -->
 # Debugging your plugin
