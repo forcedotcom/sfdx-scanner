@@ -1,7 +1,8 @@
-import { flags, SfdxCommand } from '@salesforce/command';
-import { Messages, SfdxError } from '@salesforce/core';
-import { AnyJson } from '@salesforce/ts-types';
-import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../lib/RuleManager";
+import {flags, SfdxCommand} from '@salesforce/command';
+import {Messages, SfdxError} from '@salesforce/core';
+import {AnyJson} from '@salesforce/ts-types';
+import {OUTPUT_FORMAT, RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../lib/RuleManager";
+import fs = require('fs');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -9,21 +10,6 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'run');
-
-export enum OUTPUT_FORMAT {
-  XML = 'xml',
-  CSV = 'csv'
-}
-
-export class OutfileDescriptor {
-  readonly path : string;
-  readonly filetype : OUTPUT_FORMAT;
-
-  constructor(path : string, filetype : OUTPUT_FORMAT) {
-    this.path = path;
-    this.filetype = filetype;
-  }
-}
 
 export default class Run extends SfdxCommand {
   // These determine what's displayed when the --help/-h flag is provided.
@@ -101,11 +87,12 @@ export default class Run extends SfdxCommand {
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
     const source : string[]|string = this.flags.source || this.flags.org;
+    const format : OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
-    // TODO: Once we know what the output should look like, process the output in some way.
-    let output = await ruleManager.runRulesMatchingCriteria(filters, source);
+    const output = await ruleManager.runRulesMatchingCriteria(filters, source, format);
+    this.processsOutput(output);
     return {};
   }
 
@@ -130,13 +117,51 @@ export default class Run extends SfdxCommand {
   }
 
   private validateFlags() : void {
-    // --target and --org are mutually exclusive, but they can't both be null.
+    // --source and --org are mutually exclusive, but they can't both be null.
     if (!this.flags.source && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
     }
-    // If an output file was specified, it needs to be of a type we support.
-    if (this.flags.outfile && !(this.flags.outfile.endsWith(OUTPUT_FORMAT.XML) || this.flags.outfile.endsWith(OUTPUT_FORMAT.CSV))) {
-      throw new SfdxError(messages.getMessage('validations.unsupportedOutfileType'));
+    // --format and --outfile are mutually exclusive, but they can't both be null.
+    if (!this.flags.format && !this.flags.outfile) {
+      throw new SfdxError(messages.getMessage('validations.mustSpecifyOutput'));
+    }
+  }
+
+  private deriveFormatFromOutfile() : OUTPUT_FORMAT {
+    const outfile = this.flags.outfile;
+    const lastPeriod = outfile.lastIndexOf('.');
+    if (lastPeriod < 1 || lastPeriod + 1 == outfile.length) {
+      throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'));
+    } else {
+      const fileExtension = outfile.slice(lastPeriod + 1);
+      switch (fileExtension) {
+        case OUTPUT_FORMAT.CSV:
+          return OUTPUT_FORMAT.CSV;
+        case OUTPUT_FORMAT.XML:
+          return OUTPUT_FORMAT.XML;
+        default:
+          throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'));
+      }
+    }
+  }
+
+  private processsOutput(output : string) : void {
+    if (this.flags.outfile) {
+      // If we were given a file, we should write the output to that file.
+      try {
+        fs.writeFileSync(this.flags.outfile, output);
+      } catch (e) {
+        throw new SfdxError(e.message || e);
+      }
+    } else {
+      // If we're just supposed to dump the output to the console, what precisely we do depends on the format.
+      if (this.flags.format === OUTPUT_FORMAT.CSV) {
+        // TODO: Parse the output into an array, process it, and print it as a table.
+        throw new SfdxError('Cannot log CSV to console yet.');
+      } else if (this.flags.format === OUTPUT_FORMAT.XML) {
+        // For XML, we can just dump it to the console.
+        this.ux.log(output);
+      }
     }
   }
 }

@@ -2,11 +2,17 @@ import {Rule} from '../types';
 import {SfdxError} from '@salesforce/core';
 import PmdWrapper from './pmd/PmdWrapper';
 import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
+import {RuleResultRecombinator} from './RuleResultRecombinator';
 
 export enum RULE_FILTER_TYPE {
   CATEGORY,
   RULESET,
   LANGUAGE
+}
+
+export enum OUTPUT_FORMAT {
+  XML = 'xml',
+  CSV = 'csv'
 }
 
 export class RuleFilter {
@@ -31,17 +37,22 @@ export class RuleManager {
       const allRules = await this.getAllRules();
       return allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));
     } catch (e) {
-      throw new SfdxError(e);
+      throw new SfdxError(e.message || e);
     }
   }
 
-  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string) : Promise<any> {
+  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string, format : OUTPUT_FORMAT) : Promise<string> {
     // If source is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
     // running rules against an org yet, so we'll just throw an error for now.
     if (typeof source === 'string') {
       throw new SfdxError('Running rules against orgs is not yet supported');
     }
-    return await Promise.all([this.runPmdRulesMatchingCriteria(filters, source)]);
+    // TODO: Eventually, we'll need a bunch more promises to run rules existing in other engines.
+    const [pmdResults] = await Promise.all([this.runPmdRulesMatchingCriteria(filters, source)]);
+
+    // Once all of the rules finish running, we'll need to combine their results into a single set of the desired type,
+    // which we can then return.
+    return RuleResultRecombinator.recombineAndReformatResults([pmdResults], format);
   }
 
   private async getAllRules() : Promise<Rule[]> {
@@ -56,7 +67,7 @@ export class RuleManager {
     return catalog.rules;
   }
 
-  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]) {
+  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]) : Promise<string> {
     try {
       // Convert our filters into paths that we can feed back into PMD.
       let paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
@@ -66,10 +77,18 @@ export class RuleManager {
       }
       // Otherwise, run PMD and see what we get.
       let [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
-      console.log('found violations? ' + violationsFound);
-      console.log('we got: '+ stdout);
+
+      if (violationsFound) {
+        // If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
+        const xmlStart = stdout.indexOf('<?xml');
+        const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
+        return stdout.slice(xmlStart, xmlEnd);
+      } else {
+        // If we didn't find any violations, we can just return an empty string.
+        return '';
+      }
     } catch (e) {
-      throw new SfdxError(e);
+      throw new SfdxError(e.message || e);
     }
   }
 

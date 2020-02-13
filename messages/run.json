@@ -14,6 +14,8 @@
   },
   "validations": {
     "mustTargetSomething": "[Message indicating that 'source' and 'org' flags cannot both be null]",
-    "unsupportedOutfileType": "[Message indicating that 'outfile' must be a supported file format]"
+    "mustSpecifyOutput": "[Message indicating that 'format' and 'outfile' cannot both be null]",
+    "outfileMustBeValid": "[Message indicating that 'outfile' must be a well-formed filepath]",
+    "outfileMustBeSupportedType": "[Message indicating that 'outfile' must be a supported file format]"
   }
 }
