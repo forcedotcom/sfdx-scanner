@@ -92,7 +92,7 @@ export default class Run extends SfdxCommand {
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
     const output = await ruleManager.runRulesMatchingCriteria(filters, source, format);
-    this.processsOutput(output);
+    this.processOutput(output);
     return {};
   }
 
@@ -145,7 +145,12 @@ export default class Run extends SfdxCommand {
     }
   }
 
-  private processsOutput(output : string) : void {
+  private processOutput(output : string) : void {
+    // If the output is an empty string, it means no violations were found, and we should log that information to the console
+    // so the user doesn't get confused.
+    if (output === '') {
+      this.ux.log(messages.getMessage('output.noViolationsDetected'));
+    }
     if (this.flags.outfile) {
       // If we were given a file, we should write the output to that file.
       try {
@@ -156,7 +161,18 @@ export default class Run extends SfdxCommand {
     } else {
       // If we're just supposed to dump the output to the console, what precisely we do depends on the format.
       if (this.flags.format === OUTPUT_FORMAT.CSV) {
-        // TODO: Parse the output into an array, process it, and print it as a table.
+        // TODO: GET THIS PART WORKING
+        /*
+        // The CSV is one giant string, so we'll split it by newline characters to get the rows, then split those by commas.
+        const rowStrings = output.split('\n');
+        const columns = rowStrings[0].split('","');
+        const rows = [];
+        // Initialize the loop at index 1 so we skip the columns.
+        for (let i = 1; i < rowStrings.length; i++) {
+          rows.push(rowStrings[i].split(','));
+        }
+        this.ux.table(rows, columns);
+         */
         throw new SfdxError('Cannot log CSV to console yet.');
       } else if (this.flags.format === OUTPUT_FORMAT.XML) {
         // For XML, we can just dump it to the console.
