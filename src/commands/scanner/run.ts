@@ -70,7 +70,7 @@ export default class Run extends SfdxCommand {
     format: flags.enum({
       char: 'f',
       description: messages.getMessage('flags.formatDescription'),
-      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.CSV],
+      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE],
       exclusive: ['outfile']
     }),
     outfile: flags.string({
@@ -161,22 +161,14 @@ export default class Run extends SfdxCommand {
     } else {
       // If we're just supposed to dump the output to the console, what precisely we do depends on the format.
       if (this.flags.format === OUTPUT_FORMAT.CSV) {
-        // TODO: GET THIS PART WORKING
-        /*
-        // The CSV is one giant string, so we'll split it by newline characters to get the rows, then split those by commas.
-        const rowStrings = output.split('\n');
-        const columns = rowStrings[0].split('","');
-        const rows = [];
-        // Initialize the loop at index 1 so we skip the columns.
-        for (let i = 1; i < rowStrings.length; i++) {
-          rows.push(rowStrings[i].split(','));
-        }
-        this.ux.table(rows, columns);
-         */
-        throw new SfdxError('Cannot log CSV to console yet.');
+        // The CSV is just one giant string that we can dump directly to the console.
+        this.ux.log(output);
       } else if (this.flags.format === OUTPUT_FORMAT.XML) {
         // For XML, we can just dump it to the console.
         this.ux.log(output);
+      } else if (this.flags.format === OUTPUT_FORMAT.TABLE) {
+        const outputObj = JSON.parse(output);
+        this.ux.table(outputObj.rows, outputObj.columns);
       }
     }
   }

@@ -14,6 +14,8 @@ export class RuleResultRecombinator {
         return this.constructCsv(results);
       case OUTPUT_FORMAT.XML:
         return this.constructXml(results);
+      case OUTPUT_FORMAT.TABLE:
+        return this.constructTable(results);
       default:
         throw new SfdxError('Unrecognized output format.');
     }
@@ -29,6 +31,29 @@ export class RuleResultRecombinator {
     // TODO: Eventually, we'll need logic to actually combine XMLs together and massage them into the format we want to output,
     //  but for now we can just return the XML that was provided to us.
     return pmdResults;
+  }
+
+  private static constructTable([pmdResults] : [string]) : string {
+    // TODO: Eventually, we'll need logic to combine disparate result sets into a single table. But for now, we can just
+    //  turn the PMD xml into a table by creating the CSV and then turning it into input for our table. It's the coward's
+    //  way out, but it'll work for now.
+    let pmdCsv = this.pmdToCsv(pmdResults);
+    // The CSV is one giant string, and for it to be displayable as a table, we'll need to split it up and turn it into
+    // a bunch of JSONs.
+    const rowStrings = pmdCsv.split('\n');
+    // First, we need to get the columns. This is a bit esoteric, but what we're going is pulling the first row, which
+    // holds the column names, splitting that by commas, then splitting each column name by double-quotes and keeping
+    // the middle entry. That gives us the column names as a an array without the entries being wrapped in quotes.
+    const columns = rowStrings.shift().split(',').map((v) => {return v.split('"')[1]});
+    // Next, we need to turn each row into a JSON.
+    const rowJsons = rowStrings.map((rowStr) => {
+      const rowVals = rowStr.split(',');
+      const rowJson = {};
+      columns.forEach((col, idx) => {rowJson[col] = rowVals[idx]});
+      return rowJson;
+    });
+    // Turn our JSON into a string so we can pass it back up through and parse it when we need.
+    return JSON.stringify({columns: columns, rows: rowJsons});
   }
 
   private static pmdToCsv(pmdResults : string) : string {
