@@ -1,8 +1,9 @@
-import {flags, SfdxCommand} from '@salesforce/command';
+import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {OUTPUT_FORMAT, RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../lib/RuleManager";
 import fs = require('fs');
+import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
+import {ScannerCommand} from './scannerCommand';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -11,7 +12,7 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'run');
 
-export default class Run extends SfdxCommand {
+export default class Run extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
   // TODO: Write real examples.
@@ -96,26 +97,6 @@ export default class Run extends SfdxCommand {
     return {};
   }
 
-  private buildRuleFilters() : RuleFilter[] {
-    let filters : RuleFilter[] = [];
-    // Create a filter for any provided categories.
-    if ((this.flags.category || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.CATEGORY, this.flags.category));
-    }
-
-    // Create a filter for any provided rulesets.
-    if ((this.flags.ruleset || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.RULESET, this.flags.ruleset));
-    }
-
-    // Create a filter for any provided languages.
-    if ((this.flags.language || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, this.flags.language));
-    }
-
-    return filters;
-  }
-
   private validateFlags() : void {
     // --source and --org are mutually exclusive, but they can't both be null.
     if (!this.flags.source && !this.flags.org) {
@@ -130,7 +111,7 @@ export default class Run extends SfdxCommand {
   private deriveFormatFromOutfile() : OUTPUT_FORMAT {
     const outfile = this.flags.outfile;
     const lastPeriod = outfile.lastIndexOf('.');
-    if (lastPeriod < 1 || lastPeriod + 1 == outfile.length) {
+    if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
       throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'));
     } else {
       const fileExtension = outfile.slice(lastPeriod + 1);

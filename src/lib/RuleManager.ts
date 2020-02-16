@@ -1,7 +1,7 @@
-import {Rule} from '../types';
 import {SfdxError} from '@salesforce/core';
-import PmdWrapper from './pmd/PmdWrapper';
+import {Rule} from '../types';
 import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
+import PmdWrapper from './pmd/PmdWrapper';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 
 export enum RULE_FILTER_TYPE {
@@ -71,13 +71,13 @@ export class RuleManager {
   private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]) : Promise<string> {
     try {
       // Convert our filters into paths that we can feed back into PMD.
-      let paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
+      const paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
       // If we didn't find any paths, we're done.
       if (paths == null || paths.length === 0) {
         return;
       }
       // Otherwise, run PMD and see what we get.
-      let [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
+      const [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
 
       if (violationsFound) {
         // If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
@@ -96,14 +96,14 @@ export class RuleManager {
 
   private ruleSatisfiesFilterConstraints(rule : Rule, filters : RuleFilter[]) : boolean {
     // If no filters were provided, then the rule is vacuously acceptable and we can just return true.
-    if (filters == null || filters.length == 0) {
+    if (filters == null || filters.length === 0) {
       return true;
     }
 
     // Otherwise, we'll iterate over all provided criteria and make sure that the rule satisfies them.
-    for (let i = 0; i < filters.length; i++) {
-      let filterType = filters[i].filterType;
-      let filterValues = filters[i].filterValues;
+    for (const filter of filters) {
+      const filterType = filter.filterType;
+      const filterValues = filter.filterValues;
 
       // Which property of the rule we're testing against depends on this filter's type.
       let ruleValues = null;

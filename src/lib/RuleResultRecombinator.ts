@@ -1,6 +1,6 @@
-import {OUTPUT_FORMAT} from './RuleManager';
-import {SfdxError} from "@salesforce/core";
+import {SfdxError} from '@salesforce/core';
 import {xml2js} from 'xml-js';
+import {OUTPUT_FORMAT} from './RuleManager';
 
 export class RuleResultRecombinator {
 
@@ -37,23 +37,23 @@ export class RuleResultRecombinator {
     // TODO: Eventually, we'll need logic to combine disparate result sets into a single table. But for now, we can just
     //  turn the PMD xml into a table by creating the CSV and then turning it into input for our table. It's the coward's
     //  way out, but it'll work for now.
-    let pmdCsv = this.pmdToCsv(pmdResults);
+    const pmdCsv = this.pmdToCsv(pmdResults);
     // The CSV is one giant string, and for it to be displayable as a table, we'll need to split it up and turn it into
     // a bunch of JSONs.
     const rowStrings = pmdCsv.split('\n');
     // First, we need to get the columns. This is a bit esoteric, but what we're going is pulling the first row, which
     // holds the column names, splitting that by commas, then splitting each column name by double-quotes and keeping
     // the middle entry. That gives us the column names as a an array without the entries being wrapped in quotes.
-    const columns = rowStrings.shift().split(',').map((v) => {return v.split('"')[1]});
+    const columns = rowStrings.shift().split(',').map(v => {return v.split('"')[1];});
     // Next, we need to turn each row into a JSON.
-    const rowJsons = rowStrings.map((rowStr) => {
+    const rowJsons = rowStrings.map(rowStr => {
       const rowVals = rowStr.split(',');
       const rowJson = {};
-      columns.forEach((col, idx) => {rowJson[col] = rowVals[idx]});
+      columns.forEach((col, idx) => {rowJson[col] = rowVals[idx];});
       return rowJson;
     });
     // Turn our JSON into a string so we can pass it back up through and parse it when we need.
-    return JSON.stringify({columns: columns, rows: rowJsons});
+    return JSON.stringify({columns, rows: rowJsons});
   }
 
   private static pmdToCsv(pmdResults : string) : string {
@@ -74,14 +74,12 @@ export class RuleResultRecombinator {
     // The top-level Element just has an 'property', which is a singleton list containing the 'pmd' Element, whose own
     // 'elements' property is a list of 'file' Elements.
     const fileElements = pmdJson.elements[0].elements;
-    for (let i = 0; i < fileElements.length; i++) {
-      const fileElement = fileElements[i];
+    for (const fileElement of fileElements) {
       const fileName = fileElement.attributes.name;
       // Each 'file' Element should contain in its 'elements' property a list of 'violation' Elements describing the ways
       // rules were violated.
       const violations = fileElement.elements;
-      for (let j = 0; j < violations.length; j++) {
-        const violation = violations[j];
+      for (const violation of violations) {
         const attrs = violation.attributes;
         // The error message for the violation is a 'text' Element below it.
         const msg = violation.elements[0].text.trim();

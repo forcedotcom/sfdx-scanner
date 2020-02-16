@@ -1,7 +1,8 @@
-import {flags, SfdxCommand} from '@salesforce/command';
+import {flags} from '@salesforce/command';
 import {Messages} from '@salesforce/core';
+import {RuleManager} from '../../../lib/RuleManager';
 import {Rule} from '../../../types';
-import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from "../../../lib/RuleManager";
+import {ScannerCommand} from '../scannerCommand';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -11,7 +12,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('scanner', 'list');
 const columns = ['name', 'languages', 'categories', 'rulesets', 'author'];
 
-export default class List extends SfdxCommand {
+export default class List extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
   public static description = messages.getMessage('commandDescription');
   // TODO: WRITE LEGITIMATE EXAMPLES.
@@ -66,26 +67,6 @@ export default class List extends SfdxCommand {
     // If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
     // just return the filtered list instead of the formatted list.
     return rules;
-  }
-
-  private buildRuleFilters() : RuleFilter[] {
-    let filters : RuleFilter[] = [];
-    // Create a filter for any provided categories.
-    if ((this.flags.category || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.CATEGORY, this.flags.category));
-    }
-
-    // Create a filter for any provided rulesets.
-    if ((this.flags.ruleset || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.RULESET, this.flags.ruleset));
-    }
-
-    // Create a filter for any provided languages.
-    if ((this.flags.language || []).length > 0) {
-      filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, this.flags.language));
-    }
-
-    return filters;
   }
 
   private formatRulesForDisplay(rules: Rule[]): Rule[] {
