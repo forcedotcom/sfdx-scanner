@@ -1,3 +1,5 @@
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/forcedotcom/sfdx-scanner) 
+
 
 Static code scanner that applies quality and security rules to Apex code, and provides feedback.
 
