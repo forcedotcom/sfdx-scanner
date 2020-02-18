@@ -71,6 +71,6 @@ export default class Describe extends ScannerCommand {
   }
 
   private logStyledRule(rule : Rule) : void {
-    this.ux.styledObject(Describe.formatRuleForDescribe(rule), ['name', 'categories', 'rulesets', 'language', 'description']);
+    this.ux.styledObject(Describe.formatRuleForDescribe(rule), ['name', 'categories', 'rulesets', 'languages', 'description']);
   }
 }
