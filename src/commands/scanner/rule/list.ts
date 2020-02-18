@@ -1,6 +1,8 @@
-import {flags, SfdxCommand} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
-import {PmdCatalogWrapper} from '../../../lib/pmd/PmdCatalogWrapper';
+import {flags} from '@salesforce/command';
+import {Messages} from '@salesforce/core';
+import {RuleManager} from '../../../lib/RuleManager';
+import {Rule} from '../../../types';
+import {ScannerCommand} from '../scannerCommand';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -10,13 +12,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('scanner', 'list');
 const columns = ['name', 'languages', 'categories', 'rulesets', 'author'];
 
-interface Rule {
-  categories: string[],
-  rulesets: string[],
-  languages: string[]
-}
-
-export default class List extends SfdxCommand {
+export default class List extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
   public static description = messages.getMessage('commandDescription');
   // TODO: WRITE LEGITIMATE EXAMPLES.
@@ -62,58 +58,15 @@ export default class List extends SfdxCommand {
   };
 
   public async run(): Promise<Rule[]> {
-    try {
-      const allRules = await List.getAllRules();
-      const filteredRules = allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule));
-      const formattedRules = this.formatRulesForDisplay(filteredRules);
-      this.ux.table(formattedRules, columns);
-      // If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
-      // just return the filtered list instead of the formatted list.
-      return filteredRules;
-    } catch (err) {
-      throw new SfdxError(err);
-    }
-  }
-
-  private static async getAllRules(): Promise<Rule[]> {
-    // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
-    const [pmdRules] = await Promise.all([List.getPmdRules()]);
-    return [...pmdRules];
-  }
-
-  private static async getPmdRules(): Promise<Rule[]> {
-    // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
-    const catalog = await new PmdCatalogWrapper().getCatalog();
-    return catalog.rules;
-  }
-
-  private ruleSatisfiesFilterConstraints(rule: { categories; rulesets; languages }): boolean {
-    // Get the filter criteria from the input flags.
-    const filterCats = this.flags.category || [];
-    const filterRulesets = this.flags.ruleset || [];
-    const filterLangs = this.flags.language || [];
-
-    // If the user specified one or more categories, this rule must be a member of at least one of those categories.
-    if (filterCats.length > 0 && !this.listContentsOverlap(filterCats, rule.categories)) {
-      return false;
-    }
-
-    // If the user specified one or more rulesets, this rule must be a member of at least one of those rulesets.
-    if (filterRulesets.length > 0 && !this.listContentsOverlap(filterRulesets, rule.rulesets)) {
-      return false;
-    }
-
-    // If the user specified one or more languages, this rule must apply to at least one of those languages.
-    if (filterLangs.length > 0 && !this.listContentsOverlap(filterLangs, rule.languages)) {
-      return false;
-    }
-
-    // If we didn't find any reasons to disqualify the rule, it's good.
-    return true;
-  }
-
-  private listContentsOverlap(list1: string[], list2: string[]): boolean {
-    return list1.some(x => list2.includes(x));
+    const ruleFilters = this.buildRuleFilters();
+    // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
+    // allow to boil over.
+    const rules = await new RuleManager().getRulesMatchingCriteria(ruleFilters);
+    const formattedRules = this.formatRulesForDisplay(rules);
+    this.ux.table(formattedRules, columns);
+    // If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
+    // just return the filtered list instead of the formatted list.
+    return rules;
   }
 
   private formatRulesForDisplay(rules: Rule[]): Rule[] {
