@@ -1,6 +1,8 @@
-import { flags, SfdxCommand } from '@salesforce/command';
+import { flags } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
+import {ScannerCommand} from '../scannerCommand';
+import {RuleManager} from "../../../lib/RuleManager";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -9,7 +11,7 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('scanner', 'describe');
 
-export default class Describe extends SfdxCommand {
+export default class Describe extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
   // TODO: Write real examples.
@@ -36,6 +38,11 @@ export default class Describe extends SfdxCommand {
   };
 
   public async run(): Promise<AnyJson> {
+    const ruleFilters = this.buildRuleFilters();
+    // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
+    // allow to boil over.
+    const rules = await new RuleManager().getRulesMatchingCriteria(ruleFilters);
+    this.ux.log(JSON.stringify(rules));
     return {};
   }
 }

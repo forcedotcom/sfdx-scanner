@@ -1,5 +1,5 @@
 import {SfdxCommand} from '@salesforce/command';
-import {RuleFilter, RULE_FILTER_TYPE} from '../../lib/RuleManager';
+import {RULE_FILTER_TYPE, RuleFilter} from '../../lib/RuleManager';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
@@ -18,6 +18,12 @@ export abstract class ScannerCommand extends SfdxCommand {
     // Create a filter for any provided languages.
     if ((this.flags.language || []).length > 0) {
       filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, this.flags.language));
+    }
+
+    // Create a filter for provided rule names.
+    // NOTE: Only a single rule name can be provided. It will be treated as a singleton list.
+    if (this.flags.rulename) {
+      filters.push(new RuleFilter(RULE_FILTER_TYPE.RULENAME, [this.flags.rulename]));
     }
 
     return filters;

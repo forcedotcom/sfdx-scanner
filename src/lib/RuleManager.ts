@@ -5,6 +5,7 @@ import PmdWrapper from './pmd/PmdWrapper';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 
 export enum RULE_FILTER_TYPE {
+  RULENAME,
   CATEGORY,
   RULESET,
   LANGUAGE
@@ -116,6 +117,11 @@ export class RuleManager {
           break;
         case RULE_FILTER_TYPE.LANGUAGE:
           ruleValues = rule.languages;
+          break;
+        case RULE_FILTER_TYPE.RULENAME:
+          // Rules only have one name, so we'll just turn that name into a singleton list so we can compare names the
+          // same way we compare everything else.
+          ruleValues = [rule.name];
           break;
       }
 
