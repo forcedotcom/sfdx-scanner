@@ -6,10 +6,19 @@
     "rulesetDescription": "[Description of 'ruleset' parameter]",
     "severityDescription": "[Description of 'severity' parameter]",
     "excluderuleDescription": "[Description of 'exclude-rule' parameter]",
-    "fileDescription": "[Description of 'file' parameter]",
-    "directoryDescription": "[Description of 'directory' parameter]",
     "orgDescription": "[Description of 'org' parameter]",
-    "excludeDescription": "[Description of 'exclude' parameter]",
-    "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]"
+    "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]",
+    "sourceDescription": "[Description of 'source' parameter]",
+    "formatDescription": "[Description of 'format' parameter]",
+    "outfileDescription": "[Description of 'outfile' parameter]"
+  },
+  "validations": {
+    "mustTargetSomething": "[Message indicating that 'source' and 'org' flags cannot both be null]",
+    "mustSpecifyOutput": "[Message indicating that 'format' and 'outfile' cannot both be null]",
+    "outfileMustBeValid": "[Message indicating that 'outfile' must be a well-formed filepath]",
+    "outfileMustBeSupportedType": "[Message indicating that 'outfile' must be a supported file format]"
+  },
+  "output": {
+    "noViolationsDetected": "[Message indicating that no violations were found]"
   }
 }
