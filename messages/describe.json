@@ -2,5 +2,9 @@
   "commandDescription": "[Description of 'describe' command]",
   "flags": {
     "rulenameDescription": "[Description of 'rulename' parameter]"
+  },
+  "output": {
+    "noMatchingRules": "[Warning string indicating that no rules matched the given criteria]",
+    "multipleMatchingRules": "[Warning indicating that {0} rules were found with the name {1}]"
   }
 }
