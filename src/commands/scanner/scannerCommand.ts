@@ -1,5 +1,5 @@
 import {SfdxCommand} from '@salesforce/command';
-import {RULE_FILTER_TYPE, RuleFilter} from '../../lib/RuleManager';
+import {RuleFilter, RULE_FILTER_TYPE} from '../../lib/RuleManager';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
