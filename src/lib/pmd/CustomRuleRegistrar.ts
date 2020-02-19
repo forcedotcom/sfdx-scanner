@@ -4,11 +4,11 @@ import fs = require('fs');
 import path = require('path');
 import util = require('util');
 
-const LANGUAGE_MAPPING_JSON = './catalogs/.language-mapping.json';
+export const CUSTOM_RULE_REGISTER = './catalogs/.custom_rules.json';
 
 
 
-export class LanguageMappingCreator {
+export class CustomRuleRegistrar {
 
 
     createPmdMapping(language: string) {
@@ -39,14 +39,14 @@ export class LanguageMappingCreator {
         const readFilePromise = util.promisify(fs.readFile);
         
         try {
-            const data = await readFilePromise(LANGUAGE_MAPPING_JSON, "utf-8");
+            const data = await readFilePromise(CUSTOM_RULE_REGISTER, "utf-8");
             const json = JSON.parse(data);
             mapFromFile = this.jsonToMap(json);
         } catch (err) {
             if (err.code = 'ENOENT') {
-                console.log(`${LANGUAGE_MAPPING_JSON} does not exist yet. We'll create it.`);
+                console.log(`${CUSTOM_RULE_REGISTER} does not exist yet. We'll create it.`);
             } else {
-                console.log(`Error occurred while reading ${LANGUAGE_MAPPING_JSON}`);
+                console.log(`Error occurred while reading ${CUSTOM_RULE_REGISTER}`);
                 // todo: exit?
             }
         }
@@ -58,10 +58,10 @@ export class LanguageMappingCreator {
         const writeFilePromise = util.promisify(fs.writeFile);
 
         try {
-            await writeFilePromise(LANGUAGE_MAPPING_JSON, JSON.stringify(json, null, 4));
-            console.log(`Created language mapping: ${LANGUAGE_MAPPING_JSON}`);
+            await writeFilePromise(CUSTOM_RULE_REGISTER, JSON.stringify(json, null, 4));
+            console.log(`Created language mapping: ${CUSTOM_RULE_REGISTER}`);
         } catch (err) {
-            console.log(`Could not write to ${LANGUAGE_MAPPING_JSON}: ${err.message}`);
+            console.log(`Could not write to ${CUSTOM_RULE_REGISTER}: ${err.message}`);
         }
         
     }

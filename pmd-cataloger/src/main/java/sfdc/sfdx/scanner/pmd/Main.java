@@ -18,8 +18,9 @@ public class Main {
     String pmdPath = args[0];
     String pmdVersion = args[1];
     List<String> supportedLangs = new ArrayList<>(Arrays.asList(args[2].split(",")));
+    String languageMapping = args[3];
 
-    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs);
+    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs, languageMapping);
     prc.catalogRules();
   }
 }

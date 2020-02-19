@@ -1,6 +1,6 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages } from '@salesforce/core';
-import { LanguageMappingCreator } from '../../../lib/pmd/LanguageMappingCreator';
+import { CustomRuleRegistrar } from '../../../lib/pmd/CustomRuleRegistrar';
 
 
 // Initialize Messages with the current plugin directory
@@ -56,7 +56,7 @@ export default class Addcustom extends SfdxCommand {
 
 
     this.ux.log('Adding to mapping');
-    const creator = new LanguageMappingCreator();
+    const creator = new CustomRuleRegistrar();
     await creator.createMapping(language, [jarFile]);
 
 
