@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  * Feb 2020
  */
 public class FileExaminer {
-    
+
     enum FileType {
         JAR(".jar"),
         XML(".xml");
@@ -47,13 +47,13 @@ public class FileExaminer {
             throw new ScannerPmdException("Path does not exist: " + path.getFileName());
         }
 
-        
+
         if (Files.isDirectory(path)) {
             // Recursively walk through the directory and scout for XML/JAR files
             xmlFiles.addAll(scoutForFiles(FileType.XML, path));
             jarFiles.addAll(scoutForFiles(FileType.JAR, path));
 
-        } else if (Files.isRegularFile(path) 
+        } else if (Files.isRegularFile(path)
             && path.getFileName().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
 
             jarFiles.add(path.toString());
@@ -66,17 +66,17 @@ public class FileExaminer {
 
 
     public List<String> findXmlInJar(String jarPath) {
-        JarInputStream jstream = null;
-        JarEntry entry;
 
-        final List<String> xmlFiles = new ArrayList<String>();
+      final List<String> xmlFiles = new ArrayList<String>();
 
         // TODO: can we move this high-level try block to another place?
-        try { 
-            try {
+        try {
+          JarInputStream jstream = null;
+          try {
                 jstream = new JarInputStream(new FileInputStream(jarPath));
-    
-                while ((entry = jstream.getNextJarEntry()) != null) {
+
+              JarEntry entry;
+              while ((entry = jstream.getNextJarEntry()) != null) {
                     String fName = entry.getName();
                     // For now, take all .xml files. We can ignore non-ruleset XMLs while parsing
                     if (fName.endsWith(FileType.XML.suffix)) {

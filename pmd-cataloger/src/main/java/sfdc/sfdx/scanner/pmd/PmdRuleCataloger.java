@@ -5,8 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,12 +21,10 @@ import sfdc.sfdx.scanner.ExitCode;
 class PmdRuleCataloger {
   private String pmdVersion;
   private String pmdPath;
-  private String customRuleMappingPath;
+  private String customRuleRegister;
   private List<String> languages;
 
-  // These two maps are how we know which files we need to scan for each language.
-//  private Map<String,List<String>> categoryPathsByLanguage = new HashMap<>();
-//  private Map<String,List<String>> rulesetPathsByLanguage = new HashMap<>();
+  // Holds category and rulesets maps that provide files we need to scan for each language.
   private LanguageRuleMapping languageRuleMapping = LanguageRuleMapping.getInstance();
 
   // These maps are going to help us store intermediate objects in an easy-to-reference way.
@@ -47,11 +43,11 @@ class PmdRuleCataloger {
    * @param pmdPath      - The path to PMD's lib folder.
    * @param languages    - The languages whose rules should be catalogued.
    */
-  PmdRuleCataloger(String pmdVersion, String pmdPath, List<String> languages, String customRuleMappingPath) {
+  PmdRuleCataloger(String pmdVersion, String pmdPath, List<String> languages, String customRuleRegister) {
     this.pmdVersion = pmdVersion;
     this.pmdPath = pmdPath;
     this.languages = languages;
-    this.customRuleMappingPath = customRuleMappingPath;
+    this.customRuleRegister = customRuleRegister;
   }
 
 
@@ -170,11 +166,11 @@ class PmdRuleCataloger {
 
     final FileExaminer fileExaminer = new FileExaminer();
     List<String> xmlFiles = fileExaminer.findXmlInJar(jarPath);
-    languageRuleMapping.addPathForLanguages(xmlFiles, language);
+    languageRuleMapping.addPathsForLanguage(xmlFiles, language);
   }
 
   void addCustomRules() {
-    Path jsonPath = Paths.get(this.customRuleMappingPath, "");
+    Path jsonPath = Paths.get(this.customRuleRegister, "");
 
     // If custom rules json doesn't exist, nothing else to do here
     if (Files.notExists(jsonPath)) {
@@ -183,27 +179,42 @@ class PmdRuleCataloger {
     }
 
     // Parse custom rules json into a Map
-    Map<String, List<String>> languageMap = parseCustomRulesJson();
+    Map<String, List<String>> languageMap = parseCustomRulesRegister();
 
     final FileExaminer fileExaminer = new FileExaminer();
     languageMap.keySet().forEach(language -> {
       List<String> filePaths = languageMap.get(language);
       filePaths.forEach(filePath -> {
         List<String> xmlFiles = fileExaminer.findXmlInPath(filePath);
-        languageRuleMapping.addPathForLanguages(xmlFiles, language);
+        languageRuleMapping.addPathsForLanguage(xmlFiles, language);
       });
     });
 
   }
 
-  Map<String, List<String>> parseCustomRulesJson() {
+
+  /**
+   * Parses CustomRuleRegister json into a Map
+   * Sample json:
+   * {
+   *     "apex": [
+   *         "/Users/rmohan/Development/pmdTry/myCustomRule/customRule3.jar",
+   *         "/Users/rmohan/Development/pmdTry/myCustomRule/customRule2.jar"
+   *     ],
+   *     "java": [
+   *         "/Users/rmohan/Development/pmdTry/java/customRules/lib"
+   *     ]
+   * }
+   * @return
+   */
+  Map<String, List<String>> parseCustomRulesRegister() {
     Map<String, List<String>> languageMap = new HashMap<>();
 
     JSONParser parser = new JSONParser();
     JSONObject jsonObject;
 
     try {
-      final BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(this.customRuleMappingPath));
+      final BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(this.customRuleRegister));
       jsonObject = (JSONObject) parser.parse(bufferedReader);
     } catch (IOException | ParseException e) {
       throw new ScannerPmdException("Exception occurred while reading and parsing custom rule json", e);

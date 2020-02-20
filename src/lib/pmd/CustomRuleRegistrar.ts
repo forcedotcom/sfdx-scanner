@@ -1,39 +1,40 @@
-// import { AnyJson } from '@salesforce/ts-types';
-import { PMD_LIB, PMD_VERSION } from './PmdSupport';
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
 
-export const CUSTOM_RULE_REGISTER = './catalogs/.custom_rules.json';
+export const CUSTOM_RULE_REGISTER = path.join('catalogs', '.custom_paths.json');
 
-
+/**
+ * Handles registering custom rules into CustomRuleRegister JSON
+ * 
+ * TODO: verify validity of path. Better to fail now than later while creating catalog.
+ */
 
 export class CustomRuleRegistrar {
 
+    public async createEntries(language: string, location: string[]) {
 
-    createPmdMapping(language: string) {
-        const pmdJarPath = path.join(PMD_LIB, this.deriveJarNameForLanguage(language));
-        this.createMapping(language, [pmdJarPath]);
-    }
+        // Fetch current entries in custom rule register as a Map
+        var currentEntries = await this.readCurrentEntries();
 
-    public async createMapping(language: string, location: string[]) {
-        //TODO: handle non-jar locations
-
-        var currentMappings = await this.readCurrentMappings();
-        if (currentMappings.has(language)) {
-            var currentValue = currentMappings.get(language);
+        // If current language has entries, append new paths to existing entry
+        if (currentEntries.has(language)) {
+            var currentValue = currentEntries.get(language);
             location.forEach((item) => {
                 currentValue.push(item);
             });
+
         } else {
-            currentMappings.set(language, location);
+            // When current language does not exist, create a new entry
+            currentEntries.set(language, location);
         }
         
-        await this.writeToJson(this.mapToJson(currentMappings));
+        // Write updated Map to file
+        await this.writeToJson(this.mapToJson(currentEntries));
 
     }
 
-    async readCurrentMappings(): Promise<Map<string, string[]>> {
+    async readCurrentEntries(): Promise<Map<string, string[]>> {
         var mapFromFile = new Map<string, string[]>();
 
         const readFilePromise = util.promisify(fs.readFile);
@@ -78,9 +79,5 @@ export class CustomRuleRegistrar {
 
     private jsonToMap(json: Object) {
         return new Map(Object.entries(json));
-    }
-
-    private deriveJarNameForLanguage(language: string) {
-        return "pmd-" + language + "-" + PMD_VERSION + ".jar";
     }
 }

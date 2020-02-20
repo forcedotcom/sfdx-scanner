@@ -2,6 +2,9 @@ package sfdc.sfdx.scanner.pmd;
 
 import java.util.*;
 
+/**
+ * Maintains mapping between languages and their XML paths
+ */
 public class LanguageRuleMapping {
   private final static String CATEGORY = "category";
   private final static String RULESETS = "rulesets";
@@ -20,7 +23,7 @@ public class LanguageRuleMapping {
     return INSTANCE;
   }
 
-  public void addPathForLanguages(List<String> paths, String language) {
+  public void addPathsForLanguage(List<String> paths, String language) {
     paths.forEach(path -> addPathForLanguage(path, language));
   }
 
