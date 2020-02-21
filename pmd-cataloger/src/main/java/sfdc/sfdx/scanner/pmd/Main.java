@@ -9,7 +9,7 @@ import sfdc.sfdx.scanner.ExitCode;
 public class Main {
   public static void main(String[] args) {
     // We need there to be exactly three arguments, so throw an error if we didn't get them.
-    if (args.length != 3) {
+    if (args.length != 4) {
       // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
       // outside of the ISV SWAT team.
       System.err.println("Catalog build command received " + args.length + " argument(s) instead of the required three.");

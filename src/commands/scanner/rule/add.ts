@@ -1,6 +1,6 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
-import { CustomRuleRegistrar } from '../../../lib/pmd/CustomRuleRegistrar';
+import { CustomClasspathRegistrar } from '../../../lib/pmd/CustomClasspathRegistrar';
 
 
 // Initialize Messages with the current plugin directory
@@ -27,11 +27,12 @@ export default class Addcustom extends SfdxCommand {
   protected static flagsConfig = {
     language: flags.string({ 
         char: 'l', 
-        description: messages.getMessage('languageFlagDescription'),
+        description: messages.getMessage('flags.languageFlagDescription'),
         required: true
     }),
     path: flags.string({ 
-        description: messages.getMessage('pathFlagDescription'),
+        char: 'p',
+        description: messages.getMessage('flags.pathFlagDescription'),
         required: true
     })
   };
@@ -39,11 +40,11 @@ export default class Addcustom extends SfdxCommand {
   public async run(): Promise<any> {
 
     if (this.flags.language.length === 0) {
-      throw SfdxError.create('scanner', 'add', 'errorLanguageCannotBeEmpty', []);
+      throw SfdxError.create('scanner', 'add', 'validations.errorLanguageCannotBeEmpty', []);
     }
 
     if (this.flags.path.length === 0) {
-      throw SfdxError.create('scanner', 'add', 'errorPathCannotBeEmpty', []);
+      throw SfdxError.create('scanner', 'add', 'validations.errorPathCannotBeEmpty', []);
     }
 
     const language = this.flags.language;
@@ -55,7 +56,7 @@ export default class Addcustom extends SfdxCommand {
 
 
     this.ux.log('Adding to mapping');
-    const creator = new CustomRuleRegistrar();
+    const creator = new CustomClasspathRegistrar();
     await creator.createEntries(language, path);
 
     return; // TODO: fill in return json
@@ -63,7 +64,7 @@ export default class Addcustom extends SfdxCommand {
 
   breakCommaSeparatedString(pathString: string): string[] {
     let tempArray = pathString.split(',');
-    var path = [];
+    let path = [];
     tempArray.forEach(item => {
       let trimmedValue = item.trim();
       if (trimmedValue.length > 0) {

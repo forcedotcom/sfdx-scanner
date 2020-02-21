@@ -74,7 +74,7 @@ public class LanguageRuleMapping {
   }
 
   boolean nullEmptyOrWhitespace (String someString) {
-    return (someString != null) && (someString.trim().length() > 0);
+    return !((someString != null) && (someString.trim().length() > 0));
   }
 
   @Override

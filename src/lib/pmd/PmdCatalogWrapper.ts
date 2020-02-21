@@ -2,7 +2,7 @@ import {Rule} from '../../types';
 import {AnyJson} from '@salesforce/ts-types';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import {RULE_FILTER_TYPE, RuleFilter} from "../RuleManager";
-import { CUSTOM_RULE_REGISTER } from "./CustomRuleRegistrar";
+import { CUSTOM_CLASSPATH_REGISTER } from "./CustomClasspathRegistrar";
 import fs = require('fs');
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
@@ -87,7 +87,10 @@ export class PmdCatalogWrapper extends PmdSupport {
 
   protected buildCommand(): string {
     // TODO: We'll need to make sure this works on Windows.
-    return `java -cp "${this.buildClasspath().join(':')}" ${MAIN_CLASS} ${PMD_LIB} ${PMD_VERSION} ${SUPPORTED_LANGUAGES.join(',')} ${CUSTOM_RULE_REGISTER}`;
+
+    const command = `java -cp "${this.buildClasspath().join(':')}" ${MAIN_CLASS} ${PMD_LIB} ${PMD_VERSION} ${SUPPORTED_LANGUAGES.join(',')} ${CUSTOM_CLASSPATH_REGISTER}`;
+    console.log(`About to run: ${command}`);
+    return command;
   }
 
   protected buildClasspath(): string[] {
