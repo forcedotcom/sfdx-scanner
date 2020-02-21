@@ -1,4 +1,9 @@
 import { expect, test } from '@salesforce/command/lib/test';
+import fs = require('fs');
+
+// NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of
+// the package, rather than the location of this file itself.
+const messages = JSON.parse(fs.readFileSync('./messages/describe.json').toString());
 
 describe('scanner:rule:describe', () => {
   describe('Test Case: No matching rules', () => {
@@ -7,8 +12,7 @@ describe('scanner:rule:describe', () => {
       .stderr() // Adds stderr to the test's context object.
       .command(['scanner:rule:describe', '--rulename', 'DefintelyFakeRule'])
       .it('Correct warning is displayed', ctx => {
-        // TODO: Add the message once it's available.
-        expect(ctx.stderr).to.contain('WARNING:');
+        expect(ctx.stderr).to.contain(`WARNING: ${messages.output.noMatchingRules}`);
       });
 
     test
@@ -16,8 +20,10 @@ describe('scanner:rule:describe', () => {
       .stderr()
       .command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
       .it('--json flag yields correct results', ctx => {
-        // TODO: Implement this test fully.
-        expect(true).to.be.true;
+        const ctxJson = JSON.parse(ctx.stdout);
+        expect(ctxJson.result.length).to.equal(0);
+        expect(ctxJson.warnings.length).to.equal(1);
+        expect(ctxJson.warnings[0]).to.equal(messages.output.noMatchingRules);
       });
   });
 
@@ -29,7 +35,15 @@ describe('scanner:rule:describe', () => {
       .it('Displayed output matches expectations', ctx => {
         // TODO: Implement this test.
         expect(true).to.be.true;
-      })
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .command(['scanner:rule:describe', '--rulename', 'TooManyFields', '--json'])
+      .it('--json flag yields correct results', ctx => {
+        expect(true).to.be.true;
+      });
   });
 
   describe('Test Case: Multiple matching rules', () => {
