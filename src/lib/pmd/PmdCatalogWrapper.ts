@@ -85,12 +85,12 @@ export class PmdCatalogWrapper extends PmdSupport {
     return JSON.parse(rawCatalog.toString());
   }
 
-  protected buildCommand(): string {
-    // TODO: We'll need to make sure this works on Windows.
-
-    const command = `java -cp "${this.buildClasspath().join(':')}" ${MAIN_CLASS} ${PMD_LIB} ${PMD_VERSION} ${SUPPORTED_LANGUAGES.join(',')} ${CUSTOM_CLASSPATH_REGISTER}`;
-    console.log(`About to run: ${command}`);
-    return command;
+  protected buildCommandArray(): [string, string[]] {
+    const command = 'java';
+    // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
+    // is intended for child_process.spawn(), which freaks out if you do that.
+    const args = ['-cp', this.buildClasspath().join(':'), MAIN_CLASS, PMD_LIB, PMD_VERSION, SUPPORTED_LANGUAGES.join(',')];
+    return [command, args];
   }
 
   protected buildClasspath(): string[] {
