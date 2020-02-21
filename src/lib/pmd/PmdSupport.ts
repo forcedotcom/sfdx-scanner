@@ -1,4 +1,5 @@
 import child_process = require('child_process');
+import {ChildProcessWithoutNullStreams} from "child_process";
 
 export const PMD_VERSION = '6.21.0';
 export const PMD_LIB = './dist/pmd/lib';
@@ -12,8 +13,6 @@ export enum Format {
   TEXT = 'text'
 }
 
-export type PmdSupportCallback = (err: child_process.ExecException, stdout: string, stderr: string) => void;
-
 export abstract class PmdSupport {
 
   protected buildClasspath(): string[] {
@@ -23,30 +22,42 @@ export abstract class PmdSupport {
   }
 
   /**
-   * Provides the default callback that should be provided for calls to child_process.exec. Extensions of this class can
-   * override to add more nuanced behavior.
-   * @param {Function} res - The 'resolve' method for a Promise.
-   * @param {Function} rej - The 'reject' method for a Promise.
+   * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject functions.
+   * Resolves/rejects the Promise once the child process finishes.
+   * @param cp
+   * @param res
+   * @param rej
    */
-  protected getCallback(res, rej) : PmdSupportCallback {
-    return (err, stdout, stderr) => {
-      if (err) {
-        rej(stderr);
-      } else if (stdout) {
+  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: Function, rej: Function) : void {
+    let stdout = '';
+    let stderr = '';
+
+    // When data is passed back up to us, pop it onto the appropriate string.
+    cp.stdout.on('data', data => {
+      stdout += data;
+    });
+    cp.stderr.on('data', data => {
+      stderr += data;
+    });
+
+    // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
+    cp.on('exit', code => {
+      if (code === 0) {
         res(stdout);
       } else {
-        res('success');
+        rej(stderr);
       }
-    };
+    });
   }
 
-  protected abstract buildCommand(): string;
+  protected abstract buildCommandArray(): [string, string[]];
 
-  protected async runCommand(): Promise<string> {
-    const command = this.buildCommand();
+  protected async runCommand(): Promise<any> {
+    const [command, args] = this.buildCommandArray();
+
     return new Promise((res, rej) => {
-      const callback = this.getCallback(res, rej);
-      child_process.exec(command, callback);
+      const cp = child_process.spawn(command, args);
+      this.monitorChildProcess(cp, res, rej);
     });
   }
 }

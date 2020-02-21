@@ -20,6 +20,12 @@ export abstract class ScannerCommand extends SfdxCommand {
       filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, this.flags.language));
     }
 
+    // Create a filter for provided rule names.
+    // NOTE: Only a single rule name can be provided. It will be treated as a singleton list.
+    if (this.flags.rulename) {
+      filters.push(new RuleFilter(RULE_FILTER_TYPE.RULENAME, [this.flags.rulename]));
+    }
+
     return filters;
   }
 }
