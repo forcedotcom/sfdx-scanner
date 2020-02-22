@@ -24,20 +24,41 @@ export class CustomClasspathRegistrar {
         this.jsonHandler = new RegistryJsonHandler();
     }
 
-    public async createEntries(language: string, pathsInput: string[]) {
+    public async createEntries(language: string, pathsInput: string[]): Promise<void> {
 
         const engine = this.identifyEngine();
         language = language.toLowerCase();
 
         // Fetch current entries in custom rule register as a Map
         const engineToLanguageMap = await this.jsonHandler.readCurrentEntries();
-
     
         this.createEngineToLanguageEntry(engineToLanguageMap, engine, language, pathsInput);
         
         // Write updated Map to file
-        await this.jsonHandler.writeToJson(engineToLanguageMap);
+        await this.jsonHandler.updateEntries(engineToLanguageMap);
 
+    }
+
+    public async getEntriesForEngine(engine: Engine): Promise<Map<string, string[]>> {
+        const engineToLanguageMap = await this.jsonHandler.readCurrentEntries();
+        if (engineToLanguageMap.has(engine)) {
+            return engineToLanguageMap.get(engine);
+        }
+
+        // If engine is not found, return an empty Map rather than a null
+        return new Map<string, string[]>();
+    }
+
+    public async getEntriesForLanguageByEngine(engine: Engine, language: string): Promise<string[]> {
+        const engineToLanguageMap = await this.jsonHandler.readCurrentEntries();
+        if (engineToLanguageMap.has(engine)) {
+            const languageToPathMap = engineToLanguageMap.get(engine);
+            if (languageToPathMap.has(language)) {
+                return languageToPathMap.get(language);
+            }
+        }
+
+        return [];
     }
 
     private createEngineToLanguageEntry(
@@ -46,25 +67,25 @@ export class CustomClasspathRegistrar {
         language: string, 
         pathsInput: string[]) {
 
+        let languageToPathMap: Map<string, string[]>;
         if (engineToLanguageMap.has(engine)) {
-            // If given engine has entries, 
-            this.createLanguageToPathEntry(engineToLanguageMap, engine, language, pathsInput);
+            // If given engine has entries, fetch existing language to path map
+            languageToPathMap = engineToLanguageMap.get(engine)
         }
         else {
             // When current engine does not exist, create a new entry
-            const languageToPathMap = new Map<string, string[]>();
-            languageToPathMap.set(language, pathsInput);
+            languageToPathMap = new Map<string, string[]>();
             engineToLanguageMap.set(engine, languageToPathMap);
         }
+
+        // At nested level, add language to path entry
+        this.createLanguageToPathEntry(languageToPathMap, language, pathsInput);
     }
 
     private createLanguageToPathEntry(
-        engineToLanguageMap: Map<string, Map<string, string[]>>, 
-        engine: string, 
+        languageToPathMap: Map<string, string[]>,
         language: string, 
         pathsInput: string[]) {
-
-        const languageToPathMap = engineToLanguageMap.get(engine);
 
         if (languageToPathMap.has(language)) {
 
@@ -75,18 +96,9 @@ export class CustomClasspathRegistrar {
             });
         }
         else {
-
             // When current language does not exist, create a new entry
             languageToPathMap.set(language, pathsInput);
         }
-    }
-
-    public getEntriesForEngine(engine: Engine) {
-
-    }
-
-    public getEntriesForLanguageByEngine(engine: Engine, language: string) {
-
     }
 
     private identifyEngine(): string {
@@ -99,38 +111,22 @@ export class CustomClasspathRegistrar {
 
 class RegistryJsonHandler {
 
-    async readCurrentEntries(): Promise<Map<string, Map<string, string[]>>> {
-        let mapFromFile = new Map<string, Map<string, string[]>>();
+    jsonFileOperator: JsonFileOperator;
 
-        const readFilePromise = util.promisify(fs.readFile);
-        
-        try {
-            const data = await readFilePromise(CUSTOM_CLASSPATH_REGISTER, "utf-8");
-            const json = JSON.parse(data);
-            mapFromFile = this.jsonToMap(json);
-        } catch (err) {
-            if (err.code = 'ENOENT') {
-                console.log(`${CUSTOM_CLASSPATH_REGISTER} does not exist yet. We'll create it.`);
-            } else {
-                console.log(`Error occurred while reading ${CUSTOM_CLASSPATH_REGISTER}`);
-                // todo: exit?
-            }
-        }
+    constructor() {
+        this.jsonFileOperator = new JsonFileOperator();
+    }
+
+    async readCurrentEntries(): Promise<Map<string, Map<string, string[]>>> {
+        const jsonData = await this.jsonFileOperator.readJsonFile();
+        const mapFromFile = this.jsonToMap(jsonData);
 
         return mapFromFile;
     }
 
-    async writeToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
+    async updateEntries(engineToLanguageMap: Map<string, Map<string, string[]>>) {
         const jsonObj = this.mapToJson(engineToLanguageMap);
-        const writeFilePromise = util.promisify(fs.writeFile);
-
-        try {
-            await writeFilePromise(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(jsonObj, null, 4));
-            console.log(`Created language mapping: ${CUSTOM_CLASSPATH_REGISTER}`);
-        } catch (err) {
-            console.log(`Could not write to ${CUSTOM_CLASSPATH_REGISTER}: ${err.message}`);
-        }
-        
+        await this.jsonFileOperator.writeToJsonFile(jsonObj);   
     }
 
     /**
@@ -186,5 +182,36 @@ class RegistryJsonHandler {
         });
 
         return engineToLanguageMap;
+    }
+}
+
+class JsonFileOperator {
+    async readJsonFile() {
+        const readFilePromise = util.promisify(fs.readFile);
+        try {
+            const data = await readFilePromise(CUSTOM_CLASSPATH_REGISTER, "utf-8");
+            const jsonData = JSON.parse(data);
+            return jsonData;
+        }
+        catch (err) {
+            if (err.code = 'ENOENT') {
+                console.log(`${CUSTOM_CLASSPATH_REGISTER} does not exist yet. Creating it.`);
+            }
+            else {
+                console.log(`Error occurred while reading ${CUSTOM_CLASSPATH_REGISTER}`);
+                // todo: throw error to display to user
+            }
+        }
+    }
+
+    async writeToJsonFile(jsonObj: {}) {
+        const writeFilePromise = util.promisify(fs.writeFile);
+        try {
+            await writeFilePromise(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(jsonObj, null, 4));
+            console.log(`Created language mapping: ${CUSTOM_CLASSPATH_REGISTER}`);
+        }
+        catch (err) {
+            console.log(`Could not write to ${CUSTOM_CLASSPATH_REGISTER}: ${err.message}`);
+        }
     }
 }
