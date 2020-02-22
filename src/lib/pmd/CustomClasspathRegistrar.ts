@@ -10,32 +10,97 @@ export const CUSTOM_CLASSPATH_REGISTER = path.join('catalogs', '.CustomPaths.jso
  * TODO: verify validity of path. Better to fail now than later while creating catalog.
  */
 
+
+export enum Engine {
+    PMD = "pmd"
+}
+
+
 export class CustomClasspathRegistrar {
 
-    public async createEntries(language: string, location: string[]) {
+    jsonHandler: RegistryJsonHandler;
+
+    constructor() {
+        this.jsonHandler = new RegistryJsonHandler();
+    }
+
+    public async createEntries(language: string, pathsInput: string[]) {
+
+        const engine = this.identifyEngine();
+        language = language.toLowerCase();
 
         // Fetch current entries in custom rule register as a Map
-        const currentEntries = await this.readCurrentEntries();
+        const engineToLanguageMap = await this.jsonHandler.readCurrentEntries();
 
-        // If current language has entries, append new paths to existing entry
-        if (currentEntries.has(language)) {
-            const currentValue = currentEntries.get(language);
-            location.forEach((item) => {
-                currentValue.push(item);
-            });
-
-        } else {
-            // When current language does not exist, create a new entry
-            currentEntries.set(language, location);
-        }
+    
+        this.createEngineToLanguageEntry(engineToLanguageMap, engine, language, pathsInput);
         
         // Write updated Map to file
-        await this.writeToJson(this.mapToJson(currentEntries));
+        await this.jsonHandler.writeToJson(engineToLanguageMap);
 
     }
 
-    async readCurrentEntries(): Promise<Map<string, string[]>> {
-        let mapFromFile = new Map<string, string[]>();
+    private createEngineToLanguageEntry(
+        engineToLanguageMap: Map<string, Map<string, string[]>>, 
+        engine: string, 
+        language: string, 
+        pathsInput: string[]) {
+
+        if (engineToLanguageMap.has(engine)) {
+            // If given engine has entries, 
+            this.createLanguageToPathEntry(engineToLanguageMap, engine, language, pathsInput);
+        }
+        else {
+            // When current engine does not exist, create a new entry
+            const languageToPathMap = new Map<string, string[]>();
+            languageToPathMap.set(language, pathsInput);
+            engineToLanguageMap.set(engine, languageToPathMap);
+        }
+    }
+
+    private createLanguageToPathEntry(
+        engineToLanguageMap: Map<string, Map<string, string[]>>, 
+        engine: string, 
+        language: string, 
+        pathsInput: string[]) {
+
+        const languageToPathMap = engineToLanguageMap.get(engine);
+
+        if (languageToPathMap.has(language)) {
+
+            // If given language has entries, append new paths to existing path array
+            const paths = languageToPathMap.get(language);
+            pathsInput.forEach((item) => {
+                paths.push(item);
+            });
+        }
+        else {
+
+            // When current language does not exist, create a new entry
+            languageToPathMap.set(language, pathsInput);
+        }
+    }
+
+    public getEntriesForEngine(engine: Engine) {
+
+    }
+
+    public getEntriesForLanguageByEngine(engine: Engine, language: string) {
+
+    }
+
+    private identifyEngine(): string {
+        // For now, this logic is incomplete and always assumes PMD
+        return Engine.PMD;
+    }
+
+ 
+}
+
+class RegistryJsonHandler {
+
+    async readCurrentEntries(): Promise<Map<string, Map<string, string[]>>> {
+        let mapFromFile = new Map<string, Map<string, string[]>>();
 
         const readFilePromise = util.promisify(fs.readFile);
         
@@ -55,11 +120,12 @@ export class CustomClasspathRegistrar {
         return mapFromFile;
     }
 
-    async writeToJson(json: Object) {
+    async writeToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
+        const jsonObj = this.mapToJson(engineToLanguageMap);
         const writeFilePromise = util.promisify(fs.writeFile);
 
         try {
-            await writeFilePromise(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(json, null, 4));
+            await writeFilePromise(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(jsonObj, null, 4));
             console.log(`Created language mapping: ${CUSTOM_CLASSPATH_REGISTER}`);
         } catch (err) {
             console.log(`Could not write to ${CUSTOM_CLASSPATH_REGISTER}: ${err.message}`);
@@ -67,17 +133,58 @@ export class CustomClasspathRegistrar {
         
     }
 
-    private mapToJson(inputMap: Map<string, string[]>) {
-        let json = {};
+    /**
+     * Sample JSON for reference:
+     * {
+     *  "engine1": {
+     *      "language1": ["/path/to/resource1", "path/to/resource2"],
+     *      "language2": ["/path/to/another/resource"]
+     *  },
+     *  "engine2": {
+     *      "language2": ["/yet/another/path"]
+     *  }
+     * }
+     * 
+     * This is converted into a Map such as:
+     * engine ==> {language ==> paths[]}
+     */
 
-        inputMap.forEach((value, key) => {
-            json[key] = value;
+    /**
+     * Converts Registry map into JSON object
+     */
+    private mapToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
+        let engineLevelJson = {};
+
+        engineToLanguageMap.forEach((languageToPathMap, engine) => {
+            let languageLevelJson = {}
+            languageToPathMap.forEach((paths, language) => {
+                languageLevelJson[language] = paths;
+            });
+
+            engineLevelJson[engine] = languageLevelJson;
         });
 
-        return json;
+        return engineLevelJson;
     }
 
-    private jsonToMap(json: Object) {
-        return new Map(Object.entries(json));
+    /**
+     * Converts JSON object into Registry map
+     */
+    private jsonToMap(jsonObj: Object) {
+        // Fetch json entries at engine level
+        const firstLevelMap = new Map(Object.entries(jsonObj));
+
+        // Keep a return value ready
+        let engineToLanguageMap = new Map<string, Map<string, string[]>>();
+
+        firstLevelMap.forEach((secondLevelMapAsValue, engine) => {
+            // Fetch json entries at language level
+            const languageToPathMap = new Map(Object.entries(secondLevelMapAsValue));
+
+            // Add engine to language mapping to return value
+            engineToLanguageMap.set(engine, languageToPathMap);
+        });
+
+        return engineToLanguageMap;
     }
 }
