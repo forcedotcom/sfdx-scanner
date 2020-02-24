@@ -1,5 +1,6 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import fs = require('fs');
+import path = require('path');
 
 // NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of
 // the package, rather than the location of this file itself.
@@ -14,7 +15,11 @@ describe('scanner:run', () => {
       test
         .stdout()
         .stderr()
-        .command(['scanner:run'])
+        .command(['scanner:run',
+          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--ruleset', 'ApexUnit',
+          '--format', 'xml'
+        ])
         .it('When the file contains violations, they are logged out as an XML', ctx => {
           expect(true).to.be.true;
         });
@@ -22,9 +27,13 @@ describe('scanner:run', () => {
       test
         .stdout()
         .stderr()
-        .command(['scanner:run'])
+        .command(['scanner:run',
+          '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+          '--ruleset', 'ApexUnit',
+          '--format', 'xml'
+        ])
         .it('When the file contains no violations, a message is logged to the console', ctx => {
-          expect(true).to.be.true;
+          expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
         });
     });
 
@@ -64,14 +73,6 @@ describe('scanner:run', () => {
       .stdout()
       .stderr()
       .command(['scanner:run'])
-      .it('When no violations are detected, a message is logged to the console', ctx => {
-        expect(true).to.be.true;
-      });
-
-    test
-      .stdout()
-      .stderr()
-      .command(['scanner:run'])
       .it('Properly writes CSV to console', ctx => {
         expect(true).to.be.true;
       });
@@ -82,6 +83,18 @@ describe('scanner:run', () => {
       .command(['scanner:run'])
       .it('Properly writes CSV to file', ctx => {
         expect(true).to.be.true;
+      });
+
+    test
+      .stdout()
+      .stderr()
+      .command(['scanner:run',
+        '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+        '--ruleset', 'ApexUnit',
+        '--format', 'csv'
+      ])
+      .it('When no violations are detected, a message is logged to the console', ctx => {
+        expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
       });
   });
 
@@ -98,9 +111,13 @@ describe('scanner:run', () => {
     test
       .stdout()
       .stderr()
-      .command(['scanner:run'])
+      .command(['scanner:run',
+        '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+        '--ruleset', 'ApexUnit',
+        '--format', 'table'
+      ])
       .it('When no violations are detected, a message is logged to the console', ctx => {
-        expect(true).to.be.true;
+        expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
       });
   });
 

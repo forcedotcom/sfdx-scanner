@@ -151,7 +151,8 @@ export default class Run extends ScannerCommand {
       } else if (this.flags.format === OUTPUT_FORMAT.XML) {
         // For XML, we can just dump it to the console.
         this.ux.log(output);
-      } else if (this.flags.format === OUTPUT_FORMAT.TABLE) {
+      } else if (this.flags.format === OUTPUT_FORMAT.TABLE && output.length > 0) {
+        // For tables, don't even bother printing anything unless we have something to print.
         const outputObj = JSON.parse(output);
         this.ux.table(outputObj.rows, outputObj.columns);
       }
