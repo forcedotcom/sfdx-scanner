@@ -91,9 +91,31 @@ describe('scanner:run', () => {
       test
         .stdout()
         .stderr()
-        .command(['scanner:run'])
+        .command(['scanner:run',
+          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--ruleset', 'ApexUnit,Style',
+          '--format', 'xml'
+        ])
         .it('Violations from each rule are logged as an XML', ctx => {
-          expect(true).to.be.true;
+          // We'll split the output by the <violation> tag, so we can get individual violations.
+          let violations = ctx.stdout.split('<violation');
+          // The first list item is going to be the header, so we need to pull that off.
+          violations.shift();
+          // There should be eleven violations.
+          expect(violations.length).to.equal(11, 'Should be eleven violations detected in the file');
+          // We'll check each violation in enough depth to be confident that the expected violations were returned in the
+          // expected order.
+          expect(violations[0]).to.match(/beginline="12".+rule="VariableNamingConventions"/);
+          expect(violations[1]).to.match(/beginline="13".+rule="VariableNamingConventions"/);
+          expect(violations[2]).to.match(/beginline="62".+rule="MethodNamingConventions"/);
+          expect(violations[3]).to.match(/beginline="66".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[4]).to.match(/beginline="66".+rule="MethodNamingConventions"/);
+          expect(violations[5]).to.match(/beginline="70".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[6]).to.match(/beginline="70".+rule="MethodNamingConventions"/);
+          expect(violations[7]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[8]).to.match(/beginline="74".+rule="MethodNamingConventions"/);
+          expect(violations[9]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[10]).to.match(/beginline="78".+rule="MethodNamingConventions"/);
         });
     });
 
@@ -101,10 +123,34 @@ describe('scanner:run', () => {
       test
         .stdout()
         .stderr()
-        .command(['scanner:run'])
+        .command(['scanner:run',
+          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--ruleset', 'ApexUnit',
+          '--outfile', 'testout.xml'
+        ])
+        .finally(ctx => {
+          // Regardless of what happens in the test itself, we need to delete the file we created.
+          if (fs.existsSync('testout.xml')) {
+            fs.unlinkSync('testout.xml');
+          }
+        })
         .it('The violations are written to the file as an XML', ctx => {
-          expect(true).to.be.true;
-        });
+          // Verify that the file we wanted was actually created.
+          expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
+          let fileContents = fs.readFileSync('testout.xml').toString();
+          // We'll split the output by the <violation> tag, so we can get individual violations.
+          let violations = fileContents.split('<violation');
+          // The first list item is going to be the header, so we need to pull that off.
+          violations.shift();
+          // There should be four violations.
+          expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+          // We'll check each violation in enough depth to be confident that the expected violations were returned in the
+          // expected order.
+          expect(violations[0]).to.match(/beginline="66".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[1]).to.match(/beginline="70".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+        })
     });
   });
 
