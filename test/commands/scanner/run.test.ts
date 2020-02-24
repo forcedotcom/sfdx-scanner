@@ -158,17 +158,68 @@ describe('scanner:run', () => {
     test
       .stdout()
       .stderr()
-      .command(['scanner:run'])
+      .command(['scanner:run',
+        '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+        '--ruleset', 'ApexUnit',
+        '--format', 'csv'
+      ])
       .it('Properly writes CSV to console', ctx => {
-        expect(true).to.be.true;
+        // Split the output by newline characters and throw away the first entry, so we're left with just the rows.
+        let rows = ctx.stdout.trim().split('\n');
+        rows.shift();
+
+        // There should be four rows.
+        expect(rows.length).to.equal(4, 'Should be four violations detected');
+
+        // Split each row by commas, so we'll have each cell.
+        let data = rows.map(val => val.split(','));
+        // Verify that each row looks approximately right.
+        expect(data[0][3]).to.equal('"66"', 'Violation #1 should occur on the expected line');
+        expect(data[1][3]).to.equal('"70"', 'Violation #2 should occur on the expected line');
+        expect(data[2][3]).to.equal('"74"', 'Violation #3 should occur on the expected line');
+        expect(data[3][3]).to.equal('"78"', 'Violation #4 should occur on the expected line');
+        expect(data[0][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
+        expect(data[1][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
+        expect(data[2][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
+        expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
       });
 
     test
       .stdout()
       .stderr()
-      .command(['scanner:run'])
+      .command(['scanner:run',
+        '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+        '--ruleset', 'ApexUnit',
+        '--outfile', 'testout.csv'
+      ])
+      .finally(ctx => {
+        // Regardless of what happens in the test itself, we need to delete the file we created.
+        if (fs.existsSync('testout.csv')) {
+          fs.unlinkSync('testout.csv');
+        }
+      })
       .it('Properly writes CSV to file', ctx => {
-        expect(true).to.be.true;
+        // Verify that the file we wanted was actually created.
+        expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
+        let fileContents = fs.readFileSync('testout.csv').toString();
+        // Split the output by newline characters and throw away the first entry, so we're left with just the rows.
+        let rows = fileContents.trim().split('\n');
+        rows.shift();
+
+        // There should be four rows.
+        expect(rows.length).to.equal(4, 'Should be four violations detected');
+
+        // Split each row by commas, so we'll have each cell.
+        let data = rows.map(val => val.split(','));
+        // Verify that each row looks approximately right.
+        expect(data[0][3]).to.equal('"66"', 'Violation #1 should occur on the expected line');
+        expect(data[1][3]).to.equal('"70"', 'Violation #2 should occur on the expected line');
+        expect(data[2][3]).to.equal('"74"', 'Violation #3 should occur on the expected line');
+        expect(data[3][3]).to.equal('"78"', 'Violation #4 should occur on the expected line');
+        expect(data[0][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
+        expect(data[1][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
+        expect(data[2][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
+        expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
       });
 
     test
