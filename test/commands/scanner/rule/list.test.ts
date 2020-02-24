@@ -1,7 +1,7 @@
 import { expect, test } from '@salesforce/command/lib/test';
 
 describe('scanner:rule:list', () => {
-  describe('Test Case: No filters applied only', () => {
+  describe('Test Case: No filters applied', () => {
     test
       .stdout()
       .stderr()
