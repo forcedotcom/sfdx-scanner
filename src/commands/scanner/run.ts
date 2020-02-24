@@ -27,12 +27,6 @@ export default class Run extends ScannerCommand {
   // This defines the flags accepted by this command.
   protected static flagsConfig = {
     // These flags are how you choose which rules you're running.
-    rulename: flags.string({
-      char: 'n',
-      description: messages.getMessage('flags.rulenameDescription'),
-      // If you're specifying by name, it doesn't make sense to let you specify by any other means.
-      exclusive: ['category', 'ruleset', 'severity', 'exclude-rule']
-    }),
     category: flags.array({
       char: 'c',
       description: messages.getMessage('flags.categoryDescription')
@@ -43,6 +37,12 @@ export default class Run extends ScannerCommand {
     }),
     // TODO: IMPLEMENT THESE FLAGS IN A MEANINGFUL WAY.
     /*
+    rulename: flags.string({
+      char: 'n',
+      description: messages.getMessage('flags.rulenameDescription'),
+      // If you're specifying by name, it doesn't make sense to let you specify by any other means.
+      exclusive: ['category', 'ruleset', 'severity', 'exclude-rule']
+    }),
     severity: flags.string({
       char: 's',
       description: messages.getMessage('flags.severityDescription')
@@ -98,6 +98,10 @@ export default class Run extends ScannerCommand {
   }
 
   private validateFlags() : void {
+    // It doesn't matter how you specify rules, but you do need to specify rules somehow.
+    if (!this.flags.category && !this.flags.ruleset) {
+      throw new SfdxError(messages.getMessage('validations.mustSpecifyRule'));
+    }
     // --source and --org are mutually exclusive, but they can't both be null.
     if (!this.flags.source && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
