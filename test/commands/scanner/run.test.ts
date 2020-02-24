@@ -240,9 +240,24 @@ describe('scanner:run', () => {
     test
       .stdout()
       .stderr()
-      .command(['scanner:run'])
+      .command(['scanner:run',
+        '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+        '--ruleset', 'ApexUnit',
+        '--format', 'table'
+      ])
       .it('Properly writes table to the console', ctx => {
-        expect(true).to.be.true;
+        // Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+        // That will leave us with just the rows.
+        let rows = ctx.stdout.trim().split('\n');
+        rows.shift();
+        rows.shift();
+
+        // There should be four rows, and those rows should contain the appropriate data.
+        expect(rows.length).to.equal(4, 'Should be four violations detected');
+        expect(rows[0]).to.contain("66", 'Violation #1 should occur at expected line');
+        expect(rows[1]).to.contain("70", 'Violation #2 should occur at expected line');
+        expect(rows[2]).to.contain("74", 'Violation #3 should occur at expected line');
+        expect(rows[3]).to.contain("78", 'Violation #4 should occur at expected line');
       });
 
     test
