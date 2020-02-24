@@ -6,8 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      # erbium === v12
-      - image: circleci/node:erbium
+      - image: circleci/openjdk:11.0.2-jdk-node
 
     working_directory: ~/repo
 
