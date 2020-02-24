@@ -6,8 +6,8 @@ version: 2
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      - image: circleci/node
+      # erbium === v12
+      - image: circleci/node:latest-erbium
 
     working_directory: ~/repo
 
