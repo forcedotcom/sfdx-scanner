@@ -34,6 +34,10 @@ export class RuleResultRecombinator {
   }
 
   private static constructTable([pmdResults] : [string]) : string {
+    // If the results were just an empty string, we can return it.
+    if (pmdResults === '') {
+      return '';
+    }
     // TODO: Eventually, we'll need logic to combine disparate result sets into a single table. But for now, we can just
     //  turn the PMD xml into a table by creating the CSV and then turning it into input for our table. It's the coward's
     //  way out, but it'll work for now.
