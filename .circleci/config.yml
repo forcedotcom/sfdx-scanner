@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # erbium === v12
-      - image: circleci/node:latest-erbium
+      - image: circleci/node:erbium
 
     working_directory: ~/repo
 
