@@ -21,7 +21,18 @@ describe('scanner:run', () => {
           '--format', 'xml'
         ])
         .it('When the file contains violations, they are logged out as an XML', ctx => {
-          expect(true).to.be.true;
+          // We'll split the output by the <violation> tag, so we can get individual violations.
+          let violations = ctx.stdout.split('<violation');
+          // The first list item is going to be the header, so we need to pull that off.
+          violations.shift();
+          // There should be four violations.
+          expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+          // We'll check each violation in enough depth to be confident that the expected violations were returned in the
+          // expected order.
+          expect(violations[0]).to.match(/beginline="66".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[1]).to.match(/beginline="70".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(violations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
         });
 
       test
@@ -41,9 +52,38 @@ describe('scanner:run', () => {
       test
         .stdout()
         .stderr()
-        .command(['scanner:run'])
+        .command(['scanner:run',
+          '--source', path.join('test', 'code-samples', 'apex'),
+          '--ruleset', 'ApexUnit',
+          '--format', 'xml'
+        ])
         .it('Any violations in the folder are logged as an XML', ctx => {
-          expect(true).to.be.true;
+          // We'll split the output by the <file> tag first, so we can get each file that violated rules.
+          let files = ctx.stdout.split('<file');
+          // The first list item is going to be the header, so we need to pull that off.
+          files.shift();
+          // Verify that each set of violations corresponds to the expected file.
+          expect(files.length).to.equal(2, 'Only two files should have violated the rules');
+          expect(files[0]).to.match(/name="\S+\/test\/code-samples\/apex\/AccountServiceTests.cls"/);
+          expect(files[1]).to.match(/name="\S+\/test\/code-samples\/apex\/InstallProcessorTests.cls"/);
+
+          // Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+          let acctServiceViolations = files[0].split('<violation');
+          acctServiceViolations.shift();
+          // There should be four violations.
+          expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
+          // We'll check each violation in enough depth to be confident that the expected violations were returned in the
+          // expected order.
+          expect(acctServiceViolations[0]).to.match(/beginline="66".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(acctServiceViolations[1]).to.match(/beginline="70".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(acctServiceViolations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+          expect(acctServiceViolations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+
+          let installProcessorViolations = files[1].split('<violation');
+          installProcessorViolations.shift();
+          // There should be one violation.
+          expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
+          expect(installProcessorViolations[0]).to.match(/beginline="953".+rule="ApexUnitTestClassShouldHaveAsserts"/);
         });
     });
 
