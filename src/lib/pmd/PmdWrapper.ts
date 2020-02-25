@@ -10,10 +10,9 @@ export default class PmdWrapper extends PmdSupport {
   rules: string;
   reportFormat: Format;
   reportFile: string;
-  customRuleJar: string;
 
-  public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string, customRuleJar?: string) {
-    const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile, customRuleJar);
+  public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string) {
+    const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile);
     return myPmd.execute();
   }
 
@@ -21,22 +20,17 @@ export default class PmdWrapper extends PmdSupport {
     return super.runCommand();
   }
 
-  constructor(path: string, rules: string, reportFormat?: Format, reportFile?: string, customRuleJar?: string) {
+  constructor(path: string, rules: string, reportFormat?: Format, reportFile?: string) {
     super();
     this.path = path;
     this.rules = rules;
     this.reportFormat = reportFormat || Format.XML;
     this.reportFile = reportFile || null;
-    this.customRuleJar = customRuleJar || null;
   }
 
 
   async getClassPath(): Promise<string[]> {
     const classPath = await super.buildClasspath();
-    if (this.customRuleJar.length > 0) {
-        // TODO: verify that jar file exists
-      classPath.push(this.customRuleJar);
-    }
     return classPath;
 }
 

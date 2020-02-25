@@ -1,5 +1,6 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
+import { AnyJson } from '@salesforce/ts-types';
 import { CustomClasspathRegistrar } from '../../../lib/customclasspath/CustomClasspathRegistrar';
 
 
@@ -11,7 +12,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('scanner', 'add');
 
 
-export default class Addcustom extends SfdxCommand {
+export default class Add extends SfdxCommand {
 
   public static description = messages.getMessage('commandDescription');
 
@@ -30,50 +31,37 @@ export default class Addcustom extends SfdxCommand {
         description: messages.getMessage('flags.languageFlagDescription'),
         required: true
     }),
-    path: flags.string({
+    paths: flags.array({
         char: 'p',
-        description: messages.getMessage('flags.pathFlagDescription'),
+        description: messages.getMessage('flags.pathsFlagDescription'),
         required: true
     })
   };
 
-  public async run(): Promise<any> {
+  public async run(): Promise<AnyJson> {
 
+    this.validateFlags();
+
+    const language = this.flags.language;
+    const paths = this.flags.paths;
+
+    this.logger.trace(`Language: ${language}`);
+    this.logger.trace(`Rule path: ${paths}`);
+
+    // Add to Custom Classpath registry
+    const creator = new CustomClasspathRegistrar();
+    await creator.createEntries(language, paths);
+
+    return { success: true, language: language, paths: paths };
+  }
+
+  private validateFlags() {
     if (this.flags.language.length === 0) {
       throw SfdxError.create('scanner', 'add', 'validations.errorLanguageCannotBeEmpty', []);
     }
-
-    if (this.flags.path.length === 0) {
+    if (this.flags.paths.length === 0) {
       throw SfdxError.create('scanner', 'add', 'validations.errorPathCannotBeEmpty', []);
     }
-
-    const language = this.flags.language;
-    const path = this.breakCommaSeparatedString(this.flags.path);
-
-
-    this.ux.log(`Language: ${language}`);
-    this.ux.log(`Rule path: ${path}`);
-
-
-    this.ux.log('Adding to mapping');
-    const creator = new CustomClasspathRegistrar();
-    await creator.createEntries(language, path);
-
-    return; // TODO: fill in return json
-  }
-
-  breakCommaSeparatedString(pathString: string): string[] {
-    const tempArray = pathString.split(',');
-    const path = [];
-    tempArray.forEach(item => {
-      const trimmedValue = item.trim();
-      if (trimmedValue.length > 0) {
-        path.push(item.trim());
-      }
-
-    });
-
-    return path;
   }
 
 }

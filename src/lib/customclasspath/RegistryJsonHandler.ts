@@ -1,9 +1,10 @@
 import fs = require('fs');
 import path = require('path');
 import util = require('util');
+import { SfdxError } from '@salesforce/core';
 
 
-export const CUSTOM_CLASSPATH_REGISTER = path.join('pmd-cataloger', 'catalogs', '.CustomPaths.json');
+export const CUSTOM_CLASSPATH_REGISTER = path.join('catalogs', '.CustomPaths.json');
 export class RegistryJsonHandler {
 
     private jsonFileOperator: JsonFileOperator;
@@ -13,14 +14,14 @@ export class RegistryJsonHandler {
     }
 
     async readCurrentEntries(): Promise<Map<string, Map<string, string[]>>> {
-        const jsonData = await this.jsonFileOperator.readJsonFile();
-        const mapFromFile = this.jsonToMap(jsonData);
+        const jsonData = await this.jsonFileOperator.readFromJsonFile();
+        const mapFromFile = this.convertJsonToMap(jsonData);
 
         return mapFromFile;
     }
 
     async updateEntries(engineToLanguageMap: Map<string, Map<string, string[]>>) {
-        const jsonObj = this.mapToJson(engineToLanguageMap);
+        const jsonObj = this.convertMapToJson(engineToLanguageMap);
         await this.jsonFileOperator.writeToJsonFile(jsonObj);
     }
 
@@ -43,7 +44,7 @@ export class RegistryJsonHandler {
     /**
      * Converts Registry map into JSON object
      */
-    private mapToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
+    private convertMapToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
         const engineLevelJson = {};
 
         engineToLanguageMap.forEach((languageToPathMap, engine) => {
@@ -66,7 +67,7 @@ export class RegistryJsonHandler {
     /**
      * Converts JSON object into Registry map
      */
-    private jsonToMap(jsonObj: object) {
+    private convertJsonToMap(jsonObj: object) {
         const engineToLanguageMap = new Map<string, Map<string, string[]>>();
 
         if (jsonObj !== null && jsonObj !== undefined) {
@@ -87,7 +88,7 @@ export class RegistryJsonHandler {
 }
 
 class JsonFileOperator {
-    async readJsonFile() {
+    async readFromJsonFile() {
         const readFilePromise = util.promisify(fs.readFile);
         try {
             const data = await readFilePromise(CUSTOM_CLASSPATH_REGISTER, 'utf-8');
@@ -99,8 +100,8 @@ class JsonFileOperator {
                 console.log(`${CUSTOM_CLASSPATH_REGISTER} does not exist yet. Creating it.`);
             }
             else {
-                console.log(`Error occurred while reading ${CUSTOM_CLASSPATH_REGISTER}`);
-                // todo: throw error to display to user
+                console.log(`Error occurred while reading ${CUSTOM_CLASSPATH_REGISTER}`);// TODO: move to logger.trace
+                throw SfdxError.create('scanner', 'add', 'errors.errorReadingCustomClasspath', [`${CUSTOM_CLASSPATH_REGISTER}`, `${err.message}`]);
             }
         }
     }
@@ -109,10 +110,11 @@ class JsonFileOperator {
         const writeFilePromise = util.promisify(fs.writeFile);
         try {
             await writeFilePromise(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(jsonObj, null, 4));
-            console.log(`Created language mapping: ${CUSTOM_CLASSPATH_REGISTER}`);
+            console.log(`Created language mapping: ${CUSTOM_CLASSPATH_REGISTER}`);// TODO: move to logger.trace
         }
         catch (err) {
-            console.log(`Could not write to ${CUSTOM_CLASSPATH_REGISTER}: ${err.message}`);
+            console.log(`Could not write to ${CUSTOM_CLASSPATH_REGISTER}: ${err.message}`);// TODO: move to logger.trace
+            throw SfdxError.create('scanner', 'add', 'errors.errorWritingCustomClasspath', [`${CUSTOM_CLASSPATH_REGISTER}`, `${err.message}`]);
         }
     }
 }

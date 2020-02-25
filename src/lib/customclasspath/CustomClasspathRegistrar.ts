@@ -93,6 +93,7 @@ export class CustomClasspathRegistrar {
 
     private identifyEngine(): string {
         // For now, this logic is incomplete and always assumes PMD
+        // TODO: extend this method when we handle other Rule engines
         return Engine.PMD;
     }
 
