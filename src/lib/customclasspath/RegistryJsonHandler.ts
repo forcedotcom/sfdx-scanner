@@ -21,7 +21,7 @@ export class RegistryJsonHandler {
 
     async updateEntries(engineToLanguageMap: Map<string, Map<string, string[]>>) {
         const jsonObj = this.mapToJson(engineToLanguageMap);
-        await this.jsonFileOperator.writeToJsonFile(jsonObj);   
+        await this.jsonFileOperator.writeToJsonFile(jsonObj);
     }
 
     /**
@@ -35,7 +35,7 @@ export class RegistryJsonHandler {
      *      "language2": ["/yet/another/path"]
      *  }
      * }
-     * 
+     *
      * This is converted into a Map such as:
      * engine ==> {language ==> paths[]}
      */
@@ -44,7 +44,7 @@ export class RegistryJsonHandler {
      * Converts Registry map into JSON object
      */
     private mapToJson(engineToLanguageMap: Map<string, Map<string, string[]>>) {
-        let engineLevelJson = {};
+        const engineLevelJson = {};
 
         engineToLanguageMap.forEach((languageToPathMap, engine) => {
             engineLevelJson[engine] = this.getJsonOfLanguageMap(languageToPathMap);
@@ -55,7 +55,7 @@ export class RegistryJsonHandler {
 
 
     getJsonOfLanguageMap(languageToPathMap: Map<string, string[]>) {
-        let languageLevelJson = {}
+        const languageLevelJson = {};
         languageToPathMap.forEach((paths, language) => {
             languageLevelJson[language] = paths;
         });
@@ -66,10 +66,10 @@ export class RegistryJsonHandler {
     /**
      * Converts JSON object into Registry map
      */
-    private jsonToMap(jsonObj: Object) {
-        let engineToLanguageMap = new Map<string, Map<string, string[]>>();
+    private jsonToMap(jsonObj: object) {
+        const engineToLanguageMap = new Map<string, Map<string, string[]>>();
 
-        if (jsonObj != null && jsonObj != undefined) {
+        if (jsonObj !== null && jsonObj !== undefined) {
             // Fetch json entries at engine level
             const firstLevelMap = new Map(Object.entries(jsonObj));
 
@@ -90,12 +90,12 @@ class JsonFileOperator {
     async readJsonFile() {
         const readFilePromise = util.promisify(fs.readFile);
         try {
-            const data = await readFilePromise(CUSTOM_CLASSPATH_REGISTER, "utf-8");
+            const data = await readFilePromise(CUSTOM_CLASSPATH_REGISTER, 'utf-8');
             const jsonData = JSON.parse(data);
             return jsonData;
         }
         catch (err) {
-            if (err.code = 'ENOENT') {
+            if (err.code === 'ENOENT') {
                 console.log(`${CUSTOM_CLASSPATH_REGISTER} does not exist yet. Creating it.`);
             }
             else {

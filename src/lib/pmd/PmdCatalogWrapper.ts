@@ -1,9 +1,9 @@
-import {AnyJson} from '@salesforce/ts-types';
+import { AnyJson } from '@salesforce/ts-types';
 import fs = require('fs');
 import { RegistryJsonHandler } from '../customclasspath/RegistryJsonHandler';
-import {Rule} from '../../types';
-import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
-import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
+import { Rule } from '../../types';
+import { RuleFilter, RULE_FILTER_TYPE } from '../RuleManager';
+import { PmdSupport, PMD_LIB, PMD_VERSION } from './PmdSupport';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 
@@ -113,10 +113,10 @@ export class PmdCatalogWrapper extends PmdSupport {
     const registryJsonHandler = new RegistryJsonHandler();
     const jsonObject = registryJsonHandler.getJsonOfLanguageMap(customPathEntries);
 
-    if (jsonObject != null || jsonObject != undefined) {
+    if (jsonObject !== null || jsonObject !== undefined) {
       return JSON.stringify(jsonObject);
     }
 
-    return "{}";
+    return '{}';
   }
 }

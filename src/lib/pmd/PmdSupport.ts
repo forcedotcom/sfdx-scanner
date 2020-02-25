@@ -1,6 +1,6 @@
 import child_process = require('child_process');
-import {ChildProcessWithoutNullStreams} from "child_process";
-import {CustomClasspathRegistrar, Engine} from "../customclasspath/CustomClasspathRegistrar";
+import {ChildProcessWithoutNullStreams} from 'child_process';
+import {CustomClasspathRegistrar, Engine} from '../customclasspath/CustomClasspathRegistrar';
 
 export const PMD_VERSION = '6.21.0';
 export const PMD_LIB = './dist/pmd/lib';
@@ -17,13 +17,13 @@ export enum Format {
 export abstract class PmdSupport {
 
   protected async buildClasspath(): Promise<string[]> {
-    let classpath = [];
+    const classpath = [];
     classpath.push(`${PMD_LIB}/*`);
 
     // Fetch classpaths derived from custom PMD rules
     const customClasspaths = await this.getCustomClasspath();
     classpath.push(...customClasspaths);
-    
+
     return classpath;
   }
 
@@ -68,7 +68,7 @@ export abstract class PmdSupport {
   }
 
   protected async getCustomClasspath(): Promise<string[]> {
-    let pmdClasspaths = [];
+    const pmdClasspaths = [];
 
     const customPathEntries = await this.getCustomPathEntriesForPmd();
     customPathEntries.forEach((classpaths, language) => {

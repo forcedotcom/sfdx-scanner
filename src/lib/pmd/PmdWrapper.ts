@@ -32,7 +32,7 @@ export default class PmdWrapper extends PmdSupport {
 
 
   async getClassPath(): Promise<string[]> {
-    var classPath = await super.buildClasspath();
+    const classPath = await super.buildClasspath();
     if (this.customRuleJar.length > 0) {
         // TODO: verify that jar file exists
       classPath.push(this.customRuleJar);

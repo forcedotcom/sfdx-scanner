@@ -1,16 +1,16 @@
-import { RegistryJsonHandler } from "./RegistryJsonHandler"
+import { RegistryJsonHandler } from './RegistryJsonHandler';
 
 /**
  * Handles registering classpaths for custom rules and provides visibility into the registry
- * 
+ *
  * TODO: How can I read the JSON file just once and reuse it everywhere?
- * 
+ *
  * TODO: verify validity of path. Better to fail now than later while creating catalog.
  */
 
 
 export enum Engine {
-    PMD = "pmd"
+    PMD = 'pmd'
 }
 
 
@@ -29,9 +29,9 @@ export class CustomClasspathRegistrar {
 
         // Fetch current entries in custom rule register as a Map
         const engineToLanguageMap = await this.jsonHandler.readCurrentEntries();
-    
+
         this.createEngineToLanguageEntry(engineToLanguageMap, engine, language, pathsInput);
-        
+
         // Write updated Map to file
         await this.jsonHandler.updateEntries(engineToLanguageMap);
 
@@ -54,15 +54,15 @@ export class CustomClasspathRegistrar {
     }
 
     private createEngineToLanguageEntry(
-        engineToLanguageMap: Map<string, Map<string, string[]>>, 
-        engine: string, 
-        language: string, 
+        engineToLanguageMap: Map<string, Map<string, string[]>>,
+        engine: string,
+        language: string,
         pathsInput: string[]) {
 
         let languageToPathMap: Map<string, string[]>;
         if (engineToLanguageMap.has(engine)) {
             // If given engine has entries, fetch existing language to path map
-            languageToPathMap = engineToLanguageMap.get(engine)
+            languageToPathMap = engineToLanguageMap.get(engine);
         }
         else {
             // When current engine does not exist, create a new entry
@@ -76,16 +76,14 @@ export class CustomClasspathRegistrar {
 
     private createLanguageToPathEntry(
         languageToPathMap: Map<string, string[]>,
-        language: string, 
+        language: string,
         pathsInput: string[]) {
 
         if (languageToPathMap.has(language)) {
 
             // If given language has entries, append new paths to existing path array
             const paths = languageToPathMap.get(language);
-            pathsInput.forEach((item) => {
-                paths.push(item);
-            });
+            pathsInput.forEach((item) => paths.push(item));
         }
         else {
             // When current language does not exist, create a new entry
@@ -97,5 +95,5 @@ export class CustomClasspathRegistrar {
         // For now, this logic is incomplete and always assumes PMD
         return Engine.PMD;
     }
- 
+
 }

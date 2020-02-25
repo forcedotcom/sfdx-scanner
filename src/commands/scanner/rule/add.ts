@@ -18,19 +18,19 @@ export default class Addcustom extends SfdxCommand {
   public static examples = [
     `$ sfdx scanner:rule:add --language "apex" --path "/dir/to/jar/lib"
         (todo: add sample output here)
-        
+
         $ sfdx scanner:rule:add --language "apex" --path "/file/path/to/customrule.jar,/dir/to/jar/lib"
         (todo: add sample output here)
         `
   ];
 
   protected static flagsConfig = {
-    language: flags.string({ 
-        char: 'l', 
+    language: flags.string({
+        char: 'l',
         description: messages.getMessage('flags.languageFlagDescription'),
         required: true
     }),
-    path: flags.string({ 
+    path: flags.string({
         char: 'p',
         description: messages.getMessage('flags.pathFlagDescription'),
         required: true
@@ -63,10 +63,10 @@ export default class Addcustom extends SfdxCommand {
   }
 
   breakCommaSeparatedString(pathString: string): string[] {
-    let tempArray = pathString.split(',');
-    let path = [];
+    const tempArray = pathString.split(',');
+    const path = [];
     tempArray.forEach(item => {
-      let trimmedValue = item.trim();
+      const trimmedValue = item.trim();
       if (trimmedValue.length > 0) {
         path.push(item.trim());
       }
