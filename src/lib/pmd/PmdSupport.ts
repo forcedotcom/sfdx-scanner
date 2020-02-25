@@ -1,5 +1,6 @@
 import child_process = require('child_process');
 import {ChildProcessWithoutNullStreams} from "child_process";
+import {CustomClasspathRegistrar, Engine} from "../customclasspath/CustomClasspathRegistrar";
 
 export const PMD_VERSION = '6.21.0';
 export const PMD_LIB = './dist/pmd/lib';
@@ -15,10 +16,15 @@ export enum Format {
 
 export abstract class PmdSupport {
 
-  protected buildClasspath(): string[] {
-    const pmdLibs = `${PMD_LIB}/*`;
-    // TODO: We want to allow users to add their own PMD rules, so we'll need some way for them to submit them.
-    return [pmdLibs];
+  protected async buildClasspath(): Promise<string[]> {
+    let classpath = [];
+    classpath.push(`${PMD_LIB}/*`);
+
+    // Fetch classpaths derived from custom PMD rules
+    const customClasspaths = await this.getCustomClasspath();
+    classpath.push(...customClasspaths);
+    
+    return classpath;
   }
 
   /**
@@ -50,14 +56,33 @@ export abstract class PmdSupport {
     });
   }
 
-  protected abstract buildCommandArray(): [string, string[]];
+  protected abstract buildCommandArray(): Promise<[string, string[]]>;
 
   protected async runCommand(): Promise<any> {
-    const [command, args] = this.buildCommandArray();
+    const [command, args] = await this.buildCommandArray();
 
     return new Promise((res, rej) => {
       const cp = child_process.spawn(command, args);
       this.monitorChildProcess(cp, res, rej);
     });
+  }
+
+  protected async getCustomClasspath(): Promise<string[]> {
+    let pmdClasspaths = [];
+
+    const customPathEntries = await this.getCustomPathEntriesForPmd();
+    customPathEntries.forEach((classpaths, language) => {
+      pmdClasspaths.push(...classpaths);
+    });
+
+    return pmdClasspaths;
+  }
+
+  protected async getCustomPathEntriesForPmd(): Promise<Map<string, string[]>> {
+    const classpathRegistrar = new CustomClasspathRegistrar();
+
+    // TODO: find a way to keep this readily available so that we don't have
+    // to read the entries every time.
+    return await classpathRegistrar.getEntriesForEngine(Engine.PMD);
   }
 }

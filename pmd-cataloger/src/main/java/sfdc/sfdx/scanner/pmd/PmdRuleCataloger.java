@@ -21,7 +21,7 @@ import sfdc.sfdx.scanner.ExitCode;
 class PmdRuleCataloger {
   private String pmdVersion;
   private String pmdPath;
-  private String customRuleRegister;
+  private String customClasspathMapping;
   private List<String> languages;
 
   // Holds category and rulesets maps that provide files we need to scan for each language.
@@ -43,11 +43,11 @@ class PmdRuleCataloger {
    * @param pmdPath      - The path to PMD's lib folder.
    * @param languages    - The languages whose rules should be catalogued.
    */
-  PmdRuleCataloger(String pmdVersion, String pmdPath, List<String> languages, String customRuleRegister) {
+  PmdRuleCataloger(String pmdVersion, String pmdPath, List<String> languages, String customClasspathMapping) {
     this.pmdVersion = pmdVersion;
     this.pmdPath = pmdPath;
     this.languages = languages;
-    this.customRuleRegister = customRuleRegister;
+    this.customClasspathMapping = customClasspathMapping;
   }
 
 
@@ -170,14 +170,6 @@ class PmdRuleCataloger {
   }
 
   void addCustomRules() {
-    Path jsonPath = Paths.get(this.customRuleRegister, "");
-
-    // If custom rules json doesn't exist, nothing else to do here
-    if (Files.notExists(jsonPath)) {
-      System.out.println("No custom rules created so far.");
-      return;
-    }
-
     // Parse custom rules json into a Map
     Map<String, List<String>> languageMap = parseCustomRulesRegister();
 
@@ -194,7 +186,7 @@ class PmdRuleCataloger {
 
 
   /**
-   * Parses CustomRuleRegister json into a Map
+   * Parses Custom classpath mapping json into a Map
    * Sample json:
    * {
    *     "apex": [
@@ -214,16 +206,15 @@ class PmdRuleCataloger {
     JSONObject jsonObject;
 
     try {
-      final BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(this.customRuleRegister));
-      jsonObject = (JSONObject) parser.parse(bufferedReader);
-    } catch (IOException | ParseException e) {
-      throw new ScannerPmdException("Exception occurred while reading and parsing custom rule json", e);
+      jsonObject = (JSONObject) parser.parse(customClasspathMapping);
+    } catch (ParseException e) {
+      throw new ScannerPmdException("Exception occurred while parsing custom classpath mapping", e);
     }
     Set<String> languageSet = jsonObject.keySet();
 
     languageSet.forEach(language -> {
       JSONArray languageFiles = (JSONArray) jsonObject.get(language);
-      languageMap.put(language, languageFiles.subList(0, languageFiles.size() - 1));
+      languageMap.put(language, languageFiles.subList(0, languageFiles.size()));
     });
 
     return languageMap;

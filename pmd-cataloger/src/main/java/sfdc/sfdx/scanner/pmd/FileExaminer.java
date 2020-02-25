@@ -54,7 +54,7 @@ public class FileExaminer {
             jarFiles.addAll(scoutForFiles(FileType.JAR, path));
 
         } else if (Files.isRegularFile(path)
-            && path.getFileName().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
+            && path.toString().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
 
             jarFiles.add(path.toString());
         }

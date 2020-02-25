@@ -31,8 +31,8 @@ export default class PmdWrapper extends PmdSupport {
   }
 
 
-  getClassPath(): string[] {
-    var classPath = super.buildClasspath();
+  async getClassPath(): Promise<string[]> {
+    var classPath = await super.buildClasspath();
     if (this.customRuleJar.length > 0) {
         // TODO: verify that jar file exists
       classPath.push(this.customRuleJar);
@@ -40,12 +40,13 @@ export default class PmdWrapper extends PmdSupport {
     return classPath;
 }
 
-  protected buildCommandArray(): [string, string[]] {
+  protected async buildCommandArray(): Promise<[string, string[]]> {
     const command = 'java';
+    const classpath = await this.getClassPath();
     // Start with the arguments we know we'll always need.
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
-    let args = ['-cp', this.getClassPath().join(':'), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
+    let args = ['-cp', classpath.join(':'), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
       '-format', this.reportFormat];
 
 

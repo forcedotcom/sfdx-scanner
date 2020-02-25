@@ -1,6 +1,6 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
-import { CustomClasspathRegistrar } from '../../../lib/pmd/CustomClasspathRegistrar';
+import { CustomClasspathRegistrar } from '../../../lib/customclasspath/CustomClasspathRegistrar';
 
 
 // Initialize Messages with the current plugin directory

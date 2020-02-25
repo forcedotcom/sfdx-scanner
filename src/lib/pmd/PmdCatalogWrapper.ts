@@ -2,8 +2,8 @@ import {Rule} from '../../types';
 import {AnyJson} from '@salesforce/ts-types';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import {RULE_FILTER_TYPE, RuleFilter} from "../RuleManager";
-import { CUSTOM_CLASSPATH_REGISTER } from "./CustomClasspathRegistrar";
 import fs = require('fs');
+import { RegistryJsonHandler } from '../customclasspath/RegistryJsonHandler';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 
@@ -85,17 +85,38 @@ export class PmdCatalogWrapper extends PmdSupport {
     return JSON.parse(rawCatalog.toString());
   }
 
-  protected buildCommandArray(): [string, string[]] {
+  protected async buildCommandArray(): Promise<[string, string[]]> {
     const command = 'java';
+
+    let customClasspathJsonString = await this.getCustomClasspathMapping();
+    customClasspathJsonString = encodeURI(customClasspathJsonString);
+    const classpath = await this.buildClasspath();
+
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
-    const args = ['-cp', this.buildClasspath().join(':'), MAIN_CLASS, PMD_LIB, PMD_VERSION, SUPPORTED_LANGUAGES.join(',')];
+    const args = ['-cp', classpath.join(':'), MAIN_CLASS, PMD_LIB, PMD_VERSION, SUPPORTED_LANGUAGES.join(','), customClasspathJsonString];
+
+    console.log(`Arguments to be passed with command: ${args}`);
     return [command, args];
   }
 
-  protected buildClasspath(): string[] {
+  protected async buildClasspath(): Promise<string[]> {
     // TODO: This probably isn't where the JAR ought to live. Once the JAR's home is finalized, come back to this.
     const catalogerLibs = `${PMD_CATALOGER_LIB}/*`;
-    return super.buildClasspath().concat([catalogerLibs]);
+    const classpath = await super.buildClasspath();
+    return classpath.concat([catalogerLibs]);
+  }
+
+  protected async getCustomClasspathMapping(): Promise<string> {
+    const customPathEntries = await super.getCustomPathEntriesForPmd();
+
+    const registryJsonHandler = new RegistryJsonHandler();
+    const jsonObject = registryJsonHandler.getJsonOfLanguageMap(customPathEntries);
+
+    if (jsonObject != null || jsonObject != undefined) {
+      return JSON.stringify(jsonObject);
+    }
+
+    return "{}";
   }
 }

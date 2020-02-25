@@ -1,5 +1,7 @@
 package sfdc.sfdx.scanner.pmd;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +20,20 @@ public class Main {
     String pmdPath = args[0];
     String pmdVersion = args[1];
     List<String> supportedLangs = new ArrayList<>(Arrays.asList(args[2].split(",")));
-    String customRuleRegister = args[3];
+    String encodedCustomClasspathMapping = args[3];
 
-    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs, customRuleRegister);
+    // Decode customClasspathMap into a JSOn string
+    final String customClasspathMapping = decodeCustomClasspathMapping(encodedCustomClasspathMapping);
+
+    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs, customClasspathMapping);
     prc.catalogRules();
+  }
+
+  private static String decodeCustomClasspathMapping(String encodedCustomClasspathMapping) {
+    try {
+      return (encodedCustomClasspathMapping != null)? URLDecoder.decode(encodedCustomClasspathMapping, "UTF-8") : "{}";
+    } catch (UnsupportedEncodingException e) {
+      throw new ScannerPmdException("Could not decode customClasspathMap: " + encodedCustomClasspathMapping, e);
+    }
   }
 }
