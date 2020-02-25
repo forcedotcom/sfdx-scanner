@@ -1,10 +1,6 @@
 import child_process = require('child_process');
-<<<<<<< HEAD
 import {ChildProcessWithoutNullStreams} from "child_process";
 import {CustomClasspathRegistrar, Engine} from "../customclasspath/CustomClasspathRegistrar";
-=======
-import {ChildProcessWithoutNullStreams} from 'child_process';
->>>>>>> 0abd387e0e7a1c36981ea37320663c21f56665aa
 
 export const PMD_VERSION = '6.21.0';
 export const PMD_LIB = './dist/pmd/lib';
