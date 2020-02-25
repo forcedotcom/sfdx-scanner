@@ -5,12 +5,15 @@
   "author": "ISV SWAT",
   "bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
   "dependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
     "@oclif/errors": "^1",
     "@salesforce/command": "^2.1.4",
     "@salesforce/core": "^2.1.6",
+    "mocha-junit-reporter": "^1.23.3",
     "tslib": "^1",
+    "typescript": "^3.8.2",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {
@@ -21,7 +24,15 @@
     "@types/chai": "^4",
     "@types/mocha": "^5",
     "@types/node": "^13.1.8",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
     "chai": "^4",
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "globby": "^11.0.0",
     "mocha": "^7.0.0",
     "nyc": "^15.0.0",
@@ -65,10 +76,10 @@
   "repository": "forcedotcom/sfdx-scanner",
   "scripts": {
     "build": "./gradlew build",
-    "postpack": "rm -f oclif.manifest.json",
-    "posttest": "tslint -p test -t stylish",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "postpack": "rm -f oclif.manifest.json",
+    "test": "nyc mocha test/**/*.test.ts --reporter-option mochaFile=./test-results/mocha/test-results.xml",
+    "eslint": "eslint ./src --ext .ts --format junit --output-file ./test-results/eslint/eslint.xml",
     "version": "oclif-dev readme && git add README.md"
   }
 }

@@ -1,4 +1,4 @@
-import child_process = require('child_process');
+import childProcess = require('child_process');
 import {ChildProcessWithoutNullStreams} from 'child_process';
 
 export const PMD_VERSION = '6.21.0';
@@ -28,7 +28,7 @@ export abstract class PmdSupport {
    * @param res
    * @param rej
    */
-  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void) : void {
+  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
     let stdout = '';
     let stderr = '';
 
@@ -56,7 +56,7 @@ export abstract class PmdSupport {
     const [command, args] = this.buildCommandArray();
 
     return new Promise<[boolean,string]>((res, rej) => {
-      const cp = child_process.spawn(command, args);
+      const cp = childProcess.spawn(command, args);
       this.monitorChildProcess(cp, res, rej);
     });
   }
