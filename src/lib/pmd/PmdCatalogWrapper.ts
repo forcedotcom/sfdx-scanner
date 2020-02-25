@@ -1,9 +1,9 @@
-import {Rule} from '../../types';
 import {AnyJson} from '@salesforce/ts-types';
-import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
-import {RULE_FILTER_TYPE, RuleFilter} from "../RuleManager";
 import fs = require('fs');
 import { RegistryJsonHandler } from '../customclasspath/RegistryJsonHandler';
+import {Rule} from '../../types';
+import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
+import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 
@@ -46,14 +46,14 @@ export class PmdCatalogWrapper extends PmdSupport {
     // Since PMD treats categories and rulesets as interchangeable inputs, we can put both types of path into a single
     // array and return that.
     let paths = [];
-    filters.forEach((filter) => {
+    filters.forEach(filter => {
       // Since PMD accepts rulesets and categories instead of individual rules, we only care about filters that act on
       // rulesets and categories.
-      let type = filter.filterType;
+      const type = filter.filterType;
       if (type === RULE_FILTER_TYPE.CATEGORY || type === RULE_FILTER_TYPE.RULESET) {
         // We only want to evaluate category filters against category names, and ruleset filters against ruleset names.
-        let subcatalog = type === RULE_FILTER_TYPE.CATEGORY ? this.catalogJson.categories : this.catalogJson.rulesets;
-        filter.filterValues.forEach((value) => {
+        const subcatalog = type === RULE_FILTER_TYPE.CATEGORY ? this.catalogJson.categories : this.catalogJson.rulesets;
+        filter.filterValues.forEach(value => {
           // If there's a matching category/ruleset for the specified filter, we'll need to add all the corresponding paths
           // to our list.
           if (subcatalog[value]) {
@@ -65,10 +65,10 @@ export class PmdCatalogWrapper extends PmdSupport {
     return paths;
   }
 
-  private async rebuildCatalogIfNecessary(): Promise<string> {
+  private async rebuildCatalogIfNecessary(): Promise<[boolean,string]> {
     // First, check whether the catalog is stale. If it's not, we don't even need to do anything.
     if (!PmdCatalogWrapper.catalogIsStale()) {
-      return Promise.resolve('no action taken');
+      return new Promise<[boolean,string]>(() => [false, 'no action taken']);
     }
 
     return this.runCommand();

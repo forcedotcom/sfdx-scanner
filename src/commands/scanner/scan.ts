@@ -36,6 +36,7 @@ export default class Scan extends SfdxCommand {
     customjar: flags.string({ description: messages.getMessage('customJarDescription')})
   };
 
+  // tslint:disable-next-line:no-any
   public async run(): Promise<any> {
     const rulesetFiles = this.flags.ruleset;
     const filepathName = this.flags.filepath;

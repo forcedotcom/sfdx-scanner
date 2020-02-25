@@ -1,5 +1,5 @@
+import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Format, PmdSupport} from './PmdSupport';
-import {ChildProcessWithoutNullStreams} from "child_process";
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -65,7 +65,7 @@ export default class PmdWrapper extends PmdSupport {
    * @param res
    * @param rej
    */
-  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: Function, rej: Function): void {
+  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
     let stdout = '';
     let stderr = '';
 
