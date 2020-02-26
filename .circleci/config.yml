@@ -31,17 +31,16 @@ jobs:
       # Run mocha
       - run:
           name: test
-          command: yarn test
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
           when: always
 
       # Run eslint
       - run:
           name: eslint
-          command: yarn eslint
+          command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
           when: always
 
       # Upload results
-
       - store_test_results:
           path: ./test-results
 
