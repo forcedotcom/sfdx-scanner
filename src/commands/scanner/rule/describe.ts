@@ -64,13 +64,13 @@ export default class Describe extends ScannerCommand {
     return JSON.parse(JSON.stringify(rules));
   }
 
-  private static formatRuleForDescribe(rule : Rule) : object {
+  private static formatRuleForDescribe(rule: Rule): object {
     // Strip any whitespace off of the description.
     rule.description = rule.description.trim();
     return rule;
   }
 
-  private logStyledRule(rule : Rule) : void {
+  private logStyledRule(rule: Rule): void {
     this.ux.styledObject(Describe.formatRuleForDescribe(rule), ['name', 'categories', 'rulesets', 'languages', 'description', 'message']);
   }
 }

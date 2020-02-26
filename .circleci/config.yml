@@ -28,5 +28,24 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: yarn test
+      # Run mocha
+      - run:
+          name: test
+          command: yarn test
+          when: always
+
+      # Run eslint
+      - run:
+          name: eslint
+          command: yarn eslint
+          when: always
+
+      # Upload results
+
+      - store_test_results:
+          path: ./test-results
+
+      - store_artifacts: # upload test coverage as artifact
+          path: ./test-coverage
+
+      - run: bash <(curl -s https://codecov.io/bash)

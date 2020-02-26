@@ -18,23 +18,23 @@ export enum OUTPUT_FORMAT {
 }
 
 export class RuleFilter {
-  readonly filterType : RULE_FILTER_TYPE;
-  readonly filterValues : ReadonlyArray<string>;
+  readonly filterType: RULE_FILTER_TYPE;
+  readonly filterValues: ReadonlyArray<string>;
 
-  constructor(filterType : RULE_FILTER_TYPE, filterValues : string[]) {
+  constructor(filterType: RULE_FILTER_TYPE, filterValues: string[]) {
     this.filterType = filterType;
     this.filterValues = filterValues;
   }
 }
 
 export class RuleManager {
-  private pmdCatalogWrapper : PmdCatalogWrapper;
+  private pmdCatalogWrapper: PmdCatalogWrapper;
 
   constructor() {
     this.pmdCatalogWrapper = new PmdCatalogWrapper();
   }
 
-  public async getRulesMatchingCriteria(filters: RuleFilter[]) : Promise<Rule[]> {
+  public async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
     try {
       const allRules = await this.getAllRules();
       return allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));
@@ -43,7 +43,7 @@ export class RuleManager {
     }
   }
 
-  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string, format : OUTPUT_FORMAT) : Promise<string> {
+  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string, format: OUTPUT_FORMAT): Promise<string> {
     // If source is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
     // running rules against an org yet, so we'll just throw an error for now.
     if (typeof source === 'string') {
@@ -57,9 +57,9 @@ export class RuleManager {
     return RuleResultRecombinator.recombineAndReformatResults([pmdResults], format);
   }
 
-  private async getAllRules() : Promise<Rule[]> {
+  private async getAllRules(): Promise<Rule[]> {
     // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
-    const [pmdRules] : Rule[][] = await Promise.all([this.getPmdRules()]);
+    const [pmdRules]: Rule[][] = await Promise.all([this.getPmdRules()]);
     return [...pmdRules];
   }
 
@@ -69,10 +69,10 @@ export class RuleManager {
     return catalog.rules;
   }
 
-  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]) : Promise<string> {
+  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]): Promise<string> {
     try {
       // Convert our filters into paths that we can feed back into PMD.
-      const paths : string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
+      const paths: string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
       // If we didn't find any paths, we're done.
       if (paths == null || paths.length === 0) {
         return;
@@ -95,7 +95,7 @@ export class RuleManager {
   }
 
 
-  private ruleSatisfiesFilterConstraints(rule : Rule, filters : RuleFilter[]) : boolean {
+  private ruleSatisfiesFilterConstraints(rule: Rule, filters: RuleFilter[]): boolean {
     // If no filters were provided, then the rule is vacuously acceptable and we can just return true.
     if (filters == null || filters.length === 0) {
       return true;
@@ -136,7 +136,7 @@ export class RuleManager {
     return true;
   }
 
-  private listContentsOverlap<T>(list1 : ReadonlyArray<T>, list2 : T[]) : boolean {
+  private listContentsOverlap<T>(list1: ReadonlyArray<T>, list2: T[]): boolean {
     return list1.some(x => list2.includes(x));
   }
 }

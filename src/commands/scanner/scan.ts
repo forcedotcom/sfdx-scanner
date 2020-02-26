@@ -32,7 +32,7 @@ export default class Scan extends SfdxCommand {
     report: flags.string({ char: 'r', description: messages.getMessage('reportFlagDescription') })
   };
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async run(): Promise<any> {
     const rulesetFiles = this.flags.ruleset;
     const filepathName = this.flags.filepath;
