@@ -4,5 +4,5 @@
   "recursive": true,
   "timeout": 5000,
   "forbidOnly": true,
-  "reporter": ["spec", "mocha-junit-reporter"]
+  "reporter": ["spec"]
 }

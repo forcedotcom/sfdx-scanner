@@ -78,8 +78,9 @@
     "build": "./gradlew build",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "postpack": "rm -f oclif.manifest.json",
-    "test": "nyc mocha test/**/*.test.ts --reporter-option mochaFile=./test-results/mocha/test-results.xml",
-    "eslint": "eslint ./src --ext .ts --format junit --output-file ./test-results/eslint/eslint.xml",
+    "lint": "eslint ./src --ext .ts",
+    "test": "nyc mocha test/**/*.test.ts",
+    "coverage": "nyc report --reporter text",
     "version": "oclif-dev readme && git add README.md"
   }
 }

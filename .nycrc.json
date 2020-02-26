@@ -2,5 +2,5 @@
   "extends": "@istanbuljs/nyc-config-typescript",
   "all": true,
   "reportDir": "./test-coverage",
-  "reporter": ["lcov","text","html"]
+  "reporter": ["lcov"]
 }
