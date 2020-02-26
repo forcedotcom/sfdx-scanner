@@ -1,9 +1,6 @@
 package sfdc.sfdx.scanner.pmd;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import org.json.simple.JSONArray;
@@ -25,7 +22,7 @@ class PmdRuleCataloger {
   private List<String> languages;
 
   // Holds category and rulesets maps that provide files we need to scan for each language.
-  private LanguageRuleMapping languageRuleMapping = LanguageRuleMapping.getInstance();
+  private LanguageXmlFileMapping languageXmlFileMapping = LanguageXmlFileMapping.getInstance();
 
   // These maps are going to help us store intermediate objects in an easy-to-reference way.
   private Map<String,List<PmdCatalogRule>> rulesByLanguage = new HashMap<>();
@@ -63,7 +60,7 @@ class PmdRuleCataloger {
     addCustomRules();
 
     // STEP 2: Process the category files to derive category and rule representations.
-    final Map<String, Set<String>> categoryPathsByLanguage = this.languageRuleMapping.getCategoryPaths();
+    final Map<String, Set<String>> categoryPathsByLanguage = this.languageXmlFileMapping.getCategoryPaths();
     for (String language : categoryPathsByLanguage.keySet()) {
       final Set<String> categoryPaths = categoryPathsByLanguage.get(language);
       for (String categoryPath : categoryPaths) {
@@ -72,7 +69,7 @@ class PmdRuleCataloger {
     }
 
     // STEP 3: Process the ruleset files.
-    final Map<String, Set<String>> rulesetPathsByLanguage = this.languageRuleMapping.getRulesetPaths();
+    final Map<String, Set<String>> rulesetPathsByLanguage = this.languageXmlFileMapping.getRulesetPaths();
     for (String language : rulesetPathsByLanguage.keySet()) {
       Set<String> rulesetPaths = rulesetPathsByLanguage.get(language);
       // STEP 3A: For each ruleset, generate a representation.
@@ -107,55 +104,6 @@ class PmdRuleCataloger {
     return "pmd-" + language + "-" + this.pmdVersion + ".jar";
   }
 
-
-//  /**
-//   * Identifies the JAR associated with the given language, and puts all category and ruleset definition files into the
-//   * corresponding Map field.
-//   * @param language - The language that should be processed.
-//   */
-//  private void mapFilePathsByLanguage(String language) {
-//    // First, define our lists.
-//    List<String> categoryPaths = new ArrayList<>();
-//    List<String> rulesetPaths = new ArrayList<>();
-//
-//    // Next, we need to determine the path to the JAR we want to inspect, and then do that inspection.
-//    String jarPath = this.pmdPath + File.separator + this.deriveJarNameForLanguage(language);
-//    try {
-//      // Read in the JAR file.
-//      JarInputStream jstream = new JarInputStream(new FileInputStream(jarPath));
-//      JarEntry entry;
-//
-//      // Iterate over every entry in the stream. These are the names of files/directories in that JAR.
-//      while ((entry = jstream.getNextJarEntry()) != null) {
-//        String fName = entry.getName();
-//        // We only care about .xml files, since those are how rulesets and categories are defined.
-//        if (fName.endsWith(".xml")) {
-//          // Rulesets all live in "rulesets/**/*.xml", and Categories live in "category/**/*.xml". It's frustrating that
-//          // one's plural and the other isn't, but sometimes life involves compromises.
-//          if (fName.startsWith("category")) {
-//            categoryPaths.add(fName);
-//          } else if (fName.startsWith("rulesets")) {
-//            rulesetPaths.add(fName);
-//          }
-//        }
-//      }
-//    } catch (FileNotFoundException fnf) {
-//      System.err.println("No PMD JAR found for language " + language + ". Please check the classpath.");
-//      System.exit(ExitCode.PMD_NO_SUCH_JAR.getCode());
-//    } catch (IOException io) {
-//      System.err.println("Failed to read PMD JAR for language " + language + ".");
-//      System.exit(ExitCode.PMD_JAR_READ_FAILED.getCode());
-//    }
-//
-//    // Finally, map the files we found by the language name.
-//    if (!categoryPaths.isEmpty()) {
-//      this.categoryPathsByLanguage.put(language, categoryPaths);
-//    }
-//    if (!rulesetPaths.isEmpty()) {
-//      this.rulesetPathsByLanguage.put(language, rulesetPaths);
-//    }
-//  }
-
   void addPmdRules() {
     this.languages.forEach(language -> addPmdRules(language));
 
@@ -164,21 +112,21 @@ class PmdRuleCataloger {
   void addPmdRules(String language) {
     final String jarPath = this.pmdPath + File.separator + this.deriveJarNameForLanguage(language);
 
-    final FileExaminer fileExaminer = new FileExaminer();
-    List<String> xmlFiles = fileExaminer.findXmlInJar(jarPath);
-    languageRuleMapping.addPathsForLanguage(xmlFiles, language);
+    final XmlFileFinder xmlFileFinder = new XmlFileFinder();
+    List<String> xmlFiles = xmlFileFinder.findXmlFilesInJar(jarPath);
+    languageXmlFileMapping.addPathsForLanguage(xmlFiles, language);
   }
 
   void addCustomRules() {
     // Parse custom rules json into a Map
     Map<String, List<String>> languageMap = parseCustomRulesRegister();
 
-    final FileExaminer fileExaminer = new FileExaminer();
+    final XmlFileFinder xmlFileFinder = new XmlFileFinder();
     languageMap.keySet().forEach(language -> {
       List<String> filePaths = languageMap.get(language);
       filePaths.forEach(filePath -> {
-        List<String> xmlFiles = fileExaminer.findXmlInPath(filePath);
-        languageRuleMapping.addPathsForLanguage(xmlFiles, language);
+        List<String> xmlFiles = xmlFileFinder.findXmlFilesInPath(filePath);
+        languageXmlFileMapping.addPathsForLanguage(xmlFiles, language);
       });
     });
 
@@ -202,20 +150,20 @@ class PmdRuleCataloger {
   Map<String, List<String>> parseCustomRulesRegister() {
     Map<String, List<String>> languageMap = new HashMap<>();
 
-    JSONParser parser = new JSONParser();
-    JSONObject jsonObject;
-
     try {
-      jsonObject = (JSONObject) parser.parse(customClasspathMapping);
-    } catch (ParseException e) {
-      throw new ScannerPmdException("Exception occurred while parsing custom classpath mapping", e);
-    }
-    Set<String> languageSet = jsonObject.keySet();
+      JSONParser parser = new JSONParser();
+      JSONObject jsonObject = (JSONObject) parser.parse(customClasspathMapping);
 
-    languageSet.forEach(language -> {
-      JSONArray languageFiles = (JSONArray) jsonObject.get(language);
-      languageMap.put(language, languageFiles.subList(0, languageFiles.size()));
-    });
+      Set<String> languageSet = jsonObject.keySet();
+
+      languageSet.forEach(language -> {
+        JSONArray languageFiles = (JSONArray) jsonObject.get(language);
+        languageMap.put(language, languageFiles.subList(0, languageFiles.size()));
+      });
+    } catch (ParseException e) {
+      System.err.println("Exception occurred while parsing custom classpath mapping");
+      System.exit(ExitCode.CLASSPATH_JSON_PARSE_EXCEPTION.getCode());
+    }
 
     return languageMap;
   }

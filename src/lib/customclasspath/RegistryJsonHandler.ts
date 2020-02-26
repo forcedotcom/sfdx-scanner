@@ -55,6 +55,11 @@ export class RegistryJsonHandler {
     }
 
 
+    /**
+     * This method is externally used to build JSON of language map.
+     * TODO: Find a nicer home for this method so this can be used 
+     * internally by convertMapToJson as well as called from outside.
+     */
     getJsonOfLanguageMap(languageToPathMap: Map<string, string[]>) {
         const languageLevelJson = {};
         languageToPathMap.forEach((paths, language) => {

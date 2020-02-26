@@ -22,7 +22,7 @@ public class Main {
     List<String> supportedLangs = new ArrayList<>(Arrays.asList(args[2].split(",")));
     String encodedCustomClasspathMapping = args[3];
 
-    // Decode customClasspathMap into a JSOn string
+    // Decode customClasspathMap into a JSON string
     final String customClasspathMapping = decodeCustomClasspathMapping(encodedCustomClasspathMapping);
 
     PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs, customClasspathMapping);
@@ -33,7 +33,9 @@ public class Main {
     try {
       return (encodedCustomClasspathMapping != null)? URLDecoder.decode(encodedCustomClasspathMapping, "UTF-8") : "{}";
     } catch (UnsupportedEncodingException e) {
-      throw new ScannerPmdException("Could not decode customClasspathMap: " + encodedCustomClasspathMapping, e);
+      System.err.println("Could not decode customClasspathMap: " + encodedCustomClasspathMapping);
+      System.exit(ExitCode.CLASSPATH_JSON_DECODE_ERROR.getCode());
     }
+    return "";
   }
 }

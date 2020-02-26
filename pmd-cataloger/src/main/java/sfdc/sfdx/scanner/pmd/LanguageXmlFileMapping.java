@@ -1,25 +1,27 @@
 package sfdc.sfdx.scanner.pmd;
 
+import sfdc.sfdx.scanner.ExitCode;
+
 import java.util.*;
 
 /**
- * Maintains mapping between languages and their XML paths
+ * Maintains mapping between languages and their XML file paths
  */
-public class LanguageRuleMapping {
+public class LanguageXmlFileMapping {
   private final static String CATEGORY = "category";
   private final static String RULESETS = "rulesets";
 
-  private static LanguageRuleMapping INSTANCE = new LanguageRuleMapping();
+  private static LanguageXmlFileMapping INSTANCE = new LanguageXmlFileMapping();
 
   private Map<String, Set<String>> categoryPathsByLanguage;
   private Map<String, Set<String>> rulesetPathsByLanguage;
 
-  private LanguageRuleMapping() {
+  private LanguageXmlFileMapping() {
     categoryPathsByLanguage = new HashMap<>();
     rulesetPathsByLanguage = new HashMap<>();
   }
 
-  public static LanguageRuleMapping getInstance() {
+  public static LanguageXmlFileMapping getInstance() {
     return INSTANCE;
   }
 
@@ -38,28 +40,27 @@ public class LanguageRuleMapping {
   void addPathForLanguage(String path, String language) {
     if (! nullEmptyOrWhitespace(path)) {
       if (path.contains(RULESETS)) {
-        addPathForLanguageToRulesets(path, language);
+        addRulesetPathForLanguage(path, language);
       } else if (path.contains(CATEGORY)) {
-        addPathForLanguageToCategory(path, language);
+        addCategoryPathForLanguage(path, language);
       } else {
-        // TODO: temporarily default to Category. But this won't work in all cases.
-        addPathForLanguageToCategory(path, language);
-
+        System.out.println("Dropping this XML file since its path does not conform to Rulesets or Category: " + path);
       }
     }
   }
 
-  private void addPathForLanguageToRulesets(String path, String language) {
+  private void addRulesetPathForLanguage(String path, String language) {
     addPath(path, language, rulesetPathsByLanguage);
   }
 
-  private void addPathForLanguageToCategory(String path, String language) {
+  private void addCategoryPathForLanguage(String path, String language) {
     addPath(path, language, categoryPathsByLanguage);
   }
 
   private void addPath(String path, String language, Map<String, Set<String>> pathsByLanguage) {
     if (nullEmptyOrWhitespace(language)) {
-      throw new ScannerPmdException("Language cannot be empty: " + language);
+      System.err.println("Language cannot be empty: " + language);
+      System.exit(ExitCode.LANGUAGE_MISSING_ERROR.getCode());
     }
 
     final String lowerLanguage = language.toLowerCase();
@@ -79,7 +80,7 @@ public class LanguageRuleMapping {
 
   @Override
   public String toString() {
-    return "LanguageRuleMapping{" +
+    return "LanguageXmlFileMapping{" +
       "categoryPathsByLanguage=" + categoryPathsByLanguage +
       ", rulesetPathsByLanguage=" + rulesetPathsByLanguage +
       '}';
