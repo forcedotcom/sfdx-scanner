@@ -1,4 +1,6 @@
 /build
+/test-results
+/test-coverage
 .DS_Store
 *-debug.log
 *-error.log

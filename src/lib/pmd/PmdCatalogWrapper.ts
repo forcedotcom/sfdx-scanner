@@ -17,12 +17,12 @@ export type PmdCatalog = {
 };
 
 export class PmdCatalogWrapper extends PmdSupport {
-  private catalogJson : PmdCatalog;
+  private catalogJson: PmdCatalog;
   constructor() {
     super();
   }
 
-  public async getCatalog() : Promise<PmdCatalog> {
+  public async getCatalog(): Promise<PmdCatalog> {
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {
       await this.rebuildCatalogIfNecessary();
@@ -35,7 +35,7 @@ export class PmdCatalogWrapper extends PmdSupport {
    * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
    * @param {RuleFilter[]} filters
    */
-  public async getPathsMatchingFilters(filters: RuleFilter[]) : Promise<string[]> {
+  public async getPathsMatchingFilters(filters: RuleFilter[]): Promise<string[]> {
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {
       await this.rebuildCatalogIfNecessary();

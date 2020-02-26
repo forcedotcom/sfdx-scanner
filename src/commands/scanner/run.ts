@@ -87,8 +87,8 @@ export default class Run extends ScannerCommand {
 
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
-    const source : string[]|string = this.flags.source || this.flags.org;
-    const format : OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
+    const source: string[]|string = this.flags.source || this.flags.org;
+    const format: OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
@@ -97,7 +97,7 @@ export default class Run extends ScannerCommand {
     return {};
   }
 
-  private validateFlags() : void {
+  private validateFlags(): void {
     // It doesn't matter how you specify rules, but you do need to specify rules somehow.
     if (!this.flags.category && !this.flags.ruleset) {
       throw new SfdxError(messages.getMessage('validations.mustSpecifyRule'));
@@ -112,7 +112,7 @@ export default class Run extends ScannerCommand {
     }
   }
 
-  private deriveFormatFromOutfile() : OUTPUT_FORMAT {
+  private deriveFormatFromOutfile(): OUTPUT_FORMAT {
     const outfile = this.flags.outfile;
     const lastPeriod = outfile.lastIndexOf('.');
     if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
@@ -130,7 +130,7 @@ export default class Run extends ScannerCommand {
     }
   }
 
-  private processOutput(output : string) : void {
+  private processOutput(output: string): void {
     // If the output is an empty string, it means no violations were found, and we should log that information to the console
     // so the user doesn't get confused.
     if (output === '') {

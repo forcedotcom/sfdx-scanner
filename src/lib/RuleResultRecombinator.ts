@@ -4,7 +4,7 @@ import {OUTPUT_FORMAT} from './RuleManager';
 
 export class RuleResultRecombinator {
 
-  public static recombineAndReformatResults(results : [string], format : OUTPUT_FORMAT) : string {
+  public static recombineAndReformatResults(results: [string], format: OUTPUT_FORMAT): string {
     // TODO: Since we only have the one rule engine right now, we're doing this the quick and dirty way. But once we add
     //  the other engines, we'll need to actually add interesting logic to this class.
 
@@ -21,19 +21,19 @@ export class RuleResultRecombinator {
     }
   }
 
-  private static constructCsv([pmdResults] : [string]) : string {
+  private static constructCsv([pmdResults]: [string]): string {
     // TODO: Eventually, we'll need logic to combine disparate result sets together into a single CSV, but for now we
     //  can proceed with just PMD's results.
     return this.pmdToCsv(pmdResults);
   }
 
-  private static constructXml([pmdResults] : [string]) : string {
+  private static constructXml([pmdResults]: [string]): string {
     // TODO: Eventually, we'll need logic to actually combine XMLs together and massage them into the format we want to output,
     //  but for now we can just return the XML that was provided to us.
     return pmdResults;
   }
 
-  private static constructTable([pmdResults] : [string]) : string {
+  private static constructTable([pmdResults]: [string]): string {
     // If the results were just an empty string, we can return it.
     if (pmdResults === '') {
       return '';
@@ -60,7 +60,7 @@ export class RuleResultRecombinator {
     return JSON.stringify({columns, rows: rowJsons});
   }
 
-  private static pmdToCsv(pmdResults : string) : string {
+  private static pmdToCsv(pmdResults: string): string {
     // If the results were just an empty string, we can return it.
     if (pmdResults === '') {
       return '';

@@ -11,12 +11,12 @@ export default class PmdWrapper extends PmdSupport {
   reportFormat: Format;
   reportFile: string;
 
-  public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string) {
+  public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<[boolean,string]> {
     const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile);
     return myPmd.execute();
   }
 
-  private async execute() {
+  private async execute(): Promise<[boolean,string]> {
     return super.runCommand();
   }
 
