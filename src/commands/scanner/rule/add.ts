@@ -1,7 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import { CustomRulepathManager } from '../../../lib/CustomRulepathManager';
+import { CustomRulePathManager } from '../../../lib/CustomRulepathManager';
 
 
 // Initialize Messages with the current plugin directory
@@ -49,7 +49,7 @@ export default class Add extends SfdxCommand {
     this.logger.trace(`Rule path: ${path}`);
 
     // Add to Custom Classpath registry
-    const manager = new CustomRulepathManager();
+    const manager = new CustomRulePathManager();
     await manager.addPathsForLanguage(language, path);
 
     return { success: true, language: language, path: path };
