@@ -5,14 +5,14 @@ export enum ENGINE {
   PMD = 'pmd'
 }
 
-type RulepathEntry = Map<string, Set<string>>;
-type RulepathMap = Map<ENGINE, RulepathEntry>;
+type RulePathEntry = Map<string, Set<string>>;
+type RulePathMap = Map<ENGINE, RulePathEntry>;
 
 const CATALOG_PATH = path.join('.', 'catalogs');
 export const CUSTOM_CLASSPATH_REGISTER = path.join(CATALOG_PATH, 'CustomPaths.json');
 
 export class CustomRulePathManager {
-  private pathsByLanguageByEngine: RulepathMap;
+  private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
 
   constructor() {
@@ -37,7 +37,7 @@ export class CustomRulePathManager {
       } else {
         //  Any other error needs to be rethrown, and since it could be arcane or weird, we'll also prepend it with a
         //  header so it's clear where it came from.
-        throw new Error('Failed to read custom rulepath file: ' + e.message);
+        throw new Error('Failed to read custom rule path file: ' + e.message);
       }
     }
     // Now that we've got the file contents, let's turn it into a JSON.
@@ -72,11 +72,11 @@ export class CustomRulePathManager {
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
       // so it's at least obvious what failed, if not how or why.
-      throw new Error('Failed to write to custom rulepath file: ' + e.message);
+      throw new Error('Failed to write to custom rule path file: ' + e.message);
     }
   }
 
-  private convertJsonDataToMap(json): RulepathMap {
+  private convertJsonDataToMap(json): RulePathMap {
     const map = new Map();
     for (const key of Object.keys(json)) {
       const engine = key as ENGINE;
