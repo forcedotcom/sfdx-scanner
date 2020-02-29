@@ -8,9 +8,10 @@ export enum ENGINE {
 type RulepathEntry = Map<string, Set<string>>;
 type RulepathMap = Map<ENGINE, RulepathEntry>;
 
-export const CUSTOM_CLASSPATH_REGISTER = path.join('catalogs', 'CustomPaths.json');
+const CATALOG_PATH = path.join('.', 'catalogs');
+export const CUSTOM_CLASSPATH_REGISTER = path.join(CATALOG_PATH, 'CustomPaths.json');
 
-export class CustomRulepathManager {
+export class CustomRulePathManager {
   private pathsByLanguageByEngine: RulepathMap;
   private initialized: boolean;
 
@@ -66,6 +67,7 @@ export class CustomRulepathManager {
   private async saveCustomClasspaths(): Promise<void> {
     await this.initialize();
     try {
+      await fs.promises.mkdir(CATALOG_PATH, {recursive: true});
       await fs.promises.writeFile(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(this.convertMapToJson(), null, 4));
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
