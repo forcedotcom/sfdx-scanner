@@ -1,7 +1,7 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
-import { CustomRulePathManager } from '../../../lib/CustomRulepathManager';
+import { CustomRulePathManager } from '../../../lib/CustomRulePathManager';
 
 
 // Initialize Messages with the current plugin directory
