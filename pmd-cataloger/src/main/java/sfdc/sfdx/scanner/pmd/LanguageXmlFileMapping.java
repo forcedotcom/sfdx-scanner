@@ -66,14 +66,14 @@ public class LanguageXmlFileMapping {
       System.exit(ExitCode.LANGUAGE_MISSING_ERROR.getCode());
     }
 
-    final String lowerLanguage = language.toLowerCase();
+    language = language.toLowerCase();
 
-    if (pathsByLanguage.containsKey(lowerLanguage)) {
-      pathsByLanguage.get(lowerLanguage).add(path);
+    if (pathsByLanguage.containsKey(language)) {
+      pathsByLanguage.get(language).add(path);
     } else {
       final Set<String> values = new HashSet<>();
       values.add(path);
-      pathsByLanguage.put(lowerLanguage, values);
+      pathsByLanguage.put(language, values);
     }
   }
 

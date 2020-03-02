@@ -10,7 +10,7 @@ public class Main {
   private static String DIVIDER = "=";
   private static String COMMA = ",";
   /**
-   * MAin entry to PMD Rule Catalog builder
+   * Main entry to PMD Rule Catalog builder
    * @param args should contain language separated by '=' from their comma-separated path mapping list. For example, here are some accepted arg values :
    *             "apex=/some/lib/withjars,/more/path"
    *             "javascript=/another/path,/yet/another/path/with/javascript/rules"
@@ -56,7 +56,7 @@ public class Main {
       System.exit(ExitCode.MAIN_INVALID_ARGUMENT.getCode());
     }
 
-    // Stream path array to filter out empty
+    // Stream path array to filter out empty path
     List<String> pathList = Arrays.stream(pathArray).filter(path -> !"".equals(path.trim())).collect(Collectors.toList());
 
     languagePathEntries.put(language, pathList);

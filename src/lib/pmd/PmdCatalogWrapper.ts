@@ -1,8 +1,9 @@
 import {AnyJson} from '@salesforce/ts-types';
 import fs = require('fs');
+import path = require('path');
 import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
-import {PmdSupport, PMD_VERSION} from './PmdSupport';
+import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 
@@ -88,14 +89,15 @@ export class PmdCatalogWrapper extends PmdSupport {
     const command = 'java';
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
-    const classpathEntries = await this.buildClasspath();
-    const parameters = await this.buildCatalogerParameters();
+    const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
     const args = ['-cp', classpathEntries.join(':'), MAIN_CLASS, ...parameters];
+
+    // TODO: move as log line to Trace
+    // console.log(`About to invoke Cataloger with args: ${args}`);
     return [command, args];
   }
 
   protected async buildClasspath(): Promise<string[]> {
-    // TODO: This probably isn't where the JAR ought to live. Once the JAR's home is finalized, come back to this.
     const catalogerLibs = `${PMD_CATALOGER_LIB}/*`;
     const classpathEntries = await super.buildClasspath();
     classpathEntries.push(catalogerLibs);
@@ -142,6 +144,6 @@ export class PmdCatalogWrapper extends PmdSupport {
    * PMD library holds the same naming structure for each language
    */
   private derivePmdJarName(language: string): string {
-    return "pmd-" + language + "-" + PMD_VERSION + ".jar";
+    return path.join(PMD_LIB, "pmd-" + language + "-" + PMD_VERSION + ".jar");
   }
 }

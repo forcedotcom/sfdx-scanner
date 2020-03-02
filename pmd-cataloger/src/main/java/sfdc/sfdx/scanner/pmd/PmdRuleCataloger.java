@@ -12,10 +12,6 @@ import sfdc.sfdx.scanner.xml.XmlReader;
 import sfdc.sfdx.scanner.ExitCode;
 
 class PmdRuleCataloger {
-//  private String pmdVersion;
-//  private String pmdPath;
-//  private String customClasspathMapping;
-//  private List<String> languages;
   private Map<String, List<String>> rulePathEntries;
 
   // Holds category and rulesets maps that provide files we need to scan for each language.
