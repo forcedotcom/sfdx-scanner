@@ -28,12 +28,13 @@ export default class PmdWrapper extends PmdSupport {
     this.reportFile = reportFile || null;
   }
 
-  protected buildCommandArray(): [string, string[]] {
+  protected async buildCommandArray(): Promise<[string, string[]]> {
     const command = 'java';
     // Start with the arguments we know we'll always need.
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
-    let args = ['-cp', super.buildClasspath().join(':'), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
+    const classpath = await super.buildClasspath();
+    let args = ['-cp', classpath.join(':'), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
       '-format', this.reportFormat];
 
     // Then add anything else that's dynamically included based on other input.

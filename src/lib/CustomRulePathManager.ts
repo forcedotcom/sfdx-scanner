@@ -64,6 +64,11 @@ export class CustomRulePathManager {
     return await this.saveCustomClasspaths();
   }
 
+  public async getRulePathEntries(engine: ENGINE): Promise<Map<string, Set<string>>> {
+    await this.initialize();
+    return this.pathsByLanguageByEngine.get(engine);
+  }
+
   private async saveCustomClasspaths(): Promise<void> {
     await this.initialize();
     try {
