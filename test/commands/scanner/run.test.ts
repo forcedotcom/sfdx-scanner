@@ -1,4 +1,5 @@
-import { expect, test } from '@salesforce/command/lib/test';
+import { expect } from '@salesforce/command/lib/test';
+import test from '../scannerbasetest';
 import fs = require('fs');
 import path = require('path');
 

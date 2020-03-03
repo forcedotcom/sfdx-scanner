@@ -1,7 +1,6 @@
-import { expect, test } from '@salesforce/command/lib/test';
+import { expect } from '@salesforce/command/lib/test';
+import test from '../../scannerbasetest';
 import { Messages } from '@salesforce/core';
-import { CUSTOM_CLASSPATH_REGISTER } from '../../../../src/lib/CustomRulePathManager';
-import fs = require('fs');
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -56,10 +55,6 @@ describe('scanner:rule:add', () => {
 
         const myLanguage = 'apex';
         const myPath = ['/some/local/path', 'some/other/path'];
-        const tmpFile = './.tmpCustom';
-
-        // Backup contents of actual CustomClasspathRegistry
-        await fs.promises.rename(CUSTOM_CLASSPATH_REGISTER, tmpFile);
 
         test
         .stdout()
@@ -78,8 +73,5 @@ describe('scanner:rule:add', () => {
             .and.have.lengthOf(myPath.length)
             .and.deep.equals(myPath);
         });
-
-        // Restore with original file
-        await fs.promises.rename(tmpFile, CUSTOM_CLASSPATH_REGISTER);
     });
 });
