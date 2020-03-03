@@ -1,25 +1,65 @@
 package sfdc.sfdx.scanner.pmd;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import sfdc.sfdx.scanner.ExitCode;
 
 public class Main {
-  public static void main(String[] args) {
-    // We need there to be exactly three arguments, so throw an error if we didn't get them.
-    if (args.length != 3) {
-      // It's probably fine for this error message to be hardcoded, because it should never ever ever be seen by anyone
-      // outside of the ISV SWAT team.
-      System.err.println("Catalog build command received " + args.length + " argument(s) instead of the required three.");
-      System.exit(ExitCode.PMD_WRONG_ARG_COUNT.getCode());
-    }
-    String pmdPath = args[0];
-    String pmdVersion = args[1];
-    List<String> supportedLangs = new ArrayList<>(Arrays.asList(args[2].split(",")));
 
-    PmdRuleCataloger prc = new PmdRuleCataloger(pmdVersion, pmdPath, supportedLangs);
+  private static String DIVIDER = "=";
+  private static String COMMA = ",";
+  /**
+   * Main entry to PMD Rule Catalog builder
+   * @param args should contain language separated by '=' from their comma-separated path mapping list. For example, here are some accepted arg values :
+   *             "apex=/some/lib/withjars,/more/path"
+   *             "javascript=/another/path,/yet/another/path/with/javascript/rules"
+   */
+  public static void main(String[] args) {
+
+    if (args.length < 1) {
+      System.err.println("No arguments found. Please provide language to list of path mapping for each language to support");
+      System.exit(ExitCode.MAIN_INVALID_ARGUMENT.getCode());
+    }
+
+    final Map<String, List<String>> rulePathEntries = new HashMap<>();
+
+    for (String arg: args) {
+      parseArg(rulePathEntries, arg);
+    }
+
+
+    PmdRuleCataloger prc = new PmdRuleCataloger(rulePathEntries);
     prc.catalogRules();
   }
+
+  private static void parseArg(Map<String, List<String>> languagePathEntries, String arg) {
+    final String[] splitArg = arg.split(DIVIDER);
+
+    // DIVIDER should split arg in language and path list. No less, no more
+    if (splitArg.length != 2) {
+      System.err.println("Expected one " + DIVIDER + " in argument: " + arg);
+      System.exit(ExitCode.MAIN_INVALID_ARGUMENT.getCode());
+    }
+    final String language = splitArg[0].trim();
+    final String paths = splitArg[1];
+
+    if ("".equals(language.trim()) || "".equals((paths.trim()))) {
+      System.err.println("Missing language and/or paths in argument: " + arg);
+      System.exit(ExitCode.MAIN_INVALID_ARGUMENT.getCode());
+    }
+
+    final String[] pathArray = paths.split(COMMA);
+
+    if (pathArray.length < 1) {
+      System.err.println("AT least one path needs to be provided for language " + language + " in argument: " + arg);
+      System.exit(ExitCode.MAIN_INVALID_ARGUMENT.getCode());
+    }
+
+    // Stream path array to filter out empty path
+    List<String> pathList = Arrays.stream(pathArray).filter(path -> !"".equals(path.trim())).collect(Collectors.toList());
+
+    languagePathEntries.put(language, pathList);
+  }
+
 }

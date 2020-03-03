@@ -1,5 +1,6 @@
 import {AnyJson} from '@salesforce/ts-types';
 import fs = require('fs');
+import path = require('path');
 import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
@@ -84,17 +85,65 @@ export class PmdCatalogWrapper extends PmdSupport {
     return JSON.parse(rawCatalog.toString());
   }
 
-  protected buildCommandArray(): [string, string[]] {
+  protected async buildCommandArray(): Promise<[string, string[]]> {
     const command = 'java';
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
-    const args = ['-cp', this.buildClasspath().join(':'), MAIN_CLASS, PMD_LIB, PMD_VERSION, SUPPORTED_LANGUAGES.join(',')];
+    const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
+    const args = ['-cp', classpathEntries.join(':'), MAIN_CLASS, ...parameters];
+
+    // TODO: move as log line to Trace
+    // console.log(`About to invoke Cataloger with args: ${args}`);
     return [command, args];
   }
 
-  protected buildClasspath(): string[] {
-    // TODO: This probably isn't where the JAR ought to live. Once the JAR's home is finalized, come back to this.
+  protected async buildClasspath(): Promise<string[]> {
     const catalogerLibs = `${PMD_CATALOGER_LIB}/*`;
-    return super.buildClasspath().concat([catalogerLibs]);
+    const classpathEntries = await super.buildClasspath();
+    classpathEntries.push(catalogerLibs);
+    return classpathEntries;
+  }
+
+  private async buildCatalogerParameters(): Promise<string[]> {
+    // Get custom rule path entries
+    const rulePathEntries = await this.getRulePathEntries();
+
+    // Add inbuilt PMD rule path entries
+    this.addPmdJarPaths(rulePathEntries);
+
+    const parameters = [];
+    const divider = '=';
+    const joiner = ',';
+
+    // For each language, build an argument that looks like:
+    // "language=path1,path2,path3"
+    rulePathEntries.forEach((entries, language) => {
+      const paths = Array.from(entries.values());
+      parameters.push(language + divider + paths.join(joiner));
+    });
+
+    return parameters;
+  }
+
+  private addPmdJarPaths(rulePathEntries: Map<string, Set<string>>) {
+    // For each supported language, add path to PMD's inbuilt rules
+    SUPPORTED_LANGUAGES.forEach((language) => {
+      const pmdJarName = this.derivePmdJarName(language);
+
+      // TODO: logic to add entries should be encapsulated away from here. 
+      // Duplicates some logic in CustomRulePathManager. Consider refactoring
+      if (!rulePathEntries.has(language)) {
+        rulePathEntries.set(language, new Set<string>());
+      }
+      rulePathEntries.get(language).add(pmdJarName);
+    });
+  }
+
+
+  /**
+   * PMD library holds the same naming structure for each language
+   */
+  private derivePmdJarName(language: string): string {
+    return path.join(PMD_LIB, "pmd-" + language + "-" + PMD_VERSION + ".jar");
   }
 }

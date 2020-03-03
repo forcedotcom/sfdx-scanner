@@ -1,5 +1,6 @@
 import childProcess = require('child_process');
 import {ChildProcessWithoutNullStreams} from 'child_process';
+import { CustomRulePathManager, ENGINE } from '../CustomRulePathManager'; 
 
 export const PMD_VERSION = '6.21.0';
 export const PMD_LIB = './dist/pmd/lib';
@@ -15,10 +16,18 @@ export enum Format {
 
 export abstract class PmdSupport {
 
-  protected buildClasspath(): string[] {
+  protected async buildClasspath(): Promise<string[]> {
+    // Include PMD libs into classpath
     const pmdLibs = `${PMD_LIB}/*`;
-    // TODO: We want to allow users to add their own PMD rules, so we'll need some way for them to submit them.
-    return [pmdLibs];
+    const classpathEntries = [pmdLibs];
+    
+    // Include custom rule paths into classpath
+    const rulePathEntries = await this.getRulePathEntries();
+    rulePathEntries.forEach((pathEntries, language) => {
+      classpathEntries.push(...pathEntries);
+    });
+
+    return classpathEntries;
   }
 
   /**
@@ -50,14 +59,19 @@ export abstract class PmdSupport {
     });
   }
 
-  protected abstract buildCommandArray(): [string, string[]];
+  protected abstract buildCommandArray(): Promise<[string, string[]]>;
 
   protected async runCommand(): Promise<[boolean,string]> {
-    const [command, args] = this.buildCommandArray();
+    const [command, args] = await this.buildCommandArray();
 
     return new Promise<[boolean,string]>((res, rej) => {
       const cp = childProcess.spawn(command, args);
       this.monitorChildProcess(cp, res, rej);
     });
+  }
+
+  protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
+    const customRulePathManager = new CustomRulePathManager();
+    return await customRulePathManager.getRulePathEntries(ENGINE.PMD);
   }
 }
