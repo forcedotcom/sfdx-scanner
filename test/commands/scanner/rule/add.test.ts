@@ -1,5 +1,7 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import { Messages } from '@salesforce/core';
+import { CUSTOM_CLASSPATH_REGISTER } from '../../../../src/lib/CustomRulePathManager';
+import fs = require('fs');
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -46,10 +48,19 @@ describe('scanner:rule:add', () => {
     });
 
     // TODO: This test modifies the same JSON as an actual run. Find a way to substitute file names
-    describe('Happy case to add custom path', () => {
+    // Temporary fix: 
+    // 1. Backup contents of actual CustomClasspathRegistry
+    // 2. Run test, which would create dummy entries
+    // 3. Restore with original file
+    describe('Happy case to add custom path', async () => {
 
         const myLanguage = 'apex';
         const myPath = ['/some/local/path', 'some/other/path'];
+        const tmpFile = './.tmpCustom';
+
+        // Backup contents of actual CustomClasspathRegistry
+        await fs.promises.rename(CUSTOM_CLASSPATH_REGISTER, tmpFile);
+
         test
         .stdout()
         .stderr()
@@ -67,5 +78,8 @@ describe('scanner:rule:add', () => {
             .and.have.lengthOf(myPath.length)
             .and.deep.equals(myPath);
         });
+
+        // Restore with original file
+        await fs.promises.rename(tmpFile, CUSTOM_CLASSPATH_REGISTER);
     });
 });
