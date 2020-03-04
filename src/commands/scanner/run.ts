@@ -35,22 +35,25 @@ export default class Run extends ScannerCommand {
       char: 'r',
       description: messages.getMessage('flags.rulesetDescription')
     }),
-    // TODO: IMPLEMENT THESE FLAGS IN A MEANINGFUL WAY.
-    /*
+    // TODO: After implementing this flag, unhide it.
     rulename: flags.string({
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
       // If you're specifying by name, it doesn't make sense to let you specify by any other means.
-      exclusive: ['category', 'ruleset', 'severity', 'exclude-rule']
+      exclusive: ['category', 'ruleset', 'severity', 'exclude-rule'],
+      hidden: true
     }),
+    // TODO: After implementing this flag, unhide it.
     severity: flags.string({
       char: 's',
-      description: messages.getMessage('flags.severityDescription')
+      description: messages.getMessage('flags.severityDescription'),
+      hidden: true
     }),
+    // TODO: After implementing this flag, unhide it.
     'exclude-rule': flags.array({
-      description: messages.getMessage('flags.excluderuleDescription')
+      description: messages.getMessage('flags.excluderuleDescription'),
+      hidden: true
     }),
-     */
     // These flags are how you choose which files you're targeting.
     source: flags.array({
       char: 's',
@@ -58,15 +61,19 @@ export default class Run extends ScannerCommand {
       // If you're specifying local files, it doesn't make much sense to let you specify anything else.
       exclusive: ['org']
     }),
+    // TODO: After implementing this flag, unhide it.
     org: flags.string({
       char: 'a',
       description: messages.getMessage('flags.orgDescription'),
       // If you're specifying an org, it doesn't make sense to let you specify anything else.
-      exclusive: ['source']
+      exclusive: ['source'],
+      hidden: true
     }),
     // These flags modify how the process runs, rather than what it consumes.
+    // TODO: After implementing this flag, unhide it.
     'suppress-warnings': flags.boolean({
-      description: messages.getMessage('flags.suppresswarningsDescription')
+      description: messages.getMessage('flags.suppresswarningsDescription'),
+      hidden: true
     }),
     format: flags.enum({
       char: 'f',

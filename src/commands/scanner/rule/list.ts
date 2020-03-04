@@ -39,21 +39,27 @@ export default class List extends ScannerCommand {
       char: 'r',
       description: messages.getMessage('flags.rulesetDescription')
     }),
-    severity: flags.string({
-      char: 's',
-      description: messages.getMessage('flags.severityDescription')
-    }),
     language: flags.array({
       char: 'l',
       description: messages.getMessage('flags.languageDescription')
     }),
+    // TODO: After implementing this flag, unhide it.
+    severity: flags.string({
+      char: 's',
+      description: messages.getMessage('flags.severityDescription'),
+      hidden: true
+    }),
+    // TODO: After implementing this flag, unhide it.
     standard: flags.boolean({
       description: messages.getMessage('flags.standardDescription'),
-      exclusive: ['custom']
+      exclusive: ['custom'],
+      hidden: true
     }),
+    // TODO: After implementing this flag, unhide it.
     custom: flags.boolean({
       description: messages.getMessage('flags.customDescription'),
-      exclusive: ['standard']
+      exclusive: ['standard'],
+      hidden: true
     })
   };
 
