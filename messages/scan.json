@@ -1,9 +1,0 @@
-{
-  "commandDescription": "scan local code for violations of rules",
-  "rulesetFlagDescription": "ruleset to use for scanning",
-  "filepathFlagDescription": "file path to examine",
-  "reportFlagDescription": "file to save output report",
-  "forceFlagDescription": "example boolean flag",
-  "errorNoRulesFound": "No rule definitions were found at '%s'.",
-  "errorNoCodeFound": "No code was found at '%s'."
-}

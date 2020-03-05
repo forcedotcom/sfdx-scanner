@@ -1,4 +1,5 @@
-import { expect, test } from '@salesforce/command/lib/test';
+import { expect } from '@salesforce/command/lib/test';
+import test from '../../scannerbasetest';
 import fs = require('fs');
 
 // NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of

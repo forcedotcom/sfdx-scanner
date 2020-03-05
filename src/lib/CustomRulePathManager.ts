@@ -11,6 +11,7 @@ type RulePathMap = Map<ENGINE, RulePathEntry>;
 
 const CATALOG_PATH = path.join('.', 'catalogs');
 export const CUSTOM_CLASSPATH_REGISTER = path.join(CATALOG_PATH, 'CustomPaths.json');
+export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(CATALOG_PATH, 'TmpCustomPaths.json');
 
 const EMPTY_JSON_FILE = '{}';
 
