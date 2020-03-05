@@ -1,5 +1,6 @@
 import fs = require('fs');
 import path = require('path');
+import { SfdxError } from '@salesforce/core';
 
 export enum ENGINE {
   PMD = 'pmd'
@@ -11,12 +12,16 @@ type RulePathMap = Map<ENGINE, RulePathEntry>;
 const CATALOG_PATH = path.join('.', 'catalogs');
 export const CUSTOM_CLASSPATH_REGISTER = path.join(CATALOG_PATH, 'CustomPaths.json');
 
+const EMPTY_JSON_FILE = '{}';
+
 export class CustomRulePathManager {
   private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
+  private fileOperations: FileOperations
 
-  constructor() {
+  constructor(fileOperations?: FileOperations) {
     this.pathsByLanguageByEngine = new Map();
+    this.fileOperations = fileOperations || new FileOperations();
     this.initialized = false;
   }
 
@@ -28,17 +33,21 @@ export class CustomRulePathManager {
     // Read from the JSON and use it to populate the map.
     let data = null;
     try {
-      data = await fs.promises.readFile(CUSTOM_CLASSPATH_REGISTER, 'utf-8');
+      data = await this.fileOperations.readRulePathFile();
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
       if (e.code === 'ENOENT') {
-        data = '{}';
+        data = EMPTY_JSON_FILE;
       } else {
         //  Any other error needs to be rethrown, and since it could be arcane or weird, we'll also prepend it with a
         //  header so it's clear where it came from.
-        throw new Error('Failed to read custom rule path file: ' + e.message);
+        throw SfdxError.create('scanner', 'add', 'errors.readCustomRulePathFileFailed', [e.message]);
       }
+    }
+    // If file existed but was empty, replace the whitespace/blank with empty JSON
+    if ('' === data.trim()) {
+      data = EMPTY_JSON_FILE;
     }
     // Now that we've got the file contents, let's turn it into a JSON.
     const json = JSON.parse(data);
@@ -77,12 +86,12 @@ export class CustomRulePathManager {
   private async saveCustomClasspaths(): Promise<void> {
     await this.initialize();
     try {
-      await fs.promises.mkdir(CATALOG_PATH, {recursive: true});
-      await fs.promises.writeFile(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(this.convertMapToJson(), null, 4));
+      await this.fileOperations.writeRulePathFile(this.convertMapToJson());
+      
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
       // so it's at least obvious what failed, if not how or why.
-      throw new Error('Failed to write to custom rule path file: ' + e.message);
+      throw SfdxError.create('scanner', 'add', 'errors.writeCustomRulePathFileFailed', [e.message]);
     }
   }
 
@@ -116,5 +125,18 @@ export class CustomRulePathManager {
       json[engine.toString()] = innerObj;
     });
     return json;
+  }
+}
+
+// Exported only for test visibility
+export class FileOperations {
+
+  public async readRulePathFile(): Promise<string> {
+    return await fs.promises.readFile(CUSTOM_CLASSPATH_REGISTER, 'utf-8');
+  }
+
+  async writeRulePathFile(rulePathMap: object): Promise<void> {
+    await fs.promises.mkdir(CATALOG_PATH, {recursive: true});
+    await fs.promises.writeFile(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(rulePathMap, null, 4));
   }
 }

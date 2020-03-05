@@ -9,7 +9,7 @@
     "pathCannotBeEmpty": "Path cannot be empty"
   },
   "errors": {
-    "readingCustomClasspath": "Error occurred while reading %s: %s",
-    "writingCustomClasspath": "Could not write to %s: %s"
+    "readCustomRulePathFileFailed": "Failed to read custom rule path file: %s",
+    "writeCustomRulePathFileFailed": "Failed to write to custom rule path file: %s"
   }
 }
