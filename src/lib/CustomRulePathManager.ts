@@ -18,11 +18,11 @@ const EMPTY_JSON_FILE = '{}';
 export class CustomRulePathManager {
   private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
-  private fileOperations: FileIOHandler;
+  private fileHandler: FileIOHandler;
 
-  constructor(fileOperator?: FileIOHandler) {
+  constructor(fileHandlerOverride?: FileIOHandler) {
     this.pathsByLanguageByEngine = new Map();
-    this.fileOperations = fileOperator || new FileIOHandler();
+    this.fileHandler = fileHandlerOverride || new FileIOHandler();
     this.initialized = false;
   }
 
@@ -34,7 +34,7 @@ export class CustomRulePathManager {
     // Read from the JSON and use it to populate the map.
     let data = null;
     try {
-      data = await this.fileOperations.readFile(CUSTOM_CLASSPATH_REGISTER);
+      data = await this.fileHandler.readFile(CUSTOM_CLASSPATH_REGISTER);
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
@@ -88,8 +88,8 @@ export class CustomRulePathManager {
     await this.initialize();
     try {
       const fileContent = JSON.stringify(this.convertMapToJson(), null, 4)
-      await this.fileOperations.mkdirIfNotExists(CATALOG_PATH);
-      await this.fileOperations.writeFile(CUSTOM_CLASSPATH_REGISTER, fileContent);
+      await this.fileHandler.mkdirIfNotExists(CATALOG_PATH);
+      await this.fileHandler.writeFile(CUSTOM_CLASSPATH_REGISTER, fileContent);
       
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header

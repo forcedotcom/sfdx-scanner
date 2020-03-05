@@ -3,14 +3,11 @@ import { FileIOHandler } from '../../src/lib/FileIOHandler';
 import { expect } from 'chai';
 
 import Sinon = require('sinon');
-// import { Messages } from '@salesforce/core';
 
-// Messages.importMessagesDirectory(__dirname);
-// const messages = Messages.loadMessages('scanner', 'add');
-
-// test cases:
-// read entries on initialization
-// don't run initialization if it was already run
+/**
+ * Unit tests to verify CustomRulePathManager
+ * TODO: Add tests to cover exception scenarios when CustomPath.json does not exist
+ */
 
 describe('CustomRulePathManager tests', () => {
 
@@ -68,25 +65,6 @@ describe('CustomRulePathManager tests', () => {
             expect(rulePathMap).to.be.lengthOf(0);
 
         });
-
-        // it('should handle non-existent CustomPath.json file gracefully', async () => {
-        //     // Setup stub
-        //     let stub = Sinon.createStubInstance(FileOperations);
-        //     const dummyError = new Error('Test error to indicate file does not exist');
-
-        //     // TODO: how do I set code as ENOENT?
-        //     stub.readRulePathFile.throws(dummyError);
-        //     const manager = new CustomRulePathManager(stub);
-
-        //     // Execute test and validate
-
-        //     await manager.getRulePathEntries(ENGINE.PMD);
-        //     expect(await manager.getRulePathEntries.bind(ENGINE.PMD)).throws(messages.getMessage('errors.readCustomRulePathFileFailed'));
-
-        //     // Validate
-
-
-        // });
 
         it('should initialize only once', async () => {
             // Setup stub
