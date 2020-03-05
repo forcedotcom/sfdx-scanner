@@ -125,7 +125,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     return parameters;
   }
 
-  private addPmdJarPaths(rulePathEntries: Map<string, Set<string>>) {
+  private addPmdJarPaths(rulePathEntries: Map<string, Set<string>>): void {
     // For each supported language, add path to PMD's inbuilt rules
     SUPPORTED_LANGUAGES.forEach((language) => {
       const pmdJarName = this.derivePmdJarName(language);

@@ -1,4 +1,5 @@
-import { CustomRulePathManager, ENGINE, FileOperations } from '../../src/lib/CustomRulePathManager';
+import { CustomRulePathManager, ENGINE } from '../../src/lib/CustomRulePathManager';
+import { FileIOHandler } from '../../src/lib/FileIOHandler';
 import { expect } from 'chai';
 
 import Sinon = require('sinon');
@@ -27,8 +28,8 @@ describe('CustomRulePathManager tests', () => {
     describe('Rule path entries creation', () => {
         it('should read CustomPaths.json to get Rule Path Entries', async () => {
             // Setup stub
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(populatedFile);
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(populatedFile);
             const manager = new CustomRulePathManager(stub);
 
             // Execute test
@@ -38,7 +39,7 @@ describe('CustomRulePathManager tests', () => {
             });
 
             // Validate run
-            expect(stub.readRulePathFile.calledOnce).to.be.true;
+            expect(stub.readFile.calledOnce).to.be.true;
             expect(rulePathMap).to.be.lengthOf(2);
 
             //Validate each entry
@@ -55,8 +56,8 @@ describe('CustomRulePathManager tests', () => {
 
         it('should handle empty Rule Path file gracefully', async () => {
             // Setup stub
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(emptyFile);
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(emptyFile);
             const manager = new CustomRulePathManager(stub);
 
             // Execute test
@@ -89,8 +90,8 @@ describe('CustomRulePathManager tests', () => {
 
         it('should initialize only once', async () => {
             // Setup stub
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(populatedFile);
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(populatedFile);
             const manager = new CustomRulePathManager(stub);
 
             // Execute test
@@ -99,32 +100,35 @@ describe('CustomRulePathManager tests', () => {
             await manager.getRulePathEntries(ENGINE.PMD);
 
             // Validate
-            expect(stub.readRulePathFile.calledOnce).to.be.true;
+            expect(stub.readFile.calledOnce).to.be.true;
         });
     });
 
     describe('Adding new Rule Path entries', () => {
         it('should read current entries before appending new entries', async () => {
             // Setup stub
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(populatedFile);
-            stub.writeRulePathFile.resolves(); // do nothing
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(populatedFile);
+            stub.writeFile.resolves(); // do nothing
+            stub.mkdirIfNotExists.resolves(); // do nothing
             const manager = new CustomRulePathManager(stub);
 
             // Execute test
             await manager.addPathsForLanguage('language', ['path1', 'path2']);
 
             // Validate
-            expect(stub.readRulePathFile.calledOnce).to.be.true;
-            expect(stub.writeRulePathFile.calledOnce);
+            expect(stub.readFile.calledOnce).to.be.true;
+            expect(stub.mkdirIfNotExists.calledOnce).to.be.true;
+            expect(stub.writeFile.calledOnce).to.be.true;
 
         });
 
         it('should reflect newly added entries', async () => {
             // Setup stub
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(emptyFile);
-            stub.writeRulePathFile.resolves(); // do nothing
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(emptyFile);
+            stub.writeFile.resolves(); // do nothing
+            stub.mkdirIfNotExists.resolves(); // do nothing
             const manager = new CustomRulePathManager(stub);
             const language = 'javascript';
             const path = ['path1', 'path2'];
@@ -145,9 +149,9 @@ describe('CustomRulePathManager tests', () => {
         it('should append path entries if language already exists', async () => {
             // Setup stub
             const fileContent = '{"pmd": {"apex": ["/some/user/path/customRule.jar"]}}';
-            let stub = Sinon.createStubInstance(FileOperations);
-            stub.readRulePathFile.resolves(fileContent);
-            stub.writeRulePathFile.resolves(); // do nothing
+            let stub = Sinon.createStubInstance(FileIOHandler);
+            stub.readFile.resolves(fileContent);
+            stub.writeFile.resolves(); // do nothing
             const manager = new CustomRulePathManager(stub);
             const language = 'apex';
             const newPath = '/my/new/path';

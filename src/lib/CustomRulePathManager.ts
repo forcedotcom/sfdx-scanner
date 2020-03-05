@@ -1,5 +1,5 @@
-import fs = require('fs');
 import path = require('path');
+import { FileIOHandler } from './FileIOHandler';
 import { SfdxError } from '@salesforce/core';
 
 export enum ENGINE {
@@ -18,11 +18,11 @@ const EMPTY_JSON_FILE = '{}';
 export class CustomRulePathManager {
   private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
-  private fileOperations: FileOperations
+  private fileOperations: FileIOHandler;
 
-  constructor(fileOperations?: FileOperations) {
+  constructor(fileOperator?: FileIOHandler) {
     this.pathsByLanguageByEngine = new Map();
-    this.fileOperations = fileOperations || new FileOperations();
+    this.fileOperations = fileOperator || new FileIOHandler();
     this.initialized = false;
   }
 
@@ -34,7 +34,7 @@ export class CustomRulePathManager {
     // Read from the JSON and use it to populate the map.
     let data = null;
     try {
-      data = await this.fileOperations.readRulePathFile();
+      data = await this.fileOperations.readFile(CUSTOM_CLASSPATH_REGISTER);
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
@@ -87,7 +87,9 @@ export class CustomRulePathManager {
   private async saveCustomClasspaths(): Promise<void> {
     await this.initialize();
     try {
-      await this.fileOperations.writeRulePathFile(this.convertMapToJson());
+      const fileContent = JSON.stringify(this.convertMapToJson(), null, 4)
+      await this.fileOperations.mkdirIfNotExists(CATALOG_PATH);
+      await this.fileOperations.writeFile(CUSTOM_CLASSPATH_REGISTER, fileContent);
       
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
@@ -129,16 +131,3 @@ export class CustomRulePathManager {
   }
 }
 
-// Exported only for test visibility
-  // eslint-disable-next-line @typescript-eslint/no-use-before-define
-export class FileOperations {
-
-  public async readRulePathFile(): Promise<string> {
-    return await fs.promises.readFile(CUSTOM_CLASSPATH_REGISTER, 'utf-8');
-  }
-
-  async writeRulePathFile(rulePathMap: object): Promise<void> {
-    await fs.promises.mkdir(CATALOG_PATH, {recursive: true});
-    await fs.promises.writeFile(CUSTOM_CLASSPATH_REGISTER, JSON.stringify(rulePathMap, null, 4));
-  }
-}
