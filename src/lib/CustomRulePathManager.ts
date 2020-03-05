@@ -130,6 +130,7 @@ export class CustomRulePathManager {
 }
 
 // Exported only for test visibility
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
 export class FileOperations {
 
   public async readRulePathFile(): Promise<string> {
