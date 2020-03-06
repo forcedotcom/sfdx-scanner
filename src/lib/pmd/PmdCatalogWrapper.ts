@@ -1,12 +1,13 @@
 import {AnyJson} from '@salesforce/ts-types';
-import fs = require('fs');
 import path = require('path');
 import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
+import {FileHandler} from '../FileHandler';
+import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
-
+const PMD_CATALOG_PATH = path.join(SFDX_SCANNER_PATH, PMD_CATALOG);
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
@@ -26,7 +27,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {
       await this.rebuildCatalogIfNecessary();
-      this.catalogJson = PmdCatalogWrapper.readCatalogFromFile();
+      this.catalogJson = await PmdCatalogWrapper.readCatalogFromFile();
     }
     return Promise.resolve(this.catalogJson);
   }
@@ -39,7 +40,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {
       await this.rebuildCatalogIfNecessary();
-      this.catalogJson = PmdCatalogWrapper.readCatalogFromFile();
+      this.catalogJson = await PmdCatalogWrapper.readCatalogFromFile();
     }
     // Now that we've got a catalog, we'll want to iterate over all the filters we were given, and see which ones
     // correspond to a path in the catalog.
@@ -80,9 +81,9 @@ export class PmdCatalogWrapper extends PmdSupport {
     return true;
   }
 
-  private static readCatalogFromFile(): PmdCatalog {
-    const rawCatalog = fs.readFileSync('./catalogs/PmdCatalog.json');
-    return JSON.parse(rawCatalog.toString());
+  private static async readCatalogFromFile(): Promise<PmdCatalog> {
+    const rawCatalog = await new FileHandler().readFile(PMD_CATALOG_PATH);
+    return JSON.parse(rawCatalog);
   }
 
   protected async buildCommandArray(): Promise<[string, string[]]> {

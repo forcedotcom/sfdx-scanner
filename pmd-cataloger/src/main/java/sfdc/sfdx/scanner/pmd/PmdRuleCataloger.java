@@ -1,6 +1,8 @@
 package sfdc.sfdx.scanner.pmd;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import org.w3c.dom.*;
@@ -159,10 +161,11 @@ class PmdRuleCataloger {
   }
 
   private void writeJsonToFile(PmdCatalogJson json) {
-    File catalogDirectory = new File("./catalogs");
-    catalogDirectory.mkdir();
+    Path catDirPath = Paths.get(System.getProperty("user.home"), ".sfdx-scanner");
+    File catDir = catDirPath.toFile();
+    catDir.mkdir();
     try (
-      FileWriter file = new FileWriter("./catalogs/PmdCatalog.json")
+      FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), "PmdCatalog.json").toString());
     ) {
       file.write(json.constructJson().toString());
     } catch (IOException ioe) {
