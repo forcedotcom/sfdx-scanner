@@ -1,4 +1,5 @@
 import path = require('path');
+import os = require('os');
 import { FileHandler } from './FileHandler';
 import { SfdxError } from '@salesforce/core';
 
@@ -9,7 +10,7 @@ export enum ENGINE {
 type RulePathEntry = Map<string, Set<string>>;
 type RulePathMap = Map<ENGINE, RulePathEntry>;
 
-const CATALOG_PATH = path.join('.', 'catalogs');
+const CATALOG_PATH = path.join(os.homedir(), '.sfdx-scanner');
 export const CUSTOM_CLASSPATH_REGISTER = path.join(CATALOG_PATH, 'CustomPaths.json');
 export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(CATALOG_PATH, 'TmpCustomPaths.json');
 
