@@ -5,27 +5,27 @@ import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 
-const FAKE_PMD_CATALOG_PATH = path.join('test', 'fake-catalogs', 'FakeDefaultPmdCatalog.json');
-const FAKE_PMD_RULE_COUNT = 70;
+const PMD_CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultPmdCatalogFixture.json');
+const PMD_FIXTURE_RULE_COUNT = 70;
 let ruleManager = null;
 
 describe('RuleManager', () => {
   before(() => {
     // Make sure all catalogs exist where they're supposed to.
-    if (!fs.existsSync(FAKE_PMD_CATALOG_PATH)) {
+    if (!fs.existsSync(PMD_CATALOG_FIXTURE_PATH)) {
       throw new Error('Fake catalog does not exist');
     }
 
     // Make sure all catalogs have the expected number of rules.
-    const catalogJson = JSON.parse(fs.readFileSync(FAKE_PMD_CATALOG_PATH).toString());
-    if (catalogJson.rules.length !== FAKE_PMD_RULE_COUNT) {
-      throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + FAKE_PMD_RULE_COUNT);
+    const catalogJson = JSON.parse(fs.readFileSync(PMD_CATALOG_FIXTURE_PATH).toString());
+    if (catalogJson.rules.length !== PMD_FIXTURE_RULE_COUNT) {
+      throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + PMD_FIXTURE_RULE_COUNT);
     }
 
     // Stub out the PmdCatalogWrapper's getCatalog method so it always returns the fake catalog, whose contents are known,
     // and never overwrites the real catalog.
     Sinon.stub(PmdCatalogWrapper.prototype, 'getCatalog').callsFake(async () => {
-      return JSON.parse(fs.readFileSync(FAKE_PMD_CATALOG_PATH).toString());
+      return JSON.parse(fs.readFileSync(PMD_CATALOG_FIXTURE_PATH).toString());
     });
 
     // Declare our rule manager.
@@ -39,7 +39,7 @@ describe('RuleManager', () => {
         const allRules = await ruleManager.getRulesMatchingCriteria([]);
 
         // Expect all rules to have been returned.
-        expect(allRules).to.have.lengthOf(FAKE_PMD_RULE_COUNT, 'All rules should have been returned');
+        expect(allRules).to.have.lengthOf(PMD_FIXTURE_RULE_COUNT, 'All rules should have been returned');
       });
     });
 
