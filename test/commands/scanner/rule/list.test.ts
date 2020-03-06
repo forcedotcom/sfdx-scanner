@@ -1,12 +1,12 @@
 import { expect } from '@salesforce/command/lib/test';
 import test from '../../scannerbasetest';
 import {Rule} from '../../../../src/types';
+import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
 import fs = require('fs');
-import os = require('os');
 import path = require('path');
 
 function getCatalogJson() : {rules: Rule[]} {
-  const catalogPath = path.join(os.homedir(), '.sfdx-scanner', 'PmdCatalog.json');
+  const catalogPath = path.join(SFDX_SCANNER_PATH, 'PmdCatalog.json');
   expect(fs.existsSync(catalogPath)).to.equal(true, 'Catalog file should exist');
   return JSON.parse(fs.readFileSync(catalogPath).toString());
 }
