@@ -4,7 +4,7 @@ import fs = require('fs');
  * Handles all File and IO operations. 
  * Mock this class to override file change behavior from unit tests.
  */
-export class FileIOHandler {
+export class FileHandler {
 
     async readFile(filename: string): Promise<string> {
         return await fs.promises.readFile(filename, 'utf-8');

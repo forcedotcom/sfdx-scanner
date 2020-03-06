@@ -1,5 +1,5 @@
 import path = require('path');
-import { FileIOHandler } from './FileIOHandler';
+import { FileHandler } from './FileHandler';
 import { SfdxError } from '@salesforce/core';
 
 export enum ENGINE {
@@ -18,11 +18,11 @@ const EMPTY_JSON_FILE = '{}';
 export class CustomRulePathManager {
   private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
-  private fileHandler: FileIOHandler;
+  private fileHandler: FileHandler;
 
-  constructor(fileHandlerOverride?: FileIOHandler) {
+  constructor() {
     this.pathsByLanguageByEngine = new Map();
-    this.fileHandler = fileHandlerOverride || new FileIOHandler();
+    this.fileHandler = new FileHandler();
     this.initialized = false;
   }
 
