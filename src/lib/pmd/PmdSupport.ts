@@ -23,8 +23,7 @@ export abstract class PmdSupport {
     
     // Include custom rule paths into classpath
     const rulePathEntries = await this.getRulePathEntries();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    rulePathEntries.forEach((pathEntries, language) => {
+    rulePathEntries.forEach((pathEntries) => {
       classpathEntries.push(...pathEntries);
     });
 
