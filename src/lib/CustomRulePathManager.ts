@@ -1,7 +1,7 @@
 import path = require('path');
 import { FileHandler } from './FileHandler';
 import { SfdxError } from '@salesforce/core';
-import {SFDX_SCANNER_PATH} from '../Constants';
+import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 
 export enum ENGINE {
   PMD = 'pmd'
@@ -10,8 +10,8 @@ export enum ENGINE {
 type RulePathEntry = Map<string, Set<string>>;
 type RulePathMap = Map<ENGINE, RulePathEntry>;
 
-export const CUSTOM_CLASSPATH_REGISTER = path.join(SFDX_SCANNER_PATH, 'CustomPaths.json');
-export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, 'TmpCustomPaths.json');
+export const CUSTOM_CLASSPATH_REGISTER = path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS);
+export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, `Tmp${CUSTOM_PATHS}`);
 
 const EMPTY_JSON_FILE = '{}';
 

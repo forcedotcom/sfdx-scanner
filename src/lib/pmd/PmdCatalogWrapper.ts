@@ -7,7 +7,6 @@ import {FileHandler} from '../FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
-const PMD_CATALOG_PATH = path.join(SFDX_SCANNER_PATH, PMD_CATALOG);
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
@@ -81,8 +80,18 @@ export class PmdCatalogWrapper extends PmdSupport {
     return true;
   }
 
+  private static getCatalogName(): string {
+    // We must allow for env variables to override the default catalog name. This must be recomputed in case those variables
+    // have different values in different test runs.
+    return process.env.PMD_CATALOG_NAME || PMD_CATALOG;
+  }
+
+  private static getCatalogPath(): string {
+    return path.join(SFDX_SCANNER_PATH, this.getCatalogName());
+  }
+
   private static async readCatalogFromFile(): Promise<PmdCatalog> {
-    const rawCatalog = await new FileHandler().readFile(PMD_CATALOG_PATH);
+    const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
     return JSON.parse(rawCatalog);
   }
 
@@ -91,7 +100,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
     const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
-    const args = ['-cp', classpathEntries.join(':'), MAIN_CLASS, ...parameters];
+    const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(':'), MAIN_CLASS, ...parameters];
 
     // TODO: move as log line to Trace
     // console.log(`About to invoke Cataloger with args: ${args}`);

@@ -165,7 +165,7 @@ class PmdRuleCataloger {
     File catDir = catDirPath.toFile();
     catDir.mkdir();
     try (
-      FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), "PmdCatalog.json").toString());
+      FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), System.getProperty("catalogName")).toString());
     ) {
       file.write(json.constructJson().toString());
     } catch (IOException ioe) {
