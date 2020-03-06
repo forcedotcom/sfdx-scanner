@@ -4,10 +4,10 @@ import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 import {FileHandler} from '../FileHandler';
-import {SFDX_SCANNER_PATH} from '../../Constants';
+import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
-const PMD_CATALOG_PATH = path.join(SFDX_SCANNER_PATH, 'PmdCatalog.json');
+const PMD_CATALOG_PATH = path.join(SFDX_SCANNER_PATH, PMD_CATALOG);
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
