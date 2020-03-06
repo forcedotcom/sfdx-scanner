@@ -52,6 +52,9 @@ export default class Add extends SfdxCommand {
     const manager = new CustomRulePathManager();
     await manager.addPathsForLanguage(language, path);
 
+    this.ux.log(`Successfully added rules for ${language}.`);
+    this.ux.log(`${path.length} Path(s) added: ${path}`);
+
     return { success: true, language: language, path: path };
   }
 
