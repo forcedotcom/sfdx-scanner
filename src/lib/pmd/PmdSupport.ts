@@ -23,7 +23,7 @@ export abstract class PmdSupport {
     
     // Include custom rule paths into classpath
     const rulePathEntries = await this.getRulePathEntries();
-    rulePathEntries.forEach((pathEntries, language) => {
+    rulePathEntries.forEach((pathEntries) => {
       classpathEntries.push(...pathEntries);
     });
 
