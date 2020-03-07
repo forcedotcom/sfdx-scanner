@@ -1,16 +1,14 @@
 {
   "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
+  ],
   "parserOptions": {
-    "project": "./tsconfig.json",
+    "sourceType": "module",
     "ecmaVersion": 2018
   },
   "plugins": ["@typescript-eslint"],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking"
-  ],
-  "rules": {
-  }
+  "ignorePatterns": ["lib/**", "node_modules/**"]
 }
