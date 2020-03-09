@@ -169,7 +169,7 @@ describe('scanner:run', () => {
     });
 
     describe('Output Type: CSV', () => {
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run',
@@ -198,7 +198,7 @@ describe('scanner:run', () => {
           expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run',
@@ -236,7 +236,7 @@ describe('scanner:run', () => {
           expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run',
@@ -251,7 +251,7 @@ describe('scanner:run', () => {
 
     describe('Output Type: Table', () => {
       // The table can't be written to a file, so we're just testing the console.
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run',
@@ -274,7 +274,7 @@ describe('scanner:run', () => {
           expect(rows[3]).to.contain("78", 'Violation #4 should occur at expected line');
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run',
@@ -288,7 +288,7 @@ describe('scanner:run', () => {
     });
 
     describe('Error handling', () => {
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run', '--source', 'path/that/does/not/matter', '--format', 'xml'])
@@ -296,7 +296,7 @@ describe('scanner:run', () => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustSpecifyRule}`);
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
@@ -304,7 +304,7 @@ describe('scanner:run', () => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustTargetSomething}`);
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit'])
@@ -312,7 +312,7 @@ describe('scanner:run', () => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustSpecifyOutput}`);
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
@@ -320,7 +320,7 @@ describe('scanner:run', () => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.outfileMustBeValid}`);
         });
 
-      test
+      runTest
         .stdout()
         .stderr()
         .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
