@@ -1,7 +1,7 @@
 import path = require('path');
 import { FileHandler } from './FileHandler';
 import { SfdxError } from '@salesforce/core';
-import {SFDX_SCANNER_PATH} from '../Constants';
+import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 
 export enum ENGINE {
   PMD = 'pmd'
@@ -10,8 +10,8 @@ export enum ENGINE {
 type RulePathEntry = Map<string, Set<string>>;
 type RulePathMap = Map<ENGINE, RulePathEntry>;
 
-export const CUSTOM_CLASSPATH_REGISTER = path.join(SFDX_SCANNER_PATH, 'CustomPaths.json');
-export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, 'TmpCustomPaths.json');
+export const CUSTOM_CLASSPATH_REGISTER = path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS);
+export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, `Tmp${CUSTOM_PATHS}`);
 
 const EMPTY_JSON_FILE = '{}';
 
@@ -34,7 +34,7 @@ export class CustomRulePathManager {
     // Read from the JSON and use it to populate the map.
     let data = null;
     try {
-      data = await this.fileHandler.readFile(CUSTOM_CLASSPATH_REGISTER);
+      data = await this.fileHandler.readFile(CustomRulePathManager.getFilePath());
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
@@ -89,7 +89,7 @@ export class CustomRulePathManager {
     try {
       const fileContent = JSON.stringify(this.convertMapToJson(), null, 4)
       await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
-      await this.fileHandler.writeFile(CUSTOM_CLASSPATH_REGISTER, fileContent);
+      await this.fileHandler.writeFile(CustomRulePathManager.getFilePath(), fileContent);
       
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
@@ -128,6 +128,16 @@ export class CustomRulePathManager {
       json[engine.toString()] = innerObj;
     });
     return json;
+  }
+
+  private static getFileName(): string {
+    // We must allow for env variables to override the default catalog name. This must be recomputed in case those variables
+    // have different values in different test runs.
+    return process.env.CUSTOM_PATH_FILE || CUSTOM_PATHS;
+  }
+
+  private static getFilePath(): string {
+    return path.join(SFDX_SCANNER_PATH, this.getFileName());
   }
 }
 
