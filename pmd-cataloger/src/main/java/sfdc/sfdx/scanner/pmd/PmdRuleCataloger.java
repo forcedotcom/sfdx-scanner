@@ -103,6 +103,10 @@ class PmdRuleCataloger {
     // STEP 1: Turn the category file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();
+    // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just skip it.
+    if (!root.getTagName().equalsIgnoreCase("ruleset")) {
+      return;
+    }
 
     // STEP 2: Use the root element to derive a Category representation, and put it in the master list.
     String categoryName = root.getAttribute("name");
@@ -130,6 +134,10 @@ class PmdRuleCataloger {
     // STEP 1: Turn the ruleset file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();
+    // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just skip it.
+    if (!root.getTagName().equalsIgnoreCase("ruleset")) {
+      return;
+    }
 
     // STEP 2: Use the root element to derive a Ruleset representation, which we should map to the target language and
     // also put in the master list.
