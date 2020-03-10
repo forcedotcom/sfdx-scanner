@@ -1,20 +1,29 @@
 import fs = require('fs');
+import {Stats} from 'fs';
 
 /**
- * Handles all File and IO operations. 
+ * Handles all File and IO operations.
  * Mock this class to override file change behavior from unit tests.
  */
 export class FileHandler {
 
-    async readFile(filename: string): Promise<string> {
-        return await fs.promises.readFile(filename, 'utf-8');
+    stats(filename: string): Promise<Stats> {
+        return fs.promises.stat(filename);
     }
 
-    async mkdirIfNotExists(dir: string): Promise<void> {
-        await fs.promises.mkdir(dir, { recursive: true });
+    readDir(filename: string): Promise<string[]> {
+      return fs.promises.readdir(filename);
     }
 
-    async writeFile(filename: string, fileContent: string): Promise<void> {
-        await fs.promises.writeFile(filename, fileContent);
+    readFile(filename: string): Promise<string> {
+        return fs.promises.readFile(filename, 'utf-8');
+    }
+
+    mkdirIfNotExists(dir: string): Promise<void> {
+        return fs.promises.mkdir(dir, { recursive: true });
+    }
+
+    writeFile(filename: string, fileContent: string): Promise<void> {
+        return fs.promises.writeFile(filename, fileContent);
     }
 }

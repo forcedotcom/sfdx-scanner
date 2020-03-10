@@ -1,6 +1,6 @@
 import path = require('path');
 import { FileHandler } from './FileHandler';
-import { SfdxError } from '@salesforce/core';
+import {SfdxError} from '@salesforce/core';
 import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 
 export enum ENGINE {
@@ -56,22 +56,25 @@ export class CustomRulePathManager {
     this.initialized = true;
   }
 
-  public async addPathsForLanguage(language: string, paths: string[]): Promise<void> {
+  public async addPathsForLanguage(language: string, paths: string[]): Promise<string[]> {
     await this.initialize();
+
+    const classpathEntries = await this.expandClasspaths(paths);
     // Identify the engine for each path and put them in the appropriate map and inner map.
-    paths.forEach((path) => {
-      const e = this.determineEngineForPath(path);
+    classpathEntries.forEach((entry) => {
+      const e = this.determineEngineForPath(entry);
       if (!this.pathsByLanguageByEngine.has(e)) {
         this.pathsByLanguageByEngine.set(e, new Map());
       }
       if (!this.pathsByLanguageByEngine.get(e).has(language)) {
-        this.pathsByLanguageByEngine.get(e).set(language, new Set([path]));
+        this.pathsByLanguageByEngine.get(e).set(language, new Set([entry]));
       } else {
-        this.pathsByLanguageByEngine.get(e).get(language).add(path);
+        this.pathsByLanguageByEngine.get(e).get(language).add(entry);
       }
     });
     // Now, write the changes to the file.
-    return await this.saveCustomClasspaths();
+    await this.saveCustomClasspaths();
+    return classpathEntries;
   }
 
   public async getRulePathEntries(engine: ENGINE): Promise<Map<string, Set<string>>> {
@@ -80,17 +83,17 @@ export class CustomRulePathManager {
     if (!this.pathsByLanguageByEngine.has(engine)) {
       return new Map();
     }
-    
+
     return this.pathsByLanguageByEngine.get(engine);
   }
 
   private async saveCustomClasspaths(): Promise<void> {
     await this.initialize();
     try {
-      const fileContent = JSON.stringify(this.convertMapToJson(), null, 4)
+      const fileContent = JSON.stringify(this.convertMapToJson(), null, 4);
       await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
       await this.fileHandler.writeFile(CustomRulePathManager.getFilePath(), fileContent);
-      
+
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
       // so it's at least obvious what failed, if not how or why.
@@ -138,6 +141,31 @@ export class CustomRulePathManager {
 
   private static getFilePath(): string {
     return path.join(SFDX_SCANNER_PATH, this.getFileName());
+  }
+
+  private async expandClasspaths(paths: string[]): Promise<string[]> {
+    const classpathEntries: string[] = [];
+    for (const p of paths) {
+      const stats = await this.fileHandler.stats(p);
+      if (stats.isFile()) {
+        if (p.endsWith(".jar")) {
+          // Simple filename check for .jar is enough.
+          classpathEntries.push(p);
+        }
+      } else if (stats.isDirectory()) {
+        // Always add directories, which may contain classes
+        classpathEntries.push(p);
+
+        // Look inside directories for jar files, but not recursively.
+        const files = await this.fileHandler.readDir(p);
+        for (const file of files) {
+          if (file.endsWith(".jar")) {
+            classpathEntries.push(path.resolve(p, file));
+          }
+        }
+      }
+    }
+    return classpathEntries;
   }
 }
 
