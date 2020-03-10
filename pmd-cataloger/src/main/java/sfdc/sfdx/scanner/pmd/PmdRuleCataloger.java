@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.w3c.dom.*;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
@@ -178,7 +180,8 @@ class PmdRuleCataloger {
     try (
       FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), System.getProperty("catalogName")).toString());
     ) {
-      file.write(json.constructJson().toString());
+      Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
+      file.write(prettyGson.toJson(json.constructJson()));
     } catch (IOException ioe) {
       System.err.println("Failed to write JSON to file: " + ioe.getMessage());
       System.exit(ExitCode.JSON_WRITE_EXCEPTION.getCode());
