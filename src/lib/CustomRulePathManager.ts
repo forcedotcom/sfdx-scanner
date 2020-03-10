@@ -146,7 +146,12 @@ export class CustomRulePathManager {
   private async expandClasspaths(paths: string[]): Promise<string[]> {
     const classpathEntries: string[] = [];
     for (const p of paths) {
-      const stats = await this.fileHandler.stats(p);
+      let stats;
+      try {
+        stats = await this.fileHandler.stats(p);
+      } catch (e) {
+        throw SfdxError.create('scanner', 'add', 'errors.invalidFilePath', [p]);
+      }
       if (stats.isFile()) {
         if (p.endsWith(".jar")) {
           // Simple filename check for .jar is enough.

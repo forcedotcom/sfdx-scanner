@@ -1,5 +1,6 @@
 import { expect, test } from '@salesforce/command/lib/test';
 import { Messages } from '@salesforce/core';
+import * as os from 'os';
 import { SFDX_SCANNER_PATH } from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
@@ -24,14 +25,29 @@ describe('scanner:rule:add', () => {
       }
 
       const myLanguage = 'apex';
-      const myPath = ['/some/local/path', 'some/other/path'];
 
+      // Use two dirs, with one jar file in each.
+      const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
+      let tmpFile1 = path.join(tmpDir1, 'bar.jar');
+      fs.writeFileSync(tmpFile1, "There is no spoon");
+
+      const tmpDir2 = fs.mkdtempSync(path.join(os.tmpdir(), 'bar-'));
+      let tmpFile2 = path.join(tmpDir2, 'foo.jar');
+      fs.writeFileSync(tmpFile2, "Spoon is no there");
+
+      // Now pass the first dir and the second file.
+      const myPath = [tmpDir1, tmpFile2];
+
+      // Result should be three entries: dir 1, file 1, and file 2
+      const expectedPath = [tmpDir1, tmpFile1, tmpFile2];
       test
         .env({PMD_CATALOG_NAME: CATALOG_OVERRIDE, CUSTOM_PATH_FILE: CUSTOM_PATH_OVERRIDE})
         .stdout()
         .stderr()
         .command(['scanner:rule:add', '--language', myLanguage, '--path', myPath.join(','), '--json'])
         .it('should run successfully and add entries to custom classpath json', ctx => {
+          expect(ctx.stderr).to.be.empty;
+
           const outputJson = JSON.parse(ctx.stdout);
           const result = outputJson.result;
           expect(result).to.have.property('success')
@@ -41,8 +57,8 @@ describe('scanner:rule:add', () => {
             .and.equals(myLanguage);
 
           expect(result).to.have.property('path')
-            .and.have.lengthOf(myPath.length)
-            .and.deep.equals(myPath);
+            .and.have.lengthOf(expectedPath.length)
+            .and.deep.equals(expectedPath);
         });
     });
   });

@@ -52,7 +52,7 @@ export default class Add extends SfdxCommand {
     const classpathEntries = await manager.addPathsForLanguage(language, path);
     this.ux.log(`Successfully added rules for ${language}.`);
     this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries}`);
-    return { success: true, language, path };
+    return { success: true, language, path: classpathEntries };
   }
 
   private validateFlags(): void {
