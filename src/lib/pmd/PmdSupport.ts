@@ -37,27 +37,7 @@ export abstract class PmdSupport {
    * @param res
    * @param rej
    */
-  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
-    let stdout = '';
-    let stderr = '';
-
-    // When data is passed back up to us, pop it onto the appropriate string.
-    cp.stdout.on('data', data => {
-      stdout += data;
-    });
-    cp.stderr.on('data', data => {
-      stderr += data;
-    });
-
-    // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
-    cp.on('exit', code => {
-      if (code === 0) {
-        res([!!code, stdout]);
-      } else {
-        rej(stderr);
-      }
-    });
-  }
+  protected abstract monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void;
 
   protected abstract buildCommandArray(): Promise<[string, string[]]>;
 

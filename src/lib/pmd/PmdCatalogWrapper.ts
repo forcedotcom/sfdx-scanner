@@ -5,6 +5,8 @@ import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 import {FileHandler} from '../FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
+import {ChildProcessWithoutNullStreams} from "child_process";
+import { uxEvents } from '../ScannerEvents';
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
@@ -14,6 +16,13 @@ export type PmdCatalog = {
   rules: Rule[];
   categories: AnyJson[];
   rulesets: AnyJson[];
+};
+
+type PmdCatalogEvent = {
+  type: string,
+  handler: string,
+  verbose: boolean,
+  msg: string
 };
 
 export class PmdCatalogWrapper extends PmdSupport {
@@ -155,5 +164,52 @@ export class PmdCatalogWrapper extends PmdSupport {
    */
   private derivePmdJarName(language: string): string {
     return path.join(PMD_LIB, "pmd-" + language + "-" + PMD_VERSION + ".jar");
+  }
+
+  /**
+   * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject function.
+   * Resolves/rejects the Promise once the child process finishes.
+   * @param cp
+   * @param res
+   * @param rej
+   */
+  protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
+    let stdout = '';
+    let stderr = '';
+
+    // When data is passed back up to us, pop it onto the appropriate string.
+    cp.stdout.on('data', data => {
+      stdout += data;
+    });
+    cp.stderr.on('data', data => {
+      stderr += data;
+    });
+
+    // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
+    cp.on('exit', code => {
+      if (code === 0) {
+        this.findAndEmitEvents(stdout);
+        res([!!code, stdout]);
+      } else {
+        rej(stderr);
+      }
+    });
+  }
+
+  private findAndEmitEvents(stdout: string): void {
+    // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the output as a JSON
+    // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
+    const regex = /SFDX-START(.*)SFDX-END/g;
+    const matches = stdout.match(regex);
+    if (matches && matches.length > 0) {
+      // Process any matches by parsing the JSON and throwing an appropriate event.
+      matches.forEach((match) => {
+        const matchObj: PmdCatalogEvent = JSON.parse(match.substring(10, match.length - 8));
+        if (matchObj.handler === 'UX') {
+          const eventType = `${matchObj.type.toLowerCase()}-${matchObj.verbose ? 'verbose' : 'always'}`;
+          uxEvents.emit(eventType, matchObj.msg);
+        }
+      });
+    }
   }
 }
