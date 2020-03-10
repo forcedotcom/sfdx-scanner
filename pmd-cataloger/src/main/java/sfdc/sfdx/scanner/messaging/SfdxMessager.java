@@ -30,7 +30,7 @@ public class SfdxMessager {
   }
 
   public void uxWarn(String msg, boolean verbose) {
-    System.out.println(formatMessage(msg, MessageType.WARNING, MessageHandler.UX, verbose));
+    System.err.println(formatMessage(msg, MessageType.WARNING, MessageHandler.UX, verbose));
   }
 
   private String formatMessage(String msg, MessageType type, MessageHandler handler, boolean verbose) {

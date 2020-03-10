@@ -187,8 +187,9 @@ export class PmdCatalogWrapper extends PmdSupport {
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
+      this.findAndEmitEvents(stdout);
+      this.findAndEmitEvents(stderr);
       if (code === 0) {
-        this.findAndEmitEvents(stdout);
         res([!!code, stdout]);
       } else {
         rej(stderr);
@@ -196,15 +197,17 @@ export class PmdCatalogWrapper extends PmdSupport {
     });
   }
 
-  private findAndEmitEvents(stdout: string): void {
+  private findAndEmitEvents(output: string): void {
     // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the output as a JSON
     // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
     const regex = /SFDX-START(.*)SFDX-END/g;
-    const matches = stdout.match(regex);
+    const matches = output.match(regex);
+    const headerLength = 'SFDX-START'.length;
+    const tailLength = 'SFDX-END'.length;
     if (matches && matches.length > 0) {
       // Process any matches by parsing the JSON and throwing an appropriate event.
       matches.forEach((match) => {
-        const matchObj: PmdCatalogEvent = JSON.parse(match.substring(10, match.length - 8));
+        const matchObj: PmdCatalogEvent = JSON.parse(match.substring(headerLength, match.length - tailLength));
         if (matchObj.handler === 'UX') {
           const eventType = `${matchObj.type.toLowerCase()}-${matchObj.verbose ? 'verbose' : 'always'}`;
           uxEvents.emit(eventType, matchObj.msg);
