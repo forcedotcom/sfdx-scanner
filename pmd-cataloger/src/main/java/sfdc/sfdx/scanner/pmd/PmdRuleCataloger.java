@@ -8,6 +8,7 @@ import java.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.w3c.dom.*;
+import sfdc.sfdx.scanner.messaging.SfdxMessager;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
@@ -103,8 +104,9 @@ class PmdRuleCataloger {
     // STEP 1: Turn the category file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();
-    // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just skip it.
+    // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset")) {
+      SfdxMessager.getInstance().info("Skipping File " + path + ", which is not a valid Category definition file.", true);
       return;
     }
 
@@ -134,8 +136,9 @@ class PmdRuleCataloger {
     // STEP 1: Turn the ruleset file's XML into a Document object with a Root Element that we can actually use.
     Document doc = XmlReader.getInstance().getDocumentFromPath(path);
     Element root = doc.getDocumentElement();
-    // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just skip it.
+    // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset")) {
+      SfdxMessager.getInstance().info("Skipping File " + path + ", which is not a valid Ruleset definition file.", true);
       return;
     }
 
