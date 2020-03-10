@@ -35,11 +35,13 @@ export default class Describe extends ScannerCommand {
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
       required: true
-    })
+    }),
+    verbose: flags.builtin()
   };
 
   public async run(): Promise<AnyJson> {
     const ruleFilters = this.buildRuleFilters();
+    this.buildEventListeners();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
     const rules = await new RuleManager().getRulesMatchingCriteria(ruleFilters);

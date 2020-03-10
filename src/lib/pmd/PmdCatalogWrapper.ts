@@ -19,10 +19,10 @@ export type PmdCatalog = {
 };
 
 type PmdCatalogEvent = {
-  type: string,
-  handler: string,
-  verbose: boolean,
-  msg: string
+  type: string;
+  handler: string;
+  verbose: boolean;
+  msg: string;
 };
 
 export class PmdCatalogWrapper extends PmdSupport {

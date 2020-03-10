@@ -31,6 +31,7 @@ export default class List extends ScannerCommand {
   // This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
   // is what's printed when the -h/--help flag is supplied.
   protected static flagsConfig = {
+    verbose: flags.builtin(),
     category: flags.array({
       char: 'c',
       description: messages.getMessage('flags.categoryDescription')
@@ -64,6 +65,7 @@ export default class List extends ScannerCommand {
   };
 
   public async run(): Promise<Rule[]> {
+    this.buildEventListeners();
     const ruleFilters = this.buildRuleFilters();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.

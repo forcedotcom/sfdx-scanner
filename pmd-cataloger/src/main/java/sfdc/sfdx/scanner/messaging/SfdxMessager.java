@@ -3,7 +3,7 @@ package sfdc.sfdx.scanner.messaging;
 import com.google.gson.Gson;
 
 enum MessageType {
-  INFO
+  WARNING
 }
 
 enum MessageHandler {
@@ -25,12 +25,12 @@ public class SfdxMessager {
     return INSTANCE;
   }
 
-  public void uxInfo(String msg) {
-    uxInfo(msg, false);
+  public void uxWarn(String msg) {
+    uxWarn(msg, false);
   }
 
-  public void uxInfo(String msg, boolean verbose) {
-    System.out.println(formatMessage(msg, MessageType.INFO, MessageHandler.UX, verbose));
+  public void uxWarn(String msg, boolean verbose) {
+    System.out.println(formatMessage(msg, MessageType.WARNING, MessageHandler.UX, verbose));
   }
 
   private String formatMessage(String msg, MessageType type, MessageHandler handler, boolean verbose) {

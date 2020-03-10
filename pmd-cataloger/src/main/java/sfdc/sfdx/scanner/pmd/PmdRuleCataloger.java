@@ -106,7 +106,7 @@ class PmdRuleCataloger {
     Element root = doc.getDocumentElement();
     // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset")) {
-      SfdxMessager.getInstance().uxInfo("Skipping File " + path + ", which is not a valid Category definition file.", true);
+      SfdxMessager.getInstance().uxWarn("Skipping File " + path + ", which is not a valid Category definition file.", true);
       return;
     }
 
@@ -138,7 +138,7 @@ class PmdRuleCataloger {
     Element root = doc.getDocumentElement();
     // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset")) {
-      SfdxMessager.getInstance().uxInfo("Skipping File " + path + ", which is not a valid Ruleset definition file.", true);
+      SfdxMessager.getInstance().uxWarn("Skipping File " + path + ", which is not a valid Ruleset definition file.", true);
       return;
     }
 
