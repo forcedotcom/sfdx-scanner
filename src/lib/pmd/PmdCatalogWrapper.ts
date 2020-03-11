@@ -7,6 +7,10 @@ import {FileHandler} from '../FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 import {ChildProcessWithoutNullStreams} from "child_process";
 import { uxEvents } from '../ScannerEvents';
+import {Messages} from "@salesforce/core";
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('scanner', 'EventKeyTemplates');
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
@@ -19,10 +23,11 @@ export type PmdCatalog = {
 };
 
 type PmdCatalogEvent = {
+  key: string;
+  args: string[];
   type: string;
   handler: string;
   verbose: boolean;
-  msg: string;
   time: number;
 };
 
@@ -228,7 +233,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     orderedEvents.forEach((event) => {
       if (event.handler === 'UX') {
         const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
-        uxEvents.emit(eventType, event.msg);
+        uxEvents.emit(eventType, messages.getMessage(event.key, event.args));
       }
     });
   }

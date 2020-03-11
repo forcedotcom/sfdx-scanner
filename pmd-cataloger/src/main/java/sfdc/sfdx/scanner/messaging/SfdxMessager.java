@@ -2,6 +2,9 @@ package sfdc.sfdx.scanner.messaging;
 
 import com.google.gson.Gson;
 import java.time.Instant;
+import java.util.List;
+
+import sfdc.sfdx.scanner.EventKey;
 
 enum MessageType {
   WARNING
@@ -26,33 +29,35 @@ public class SfdxMessager {
     return INSTANCE;
   }
 
-  public void uxWarn(String msg) {
-    uxWarn(msg, false);
+  public void uxWarn(EventKey key, List<String> args) {
+    uxWarn(key, args, false);
   }
 
-  public void uxWarn(String msg, boolean verbose) {
-    System.err.println(formatMessage(msg, MessageType.WARNING, MessageHandler.UX, verbose));
+  public void uxWarn(EventKey key, List<String> args, boolean verbose) {
+    System.err.println(formatMessage(key, args, MessageType.WARNING, MessageHandler.UX, verbose));
   }
 
-  private String formatMessage(String msg, MessageType type, MessageHandler handler, boolean verbose) {
+  private String formatMessage(EventKey key, List<String> args, MessageType type, MessageHandler handler, boolean verbose) {
     // A message is created by serializing an SfdxMessage instance and sandwiching it between the START and END strings.
-    return START + new SfdxMessage(msg, type, handler, verbose).toJson() + END;
+    return START + new SfdxMessage(key, args, type, handler, verbose).toJson() + END;
   }
 }
 
 class SfdxMessage {
+  private EventKey key;
+  private List<String> args;
   private MessageType type;
   private MessageHandler handler;
   private boolean verbose;
   private long time;
-  private String msg;
 
-  SfdxMessage(String msg, MessageType type, MessageHandler handler, boolean verbose) {
+  SfdxMessage(EventKey key, List<String> args, MessageType type, MessageHandler handler, boolean verbose) {
+    this.key = key;
+    this.args = args;
     this.type = type;
     this.handler = handler;
-    this.verbose = verbose;
     this.time = Instant.now().toEpochMilli();
-    this.msg = msg;
+    this.verbose = verbose;
   }
 
   String toJson() {

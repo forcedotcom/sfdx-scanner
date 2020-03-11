@@ -14,8 +14,9 @@ import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRuleset;
 import sfdc.sfdx.scanner.xml.XmlReader;
-import sfdc.sfdx.scanner.ExitCode;
 import sfdc.sfdx.scanner.paths.PathManipulator;
+import sfdc.sfdx.scanner.ExitCode;
+import sfdc.sfdx.scanner.EventKey;
 
 class PmdRuleCataloger {
   private Map<String, List<String>> rulePathEntries;
@@ -108,7 +109,7 @@ class PmdRuleCataloger {
     // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
       String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-      SfdxMessager.getInstance().uxWarn("Cataloger skipped invalid PMD Category file '" + fullPath + "'", true);
+      SfdxMessager.getInstance().uxWarn(EventKey.WARNING_INVALID_CAT_SKIPPED, new ArrayList<>(Arrays.asList(fullPath)), true);
       return;
     }
 
@@ -141,7 +142,7 @@ class PmdRuleCataloger {
     // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
       String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-      SfdxMessager.getInstance().uxWarn("Cataloger skipped invalid PMD Ruleset file '" + fullPath + "'", true);
+      SfdxMessager.getInstance().uxWarn(EventKey.WARNING_INVALID_RULESET_SKIPPED, new ArrayList<>(Arrays.asList(fullPath)), true);
       return;
     }
 
