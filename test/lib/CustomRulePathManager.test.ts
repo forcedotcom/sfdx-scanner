@@ -1,7 +1,7 @@
-import { CustomRulePathManager, ENGINE } from '../../src/lib/CustomRulePathManager';
-import { FileHandler } from '../../src/lib/FileHandler';
-import { expect } from 'chai';
-
+import {expect} from 'chai';
+import {Stats} from 'fs';
+import {CustomRulePathManager, ENGINE} from '../../src/lib/CustomRulePathManager';
+import {FileHandler} from '../../src/lib/FileHandler';
 import Sinon = require('sinon');
 
 /**
@@ -24,51 +24,51 @@ describe('CustomRulePathManager tests', () => {
             beforeEach(() => {
                 readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(populatedFile);
             });
-    
+
             afterEach(() => {
                 readStub.restore();
             });
 
             it('should read CustomPaths.json to get Rule Path Entries', async () => {
                 const manager = new CustomRulePathManager();
-    
+
                 // Execute test
                 const rulePathMap = await manager.getRulePathEntries(ENGINE.PMD);
-    
+
                 // Validate run
                 expect(readStub.calledOnce).to.be.true;
                 expect(rulePathMap).to.be.lengthOf(2);
-    
+
                 //Validate each entry
                 expect(rulePathMap).has.keys('apex', 'java');
                 const apexPaths = rulePathMap.get('apex');
                 expect(apexPaths).to.be.lengthOf(1);
                 expect(apexPaths).deep.contains('/some/user/path/customRule.jar');
-    
+
                 const javaPaths = rulePathMap.get('java');
                 expect(javaPaths).to.be.lengthOf(2);
                 expect(javaPaths).deep.contains('/abc/def/ghi');
                 expect(javaPaths).deep.contains('/home/lib/jars');
-    
+
             });
 
             it('should initialize only once', async () => {
                 const manager = new CustomRulePathManager();
-    
+
                 // Execute test
                 await manager.getRulePathEntries(ENGINE.PMD);
                 // Rerun same end point again. This time, it shouldn't have read file
                 await manager.getRulePathEntries(ENGINE.PMD);
-    
+
                 // Validate
                 expect(readStub.calledOnce).to.be.true;
             });
         });
-        
+
 
         it('should handle empty Rule Path file gracefully', async () => {
             // Setup stub
-            let readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
+            const readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
             const manager = new CustomRulePathManager();
 
             // Execute test
@@ -85,15 +85,21 @@ describe('CustomRulePathManager tests', () => {
 
     describe('Adding new Rule Path entries', () => {
 
-        let readStub, writeStub, mkdirStub;
+        let statsStub, readDirStub, readStub, writeStub, mkdirStub;
         before(() => {
             writeStub = Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
             mkdirStub = Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves();
+
+            const mockDirStats = new Stats();
+            mockDirStats.isDirectory = () => true;
+            mockDirStats.isFile = () => false;
+            statsStub = Sinon.stub(FileHandler.prototype, 'stats').resolves(mockDirStats);
+            readDirStub = Sinon.stub(FileHandler.prototype, 'readDir').resolves([]);
         });
 
         afterEach(() => {
             readStub.restore();
-        })
+        });
 
         after(() => {
             Sinon.restore();
@@ -108,6 +114,8 @@ describe('CustomRulePathManager tests', () => {
             await manager.addPathsForLanguage('language', ['path1', 'path2']);
 
             // Validate
+            expect(statsStub.calledTwice).to.be.true; // Once per path
+            expect(readDirStub.calledTwice).to.be.true; // Once per path
             expect(readStub.calledOnce).to.be.true;
             expect(mkdirStub.calledOnce).to.be.true;
             expect(writeStub.calledOnce).to.be.true;
@@ -146,8 +154,8 @@ describe('CustomRulePathManager tests', () => {
             const originalRulePathMap = await manager.getRulePathEntries(ENGINE.PMD);
             // Pre-validate to make sure test setup is alright, before proceeding
             expect(originalRulePathMap).has.keys([language]);
-            const orginalPathEntries = originalRulePathMap.get(language);
-            expect(orginalPathEntries).to.be.lengthOf(1);
+            const originalPathEntries = originalRulePathMap.get(language);
+            expect(originalPathEntries).to.be.lengthOf(1);
             // Now add more entries to same language
             await manager.addPathsForLanguage(language, [newPath]);
             // Fetch updated Map to validate
