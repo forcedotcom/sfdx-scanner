@@ -16,7 +16,6 @@ public class PmdCatalogRule {
   public static final String JSON_LANGUAGES = "languages";
   public static final String JSON_CATEGORIES = "categories";
   public static final String JSON_RULESETS = "rulesets";
-  public static final String PATH_JOINER = "/";
 
   private String name;
   private String message;
@@ -42,7 +41,7 @@ public class PmdCatalogRule {
   }
 
   String getFullName() {
-    return getCategoryPath() + PATH_JOINER + getName();
+    return getCategoryPath() + "/" + getName();
   }
 
   String getName() {

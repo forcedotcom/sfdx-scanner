@@ -38,7 +38,7 @@ public class PmdCatalogJsonTest {
     final String expectedCategoryJson = String.format("{\"%s\":[\"%s\"]}", CATEGORY_NAME, CATEGORY_PATH);
     assertEquals(expectedCategoryJson, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString());
 
-    // Ruleset json has its own test where we verify the Json contents. Here, we only confirm that it exists
+    // Rules json has its own test where we verify the Json contents. Here, we only confirm that it exists
     assertTrue("JSON should contain 'rules' element", jsonObject.containsKey(PmdCatalogJson.JSON_RULES));
   }
 
