@@ -39,7 +39,6 @@ export default class Add extends SfdxCommand {
   };
 
   public async run(): Promise<AnyJson> {
-
     this.validateFlags();
 
     const language = this.flags.language;
@@ -50,12 +49,10 @@ export default class Add extends SfdxCommand {
 
     // Add to Custom Classpath registry
     const manager = new CustomRulePathManager();
-    await manager.addPathsForLanguage(language, path);
-
+    const classpathEntries = await manager.addPathsForLanguage(language, path);
     this.ux.log(`Successfully added rules for ${language}.`);
-    this.ux.log(`${path.length} Path(s) added: ${path}`);
-
-    return { success: true, language: language, path: path };
+    this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries}`);
+    return { success: true, language, path: classpathEntries };
   }
 
   private validateFlags(): void {
