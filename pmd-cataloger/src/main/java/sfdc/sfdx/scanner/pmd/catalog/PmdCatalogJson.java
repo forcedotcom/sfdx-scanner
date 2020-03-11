@@ -9,6 +9,10 @@ import org.json.simple.*;
 
 @SuppressWarnings("unchecked")
 public class PmdCatalogJson {
+  public static final String JSON_RULES = "rules";
+  public static final String JSON_CATEGORIES = "categories";
+  public static final String JSON_RULESETS = "rulesets";
+
   private List<PmdCatalogRule> rules;
   private List<PmdCatalogCategory> categories;
   private List<PmdCatalogRuleset> rulesets;
@@ -25,9 +29,9 @@ public class PmdCatalogJson {
   public JSONObject constructJson() {
     JSONObject result = new JSONObject();
 
-    result.put("rules", constructRulesList());
-    result.put("categories", constructCategoriesMap());
-    result.put("rulesets", constructRulesetsMap());
+    result.put(JSON_RULES, constructRulesList());
+    result.put(JSON_CATEGORIES, constructCategoriesMap());
+    result.put(JSON_RULESETS, constructRulesetsMap());
 
     return result;
   }

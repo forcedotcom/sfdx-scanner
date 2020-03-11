@@ -7,6 +7,17 @@ import org.json.simple.*;
 import sfdc.sfdx.scanner.ExitCode;
 
 public class PmdCatalogRule {
+  public static final String ATTR_NAME = "name";
+  public static final String ATTR_MESSAGE = "message";
+  public static final String ATTR_DESCRIPTION = "description";
+  public static final String JSON_NAME = "name";
+  public static final String JSON_MESSAGE = "message";
+  public static final String JSON_DESCRIPTION = "description";
+  public static final String JSON_LANGUAGES = "languages";
+  public static final String JSON_CATEGORIES = "categories";
+  public static final String JSON_RULESETS = "rulesets";
+  public static final String PATH_JOINER = "/";
+
   private String name;
   private String message;
   private String description;
@@ -23,15 +34,15 @@ public class PmdCatalogRule {
 
 
   public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
-    this.name = element.getAttribute("name");
-    this.message = element.getAttribute("message");
+    this.name = element.getAttribute(ATTR_NAME);
+    this.message = element.getAttribute(ATTR_MESSAGE);
     this.language = language;
     this.category = category;
     this.description = getDescription(element);
   }
 
   String getFullName() {
-    return getCategoryPath() + "/" + getName();
+    return getCategoryPath() + PATH_JOINER + getName();
   }
 
   String getName() {
@@ -57,7 +68,7 @@ public class PmdCatalogRule {
    */
   private String getDescription(Element element) {
     // The rule node should have at most one "description" node, so get that.
-    NodeList nl = element.getElementsByTagName("description");
+    NodeList nl = element.getElementsByTagName(ATTR_DESCRIPTION);
     String res = null;
     switch (nl.getLength()) {
       case 0:
@@ -83,24 +94,24 @@ public class PmdCatalogRule {
    */
   JSONObject toJson() {
     Map<String,Object> m = new HashMap<>();
-    m.put("name", this.name);
-    m.put("message", this.message);
-    m.put("description", this.description);
+    m.put(JSON_NAME, this.name);
+    m.put(JSON_MESSAGE, this.message);
+    m.put(JSON_DESCRIPTION, this.description);
 
     // We want 'languages' to be represented as an array even though PMD rules only run against one language, because
     // this way it's easier to integrate with the language-agnostic framework that we ultimately want.
     List<String> langs = new ArrayList<>(Collections.singletonList((this.language)));
-    m.put("languages", langs);
+    m.put(JSON_LANGUAGES, langs);
 
     // We also want 'categories' to be an array for the same reason.
     List<String> categoryNames = new ArrayList<>(Collections.singletonList(this.category.getName()));
-    m.put("categories", categoryNames);
+    m.put(JSON_CATEGORIES, categoryNames);
 
     List<String> rulesetNames = new ArrayList<>();
     for (PmdCatalogRuleset ruleset : rulesets) {
       rulesetNames.add(ruleset.getName());
     }
-    m.put("rulesets", rulesetNames);
+    m.put(JSON_RULESETS, rulesetNames);
 
     return new JSONObject(m);
   }
