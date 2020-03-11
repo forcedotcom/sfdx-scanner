@@ -26,6 +26,7 @@ export default class Run extends ScannerCommand {
 
   // This defines the flags accepted by this command.
   protected static flagsConfig = {
+    verbose: flags.builtin(),
     // These flags are how you choose which rules you're running.
     category: flags.array({
       char: 'c',

@@ -1,5 +1,6 @@
 import {SfdxCommand} from '@salesforce/command';
 import {RuleFilter, RULE_FILTER_TYPE} from '../../lib/RuleManager';
+import { uxEvents } from '../../lib/ScannerEvents';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
@@ -27,5 +28,21 @@ export abstract class ScannerCommand extends SfdxCommand {
     }
 
     return filters;
+  }
+
+  protected displayWarning(msg: string, verboseOnly: boolean): void {
+    if (!verboseOnly || this.flags.verbose) {
+      this.ux.warn(msg);
+    }
+  }
+
+  protected async init() {
+    await super.init();
+    this.buildEventListeners();
+  }
+
+  protected buildEventListeners(): void {
+    uxEvents.on('warning-always', msg => this.displayWarning(msg, false));
+    uxEvents.on('warning-verbose', msg => this.displayWarning(msg, true));
   }
 }

@@ -35,7 +35,8 @@ export default class Describe extends ScannerCommand {
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
       required: true
-    })
+    }),
+    verbose: flags.builtin()
   };
 
   public async run(): Promise<AnyJson> {
