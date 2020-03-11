@@ -36,6 +36,11 @@ export abstract class ScannerCommand extends SfdxCommand {
     }
   }
 
+  protected async init() {
+    await super.init();
+    this.buildEventListeners();
+  }
+
   protected buildEventListeners(): void {
     uxEvents.on('warning-always', msg => this.displayWarning(msg, false));
     uxEvents.on('warning-verbose', msg => this.displayWarning(msg, true));

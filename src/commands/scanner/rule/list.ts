@@ -65,7 +65,6 @@ export default class List extends ScannerCommand {
   };
 
   public async run(): Promise<Rule[]> {
-    this.buildEventListeners();
     const ruleFilters = this.buildRuleFilters();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
