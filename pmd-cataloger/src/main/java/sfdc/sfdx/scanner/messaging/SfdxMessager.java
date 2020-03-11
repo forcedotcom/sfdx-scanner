@@ -1,6 +1,7 @@
 package sfdc.sfdx.scanner.messaging;
 
 import com.google.gson.Gson;
+import java.time.Instant;
 
 enum MessageType {
   WARNING
@@ -43,12 +44,14 @@ class SfdxMessage {
   private MessageType type;
   private MessageHandler handler;
   private boolean verbose;
+  private long time;
   private String msg;
 
   SfdxMessage(String msg, MessageType type, MessageHandler handler, boolean verbose) {
     this.type = type;
     this.handler = handler;
     this.verbose = verbose;
+    this.time = Instant.now().toEpochMilli();
     this.msg = msg;
   }
 

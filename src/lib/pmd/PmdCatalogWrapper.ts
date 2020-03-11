@@ -23,6 +23,7 @@ type PmdCatalogEvent = {
   handler: string;
   verbose: boolean;
   msg: string;
+  time: number;
 };
 
 export class PmdCatalogWrapper extends PmdSupport {
@@ -187,8 +188,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
-      this.findAndEmitEvents(stdout);
-      this.findAndEmitEvents(stderr);
+      this.findAndEmitEvents(stdout, stderr);
       if (code === 0) {
         res([!!code, stdout]);
       } else {
@@ -197,22 +197,39 @@ export class PmdCatalogWrapper extends PmdSupport {
     });
   }
 
-  private findAndEmitEvents(output: string): void {
-    // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the output as a JSON
+  private findAndEmitEvents(stdout: string, stderr: string): void {
+    // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the outputs as JSONs
     // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
     const regex = /SFDX-START(.*)SFDX-END/g;
-    const matches = output.match(regex);
     const headerLength = 'SFDX-START'.length;
     const tailLength = 'SFDX-END'.length;
-    if (matches && matches.length > 0) {
-      // Process any matches by parsing the JSON and throwing an appropriate event.
-      matches.forEach((match) => {
-        const matchObj: PmdCatalogEvent = JSON.parse(match.substring(headerLength, match.length - tailLength));
-        if (matchObj.handler === 'UX') {
-          const eventType = `${matchObj.type.toLowerCase()}-${matchObj.verbose ? 'verbose' : 'always'}`;
-          uxEvents.emit(eventType, matchObj.msg);
-        }
-      });
+    const outEvents: PmdCatalogEvent[] = (stdout.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
+    const errEvents: PmdCatalogEvent[] = (stderr.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
+    // If both lists are empty, we can just be done now.
+    if (outEvents.length == 0 && errEvents.length == 0) {
+      return;
     }
+
+    // If either list is non-empty, we'll need to interleave the events in both lists into a single list that's ordered
+    // chronologically. We'll do that with a bog-standard merge algorithm.
+    let orderedEvents = [];
+    let outIdx = 0;
+    let errIdx = 0;
+    while (outIdx < outEvents.length && errIdx < errEvents.length) {
+      if (outEvents[outIdx].time <= errEvents[errIdx].time) {
+        orderedEvents.push(outEvents[outIdx++]);
+      } else {
+        orderedEvents.push(errEvents[errIdx++]);
+      }
+    }
+    orderedEvents = orderedEvents.concat(outEvents.slice(outIdx)).concat(errEvents.slice(errIdx));
+
+    // Iterate over all of the events and throw them as appropriate.
+    orderedEvents.forEach((event) => {
+      if (event.handler === 'UX') {
+        const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
+        uxEvents.emit(eventType, event.msg);
+      }
+    });
   }
 }
