@@ -10,7 +10,7 @@ import { uxEvents } from '../ScannerEvents';
 import {Messages} from "@salesforce/core";
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('scanner', 'EventKeyTemplates');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];

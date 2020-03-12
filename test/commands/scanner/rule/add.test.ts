@@ -7,7 +7,7 @@ import path = require('path');
 
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('scanner', 'add');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 
 describe('scanner:rule:add', () => {
