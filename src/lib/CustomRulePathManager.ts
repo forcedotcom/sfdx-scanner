@@ -43,7 +43,7 @@ export class CustomRulePathManager {
       } else {
         //  Any other error needs to be rethrown, and since it could be arcane or weird, we'll also prepend it with a
         //  header so it's clear where it came from.
-        throw SfdxError.create('scanner', 'add', 'errors.readCustomRulePathFileFailed', [e.message]);
+        throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'errors.readCustomRulePathFileFailed', [e.message]);
       }
     }
     // If file existed but was empty, replace the whitespace/blank with empty JSON
@@ -97,7 +97,7 @@ export class CustomRulePathManager {
     } catch (e) {
       // If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
       // so it's at least obvious what failed, if not how or why.
-      throw SfdxError.create('scanner', 'add', 'errors.writeCustomRulePathFileFailed', [e.message]);
+      throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'errors.writeCustomRulePathFileFailed', [e.message]);
     }
   }
 
@@ -150,7 +150,7 @@ export class CustomRulePathManager {
       try {
         stats = await this.fileHandler.stats(p);
       } catch (e) {
-        throw SfdxError.create('scanner', 'add', 'errors.invalidFilePath', [p]);
+        throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'errors.invalidFilePath', [p]);
       }
       if (stats.isFile()) {
         if (p.endsWith(".jar")) {
