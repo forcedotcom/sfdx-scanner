@@ -10,7 +10,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('scanner', 'describe');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
 export default class Describe extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
