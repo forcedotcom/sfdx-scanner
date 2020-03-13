@@ -1,5 +1,6 @@
 import {AnyJson} from '@salesforce/ts-types';
 import path = require('path');
+import * as JreSetupManager from './../JreSetupManager';
 import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
@@ -10,7 +11,7 @@ import { uxEvents } from '../ScannerEvents';
 import {Messages} from "@salesforce/core";
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('scanner', 'EventKeyTemplates');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
@@ -111,7 +112,9 @@ export class PmdCatalogWrapper extends PmdSupport {
   }
 
   protected async buildCommandArray(): Promise<[string, string[]]> {
-    const command = 'java';
+    const javaHome = await JreSetupManager.verifyJreSetup();
+    const command = path.join(javaHome, 'bin', 'java');
+    
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
     const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
