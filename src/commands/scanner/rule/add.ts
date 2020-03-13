@@ -9,7 +9,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('scanner', 'add');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 
 export default class Add extends SfdxCommand {
@@ -57,10 +57,10 @@ export default class Add extends SfdxCommand {
 
   private validateFlags(): void {
     if (this.flags.language.length === 0) {
-      throw SfdxError.create('scanner', 'add', 'validations.languageCannotBeEmpty', []);
+      throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.languageCannotBeEmpty', []);
     }
     if (this.flags.path.includes('')) {
-      throw SfdxError.create('scanner', 'add', 'validations.pathCannotBeEmpty', []);
+      throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.pathCannotBeEmpty', []);
     }
   }
 
