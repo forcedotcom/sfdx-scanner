@@ -36,7 +36,7 @@ class JreSetupManager extends AsyncCreatable {
         });
     }
 
-    async verifyJreSetup(): Promise<void> {
+    async verifyJreSetup(): Promise<string> {
         // Find Java Home
         const javaHome = await this.findJavaHome();
 
@@ -119,7 +119,7 @@ class JreSetupManager extends AsyncCreatable {
         // The version number could be of the format 11.0 or 1.8
         const regex = 'version "(\\d+).(\\d+)';
         const matchedParts = versionOut.match(regex);
-        this.logger.trace(`Version output match for patter ${regex} is ${matchedParts}`);
+        this.logger.trace(`Version output match for pattern ${regex} is ${matchedParts}`);
 
         // matchedParts should have three groups: "version \"11.0", "11", "0"
         if (!matchedParts || matchedParts.length < 3) {
@@ -145,7 +145,7 @@ class JreSetupManager extends AsyncCreatable {
 
     private async fetchJavaVersion(javaHome: string): Promise<string> {
         const javaWithFullPath = path.join(javaHome, 'bin', 'java');
-        // Run java -version and examine stdout for version
+        // Run java -version and examine stderr for version
         return new Promise((resolve, reject) => {
             childProcess.execFile(javaWithFullPath, ['-version'], {},
                 (error, _stdout, stderr) => {
@@ -177,7 +177,7 @@ class JreSetupManager extends AsyncCreatable {
 }
 
 // Method that'll be invoked externally
-export async function verifyJreSetup(): Promise<void> {
+export async function verifyJreSetup(): Promise<string> {
     const manager = await JreSetupManager.create({});
-    await manager.verifyJreSetup();
+    return await manager.verifyJreSetup();
 }

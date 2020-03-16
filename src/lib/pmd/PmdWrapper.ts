@@ -1,5 +1,7 @@
 import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Format, PmdSupport} from './PmdSupport';
+import * as JreSetupManager from './../JreSetupManager';
+import path = require('path');
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -29,7 +31,9 @@ export default class PmdWrapper extends PmdSupport {
   }
 
   protected async buildCommandArray(): Promise<[string, string[]]> {
-    const command = 'java';
+    const javaHome = await JreSetupManager.verifyJreSetup();
+    const command = path.join(javaHome, 'bin', 'java');
+
     // Start with the arguments we know we'll always need.
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.

@@ -82,6 +82,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint ./src --ext .ts",
     "test": "./gradlew test && nyc mocha './test/**/*.test.ts'",
+    "postinstall": "ts-node  -e 'require(\"./src/lib/JreSetupManager\").verifyJreSetup()'",
     "coverage": "nyc report --reporter text",
     "version": "oclif-dev readme && git add README.md"
   }
