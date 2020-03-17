@@ -69,7 +69,7 @@ class JreSetupManager extends AsyncCreatable {
 
         // At this point, if we don't have a javaHome, we throw an error and ask user to add it themselves
         if (!javaHome) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
         }
 
         return javaHome;
@@ -106,7 +106,7 @@ class JreSetupManager extends AsyncCreatable {
         try {
             await fileHandler.stats(javaHome);
         } catch (error) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome]);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome]);
         }
     }
 
@@ -123,7 +123,7 @@ class JreSetupManager extends AsyncCreatable {
 
         // matchedParts should have three groups: "version \"11.0", "11", "0"
         if (!matchedParts || matchedParts.length < 3) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'VersionNotFound', []);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'VersionNotFound', []);
         }
 
         const versionPart1 = parseInt(matchedParts[1]);
@@ -133,13 +133,13 @@ class JreSetupManager extends AsyncCreatable {
         // Upto JDK8, the version scheme is 1.blah
         // Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
         // If either version part clicks, we should be good.
-        if (versionPart1 > 1 || versionPart2 > 8) {
+        if (versionPart1 >= 1 || versionPart2 >= 8) {
             this.logger.trace(`Java version found as ${version}`);
             return;
         }
 
         // If we are here, version number is not what we are looking for
-        throw SfdxError.create('scanner', 'jreSetupManager', 'InvalidVersion', [version]);
+        throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidVersion', [version]);
 
     }
 
