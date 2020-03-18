@@ -36,7 +36,7 @@ export abstract class ScannerCommand extends SfdxCommand {
     }
   }
 
-  protected async init() {
+  protected async init(): Promise<void> {
     await super.init();
     this.buildEventListeners();
   }

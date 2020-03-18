@@ -14,7 +14,9 @@ Messages.importMessagesDirectory(__dirname);
 const JAVA_HOME_KEY = 'java-home';
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
-class Config extends ConfigFile<ConfigFile.Options> {
+// Exported to be used by tests. If this is needed to be used in other places, 
+// consider moving it to a module of its own
+export class Config extends ConfigFile<ConfigFile.Options> {
 
     public static getFileName(): string {
         // TODO: Revisit the file location!
@@ -24,9 +26,21 @@ class Config extends ConfigFile<ConfigFile.Options> {
     }
 }
 
+// Exported only to be used by tests
+export class JreSetupManagerDependencies {
+    autoDetectJavaHome(): Promise<string> {
+        return new Promise<string>((resolve) => {
+            findJavaHome({allowJre: true}, (err, home) => {
+                resolve(err? null : home);
+            });
+        });
+    }
+}
+
 class JreSetupManager extends AsyncCreatable {
     private logger!: Logger;
     private config!: Config;
+    private dependencies: JreSetupManagerDependencies;
 
     protected async init(): Promise<void> {
         this.logger = await Logger.child('verifyJRE');
@@ -34,6 +48,7 @@ class JreSetupManager extends AsyncCreatable {
             isGlobal: true,
             throwOnNotFound: false
         });
+        this.dependencies = new JreSetupManagerDependencies();
     }
 
     async verifyJreSetup(): Promise<string> {
@@ -88,17 +103,8 @@ class JreSetupManager extends AsyncCreatable {
         return javaHome;
     }
 
-    private async autoDetectJavaHome(): Promise<string> {
-        return new Promise((resolve) => {
-            findJavaHome({ allowJre: true }, (err: Error, home: string) => {
-                if (err) {
-                    this.logger.trace(`Could not auto-detect Java Home: ${err.message}`);
-                    return resolve(null); // We don't want to reject here. No Java Home is handled later
-                } else {
-                    return resolve(home);
-                }
-            });
-        });
+    private autoDetectJavaHome(): Promise<string> {
+        return this.dependencies.autoDetectJavaHome();
     }
 
     private async verifyPath(javaHome: string): Promise<void> {
