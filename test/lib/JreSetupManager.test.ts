@@ -20,11 +20,14 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
     describe('With valid javaHome path in Config and an accepted Java version', () => {
 
+        let writeToConfigStub, setJavaHomeStub;
         before(() => {
             Sinon.createSandbox();
             // Config file exists and has the valid path
             Sinon.stub(Config.prototype, 'exists').resolves(true); 
             Sinon.stub(Config.prototype, 'get').resolves(javaHomeValidPath);
+            writeToConfigStub = Sinon.stub(Config.prototype, 'write').resolves();
+            setJavaHomeStub = Sinon.stub(Config.prototype, 'set').resolves();
             
             // FileHandler stat confirms that path is valid
             Sinon.stub(FileHandler.prototype, 'stats').resolves();
@@ -38,10 +41,6 @@ describe('JreSetupManager #verifyJreSetup', () => {
         });
 
         it('should set correct Key in config and write the value back to Config', async () => {
-            // Setup more stubs
-            const setJavaHomeStub = Sinon.stub(Config.prototype, 'set').resolves();
-            const writeToConfigStub = Sinon.stub(Config.prototype, 'write').resolves();
-
             // Execute
             const javaHome = await verifyJreSetup();
 
@@ -52,9 +51,6 @@ describe('JreSetupManager #verifyJreSetup', () => {
             expect(javaHomeValue).equals(javaHomeValidPath);
             expect(writeToConfigStub.calledOnce).to.be.true;
             expect(javaHome).equals(javaHomeValidPath);
-
-            setJavaHomeStub.restore();
-            writeToConfigStub.restore();
         });
 
     });
