@@ -117,6 +117,9 @@ describe('JreSetupManager #verifyJreSetup', () => {
             // Config file exists and has the valid path
             Sinon.stub(Config.prototype, 'exists').resolves(false);
 
+            // No System variables in process.env
+            process.env = {};
+
             // FileHandler stat confirms that path is valid
             Sinon.stub(FileHandler.prototype, 'stats').resolves();
 
