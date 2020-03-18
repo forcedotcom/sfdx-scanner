@@ -72,14 +72,16 @@ workflows:
   version: 2.1
   test-publish:
     jobs:
-      - test
+      - test:
+          filters:
+            tags:
+              only: /.*/
       - deploy-latest:
           requires:
             - test
           filters:
             branches:
-              ignore:
-                /.*/
+              ignore: /.*/
             tags:
               only:
-                /^tag-test-v2.*/
+                /^v.*/
