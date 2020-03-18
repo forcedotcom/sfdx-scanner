@@ -13,7 +13,8 @@ import {Messages} from "@salesforce/core";
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
-const PMD_CATALOGER_LIB = './dist/pmd-cataloger/lib';
+// Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
+const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
