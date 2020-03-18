@@ -14,7 +14,9 @@ Messages.importMessagesDirectory(__dirname);
 const JAVA_HOME_KEY = 'java-home';
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
-class Config extends ConfigFile<ConfigFile.Options> {
+// Exported to be used by tests. If this is needed to be used in other places, 
+// consider moving it to a module of its own
+export class Config extends ConfigFile<ConfigFile.Options> {
 
     public static getFileName(): string {
         // TODO: Revisit the file location!
@@ -24,9 +26,21 @@ class Config extends ConfigFile<ConfigFile.Options> {
     }
 }
 
+// Exported only to be used by tests
+export class JreSetupManagerDependencies {
+    autoDetectJavaHome(handleDetectedValue: (err: Error, home: string) => string): Promise<string> {
+        return new Promise<string>((resolve) => {
+            findJavaHome({allowJre: true}, (err, home) => {
+                resolve(handleDetectedValue(err, home));
+            });
+        });
+    }
+}
+
 class JreSetupManager extends AsyncCreatable {
     private logger!: Logger;
     private config!: Config;
+    private dependencies: JreSetupManagerDependencies;
 
     protected async init(): Promise<void> {
         this.logger = await Logger.child('verifyJRE');
@@ -34,6 +48,7 @@ class JreSetupManager extends AsyncCreatable {
             isGlobal: true,
             throwOnNotFound: false
         });
+        this.dependencies = new JreSetupManagerDependencies();
     }
 
     async verifyJreSetup(): Promise<string> {
@@ -69,7 +84,7 @@ class JreSetupManager extends AsyncCreatable {
 
         // At this point, if we don't have a javaHome, we throw an error and ask user to add it themselves
         if (!javaHome) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
         }
 
         return javaHome;
@@ -88,17 +103,16 @@ class JreSetupManager extends AsyncCreatable {
         return javaHome;
     }
 
-    private async autoDetectJavaHome(): Promise<string> {
-        return new Promise((resolve) => {
-            findJavaHome({ allowJre: true }, (err: Error, home: string) => {
-                if (err) {
-                    this.logger.trace(`Could not auto-detect Java Home: ${err.message}`);
-                    return resolve(null); // We don't want to reject here. No Java Home is handled later
-                } else {
-                    return resolve(home);
-                }
-            });
-        });
+    private autoDetectJavaHome(): Promise<string> {
+        return this.dependencies.autoDetectJavaHome(this.handleAutoDetectedJavaHome);
+    }
+    handleAutoDetectedJavaHome(err: Error, home: string): string {
+        if (err) {
+            return null; // Absence of javaHome is handled later
+        }
+        else {
+            return home;
+        }
     }
 
     private async verifyPath(javaHome: string): Promise<void> {
@@ -106,7 +120,7 @@ class JreSetupManager extends AsyncCreatable {
         try {
             await fileHandler.stats(javaHome);
         } catch (error) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome]);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome]);
         }
     }
 
@@ -123,7 +137,7 @@ class JreSetupManager extends AsyncCreatable {
 
         // matchedParts should have three groups: "version \"11.0", "11", "0"
         if (!matchedParts || matchedParts.length < 3) {
-            throw SfdxError.create('scanner', 'jreSetupManager', 'VersionNotFound', []);
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'VersionNotFound', []);
         }
 
         const versionPart1 = parseInt(matchedParts[1]);
@@ -133,13 +147,13 @@ class JreSetupManager extends AsyncCreatable {
         // Upto JDK8, the version scheme is 1.blah
         // Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
         // If either version part clicks, we should be good.
-        if (versionPart1 > 1 || versionPart2 > 8) {
+        if (versionPart1 >= 1 || versionPart2 >= 8) {
             this.logger.trace(`Java version found as ${version}`);
             return;
         }
 
         // If we are here, version number is not what we are looking for
-        throw SfdxError.create('scanner', 'jreSetupManager', 'InvalidVersion', [version]);
+        throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidVersion', [version]);
 
     }
 
