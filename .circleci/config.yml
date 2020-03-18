@@ -3,13 +3,14 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2.1
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/openjdk:11.0.2-jdk-node
+
 jobs:
-  build:
-    docker:
-      - image: circleci/openjdk:11.0.2-jdk-node
-
-    working_directory: ~/repo
-
+  test:
+    <<: *defaults
     steps:
       - checkout
 
@@ -48,3 +49,37 @@ jobs:
           path: ./test-coverage
 
       - run: bash <(curl -s https://codecov.io/bash)
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+  deploy-latest:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run:
+          name: Authenticate with npm registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" >> ~/repo/.npmrc
+
+      - run:
+          name: Publish a public package with the tag "latest"
+          command: npm publish --public --tag latest
+
+workflows:
+  version: 2.1
+  test-publish:
+    jobs:
+      - test
+      - deploy-latest:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - jfAutomatedDeploy2
+            tags:
+              only:
+                /^v.*/
