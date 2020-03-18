@@ -77,9 +77,9 @@ workflows:
           requires:
             - test
           filters:
-#            branches:
-#              only:
-#                - jfAutomatedDeploy2
+            branches:
+              ignore:
+                /.*/
             tags:
               only:
                 /^v.*/
