@@ -28,10 +28,10 @@ export class Config extends ConfigFile<ConfigFile.Options> {
 
 // Exported only to be used by tests
 export class JreSetupManagerDependencies {
-    autoDetectJavaHome(handleDetectedValue: (err: Error, home: string) => string): Promise<string> {
+    autoDetectJavaHome(): Promise<string> {
         return new Promise<string>((resolve) => {
             findJavaHome({allowJre: true}, (err, home) => {
-                resolve(handleDetectedValue(err, home));
+                resolve(err? null : home);
             });
         });
     }
@@ -104,15 +104,7 @@ class JreSetupManager extends AsyncCreatable {
     }
 
     private autoDetectJavaHome(): Promise<string> {
-        return this.dependencies.autoDetectJavaHome(this.handleAutoDetectedJavaHome);
-    }
-    handleAutoDetectedJavaHome(err: Error, home: string): string {
-        if (err) {
-            return null; // Absence of javaHome is handled later
-        }
-        else {
-            return home;
-        }
+        return this.dependencies.autoDetectJavaHome();
     }
 
     private async verifyPath(javaHome: string): Promise<void> {

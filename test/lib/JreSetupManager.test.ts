@@ -137,7 +137,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
         });
 
         it('should handle successful javaHome auto detection', async () => {
-            const findJavaHomeStub = Sinon.stub(JreSetupManagerDependencies.prototype, 'autoDetectJavaHome').yields(noError, javaHomeValidPath);
+            const findJavaHomeStub = Sinon.stub(JreSetupManagerDependencies.prototype, 'autoDetectJavaHome').resolves(javaHomeValidPath);
 
             // Execute
             const javaHome = await verifyJreSetup();
@@ -151,7 +151,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
         });
 
         it('should handle failed javaHome auto detection', async () => {
-            const findJavaHomeStub = Sinon.stub(JreSetupManagerDependencies.prototype, 'autoDetectJavaHome').yields(error, undefined);
+            const findJavaHomeStub = Sinon.stub(JreSetupManagerDependencies.prototype, 'autoDetectJavaHome').resolves(null);
 
             // Execute and verify
             try {
