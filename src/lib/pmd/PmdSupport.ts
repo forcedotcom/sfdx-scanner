@@ -3,7 +3,7 @@ import {ChildProcessWithoutNullStreams} from 'child_process';
 import { CustomRulePathManager, ENGINE } from '../CustomRulePathManager'; 
 import path = require('path');
 
-export const PMD_VERSION = '6.21.0';
+export const PMD_VERSION = '6.22.0';
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 export const PMD_LIB = path.join(__dirname,'..','..','..','dist','pmd','lib');
 
