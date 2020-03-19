@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/sfdx-scanner",
   "description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "author": "ISV SWAT",
   "bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
   "dependencies": {
@@ -45,6 +45,7 @@
     "node": ">=8.0.0"
   },
   "files": [
+    "/dist",
     "/lib",
     "/messages",
     "/npm-shrinkwrap.json",
