@@ -106,10 +106,6 @@ export default class Run extends ScannerCommand {
   }
 
   private validateFlags(): void {
-    // It doesn't matter how you specify rules, but you do need to specify rules somehow.
-    if (!this.flags.category && !this.flags.ruleset) {
-      throw new SfdxError(messages.getMessage('validations.mustSpecifyRule'));
-    }
     // --source and --org are mutually exclusive, but they can't both be null.
     if (!this.flags.source && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));

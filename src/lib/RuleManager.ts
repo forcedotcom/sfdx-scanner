@@ -75,7 +75,7 @@ export class RuleManager {
       const paths: string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
       // If we didn't find any paths, we're done.
       if (paths == null || paths.length === 0) {
-        return;
+        return '';
       }
       // Otherwise, run PMD and see what we get.
       const [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
