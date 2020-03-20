@@ -4,7 +4,7 @@ import * as JreSetupManager from './../JreSetupManager';
 import {Rule} from '../../types';
 import {RuleFilter, RULE_FILTER_TYPE} from '../RuleManager';
 import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
-import {FileHandler} from '../FileHandler';
+import {FileHandler} from '../util/FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 import {ChildProcessWithoutNullStreams} from "child_process";
 import { uxEvents } from '../ScannerEvents';

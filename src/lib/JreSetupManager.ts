@@ -1,30 +1,17 @@
-import { CONFIG } from '../Constants';
-import { ConfigFile, Logger, SfdxError, Messages } from '@salesforce/core';
+import { Logger, SfdxError, Messages } from '@salesforce/core';
 import { AsyncCreatable } from '@salesforce/kit';
 
 import process = require('process');
 import findJavaHome = require('find-java-home');
 import childProcess = require('child_process');
 import path = require('path');
-import { FileHandler } from './FileHandler';
+import { FileHandler } from './util/FileHandler';
+import { Config } from './util/Config';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
-const JAVA_HOME_KEY = 'java-home';
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
-
-// Exported to be used by tests. If this is needed to be used in other places, 
-// consider moving it to a module of its own
-export class Config extends ConfigFile<ConfigFile.Options> {
-
-    public static getFileName(): string {
-        // TODO: Revisit the file location!
-        // This doesn't work if I give the directory as ~/.sfdx-scanner.
-        // File only goes to ~/.sfdx
-        return CONFIG;
-    }
-}
 
 // Exported only to be used by tests
 export class JreSetupManagerDependencies {
@@ -44,10 +31,7 @@ class JreSetupManager extends AsyncCreatable {
 
     protected async init(): Promise<void> {
         this.logger = await Logger.child('verifyJRE');
-        this.config = await Config.create({
-            isGlobal: true,
-            throwOnNotFound: false
-        });
+        this.config = await Config.create({});
         this.dependencies = new JreSetupManagerDependencies();
     }
 
@@ -62,7 +46,7 @@ class JreSetupManager extends AsyncCreatable {
         await this.verifyJavaVersion(javaHome);
 
         // Write javaHome to Config file
-        await this.setJavaHomeInConfig(javaHome);
+        await this.config.setJavaHome(javaHome);
 
         return javaHome;
     }
@@ -70,7 +54,7 @@ class JreSetupManager extends AsyncCreatable {
     private async findJavaHome(): Promise<string> {
         let javaHome: string;
         // First try getting javaHome from config
-        javaHome = await this.getJavaHomeFromConfig();
+        javaHome = this.config.getJavaHome();
 
         // If config doesn't have javaHome, try getting from System Variables
         if (!javaHome) {
@@ -163,22 +147,6 @@ class JreSetupManager extends AsyncCreatable {
                     return resolve(stderr);
                 });
         });
-    }
-
-    private async setJavaHomeInConfig(javaHome: string): Promise<void> {
-        this.config.set(JAVA_HOME_KEY, javaHome);
-        this.logger.trace(`Persisting config file with values ${this.config.values()}`);
-        await this.config.write();
-    }
-
-    private async getJavaHomeFromConfig(): Promise<string> {
-        const configExists = await this.config.exists();
-        if (configExists) {
-            const javaHomeJson = this.config.get(JAVA_HOME_KEY);
-            this.logger.trace(`javaHomeJson read from config file: ${javaHomeJson}`);
-            return javaHomeJson.valueOf() as string;
-        }
-        return null;
     }
 }
 

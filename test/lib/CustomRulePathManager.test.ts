@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {Stats} from 'fs';
 import {CustomRulePathManager, ENGINE} from '../../src/lib/CustomRulePathManager';
-import {FileHandler} from '../../src/lib/FileHandler';
+import {FileHandler} from '../../src/lib/util/FileHandler';
 import Sinon = require('sinon');
 
 /**
