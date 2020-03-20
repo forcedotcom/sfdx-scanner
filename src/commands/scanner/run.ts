@@ -56,9 +56,9 @@ export default class Run extends ScannerCommand {
       hidden: true
     }),
     // These flags are how you choose which files you're targeting.
-    source: flags.array({
-      char: 's',
-      description: messages.getMessage('flags.sourceDescription'),
+    target: flags.array({
+      char: 't',
+      description: messages.getMessage('flags.targetDescription'),
       // If you're specifying local files, it doesn't make much sense to let you specify anything else.
       exclusive: ['org']
     }),
@@ -67,7 +67,7 @@ export default class Run extends ScannerCommand {
       char: 'a',
       description: messages.getMessage('flags.orgDescription'),
       // If you're specifying an org, it doesn't make sense to let you specify anything else.
-      exclusive: ['source'],
+      exclusive: ['target'],
       hidden: true
     }),
     // These flags modify how the process runs, rather than what it consumes.
@@ -95,19 +95,19 @@ export default class Run extends ScannerCommand {
 
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
-    const source: string[]|string = this.flags.source || this.flags.org;
+    const target: string[]|string = this.flags.target || this.flags.org;
     const format: OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
-    const output = await ruleManager.runRulesMatchingCriteria(filters, source, format);
+    const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);
     this.processOutput(output);
     return {};
   }
 
   private validateFlags(): void {
-    // --source and --org are mutually exclusive, but they can't both be null.
-    if (!this.flags.source && !this.flags.org) {
+    // --target and --org are mutually exclusive, but they can't both be null.
+    if (!this.flags.target && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
     }
     // --format and --outfile are mutually exclusive, but they can't both be null.
