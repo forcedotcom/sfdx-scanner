@@ -43,14 +43,14 @@ export class RuleManager {
     }
   }
 
-  public async runRulesMatchingCriteria(filters: RuleFilter[], source: string[]|string, format: OUTPUT_FORMAT): Promise<string> {
-    // If source is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
+  public async runRulesMatchingCriteria(filters: RuleFilter[], target: string[]|string, format: OUTPUT_FORMAT): Promise<string> {
+    // If target is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
     // running rules against an org yet, so we'll just throw an error for now.
-    if (typeof source === 'string') {
+    if (typeof target === 'string') {
       throw new SfdxError('Running rules against orgs is not yet supported');
     }
     // TODO: Eventually, we'll need a bunch more promises to run rules existing in other engines.
-    const [pmdResults] = await Promise.all([this.runPmdRulesMatchingCriteria(filters, source)]);
+    const [pmdResults] = await Promise.all([this.runPmdRulesMatchingCriteria(filters, target)]);
 
     // Once all of the rules finish running, we'll need to combine their results into a single set of the desired type,
     // which we can then return.
@@ -69,7 +69,7 @@ export class RuleManager {
     return catalog.rules;
   }
 
-  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], source: string[]): Promise<string> {
+  private async runPmdRulesMatchingCriteria(filters: RuleFilter[], target: string[]): Promise<string> {
     try {
       // Convert our filters into paths that we can feed back into PMD.
       const paths: string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
@@ -78,7 +78,7 @@ export class RuleManager {
         return '';
       }
       // Otherwise, run PMD and see what we get.
-      const [violationsFound, stdout] = await PmdWrapper.execute(source.join(','), paths.join(','));
+      const [violationsFound, stdout] = await PmdWrapper.execute(target.join(','), paths.join(','));
 
       if (violationsFound) {
         // If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.

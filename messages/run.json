@@ -8,12 +8,12 @@
     "excluderuleDescription": "[Description of 'exclude-rule' parameter]",
     "orgDescription": "[Description of 'org' parameter]",
     "suppresswarningsDescription": "[Description of 'suppress-warnings' parameter]",
-    "sourceDescription": "[Description of 'source' parameter]",
+    "targetDescription": "[Description of 'target' parameter]",
     "formatDescription": "[Description of 'format' parameter]",
     "outfileDescription": "[Description of 'outfile' parameter]"
   },
   "validations": {
-    "mustTargetSomething": "[Message indicating that 'source' and 'org' flags cannot both be null]",
+    "mustTargetSomething": "[Message indicating that 'target' and 'org' flags cannot both be null]",
     "mustSpecifyOutput": "[Message indicating that 'format' and 'outfile' cannot both be null]",
     "outfileMustBeValid": "[Message indicating that 'outfile' must be a well-formed filepath]",
     "outfileMustBeSupportedType": "[Message indicating that 'outfile' must be a supported file format]"

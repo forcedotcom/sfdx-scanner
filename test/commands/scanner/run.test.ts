@@ -31,7 +31,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
             '--ruleset', 'ApexUnit',
             '--format', 'xml'
           ])
@@ -54,7 +54,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
             '--ruleset', 'ApexUnit',
             '--format', 'xml'
           ])
@@ -68,7 +68,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex'),
+            '--target', path.join('test', 'code-samples', 'apex'),
             '--ruleset', 'ApexUnit',
             '--format', 'xml'
           ])
@@ -107,7 +107,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
             '--ruleset', 'ApexUnit,Style',
             '--format', 'xml'
           ])
@@ -139,7 +139,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
             '--ruleset', 'ApexUnit',
             '--outfile', 'testout.xml'
           ])
@@ -174,7 +174,7 @@ describe('scanner:run', () => {
         .stdout()
         .stderr()
         .command(['scanner:run',
-          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
           '--ruleset', 'ApexUnit',
           '--format', 'csv'
         ])
@@ -203,7 +203,7 @@ describe('scanner:run', () => {
         .stdout()
         .stderr()
         .command(['scanner:run',
-          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
           '--ruleset', 'ApexUnit',
           '--outfile', 'testout.csv'
         ])
@@ -241,7 +241,7 @@ describe('scanner:run', () => {
         .stdout()
         .stderr()
         .command(['scanner:run',
-          '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+          '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
           '--ruleset', 'ApexUnit',
           '--format', 'csv'
         ])
@@ -256,7 +256,7 @@ describe('scanner:run', () => {
         .stdout()
         .stderr()
         .command(['scanner:run',
-          '--source', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+          '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
           '--ruleset', 'ApexUnit',
           '--format', 'table'
         ])
@@ -279,7 +279,7 @@ describe('scanner:run', () => {
         .stdout()
         .stderr()
         .command(['scanner:run',
-          '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+          '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
           '--ruleset', 'ApexUnit',
           '--format', 'table'
         ])
@@ -294,7 +294,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
             '--format', 'xml'
           ])
           .it('When no rules are explicitly specified, all rules are run', ctx => {
@@ -311,7 +311,7 @@ describe('scanner:run', () => {
           .stdout()
           .stderr()
           .command(['scanner:run',
-            '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+            '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
             '--format', 'xml',
             '--verbose'
           ])
@@ -337,7 +337,7 @@ describe('scanner:run', () => {
       runTest
         .stdout()
         .stderr()
-        .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit'])
+        .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit'])
         .it('Error thrown when no out format is specified', ctx => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustSpecifyOutput}`);
         });
@@ -345,7 +345,7 @@ describe('scanner:run', () => {
       runTest
         .stdout()
         .stderr()
-        .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
+        .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
         .it('Error thrown when output file is malformed', ctx => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.outfileMustBeValid}`);
         });
@@ -353,7 +353,7 @@ describe('scanner:run', () => {
       runTest
         .stdout()
         .stderr()
-        .command(['scanner:run', '--source', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
+        .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
         .it('Error thrown when output file is unsupported type', ctx => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.outfileMustBeSupportedType}`);
         });
