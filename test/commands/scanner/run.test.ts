@@ -6,6 +6,7 @@ import {SFDX_SCANNER_PATH} from '../../../src/Constants';
 // NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of
 // the package, rather than the location of this file itself.
 const messages = JSON.parse(fs.readFileSync('./messages/run.json').toString());
+const events = JSON.parse(fs.readFileSync('./messages/EventKeyTemplates.json').toString());
 const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
 
@@ -287,15 +288,44 @@ describe('scanner:run', () => {
         });
     });
 
-    describe('Error handling', () => {
-      runTest
-        .stdout()
-        .stderr()
-        .command(['scanner:run', '--source', 'path/that/does/not/matter', '--format', 'xml'])
-        .it('Error thrown when no rules are specified', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustSpecifyRule}`);
-        });
+    describe('Edge Cases', () => {
+      describe('Test Case: No rules specified', () => {
+        runTest
+          .stdout()
+          .stderr()
+          .command(['scanner:run',
+            '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+            '--format', 'xml'
+          ])
+          .it('When no rules are explicitly specified, all rules are run', ctx => {
+            // We'll split the output by the <violation> tag, so we can get individual violations.
+            let violations = ctx.stdout.split('<violation');
+            // The first list item is going to be the header, so we need to pull that off.
+            violations.shift();
+            // There should be 84 violations. We won't individually check all of them, because we'd be here all day. We'll just
+            // make sure there's the right number of them.
+            expect(violations.length).to.equal(84, 'Should be 84 violations detected in the file');
+          });
 
+        runTest
+          .stdout()
+          .stderr()
+          .command(['scanner:run',
+            '--source', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+            '--format', 'xml',
+            '--verbose'
+          ])
+          .it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
+            // We'll split the output by the <violation> tag, so we can get individual violations.
+            let violations = ctx.stdout.split('<violation');
+            // Before the violations are logged, there should be 16 log messages about implicitly included PMD categories.
+            const regex = new RegExp(events['INFO_PMD_CATEGORY_IMPLICITLY_RUN'].replace(/%s/g, '.*'), 'g');
+            expect(violations[0].match(regex) || []).to.have.lengthOf(16, 'Should be 16 PMD-related logs, two for each of the eight categories');
+          });
+      });
+    });
+
+    describe('Error handling', () => {
       runTest
         .stdout()
         .stderr()
