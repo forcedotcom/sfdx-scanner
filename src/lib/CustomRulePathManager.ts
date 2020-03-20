@@ -1,5 +1,5 @@
 import path = require('path');
-import { FileHandler } from './FileHandler';
+import { FileHandler } from './util/FileHandler';
 import {SfdxError} from '@salesforce/core';
 import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 

@@ -1,7 +1,8 @@
 import {expect} from 'chai';
-import {FileHandler} from '../../src/lib/FileHandler';
+import {FileHandler} from '../../src/lib/util/FileHandler';
+import {Config} from '../../src/lib/util/Config';
 import Sinon = require('sinon');
-import {Config, verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetupManager';
+import {verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetupManager';
 import childProcess = require('child_process');
 import { Messages } from '@salesforce/core';
 import { before } from 'mocha';
@@ -20,14 +21,12 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
     describe('With valid javaHome path in Config and an accepted Java version', () => {
 
-        let writeToConfigStub, setJavaHomeStub;
+        let setJavaHomeStub;
         before(() => {
             Sinon.createSandbox();
             // Config file exists and has the valid path
-            Sinon.stub(Config.prototype, 'exists').resolves(true); 
-            Sinon.stub(Config.prototype, 'get').resolves(javaHomeValidPath);
-            writeToConfigStub = Sinon.stub(Config.prototype, 'write').resolves();
-            setJavaHomeStub = Sinon.stub(Config.prototype, 'set').resolves();
+            Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
+            setJavaHomeStub = Sinon.stub(Config.prototype, 'setJavaHome').resolves();
             
             // FileHandler stat confirms that path is valid
             Sinon.stub(FileHandler.prototype, 'stats').resolves();
@@ -40,16 +39,14 @@ describe('JreSetupManager #verifyJreSetup', () => {
             Sinon.restore();
         });
 
-        it('should set correct Key in config and write the value back to Config', async () => {
+        it('should set correct Key in config', async () => {
             // Execute
             const javaHome = await verifyJreSetup();
 
             // Verify
-            const javaHomeKey = setJavaHomeStub.getCall(0).args[0];
-            const javaHomeValue = setJavaHomeStub.getCall(0).args[1];
-            expect(javaHomeKey).equals('java-home');
+            const javaHomeValue = setJavaHomeStub.getCall(0).args[0];
             expect(javaHomeValue).equals(javaHomeValidPath);
-            expect(writeToConfigStub.calledOnce).to.be.true;
+            expect(setJavaHomeStub.calledOnce).to.be.true;
             expect(javaHome).equals(javaHomeValidPath);
         });
 
@@ -61,7 +58,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
         before(() => {
             Sinon.createSandbox();
             // Config file exists and has the valid path
-            Sinon.stub(Config.prototype, 'exists').resolves(false);
+            Sinon.stub(Config.prototype, 'getJavaHome').returns('');
 
             // FileHandler stat confirms that path is valid
             Sinon.stub(FileHandler.prototype, 'stats').resolves();
@@ -70,8 +67,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
             Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion8);
 
             // Stub the interactions with Config file
-            Sinon.stub(Config.prototype, 'set').resolves();
-            Sinon.stub(Config.prototype, 'write').resolves();
+            Sinon.stub(Config.prototype, 'setJavaHome').resolves();
         });
 
         after(() => {
@@ -115,7 +111,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
         before(() => {
             Sinon.createSandbox();
             // Config file exists and has the valid path
-            Sinon.stub(Config.prototype, 'exists').resolves(false);
+            Sinon.stub(Config.prototype, 'getJavaHome').returns('');
 
             // No System variables in process.env
             process.env = {};
@@ -127,8 +123,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
             Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion8);
 
             // Stub the interactions with Config file
-            Sinon.stub(Config.prototype, 'set').resolves();
-            Sinon.stub(Config.prototype, 'write').resolves();
+            Sinon.stub(Config.prototype, 'setJavaHome').resolves();
         });
 
         after(() => {
@@ -170,13 +165,9 @@ describe('JreSetupManager #verifyJreSetup', () => {
     describe('With Config entry leading to different outcomes', () => {
 
         before(() => {
-            Sinon.createSandbox();
-            // Config file exists and has the valid path
-            Sinon.stub(Config.prototype, 'exists').resolves(true);            
-
+            Sinon.createSandbox();         
             // Stub the interactions with Config file
-            Sinon.stub(Config.prototype, 'set').resolves();
-            Sinon.stub(Config.prototype, 'write').resolves();
+            Sinon.stub(Config.prototype, 'setJavaHome').resolves();
         });
 
         after(() => {
@@ -185,7 +176,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
         it('should fail when invalid path is found', async () => {
             // More stubbing
-            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'get').resolves(javaHomeInvalidPath);
+            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeInvalidPath);
             // FileHandler stat claims that path is invalid
             const statStub = Sinon.stub(FileHandler.prototype, 'stats').throws(error);
 
@@ -202,7 +193,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
         it('should fail when valid path is found, but Java version is not acceptable', async () => {
             // More stubbing
-            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'get').resolves(javaHomeValidPath);
+            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
             const statStub = Sinon.stub(FileHandler.prototype, 'stats').resolves();
             // Invalid java version is returned
             const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, invalidVersion);
@@ -221,7 +212,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
         it('should finish successfully when Java11 is found', async () => {
             // More stubbing
-            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'get').resolves(javaHomeValidPath);
+            const configGetJavaHomeStub = Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
             const statStub = Sinon.stub(FileHandler.prototype, 'stats').resolves();
             const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion11);
 
