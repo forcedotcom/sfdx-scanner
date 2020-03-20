@@ -30,6 +30,12 @@ export abstract class ScannerCommand extends SfdxCommand {
     return filters;
   }
 
+  protected displayInfo(msg: string, verboseOnly: boolean): void {
+    if (!verboseOnly || this.flags.verbose) {
+      this.ux.log(msg);
+    }
+  }
+
   protected displayWarning(msg: string, verboseOnly: boolean): void {
     if (!verboseOnly || this.flags.verbose) {
       this.ux.warn(msg);
@@ -42,6 +48,8 @@ export abstract class ScannerCommand extends SfdxCommand {
   }
 
   protected buildEventListeners(): void {
+    uxEvents.on('info-always', msg => this.displayInfo(msg, false));
+    uxEvents.on('info-verbose', msg => this.displayInfo(msg, true));
     uxEvents.on('warning-always', msg => this.displayWarning(msg, false));
     uxEvents.on('warning-verbose', msg => this.displayWarning(msg, true));
   }

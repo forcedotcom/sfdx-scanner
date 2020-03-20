@@ -58,8 +58,13 @@ export class PmdCatalogWrapper extends PmdSupport {
       await this.rebuildCatalogIfNecessary();
       this.catalogJson = await PmdCatalogWrapper.readCatalogFromFile();
     }
-    // Now that we've got a catalog, we'll want to iterate over all the filters we were given, and see which ones
-    // correspond to a path in the catalog.
+    // If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
+    // rules in category files, we should just return all paths corresponding to a category.
+    if (!filters || filters.length === 0) {
+      return this.getAllCategoryPaths();
+    }
+    // If we actually do have filters, we'll want to iterate over all of them and see which ones correspond to a path in
+    // the catalog.
     // Since PMD treats categories and rulesets as interchangeable inputs, we can put both types of path into a single
     // array and return that.
     let paths = [];
@@ -95,6 +100,37 @@ export class PmdCatalogWrapper extends PmdSupport {
     // TODO: Pretty soon, we'll want to add sophisticated logic to determine whether the catalog is stale. But for now,
     //  we'll just return true so we always rebuild the catalog.
     return true;
+  }
+
+  private getAllCategoryPaths(): string[] {
+    // We'll want to be building a list of all of the paths we found.
+    let paths = [];
+    // Since this method is run when no filter criteria are provided, it might be nice to provide a level of visibility
+    // into all of the categories that were run. To do that, we'll be creating event descriptors as we go.
+    const events = [];
+
+    // Iterate over all of the categories.
+    const categories = this.catalogJson.categories;
+    Object.getOwnPropertyNames(categories).forEach((catName) => {
+      const catPaths = categories[catName];
+      // Add all of the paths associated with this category name into our list.
+      paths = [...paths, ...catPaths];
+      // For each path, build an event indicating that the path was implicitly included.
+      catPaths.forEach((path) => {
+        events.push({
+          key: 'INFO_PMD_CATEGORY_IMPLICITLY_RUN',
+          args: [catName, path],
+          type: 'INFO',
+          handler: 'UX',
+          verbose: true,
+          time: Date.now()
+        });
+      });
+    });
+
+    // Throw all of our events, and then return the paths.
+    this.orderAndEmitEvents(events, []);
+    return paths;
   }
 
   private static getCatalogName(): string {
@@ -197,7 +233,15 @@ export class PmdCatalogWrapper extends PmdSupport {
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
-      this.findAndEmitEvents(stdout, stderr);
+      // We want to find any events that were dumped into stdout or stderr and turn them back into events that can be thrown.
+      // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the outputs as JSONs
+      // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
+      const regex = /SFDX-START(.*)SFDX-END/g;
+      const headerLength = 'SFDX-START'.length;
+      const tailLength = 'SFDX-END'.length;
+      const outEvents: PmdCatalogEvent[] = (stdout.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
+      const errEvents: PmdCatalogEvent[] = (stderr.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
+      this.orderAndEmitEvents(outEvents, errEvents);
       if (code === 0) {
         res([!!code, stdout]);
       } else {
@@ -206,14 +250,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     });
   }
 
-  private findAndEmitEvents(stdout: string, stderr: string): void {
-    // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the outputs as JSONs
-    // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
-    const regex = /SFDX-START(.*)SFDX-END/g;
-    const headerLength = 'SFDX-START'.length;
-    const tailLength = 'SFDX-END'.length;
-    const outEvents: PmdCatalogEvent[] = (stdout.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
-    const errEvents: PmdCatalogEvent[] = (stderr.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
+  private orderAndEmitEvents(outEvents: PmdCatalogEvent[], errEvents: PmdCatalogEvent[]): void {
     // If both lists are empty, we can just be done now.
     if (outEvents.length == 0 && errEvents.length == 0) {
       return;
