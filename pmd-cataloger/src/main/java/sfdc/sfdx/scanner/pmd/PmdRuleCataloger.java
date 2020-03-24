@@ -8,6 +8,7 @@ import java.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.w3c.dom.*;
+import sfdc.sfdx.scanner.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
@@ -15,7 +16,6 @@ import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRuleset;
 import sfdc.sfdx.scanner.xml.XmlReader;
 import sfdc.sfdx.scanner.paths.PathManipulator;
-import sfdc.sfdx.scanner.ExitCode;
 import sfdc.sfdx.scanner.EventKey;
 
 class PmdRuleCataloger {
@@ -187,8 +187,7 @@ class PmdRuleCataloger {
       Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
       file.write(prettyGson.toJson(json.constructJson()));
     } catch (IOException ioe) {
-      System.err.println("Failed to write JSON to file: " + ioe.getMessage());
-      System.exit(ExitCode.JSON_WRITE_EXCEPTION.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, new String[]{System.getProperty("catalogName")}, ioe);
     }
   }
 }

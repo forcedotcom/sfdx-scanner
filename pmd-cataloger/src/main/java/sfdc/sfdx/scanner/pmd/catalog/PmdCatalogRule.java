@@ -4,7 +4,8 @@ import java.util.*;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
-import sfdc.sfdx.scanner.ExitCode;
+import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.EventKey;
 
 public class PmdCatalogRule {
   public static final String ATTR_NAME = "name";
@@ -81,8 +82,7 @@ public class PmdCatalogRule {
       default:
         // If there was more than one description node, then something's gone crazy wrong and we should exit as gracefully
         // as possible.
-        System.err.println("PMD Rule [" + getFullName() + "] has " + nl.getLength() + " 'description' elements. Please reduce this number to 1.");
-        System.exit(ExitCode.PMD_MULTIPLE_RULE_DESCRIPTIONS.getCode());
+        throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC, new String[]{getFullName(), String.valueOf(nl.getLength())});
     }
     return res;
   }

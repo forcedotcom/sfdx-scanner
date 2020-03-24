@@ -2,7 +2,8 @@ package sfdc.sfdx.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import sfdc.sfdx.scanner.ExitCode;
+import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.EventKey;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,14 +45,9 @@ public class XmlReader {
       DocumentBuilder db = dbf.newDocumentBuilder();
       doc = db.parse(in);
     } catch (IOException ioe) {
-      System.err.println("Error occurred while reading file [" + path + "]: " + ioe.getMessage());
-      System.exit(ExitCode.XML_IO_EXCEPTION.getCode());
-    } catch (ParserConfigurationException pce) {
-      System.err.println("Could not construct XML Parser: " + pce.getMessage());
-      System.exit(ExitCode.XML_PARSER_EXCEPTION.getCode());
-    } catch (SAXException saxe) {
-      System.err.println("Could not parse XML file [" + path + "]: " + saxe.getMessage());
-      System.exit(ExitCode.XML_SAXE_EXCEPTION.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, new String[]{path, ioe.getMessage()}, ioe);
+    } catch (ParserConfigurationException | SAXException e) {
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, new String[]{path, e.getMessage()}, e);
     }
     return doc;
   }
