@@ -187,7 +187,7 @@ class PmdRuleCataloger {
       Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
       file.write(prettyGson.toJson(json.constructJson()));
     } catch (IOException ioe) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, new String[]{System.getProperty("catalogName")}, ioe);
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, System.getProperty("catalogName"));
     }
   }
 }

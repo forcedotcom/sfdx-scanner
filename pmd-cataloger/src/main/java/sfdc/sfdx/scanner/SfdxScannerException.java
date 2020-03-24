@@ -15,11 +15,11 @@ public class SfdxScannerException extends RuntimeException {
   private final EventKey eventKey;
   private final List<String> args;
 
-  public SfdxScannerException(EventKey eventKey, String[] args) {
-    this(eventKey, args, null);
+  public SfdxScannerException(EventKey eventKey, String... args) {
+    this(eventKey, null, args);
   }
 
-  public SfdxScannerException(EventKey eventKey, String[] args, Throwable throwable) {
+  public SfdxScannerException(EventKey eventKey, Throwable throwable, String... args) {
     super(throwable);
 
     // Confirm that the correct number of arguments for the message has been provided
