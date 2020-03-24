@@ -4,6 +4,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import fs = require('fs');
 import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
+import globby = require('globby');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -95,7 +96,7 @@ export default class Run extends ScannerCommand {
 
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
-    const target: string[]|string = this.flags.target || this.flags.org;
+    const target: string[]|string = this.flags.org || await this.unpackTargets();
     const format: OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
     const ruleManager = new RuleManager();
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
@@ -113,6 +114,16 @@ export default class Run extends ScannerCommand {
     // --format and --outfile are mutually exclusive, but they can't both be null.
     if (!this.flags.format && !this.flags.outfile) {
       throw new SfdxError(messages.getMessage('validations.mustSpecifyOutput'));
+    }
+  }
+
+  private async unpackTargets(): Promise<string[]> {
+    // If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
+    // the target paths.
+    if (globby.hasMagic(this.flags.target)) {
+      return await globby(this.flags.target);
+    } else {
+      return this.flags.target;
     }
   }
 
