@@ -98,7 +98,7 @@ export default class Run extends ScannerCommand {
     const filters = this.buildRuleFilters();
     const target: string[]|string = this.flags.org || await this.unpackTargets();
     const format: OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
-    const ruleManager = new RuleManager();
+    const ruleManager = await RuleManager.create({});
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
     const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);

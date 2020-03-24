@@ -1,6 +1,7 @@
 {
   "WARNING_INVALID_CAT_SKIPPED": "Cataloger skipped invalid PMD Category file '%s'.",
   "WARNING_INVALID_RULESET_SKIPPED": "Cataloger skipped invalid PMD Ruleset file '%s'.",
+  "WARNING_XML_DROPPED": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
   "INFO_PMD_CATEGORY_IMPLICITLY_RUN": "Implicitly running PMD Category '%s' defined in '%s'.",
   "INFO_JAR_AND_XML_PROCESSED": "XML files collected from JAR [%s]: %s",
   "ERROR_UNEXPECTED": "Unexpected error occurred while cataloging rules.",

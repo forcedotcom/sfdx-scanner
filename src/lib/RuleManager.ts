@@ -1,4 +1,5 @@
-import {SfdxError} from '@salesforce/core';
+import {SfdxError, Logger} from '@salesforce/core';
+import { AsyncCreatable } from '@salesforce/kit';
 import {Rule} from '../types';
 import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
 import PmdWrapper from './pmd/PmdWrapper';
@@ -27,14 +28,18 @@ export class RuleFilter {
   }
 }
 
-export class RuleManager {
+export class RuleManager extends AsyncCreatable {
   private pmdCatalogWrapper: PmdCatalogWrapper;
+  private logger: Logger; // TODO: add relevant trace logs
 
-  constructor() {
-    this.pmdCatalogWrapper = new PmdCatalogWrapper();
+  protected async init(): Promise<void> {
+    this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
+    this.logger = await Logger.child('RuleManager');
   }
 
   public async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+    this.logger.trace(`Fetching rules that match the criteria ${filters}`);
+
     try {
       const allRules = await this.getAllRules();
       return allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));

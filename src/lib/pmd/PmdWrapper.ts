@@ -1,4 +1,5 @@
 import {ChildProcessWithoutNullStreams} from 'child_process';
+import {Logger} from '@salesforce/core';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
@@ -6,15 +7,28 @@ import path = require('path');
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
 
+interface PmdWrapperOptions {
+  path: string;
+  rules: string;
+  reportFormat?: Format;
+  reportFile?: string;
+}
+
 export default class PmdWrapper extends PmdSupport {
+
 
   path: string;
   rules: string;
   reportFormat: Format;
   reportFile: string;
+  logger: Logger; // TODO: Add relevant trace log lines
+
+  protected async init(): Promise<void> {
+    this.logger = await Logger.child('PmdWrapper');
+  }
 
   public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<[boolean,string]> {
-    const myPmd = new PmdWrapper(path, rules, reportFormat, reportFile);
+    const myPmd = await PmdWrapper.create({path: path, rules: rules, reportFormat: reportFormat, reportFile: reportFile});
     return myPmd.execute();
   }
 
@@ -22,12 +36,12 @@ export default class PmdWrapper extends PmdSupport {
     return super.runCommand();
   }
 
-  constructor(path: string, rules: string, reportFormat?: Format, reportFile?: string) {
-    super();
-    this.path = path;
-    this.rules = rules;
-    this.reportFormat = reportFormat || Format.XML;
-    this.reportFile = reportFile || null;
+  constructor(options: PmdWrapperOptions) {
+    super(options);
+    this.path = options.path;
+    this.rules = options.rules;
+    this.reportFormat = options.reportFormat || Format.XML;
+    this.reportFile = options.reportFile || null;
   }
 
   protected async buildCommandArray(): Promise<[string, string[]]> {
@@ -46,6 +60,7 @@ export default class PmdWrapper extends PmdSupport {
       args = [...args, '-reportfile', this.reportFile];
     }
 
+    this.logger.trace(`Command: ${command}, Args: ${args}`);
     return [command, args];
   }
 
