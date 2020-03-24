@@ -2,7 +2,8 @@ package sfdc.sfdx.scanner.pmd.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import sfdc.sfdx.scanner.ExitCode;
+import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.EventKey;
 
 import java.util.*;
 
@@ -93,8 +94,7 @@ public class PmdCatalogRuleset {
     // for circular references, we're just going to forcibly exit if we go deeper than 10 layers of recursion, which is
     // way more than anyone could possibly want or need.
     if (recursionDepth > 10) {
-      System.err.println("PMD Ruleset [" + caller.getPath() + "] references rule [" + rule.getFullName() + "] through 10 or more layers of indirection. Please reduce this number.");
-      System.exit(ExitCode.PMD_RULESET_RECURSION_LIMIT_REACHED.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_RECURSION_LIMIT, new String[]{caller.getPath(), rule.getFullName()});
     }
     // Depending on whether this method was invoked by another ruleset, we'll either look for references to the rule's
     // category or references to the ruleset that invoked this method.

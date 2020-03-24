@@ -1,7 +1,5 @@
 package sfdc.sfdx.scanner.pmd;
 
-import sfdc.sfdx.scanner.ExitCode;
-
 import java.util.*;
 
 /**
@@ -61,11 +59,6 @@ public class LanguageXmlFileMapping {
   }
 
   private void addPath(String path, String language, Map<String, Set<String>> pathsByLanguage) {
-    if (nullEmptyOrWhitespace(language)) {
-      System.err.println("Language cannot be empty: " + language);
-      System.exit(ExitCode.LANGUAGE_MISSING_ERROR.getCode());
-    }
-
     language = language.toLowerCase();
 
     if (pathsByLanguage.containsKey(language)) {

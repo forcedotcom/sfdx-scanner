@@ -1,6 +1,7 @@
 package sfdc.sfdx.scanner.pmd;
 
-import sfdc.sfdx.scanner.ExitCode;
+import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.EventKey;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -47,8 +48,7 @@ public class XmlFileFinder {
 
     // Make sure that the path exists to begin with
     if (!Files.exists(path)) {
-      System.err.println("Path does not exist: " + path.getFileName());
-      System.exit(ExitCode.CLASSPATH_DOES_NOT_EXIST.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{path.getFileName().toString()});
     }
 
 
@@ -88,8 +88,7 @@ public class XmlFileFinder {
       }
     } catch (Exception e) {
       //TODO: add logging and print stacktrace for debugging
-      System.err.println("Unable to read resource JAR " + jarPath);
-      System.exit(ExitCode.JAR_READ_FAILED.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, new String[]{jarPath}, e);
     }
 
     return xmlFiles;
@@ -108,8 +107,7 @@ public class XmlFileFinder {
       filesFound.addAll( walk.map(x -> x.toString())
         .filter(f -> f.endsWith(fileType.suffix)).collect(Collectors.toList()));
     } catch (IOException e) {
-      System.err.println("Error parsing directory: " + path);
-      System.exit(ExitCode.DIRECTORY_READ_EXCEPTION.getCode());
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, new String[]{path.toString()}, e);
     }
 
     return filesFound;
