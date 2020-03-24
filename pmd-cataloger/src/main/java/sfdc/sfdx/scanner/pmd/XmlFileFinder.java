@@ -2,6 +2,7 @@ package sfdc.sfdx.scanner.pmd;
 
 import sfdc.sfdx.scanner.SfdxScannerException;
 import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxMessager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -86,6 +87,8 @@ public class XmlFileFinder {
           xmlFiles.add(fName);
         }
       }
+
+      SfdxMessager.getInstance().uxInfo(true, EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
     } catch (Exception e) {
       //TODO: add logging and print stacktrace for debugging
       throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);

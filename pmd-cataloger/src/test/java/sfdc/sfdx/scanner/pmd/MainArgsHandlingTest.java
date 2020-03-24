@@ -73,7 +73,7 @@ public class MainArgsHandlingTest {
       fail(failureMessage);
     } catch (SfdxScannerException e) {
       assertEquals("Unexpected eventKey on exception", EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, e.getEventKey());
-      assertEquals("Unexpected arg list on exception", expectedArgForMessage, e.getArgs().get(0));
+      assertEquals("Unexpected arg list on exception", expectedArgForMessage, e.getArgs()[0]);
     }
   }
 }

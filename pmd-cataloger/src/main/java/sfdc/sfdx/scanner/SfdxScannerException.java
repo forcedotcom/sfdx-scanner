@@ -13,7 +13,7 @@ import java.util.List;
 public class SfdxScannerException extends RuntimeException {
 
   private final EventKey eventKey;
-  private final List<String> args;
+  private final String[] args;
 
   public SfdxScannerException(EventKey eventKey, String... args) {
     this(eventKey, null, args);
@@ -22,19 +22,15 @@ public class SfdxScannerException extends RuntimeException {
   public SfdxScannerException(EventKey eventKey, Throwable throwable, String... args) {
     super(throwable);
 
-    // Confirm that the correct number of arguments for the message has been provided
-    // If this fails, this would be a developer error
-    assert (eventKey.getArgCount() == args.length);
-
     this.eventKey = eventKey;
-    this.args = Arrays.asList(args);
+    this.args = args;
   }
 
   public EventKey getEventKey() {
     return eventKey;
   }
 
-  public List<String> getArgs() {
+  public String[] getArgs() {
     return args;
   }
 
@@ -42,4 +38,11 @@ public class SfdxScannerException extends RuntimeException {
     return Throwables.getStackTraceAsString(this).replace("\\n", " | ");
   }
 
+  @Override
+  public String toString() {
+    return "SfdxScannerException{" +
+      "eventKey=" + eventKey +
+      ", args=" + Arrays.toString(args) +
+      '}';
+  }
 }

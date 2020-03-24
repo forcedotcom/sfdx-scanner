@@ -3,12 +3,14 @@ package sfdc.sfdx.scanner.messaging;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import sfdc.sfdx.scanner.EventKey;
 import sfdc.sfdx.scanner.SfdxScannerException;
 
 enum MessageType {
+  INFO,
   WARNING,
   ERROR
 }
@@ -34,21 +36,67 @@ public class SfdxMessager {
     return INSTANCE;
   }
 
-  public void uxWarn(EventKey key, List<String> args) {
-    uxWarn(key, args, false);
+  public void uxInfo(boolean verbose, EventKey key, String... args) {
+    uxAddMessage(
+      verbose,
+      MessageType.INFO,
+      key,
+      args);
   }
 
-  public void uxWarn(EventKey key, List<String> args, boolean verbose) {
-    // TODO: delete in the next iteration
-    System.err.println(formatMessage(key, args, MessageType.WARNING, MessageHandler.UX, verbose));
-    final Message message = new Message(key, args, "", MessageType.WARNING, MessageHandler.UX, verbose);
-    MESSAGES.add(message);
+  public void uxWarn(boolean verbose, EventKey key, String... args) {
+    uxAddMessage(
+      verbose,
+      MessageType.WARNING,
+      key,
+      args);
   }
 
   public void uxError(SfdxScannerException exception) {
-    final Message message = new Message(exception.getEventKey(), exception.getArgs(), exception.getFullStacktrace(), MessageType.ERROR, MessageHandler.UX, false);
+    uxAddMessage(
+      false,
+      MessageType.ERROR,
+      MessageHandler.UX,
+      exception.getFullStacktrace(),
+      exception.getEventKey(),
+      exception.getArgs());
+  }
+
+  private void uxAddMessage(
+    boolean verbose,
+    MessageType messageType,
+    EventKey key,
+    String... args) {
+    uxAddMessage(
+      verbose,
+      messageType,
+      MessageHandler.UX,
+      "",
+      key,
+      args);
+  }
+
+  private void uxAddMessage(
+    boolean verbose,
+    MessageType messageType,
+    MessageHandler messageHandler,
+    String log,
+    EventKey eventKey,
+    String... args) {
+    // Confirm that the correct number of arguments for the message has been provided
+    // If this fails, this would be a developer error
+    assert (eventKey.getArgCount() == args.length);
+
+    final Message message = new Message(
+      eventKey,
+      Arrays.asList(args),
+      log,
+      messageType,
+      messageHandler,
+      verbose);
     MESSAGES.add(message);
   }
+
 
   public String getAllMessagesWithFormatting() {
     final String messagesAsJson = getMessagesAsJson();
@@ -76,13 +124,6 @@ public class SfdxMessager {
   public void resetMessages() {
     MESSAGES.clear();
   }
-
-  // TODO: delete in the next iteration
-  private String formatMessage(EventKey key, List<String> args, MessageType type, MessageHandler handler, boolean verbose) {
-    // A message is created by serializing an SfdxMessage instance and sandwiching it between the START and END strings.
-    return START + new Message(key, args, "", type, handler, verbose).toJson() + END;
-  }
-
 
 }
 
