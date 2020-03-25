@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/sfdx-scanner",
   "description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "author": "ISV SWAT",
   "bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
   "dependencies": {
@@ -83,7 +83,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "lint": "eslint ./src --ext .ts",
     "test": "./gradlew test && nyc mocha \"./test/**/*.test.ts\"",
-    "postinstall": "ts-node  -e \"require(\"./lib/lib/JreSetupManager\").verifyJreSetup()\"",
+    "postinstall": "ts-node  -e \"require('./lib/lib/JreSetupManager').verifyJreSetup()\"",
     "coverage": "nyc report --reporter text",
     "version": "oclif-dev readme && git add README.md"
   }
