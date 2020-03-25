@@ -2,6 +2,7 @@ import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
+import {JAVA_CLASSPATH_SEPARATOR} from '../../Constants';
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -38,7 +39,7 @@ export default class PmdWrapper extends PmdSupport {
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
     const classpath = await super.buildClasspath();
-    let args = ['-cp', classpath.join(':'), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
+    let args = ['-cp', classpath.join(JAVA_CLASSPATH_SEPARATOR), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
       '-format', this.reportFormat];
 
     // Then add anything else that's dynamically included based on other input.
