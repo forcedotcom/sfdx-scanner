@@ -398,7 +398,7 @@ describe('scanner:run', () => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
             let violations = ctx.stdout.split('<violation');
             // Before the violations are logged, there should be 16 log messages about implicitly included PMD categories.
-            const regex = new RegExp(events['INFO_PMD_CATEGORY_IMPLICITLY_RUN'].replace(/%s/g, '.*'), 'g');
+            const regex = new RegExp(events.info.pmdJarImplicitlyRun.replace(/%s/g, '.*'), 'g');
             expect(violations[0].match(regex) || []).to.have.lengthOf(16, 'Should be 16 PMD-related logs, two for each of the eight categories');
           });
       });

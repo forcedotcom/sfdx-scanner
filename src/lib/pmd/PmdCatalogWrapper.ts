@@ -110,7 +110,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       // For each path, build an event indicating that the path was implicitly included.
       catPaths.forEach((path) => {
         events.push({
-          key: 'info.pmdJarImplicitlyRun',
+          messageKey: 'info.pmdJarImplicitlyRun',
           args: [catName, path],
           type: 'INFO',
           handler: 'UX',
@@ -121,7 +121,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     });
 
     // Throw all of our events, and then return the paths.
-    this.outputProcessor.orderAndEmitEvents(events, []);
+    this.outputProcessor.emitEvents(events);
     return paths;
   }
 
@@ -226,7 +226,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
-      this.outputProcessor.processOutput(stdout, stderr);
+      this.outputProcessor.processOutput(stdout);
 
       if (code === 0) {
         res([!!code, stdout]);

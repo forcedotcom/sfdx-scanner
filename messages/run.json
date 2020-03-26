@@ -19,6 +19,7 @@
     "outfileMustBeSupportedType": "[Message indicating that 'outfile' must be a supported file format]"
   },
   "output": {
-    "noViolationsDetected": "[Message indicating that no violations were found]"
+    "noViolationsDetected": "[Message indicating that no violations were found]",
+    "writtenToOutFile": "[Message indicating that results are in %s]"
   }
 }
