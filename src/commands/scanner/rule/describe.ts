@@ -15,15 +15,10 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 export default class Describe extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
-  // TODO: Write real examples.
   public static examples = [
-    `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
-  Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
-  My hub org id is: 00Dxx000000001234
-  `,
-    `$ sfdx hello:org --name myname --targetusername myOrg@example.com
-  Hello myname! This is org: MyOrg and I will be around until Tue Mar 20 2018!
-  `
+    messages.getMessage('examples.normalExample'),
+    messages.getMessage('examples.noRulesExample'),
+    messages.getMessage('examples.multipleRulesExample')
   ];
 
   public static args = [{name: 'file'}];
@@ -48,7 +43,7 @@ export default class Describe extends ScannerCommand {
     if (rules.length === 0) {
       // If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
       // so it's immediately obvious.
-      this.ux.warn(messages.getMessage('output.noMatchingRules'));
+      this.ux.warn(messages.getMessage('output.noMatchingRules').replace('{0}', this.flags.rulename));
     } else if (rules.length > 1) {
       // If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
       const msg = messages.getMessage('output.multipleMatchingRules')
