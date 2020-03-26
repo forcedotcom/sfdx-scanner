@@ -45,9 +45,9 @@ public class XmlReader {
       DocumentBuilder db = dbf.newDocumentBuilder();
       doc = db.parse(in);
     } catch (IOException ioe) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, new String[]{path, ioe.getMessage()}, ioe);
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
     } catch (ParserConfigurationException | SAXException e) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, new String[]{path, e.getMessage()}, e);
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
     }
     return doc;
   }

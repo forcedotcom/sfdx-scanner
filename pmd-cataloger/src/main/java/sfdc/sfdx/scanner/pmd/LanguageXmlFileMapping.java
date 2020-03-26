@@ -1,5 +1,8 @@
 package sfdc.sfdx.scanner.pmd;
 
+import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxMessager;
+
 import java.util.*;
 
 /**
@@ -45,7 +48,7 @@ public class LanguageXmlFileMapping {
       } else if (path.contains(CATEGORY)) {
         addCategoryPathForLanguage(path, language);
       } else {
-        System.out.println("Dropping this XML file since its path does not conform to Rulesets or Category: " + path);
+        SfdxMessager.getInstance().uxWarn(true, EventKey.WARNING_XML_DROPPED, path);
       }
     }
   }

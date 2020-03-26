@@ -109,7 +109,7 @@ class PmdRuleCataloger {
     // If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
       String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-      SfdxMessager.getInstance().uxWarn(EventKey.WARNING_INVALID_CAT_SKIPPED, new ArrayList<>(Arrays.asList(fullPath)), true);
+      SfdxMessager.getInstance().uxWarn(true, EventKey.WARNING_INVALID_CAT_SKIPPED, fullPath);
       return;
     }
 
@@ -142,7 +142,7 @@ class PmdRuleCataloger {
     // If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just log something and skip it.
     if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
       String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-      SfdxMessager.getInstance().uxWarn(EventKey.WARNING_INVALID_RULESET_SKIPPED, new ArrayList<>(Arrays.asList(fullPath)), true);
+      SfdxMessager.getInstance().uxWarn(true, EventKey.WARNING_INVALID_RULESET_SKIPPED, fullPath);
       return;
     }
 
@@ -187,7 +187,7 @@ class PmdRuleCataloger {
       Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
       file.write(prettyGson.toJson(json.constructJson()));
     } catch (IOException ioe) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, new String[]{System.getProperty("catalogName")}, ioe);
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, System.getProperty("catalogName"));
     }
   }
 }

@@ -1,5 +1,6 @@
 import childProcess = require('child_process');
 import {ChildProcessWithoutNullStreams} from 'child_process';
+import { AsyncCreatable } from '@salesforce/kit';
 import { CustomRulePathManager, ENGINE } from '../CustomRulePathManager'; 
 import path = require('path');
 
@@ -16,7 +17,7 @@ export enum Format {
   TEXT = 'text'
 }
 
-export abstract class PmdSupport {
+export abstract class PmdSupport extends AsyncCreatable {
 
   protected async buildClasspath(): Promise<string[]> {
     // Include PMD libs into classpath

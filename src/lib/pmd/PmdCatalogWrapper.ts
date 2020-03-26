@@ -7,11 +7,8 @@ import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 import {FileHandler} from '../util/FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 import {ChildProcessWithoutNullStreams} from "child_process";
-import { uxEvents } from '../ScannerEvents';
-import {Messages} from "@salesforce/core";
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
+import { Logger } from '@salesforce/core';
+import {OutputProcessor} from './OutputProcessor';
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
@@ -24,19 +21,14 @@ export type PmdCatalog = {
   rulesets: AnyJson[];
 };
 
-type PmdCatalogEvent = {
-  key: string;
-  args: string[];
-  type: string;
-  handler: string;
-  verbose: boolean;
-  time: number;
-};
-
 export class PmdCatalogWrapper extends PmdSupport {
   private catalogJson: PmdCatalog;
-  constructor() {
-    super();
+  private outputProcessor: OutputProcessor;
+  private logger: Logger; // TODO: add relevant trace logs
+
+  protected async init(): Promise<void> {
+    this.outputProcessor = await OutputProcessor.create({});
+    this.logger = await Logger.child('PmdCatalogWrapper');
   }
 
   public async getCatalog(): Promise<PmdCatalog> {
@@ -129,7 +121,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     });
 
     // Throw all of our events, and then return the paths.
-    this.orderAndEmitEvents(events, []);
+    this.outputProcessor.orderAndEmitEvents(events, []);
     return paths;
   }
 
@@ -202,6 +194,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       }
       rulePathEntries.get(language).add(pmdJarName);
     });
+    this.logger.trace(`Added PMD Jar paths: ${rulePathEntries}`);
   }
 
 
@@ -233,49 +226,16 @@ export class PmdCatalogWrapper extends PmdSupport {
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
-      // We want to find any events that were dumped into stdout or stderr and turn them back into events that can be thrown.
-      // As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the outputs as JSONs
-      // sandwiched between 'SFDX-START' and 'SFDX-END'. So we'll find all instances of that.
-      const regex = /SFDX-START(.*)SFDX-END/g;
-      const headerLength = 'SFDX-START'.length;
-      const tailLength = 'SFDX-END'.length;
-      const outEvents: PmdCatalogEvent[] = (stdout.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
-      const errEvents: PmdCatalogEvent[] = (stderr.match(regex) || []).map(str => JSON.parse(str.substring(headerLength, str.length - tailLength)));
-      this.orderAndEmitEvents(outEvents, errEvents);
+      this.outputProcessor.processOutput(stdout, stderr);
+
       if (code === 0) {
         res([!!code, stdout]);
-      } else {
+      }
+      else {
         rej(stderr);
       }
     });
   }
 
-  private orderAndEmitEvents(outEvents: PmdCatalogEvent[], errEvents: PmdCatalogEvent[]): void {
-    // If both lists are empty, we can just be done now.
-    if (outEvents.length == 0 && errEvents.length == 0) {
-      return;
-    }
 
-    // If either list is non-empty, we'll need to interleave the events in both lists into a single list that's ordered
-    // chronologically. We'll do that with a bog-standard merge algorithm.
-    let orderedEvents = [];
-    let outIdx = 0;
-    let errIdx = 0;
-    while (outIdx < outEvents.length && errIdx < errEvents.length) {
-      if (outEvents[outIdx].time <= errEvents[errIdx].time) {
-        orderedEvents.push(outEvents[outIdx++]);
-      } else {
-        orderedEvents.push(errEvents[errIdx++]);
-      }
-    }
-    orderedEvents = orderedEvents.concat(outEvents.slice(outIdx)).concat(errEvents.slice(errIdx));
-
-    // Iterate over all of the events and throw them as appropriate.
-    orderedEvents.forEach((event) => {
-      if (event.handler === 'UX') {
-        const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
-        uxEvents.emit(eventType, messages.getMessage(event.key, event.args));
-      }
-    });
-  }
 }

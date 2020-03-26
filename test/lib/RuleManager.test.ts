@@ -10,7 +10,7 @@ const PMD_FIXTURE_RULE_COUNT = 70;
 let ruleManager = null;
 
 describe('RuleManager', () => {
-  before(() => {
+  before(async () => {
     // Make sure all catalogs exist where they're supposed to.
     if (!fs.existsSync(PMD_CATALOG_FIXTURE_PATH)) {
       throw new Error('Fake catalog does not exist');
@@ -29,7 +29,7 @@ describe('RuleManager', () => {
     });
 
     // Declare our rule manager.
-    ruleManager = new RuleManager();
+    ruleManager = await RuleManager.create({});
   });
 
   describe('getRulesMatchingCriteria()', () => {

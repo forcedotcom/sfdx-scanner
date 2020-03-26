@@ -2,6 +2,7 @@ package sfdc.sfdx.scanner.pmd;
 
 import sfdc.sfdx.scanner.SfdxScannerException;
 import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxMessager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class XmlFileFinder {
 
     // Make sure that the path exists to begin with
     if (!Files.exists(path)) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{path.getFileName().toString()});
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
     }
 
 
@@ -86,9 +87,11 @@ public class XmlFileFinder {
           xmlFiles.add(fName);
         }
       }
+
+      SfdxMessager.getInstance().uxInfo(true, EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
     } catch (Exception e) {
       //TODO: add logging and print stacktrace for debugging
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, new String[]{jarPath}, e);
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);
     }
 
     return xmlFiles;
@@ -107,7 +110,7 @@ public class XmlFileFinder {
       filesFound.addAll( walk.map(x -> x.toString())
         .filter(f -> f.endsWith(fileType.suffix)).collect(Collectors.toList()));
     } catch (IOException e) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, new String[]{path.toString()}, e);
+      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, e, path.toString());
     }
 
     return filesFound;
