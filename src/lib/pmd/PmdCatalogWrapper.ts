@@ -110,7 +110,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       // For each path, build an event indicating that the path was implicitly included.
       catPaths.forEach((path) => {
         events.push({
-          key: 'INFO_PMD_CATEGORY_IMPLICITLY_RUN',
+          key: 'info.pmdJarImplicitlyRun',
           args: [catName, path],
           type: 'INFO',
           handler: 'UX',

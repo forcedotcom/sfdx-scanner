@@ -3,8 +3,8 @@ package sfdc.sfdx.scanner.pmd;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import sfdc.sfdx.scanner.EventKey;
-import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
 
 public class Main {
@@ -45,11 +45,11 @@ public class Main {
 
     } catch (SfdxScannerException se) {
       // Add all SfdxScannerExceptions as messages
-      SfdxMessager.getInstance().uxError(se);
+      SfdxMessager.getInstance().addMessage(se);
     } catch (Throwable throwable) {
       // Catch and handle any exceptions that may have slipped through
-      final SfdxScannerException exception = new SfdxScannerException(EventKey.ERROR_UNEXPECTED, throwable, throwable.getMessage());
-      SfdxMessager.getInstance().uxError(exception);
+      final SfdxScannerException exception = new SfdxScannerException(EventKey.ERROR_INTERNAL_UNEXPECTED, throwable, throwable.getMessage());
+      SfdxMessager.getInstance().addMessage(exception);
     }
     finally {
       // Print all the messages we have collected in a parsable format

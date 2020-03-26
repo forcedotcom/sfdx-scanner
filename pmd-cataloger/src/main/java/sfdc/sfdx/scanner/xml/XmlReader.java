@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import sfdc.sfdx.scanner.SfdxScannerException;
-import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;

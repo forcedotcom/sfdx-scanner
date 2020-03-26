@@ -5,9 +5,10 @@ import { uxEvents } from '../ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
+const genericMessageKey = 'error.external.genericErrorMessage';
 
 export type PmdCatalogEvent = {
-    key: string;
+    messageKey: string;
     args: string[];
     type: string;
     log: string;
@@ -58,15 +59,22 @@ export class OutputProcessor extends AsyncCreatable {
 
         // Iterate over all of the events and throw them as appropriate.
         orderedEvents.forEach((event) => {
+            this.logEvent(event);
             if (event.handler === 'UX') {
                 const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
-                this.logger.trace(`Sending new event of type ${eventType} and message ${event.key}`);
-                this.logEvent(event);
-                uxEvents.emit(eventType, messages.getMessage(event.key, event.args));
+                this.emitUxEvent(eventType, event.messageKey, event.args);
+            } else if (event.handler === 'INTERNAL' && event.type === 'ERROR') {
+                this.logger.trace(`Logging error ${event.messageKey} and sending generic error message`);
+                this.emitUxEvent(`error-always`, genericMessageKey, []);
             }
         });
     }
 
+
+    private emitUxEvent(eventType: string, messageKey: string, args: string[]) {
+        this.logger.trace(`Sending new event of type ${eventType} and message ${messageKey}`);
+        uxEvents.emit(eventType, messages.getMessage(messageKey, args));
+    }
 
     private getEventsFromString(str: string): PmdCatalogEvent[] {
         const events: PmdCatalogEvent[] = [];
@@ -86,6 +94,11 @@ export class OutputProcessor extends AsyncCreatable {
         return events;
     }
 
+    private logEvent(event: PmdCatalogEvent): void {
+        const message = `Event: messageKey = ${event.messageKey}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, log = ${event.log}`;
+        this.messageLogger.info(message);
+    }
+
     // TODO: This may no longer be needed since no messages will be printed to stderr. Consider removing this logic
     private orderEventsChronologically(outEvents: PmdCatalogEvent[], errEvents: PmdCatalogEvent[]): PmdCatalogEvent[] {
         let orderedEvents = [];
@@ -101,10 +114,5 @@ export class OutputProcessor extends AsyncCreatable {
         }
         orderedEvents = orderedEvents.concat(outEvents.slice(outIdx)).concat(errEvents.slice(errIdx));
         return orderedEvents;
-    }
-
-    private logEvent(event: PmdCatalogEvent): void {
-        const message = `Event: key = ${event.key}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, log = ${event.log}`;
-        this.messageLogger.info(message);
     }
 }

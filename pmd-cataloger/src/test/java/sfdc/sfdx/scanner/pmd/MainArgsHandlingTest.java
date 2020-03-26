@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.pmd;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import sfdc.sfdx.scanner.SfdxScannerException;
-import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 import java.util.List;
 import java.util.Map;

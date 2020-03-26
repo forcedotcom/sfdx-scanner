@@ -6,8 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.After;
 import org.junit.Test;
-import sfdc.sfdx.scanner.EventKey;
-import sfdc.sfdx.scanner.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.Message;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
 
@@ -24,7 +24,7 @@ public class MainMessagesTest {
 
   @Test
   public void verifySfdxScannerExceptionsToMessages() {
-    final EventKey expectedEventKey = EventKey.ERROR_UNEXPECTED;
+    final EventKey expectedEventKey = EventKey.ERROR_INTERNAL_UNEXPECTED;
     final String[] expectedArgs = {"dummy arg"};
     final SfdxScannerException exception = new SfdxScannerException(expectedEventKey, expectedArgs);
 
@@ -40,7 +40,7 @@ public class MainMessagesTest {
     final Message actualMessage = messages.get(0);
 
     // Validate message
-    assertEquals("Unexpected eventKey in message", expectedEventKey, actualMessage.getKey());
+    assertEquals("Unexpected eventKey in message", expectedEventKey.getMessageKey(), actualMessage.getMessageKey());
     assertEquals("Unexpected args in message", actualMessage.getArgs().get(0), expectedArgs[0]);
   }
 
@@ -58,7 +58,7 @@ public class MainMessagesTest {
     final Message actualMessage = messages.get(0);
 
     // Validate message
-    assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_UNEXPECTED, actualMessage.getKey());
+    assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey());
     final String actualLog = actualMessage.getLog();
     assertTrue("log field of message should contain message from actual exception", actualLog.contains(exception.getMessage()));
   }
