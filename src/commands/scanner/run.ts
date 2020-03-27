@@ -5,6 +5,7 @@ import fs = require('fs');
 import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
 import globby = require('globby');
+import normalize = require('normalize-path');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -118,12 +119,14 @@ export default class Run extends ScannerCommand {
   }
 
   private async unpackTargets(): Promise<string[]> {
+    // First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
+    const normalizedPaths = this.flags.target.map(path => normalize(path));
     // If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
     // the target paths.
-    if (globby.hasMagic(this.flags.target)) {
-      return await globby(this.flags.target);
+    if (globby.hasMagic(normalizedPaths)) {
+      return await globby(normalizedPaths);
     } else {
-      return this.flags.target;
+      return normalizedPaths;
     }
   }
 
