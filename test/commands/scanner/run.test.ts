@@ -2,10 +2,10 @@ import { expect, test } from '@salesforce/command/lib/test';
 import fs = require('fs');
 import path = require('path');
 import {SFDX_SCANNER_PATH} from '../../../src/Constants';
+import messages = require('../../../messages/run');
 
 // NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of
 // the package, rather than the location of this file itself.
-const messages = JSON.parse(fs.readFileSync('./messages/run.json').toString());
 const events = JSON.parse(fs.readFileSync('./messages/EventKeyTemplates.json').toString());
 const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
