@@ -17,15 +17,15 @@ module.exports = {
 Refer to PMD's documentation for information on writing rules: https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html
   
   You may specify one or more JARs directly.
-    E.g., $ sfdx scanner:rule:add --language apex --path "~/rules/Jar1.jar,~/rules/Jar2.jar"
+    E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
       Successfully added rules for apex.
       2 path(s) added:
-      ~/rules/SomeJar.jar,~/rules/AnotherJar.jar
+      /Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
       
   You may also specify a directory containing one or more JARs, all of which will be added.
-    E.g., $ sfdx scanner:rule:add --language apex --path "~/rules"
+    E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
       Successfully added rules for apex.
       2 path(s) added:
-      ~/rules/SomeJar.jar,~/rules/AnotherJar.jar
+      /Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
   `
 };
