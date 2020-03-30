@@ -18,7 +18,8 @@ module.exports = {
     "outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv."
   },
   "output": {
-    "noViolationsDetected": "No rule violations found."
+    "noViolationsDetected": "No rule violations found.",
+    "writtenToOutFile": "Rule violations have been written to %s."
   },
   "examples": `Invoking without specifying any rules causes all rules to be run.
   E.g., $ sfdx scanner:run --format xml --target "somefile.js"

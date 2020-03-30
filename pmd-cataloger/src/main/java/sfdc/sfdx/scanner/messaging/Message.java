@@ -1,24 +1,23 @@
 package sfdc.sfdx.scanner.messaging;
 
 import com.google.gson.Gson;
-import sfdc.sfdx.scanner.EventKey;
-
+import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 import java.time.Instant;
 import java.util.List;
 
 public class Message {
-  private EventKey key;
+  private String messageKey;
   private List<String> args;
-  private String log;
+  private String internalLog;
   private MessageType type;
   private MessageHandler handler;
   private boolean verbose;
   private long time;
 
-  Message(EventKey key, List<String> args, String log, MessageType type, MessageHandler handler, boolean verbose) {
-    this.key = key;
+  Message(String messageKey, List<String> args, String internalLog, MessageType type, MessageHandler handler, boolean verbose) {
+    this.messageKey = messageKey;
     this.args = args;
-    this.log = log;
+    this.internalLog = internalLog;
     this.type = type;
     this.handler = handler;
     this.time = Instant.now().toEpochMilli();
@@ -29,16 +28,16 @@ public class Message {
     return new Gson().toJson(this);
   }
 
-  public EventKey getKey() {
-    return key;
+  public String getMessageKey() {
+    return messageKey;
   }
 
   public List<String> getArgs() {
     return args;
   }
 
-  public String getLog() {
-    return log;
+  public String getInternalLog() {
+    return internalLog;
   }
 
 }

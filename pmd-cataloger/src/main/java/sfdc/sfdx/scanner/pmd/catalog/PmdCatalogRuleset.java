@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.pmd.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import sfdc.sfdx.scanner.SfdxScannerException;
-import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 import java.util.*;
 

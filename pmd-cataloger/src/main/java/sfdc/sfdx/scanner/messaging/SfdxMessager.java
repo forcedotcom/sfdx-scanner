@@ -6,19 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import sfdc.sfdx.scanner.EventKey;
-import sfdc.sfdx.scanner.SfdxScannerException;
-
-enum MessageType {
-  INFO,
-  WARNING,
-  ERROR
-}
-
-enum MessageHandler {
-  UX
-}
-
 public class SfdxMessager {
   // The START string gives us something to scan for when we're processing output.
   private static final String START = "SFDX-START";
@@ -36,64 +23,43 @@ public class SfdxMessager {
     return INSTANCE;
   }
 
-  public void uxInfo(boolean verbose, EventKey key, String... args) {
-    uxAddMessage(
-      verbose,
-      MessageType.INFO,
-      key,
-      args);
-  }
-
-  public void uxWarn(boolean verbose, EventKey key, String... args) {
-    uxAddMessage(
-      verbose,
-      MessageType.WARNING,
-      key,
-      args);
-  }
-
-  public void uxError(SfdxScannerException exception) {
-    uxAddMessage(
-      false,
-      MessageType.ERROR,
-      MessageHandler.UX,
+  /**
+   * Add exception to pass onto Typescript layer.
+   * Will be treated as an Error based on the properties set
+   * in EventKey. Please make sure that EventKey is correct and is
+   * in sync with messages/EventKeyTemplates.json
+   * @param exception to send to Typescript layer
+   */
+  public void addMessage(SfdxScannerException exception) {
+    final EventKey eventKey = exception.getEventKey();
+    addMessage(
       exception.getFullStacktrace(),
-      exception.getEventKey(),
+      eventKey,
       exception.getArgs());
   }
 
-  private void uxAddMessage(
-    boolean verbose,
-    MessageType messageType,
-    EventKey key,
-    String... args) {
-    uxAddMessage(
-      verbose,
-      messageType,
-      MessageHandler.UX,
-      "",
-      key,
-      args);
-  }
-
-  private void uxAddMessage(
-    boolean verbose,
-    MessageType messageType,
-    MessageHandler messageHandler,
-    String log,
-    EventKey eventKey,
-    String... args) {
+  /**
+   * Add message to pass onto Typescript layer.
+   * Make sure EventKey is updated with messages/EventKeyTemplates.json
+   * and has correct properties in the enum.
+   * @param internalLog Information for internal use. Will be logged but not displayed to user
+   * @param eventKey EventKey to display to user
+   * @param args String args passed to the EventKey to make the displayed message meaningful
+   */
+  public void addMessage(String internalLog, EventKey eventKey, String... args) {
+    // Developer error if eventKey was not added to exception and we'll get a bunch of NPEs
+    assert (eventKey != null);
     // Confirm that the correct number of arguments for the message has been provided
     // If this fails, this would be a developer error
     assert (eventKey.getArgCount() == args.length);
 
     final Message message = new Message(
-      eventKey,
+      eventKey.getMessageKey(),
       Arrays.asList(args),
-      log,
-      messageType,
-      messageHandler,
-      verbose);
+      internalLog,
+      eventKey.getMessageType(),
+      eventKey.getMessageHandler(),
+      eventKey.isVerbose());
     MESSAGES.add(message);
   }
 
@@ -125,5 +91,15 @@ public class SfdxMessager {
     MESSAGES.clear();
   }
 
+  enum MessageHandler {
+    UX,
+    INTERNAL
+  }
+
+  enum MessageType {
+    INFO,
+    WARNING,
+    ERROR
+  }
 }
 

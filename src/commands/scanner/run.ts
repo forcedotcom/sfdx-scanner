@@ -157,6 +157,7 @@ export default class Run extends ScannerCommand {
       // If we were given a file, we should write the output to that file.
       try {
         fs.writeFileSync(this.flags.outfile, output);
+        this.ux.log(messages.getMessage('output.writtenToOutFile', [this.flags.outfile]));
       } catch (e) {
         throw new SfdxError(e.message || e);
       }

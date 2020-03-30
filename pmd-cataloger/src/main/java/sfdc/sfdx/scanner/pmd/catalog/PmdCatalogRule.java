@@ -4,8 +4,8 @@ import java.util.*;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
-import sfdc.sfdx.scanner.SfdxScannerException;
-import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 public class PmdCatalogRule {
   public static final String ATTR_NAME = "name";
