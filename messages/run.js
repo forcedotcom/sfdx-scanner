@@ -19,7 +19,7 @@ module.exports = {
   },
   "output": {
     "noViolationsDetected": "No rule violations found.",
-    "writtenToOutFile": "Rule violations have been added to %s."
+    "writtenToOutFile": "Rule violations have been written to %s."
   },
   "examples": `Invoking without specifying any rules causes all rules to be run.
   E.g., $ sfdx scanner:run --format xml --target "somefile.js"
