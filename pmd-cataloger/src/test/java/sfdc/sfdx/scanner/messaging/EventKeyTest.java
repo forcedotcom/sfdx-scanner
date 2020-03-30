@@ -29,7 +29,7 @@ public class EventKeyTest {
   private static final String ERROR_INTERNAL = "error.internal";
 
   // Current path is sfdx-scanner/pmd-cataloger
-  private static final String MESSAGES_FILE = "../messages/EventKeyTemplates.json";
+  private static final String MESSAGES_FILE = "../messages/EventKeyTemplates.js";
 
   JSONObject jsonObject = null;
 
@@ -37,7 +37,11 @@ public class EventKeyTest {
   public void extractMessagesJson() throws IOException, ParseException {
     final Path path = Paths.get(MESSAGES_FILE);
     assertTrue("Invalid test setup. File does not exist: " + MESSAGES_FILE, Files.exists(path));
-    final String jsonContent = new String(Files.readAllBytes(path));
+    final String fileContent = new String(Files.readAllBytes(path));
+    final String[] fileSplit = fileContent.split("=");
+    final int fileParts = fileSplit.length;
+    assertEquals("Invalid test setup. File has more than one '=', which caused confusion in picking JSON content. Please revisit messages in " + MESSAGES_FILE, 2, fileParts);
+    final String jsonContent = fileSplit[1];
     jsonObject = (JSONObject) new JSONParser().parse(jsonContent);
     assertNotNull("Invalid test setup. Messages json has not been parsed correctly. Please check validity of " + MESSAGES_FILE, jsonObject);
   }
