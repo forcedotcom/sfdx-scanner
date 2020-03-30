@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-
+import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -59,7 +59,7 @@ public class MainMessagesTest {
 
     // Validate message
     assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey());
-    final String actualLog = actualMessage.getLog();
+    final String actualLog = actualMessage.getInternalLog();
     assertTrue("log field of message should contain message from actual exception", actualLog.contains(exception.getMessage()));
   }
 

@@ -42,11 +42,11 @@ public class SfdxMessager {
    * Add message to pass onto Typescript layer.
    * Make sure EventKey is updated with messages/EventKeyTemplates.json
    * and has correct properties in the enum.
-   * @param log Information for internal use. Will be logged but not displayed to user
+   * @param internalLog Information for internal use. Will be logged but not displayed to user
    * @param eventKey EventKey to display to user
    * @param args String args passed to the EventKey to make the displayed message meaningful
    */
-  public void addMessage(String log, EventKey eventKey, String... args) {
+  public void addMessage(String internalLog, EventKey eventKey, String... args) {
     // Developer error if eventKey was not added to exception and we'll get a bunch of NPEs
     assert (eventKey != null);
     // Confirm that the correct number of arguments for the message has been provided
@@ -56,7 +56,7 @@ public class SfdxMessager {
     final Message message = new Message(
       eventKey.getMessageKey(),
       Arrays.asList(args),
-      log,
+      internalLog,
       eventKey.getMessageType(),
       eventKey.getMessageHandler(),
       eventKey.isVerbose());
@@ -91,5 +91,15 @@ public class SfdxMessager {
     MESSAGES.clear();
   }
 
+  enum MessageHandler {
+    UX,
+    INTERNAL
+  }
+
+  enum MessageType {
+    INFO,
+    WARNING,
+    ERROR
+  }
 }
 

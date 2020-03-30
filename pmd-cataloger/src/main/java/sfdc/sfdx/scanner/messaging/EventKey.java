@@ -1,10 +1,8 @@
 package sfdc.sfdx.scanner.messaging;
-
-import sfdc.sfdx.scanner.messaging.MessageHandler;
-import sfdc.sfdx.scanner.messaging.MessageType;
+import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 
 public enum EventKey {
-  // ANY NEW VALUES ADDED TO THIS ENUM MUST HAVE A CORRESPONDING ENTRY IN 'messages/EventKeyTemplates.json'!
+  // MAKE SURE messageKey OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.json'!
   WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
   WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
   WARNING_XML_DROPPED("warning.xmlDropped", 1, MessageType.WARNING, MessageHandler.UX, true),
@@ -13,6 +11,7 @@ public enum EventKey {
   ERROR_INTERNAL_MAIN_INVALID_ARGUMENT("error.internal.mainInvalidArgument", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
   ERROR_INTERNAL_JSON_WRITE_FAILED("error.internal.jsonWriteFailed", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
   ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST("error.internal.classpathDoesNotExist", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
+  ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH("error.internal.xmlMissingInClasspath", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
   ERROR_EXTERNAL_JAR_NOT_READABLE("error.external.jarNotReadable", 1, MessageType.ERROR, MessageHandler.UX, false),
   ERROR_EXTERNAL_DIR_NOT_READABLE("error.external.dirNotReadable", 1, MessageType.ERROR, MessageHandler.UX, false),
   ERROR_EXTERNAL_MULTIPLE_RULE_DESC("error.external.multipleRuleDesc", 2, MessageType.ERROR, MessageHandler.UX, false),

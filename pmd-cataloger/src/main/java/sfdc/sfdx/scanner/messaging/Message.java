@@ -1,23 +1,23 @@
 package sfdc.sfdx.scanner.messaging;
 
 import com.google.gson.Gson;
-
+import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 import java.time.Instant;
 import java.util.List;
 
 public class Message {
   private String messageKey;
   private List<String> args;
-  private String log;
+  private String internalLog;
   private MessageType type;
   private MessageHandler handler;
   private boolean verbose;
   private long time;
 
-  Message(String messageKey, List<String> args, String log, MessageType type, MessageHandler handler, boolean verbose) {
+  Message(String messageKey, List<String> args, String internalLog, MessageType type, MessageHandler handler, boolean verbose) {
     this.messageKey = messageKey;
     this.args = args;
-    this.log = log;
+    this.internalLog = internalLog;
     this.type = type;
     this.handler = handler;
     this.time = Instant.now().toEpochMilli();
@@ -36,8 +36,8 @@ public class Message {
     return args;
   }
 
-  public String getLog() {
-    return log;
+  public String getInternalLog() {
+    return internalLog;
   }
 
 }

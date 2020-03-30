@@ -1,7 +1,6 @@
 import {SfdxCommand} from '@salesforce/command';
 import {RuleFilter, RULE_FILTER_TYPE} from '../../lib/RuleManager';
 import { uxEvents } from '../../lib/ScannerEvents';
-import { SfdxError } from '@salesforce/core';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
@@ -44,7 +43,7 @@ export abstract class ScannerCommand extends SfdxCommand {
   }
 
   protected displayError(msg: string): void {
-    throw new SfdxError(msg);
+    this.ux.error(msg);
   }
 
   protected async init(): Promise<void> {

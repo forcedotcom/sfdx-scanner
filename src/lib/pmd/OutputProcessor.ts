@@ -1,4 +1,4 @@
-import { Logger, Messages } from '@salesforce/core';
+import { Logger, Messages, LoggerLevel } from '@salesforce/core';
 import { AsyncCreatable } from '@salesforce/kit';
 import { uxEvents } from '../ScannerEvents';
 
@@ -11,7 +11,7 @@ export type PmdCatalogEvent = {
     messageKey: string;
     args: string[];
     type: string;
-    log: string;
+    internalLog: string;
     handler: string;
     verbose: boolean;
     time: number;
@@ -28,6 +28,8 @@ export class OutputProcessor extends AsyncCreatable {
     protected async init(): Promise<void> {
         this.logger = await Logger.child('OutputProcessor');
         this.messageLogger = await Logger.child('MessageLog');
+        // this.logger.setLevel(LoggerLevel.TRACE);
+        this.messageLogger.setLevel(LoggerLevel.TRACE);
     }
 
     // We want to find any events that were dumped into stdout or stderr and turn them back into events that can be thrown.
@@ -92,7 +94,7 @@ export class OutputProcessor extends AsyncCreatable {
     }
 
     private logEvent(event: PmdCatalogEvent): void {
-        const message = `Event: messageKey = ${event.messageKey}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, log = ${event.log}`;
+        const message = `Event: messageKey = ${event.messageKey}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, internalLog = ${event.internalLog}`;
         this.messageLogger.info(message);
     }
 

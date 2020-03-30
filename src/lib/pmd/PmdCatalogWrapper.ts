@@ -7,8 +7,11 @@ import {PmdSupport, PMD_LIB, PMD_VERSION} from './PmdSupport';
 import {FileHandler} from '../util/FileHandler';
 import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 import {ChildProcessWithoutNullStreams} from "child_process";
-import { Logger } from '@salesforce/core';
+import { Logger, Messages } from '@salesforce/core';
 import {OutputProcessor} from './OutputProcessor';
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
+
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
@@ -214,25 +217,20 @@ export class PmdCatalogWrapper extends PmdSupport {
    */
   protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
     let stdout = '';
-    let stderr = '';
 
     // When data is passed back up to us, pop it onto the appropriate string.
     cp.stdout.on('data', data => {
       stdout += data;
     });
-    cp.stderr.on('data', data => {
-      stderr += data;
-    });
 
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
       this.outputProcessor.processOutput(stdout);
-
       if (code === 0) {
         res([!!code, stdout]);
       }
       else {
-        rej(stderr);
+        rej(messages.getMessage('error.external.errorMessageAbove'));
       }
     });
   }
