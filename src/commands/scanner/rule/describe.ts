@@ -16,9 +16,7 @@ export default class Describe extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
   public static examples = [
-    messages.getMessage('examples.normalExample'),
-    messages.getMessage('examples.noRulesExample'),
-    messages.getMessage('examples.multipleRulesExample')
+    messages.getMessage('examples.normalExample')
   ];
 
   public static args = [{name: 'file'}];
