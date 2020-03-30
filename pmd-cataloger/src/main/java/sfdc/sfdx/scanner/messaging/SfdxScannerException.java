@@ -1,9 +1,9 @@
-package sfdc.sfdx.scanner;
+package sfdc.sfdx.scanner.messaging;
 
 import com.google.common.base.Throwables;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Internal exception representation.

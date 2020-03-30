@@ -1,17 +1,31 @@
 module.exports = {
-  "WARNING_INVALID_CAT_SKIPPED": "Cataloger skipped invalid PMD Category file '%s'.",
-  "WARNING_INVALID_RULESET_SKIPPED": "Cataloger skipped invalid PMD Ruleset file '%s'.",
-  "WARNING_XML_DROPPED": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
-  "INFO_PMD_CATEGORY_IMPLICITLY_RUN": "Implicitly running PMD Category '%s' defined in '%s'.",
-  "INFO_JAR_AND_XML_PROCESSED": "XML files collected from JAR [%s]: %s",
-  "ERROR_UNEXPECTED": "Unexpected error occurred while cataloging rules.",
-  "ERROR_INTERNAL_MAIN_INVALID_ARGUMENT": "Invalid arguments passed to Main. Details: %s",
-  "ERROR_INTERNAL_JSON_WRITE_FAILED": "Failed to write JSON to file: %s",
-  "ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST": "Path does not exist: %s",
-  "ERROR_EXTERNAL_JAR_NOT_READABLE": "Unable to read resource JAR: %s",
-  "ERROR_EXTERNAL_DIR_NOT_READABLE": "Unable to walk directory: %s",
-  "ERROR_EXTERNAL_MULTIPLE_RULE_DESC": "PMD Rule [%s] has %s 'description' elements. Please reduce this number to 1.",
-  "ERROR_EXTERNAL_RECURSION_LIMIT": "PMD Ruleset [%s] references rule [%s] through 10 or more layers of indirection. Please reduce this number.",
-  "ERROR_EXTERNAL_XML_NOT_READABLE": "Error occurred while reading file [%s]: %s",
-  "ERROR_EXTERNAL_XML_NOT_PARSABLE": "Could not parse XML file [%s]: %s"
-};
+   "info": {
+    "pmdJarImplicitlyRun": "Implicitly running PMD Category '%s' defined in '%s'.",
+    "jarAndXmlProcessed": "XML files collected from JAR [%s]: %s"
+  },
+  "warning": {
+    "invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
+    "invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
+    "xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category."
+  },
+  "error": {
+    "internal": {
+      "unexpectedError": "Unexpected error occurred while cataloging rules: %s",
+      "mainInvalidArgument": "Invalid arguments passed to Main. Details: %s",
+      "jsonWriteFailed": "Failed to write JSON to file: %s",
+      "classpathDoesNotExist": "Path does not exist: %s",
+      "xmlMissingInClasspath": "XML resource [%s] found in jar, but not in Classpath"
+    },
+    "external": {
+      "errorMessageAbove": "Please see error details displayed above.",
+      "genericErrorMessage": "ERROR: An internal error occurred. [TODO: Information on how to contact us and what details to provide]",
+      "jarNotReadable": "ERROR: Unable to read resource JAR: %s",
+      "dirNotReadable": "ERROR: Unable to walk directory: %s",
+      "multipleRuleDesc": "ERROR: PMD Rule [%s] has %s 'description' elements. Please reduce this number to 1.",
+      "recursionLimitReached": "ERROR: PMD Ruleset [%s] references rule [%s] through 10 or more layers of indirection. Please reduce this number.",
+      "xmlNotReadable": "ERROR: Error occurred while reading file [%s]: %s",
+      "xmlNotParsable": "ERROR: Could not parse XML file [%s]: %s"
+    }
+  }
+
+}

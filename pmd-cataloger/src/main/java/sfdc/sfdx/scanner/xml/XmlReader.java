@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import sfdc.sfdx.scanner.SfdxScannerException;
-import sfdc.sfdx.scanner.EventKey;
+import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -48,6 +48,8 @@ public class XmlReader {
       throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
     } catch (ParserConfigurationException | SAXException e) {
       throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
+    } catch (IllegalArgumentException iae) {
+      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH, iae, path);
     }
     return doc;
   }
