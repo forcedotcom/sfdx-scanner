@@ -1,4 +1,4 @@
-{
+module.exports = {
   "commandDescription": "Add custom rules to use while scanning. Rules should have been compiled and tested separately. Users can refer to PMD’s documentation on information and examples to write your own custom rules: https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html",
   "flags": {
     "languageDescription": "Programming language for which custom rules are added.",
@@ -13,4 +13,4 @@
     "readCustomRulePathFileFailed": "Failed to read custom rule path file: %s",
     "writeCustomRulePathFileFailed": "Failed to write to custom rule path file: %s"
   }
-}
+};
