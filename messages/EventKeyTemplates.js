@@ -1,4 +1,4 @@
-{
+module.exports = {
   "WARNING_INVALID_CAT_SKIPPED": "Cataloger skipped invalid PMD Category file '%s'.",
   "WARNING_INVALID_RULESET_SKIPPED": "Cataloger skipped invalid PMD Ruleset file '%s'.",
   "WARNING_XML_DROPPED": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
@@ -14,4 +14,4 @@
   "ERROR_EXTERNAL_RECURSION_LIMIT": "PMD Ruleset [%s] references rule [%s] through 10 or more layers of indirection. Please reduce this number.",
   "ERROR_EXTERNAL_XML_NOT_READABLE": "Error occurred while reading file [%s]: %s",
   "ERROR_EXTERNAL_XML_NOT_PARSABLE": "Could not parse XML file [%s]: %s"
-}
+};

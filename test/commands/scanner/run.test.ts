@@ -2,11 +2,9 @@ import { expect, test } from '@salesforce/command/lib/test';
 import fs = require('fs');
 import path = require('path');
 import {SFDX_SCANNER_PATH} from '../../../src/Constants';
+import messages = require('../../../messages/run');
+import events = require('../../../messages/EventKeyTemplates');
 
-// NOTE: When we're running npm test, the current working directory is actually going to be the top-level directory of
-// the package, rather than the location of this file itself.
-const messages = JSON.parse(fs.readFileSync('./messages/run.json').toString());
-const events = JSON.parse(fs.readFileSync('./messages/EventKeyTemplates.json').toString());
 const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
 
@@ -368,6 +366,30 @@ describe('scanner:run', () => {
     });
 
     describe('Edge Cases', () => {
+      describe('Test case: No output specified', () => {
+        runTest
+          .stdout()
+          .stderr()
+          .command(['scanner:run',
+            '--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+            '--ruleset', 'ApexUnit'
+          ])
+          .it('When no format is specified, we default to a TABLE', ctx => {
+            // Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+            // That will leave us with just the rows.
+            let rows = ctx.stdout.trim().split('\n');
+            rows.shift();
+            rows.shift();
+
+            // There should be four rows, and those rows should contain the appropriate data.
+            expect(rows.length).to.equal(4, 'Should be four violations detected');
+            expect(rows[0]).to.contain("66", 'Violation #1 should occur at expected line');
+            expect(rows[1]).to.contain("70", 'Violation #2 should occur at expected line');
+            expect(rows[2]).to.contain("74", 'Violation #3 should occur at expected line');
+            expect(rows[3]).to.contain("78", 'Violation #4 should occur at expected line');
+          });
+      });
+
       describe('Test Case: No rules specified', () => {
         runTest
           .stdout()
@@ -411,14 +433,6 @@ describe('scanner:run', () => {
         .command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
         .it('Error thrown when no target is specified', ctx => {
           expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustTargetSomething}`);
-        });
-
-      runTest
-        .stdout()
-        .stderr()
-        .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit'])
-        .it('Error thrown when no out format is specified', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustSpecifyOutput}`);
         });
 
       runTest
