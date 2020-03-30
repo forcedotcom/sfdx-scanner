@@ -1,4 +1,4 @@
-{
+module.exports = {
    "info": {
     "pmdJarImplicitlyRun": "Implicitly running PMD Category '%s' defined in '%s'.",
     "jarAndXmlProcessed": "XML files collected from JAR [%s]: %s"

@@ -150,7 +150,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     // NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
     // is intended for child_process.spawn(), which freaks out if you do that.
     const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
-    const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(':'), MAIN_CLASS, ...parameters];
+    const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
     // TODO: move as log line to Trace
     // console.log(`About to invoke Cataloger with args: ${args}`);

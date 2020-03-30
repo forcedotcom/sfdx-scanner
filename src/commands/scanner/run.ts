@@ -5,6 +5,7 @@ import fs = require('fs');
 import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
 import globby = require('globby');
+import normalize = require('normalize-path');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -18,10 +19,8 @@ export default class Run extends ScannerCommand {
   public static description = messages.getMessage('commandDescription');
   // TODO: Write real examples.
   public static examples = [
-    `$ sfdx hello:org --targetusername myOrg@example.com --targetdevhubusername devhub@org.com
-  Hello world! This is org: MyOrg and I will be around until Tue Mar 20 2018!
-  My hub org id is: 00Dxx000000001234
-  `];
+    messages.getMessage('examples')
+  ];
 
   public static args = [{name: 'file'}];
 
@@ -81,6 +80,7 @@ export default class Run extends ScannerCommand {
       char: 'f',
       description: messages.getMessage('flags.formatDescription'),
       options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE],
+      default: OUTPUT_FORMAT.TABLE,
       exclusive: ['outfile']
     }),
     outfile: flags.string({
@@ -97,7 +97,10 @@ export default class Run extends ScannerCommand {
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
     const target: string[]|string = this.flags.org || await this.unpackTargets();
-    const format: OUTPUT_FORMAT = this.flags.format || this.deriveFormatFromOutfile();
+    // If the user specified an outfile, we'll deduce the implied format based on the file extension. Otherwise, we'll
+    // check the format flag. We check the outfile first because its value could be null, unlike the format flag which
+    // always defaults to TABLE.
+    const format: OUTPUT_FORMAT = this.flags.outfile ? this.deriveFormatFromOutfile() : this.flags.format;
     const ruleManager = await RuleManager.create({});
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
@@ -111,19 +114,18 @@ export default class Run extends ScannerCommand {
     if (!this.flags.target && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
     }
-    // --format and --outfile are mutually exclusive, but they can't both be null.
-    if (!this.flags.format && !this.flags.outfile) {
-      throw new SfdxError(messages.getMessage('validations.mustSpecifyOutput'));
-    }
   }
 
   private async unpackTargets(): Promise<string[]> {
+    // First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
+    // Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
+    const normalizedPaths = this.flags.target.map(path => normalize(path).replace(/['"]/g, ''));
     // If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
     // the target paths.
-    if (globby.hasMagic(this.flags.target)) {
-      return await globby(this.flags.target);
+    if (globby.hasMagic(normalizedPaths)) {
+      return await globby(normalizedPaths);
     } else {
-      return this.flags.target;
+      return normalizedPaths;
     }
   }
 
