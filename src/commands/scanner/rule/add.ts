@@ -17,12 +17,7 @@ export default class Add extends SfdxCommand {
   public static description = messages.getMessage('commandDescription');
 
   public static examples = [
-    `$ sfdx scanner:rule:add --language "apex" --path "/dir/to/jar/lib"
-        (todo: add sample output here)
-
-        $ sfdx scanner:rule:add --language "apex" --path "/file/path/to/customrule.jar,/dir/to/jar/lib"
-        (todo: add sample output here)
-        `
+    messages.getMessage('examples')
   ];
 
   protected static flagsConfig = {
