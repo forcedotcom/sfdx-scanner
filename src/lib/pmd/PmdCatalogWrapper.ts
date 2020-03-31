@@ -9,6 +9,7 @@ import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
 import {ChildProcessWithoutNullStreams} from "child_process";
 import { Logger, Messages } from '@salesforce/core';
 import {OutputProcessor} from './OutputProcessor';
+import * as PrettyPrinter from '../util/PrettyPrinter';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
@@ -48,8 +49,11 @@ export class PmdCatalogWrapper extends PmdSupport {
    * @param {RuleFilter[]} filters
    */
   public async getPathsMatchingFilters(filters: RuleFilter[]): Promise<string[]> {
+    this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
+
     // If we haven't read in a catalog yet, do so now.
     if (!this.catalogJson) {
+      this.logger.trace(`Populating Catalog JSON.`);
       await this.rebuildCatalogIfNecessary();
       this.catalogJson = await PmdCatalogWrapper.readCatalogFromFile();
     }
@@ -152,8 +156,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
     const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
-    // TODO: move as log line to Trace
-    // console.log(`About to invoke Cataloger with args: ${args}`);
+    this.logger.trace(`Command array for Cataloger is ready. Command: "${command}", Args: "${args}"`);
     return [command, args];
   }
 
@@ -182,6 +185,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       parameters.push(language + divider + paths.join(joiner));
     });
 
+    this.logger.trace(`Cataloger parameters have been built: ${parameters}`);
     return parameters;
   }
 
@@ -197,7 +201,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       }
       rulePathEntries.get(language).add(pmdJarName);
     });
-    this.logger.trace(`Added PMD Jar paths: ${rulePathEntries}`);
+    this.logger.trace(`Added PMD Jar paths: ${PrettyPrinter.stringifyMapSet(rulePathEntries)}`);
   }
 
 
@@ -226,6 +230,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     // When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
     cp.on('exit', code => {
       this.outputProcessor.processOutput(stdout);
+      this.logger.trace(`monitorChildProcess has received exit code ${code}`);
       if (code === 0) {
         res([!!code, stdout]);
       }
