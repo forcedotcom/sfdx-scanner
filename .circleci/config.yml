@@ -66,14 +66,16 @@ jobs:
       # Commands are run in a Windows virtual machine environment
       - checkout
       - run:
-        command:
-          - npm install sfdx-cli
-        shell: cmd.exe
+          name: "Install sfdx cli"
+          shell: cmd.exe
+          command: |
+            install sfdx-cli
       - run:
-        command:
-          - sfdx plugins:install @salesforce/sfdx-scanner
-          - sfdx scanner:rule:list
-        shell: cmd.exe
+          name: "Install and run plugin"
+          shell: cmd.exe
+          command: |
+            sfdx plugins:install @salesforce/sfdx-scanner
+            sfdx scanner:rule:list
 
   publish-latest:
     <<: *defaults
