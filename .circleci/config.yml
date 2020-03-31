@@ -69,7 +69,7 @@ jobs:
           name: "Install sfdx cli"
           shell: cmd.exe
           command: |
-            npm install sfdx-cli
+            npm install -g sfdx-cli
       - run:
           name: "Install and run plugin"
           shell: cmd.exe
