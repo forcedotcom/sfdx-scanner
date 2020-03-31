@@ -1,7 +1,9 @@
 import path = require('path');
 import { FileHandler } from './util/FileHandler';
-import {SfdxError} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
+import { AsyncCreatable } from '@salesforce/kit';
 import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
+import * as PrettyPrinter from './util/PrettyPrinter';
 
 export enum ENGINE {
   PMD = 'pmd'
@@ -15,12 +17,16 @@ export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, `Tmp${
 
 const EMPTY_JSON_FILE = '{}';
 
-export class CustomRulePathManager {
+
+export class CustomRulePathManager extends AsyncCreatable {
+  private logger!: Logger;
   private pathsByLanguageByEngine: RulePathMap;
   private initialized: boolean;
   private fileHandler: FileHandler;
 
-  constructor() {
+
+  protected async init(): Promise<void> {
+    this.logger = await Logger.child('CustomRulePathManager');
     this.pathsByLanguageByEngine = new Map();
     this.fileHandler = new FileHandler();
     this.initialized = false;
@@ -28,17 +34,23 @@ export class CustomRulePathManager {
 
   private async initialize(): Promise<void> {
     if (this.initialized) {
+      this.logger.trace(`CustomRulePathManager has already been initialized`);
       return;
     }
+
+    this.logger.trace(`Initializing CustomRulePathManager.`);
 
     // Read from the JSON and use it to populate the map.
     let data = null;
     try {
-      data = await this.fileHandler.readFile(CustomRulePathManager.getFilePath());
+      const customRulePathFile = CustomRulePathManager.getFilePath();
+      data = await this.fileHandler.readFile(customRulePathFile);
+      this.logger.trace(`CustomRulePath content from ${customRulePathFile}: ${data}`);
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
       if (e.code === 'ENOENT') {
+        this.logger.trace(`CustomRulePath file does not exist yet. In the process of creating a new file.`);
         data = EMPTY_JSON_FILE;
       } else {
         //  Any other error needs to be rethrown, and since it could be arcane or weird, we'll also prepend it with a
@@ -48,25 +60,30 @@ export class CustomRulePathManager {
     }
     // If file existed but was empty, replace the whitespace/blank with empty JSON
     if ('' === data.trim()) {
+      this.logger.trace(`CustomRulePath file existed, but was empty.`);
       data = EMPTY_JSON_FILE;
     }
     // Now that we've got the file contents, let's turn it into a JSON.
     const json = JSON.parse(data);
     this.pathsByLanguageByEngine = this.convertJsonDataToMap(json);
+    this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMaps(this.pathsByLanguageByEngine)}`);
     this.initialized = true;
   }
 
   public async addPathsForLanguage(language: string, paths: string[]): Promise<string[]> {
     await this.initialize();
 
+    this.logger.trace(`About to add paths[${paths}] for language ${language}`);
     const classpathEntries = await this.expandClasspaths(paths);
     // Identify the engine for each path and put them in the appropriate map and inner map.
     classpathEntries.forEach((entry) => {
       const e = this.determineEngineForPath(entry);
       if (!this.pathsByLanguageByEngine.has(e)) {
+        this.logger.trace(`Creating new entry for engine ${e}`);
         this.pathsByLanguageByEngine.set(e, new Map());
       }
       if (!this.pathsByLanguageByEngine.get(e).has(language)) {
+        this.logger.trace(`Creating new entry for language ${language} in engine ${e}`);
         this.pathsByLanguageByEngine.get(e).set(language, new Set([entry]));
       } else {
         this.pathsByLanguageByEngine.get(e).get(language).add(entry);
@@ -81,6 +98,7 @@ export class CustomRulePathManager {
     await this.initialize();
 
     if (!this.pathsByLanguageByEngine.has(engine)) {
+      this.logger.trace(`CustomRulePath does not have entries for engine ${engine}`);
       return new Map();
     }
 
@@ -91,6 +109,7 @@ export class CustomRulePathManager {
     await this.initialize();
     try {
       const fileContent = JSON.stringify(this.convertMapToJson(), null, 4);
+      this.logger.trace(`Writing file content to CustomRulePath file [${CustomRulePathManager.getFilePath()}]: ${fileContent}`);
       await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
       await this.fileHandler.writeFile(CustomRulePathManager.getFilePath(), fileContent);
 
@@ -148,6 +167,7 @@ export class CustomRulePathManager {
     for (const p of paths) {
       let stats;
       try {
+        this.logger.trace(`Fetching stats for path ${p}`);
         stats = await this.fileHandler.stats(p);
       } catch (e) {
         throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'errors.invalidFilePath', [p]);
@@ -155,6 +175,7 @@ export class CustomRulePathManager {
       if (stats.isFile()) {
         if (p.endsWith(".jar")) {
           // Simple filename check for .jar is enough.
+          this.logger.trace(`Adding JAR directly provided as a path: ${p}`);
           classpathEntries.push(p);
         }
       } else if (stats.isDirectory()) {
@@ -165,7 +186,9 @@ export class CustomRulePathManager {
         const files = await this.fileHandler.readDir(p);
         for (const file of files) {
           if (file.endsWith(".jar")) {
-            classpathEntries.push(path.resolve(p, file));
+            const filePath = path.resolve(p, file);
+            this.logger.trace(`Adding JAR found inside a directory provided as a path: ${filePath}`);
+            classpathEntries.push(filePath);
           }
         }
       }
