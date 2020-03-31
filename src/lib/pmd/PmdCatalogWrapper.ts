@@ -156,7 +156,7 @@ export class PmdCatalogWrapper extends PmdSupport {
     const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
     const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
-    this.logger.trace(`Command array for Cataloger is ready. Command: "${command}", Args: "${args}"`);
+    this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${args}"`);
     return [command, args];
   }
 
@@ -201,7 +201,7 @@ export class PmdCatalogWrapper extends PmdSupport {
       }
       rulePathEntries.get(language).add(pmdJarName);
     });
-    this.logger.trace(`Added PMD Jar paths: ${PrettyPrinter.stringifyMapSet(rulePathEntries)}`);
+    this.logger.trace(`Added PMD Jar paths: ${PrettyPrinter.stringifyMapofSets(rulePathEntries)}`);
   }
 
 

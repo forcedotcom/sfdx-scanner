@@ -9,12 +9,12 @@ describe(('PrettyPrinter tests'), () => {
 
     it('should print Map<string, Set<string>>', () => {
         const { mapOfSet, expectedMapString } = createMapOfSet();
-        expect(PrettyPrinter.stringifyMapSet(mapOfSet)).equals(expectedMapString);
+        expect(PrettyPrinter.stringifyMapofSets(mapOfSet)).equals(expectedMapString);
     });
 
     it('should print Map<string, Map<string, Set<string>>>', () => {
         const { mapOfMapOfSet, expectedMapOfMapString } = createMapOfMapOfSet();
-        expect(PrettyPrinter.stringifyMapOfMap(mapOfMapOfSet)).equals(expectedMapOfMapString);
+        expect(PrettyPrinter.stringifyMapOfMaps(mapOfMapOfSet)).equals(expectedMapOfMapString);
     });
 
     // TODO: add tests for RuleFilter stringify

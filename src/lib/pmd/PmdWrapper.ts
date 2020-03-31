@@ -60,7 +60,7 @@ export default class PmdWrapper extends PmdSupport {
       args = [...args, '-reportfile', this.reportFile];
     }
 
-    this.logger.trace(`Command array for PMD is ready. Command: "${command}", Args: "${args}"`);
+    this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${args}"`);
     return [command, args];
   }
 

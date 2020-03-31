@@ -12,7 +12,7 @@ export function stringifySet(stringSet: Set<string>): string {
  * Typically used to print Language-RulePath mapping
  * @param mapOfSet Map<string, Set<string>> to stringify
  */
-export function stringifyMapSet(mapOfSet: Map<string, Set<string>>): string {
+export function stringifyMapofSets(mapOfSet: Map<string, Set<string>>): string {
     const returnArr = [];
     mapOfSet.forEach((value, key) => {
         returnArr.push(`{${key} => ${stringifySet(value)}}`);
@@ -24,10 +24,10 @@ export function stringifyMapSet(mapOfSet: Map<string, Set<string>>): string {
  * Typically used to print Engine-Language-RulePath mapping
  * @param mapOfMap Map<string, Map<string, Set<string>>> to stringify
  */
-export function stringifyMapOfMap(mapOfMap: Map<string, Map<string, Set<string>>>): string {
+export function stringifyMapOfMaps(mapOfMap: Map<string, Map<string, Set<string>>>): string {
     const returnArr = [];
     mapOfMap.forEach((value, key) => {
-        returnArr.push(`{${key} => ${stringifyMapSet(value)}}`);
+        returnArr.push(`{${key} => ${stringifyMapofSets(value)}}`);
     });
     return `${returnArr.join(',')}`;
 }

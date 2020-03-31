@@ -44,9 +44,8 @@ export class CustomRulePathManager extends AsyncCreatable {
     let data = null;
     try {
       const customRulePathFile = CustomRulePathManager.getFilePath();
-      this.logger.trace(`Reading CustomRulePath file at ${customRulePathFile}`);
       data = await this.fileHandler.readFile(customRulePathFile);
-      this.logger.trace(`CustomRulePath content read as: ${data}`);
+      this.logger.trace(`CustomRulePath content from ${customRulePathFile}: ${data}`);
     } catch (e) {
       // An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
       // no information in it.
@@ -67,7 +66,7 @@ export class CustomRulePathManager extends AsyncCreatable {
     // Now that we've got the file contents, let's turn it into a JSON.
     const json = JSON.parse(data);
     this.pathsByLanguageByEngine = this.convertJsonDataToMap(json);
-    this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMap(this.pathsByLanguageByEngine)}`);
+    this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMaps(this.pathsByLanguageByEngine)}`);
     this.initialized = true;
   }
 
@@ -181,7 +180,6 @@ export class CustomRulePathManager extends AsyncCreatable {
         }
       } else if (stats.isDirectory()) {
         // Always add directories, which may contain classes
-        this.logger.trace(`Adding directory directly provided as a path: ${p}`);
         classpathEntries.push(p);
 
         // Look inside directories for jar files, but not recursively.
