@@ -54,7 +54,7 @@ export abstract class PmdSupport extends AsyncCreatable {
   }
 
   protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
-    const customRulePathManager = new CustomRulePathManager();
+    const customRulePathManager = await CustomRulePathManager.create({});
     return await customRulePathManager.getRulePathEntries(ENGINE.PMD);
   }
 }

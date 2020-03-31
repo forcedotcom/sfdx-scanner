@@ -31,7 +31,7 @@ describe('CustomRulePathManager tests', () => {
             });
 
             it('should read CustomPaths.json to get Rule Path Entries', async () => {
-                const manager = new CustomRulePathManager();
+                const manager = await CustomRulePathManager.create({});
 
                 // Execute test
                 const rulePathMap = await manager.getRulePathEntries(ENGINE.PMD);
@@ -54,7 +54,7 @@ describe('CustomRulePathManager tests', () => {
             });
 
             it('should initialize only once', async () => {
-                const manager = new CustomRulePathManager();
+                const manager = await CustomRulePathManager.create({});
 
                 // Execute test
                 await manager.getRulePathEntries(ENGINE.PMD);
@@ -70,7 +70,7 @@ describe('CustomRulePathManager tests', () => {
         it('should handle empty Rule Path file gracefully', async () => {
             // Setup stub
             const readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-            const manager = new CustomRulePathManager();
+            const manager = await CustomRulePathManager.create({});
 
             // Execute test
             const rulePathMap = await manager.getRulePathEntries(ENGINE.PMD);
@@ -119,7 +119,7 @@ describe('CustomRulePathManager tests', () => {
 
       it('Should reflect any new entries', async() => {
         readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-        const manager = new CustomRulePathManager();
+        const manager = await CustomRulePathManager.create({});
         const language = 'javascript';
         const paths = ['/absolute/path/to/SomeJar.jar', '/another/absolute/path/to/AnotherJar.jar'];
 
@@ -142,7 +142,7 @@ describe('CustomRulePathManager tests', () => {
         const fileContent = '{"pmd": {"apex": ["/some/user/path/customRule.jar"]}}';
         readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(fileContent);
 
-        const manager = new CustomRulePathManager();
+        const manager = await CustomRulePathManager.create({});
         const language = 'apex';
         const newPaths = ['/absolute/path/to/SomeJar.jar', '/different/absolute/path/to/OtherJar.jar'];
 
@@ -185,7 +185,7 @@ describe('CustomRulePathManager tests', () => {
 
       it('Should reflect newly added entries', async() => {
         readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-        const manager = new CustomRulePathManager();
+        const manager = await CustomRulePathManager.create({});
         const language = 'javascript';
         const paths = ['path1', 'path2'];
 
@@ -210,7 +210,7 @@ describe('CustomRulePathManager tests', () => {
         const fileContent = '{"pmd": {"apex": ["/some/user/path/customRule.jar"]}}';
         readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(fileContent);
 
-        const manager = new CustomRulePathManager();
+        const manager = await CustomRulePathManager.create({});
         const language = 'apex';
         const newPath = '/my/new/path';
 

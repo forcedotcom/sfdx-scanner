@@ -60,7 +60,7 @@ export default class PmdWrapper extends PmdSupport {
       args = [...args, '-reportfile', this.reportFile];
     }
 
-    this.logger.trace(`Command: ${command}, Args: ${args}`);
+    this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${args}"`);
     return [command, args];
   }
 
@@ -84,6 +84,7 @@ export default class PmdWrapper extends PmdSupport {
     });
 
     cp.on('exit', code => {
+      this.logger.trace(`monitorChildProcess has received exit code ${code}`);
       if (code === 0 || code === 4) {
         // If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
         // one violation was found. In either case, PMD ran successfully, so we'll resolve the Promise. We use a tuple
