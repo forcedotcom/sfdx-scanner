@@ -158,9 +158,7 @@ export class CustomRulePathManager {
           classpathEntries.push(p);
         }
       } else if (stats.isDirectory()) {
-        // Always add directories, which may contain classes
-        classpathEntries.push(p);
-
+        // TODO: Once we add support for other engines, we'll need to check whether the directory contains things other than JARs.
         // Look inside directories for jar files, but not recursively.
         const files = await this.fileHandler.readDir(p);
         for (const file of files) {
