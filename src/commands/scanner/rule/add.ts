@@ -2,6 +2,8 @@ import { flags, SfdxCommand } from '@salesforce/command';
 import { Messages, SfdxError } from '@salesforce/core';
 import { AnyJson } from '@salesforce/ts-types';
 import { CustomRulePathManager } from '../../../lib/CustomRulePathManager';
+import path = require('path');
+import untildify = require('untildify');
 
 
 // Initialize Messages with the current plugin directory
@@ -37,7 +39,7 @@ export default class Add extends SfdxCommand {
     this.validateFlags();
 
     const language = this.flags.language;
-    const path = this.flags.path;
+    const path = this.resolvePaths();
 
     this.logger.trace(`Language: ${language}`);
     this.logger.trace(`Rule path: ${path}`);
@@ -59,4 +61,9 @@ export default class Add extends SfdxCommand {
     }
   }
 
+  private resolvePaths(): string[] {
+    // path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
+    // they'll be concatenated together. So we use .map() to call it on each path separately.
+    return this.flags.path.map(p => path.resolve(untildify(p)));
+  }
 }
