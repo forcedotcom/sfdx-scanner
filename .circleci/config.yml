@@ -76,9 +76,12 @@ jobs:
           command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
       - run:
-          name: "Run plugin"
-          shell: cmd.exe
+          name: "List rules"
           command: sfdx scanner:rule:list
+
+      - run:
+          name: "Run rules"
+          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes  --format table
 
   publish-latest:
     <<: *defaults
