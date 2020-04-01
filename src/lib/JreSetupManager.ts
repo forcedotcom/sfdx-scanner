@@ -104,32 +104,40 @@ class JreSetupManager extends AsyncCreatable {
         const versionOut = await this.fetchJavaVersion(javaHome);
 
         // Version output looks like this:
-        // "openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n"
-        // We want to get the "version \"11.0" part
-        // The version number could be of the format 11.0 or 1.8
-        const regex = 'version "(\\d+).(\\d+)';
+        // MacOS: "openjdk version "11.0.6" 2020-01-14 LTS\nOpenJDK Runtime Environment Zulu11.37+17-CA (build 11.0.6+10-LTS)\nOpenJDK 64-Bit Server VM Zulu11.37+17-CA (build 11.0.6+10-LTS, mixed mode)\n"
+        // Win10: "openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n"
+        // We want to get the "11.0" or "14" part
+        // The version number could be of the format 11.0 or 1.8 or 14
+        const regex = '(\\d+)(\\.(\\d+))?';
         const matchedParts = versionOut.match(regex);
         this.logger.trace(`Version output match for pattern ${regex} is ${matchedParts}`);
 
-        // matchedParts should have three groups: "version \"11.0", "11", "0"
-        if (!matchedParts || matchedParts.length < 3) {
+        // matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
+        if (!matchedParts || matchedParts.length < 4) {
             throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'VersionNotFound', []);
         }
 
-        const versionPart1 = parseInt(matchedParts[1]);
-        const versionPart2 = parseInt(matchedParts[2]);
-        const version = versionPart1 + '.' + versionPart2;
+        const majorVersion = parseInt(matchedParts[1]);
+        const minorVersion = matchedParts[3]? parseInt(matchedParts[3]) : '';
+        let version = '';
         // We want to allow 1.8 and greater.
         // Upto JDK8, the version scheme is 1.blah
         // Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
         // If either version part clicks, we should be good.
-        if (versionPart1 >= 1 || versionPart2 >= 8) {
-            this.logger.trace(`Java version found as ${version}`);
-            return;
+        if(majorVersion >= 9) {
+            // Accept if Major version is greater than or equal to 9
+            version += majorVersion + (minorVersion ? `.${minorVersion}` : '');
+        } else if (majorVersion === 1 && minorVersion === 8) {
+            // Accommodating 1.8
+            version += majorVersion + '.' + minorVersion;
+        } else {
+            // Not matching what we are looking for
+            throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidVersion', [version]);
         }
 
-        // If we are here, version number is not what we are looking for
-        throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidVersion', [version]);
+        this.logger.trace(`Java version found as ${version}`);
+        return;
+        
 
     }
 
