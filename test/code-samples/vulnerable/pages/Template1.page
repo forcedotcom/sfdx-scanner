@@ -1,0 +1,25 @@
+<apex:page showHeader="true" sidebar="true">
+	<!-- this is a template that embeds other pages and components, and is also a visualforce page in its own right -->
+	<div id='foo'>nested frame</div>
+	
+	<script>
+	   <!-- this script will also be in scope of any embedded pages, comoponents -->
+	   var elem = document.getElementById('foo');
+	   var a_obj = { 'a' : function(x) { 
+	   							elem.innerHTML=x; //sfdc:sink16
+	   							}
+	   				}; 
+	   var a_func = function(y) { 
+	   		elem.innerHTML = y; //sfdc:sink17
+	   		};  
+	 </script>
+
+	 
+
+	 We are inserting a child here:
+	 <apex:insert name="insert1"/>
+	 <p />
+	 And another child here:
+	 <apex:insert name="insert2"/>
+
+</apex:page>

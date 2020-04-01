@@ -1,0 +1,13 @@
+<apex:page >
+  This page embedds a lightning app:
+  <apex:includeLightning />
+  <div id="lightning" />
+    <script>
+        $Lightning.use("c:LightningOutVulnTest", function() {
+          $Lightning.createComponent("c:DOMXSS", 
+                                     {}, "lightning",
+          function(cmp) {
+          });
+        });
+    </script>
+</apex:page>

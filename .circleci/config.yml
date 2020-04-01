@@ -8,6 +8,9 @@ defaults: &defaults
   docker:
     - image: circleci/openjdk:11.0.2-jdk-node
 
+orbs:
+  win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
+
 jobs:
   test:
     <<: *defaults
@@ -54,6 +57,32 @@ jobs:
           root: ~/repo
           paths: .
 
+  test-windows:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+
+    steps:
+      # Commands are run in a Windows virtual machine environment
+      - checkout
+      - run:
+          name: "Install sfdx cli"
+          shell: cmd.exe
+          command: npm install -g sfdx-cli
+
+      - run:
+          name: "Install plugin"
+          shell: cmd.exe
+          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+
+      - run:
+          name: "List rules"
+          command: sfdx scanner:rule:list
+
+      - run:
+          name: "Run rules"
+          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes  --format table
+
   publish-latest:
     <<: *defaults
     steps:
@@ -78,10 +107,17 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
+      - test-windows:
+          filters:
+            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
+            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
+            tags:
+              only: /.*/
       - publish-latest:
           # This job should only run after 'test' finishes successfully.
           requires:
             - test
+            - test-windows
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
