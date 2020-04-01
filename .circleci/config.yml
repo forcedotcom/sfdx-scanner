@@ -68,14 +68,17 @@ jobs:
       - run:
           name: "Install sfdx cli"
           shell: cmd.exe
-          command: |
-            npm install -g sfdx-cli
+          command: npm install -g sfdx-cli
+
       - run:
-          name: "Install and run plugin"
+          name: "Install plugin"
           shell: cmd.exe
-          command: |
-            echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
-            sfdx scanner:rule:list
+          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+
+      - run:
+          name: "Run plugin"
+          shell: cmd.exe
+          command: sfdx scanner:rule:list
 
   publish-latest:
     <<: *defaults
