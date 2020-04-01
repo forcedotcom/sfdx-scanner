@@ -152,6 +152,7 @@ export default class Run extends ScannerCommand {
     // so the user doesn't get confused.
     if (output === '') {
       this.ux.log(messages.getMessage('output.noViolationsDetected'));
+      return;
     }
     if (this.flags.outfile) {
       // If we were given a file, we should write the output to that file.
