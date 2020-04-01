@@ -74,7 +74,7 @@ jobs:
           name: "Install and run plugin"
           shell: cmd.exe
           command: |
-            sfdx plugins:install @salesforce/sfdx-scanner
+            echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
             sfdx scanner:rule:list
 
   publish-latest:
