@@ -79,7 +79,7 @@ export default class Run extends ScannerCommand {
     format: flags.enum({
       char: 'f',
       description: messages.getMessage('flags.formatDescription'),
-      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE],
+      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE],
       default: OUTPUT_FORMAT.TABLE,
       exclusive: ['outfile']
     }),
