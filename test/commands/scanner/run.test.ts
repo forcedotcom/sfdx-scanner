@@ -1,9 +1,10 @@
 import { expect, test } from '@salesforce/command/lib/test';
+import {Messages} from '@salesforce/core';
 import fs = require('fs');
 import path = require('path');
 import {SFDX_SCANNER_PATH} from '../../../src/Constants';
-import messages = require('../../../messages/run');
 import events = require('../../../messages/EventKeyTemplates');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 
 const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
@@ -57,7 +58,7 @@ describe('scanner:run', () => {
             '--format', 'xml'
           ])
           .it('When the file contains no violations, a message is logged to the console', ctx => {
-            expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
+            expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
           });
       });
 
@@ -291,6 +292,10 @@ describe('scanner:run', () => {
           }
         })
         .it('Properly writes CSV to file', ctx => {
+          // Verify that the correct message is displayed to user
+          expect(ctx.stdout).to.contain(messages.getMessage('output.writtenToOutFile', ['testout.csv']));
+          expect(ctx.stdout).to.not.contain(messages.getMessage('output.noViolationsDetected', []));
+
           // Verify that the file we wanted was actually created.
           expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
           let fileContents = fs.readFileSync('testout.csv').toString();
@@ -323,7 +328,27 @@ describe('scanner:run', () => {
           '--format', 'csv'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
+          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
+        });
+
+        runTest
+        .stdout()
+        .stderr()
+        .command(['scanner:run',
+          '--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+          '--ruleset', 'ApexUnit',
+          '--outfile', 'testout.csv'
+        ])
+        .finally(ctx => {
+          // Regardless of what happens in the test itself, we need to delete the file we created.
+          if (fs.existsSync('testout.csv')) {
+            fs.unlinkSync('testout.csv');
+          }
+        })
+        .it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
+          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
+          expect(ctx.stdout).to.not.contain(messages.getMessage('output.writtenToOutFile', ['testout.csv']));
+          expect(fs.existsSync('testout.csv')).to.be.false;
         });
     });
 
@@ -361,7 +386,7 @@ describe('scanner:run', () => {
           '--format', 'table'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(`${messages.output.noViolationsDetected}`);
+          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
         });
     });
 
@@ -432,7 +457,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
         .it('Error thrown when no target is specified', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.mustTargetSomething}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.mustTargetSomething', [])}`);
         });
 
       runTest
@@ -440,7 +465,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
         .it('Error thrown when output file is malformed', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.outfileMustBeValid}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeValid', [])}`);
         });
 
       runTest
@@ -448,7 +473,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
         .it('Error thrown when output file is unsupported type', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.validations.outfileMustBeSupportedType}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeSupportedType', [])}`);
         });
     });
   });
