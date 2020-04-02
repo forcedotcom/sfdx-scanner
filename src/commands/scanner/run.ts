@@ -6,6 +6,7 @@ import {ScannerCommand} from './scannerCommand';
 import fs = require('fs');
 import globby = require('globby');
 import normalize = require('normalize-path');
+import untildify = require('untildify');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -126,7 +127,7 @@ export default class Run extends ScannerCommand {
   private async unpackTargets(): Promise<string[]> {
     // First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
     // Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
-    const normalizedPaths = this.flags.target.map(path => normalize(path).replace(/['"]/g, ''));
+    const normalizedPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
     // If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
     // the target paths.
     if (globby.hasMagic(normalizedPaths)) {
