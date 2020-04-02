@@ -60,7 +60,7 @@ jobs:
       - store_artifacts: # upload test coverage as artifact
           path: ./test-coverage
 
-  test-windows:
+  unpackaged-sanity:
     executor:
       name: win/default # executor type
       size: "medium"
@@ -73,8 +73,24 @@ jobs:
 
       - run: md .\test-results
 
-      - run: C:\repo\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
+      - run:
+          name: "List rules"
+          command: .\bin\run.cmd scanner:rule:list
 
+      - run:
+          name: "Run rules"
+          command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
+
+      # Upload results
+      - store_test_results:
+          path: .\test-results
+
+  packaged-sanity:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+
+    steps:
       - run:
           name: "Install sfdx cli"
           shell: cmd.exe
@@ -129,14 +145,25 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      - test-windows:
+      - unpackaged-sanity:
           requires:
             - build
       - publish-latest:
           # This job should only run after 'test' finishes successfully.
           requires:
             - test
-#            - test-windows
+            - unpackaged-sanity
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
+      - packaged-sanity:
+          requires:
+            - publish-latest
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
