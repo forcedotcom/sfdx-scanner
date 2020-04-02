@@ -4,10 +4,12 @@ import fs = require('fs');
 import path = require('path');
 import {SFDX_SCANNER_PATH} from '../../../src/Constants';
 import events = require('../../../messages/EventKeyTemplates');
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 
 const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 
 // Before our tests, delete any existing catalog and/or custom path associated with our override.
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
@@ -36,7 +38,7 @@ describe('scanner:run', () => {
           ])
           .it('When the file contains violations, they are logged out as an XML', ctx => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
-            let violations = ctx.stdout.split('<violation');
+            const violations = ctx.stdout.split('<violation');
             // The first list item is going to be the header, so we need to pull that off.
             violations.shift();
             // There should be four violations.
@@ -58,7 +60,7 @@ describe('scanner:run', () => {
             '--format', 'xml'
           ])
           .it('When the file contains no violations, a message is logged to the console', ctx => {
-            expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
+            expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
           });
       });
 
@@ -73,7 +75,7 @@ describe('scanner:run', () => {
           ])
           .it('Both files are evaluated, and any violations are logged', ctx => {
             // We'll split the output by the <file> tag first, so we can get each file that violated rules.
-            let files = ctx.stdout.split('<file');
+            const files = ctx.stdout.split('<file');
             // The first list item is going to be the header, so we need to pull that off.
             files.shift();
             // Verify that each set of violations corresponds to the expected file.
@@ -82,7 +84,7 @@ describe('scanner:run', () => {
             expect(files[1]).to.match(/name="\S+\/test\/code-samples\/apex\/InstallProcessorTests.cls"/);
 
             // Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-            let acctServiceViolations = files[0].split('<violation');
+            const acctServiceViolations = files[0].split('<violation');
             acctServiceViolations.shift();
             // There should be four violations.
             expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
@@ -93,7 +95,7 @@ describe('scanner:run', () => {
             expect(acctServiceViolations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
             expect(acctServiceViolations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
-            let installProcessorViolations = files[1].split('<violation');
+            const installProcessorViolations = files[1].split('<violation');
             installProcessorViolations.shift();
             // There should be one violation.
             expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
@@ -121,7 +123,7 @@ describe('scanner:run', () => {
             expect(files[1]).to.match(/name="\S+\/test\/code-samples\/apex\/InstallProcessorTests.cls"/);
 
             // Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-            let acctServiceViolations = files[0].split('<violation');
+            const acctServiceViolations = files[0].split('<violation');
             acctServiceViolations.shift();
             // There should be four violations.
             expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
@@ -152,7 +154,7 @@ describe('scanner:run', () => {
           ])
           .it('Glob is resolved to files, and those files are evaluated', ctx => {
             // We'll split the output by the <file> tag first, so we can get each file that violated rules.
-            let files = ctx.stdout.split('<file');
+            const files = ctx.stdout.split('<file');
             // The first list item is going to be the header, so we need to pull that off.
             files.shift();
             // Verify that each set of violations corresponds to the expected file.
@@ -161,7 +163,7 @@ describe('scanner:run', () => {
             expect(files[1]).to.match(/name="\S+\/test\/code-samples\/apex\/InstallProcessorTests.cls"/);
 
             // Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-            let acctServiceViolations = files[0].split('<violation');
+            const acctServiceViolations = files[0].split('<violation');
             acctServiceViolations.shift();
             // There should be four violations.
             expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
@@ -172,7 +174,7 @@ describe('scanner:run', () => {
             expect(acctServiceViolations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
             expect(acctServiceViolations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
-            let installProcessorViolations = files[1].split('<violation');
+            const installProcessorViolations = files[1].split('<violation');
             installProcessorViolations.shift();
             // There should be one violation.
             expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
@@ -191,7 +193,7 @@ describe('scanner:run', () => {
           ])
           .it('Violations from each rule are logged as an XML', ctx => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
-            let violations = ctx.stdout.split('<violation');
+            const violations = ctx.stdout.split('<violation');
             // The first list item is going to be the header, so we need to pull that off.
             violations.shift();
             // There should be eleven violations.
@@ -230,9 +232,9 @@ describe('scanner:run', () => {
           .it('The violations are written to the file as an XML', ctx => {
             // Verify that the file we wanted was actually created.
             expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
-            let fileContents = fs.readFileSync('testout.xml').toString();
+            const fileContents = fs.readFileSync('testout.xml').toString();
             // We'll split the output by the <violation> tag, so we can get individual violations.
-            let violations = fileContents.split('<violation');
+            const violations = fileContents.split('<violation');
             // The first list item is going to be the header, so we need to pull that off.
             violations.shift();
             // There should be four violations.
@@ -258,14 +260,14 @@ describe('scanner:run', () => {
         ])
         .it('Properly writes CSV to console', ctx => {
           // Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-          let rows = ctx.stdout.trim().split('\n');
+          const rows = ctx.stdout.trim().split('\n');
           rows.shift();
 
           // There should be four rows.
           expect(rows.length).to.equal(4, 'Should be four violations detected');
 
           // Split each row by commas, so we'll have each cell.
-          let data = rows.map(val => val.split(','));
+          const data = rows.map(val => val.split(','));
           // Verify that each row looks approximately right.
           expect(data[0][3]).to.equal('"66"', 'Violation #1 should occur on the expected line');
           expect(data[1][3]).to.equal('"70"', 'Violation #2 should occur on the expected line');
@@ -298,16 +300,16 @@ describe('scanner:run', () => {
 
           // Verify that the file we wanted was actually created.
           expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
-          let fileContents = fs.readFileSync('testout.csv').toString();
+          const fileContents = fs.readFileSync('testout.csv').toString();
           // Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-          let rows = fileContents.trim().split('\n');
+          const rows = fileContents.trim().split('\n');
           rows.shift();
 
           // There should be four rows.
           expect(rows.length).to.equal(4, 'Should be four violations detected');
 
           // Split each row by commas, so we'll have each cell.
-          let data = rows.map(val => val.split(','));
+          const data = rows.map(val => val.split(','));
           // Verify that each row looks approximately right.
           expect(data[0][3]).to.equal('"66"', 'Violation #1 should occur on the expected line');
           expect(data[1][3]).to.equal('"70"', 'Violation #2 should occur on the expected line');
@@ -328,7 +330,7 @@ describe('scanner:run', () => {
           '--format', 'csv'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
+          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
         });
 
         runTest
@@ -365,7 +367,7 @@ describe('scanner:run', () => {
         .it('Properly writes table to the console', ctx => {
           // Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
           // That will leave us with just the rows.
-          let rows = ctx.stdout.trim().split('\n');
+          const rows = ctx.stdout.trim().split('\n');
           rows.shift();
           rows.shift();
 
@@ -386,7 +388,7 @@ describe('scanner:run', () => {
           '--format', 'table'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
+          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
         });
     });
 
@@ -402,7 +404,7 @@ describe('scanner:run', () => {
           .it('When no format is specified, we default to a TABLE', ctx => {
             // Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
             // That will leave us with just the rows.
-            let rows = ctx.stdout.trim().split('\n');
+            const rows = ctx.stdout.trim().split('\n');
             rows.shift();
             rows.shift();
 
@@ -425,7 +427,7 @@ describe('scanner:run', () => {
           ])
           .it('When no rules are explicitly specified, all rules are run', ctx => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
-            let violations = ctx.stdout.split('<violation');
+            const violations = ctx.stdout.split('<violation');
             // The first list item is going to be the header, so we need to pull that off.
             violations.shift();
             // There should be 84 violations. We won't individually check all of them, because we'd be here all day. We'll just
@@ -443,7 +445,7 @@ describe('scanner:run', () => {
           ])
           .it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
-            let violations = ctx.stdout.split('<violation');
+            const violations = ctx.stdout.split('<violation');
             // Before the violations are logged, there should be 16 log messages about implicitly included PMD categories.
             const regex = new RegExp(events.info.pmdJarImplicitlyRun.replace(/%s/g, '.*'), 'g');
             expect(violations[0].match(regex) || []).to.have.lengthOf(16, 'Should be 16 PMD-related logs, two for each of the eight categories');
@@ -457,7 +459,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
         .it('Error thrown when no target is specified', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.mustTargetSomething', [])}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.mustTargetSomething')}`);
         });
 
       runTest
@@ -465,7 +467,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
         .it('Error thrown when output file is malformed', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeValid', [])}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeValid')}`);
         });
 
       runTest
@@ -473,7 +475,15 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
         .it('Error thrown when output file is unsupported type', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeSupportedType', [])}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeSupportedType')}`);
+        });
+
+      runTest
+        .stdout()
+        .stderr()
+        .command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
+        .it('Warning logged when output file format does not match format', ctx => {
+          expect(ctx.stdout).to.contain(messages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
         });
     });
   });
