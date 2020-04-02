@@ -81,7 +81,7 @@ jobs:
 
       - run:
           name: "Run rules"
-          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes  --format table
+          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes  --format junit
 
   publish-latest:
     <<: *defaults

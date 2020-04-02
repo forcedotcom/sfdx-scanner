@@ -14,6 +14,8 @@ export class RuleResultRecombinator {
         return this.constructCsv(results);
       case OUTPUT_FORMAT.XML:
         return this.constructXml(results);
+      case OUTPUT_FORMAT.JUNIT:
+        return this.constructJunit(results);
       case OUTPUT_FORMAT.TABLE:
         return this.constructTable(results);
       default:
@@ -25,6 +27,10 @@ export class RuleResultRecombinator {
     // TODO: Eventually, we'll need logic to combine disparate result sets together into a single CSV, but for now we
     //  can proceed with just PMD's results.
     return this.pmdToCsv(pmdResults);
+  }
+
+  private static constructJunit([pmdResults]: [string]): string {
+    return this.pmdToJunit(pmdResults);
   }
 
   private static constructXml([pmdResults]: [string]): string {
@@ -48,12 +54,16 @@ export class RuleResultRecombinator {
     // First, we need to get the columns. This is a bit esoteric, but what we're going is pulling the first row, which
     // holds the column names, splitting that by commas, then splitting each column name by double-quotes and keeping
     // the middle entry. That gives us the column names as a an array without the entries being wrapped in quotes.
-    const columns = rowStrings.shift().split(',').map(v => {return v.split('"')[1];});
+    const columns = rowStrings.shift().split(',').map(v => {
+      return v.split('"')[1];
+    });
     // Next, we need to turn each row into a JSON.
     const rowJsons = rowStrings.map(rowStr => {
       const rowVals = rowStr.split(',');
       const rowJson = {};
-      columns.forEach((col, idx) => {rowJson[col] = rowVals[idx];});
+      columns.forEach((col, idx) => {
+        rowJson[col] = rowVals[idx];
+      });
       return rowJson;
     });
     // Turn our JSON into a string so we can pass it back up through and parse it when we need.
@@ -92,6 +102,52 @@ export class RuleResultRecombinator {
       }
     }
     return results;
+  }
+
+  private static pmdToJunit(pmdResults: string): string {
+    // If the results were just an empty string, we can return it.
+    if (pmdResults === '') {
+      return '';
+    }
+    // PMD's results are given to us as an XML contained in a string. To turn the results into a CSV, first we'll need
+    // to turn the XML into a JSON that we can easily iterate through.
+    const pmdJson = xml2js(pmdResults, {compact: false, ignoreDeclaration: true});
+    let results = ``;
+    let problemCount = 0;
+
+    // The top-level Element just has an 'property', which is a singleton list containing the 'pmd' Element, whose own
+    // 'elements' property is a list of 'file' Elements.
+    const fileElements = pmdJson.elements[0].elements;
+    for (const fileElement of fileElements) {
+      const fileName = fileElement.attributes.name;
+      // Each 'file' Element should contain in its 'elements' property a list of 'violation' Elements describing the ways
+      // rules were violated.
+      const violations = fileElement.elements;
+      let failures = '';
+      for (const violation of violations) {
+        problemCount++;
+        const attrs = violation.attributes;
+        // The error message for the violation is a 'text' Element below it.
+        const msg = violation.elements[0].text.trim();
+        failures += `
+            <failure message="${fileName}: ${attrs.beginline} ${msg}" type="${attrs.priority}">
+${attrs.priority}: ${msg}
+Category: ${attrs.ruleset} - ${attrs.rule}
+File: ${fileName}
+Line: ${attrs.beginline}
+            </failure>`;
+      }
+      results += `
+      <testcase id="${fileName}" name="${fileName}">
+          ${failures}
+      </testcase>`;
+    }
+
+    return `<testsuites tests="${fileElements.length}" failures="${problemCount}">
+    <testsuite tests="${fileElements.length}" failures="${problemCount}">
+        ${results}
+    </testsuite>
+</testsuites>`;
   }
 }
 

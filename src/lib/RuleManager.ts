@@ -14,6 +14,7 @@ export enum RULE_FILTER_TYPE {
 
 export enum OUTPUT_FORMAT {
   XML = 'xml',
+  JUNIT = 'junit',
   CSV = 'csv',
   TABLE = 'table'
 }
