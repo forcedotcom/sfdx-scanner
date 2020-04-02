@@ -166,7 +166,7 @@ export default class Run extends ScannerCommand {
       if (this.flags.format === OUTPUT_FORMAT.CSV) {
         // The CSV is just one giant string that we can dump directly to the console.
         this.ux.log(output);
-      } else if (this.flags.format === OUTPUT_FORMAT.XML) {
+      } else if (this.flags.format === OUTPUT_FORMAT.XML || this.flags.format === OUTPUT_FORMAT.JUNIT) {
         // For XML, we can just dump it to the console.
         this.ux.log(output);
       } else if (this.flags.format === OUTPUT_FORMAT.TABLE && output.length > 0) {
