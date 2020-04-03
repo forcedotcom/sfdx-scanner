@@ -1,7 +1,7 @@
 {
   "name": "@salesforce/sfdx-scanner",
   "description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "author": "ISV SWAT",
   "bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
   "dependencies": {
@@ -64,10 +64,10 @@
     "bin": "sfdx",
     "topics": {
       "scanner": {
-        "description": "scan code to preemptively detect code quality issues and security vulnerabilities",
+        "description": "Scan code to preemptively detect code quality issues and security vulnerabilities.",
         "subtopics": {
           "rule": {
-            "description": "view/add rules that are used to scan code"
+            "description": "View/add rules that are used to scan code."
           }
         }
       },
