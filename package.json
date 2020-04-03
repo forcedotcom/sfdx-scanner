@@ -64,10 +64,10 @@
     "bin": "sfdx",
     "topics": {
       "scanner": {
-        "description": "[Description of scanner plugin goes here]",
+        "description": "Scan code to preemptively detect code quality issues and security vulnerabilities.",
         "subtopics": {
           "rule": {
-            "description": "[Description for 'rule' subtopic]"
+            "description": "View/add rules that are used to scan code."
           }
         }
       },
