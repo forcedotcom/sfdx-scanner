@@ -35,29 +35,22 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths: .
-  test:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
 
-      # Run mocha
+      # UNIT TESTS
       - run:
           name: test
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
           when: always
 
-      # Run eslint
       - run:
           name: eslint
           command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
           when: always
 
-      # Upload results
       - store_test_results:
           path: ./test-results
 
-      - store_artifacts: # upload test coverage as artifact
+      - store_artifacts: # upload test coverage as artifact.
           path: ./test-coverage
 
   unpackaged-sanity:
@@ -91,6 +84,8 @@ jobs:
       size: "medium"
 
     steps:
+      - checkout
+
       - run:
           name: "Install sfdx cli"
           shell: cmd.exe
@@ -137,21 +132,13 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      - test:
-          requires:
-            - build
-          filters:
-            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-            tags:
-              only: /.*/
       - unpackaged-sanity:
           requires:
             - build
       - publish-latest:
-          # This job should only run after 'test' finishes successfully.
+          # This job should only run after 'build' finishes successfully.
           requires:
-            - test
+            - build
             - unpackaged-sanity
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
