@@ -14,6 +14,7 @@ module.exports = {
   },
   "validations": {
     "mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
+    "outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
     "outfileMustBeValid": "--outfile must be a well-formed filepath.",
     "outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv."
   },
@@ -24,11 +25,11 @@ module.exports = {
   "examples": `Invoking without specifying any rules causes all rules to be run.
   E.g., $ sfdx scanner:run --format xml --target "somefile.js"
     Evaluates all rules against somefile.js.
-    
+
 Specifying multiple categories or rulesets is treated as a logical OR.
   E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
     Evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
-    
+
 Wrap globs in quotes.
   Unix example:    $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
   Windows example: > sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...

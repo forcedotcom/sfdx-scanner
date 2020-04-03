@@ -1,11 +1,12 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import fs = require('fs');
 import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
+import fs = require('fs');
 import globby = require('globby');
 import normalize = require('normalize-path');
+import untildify = require('untildify');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -79,14 +80,11 @@ export default class Run extends ScannerCommand {
     format: flags.enum({
       char: 'f',
       description: messages.getMessage('flags.formatDescription'),
-      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE],
-      default: OUTPUT_FORMAT.TABLE,
-      exclusive: ['outfile']
+      options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE]
     }),
     outfile: flags.string({
       char: 'o',
-      description: messages.getMessage('flags.outfileDescription'),
-      exclusive: ['format']
+      description: messages.getMessage('flags.outfileDescription')
     })
   };
 
@@ -97,10 +95,10 @@ export default class Run extends ScannerCommand {
     // Next, we need to build our input.
     const filters = this.buildRuleFilters();
     const target: string[]|string = this.flags.org || await this.unpackTargets();
-    // If the user specified an outfile, we'll deduce the implied format based on the file extension. Otherwise, we'll
-    // check the format flag. We check the outfile first because its value could be null, unlike the format flag which
-    // always defaults to TABLE.
-    const format: OUTPUT_FORMAT = this.flags.outfile ? this.deriveFormatFromOutfile() : this.flags.format;
+    // If format is specified, use it.  Otherwise, if outfile is specified, infer the format from its extension.
+    // Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
+    // between 'table' being defaulted and 'table' being explicitly chosen by the user.
+    const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
     const ruleManager = await RuleManager.create({});
     // It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
     // allow to boil over.
@@ -114,12 +112,22 @@ export default class Run extends ScannerCommand {
     if (!this.flags.target && !this.flags.org) {
       throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
     }
+
+    // Be liberal with the user, but do log an info message if they choose a file extension that does not match their format.
+    if (this.flags.format && this.flags.outfile) {
+      const derivedFormat = this.deriveFormatFromOutfile();
+      // For validation purposes, treat junit as xml.
+      const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format;
+      if (derivedFormat !== chosenFormat) {
+        this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format, derivedFormat]));
+      }
+    }
   }
 
   private async unpackTargets(): Promise<string[]> {
     // First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
     // Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
-    const normalizedPaths = this.flags.target.map(path => normalize(path).replace(/['"]/g, ''));
+    const normalizedPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
     // If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
     // the target paths.
     if (globby.hasMagic(normalizedPaths)) {
@@ -163,14 +171,16 @@ export default class Run extends ScannerCommand {
         throw new SfdxError(e.message || e);
       }
     } else {
+      // Default properly, again, as we did earlier.
+      const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
       // If we're just supposed to dump the output to the console, what precisely we do depends on the format.
-      if (this.flags.format === OUTPUT_FORMAT.CSV) {
+      if (format === OUTPUT_FORMAT.CSV) {
         // The CSV is just one giant string that we can dump directly to the console.
         this.ux.log(output);
-      } else if (this.flags.format === OUTPUT_FORMAT.XML || this.flags.format === OUTPUT_FORMAT.JUNIT) {
+      } else if (format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) {
         // For XML, we can just dump it to the console.
         this.ux.log(output);
-      } else if (this.flags.format === OUTPUT_FORMAT.TABLE && output.length > 0) {
+      } else if (format === OUTPUT_FORMAT.TABLE && output.length > 0) {
         // For tables, don't even bother printing anything unless we have something to print.
         const outputObj = JSON.parse(output);
         this.ux.table(outputObj.rows, outputObj.columns);

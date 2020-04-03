@@ -12,7 +12,7 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
 
 jobs:
-  test:
+  build:
     <<: *defaults
     steps:
       - checkout
@@ -31,6 +31,15 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
+
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+  test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
 
       # Run mocha
       - run:
@@ -51,20 +60,37 @@ jobs:
       - store_artifacts: # upload test coverage as artifact
           path: ./test-coverage
 
-      - run: bash <(curl -s https://codecov.io/bash)
+  unpackaged-sanity:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+    working_directory: C:\repo
 
-      - persist_to_workspace:
-          root: ~/repo
-          paths: .
+    steps:
+      # Commands are run in a Windows virtual machine environment
+      - attach_workspace:
+          at: C:\repo
 
-  test-windows:
+      - run: md .\test-results
+
+      - run:
+          name: "List rules"
+          command: .\bin\run.cmd scanner:rule:list
+
+      - run:
+          name: "Run rules"
+          command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
+
+      # Upload results
+      - store_test_results:
+          path: .\test-results
+
+  packaged-sanity:
     executor:
       name: win/default # executor type
       size: "medium"
 
     steps:
-      # Commands are run in a Windows virtual machine environment
-      - checkout
       - run:
           name: "Install sfdx cli"
           shell: cmd.exe
@@ -105,23 +131,39 @@ workflows:
   version: 2.1
   test-publish:
     jobs:
+      - build:
+          filters:
+            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
+            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
+            tags:
+              only: /.*/
       - test:
+          requires:
+            - build
           filters:
             # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      - test-windows:
-          filters:
-            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-            tags:
-              only: /.*/
+      - unpackaged-sanity:
+          requires:
+            - build
       - publish-latest:
           # This job should only run after 'test' finishes successfully.
           requires:
             - test
-#            - test-windows
+            - unpackaged-sanity
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
+      - packaged-sanity:
+          requires:
+            - publish-latest
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
