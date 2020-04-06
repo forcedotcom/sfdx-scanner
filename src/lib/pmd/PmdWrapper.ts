@@ -129,7 +129,7 @@ export default class PmdWrapper extends PmdSupport {
     } else {
       // If there's more than one entry, then we've got some errors we need to process. We'll gradually build up our processed
       // string.
-      let outputArray = [];
+      const outputArray = [];
       splitStdout.forEach(piece => {
         if (piece === '') {
           // If the piece is an empty string, that means there were two separators next to each other. Skip it.
