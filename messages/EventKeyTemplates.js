@@ -6,7 +6,8 @@ module.exports = {
   "warning": {
     "invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
     "invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
-    "xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category."
+    "xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
+    "pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s"
   },
   "error": {
     "internal": {

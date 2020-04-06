@@ -1,8 +1,12 @@
 import {ChildProcessWithoutNullStreams} from 'child_process';
-import {Logger} from '@salesforce/core';
+import {Logger, Messages} from '@salesforce/core';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
+import { uxEvents } from '../ScannerEvents';
 import path = require('path');
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -85,7 +89,6 @@ export default class PmdWrapper extends PmdSupport {
 
     cp.on('exit', code => {
       this.logger.trace(`monitorChildProcess has received exit code ${code}`);
-      console.log('exited with code ' + code);
       if (code === 0 || code === 4) {
         let processedStdout = this.turnErrorsIntoWarnings(stdout);
         // If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
@@ -138,8 +141,12 @@ export default class PmdWrapper extends PmdSupport {
         } else if (piece.startsWith('filename')) {
           // If the piece starts with 'filename', then it's the contents of an error tag. We know that because filename is
           // the first argument provided to the tag.
-          // We'll use the contents of the tag to construct a warning that will be logged and surfaced to the user.
-          // TODO: Actually implement the warning surfacing part.
+          // We'll use the contents of the tag to construct a warning that will be surfaced to the user.
+          // We'll need the filename and the failure message. They'll be between the first and second '"', and between the
+          // third and fourth '"' respectively.
+          const filename = piece.split('"')[1];
+          const msg = piece.split('"')[3];
+          uxEvents.emit('warning-always', messages.getMessage('warning.pmdSkippedFile', [filename, msg]));
         }
       });
       // Once we've processed all the pieces, we can join what we've got and return it.
