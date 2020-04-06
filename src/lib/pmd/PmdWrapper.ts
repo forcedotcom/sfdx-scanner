@@ -90,7 +90,7 @@ export default class PmdWrapper extends PmdSupport {
     cp.on('exit', code => {
       this.logger.trace(`monitorChildProcess has received exit code ${code}`);
       if (code === 0 || code === 4) {
-        let processedStdout = this.turnErrorsIntoWarnings(stdout);
+        const processedStdout = this.turnErrorsIntoWarnings(stdout);
         // If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
         // one violation was found. In either case, PMD ran successfully, so we'll resolve the Promise. We use a tuple
         // containing a boolean that will be true if there were any violations, and stdut.
@@ -122,7 +122,7 @@ export default class PmdWrapper extends PmdSupport {
     // Any thrown errors should be in an <error> tag. So we'll split the output, using the following regex. It will catch
     // the opening '<error' or the closing '</error>', and pull off any whitespace at the end. That way, we'll instantly
     // be able to tell what we're looking at when we examine each piece.
-    let splitStdout = stdout.split(/<error\s*|<\/error>\s*/g);
+    const splitStdout = stdout.split(/<error\s*|<\/error>\s*/g);
     if (splitStdout.length === 1) {
       // If there's only one entry, then it means there weren't any errors, so we can just return the string.
       return stdout;
