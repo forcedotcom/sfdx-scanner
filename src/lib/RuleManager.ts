@@ -4,6 +4,7 @@ import {Rule} from '../types';
 import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
 import PmdWrapper from './pmd/PmdWrapper';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
+import * as PrettyPrinter from './util/PrettyPrinter';
 
 export enum RULE_FILTER_TYPE {
   RULENAME,
@@ -31,7 +32,7 @@ export class RuleFilter {
 
 export class RuleManager extends AsyncCreatable {
   private pmdCatalogWrapper: PmdCatalogWrapper;
-  private logger: Logger; // TODO: add relevant trace logs
+  private logger: Logger;
 
   protected async init(): Promise<void> {
     this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
@@ -39,11 +40,13 @@ export class RuleManager extends AsyncCreatable {
   }
 
   public async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
-    this.logger.trace(`Fetching rules that match the criteria ${filters}`);
+    this.logger.trace(`Fetching rules that match the criteria ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
     try {
       const allRules = await this.getAllRules();
-      return allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));
+      const rulesThatMatchCriteria = allRules.filter(rule => this.ruleSatisfiesFilterConstraints(rule, filters));
+      this.logger.trace(`Rules that match the criteria: ${PrettyPrinter.stringifyRules(rulesThatMatchCriteria)}`);
+      return rulesThatMatchCriteria;
     } catch (e) {
       throw new SfdxError(e.message || e);
     }
@@ -57,13 +60,17 @@ export class RuleManager extends AsyncCreatable {
     }
     // TODO: Eventually, we'll need a bunch more promises to run rules existing in other engines.
     const [pmdResults] = await Promise.all([this.runPmdRulesMatchingCriteria(filters, target)]);
+    this.logger.trace(`Received rule violations: ${pmdResults}`);
 
     // Once all of the rules finish running, we'll need to combine their results into a single set of the desired type,
     // which we can then return.
+    this.logger.trace(`Recombining results into requested format ${format}`);
     return RuleResultRecombinator.recombineAndReformatResults([pmdResults], format);
   }
 
   private async getAllRules(): Promise<Rule[]> {
+    this.logger.trace('Getting all rules.');
+
     // TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
     const [pmdRules]: Rule[][] = await Promise.all([this.getPmdRules()]);
     return [...pmdRules];
@@ -71,28 +78,37 @@ export class RuleManager extends AsyncCreatable {
 
   private async getPmdRules(): Promise<Rule[]> {
     // PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
+    this.logger.trace('Getting PMD rules.');
     const catalog = await this.pmdCatalogWrapper.getCatalog();
     return catalog.rules;
   }
 
   private async runPmdRulesMatchingCriteria(filters: RuleFilter[], target: string[]): Promise<string> {
+    this.logger.trace(`About to run PMD rules. Target count: ${target.length}, filter count: ${filters.length}`);
     try {
       // Convert our filters into paths that we can feed back into PMD.
       const paths: string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
       // If we didn't find any paths, we're done.
       if (paths == null || paths.length === 0) {
+        this.logger.trace('No Rule paths found. Nothing to execute.')
         return '';
       }
       // Otherwise, run PMD and see what we get.
+      // TODO: Weird translation to next layer. target=path and path=rule path. Consider renaming
       const [violationsFound, stdout] = await PmdWrapper.execute(target.join(','), paths.join(','));
 
       if (violationsFound) {
+        this.logger.trace('Found rule violations.');
         // If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
         const xmlStart = stdout.indexOf('<?xml');
         const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
-        return stdout.slice(xmlStart, xmlEnd);
+        const ruleViolationsXml = stdout.slice(xmlStart, xmlEnd);
+
+        this.logger.trace(`Rule violations in the original XML format: ${ruleViolationsXml}`);
+        return ruleViolationsXml;
       } else {
         // If we didn't find any violations, we can just return an empty string.
+        this.logger.trace('No rule violations found.');
         return '';
       }
     } catch (e) {

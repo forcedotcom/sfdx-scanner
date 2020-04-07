@@ -1,4 +1,5 @@
 import {RuleFilter} from '../RuleManager';
+import { Rule } from '../../types';
 
 /**
  * @param stringSet Set<string> to stringify
@@ -46,6 +47,24 @@ export function stringifyRuleFilters(filters: RuleFilter[]): string {
     const returnArr = [];
     filters.forEach((filter) => {
         returnArr.push(stringifyRuleFilter(filter));
+    });
+    return `[${returnArr.join(',')}]`;
+}
+
+/**
+ * @param rule Rule to stringify
+ */
+export function stringifyRule(rule: Rule): string {
+    return `Rule[name: ${rule.name}, description: ${rule.description}, categories: ${rule.categories.join(',')}, rulesets: ${rule.rulesets.join(',')}, languages: ${rule.languages.join(',')}]`;
+}
+
+/**
+ * @param rules Array of Rule to stringify
+ */
+export function stringifyRules(rules: Rule[]): string {
+    const returnArr = [];
+    rules.forEach((rule) => {
+        returnArr.push(stringifyRule(rule));
     });
     return `[${returnArr.join(',')}]`;
 }
