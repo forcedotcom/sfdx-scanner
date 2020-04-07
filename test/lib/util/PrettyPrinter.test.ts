@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import * as PrettyPrinter from '../../../src/lib/util/PrettyPrinter';
+import { RuleFilter, RULE_FILTER_TYPE } from '../../../src/lib/RuleManager';
 
 describe(('PrettyPrinter tests'), () => {
     it('should print Set<string>', () => {
@@ -17,8 +18,58 @@ describe(('PrettyPrinter tests'), () => {
         expect(PrettyPrinter.stringifyMapOfMaps(mapOfMapOfSet)).equals(expectedMapOfMapString);
     });
 
-    // TODO: add tests for RuleFilter stringify
+    it('should print a RuleFilter', () => {
+        const { ruleFilter, expectedRuleFilterString } = createRuleFilter(RULE_FILTER_TYPE.CATEGORY);
+        expect(PrettyPrinter.stringifyRuleFilter(ruleFilter)).equals(expectedRuleFilterString);
+    });
+
+    it('should print RuleFilter array', () => {
+        const { ruleFilters, expectedRuleFiltersString } = createRuleFilters();
+        expect(PrettyPrinter.stringifyRuleFilters(ruleFilters)).equals(expectedRuleFiltersString);
+    });
+
+    it('should print a Rule', () => {
+        const { rule, expectedRuleString } = createRule();
+        expect(PrettyPrinter.stringifyRule(rule)).equals(expectedRuleString);
+    });
+
+    it('should print a Rule array', () => {
+        const { rules, expectedRulesString } = createRules();
+        expect(PrettyPrinter.stringifyRules(rules)).equals(expectedRulesString);
+    });
 });
+
+function createRuleFilter(filterType: RULE_FILTER_TYPE) {
+    const expectedRuleFilterString = `RuleFilter[filterType=${filterType}, filterValues=Rule1,Rule2]`;
+    const ruleFilter = new RuleFilter(filterType, ['Rule1', 'Rule2']);
+    return { ruleFilter, expectedRuleFilterString };
+}
+
+function createRuleFilters() {
+    const ruleFilter1 = createRuleFilter(RULE_FILTER_TYPE.RULENAME);
+    const ruleFilter2 = createRuleFilter(RULE_FILTER_TYPE.LANGUAGE);
+    const ruleFilters: RuleFilter[] = [ruleFilter1.ruleFilter, ruleFilter2.ruleFilter];
+    const expectedRuleFiltersString = `[${ruleFilter1.expectedRuleFilterString},${ruleFilter2.expectedRuleFilterString}]`;
+    return { ruleFilters, expectedRuleFiltersString };
+}
+
+function createRule() {
+    const rule = {name: 'RuleName1', 
+    description: 'rule description', 
+    categories: ['Category1', 'Category2'],
+    rulesets: ['Ruleset1', 'Ruleset2'],
+    languages: ['apex', 'javascript'] };
+    const expectedRuleString = 'Rule[name: RuleName1, description: rule description, categories: Category1,Category2, rulesets: Ruleset1,Ruleset2, languages: apex,javascript]';
+    return { rule, expectedRuleString };
+}
+
+function createRules() {
+    const rule1 = createRule();
+    const rule2 = createRule();
+    const rules = [rule1.rule, rule2.rule];
+    const expectedRulesString = `[${rule1.expectedRuleString},${rule2.expectedRuleString}]`;
+    return { rules, expectedRulesString };
+}
 
 function createSet() {
     const setOfString = new Set<string>();
