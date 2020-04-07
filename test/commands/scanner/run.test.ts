@@ -11,7 +11,8 @@ const CATALOG_OVERRIDE = 'RunTestPmdCatalog.json';
 const CUSTOM_PATH_OVERRIDE = 'RunTestCustomPaths.json';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 // Before our tests, delete any existing catalog and/or custom path associated with our override.
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
@@ -62,7 +63,7 @@ describe('scanner:run', () => {
             '--format', 'xml'
           ])
           .it('When the file contains no violations, a message is logged to the console', ctx => {
-            expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
+            expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
           });
       });
 
@@ -257,8 +258,8 @@ describe('scanner:run', () => {
         })
         .it('Properly writes CSV to file', ctx => {
           // Verify that the correct message is displayed to user
-          expect(ctx.stdout).to.contain(messages.getMessage('output.writtenToOutFile', ['testout.csv']));
-          expect(ctx.stdout).to.not.contain(messages.getMessage('output.noViolationsDetected', []));
+          expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
+          expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
 
           // Verify that the file we wanted was actually created.
           expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
@@ -292,7 +293,7 @@ describe('scanner:run', () => {
           '--format', 'csv'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
+          expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
         });
 
         runTest
@@ -310,8 +311,8 @@ describe('scanner:run', () => {
           }
         })
         .it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected', []));
-          expect(ctx.stdout).to.not.contain(messages.getMessage('output.writtenToOutFile', ['testout.csv']));
+          expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+          expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
           expect(fs.existsSync('testout.csv')).to.be.false;
         });
     });
@@ -350,7 +351,7 @@ describe('scanner:run', () => {
           '--format', 'table'
         ])
         .it('When no violations are detected, a message is logged to the console', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('output.noViolationsDetected'));
+          expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
         });
     });
 
@@ -476,9 +477,55 @@ describe('scanner:run', () => {
           .it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
             // We'll split the output by the <violation> tag, so we can get individual violations.
             const violations = ctx.stdout.split('<violation');
-            // Before the violations are logged, there should be 16 log messages about implicitly included PMD categories.
+            // Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
             const regex = new RegExp(events.info.pmdJarImplicitlyRun.replace(/%s/g, '.*'), 'g');
             expect(violations[0].match(regex) || []).to.have.lengthOf(16, 'Should be 16 PMD-related logs, two for each of the eight categories');
+          });
+      });
+
+      describe('Test Case: Evaluating rules against invalid code', () => {
+        const pathToBadSyntax = path.join('test', 'code-samples', 'invalid-apex', 'BadSyntax1.cls');
+        const pathToGoodSyntax = path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls');
+        runTest
+          .stdout()
+          .stderr()
+          .command(['scanner:run',
+            '--ruleset', 'ApexUnit',
+            '--target', pathToBadSyntax,
+            '--format', 'xml'
+          ])
+          .it('When only malformed code is supplied, no violations are detected but a warning is logged', ctx => {
+            // Expect the output to include the "No violations" string.
+            expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'), 'No violations should be found');
+            // Expect stderr to include the warning indicating that the file's output was skipped. We don't care much
+            // about the message from PMD, so just replace it with an empty string so it doesn't fail anything.
+            expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
+          });
+
+        runTest
+          .stdout()
+          .stderr()
+          .command(['scanner:run',
+            '--ruleset', 'ApexUnit',
+            '--target', `${pathToBadSyntax},${pathToGoodSyntax}`,
+            '--format', 'xml'
+          ])
+          .it('When a malformed file and a valid file are supplied, the malformed file does not tank the process', ctx => {
+            // stdout should be the same as if we'd only run against the good file.
+            // We'll split the output by the <violation> tag, so we can get individual violations.
+            const violations = ctx.stdout.split('<violation');
+            // The first list item is going to be the header, so we need to pull that off.
+            violations.shift();
+            // There should be four violations.
+            expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+            // We'll check each violation in enough depth to be confident that the expected violations were returned in the
+            // expected order.
+            expect(violations[0]).to.match(/beginline="66".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+            expect(violations[1]).to.match(/beginline="70".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+            expect(violations[2]).to.match(/beginline="74".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+            expect(violations[3]).to.match(/beginline="78".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+            // stderr should include the warning indicating that the file was skipped.
+            expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
           });
       });
     });
@@ -489,7 +536,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
         .it('Error thrown when no target is specified', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.mustTargetSomething')}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.mustTargetSomething')}`);
         });
 
       runTest
@@ -497,7 +544,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
         .it('Error thrown when output file is malformed', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeValid')}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeValid')}`);
         });
 
       runTest
@@ -505,7 +552,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
         .it('Error thrown when output file is unsupported type', ctx => {
-          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${messages.getMessage('validations.outfileMustBeSupportedType')}`);
+          expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeSupportedType')}`);
         });
 
       runTest
@@ -513,7 +560,7 @@ describe('scanner:run', () => {
         .stderr()
         .command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
         .it('Warning logged when output file format does not match format', ctx => {
-          expect(ctx.stdout).to.contain(messages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
+          expect(ctx.stdout).to.contain(runMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
         });
     });
   });
