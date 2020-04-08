@@ -1,8 +1,14 @@
 module.exports = {
   "commandDescription": `Add custom rules to the scanner's registry.`,
+  "commandDescriptionLong": `Add custom rules to Sfdx Scanner's registry to run them along with built-in rules. 
+  Rules should have been compiled and tested separately. 
+  Please refer to our Custom Rules help page for more information: 
+  <link to Custom Rules Help Page>`,
   "flags": {
-    "languageDescription": "Language against which the custom rules will evaluate.",
-    "pathDescription": `One or more paths to custom rule definitions. Specify multiple values with a comma-separated list.`
+    "languageDescription": "language against which the custom rules will evaluate",
+    "languageDescriptionLong": "Language against which the custom rules will evaluate.",
+    "pathDescription": "file path(s) to custom rule JAR files",
+    "pathDescriptionLong": `One or more paths to custom rule definitions. Specify multiple values with a comma-separated list.`
   },
   "validations": {
     "languageCannotBeEmpty": "Language cannot be empty",
