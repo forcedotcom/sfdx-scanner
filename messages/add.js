@@ -7,7 +7,7 @@ module.exports = {
   "flags": {
     "languageDescription": "language against which the custom rules will evaluate",
     "languageDescriptionLong": "Language against which the custom rules will evaluate.",
-    "pathDescription": "file path(s) to custom rule JAR files",
+    "pathDescription": "one or more paths to custom rule definitions",
     "pathDescriptionLong": `One or more paths to custom rule definitions. Specify multiple values with a comma-separated list.`
   },
   "validations": {
