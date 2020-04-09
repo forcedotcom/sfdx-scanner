@@ -1,6 +1,6 @@
 module.exports = {
   "commandDescription": "Lists basic information about all rules matching provided criteria",
-  "commandDescriptionLong": `Lists all the rules available in the catalog. To look at a smaller set of rules at a time,
+  "commandDescriptionLong": `Lists all the rules available in the catalog. To look at a smaller set of rules,
   use the filter options available. To get more information about a specific rule,
   you can use the scanner:rule:describe command.
   Please make sure your machine has Java8 or greater setup correctly.`,
