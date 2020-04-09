@@ -7,7 +7,7 @@ module.exports = {
   Please make sure your machine has Java 8 or greater setup correctly.`,
   "flags": {
     "rulenameDescription": "The name of a rule.",
-    "rulenameDescriptionLong": "Name of the rule whose description you would like to view."
+    "rulenameDescriptionLong": "Name of the rule to describe in more detail."
   },
   "output": {
     "noMatchingRules": "No rules exist with the name '{0}'",
