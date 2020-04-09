@@ -3,7 +3,7 @@ module.exports = {
   "commandDescriptionLong": `Lists all the rules available in the catalog. To look at a smaller set of rules,
   use the filter options available. To get more information about a specific rule,
   you can use the scanner:rule:describe command.
-  Please make sure your machine has Java8 or greater setup correctly.`,
+  Please make sure your machine has Java 8 or greater setup correctly.`,
   "flags": {
     "languageDescription": "language(s) to filter list by",
     "languageDescriptionLong": "Select rules by language. Enter multiple values as a comma-separated list.",
