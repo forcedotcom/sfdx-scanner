@@ -17,6 +17,7 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 export default class Add extends SfdxCommand {
 
   public static description = messages.getMessage('commandDescription');
+  public static longDescription = messages.getMessage('commandDescriptionLong');
 
   public static examples = [
     messages.getMessage('examples')
@@ -26,11 +27,13 @@ export default class Add extends SfdxCommand {
     language: flags.string({
         char: 'l',
         description: messages.getMessage('flags.languageDescription'),
+        longDescription: messages.getMessage('flags.languageDescriptionLong'),
         required: true
     }),
     path: flags.array({
         char: 'p',
         description: messages.getMessage('flags.pathDescription'),
+        longDescription: messages.getMessage('flags.pathDescriptionLong'),
         required: true
     })
   };

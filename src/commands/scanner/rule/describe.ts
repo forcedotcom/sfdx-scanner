@@ -15,6 +15,8 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 export default class Describe extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
+  public static longDescription = messages.getMessage('commandDescriptionLong');
+
   public static examples = [
     messages.getMessage('examples.normalExample')
   ];
@@ -27,6 +29,7 @@ export default class Describe extends ScannerCommand {
     rulename: flags.string({
       char: 'n',
       description: messages.getMessage('flags.rulenameDescription'),
+      longDescription: messages.getMessage('flags.rulenameDescriptionLong'),
       required: true
     }),
     verbose: flags.builtin()

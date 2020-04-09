@@ -18,7 +18,8 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 export default class Run extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is provided.
   public static description = messages.getMessage('commandDescription');
-  // TODO: Write real examples.
+  public static longDescription = messages.getMessage('commandDescriptionLong');
+
   public static examples = [
     messages.getMessage('examples')
   ];
@@ -31,11 +32,13 @@ export default class Run extends ScannerCommand {
     // These flags are how you choose which rules you're running.
     category: flags.array({
       char: 'c',
-      description: messages.getMessage('flags.categoryDescription')
+      description: messages.getMessage('flags.categoryDescription'),
+      longDescription: messages.getMessage('flags.categoryDescriptionLong')
     }),
     ruleset: flags.array({
       char: 'r',
-      description: messages.getMessage('flags.rulesetDescription')
+      description: messages.getMessage('flags.rulesetDescription'),
+      longDescription: messages.getMessage('flags.rulesetDescriptionLong')
     }),
     // TODO: After implementing this flag, unhide it.
     rulename: flags.string({
@@ -60,6 +63,7 @@ export default class Run extends ScannerCommand {
     target: flags.array({
       char: 't',
       description: messages.getMessage('flags.targetDescription'),
+      longDescription: messages.getMessage('flags.targetDescriptionLong'),
       // If you're specifying local files, it doesn't make much sense to let you specify anything else.
       exclusive: ['org']
     }),
@@ -80,11 +84,13 @@ export default class Run extends ScannerCommand {
     format: flags.enum({
       char: 'f',
       description: messages.getMessage('flags.formatDescription'),
+      longDescription: messages.getMessage('flags.formatDescriptionLong'),
       options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE]
     }),
     outfile: flags.string({
       char: 'o',
-      description: messages.getMessage('flags.outfileDescription')
+      description: messages.getMessage('flags.outfileDescription'),
+      longDescription: messages.getMessage('flags.outfileDescriptionLong')
     })
   };
 

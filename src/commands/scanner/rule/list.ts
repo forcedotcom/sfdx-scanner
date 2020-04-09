@@ -15,6 +15,8 @@ const columns = ['name', 'languages', 'categories', 'rulesets'];
 export default class List extends ScannerCommand {
   // These determine what's displayed when the --help/-h flag is supplied.
   public static description = messages.getMessage('commandDescription');
+  public static longDescription = messages.getMessage('commandDescriptionLong');
+
   public static examples = [
     messages.getMessage('examples')
   ];
@@ -27,15 +29,18 @@ export default class List extends ScannerCommand {
     verbose: flags.builtin(),
     category: flags.array({
       char: 'c',
-      description: messages.getMessage('flags.categoryDescription')
+      description: messages.getMessage('flags.categoryDescription'),
+      longDescription: messages.getMessage('flags.categoryDescriptionLong')
     }),
     ruleset: flags.array({
       char: 'r',
-      description: messages.getMessage('flags.rulesetDescription')
+      description: messages.getMessage('flags.rulesetDescription'),
+      longDescription: messages.getMessage('flags.rulesetDescriptionLong')
     }),
     language: flags.array({
       char: 'l',
-      description: messages.getMessage('flags.languageDescription')
+      description: messages.getMessage('flags.languageDescription'),
+      longDescription: messages.getMessage('flags.languageDescriptionLong')
     }),
     // TODO: After implementing this flag, unhide it.
     severity: flags.string({
