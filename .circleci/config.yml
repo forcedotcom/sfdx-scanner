@@ -120,10 +120,8 @@ jobs:
           command: |
             git config user.email "isv.swat@salesforce.com"
             git config user.name "$CIRCLE_USERNAME"
-            git checkout release
-            git pull
             git checkout dev
-            git pull
+            git pull origin dev
             git merge release --commit -m "Automerging changes from release branch"
             git push origin dev
   publish-latest:
