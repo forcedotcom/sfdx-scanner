@@ -108,6 +108,19 @@ jobs:
       - store_test_results:
           path: .\test-results
 
+  auto-merge-release:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: "Merge release"
+          command: |
+            git checkout dev
+            git pull
+            git merge origin/release
+            git commit -m "Automerging changes from release branch"
+            git push origin dev
+
   publish-latest:
     <<: *defaults
     steps:
@@ -135,6 +148,13 @@ workflows:
       - unpackaged-sanity:
           requires:
             - build
+      - auto-merge-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - release
       - publish-latest:
           # This job should only run after 'build' finishes successfully.
           requires:
