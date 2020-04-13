@@ -12,45 +12,48 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class XmlReader {
-  private static XmlReader INSTANCE = null;
-  public static XmlReader getInstance() {
-    if (INSTANCE == null) {
-      INSTANCE = new XmlReader();
-    }
-    return INSTANCE;
-  }
+	private static XmlReader INSTANCE = null;
 
-  /**
-   * Given the path to a resource, returns an InputStream for that resource.
-   * @param path - The path to a resource.
-   * @return     - An InputStream for the provided resource.
-   */
-  private InputStream getResourceAsStream(String path) {
-    final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
-    return in == null ? getClass().getResourceAsStream(path) : in;
-  }
+	public static XmlReader getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new XmlReader();
+		}
+		return INSTANCE;
+	}
+
+	/**
+	 * Given the path to a resource, returns an InputStream for that resource.
+	 *
+	 * @param path - The path to a resource.
+	 * @return - An InputStream for the provided resource.
+	 */
+	private InputStream getResourceAsStream(String path) {
+		final InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+		return in == null ? getClass().getResourceAsStream(path) : in;
+	}
 
 
-  /**
-   * Accepts the path to an XML resource, and returns a Document.
-   * @param path - The path to an XMML resource.
-   * @return     - A Document object representing the parsed resource.
-   */
-  public Document getDocumentFromPath(String path) {
-    Document doc = null;
-    try (
-      InputStream in = getResourceAsStream(path)
-    ) {
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-      DocumentBuilder db = dbf.newDocumentBuilder();
-      doc = db.parse(in);
-    } catch (IOException ioe) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
-    } catch (ParserConfigurationException | SAXException e) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
-    } catch (IllegalArgumentException iae) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH, iae, path);
-    }
-    return doc;
-  }
+	/**
+	 * Accepts the path to an XML resource, and returns a Document.
+	 *
+	 * @param path - The path to an XMML resource.
+	 * @return - A Document object representing the parsed resource.
+	 */
+	public Document getDocumentFromPath(String path) {
+		Document doc = null;
+		try (
+			InputStream in = getResourceAsStream(path)
+		) {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			doc = db.parse(in);
+		} catch (IOException ioe) {
+			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
+		} catch (ParserConfigurationException | SAXException e) {
+			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
+		} catch (IllegalArgumentException iae) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH, iae, path);
+		}
+		return doc;
+	}
 }

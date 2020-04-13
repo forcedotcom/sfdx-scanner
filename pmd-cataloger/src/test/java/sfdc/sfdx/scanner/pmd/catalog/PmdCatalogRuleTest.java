@@ -1,9 +1,13 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
 import org.json.simple.JSONObject;
+
 import static org.junit.Assert.*;
+
 import org.junit.Test;
+
 import static org.mockito.Mockito.*;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -13,86 +17,86 @@ import java.util.List;
 
 public class PmdCatalogRuleTest {
 
-  private static final String NAME = "Name";
-  private static final String MESSAGE = "Some message";
-  private static final String LANGUAGE = "apex";
+	private static final String NAME = "Name";
+	private static final String MESSAGE = "Some message";
+	private static final String LANGUAGE = "apex";
 
-  private static final String CATEGORY_NAME = "Best Practices";
-  private static final String CATEGORY_PATH = "/some/path";
-  private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH);
+	private static final String CATEGORY_NAME = "Best Practices";
+	private static final String CATEGORY_PATH = "/some/path";
+	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH);
 
-  @Test
-  public void testCatalogRuleJsonConversion() {
-    // Setup mock
-    final Element elementMock = getElementMock(1, "description");
-    final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
-
-
-    // Execute
-    final JSONObject jsonObject = catalogRule.toJson();
+	@Test
+	public void testCatalogRuleJsonConversion() {
+		// Setup mock
+		final Element elementMock = getElementMock(1, "description");
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
 
-    // Validate
-    assertEquals("Unexpected name on JSON", NAME, jsonObject.get(PmdCatalogRule.JSON_NAME));
+		// Execute
+		final JSONObject jsonObject = catalogRule.toJson();
 
-    assertEquals("Unexpected message", MESSAGE, jsonObject.get(PmdCatalogRule.JSON_MESSAGE));
 
-    final List<String> expectedLanguages = new ArrayList<>();
-    expectedLanguages.add(LANGUAGE);
-    assertEquals("Unexpected language", expectedLanguages, (List<String>)jsonObject.get(PmdCatalogRule.JSON_LANGUAGES));
+		// Validate
+		assertEquals("Unexpected name on JSON", NAME, jsonObject.get(PmdCatalogRule.JSON_NAME));
 
-    final List<String> expectedCategoryNames = new ArrayList<>();
-    expectedCategoryNames.add(CATEGORY_NAME);
-    assertEquals("Unexpected categories", expectedCategoryNames, jsonObject.get(PmdCatalogRule.JSON_CATEGORIES));
+		assertEquals("Unexpected message", MESSAGE, jsonObject.get(PmdCatalogRule.JSON_MESSAGE));
 
-  }
+		final List<String> expectedLanguages = new ArrayList<>();
+		expectedLanguages.add(LANGUAGE);
+		assertEquals("Unexpected language", expectedLanguages, (List<String>) jsonObject.get(PmdCatalogRule.JSON_LANGUAGES));
 
-  @Test
-  public void testCatalogRuleNoDescription() {
+		final List<String> expectedCategoryNames = new ArrayList<>();
+		expectedCategoryNames.add(CATEGORY_NAME);
+		assertEquals("Unexpected categories", expectedCategoryNames, jsonObject.get(PmdCatalogRule.JSON_CATEGORIES));
 
-    final int descriptionNlCount = 0;
-    final String emptyDescription = "";
+	}
 
-    // Setup mock
-    final Element elementMock = getElementMock(descriptionNlCount, emptyDescription);
-    final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+	@Test
+	public void testCatalogRuleNoDescription() {
 
-    // Execute
-    final JSONObject jsonObject = catalogRule.toJson();
+		final int descriptionNlCount = 0;
+		final String emptyDescription = "";
 
-    // Validate
-    assertEquals("Unexpected description", emptyDescription, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
-  }
+		// Setup mock
+		final Element elementMock = getElementMock(descriptionNlCount, emptyDescription);
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
-  @Test
-  public void testCatalogRuleJsonWithDescription() {
-    final int descriptionNlCount = 1;
-    final String description = "Some description";
+		// Execute
+		final JSONObject jsonObject = catalogRule.toJson();
 
-    // Setup mock
-    final Element elementMock = getElementMock(descriptionNlCount, description);
-    final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+		// Validate
+		assertEquals("Unexpected description", emptyDescription, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
+	}
 
-    // Execute
-    final JSONObject jsonObject = catalogRule.toJson();
+	@Test
+	public void testCatalogRuleJsonWithDescription() {
+		final int descriptionNlCount = 1;
+		final String description = "Some description";
 
-    // Validate
-    assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
-  }
+		// Setup mock
+		final Element elementMock = getElementMock(descriptionNlCount, description);
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
-  private Element getElementMock(int descriptionNlCount, String emptyDescription) {
-    final Element elementMock = mock(Element.class);
-    doReturn(NAME).when(elementMock).getAttribute(PmdCatalogRule.ATTR_NAME);
-    doReturn(MESSAGE).when(elementMock).getAttribute(PmdCatalogRule.ATTR_MESSAGE);
+		// Execute
+		final JSONObject jsonObject = catalogRule.toJson();
 
-    final Element descElementMock = mock(Element.class);
-    doReturn(emptyDescription).when(descElementMock).getTextContent();
+		// Validate
+		assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
+	}
 
-    final NodeList nodeList = mock(NodeList.class);
-    doReturn(descriptionNlCount).when(nodeList).getLength();
-    doReturn(descElementMock).when(nodeList).item(0);
-    doReturn(nodeList).when(elementMock).getElementsByTagName(PmdCatalogRule.ATTR_DESCRIPTION);
+	private Element getElementMock(int descriptionNlCount, String emptyDescription) {
+		final Element elementMock = mock(Element.class);
+		doReturn(NAME).when(elementMock).getAttribute(PmdCatalogRule.ATTR_NAME);
+		doReturn(MESSAGE).when(elementMock).getAttribute(PmdCatalogRule.ATTR_MESSAGE);
 
-    return elementMock;
-  }
+		final Element descElementMock = mock(Element.class);
+		doReturn(emptyDescription).when(descElementMock).getTextContent();
+
+		final NodeList nodeList = mock(NodeList.class);
+		doReturn(descriptionNlCount).when(nodeList).getLength();
+		doReturn(descElementMock).when(nodeList).item(0);
+		doReturn(nodeList).when(elementMock).getElementsByTagName(PmdCatalogRule.ATTR_DESCRIPTION);
+
+		return elementMock;
+	}
 }

@@ -17,67 +17,68 @@ import static org.mockito.Mockito.*;
 
 public class MainMessagesTest {
 
-  @After
-  public void clearMessages() {
-    SfdxMessager.getInstance().resetMessages();
-  }
+	@After
+	public void clearMessages() {
+		SfdxMessager.getInstance().resetMessages();
+	}
 
-  @Test
-  public void verifySfdxScannerExceptionsToMessages() {
-    final EventKey expectedEventKey = EventKey.ERROR_INTERNAL_UNEXPECTED;
-    final String[] expectedArgs = {"dummy arg"};
-    final SfdxScannerException exception = new SfdxScannerException(expectedEventKey, expectedArgs);
+	@Test
+	public void verifySfdxScannerExceptionsToMessages() {
+		final EventKey expectedEventKey = EventKey.ERROR_INTERNAL_UNEXPECTED;
+		final String[] expectedArgs = {"dummy arg"};
+		final SfdxScannerException exception = new SfdxScannerException(expectedEventKey, expectedArgs);
 
-    // Setup mock
-    final Main.Dependencies dependencies = setupMockToThrowException(exception);
+		// Setup mock
+		final Main.Dependencies dependencies = setupMockToThrowException(exception);
 
-    // Execute
-    new Main(dependencies).mainInternal(new String[]{"apex=blah"});
+		// Execute
+		new Main(dependencies).mainInternal(new String[]{"apex=blah"});
 
-    // Validate
-    final List<Message> messages = getMessages();
-    assertEquals("Unexpected count of messages", 1, messages.size());
-    final Message actualMessage = messages.get(0);
+		// Validate
+		final List<Message> messages = getMessages();
+		assertEquals("Unexpected count of messages", 1, messages.size());
+		final Message actualMessage = messages.get(0);
 
-    // Validate message
-    assertEquals("Unexpected eventKey in message", expectedEventKey.getMessageKey(), actualMessage.getMessageKey());
-    assertEquals("Unexpected args in message", actualMessage.getArgs().get(0), expectedArgs[0]);
-  }
+		// Validate message
+		assertEquals("Unexpected eventKey in message", expectedEventKey.getMessageKey(), actualMessage.getMessageKey());
+		assertEquals("Unexpected args in message", actualMessage.getArgs().get(0), expectedArgs[0]);
+	}
 
-  @Test
-  public void verifyAnyThrowableAddedToMessages() {
-    final RuntimeException exception = new RuntimeException("Some dummy message");
-    final Main.Dependencies dependencies = setupMockToThrowException(exception);
+	@Test
+	public void verifyAnyThrowableAddedToMessages() {
+		final RuntimeException exception = new RuntimeException("Some dummy message");
+		final Main.Dependencies dependencies = setupMockToThrowException(exception);
 
-    // Execute
-    new Main(dependencies).mainInternal(new String[]{"apex=blah"});
+		// Execute
+		new Main(dependencies).mainInternal(new String[]{"apex=blah"});
 
-    // Validate
-    List<Message> messages = getMessages();
-    assertEquals("Unexpected count of messages", 1, messages.size());
-    final Message actualMessage = messages.get(0);
+		// Validate
+		List<Message> messages = getMessages();
+		assertEquals("Unexpected count of messages", 1, messages.size());
+		final Message actualMessage = messages.get(0);
 
-    // Validate message
-    assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey());
-    final String actualLog = actualMessage.getInternalLog();
-    assertTrue("log field of message should contain message from actual exception", actualLog.contains(exception.getMessage()));
-  }
+		// Validate message
+		assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey());
+		final String actualLog = actualMessage.getInternalLog();
+		assertTrue("log field of message should contain message from actual exception", actualLog.contains(exception.getMessage()));
+	}
 
-  private Main.Dependencies setupMockToThrowException(Exception exception) {
-    Main.Dependencies dependencies = mock(Main.Dependencies.class);
-    final PmdRuleCataloger prc = mock(PmdRuleCataloger.class);
-    doThrow(exception).when(prc).catalogRules();
-    doReturn(prc).when(dependencies).getPmdRuleCataloger(any());
-    return dependencies;
-  }
+	private Main.Dependencies setupMockToThrowException(Exception exception) {
+		Main.Dependencies dependencies = mock(Main.Dependencies.class);
+		final PmdRuleCataloger prc = mock(PmdRuleCataloger.class);
+		doThrow(exception).when(prc).catalogRules();
+		doReturn(prc).when(dependencies).getPmdRuleCataloger(any());
+		return dependencies;
+	}
 
-  private List<Message> getMessages() {
-    final String messagesInJson = SfdxMessager.getInstance().getAllMessages();
-    assertNotNull(messagesInJson);
+	private List<Message> getMessages() {
+		final String messagesInJson = SfdxMessager.getInstance().getAllMessages();
+		assertNotNull(messagesInJson);
 
-    // Deserialize JSON to verify further
-    final List<Message> messages = new Gson().fromJson(messagesInJson, new TypeToken<List<Message>>(){}.getType());
-    assertNotNull(messages);
-    return messages;
-  }
+		// Deserialize JSON to verify further
+		final List<Message> messages = new Gson().fromJson(messagesInJson, new TypeToken<List<Message>>() {
+		}.getType());
+		assertNotNull(messages);
+		return messages;
+	}
 }
