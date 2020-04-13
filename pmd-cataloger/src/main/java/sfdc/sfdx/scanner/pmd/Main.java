@@ -9,108 +9,109 @@ import sfdc.sfdx.scanner.messaging.SfdxMessager;
 
 public class Main {
 
-  static String DIVIDER = "=";
-  static String COMMA = ",";
+	static String DIVIDER = "=";
+	static String COMMA = ",";
 
-  static final String NO_ARGUMENTS_FOUND = "No arguments found";
-  static final String EXPECTED_DIVIDER = "Expected one " + DIVIDER + " in argument: %s";
-  static final String MISSING_PARTS = "Missing language and/or paths in argument: %s";
-  static final String NO_PATH_PROVIDED = "At least one path needs to be provided for language %s in argument: %s";
+	static final String NO_ARGUMENTS_FOUND = "No arguments found";
+	static final String EXPECTED_DIVIDER = "Expected one " + DIVIDER + " in argument: %s";
+	static final String MISSING_PARTS = "Missing language and/or paths in argument: %s";
+	static final String NO_PATH_PROVIDED = "At least one path needs to be provided for language %s in argument: %s";
 
-  Dependencies dependencies;
-  public Main() {
-    this(new Dependencies());
-  }
+	Dependencies dependencies;
 
-  public Main(Dependencies dependencies) {
-    this.dependencies = dependencies;
-  }
+	public Main() {
+		this(new Dependencies());
+	}
 
-  /**
-   * Main entry to PMD Rule Catalog builder
-   * @param args should contain language separated by '=' from their comma-separated path mapping list. For example, here are some accepted arg values :
-   *             "apex=/some/lib/withjars,/more/path"
-   *             "javascript=/another/path,/yet/another/path/with/javascript/rules"
-   */
-  public static void main(String[] args) {
+	public Main(Dependencies dependencies) {
+		this.dependencies = dependencies;
+	}
 
-    final Main main = new Main(new Dependencies());
-    final int exitCode = main.mainInternal(args)? 0 : 1;
-    System.exit(exitCode);
-  }
+	/**
+	 * Main entry to PMD Rule Catalog builder
+	 *
+	 * @param args should contain language separated by '=' from their comma-separated path mapping list. For example, here are some accepted arg values :
+	 *             "apex=/some/lib/withjars,/more/path"
+	 *             "javascript=/another/path,/yet/another/path/with/javascript/rules"
+	 */
+	public static void main(String[] args) {
 
-  boolean mainInternal(String[] args) {
-    boolean exitGracefully = true;
-    try {
-      final Map<String, List<String>> rulePathEntries = parseArguments(args);
-      catalogRules(rulePathEntries);
+		final Main main = new Main(new Dependencies());
+		final int exitCode = main.mainInternal(args) ? 0 : 1;
+		System.exit(exitCode);
+	}
 
-    } catch (SfdxScannerException se) {
-      // Add all SfdxScannerExceptions as messages
-      SfdxMessager.getInstance().addMessage(se);
-      exitGracefully = false;
-    } catch (Throwable throwable) {
-      // Catch and handle any exceptions that may have slipped through
-      final SfdxScannerException exception = new SfdxScannerException(EventKey.ERROR_INTERNAL_UNEXPECTED, throwable, throwable.getMessage());
-      SfdxMessager.getInstance().addMessage(exception);
-      exitGracefully = false;
-    }
-    finally {
-      // Print all the messages we have collected in a parsable format
-      System.out.println(SfdxMessager.getInstance().getAllMessagesWithFormatting());
-    }
+	boolean mainInternal(String[] args) {
+		boolean exitGracefully = true;
+		try {
+			final Map<String, List<String>> rulePathEntries = parseArguments(args);
+			catalogRules(rulePathEntries);
 
-    return exitGracefully;
-  }
+		} catch (SfdxScannerException se) {
+			// Add all SfdxScannerExceptions as messages
+			SfdxMessager.getInstance().addMessage(se);
+			exitGracefully = false;
+		} catch (Throwable throwable) {
+			// Catch and handle any exceptions that may have slipped through
+			final SfdxScannerException exception = new SfdxScannerException(EventKey.ERROR_INTERNAL_UNEXPECTED, throwable, throwable.getMessage());
+			SfdxMessager.getInstance().addMessage(exception);
+			exitGracefully = false;
+		} finally {
+			// Print all the messages we have collected in a parsable format
+			System.out.println(SfdxMessager.getInstance().getAllMessagesWithFormatting());
+		}
 
-  private void catalogRules(Map<String, List<String>> rulePathEntries) {
-    PmdRuleCataloger prc = dependencies.getPmdRuleCataloger(rulePathEntries);
-    prc.catalogRules();
-  }
+		return exitGracefully;
+	}
 
-  Map<String, List<String>> parseArguments(String[] args) {
-    if (args == null || args.length < 1) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, NO_ARGUMENTS_FOUND);
-    }
+	private void catalogRules(Map<String, List<String>> rulePathEntries) {
+		PmdRuleCataloger prc = dependencies.getPmdRuleCataloger(rulePathEntries);
+		prc.catalogRules();
+	}
 
-    final Map<String, List<String>> rulePathEntries = new HashMap<>();
+	Map<String, List<String>> parseArguments(String[] args) {
+		if (args == null || args.length < 1) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, NO_ARGUMENTS_FOUND);
+		}
 
-    for (String arg : args) {
-      parseArg(rulePathEntries, arg);
-    }
-    return rulePathEntries;
-  }
+		final Map<String, List<String>> rulePathEntries = new HashMap<>();
 
-  private void parseArg(Map<String, List<String>> languagePathEntries, String arg) {
-    final String[] splitArg = arg.split(DIVIDER);
+		for (String arg : args) {
+			parseArg(rulePathEntries, arg);
+		}
+		return rulePathEntries;
+	}
 
-    // DIVIDER should split arg in language and path list. No less, no more
-    if (splitArg.length != 2) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(EXPECTED_DIVIDER, arg));
-    }
-    final String language = splitArg[0].trim();
-    final String paths = splitArg[1];
+	private void parseArg(Map<String, List<String>> languagePathEntries, String arg) {
+		final String[] splitArg = arg.split(DIVIDER);
 
-    if ("".equals(language.trim()) || "".equals((paths.trim()))) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(MISSING_PARTS, arg));
-    }
+		// DIVIDER should split arg in language and path list. No less, no more
+		if (splitArg.length != 2) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(EXPECTED_DIVIDER, arg));
+		}
+		final String language = splitArg[0].trim();
+		final String paths = splitArg[1];
 
-    final String[] pathArray = paths.split(COMMA);
+		if ("".equals(language.trim()) || "".equals((paths.trim()))) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(MISSING_PARTS, arg));
+		}
 
-    if (pathArray.length < 1) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(NO_PATH_PROVIDED, language, arg));
-    }
+		final String[] pathArray = paths.split(COMMA);
 
-    // Stream path array to filter out empty path
-    List<String> pathList = Arrays.stream(pathArray).filter(path -> !"".equals(path.trim())).collect(Collectors.toList());
+		if (pathArray.length < 1) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(NO_PATH_PROVIDED, language, arg));
+		}
 
-    languagePathEntries.put(language, pathList);
-  }
+		// Stream path array to filter out empty path
+		List<String> pathList = Arrays.stream(pathArray).filter(path -> !"".equals(path.trim())).collect(Collectors.toList());
 
-  static class Dependencies {
+		languagePathEntries.put(language, pathList);
+	}
 
-    PmdRuleCataloger getPmdRuleCataloger(Map<String, List<String>> rulePathEntries) {
-      return new PmdRuleCataloger(rulePathEntries);
-    }
-  }
+	static class Dependencies {
+
+		PmdRuleCataloger getPmdRuleCataloger(Map<String, List<String>> rulePathEntries) {
+			return new PmdRuleCataloger(rulePathEntries);
+		}
+	}
 }

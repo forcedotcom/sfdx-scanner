@@ -23,96 +23,96 @@ import java.util.stream.Stream;
  */
 public class XmlFileFinder {
 
-  enum FileType {
-    JAR(".jar"),
-    XML(".xml");
+	enum FileType {
+		JAR(".jar"),
+		XML(".xml");
 
-    String suffix;
+		String suffix;
 
-    FileType(String suffix) {
-      this.suffix = suffix;
-    }
-  }
-
-
-  /***
-   * Find XML in a given path
-   * @param pathString - could be a directory with classes and/or jar files, or a single jar file
-   * @return a list of XML files found
-   */
-  public List<String> findXmlFilesInPath(String pathString) {
-
-    final List<String> xmlFiles = new ArrayList<>();
-    final List<String> jarFiles = new ArrayList<>();
-
-    final Path path = Paths.get(pathString);
-
-    // Make sure that the path exists to begin with
-    if (!Files.exists(path)) {
-      throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
-    }
+		FileType(String suffix) {
+			this.suffix = suffix;
+		}
+	}
 
 
-    if (Files.isDirectory(path)) {
-      // Recursively walk through the directory and scout for XML/JAR files
-      xmlFiles.addAll(scoutForFiles(FileType.XML, path));
-      jarFiles.addAll(scoutForFiles(FileType.JAR, path));
+	/***
+	 * Find XML in a given path
+	 * @param pathString - could be a directory with classes and/or jar files, or a single jar file
+	 * @return a list of XML files found
+	 */
+	public List<String> findXmlFilesInPath(String pathString) {
 
-    } else if (Files.isRegularFile(path)
-      && path.toString().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
+		final List<String> xmlFiles = new ArrayList<>();
+		final List<String> jarFiles = new ArrayList<>();
 
-      jarFiles.add(path.toString());
-    }
+		final Path path = Paths.get(pathString);
 
-    jarFiles.forEach(jarPath -> xmlFiles.addAll(findXmlFilesInJar(jarPath)));
+		// Make sure that the path exists to begin with
+		if (!Files.exists(path)) {
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
+		}
 
-    return xmlFiles;
-  }
 
-  /**
-   * Read through file entries in a Jar manifest and identify all XML files
-   */
-  public List<String> findXmlFilesInJar(String jarPath) {
+		if (Files.isDirectory(path)) {
+			// Recursively walk through the directory and scout for XML/JAR files
+			xmlFiles.addAll(scoutForFiles(FileType.XML, path));
+			jarFiles.addAll(scoutForFiles(FileType.JAR, path));
 
-    final List<String> xmlFiles = new ArrayList<String>();
-    try (
-      JarInputStream jstream = new JarInputStream(new FileInputStream(jarPath));
-    ) {
+		} else if (Files.isRegularFile(path)
+			&& path.toString().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
 
-      JarEntry entry;
-      while ((entry = jstream.getNextJarEntry()) != null) {
-        String fName = entry.getName();
-        // For now, take all .xml files. We can ignore non-ruleset XMLs while parsing
-        if (fName.endsWith(FileType.XML.suffix)) {
-          xmlFiles.add(fName);
-        }
-      }
+			jarFiles.add(path.toString());
+		}
 
-      SfdxMessager.getInstance().addMessage("", EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
-    } catch (Exception e) {
-      //TODO: add logging and print stacktrace for debugging
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);
-    }
+		jarFiles.forEach(jarPath -> xmlFiles.addAll(findXmlFilesInJar(jarPath)));
 
-    return xmlFiles;
-  }
+		return xmlFiles;
+	}
 
-  /**
-   * Walks a directory path to identify files of a requested type
-   */
-  private List<String> scoutForFiles(FileType fileType, Path path) {
-    final List<String> filesFound = new ArrayList<>();
+	/**
+	 * Read through file entries in a Jar manifest and identify all XML files
+	 */
+	public List<String> findXmlFilesInJar(String jarPath) {
 
-    // Create a stream of Paths for the contents of the directory
-    try (Stream<Path> walk = Files.walk(path)) {
+		final List<String> xmlFiles = new ArrayList<String>();
+		try (
+			JarInputStream jstream = new JarInputStream(new FileInputStream(jarPath));
+		) {
 
-      // Filter the stream to find only Paths that match the filetype we are looking
-      filesFound.addAll( walk.map(x -> x.toString())
-        .filter(f -> f.endsWith(fileType.suffix)).collect(Collectors.toList()));
-    } catch (IOException e) {
-      throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, e, path.toString());
-    }
+			JarEntry entry;
+			while ((entry = jstream.getNextJarEntry()) != null) {
+				String fName = entry.getName();
+				// For now, take all .xml files. We can ignore non-ruleset XMLs while parsing
+				if (fName.endsWith(FileType.XML.suffix)) {
+					xmlFiles.add(fName);
+				}
+			}
 
-    return filesFound;
-  }
+			SfdxMessager.getInstance().addMessage("", EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
+		} catch (Exception e) {
+			//TODO: add logging and print stacktrace for debugging
+			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);
+		}
+
+		return xmlFiles;
+	}
+
+	/**
+	 * Walks a directory path to identify files of a requested type
+	 */
+	private List<String> scoutForFiles(FileType fileType, Path path) {
+		final List<String> filesFound = new ArrayList<>();
+
+		// Create a stream of Paths for the contents of the directory
+		try (Stream<Path> walk = Files.walk(path)) {
+
+			// Filter the stream to find only Paths that match the filetype we are looking
+			filesFound.addAll(walk.map(x -> x.toString())
+				.filter(f -> f.endsWith(fileType.suffix)).collect(Collectors.toList()));
+		} catch (IOException e) {
+			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, e, path.toString());
+		}
+
+		return filesFound;
+	}
 }

@@ -7,23 +7,23 @@ import {Stats} from 'fs';
  */
 export class FileHandler {
 
-    stats(filename: string): Promise<Stats> {
-        return fs.promises.stat(filename);
-    }
+	stats(filename: string): Promise<Stats> {
+		return fs.promises.stat(filename);
+	}
 
-    readDir(filename: string): Promise<string[]> {
-      return fs.promises.readdir(filename);
-    }
+	readDir(filename: string): Promise<string[]> {
+		return fs.promises.readdir(filename);
+	}
 
-    readFile(filename: string): Promise<string> {
-        return fs.promises.readFile(filename, 'utf-8');
-    }
+	readFile(filename: string): Promise<string> {
+		return fs.promises.readFile(filename, 'utf-8');
+	}
 
-    mkdirIfNotExists(dir: string): Promise<void> {
-        return fs.promises.mkdir(dir, { recursive: true });
-    }
+	mkdirIfNotExists(dir: string): Promise<void> {
+		return fs.promises.mkdir(dir, {recursive: true});
+	}
 
-    writeFile(filename: string, fileContent: string): Promise<void> {
-        return fs.promises.writeFile(filename, fileContent);
-    }
+	writeFile(filename: string, fileContent: string): Promise<void> {
+		return fs.promises.writeFile(filename, fileContent);
+	}
 }
