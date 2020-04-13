@@ -4,183 +4,182 @@
 #
 version: 2.1
 defaults: &defaults
-    working_directory: ~/repo
-    docker:
-        -   image: circleci/openjdk:11.0.2-jdk-node
+  working_directory: ~/repo
+  docker:
+    - image: circleci/openjdk:11.0.2-jdk-node
 
 orbs:
-    win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
+  win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
 
 jobs:
-    build:
-        <<: *defaults
-        steps:
-            - checkout
+  build:
+    <<: *defaults
+    steps:
+      - checkout
 
-            # Download and cache dependencies
-            -   restore_cache:
-                    keys:
-                        - v1-dependencies-{{ checksum "package.json" }}
-                        # fallback to using the latest cache if no exact match is found
-                        - v1-dependencies-
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
-            -   run: yarn --ignore-scripts
-            -   run: yarn build
+      - run: yarn --ignore-scripts
+      - run: yarn build
 
-            -   save_cache:
-                    paths:
-                        - node_modules
-                    key: v1-dependencies-{{ checksum "package.json" }}
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
 
-            -   persist_to_workspace:
-                    root: ~/repo
-                    paths: .
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
 
-            # UNIT TESTS
-            -   run:
-                    name: test
-                    command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
-                    when: always
+      # UNIT TESTS
+      - run:
+          name: test
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
+          when: always
 
-            -   run:
-                    name: eslint
-                    command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
-                    when: always
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
+          when: always
 
-            -   store_test_results:
-                    path: ./test-results
+      - store_test_results:
+          path: ./test-results
 
-            -   store_artifacts: # upload test coverage as artifact.
-                    path: ./test-coverage
+      - store_artifacts: # upload test coverage as artifact.
+          path: ./test-coverage
 
-    unpackaged-sanity:
-        executor:
-            name: win/default # executor type
-            size: "medium"
-        working_directory: C:\repo
+  unpackaged-sanity:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+    working_directory: C:\repo
 
-        steps:
-            # Commands are run in a Windows virtual machine environment
-            -   attach_workspace:
-                    at: C:\repo
+    steps:
+      # Commands are run in a Windows virtual machine environment
+      - attach_workspace:
+          at: C:\repo
 
-            -   run: md .\test-results
+      - run: md .\test-results
 
-            -   run:
-                    name: "List rules"
-                    command: .\bin\run.cmd scanner:rule:list
+      - run:
+          name: "List rules"
+          command: .\bin\run.cmd scanner:rule:list
 
-            -   run:
-                    name: "Run rules"
-                    command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
+      - run:
+          name: "Run rules"
+          command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
 
-            # Upload results
-            -   store_test_results:
-                    path: .\test-results
+      # Upload results
+      - store_test_results:
+          path: .\test-results
 
-    packaged-sanity:
-        executor:
-            name: win/default # executor type
-            size: "medium"
+  packaged-sanity:
+    executor:
+      name: win/default # executor type
+      size: "medium"
 
-        steps:
-            - checkout
+    steps:
+      - checkout
 
-            -   run:
-                    name: "Install sfdx cli"
-                    shell: cmd.exe
-                    command: npm install -g sfdx-cli
+      - run:
+          name: "Install sfdx cli"
+          shell: cmd.exe
+          command: npm install -g sfdx-cli
 
-            -   run:
-                    name: "Install plugin"
-                    shell: cmd.exe
-                    command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+      - run:
+          name: "Install plugin"
+          shell: cmd.exe
+          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
-            -   run:
-                    name: "List rules"
-                    command: sfdx scanner:rule:list
+      - run:
+          name: "List rules"
+          command: sfdx scanner:rule:list
 
-            -   run:
-                    name: "Run rules"
-                    command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes --format junit --outfile .\test-results\vulnerable.xml
+      - run:
+          name: "Run rules"
+          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes --format junit --outfile .\test-results\vulnerable.xml
 
-            # Upload results
-            -   store_test_results:
-                    path: .\test-results
+      # Upload results
+      - store_test_results:
+          path: .\test-results
 
-    auto-merge-release:
-        <<: *defaults
-        steps:
-            -   add_ssh_keys:
-                -   fingerprints:
-                        - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-            -   checkout
-            -   run:
-                    name: "Merge release"
-                    command: |
-                        git checkout dev
-                        git pull
-                        git config user.email "isv.swat@salesforce.com"
-                        git config user.name $CIRCLE_USERNAME
-                        git merge origin/release
-                        git commit -m "Automerging changes from release branch"
-                        git push origin dev
+  auto-merge-release:
+    <<: *defaults
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
+      - checkout
+      - run:
+          name: "Merge release"
+          command: |
+            git config user.email "isv.swat@salesforce.com"
+            git config user.name "$CIRCLE_USERNAME"
+            git checkout dev
+            git pull
+            git merge origin/release
+            git commit -m "Automerging changes from release branch"
+            git push origin dev
+  publish-latest:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
 
-    publish-latest:
-        <<: *defaults
-        steps:
-            -   attach_workspace:
-                    at: ~/repo
+      - run:
+          name: Authenticate with npm registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" >> ~/repo/.npmrc
 
-            -   run:
-                    name: Authenticate with npm registry
-                    command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" >> ~/repo/.npmrc
-
-            -   run:
-                    name: Publish a public package with the tag "latest"
-                    command: npm publish --public --tag latest
+      - run:
+          name: Publish a public package with the tag "latest"
+          command: npm publish --public --tag latest
 
 workflows:
-    version: 2.1
-    test-publish:
-        jobs:
-            -   build:
-                    filters:
-                        # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-                        # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-                        tags:
-                            only: /.*/
-            -   unpackaged-sanity:
-                    requires:
-                        - build
-            -   auto-merge-release:
-                    requires:
-                        - build
-                    filters:
-                        branches:
-                            only:
-                                - release
-            -   publish-latest:
-                    # This job should only run after 'build' finishes successfully.
-                    requires:
-                        - build
-                        - unpackaged-sanity
-                    filters:
-                        # We never want to publish branches, so we need to explicitly ignore all of them.
-                        branches:
-                            ignore: /.*/
-                        # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-                        tags:
-                            only:
-                                /^v.*/
-            -   packaged-sanity:
-                    requires:
-                        - publish-latest
-                    filters:
-                        # We never want to publish branches, so we need to explicitly ignore all of them.
-                        branches:
-                            ignore: /.*/
-                        # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-                        tags:
-                            only:
-                                /^v.*/
+  version: 2.1
+  test-publish:
+    jobs:
+      - build:
+          filters:
+            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
+            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
+            tags:
+              only: /.*/
+      - unpackaged-sanity:
+          requires:
+            - build
+      - auto-merge-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - release
+      - publish-latest:
+          # This job should only run after 'build' finishes successfully.
+          requires:
+            - build
+            - unpackaged-sanity
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
+      - packaged-sanity:
+          requires:
+            - publish-latest
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
