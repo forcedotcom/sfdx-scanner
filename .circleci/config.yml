@@ -151,13 +151,6 @@ workflows:
       - unpackaged-sanity:
           requires:
             - build
-      - auto-merge-release:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - release
       - publish-latest:
           # This job should only run after 'build' finishes successfully.
           requires:
