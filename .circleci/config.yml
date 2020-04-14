@@ -121,9 +121,8 @@ jobs:
             git config user.email "isv.swat@salesforce.com"
             git config user.name "$CIRCLE_USERNAME"
             git checkout dev
-            git pull
-            git merge origin/release
-            git commit -m "Automerging changes from release branch"
+            git pull origin dev
+            git merge release --commit --no-edit -m "Automerge release to dev"
             git push origin dev
   publish-latest:
     <<: *defaults
@@ -152,13 +151,6 @@ workflows:
       - unpackaged-sanity:
           requires:
             - build
-      - auto-merge-release:
-          requires:
-            - build
-          filters:
-            branches:
-              only:
-                - release
       - publish-latest:
           # This job should only run after 'build' finishes successfully.
           requires:

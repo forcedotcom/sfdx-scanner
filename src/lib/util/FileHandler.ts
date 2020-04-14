@@ -19,7 +19,7 @@ export class FileHandler {
 		return fs.promises.readFile(filename, 'utf-8');
 	}
 
-	mkdirIfNotExists(dir: string): Promise<void> {
+	mkdirIfNotExists(dir: string): Promise<string> {
 		return fs.promises.mkdir(dir, {recursive: true});
 	}
 
