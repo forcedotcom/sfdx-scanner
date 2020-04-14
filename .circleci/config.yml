@@ -122,7 +122,7 @@ jobs:
             git config user.name "$CIRCLE_USERNAME"
             git checkout dev
             git pull origin dev
-            git merge release --commit -q -m "Automerge release to dev"
+            git merge release --commit --no-edit -m "Automerge release to dev"
             git push origin dev
   publish-latest:
     <<: *defaults
