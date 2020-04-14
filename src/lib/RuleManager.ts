@@ -10,7 +10,8 @@ export enum RULE_FILTER_TYPE {
 	RULENAME,
 	CATEGORY,
 	RULESET,
-	LANGUAGE
+	LANGUAGE,
+	SOURCEPACKAGE
 }
 
 export enum OUTPUT_FORMAT {
@@ -144,6 +145,9 @@ export class RuleManager extends AsyncCreatable {
 					// Rules only have one name, so we'll just turn that name into a singleton list so we can compare names the
 					// same way we compare everything else.
 					ruleValues = [rule.name];
+				case RULE_FILTER_TYPE.SOURCEPACKAGE:
+					// Rules also only have one source package, so we'll turn it into a singleton list just like we do with 'name'.
+					ruleValues = [rule.sourcepackage];
 					break;
 			}
 

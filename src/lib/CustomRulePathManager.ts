@@ -74,7 +74,7 @@ export class CustomRulePathManager extends AsyncCreatable {
 		await this.initialize();
 
 		this.logger.trace(`About to add paths[${paths}] for language ${language}`);
-		const classpathEntries = await this.expandClasspaths(paths);
+		const classpathEntries = await this.expandPaths(paths);
 		// Identify the engine for each path and put them in the appropriate map and inner map.
 		classpathEntries.forEach((entry) => {
 			const e = this.determineEngineForPath(entry);
@@ -92,6 +92,54 @@ export class CustomRulePathManager extends AsyncCreatable {
 		// Now, write the changes to the file.
 		await this.saveCustomClasspaths();
 		return classpathEntries;
+	}
+
+	public async getMatchingPaths(language: string, paths: string[]): Promise<string[]> {
+		await this.initialize();
+
+		this.logger.trace(`Returning paths for language ${language} that match patterns [${paths}]`);
+
+		// Expand the patterns into actual paths. E.g., expand directories into the rule objects they contain, etc.
+		const expandedPaths = await this.expandPaths(paths);
+
+		// Now that we've got the possible paths, we need to see which ones are actually present.
+		return expandedPaths.filter((p) => {
+			// Determine the engine associated with this path.
+			const e = this.determineEngineForPath(p);
+			// If there's nothing mapped for that engine, or the engine has nothing for this language, we can drop this
+			// path.
+			if (!this.pathsByLanguageByEngine.has(e) || !this.pathsByLanguageByEngine.get(e).has(language)) {
+				return false;
+			}
+			// Otherwise, we need to see if the paths mapped to that language include the target path.
+			return this.pathsByLanguageByEngine.get(e).get(language).has(p);
+		});
+	}
+
+	public async removePathsForLanguage(language: string, paths: string[]): Promise<string[]> {
+		await this.initialize();
+
+		this.logger.trace(`Removing paths [${paths}] for language ${language}`);
+
+		// Expand the patterns into actual paths that we can delete.
+		const expandedPaths = await this.expandPaths(paths);
+		// For logging and display purposes, we'll want to track the paths that we actually delete.
+		const deletedPaths = [];
+
+		expandedPaths.forEach((p) => {
+			// Determine the engine associated with the provided path.
+			const e = this.determineEngineForPath(p);
+			// If we have custom rules associated with that engine for the target language, attempt to delete the path.
+			if (this.pathsByLanguageByEngine.has(e) && this.pathsByLanguageByEngine.get(e).has(language)) {
+				if (this.pathsByLanguageByEngine.get(e).get(language).delete(p)) {
+					// If we were able to delete the path, add it to the list.
+					deletedPaths.push(p);
+				}
+			}
+		});
+		// Write the changes to the file.
+		await this.saveCustomClasspaths();
+		return deletedPaths;
 	}
 
 	public async getRulePathEntries(engine: ENGINE): Promise<Map<string, Set<string>>> {
@@ -162,7 +210,7 @@ export class CustomRulePathManager extends AsyncCreatable {
 		return path.join(SFDX_SCANNER_PATH, this.getFileName());
 	}
 
-	private async expandClasspaths(paths: string[]): Promise<string[]> {
+	private async expandPaths(paths: string[]): Promise<string[]> {
 		const classpathEntries: string[] = [];
 		for (const p of paths) {
 			let stats;

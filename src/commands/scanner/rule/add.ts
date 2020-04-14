@@ -42,14 +42,14 @@ export default class Add extends SfdxCommand {
 		this.validateFlags();
 
 		const language = this.flags.language;
-		const path = this.resolvePaths();
+		const paths = this.resolvePaths();
 
 		this.logger.trace(`Language: ${language}`);
-		this.logger.trace(`Rule path: ${path}`);
+		this.logger.trace(`Rule path: ${paths}`);
 
 		// Add to Custom Classpath registry
 		const manager = await CustomRulePathManager.create({});
-		const classpathEntries = await manager.addPathsForLanguage(language, path);
+		const classpathEntries = await manager.addPathsForLanguage(language, paths);
 		this.ux.log(`Successfully added rules for ${language}.`);
 		this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries}`);
 		return {success: true, language, path: classpathEntries};
