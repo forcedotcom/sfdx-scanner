@@ -17,11 +17,13 @@ public class PmdCatalogRule {
 	public static final String JSON_LANGUAGES = "languages";
 	public static final String JSON_CATEGORIES = "categories";
 	public static final String JSON_RULESETS = "rulesets";
+	public static final String JSON_SOURCEJAR = "sourcejar";
 
 	private String name;
 	private String message;
 	private String description;
 	private String language;
+	private String sourceJar;
 	/**
 	 * Seemingly all rules are defined in category XML files, so we can reasonably assume that each rule is a member of only
 	 * one category.
@@ -39,6 +41,7 @@ public class PmdCatalogRule {
 		this.language = language;
 		this.category = category;
 		this.description = getDescription(element);
+		this.sourceJar = category.getSourceJar();
 	}
 
 	String getFullName() {
@@ -97,6 +100,7 @@ public class PmdCatalogRule {
 		m.put(JSON_NAME, this.name);
 		m.put(JSON_MESSAGE, this.message);
 		m.put(JSON_DESCRIPTION, this.description);
+		m.put(JSON_SOURCEJAR, this.sourceJar);
 
 		// We want 'languages' to be represented as an array even though PMD rules only run against one language, because
 		// this way it's easier to integrate with the language-agnostic framework that we ultimately want.

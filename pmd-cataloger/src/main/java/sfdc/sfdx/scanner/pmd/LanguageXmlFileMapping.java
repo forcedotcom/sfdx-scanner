@@ -16,18 +16,20 @@ public class LanguageXmlFileMapping {
 
 	private Map<String, Set<String>> categoryPathsByLanguage;
 	private Map<String, Set<String>> rulesetPathsByLanguage;
+	private Map<String, String> categoryToSourceJar;
 
 	private LanguageXmlFileMapping() {
 		categoryPathsByLanguage = new HashMap<>();
 		rulesetPathsByLanguage = new HashMap<>();
+		categoryToSourceJar = new HashMap<>();
 	}
 
 	public static LanguageXmlFileMapping getInstance() {
 		return INSTANCE;
 	}
 
-	public void addPathsForLanguage(List<String> paths, String language) {
-		paths.forEach(path -> addPathForLanguage(path, language));
+	public void addPathsForLanguage(List<String> paths, String language, String sourceJar) {
+		paths.forEach(path -> addPathForLanguage(path, language, sourceJar));
 	}
 
 	public Map<String, Set<String>> getCategoryPaths() {
@@ -38,15 +40,20 @@ public class LanguageXmlFileMapping {
 		return this.rulesetPathsByLanguage;
 	}
 
+	public String getSourceJarForCategory(String catPath) {
+		return this.categoryToSourceJar.get(catPath);
+	}
+
 	// We want to distinguish XMLs as a Ruleset or a Category.
 	// If path looks like */rulesets/**/*.xml, we consider the XML a Ruleset
 	// If path looks like */category/**/*.xml, we consider the XML a Category
-	private void addPathForLanguage(String path, String language) {
+	private void addPathForLanguage(String path, String language, String sourceJar) {
 		if (!nullEmptyOrWhitespace(path)) {
 			if (path.contains(RULESETS)) {
 				addRulesetPathForLanguage(path, language);
 			} else if (path.contains(CATEGORY)) {
 				addCategoryPathForLanguage(path, language);
+				categoryToSourceJar.put(path, sourceJar);
 			} else {
 				SfdxMessager.getInstance().addMessage("Adding path " + path + " for language " + language, EventKey.WARNING_XML_DROPPED, path);
 			}

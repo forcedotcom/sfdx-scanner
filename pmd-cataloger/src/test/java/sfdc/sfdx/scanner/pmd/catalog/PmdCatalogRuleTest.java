@@ -23,7 +23,8 @@ public class PmdCatalogRuleTest {
 
 	private static final String CATEGORY_NAME = "Best Practices";
 	private static final String CATEGORY_PATH = "/some/path";
-	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH);
+	private static final String CATEGORY_SOURCEJAR = "/path/to/sourcejar.jar";
+	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH, CATEGORY_SOURCEJAR);
 
 	@Test
 	public void testCatalogRuleJsonConversion() {
