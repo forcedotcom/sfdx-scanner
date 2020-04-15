@@ -5,6 +5,7 @@ import {ScannerCommand} from '../scannerCommand';
 import path = require('path');
 import {RuleFilter, RuleManager, RULE_FILTER_TYPE} from '../../../lib/RuleManager';
 import untildify = require('untildify');
+import {Rule} from '../../../types';
 import {CustomRulePathManager} from '../../../lib/CustomRulePathManager';
 
 // Initialize Messages with the current plugin directory
@@ -66,9 +67,9 @@ export default class Remove extends ScannerCommand {
 		const crpm = await CustomRulePathManager.create({});
 		const deletablePaths = await crpm.getMatchingPaths(language, paths);
 
-		// Step 3a: If there aren't any deletable paths, we should log a message stating that and then return.
+		// Step 3a: If there aren't any deletable paths, we should throw an error saying as much.
 		if (!deletablePaths || deletablePaths.length === 0) {
-			this.ux.log('PLACEHOLDER MESSAGE ABOUT NO DELETABLE PATHS');
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'errors.noMatchingPaths', []);
 		}
 
 		// Step 4: Unless the --force flag was used, we'll want to identify all of the rules that are defined in the entries
@@ -81,10 +82,11 @@ export default class Remove extends ScannerCommand {
 
 			// Step 4b: We'll want to retrieve the matching rules.
 			const rm = await RuleManager.create({});
-			const matchingRules = await rm.getRulesMatchingCriteria(filters);
+			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 
 			// Step 4c: Ask the user to confirm that they actually want to delete the rules in question.
-			if (await this.ux.confirm('Placeholder. Do you want to delete ' + matchingRules.length + ' rules? (y/n)') === false) {
+			if (await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
+				this.ux.log(messages.getMessage('output.aborted'));
 				return [];
 			}
 		}
@@ -94,7 +96,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 6: Output. We'll display a message indicating which entries were deleted, and we'll return that array
 		// for the --json flag.
-		this.ux.log('Placeholder: Successfully deleted ' + deletedPaths.length + ' custom entries');
+		this.ux.log(messages.getMessage('output.resultSummary', [deletedPaths.join(', ')]));
 		return deletedPaths;
 	}
 
@@ -111,5 +113,12 @@ export default class Remove extends ScannerCommand {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.
 		return this.flags.path.map(p => path.resolve(untildify(p)));
+	}
+
+	private generateConfirmationPrompt(rules: Rule[]): string {
+		// We'll want to create a list of short strings containing the name of each rule and where it's defined, so we
+		// can log that out to the user.
+		const ruleDescriptions: string[] = rules.map(rule => messages.getMessage('output.ruleTemplate', [rule.name, rule.sourcepackage]));
+		return messages.getMessage('output.deletionPrompt', [rules.length, ruleDescriptions.join('\n')]);
 	}
 }
