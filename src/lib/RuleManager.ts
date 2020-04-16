@@ -1,9 +1,9 @@
-import {SfdxError, Logger} from '@salesforce/core';
-import {AsyncCreatable} from '@salesforce/kit';
+import {Logger, SfdxError} from '@salesforce/core';
+import {multiInject} from 'inversify';
+import {Container, Services} from '../ioc.config';
 import {Rule} from '../types';
-import {PmdCatalogWrapper} from './pmd/PmdCatalogWrapper';
-import PmdWrapper from './pmd/PmdWrapper';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
+import {RuleEngine} from './services/RuleEngine';
 import * as PrettyPrinter from './util/PrettyPrinter';
 
 export enum RULE_FILTER_TYPE {
@@ -30,13 +30,27 @@ export class RuleFilter {
 	}
 }
 
-export class RuleManager extends AsyncCreatable {
-	private pmdCatalogWrapper: PmdCatalogWrapper;
+export class RuleManager {
+	public static async create(): Promise<RuleManager> {
+		const engines = Container.getAll<RuleEngine>(Services.RuleEngine);
+		const manager = new RuleManager(engines);
+		await manager.init();
+		return manager;
+	}
+
 	private logger: Logger;
+	private readonly engines: RuleEngine[] = [];
+
+
+	constructor(@multiInject("RuleEngine") engines: RuleEngine[]) {
+		this.engines = engines;
+	}
 
 	protected async init(): Promise<void> {
-		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
 		this.logger = await Logger.child('RuleManager');
+		for (const e of this.engines) {
+			await e.init();
+		}
 	}
 
 	public async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
@@ -53,69 +67,28 @@ export class RuleManager extends AsyncCreatable {
 	}
 
 	public async runRulesMatchingCriteria(filters: RuleFilter[], target: string[] | string, format: OUTPUT_FORMAT): Promise<string> {
-		// If target is a string, it means it's an alias for an org, instead of a bunch of local filepaths. We can't handle
+		// If target is a string, it means it's an alias for an org, instead of a bunch of local file paths. We can't handle
 		// running rules against an org yet, so we'll just throw an error for now.
 		if (typeof target === 'string') {
 			throw new SfdxError('Running rules against orgs is not yet supported');
 		}
-		// TODO: Eventually, we'll need a bunch more promises to run rules existing in other engines.
-		const [pmdResults] = await Promise.all([this.runPmdRulesMatchingCriteria(filters, target)]);
-		this.logger.trace(`Received rule violations: ${pmdResults}`);
+		const ps = this.engines.map(e => e.run(filters, target));
+		const [results] = await Promise.all(ps);
+		this.logger.trace(`Received rule violations: ${results}`);
 
 		// Once all of the rules finish running, we'll need to combine their results into a single set of the desired type,
 		// which we can then return.
 		this.logger.trace(`Recombining results into requested format ${format}`);
-		return RuleResultRecombinator.recombineAndReformatResults([pmdResults], format);
+		return RuleResultRecombinator.recombineAndReformatResults([results], format);
 	}
 
 	private async getAllRules(): Promise<Rule[]> {
 		this.logger.trace('Getting all rules.');
 
-		// TODO: Eventually, we'll need a bunch more promises to load rules from their source files in other engines.
-		const [pmdRules]: Rule[][] = await Promise.all([this.getPmdRules()]);
-		return [...pmdRules];
+		const ps = this.engines.map(e => e.getAll());
+		const [rules]: Rule[][] = await Promise.all(ps);
+		return [...rules];
 	}
-
-	private async getPmdRules(): Promise<Rule[]> {
-		// PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
-		this.logger.trace('Getting PMD rules.');
-		const catalog = await this.pmdCatalogWrapper.getCatalog();
-		return catalog.rules;
-	}
-
-	private async runPmdRulesMatchingCriteria(filters: RuleFilter[], target: string[]): Promise<string> {
-		this.logger.trace(`About to run PMD rules. Target count: ${target.length}, filter count: ${filters.length}`);
-		try {
-			// Convert our filters into paths that we can feed back into PMD.
-			const paths: string[] = await this.pmdCatalogWrapper.getPathsMatchingFilters(filters);
-			// If we didn't find any paths, we're done.
-			if (paths == null || paths.length === 0) {
-				this.logger.trace('No Rule paths found. Nothing to execute.')
-				return '';
-			}
-			// Otherwise, run PMD and see what we get.
-			// TODO: Weird translation to next layer. target=path and path=rule path. Consider renaming
-			const [violationsFound, stdout] = await PmdWrapper.execute(target.join(','), paths.join(','));
-
-			if (violationsFound) {
-				this.logger.trace('Found rule violations.');
-				// If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
-				const xmlStart = stdout.indexOf('<?xml');
-				const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
-				const ruleViolationsXml = stdout.slice(xmlStart, xmlEnd);
-
-				this.logger.trace(`Rule violations in the original XML format: ${ruleViolationsXml}`);
-				return ruleViolationsXml;
-			} else {
-				// If we didn't find any violations, we can just return an empty string.
-				this.logger.trace('No rule violations found.');
-				return '';
-			}
-		} catch (e) {
-			throw new SfdxError(e.message || e);
-		}
-	}
-
 
 	private ruleSatisfiesFilterConstraints(rule: Rule, filters: RuleFilter[]): boolean {
 		// If no filters were provided, then the rule is vacuously acceptable and we can just return true.
