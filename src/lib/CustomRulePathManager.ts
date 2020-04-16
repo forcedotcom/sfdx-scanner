@@ -110,14 +110,14 @@ export class CustomRulePathManager {
 		// Now that we've got the possible paths, we need to see which ones are actually present.
 		return expandedPaths.filter((p) => {
 			// Determine the engine associated with this path.
-			const e = this.determineEngineForPath(p);
+			const engine = this.determineEngineForPath(p).getName();
 			// If there's nothing mapped for that engine, or the engine has nothing for this language, we can drop this
 			// path.
-			if (!this.pathsByLanguageByEngine.has(e) || !this.pathsByLanguageByEngine.get(e).has(language)) {
+			if (!this.pathsByLanguageByEngine.has(engine) || !this.pathsByLanguageByEngine.get(engine).has(language)) {
 				return false;
 			}
 			// Otherwise, we need to see if the paths mapped to that language include the target path.
-			return this.pathsByLanguageByEngine.get(e).get(language).has(p);
+			return this.pathsByLanguageByEngine.get(engine).get(language).has(p);
 		});
 	}
 
@@ -133,10 +133,10 @@ export class CustomRulePathManager {
 
 		expandedPaths.forEach((p) => {
 			// Determine the engine associated with the provided path.
-			const e = this.determineEngineForPath(p);
+			const engine = this.determineEngineForPath(p).getName();
 			// If we have custom rules associated with that engine for the target language, attempt to delete the path.
-			if (this.pathsByLanguageByEngine.has(e) && this.pathsByLanguageByEngine.get(e).has(language)) {
-				if (this.pathsByLanguageByEngine.get(e).get(language).delete(p)) {
+			if (this.pathsByLanguageByEngine.has(engine) && this.pathsByLanguageByEngine.get(engine).has(language)) {
+				if (this.pathsByLanguageByEngine.get(engine).get(language).delete(p)) {
 					// If we were able to delete the path, add it to the list.
 					deletedPaths.push(p);
 				}
