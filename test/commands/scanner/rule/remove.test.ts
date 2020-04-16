@@ -2,7 +2,7 @@ import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
 //import * as os from 'os';
 import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
-import {ENGINE} from '../../../../src/lib/CustomRulePathManager';
+import {PmdEngine} from '../../../../src/lib/pmd/PmdEngine';
 import fs = require('fs');
 import path = require('path');
 
@@ -29,7 +29,7 @@ const pathToApexJar3 = path.resolve('./test/test-jars/apex/testjar3.jar');
 const pathToApexJar4 = path.resolve('./test/test-jars/apex/testjar4.jar');
 // For our tests, we'll include three Apex JARs.
 const customPathDescriptor = {
-	[ENGINE.PMD]: {
+	[PmdEngine.NAME]: {
 		'apex': [pathToApexJar1, pathToApexJar2, pathToApexJar3]
 	}
 };
@@ -61,7 +61,7 @@ describe('scanner:rule:remove', () => {
 						);
 						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
-							[ENGINE.PMD]: {
+							[PmdEngine.NAME]: {
 								'apex': [pathToApexJar2, pathToApexJar3]
 							}
 						}, 'Deletion should have been persisted');
@@ -86,7 +86,7 @@ describe('scanner:rule:remove', () => {
 						);
 						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
-							[ENGINE.PMD]: {
+							[PmdEngine.NAME]: {
 								'apex': [pathToApexJar3]
 							}
 						}, 'Deletion should have been persisted');
@@ -111,7 +111,7 @@ describe('scanner:rule:remove', () => {
 						);
 						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
-							[ENGINE.PMD]: {
+							[PmdEngine.NAME]: {
 								'apex': []
 							}
 						}, 'Deletion should have been persisted');
@@ -170,7 +170,7 @@ describe('scanner:rule:remove', () => {
 						);
 						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
-							[ENGINE.PMD]: {
+							[PmdEngine.NAME]: {
 								'apex': [pathToApexJar2, pathToApexJar3]
 							}
 						}, 'Deletion should have been persisted');
