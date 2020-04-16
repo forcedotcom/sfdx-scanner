@@ -1,29 +1,34 @@
 import path = require('path');
+import {Container,Services} from '../ioc.config';
+import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {Logger, SfdxError} from '@salesforce/core';
-import {AsyncCreatable} from '@salesforce/kit';
 import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 import * as PrettyPrinter from './util/PrettyPrinter';
 
-export enum ENGINE {
-	PMD = 'pmd'
-}
-
 type RulePathEntry = Map<string, Set<string>>;
-type RulePathMap = Map<ENGINE, RulePathEntry>;
-
-export const CUSTOM_CLASSPATH_REGISTER = path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS);
-export const CUSTOM_CLASSPATH_REGISTER_TMP = path.join(SFDX_SCANNER_PATH, `Tmp${CUSTOM_PATHS}`);
+type RulePathMap = Map<string, RulePathEntry>;
 
 const EMPTY_JSON_FILE = '{}';
 
 
-export class CustomRulePathManager extends AsyncCreatable {
+export class CustomRulePathManager {
+	public static async create(): Promise<CustomRulePathManager> {
+		const engines = Container.getAll<RuleEngine>(Services.RuleEngine);
+		const manager = new CustomRulePathManager(engines);
+		await manager.init();
+		return manager;
+	}
+
 	private logger!: Logger;
+	private engines: RuleEngine[];
 	private pathsByLanguageByEngine: RulePathMap;
 	private initialized: boolean;
 	private fileHandler: FileHandler;
 
+	constructor(engines: RuleEngine[]) {
+		this.engines = engines;
+	}
 
 	protected async init(): Promise<void> {
 		this.logger = await Logger.child('CustomRulePathManager');
@@ -65,7 +70,7 @@ export class CustomRulePathManager extends AsyncCreatable {
 		}
 		// Now that we've got the file contents, let's turn it into a JSON.
 		const json = JSON.parse(data);
-		this.pathsByLanguageByEngine = this.convertJsonDataToMap(json);
+		this.pathsByLanguageByEngine = CustomRulePathManager.convertJsonDataToMap(json);
 		this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMaps(this.pathsByLanguageByEngine)}`);
 		this.initialized = true;
 	}
@@ -77,16 +82,16 @@ export class CustomRulePathManager extends AsyncCreatable {
 		const classpathEntries = await this.expandClasspaths(paths);
 		// Identify the engine for each path and put them in the appropriate map and inner map.
 		classpathEntries.forEach((entry) => {
-			const e = this.determineEngineForPath(entry);
-			if (!this.pathsByLanguageByEngine.has(e)) {
-				this.logger.trace(`Creating new entry for engine ${e}`);
-				this.pathsByLanguageByEngine.set(e, new Map());
+			const engine = this.determineEngineForPath(entry);
+			if (!this.pathsByLanguageByEngine.has(engine.getName())) {
+				this.logger.trace(`Creating new entry for engine ${engine.getName()}`);
+				this.pathsByLanguageByEngine.set(engine.getName(), new Map());
 			}
-			if (!this.pathsByLanguageByEngine.get(e).has(language)) {
-				this.logger.trace(`Creating new entry for language ${language} in engine ${e}`);
-				this.pathsByLanguageByEngine.get(e).set(language, new Set([entry]));
+			if (!this.pathsByLanguageByEngine.get(engine.getName()).has(language)) {
+				this.logger.trace(`Creating new entry for language ${language} in engine ${engine.getName()}`);
+				this.pathsByLanguageByEngine.get(engine.getName()).set(language, new Set([entry]));
 			} else {
-				this.pathsByLanguageByEngine.get(e).get(language).add(entry);
+				this.pathsByLanguageByEngine.get(engine.getName()).get(language).add(entry);
 			}
 		});
 		// Now, write the changes to the file.
@@ -94,7 +99,7 @@ export class CustomRulePathManager extends AsyncCreatable {
 		return classpathEntries;
 	}
 
-	public async getRulePathEntries(engine: ENGINE): Promise<Map<string, Set<string>>> {
+	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
 		await this.initialize();
 
 		if (!this.pathsByLanguageByEngine.has(engine)) {
@@ -120,10 +125,10 @@ export class CustomRulePathManager extends AsyncCreatable {
 		}
 	}
 
-	private convertJsonDataToMap(json): RulePathMap {
+	private static convertJsonDataToMap(json): RulePathMap {
 		const map = new Map();
 		for (const key of Object.keys(json)) {
-			const engine = key as ENGINE;
+			const engine = key as string;
 			const val = json[key];
 			const innerMap = new Map();
 			for (const lang of Object.keys(val)) {
@@ -135,9 +140,8 @@ export class CustomRulePathManager extends AsyncCreatable {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	private determineEngineForPath(path: string): ENGINE {
-		// TODO: Once we support other engines, we'll need more logic here.
-		return ENGINE.PMD;
+	private determineEngineForPath(path: string): RuleEngine {
+		return this.engines.find(e => e.matchPath(path));
 	}
 
 	private convertMapToJson(): object {

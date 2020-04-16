@@ -1,11 +1,18 @@
 {
-  "extends": "./node_modules/@salesforce/dev-config/tsconfig",
-  "compilerOptions": {
-    "outDir": "./lib",
-    "rootDir": "./src",
-    "allowJs": false
-  },
-  "include": [
-    "./src/**/*"
-  ]
+	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
+	"compilerOptions": {
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"allowJs": false,
+		"target": "es6",
+		"lib": ["es6", "dom"],
+		"types": ["reflect-metadata", "node", "mocha"],
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	},
+	"include": [
+		"./src/**/*"
+	]
 }

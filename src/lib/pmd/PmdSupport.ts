@@ -1,7 +1,8 @@
 import childProcess = require('child_process');
 import {ChildProcessWithoutNullStreams} from 'child_process';
 import {AsyncCreatable} from '@salesforce/kit';
-import {CustomRulePathManager, ENGINE} from '../CustomRulePathManager';
+import {CustomRulePathManager} from '../CustomRulePathManager';
+import {PmdEngine} from './PmdEngine';
 import path = require('path');
 
 export const PMD_VERSION = '6.22.0';
@@ -54,7 +55,7 @@ export abstract class PmdSupport extends AsyncCreatable {
 	}
 
 	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
-		const customRulePathManager = await CustomRulePathManager.create({});
-		return await customRulePathManager.getRulePathEntries(ENGINE.PMD);
+		const customRulePathManager = await CustomRulePathManager.create();
+		return await customRulePathManager.getRulePathEntries(PmdEngine.NAME);
 	}
 }

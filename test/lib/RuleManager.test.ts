@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from '../../src/lib/RuleManager';
 import {PmdCatalogWrapper} from "../../src/lib/pmd/PmdCatalogWrapper";
+import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from '../../src/lib/RuleManager';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
@@ -29,7 +29,7 @@ describe('RuleManager', () => {
 		});
 
 		// Declare our rule manager.
-		ruleManager = await RuleManager.create({});
+		ruleManager = await RuleManager.create();
 	});
 
 	describe('getRulesMatchingCriteria()', () => {
