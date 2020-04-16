@@ -99,10 +99,28 @@ export class CustomRulePathManager {
 		return classpathEntries;
 	}
 
-	public async getMatchingPaths(language: string, paths: string[]): Promise<string[]> {
+	public async getAllPaths(): Promise<string[]> {
 		await this.initialize();
 
-		this.logger.trace(`Returning paths for language ${language} that match patterns [${paths}]`);
+		// We'll combine every entry set for every language in every engine into a single array. We don't care about
+		// uniqueness right now.
+		let rawResults = [];
+
+		this.engines.forEach((engine) => {
+			if (this.pathsByLanguageByEngine.has(engine.getName())) {
+				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine.getName());
+				for (const pathSet of pathsByLanguage.values()) {
+					rawResults = [...rawResults, ...Array.from(pathSet)];
+				}
+			}
+		});
+		return [...new Set(rawResults)];
+	}
+
+	public async getMatchingPaths(paths: string[]): Promise<string[]> {
+		await this.initialize();
+
+		this.logger.trace(`Returning paths that match patterns [${paths}]`);
 
 		// Expand the patterns into actual paths. E.g., expand directories into the rule objects they contain, etc.
 		const expandedPaths = await this.expandPaths(paths);
@@ -111,20 +129,20 @@ export class CustomRulePathManager {
 		return expandedPaths.filter((p) => {
 			// Determine the engine associated with this path.
 			const engine = this.determineEngineForPath(p).getName();
-			// If there's nothing mapped for that engine, or the engine has nothing for this language, we can drop this
-			// path.
-			if (!this.pathsByLanguageByEngine.has(engine) || !this.pathsByLanguageByEngine.get(engine).has(language)) {
-				return false;
+			// If there's anything mapped for that engine, check whether this path is mapped to any of the languages
+			// under that engine.
+			if (this.pathsByLanguageByEngine.has(engine)) {
+				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine);
+				return Array.from(pathsByLanguage.values()).some(pathSet => pathSet.has(p));
 			}
-			// Otherwise, we need to see if the paths mapped to that language include the target path.
-			return this.pathsByLanguageByEngine.get(engine).get(language).has(p);
+			return false;
 		});
 	}
 
-	public async removePathsForLanguage(language: string, paths: string[]): Promise<string[]> {
+	public async removePaths(paths: string[]): Promise<string[]> {
 		await this.initialize();
 
-		this.logger.trace(`Removing paths [${paths}] for language ${language}`);
+		this.logger.trace(`Removing paths [${paths}]`);
 
 		// Expand the patterns into actual paths that we can delete.
 		const expandedPaths = await this.expandPaths(paths);
@@ -134,18 +152,22 @@ export class CustomRulePathManager {
 		expandedPaths.forEach((p) => {
 			// Determine the engine associated with the provided path.
 			const engine = this.determineEngineForPath(p).getName();
-			// If we have custom rules associated with that engine for the target language, attempt to delete the path.
-			if (this.pathsByLanguageByEngine.has(engine) && this.pathsByLanguageByEngine.get(engine).has(language)) {
-				if (this.pathsByLanguageByEngine.get(engine).get(language).delete(p)) {
-					// If we were able to delete the path, add it to the list.
-					deletedPaths.push(p);
-				}
+			// If we have custom rules associated with that engine, attempt to delete the path from any languages on that
+			// engine.
+			if (this.pathsByLanguageByEngine.has(engine)) {
+				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine);
+				Array.from(pathsByLanguage.values()).forEach((pathSet) => {
+					if (pathSet.delete(p)) {
+						deletedPaths.push(p);
+					}
+				});
 			}
 		});
 		// Write the changes to the file.
 		await this.saveCustomClasspaths();
 		return deletedPaths;
 	}
+
 	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
 		await this.initialize();
 

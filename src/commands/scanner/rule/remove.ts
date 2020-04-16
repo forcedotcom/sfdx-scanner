@@ -2,11 +2,11 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from '../scannerCommand';
-import path = require('path');
-import {RuleFilter, RuleManager, RULE_FILTER_TYPE} from '../../../lib/RuleManager';
-import untildify = require('untildify');
+import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from '../../../lib/RuleManager';
 import {Rule} from '../../../types';
 import {CustomRulePathManager} from '../../../lib/CustomRulePathManager';
+import path = require('path');
+import untildify = require('untildify');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -38,73 +38,73 @@ export default class Remove extends ScannerCommand {
 		path: flags.array({
 			char: 'p',
 			description: messages.getMessage('flags.pathDescription'),
-			longDescription: messages.getMessage('flags.pathDescriptionLong'),
-			required: true
-		}),
-		language: flags.string({
-			char: 'l',
-			description: messages.getMessage('flags.languageDescription'),
-			longDescription: messages.getMessage('flags.languageDescriptionLong'),
-			required: true
+			longDescription: messages.getMessage('flags.pathDescriptionLong')
 		})
 	};
 
 	public async run(): Promise<AnyJson> {
-		// Step 1: Validate our input. Our language and path flags both need to be non-null.
+		// Step 1: Validate our input.
 		this.validateFlags();
 
-		// Step 2: We need to resolve the paths we were given.
-		const language = this.flags.language;
-		const paths = this.resolvePaths();
+		// Step 2: Pull out and process our flag.
+		const paths = this.flags.path ? this.resolvePaths() : null;
 
-		this.logger.trace(`Language: ${language}`);
 		this.logger.trace(`Rule path: ${paths}`);
 
-		// Step 3: The paths we were given aren't guaranteed to be the actual paths to rule definitions. They could be
-		// going to folders, or entries that aren't mapped to a language, or to nothing at all. So we'll expand the list
-		// into valid entry paths, then reduce that second list down to only entries that are currently mapped to the target
-		// language.
-		const crpm = await CustomRulePathManager.create({});
-		const deletablePaths = await crpm.getMatchingPaths(language, paths);
+		// Step 3: Get all rule entries matching the criteria they provided.
+		const crpm = await CustomRulePathManager.create();
+		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : await crpm.getAllPaths();
 
-		// Step 3a: If there aren't any deletable paths, we should throw an error saying as much.
+		// Step 4: If there aren't any matching paths, we need to react appropriately.
 		if (!deletablePaths || deletablePaths.length === 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'errors.noMatchingPaths', []);
+			// If the --path flag was used, then we couldn't find any paths matching their criteria, and we should throw
+			// and error saying as much.
+			if (paths) {
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'errors.noMatchingPaths');
+			} else {
+				// If the flag wasn't used, then they're just doing a dry run. We should still let them know that they
+				// don't have anything, but it should be surfaced as a log instead of an error.
+				this.ux.log('PLACEHOLDER INDICATING NO RULES FOR DRY RUN');
+				return [];
+			}
 		}
 
-		// Step 4: Unless the --force flag was used, we'll want to identify all of the rules that are defined in the entries
-		// they want to delete, and force them to confirm.
+		// Step 5: If the --path flag was NOT used, they want to do a dry run. We should let them know all of the custom
+		// rules they've defined.
+		if (!paths) {
+			this.ux.log('PLACEHOLDER: Here are all of your paths:\n\t' + deletablePaths.join('\n\t'));
+			return [];
+		}
+
+		// Step 6: Unless the --force flag was used, we'll want to identify all of the rules that are defined in the entries
+		// they want to delete, and force them to confirm that they're really sure.
 		if (!this.flags.force) {
-			// Step 4a: We'll want to create filter criteria.
+			// Step 6a: We'll want to create filter criteria.
 			const filters: RuleFilter[] = [];
-			filters.push(new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, [language]));
 			filters.push(new RuleFilter(RULE_FILTER_TYPE.SOURCEPACKAGE, deletablePaths));
 
-			// Step 4b: We'll want to retrieve the matching rules.
-			const rm = await RuleManager.create({});
+			// Step 6b: We'll want to retrieve the matching rules.
+			const rm = await RuleManager.create();
 			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 
-			// Step 4c: Ask the user to confirm that they actually want to delete the rules in question.
+			// Step 6c: Ask the user to confirm that they actually want to delete the rules in question.
 			if (await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
 				this.ux.log(messages.getMessage('output.aborted'));
 				return [];
 			}
 		}
 
-		// Step 5: Actually delete the entries.
-		const deletedPaths = await crpm.removePathsForLanguage(language, paths);
+		// Step 7: Actually delete the entries.
+		const deletedPaths = await crpm.removePaths(paths);
 
-		// Step 6: Output. We'll display a message indicating which entries were deleted, and we'll return that array
-		// for the --json flag.
+		// Step 8: Output. We'll display a message indicating which entries were deleted, and we'll return that array for
+		// the --json flag.
 		this.ux.log(messages.getMessage('output.resultSummary', [deletedPaths.join(', ')]));
 		return deletedPaths;
 	}
 
 	private validateFlags(): void {
-		if (this.flags.language.length === 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.languageCannotBeEmpty', []);
-		}
-		if (this.flags.path.includes('')) {
+		if (this.flags.path != null && this.flags.path.includes('')) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.pathCannotBeEmpty', []);
 		}
 	}
