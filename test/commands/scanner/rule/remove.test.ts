@@ -137,16 +137,87 @@ describe('scanner:rule:remove', () => {
 
 		describe('User prompt', () => {
 			describe('Test Case: User chooses to abort transaction instead of confirming', () => {
-
+				removeTest
+					.stdout()
+					.stderr()
+					// We'll wait three seconds and then send in a 'n', to simulate the user aborting the request.
+					.stdin('n\n', 3000)
+					.timeout(10000)
+					.command(['scanner:rule:remove',
+						'--language', 'apex',
+						'--path', pathToApexJar1
+					])
+					.it('Request is successfully cancelled', ctx => {
+						expect(ctx.stdout).to.contain(messages.getMessage('output.aborted'), 'Transaction should have been aborted');
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						expect(updatedCustomPathJson).to.deep.equal(customPathDescriptor, 'Custom paths should not have changed');
+					});
 			});
 
 			describe('Test Case: User uses --force flag to skip confirmation prompt', () => {
-
+				removeTest
+					.stdout()
+					.stderr()
+					.command(['scanner:rule:remove',
+						'--language', 'apex',
+						'--path', pathToApexJar1,
+						'--force'
+					])
+					.it('--force flag bypasses need for confirmation', ctx => {
+						expect(ctx.stdout).to.contain(
+							messages.getMessage('output.resultSummary', [pathToApexJar1]),
+							'Console should report deletion.'
+						);
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						expect(updatedCustomPathJson).to.deep.equal({
+							[ENGINE.PMD]: {
+								'apex': [pathToApexJar2, pathToApexJar3]
+							}
+						}, 'Deletion should have been persisted');
+					});
 			});
 		});
 
 		describe('Validations', () => {
+			describe('Language validations', () => {
+				// Test for failure scenario doesn't need to do any special setup or cleanup.
+				test
+					.stdout()
+					.stderr()
+					.command(['scanner:rule:remove', '--path', '/some/local/path'])
+					.it('should complain about missing --language flag', ctx => {
+						expect(ctx.stderr).contains(messages.getMessage('flags.languageDescription'));
+					});
 
+				// Test for failure scenario doesn't need to do any special setup or cleanup.
+				test
+					.stdout()
+					.stderr()
+					.command(['scanner:rule:remove', '--language', '', '--path', '/some/local/path'])
+					.it('should complain about empty language entry', ctx => {
+						expect(ctx.stderr).contains(messages.getMessage('validations.languageCannotBeEmpty'));
+					});
+			});
+
+			describe('Path validations', () => {
+				// Test for failure scenario doesn't need to do any special setup or cleanup.
+				test
+					.stdout()
+					.stderr()
+					.command(['scanner:rule:remove', '--language', 'apex'])
+					.it('should complain about missing --path flag', ctx => {
+						expect(ctx.stderr).contains('Missing required flag:\n -p, --path PATH');
+					});
+
+				// Test for failure scenario doesn't need to do any special setup or cleanup.
+				test
+					.stdout()
+					.stderr()
+					.command(['scanner:rule:remove', '--language', 'apex', '--path', ''])
+					.it('should complain about empty path', ctx => {
+						expect(ctx.stderr).contains(messages.getMessage('validations.pathCannotBeEmpty'));
+					});
+			});
 		});
 	});
 });
