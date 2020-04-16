@@ -105,7 +105,7 @@ export default class Run extends ScannerCommand {
 		// Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
 		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
 		const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
-		const ruleManager = await RuleManager.create({});
+		const ruleManager = await RuleManager.create();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);

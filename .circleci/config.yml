@@ -108,6 +108,22 @@ jobs:
       - store_test_results:
           path: .\test-results
 
+  auto-merge-release:
+    <<: *defaults
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
+      - checkout
+      - run:
+          name: "Merge release"
+          command: |
+            git config user.email "isv.swat@salesforce.com"
+            git config user.name "$CIRCLE_USERNAME"
+            git checkout dev
+            git pull origin dev
+            git merge release --commit --no-edit -m "Automerge release to dev"
+            git push origin dev
   publish-latest:
     <<: *defaults
     steps:

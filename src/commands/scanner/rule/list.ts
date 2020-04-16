@@ -64,7 +64,7 @@ export default class List extends ScannerCommand {
 
 	public async run(): Promise<Rule[]> {
 		const ruleFilters = this.buildRuleFilters();
-		const ruleManager = await RuleManager.create({});
+		const ruleManager = await RuleManager.create();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
