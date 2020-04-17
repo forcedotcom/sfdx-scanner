@@ -42,6 +42,19 @@ let removeTest = test
 
 describe('scanner:rule:remove', () => {
 	describe('E2E', () => {
+		describe('Dry-Run (omitting --path parameter)', () => {
+			removeTest
+				.stdout()
+				.stderr()
+				.command(['scanner:rule:remove'])
+				.it('When custom rules are registered, all paths are returned', ctx => {
+					const expectedRuleSummary = [pathToApexJar1, pathToApexJar2, pathToApexJar3]
+						.map(p => messages.getMessage('output.dryRunRuleTemplate', [p]))
+						.join('\n');
+					expect(ctx.stdout).to.contain(messages.getMessage('output.dryRunOutput', [3, expectedRuleSummary]), 'All paths should be logged');
+				});
+		});
+
 		describe('Rule Removal', () => {
 			describe('Test Case: Removing a single PMD JAR', () => {
 				removeTest
@@ -51,7 +64,6 @@ describe('scanner:rule:remove', () => {
 					.stdin('y\n', 3000)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', pathToApexJar1
 					])
 					.it('The specified JAR is deleted.', ctx => {
@@ -76,7 +88,6 @@ describe('scanner:rule:remove', () => {
 					.stdin('y\n', 3000)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', [pathToApexJar1, pathToApexJar2].join(',')
 					])
 					.it('The specified JARs are deleted', ctx => {
@@ -101,7 +112,6 @@ describe('scanner:rule:remove', () => {
 					.stdin('y\n', 3000)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', parentFolderForJars
 					])
 					.it('All JARs in the target folder are deleted', ctx => {
@@ -126,7 +136,6 @@ describe('scanner:rule:remove', () => {
 					.stdin('y\n', 3000)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', pathToApexJar4
 					])
 					.it('All JARs in the target folder are deleted', ctx => {
@@ -144,7 +153,6 @@ describe('scanner:rule:remove', () => {
 					.stdin('n\n', 3000)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', pathToApexJar1
 					])
 					.it('Request is successfully cancelled', ctx => {
@@ -159,7 +167,6 @@ describe('scanner:rule:remove', () => {
 					.stdout()
 					.stderr()
 					.command(['scanner:rule:remove',
-						'--language', 'apex',
 						'--path', pathToApexJar1,
 						'--force'
 					])
@@ -179,41 +186,12 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('Validations', () => {
-			describe('Language validations', () => {
-				// Test for failure scenario doesn't need to do any special setup or cleanup.
-				test
-					.stdout()
-					.stderr()
-					.command(['scanner:rule:remove', '--path', '/some/local/path'])
-					.it('should complain about missing --language flag', ctx => {
-						expect(ctx.stderr).contains(messages.getMessage('flags.languageDescription'));
-					});
-
-				// Test for failure scenario doesn't need to do any special setup or cleanup.
-				test
-					.stdout()
-					.stderr()
-					.command(['scanner:rule:remove', '--language', '', '--path', '/some/local/path'])
-					.it('should complain about empty language entry', ctx => {
-						expect(ctx.stderr).contains(messages.getMessage('validations.languageCannotBeEmpty'));
-					});
-			});
-
 			describe('Path validations', () => {
 				// Test for failure scenario doesn't need to do any special setup or cleanup.
-				test
+				removeTest
 					.stdout()
 					.stderr()
-					.command(['scanner:rule:remove', '--language', 'apex'])
-					.it('should complain about missing --path flag', ctx => {
-						expect(ctx.stderr).contains('Missing required flag:\n -p, --path PATH');
-					});
-
-				// Test for failure scenario doesn't need to do any special setup or cleanup.
-				test
-					.stdout()
-					.stderr()
-					.command(['scanner:rule:remove', '--language', 'apex', '--path', ''])
+					.command(['scanner:rule:remove', '--path', ''])
 					.it('should complain about empty path', ctx => {
 						expect(ctx.stderr).contains(messages.getMessage('validations.pathCannotBeEmpty'));
 					});

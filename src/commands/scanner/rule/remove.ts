@@ -64,7 +64,7 @@ export default class Remove extends ScannerCommand {
 			} else {
 				// If the flag wasn't used, then they're just doing a dry run. We should still let them know that they
 				// don't have anything, but it should be surfaced as a log instead of an error.
-				this.ux.log('PLACEHOLDER INDICATING NO RULES FOR DRY RUN');
+				this.ux.log(messages.getMessage('output.dryRunReturnedNoRules'));
 				return [];
 			}
 		}
@@ -72,7 +72,7 @@ export default class Remove extends ScannerCommand {
 		// Step 5: If the --path flag was NOT used, they want to do a dry run. We should let them know all of the custom
 		// rules they've defined.
 		if (!paths) {
-			this.ux.log('PLACEHOLDER: Here are all of your paths:\n\t' + deletablePaths.join('\n\t'));
+			this.ux.log(this.generateDryRunOutput(deletablePaths));
 			return [];
 		}
 
@@ -120,5 +120,11 @@ export default class Remove extends ScannerCommand {
 		// can log that out to the user.
 		const ruleDescriptions: string[] = rules.map(rule => messages.getMessage('output.ruleTemplate', [rule.name, rule.sourcepackage]));
 		return messages.getMessage('output.deletionPrompt', [rules.length, ruleDescriptions.join('\n')]);
+	}
+
+	private generateDryRunOutput(paths: string[]): string {
+		const pathString = paths.map(p => messages.getMessage('output.dryRunRuleTemplate', [p])).join('\n');
+		return messages.getMessage('output.dryRunOutput', [paths.length, pathString]);
+
 	}
 }
