@@ -25,5 +25,17 @@ specify one or more paths to remove, or omit it to receive a list of all valid c
 		"deletionPrompt": "NOTE: This action will unregister the following %i rule(s):\n%s\nDo you wish to proceed? (y/n)",
 		"resultSummary": "Successfully unregistered all rules defined in %s.",
 	},
-	"examples": `Some examples will go here`
+	"examples": `Run the command with no arguments to see a list of all currently registered custom paths.
+	E.g., $ sfdx scanner:rule:remove
+		Returns all registered custom paths.
+
+You may use the --path parameter to specify one or more paths to remove.
+	E.g., $ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
+		Deregisters the rules defined in somerules.jar and any JARs contained in the rules folder.
+
+By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed.
+The --force flag may be used to bypass that confirmation.
+	E.g., $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
+		Deregisters somerules.jar without requiring confirmation.
+`
 };
