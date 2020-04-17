@@ -55,7 +55,7 @@ export function stringifyRuleFilters(filters: RuleFilter[]): string {
  * @param rule Rule to stringify
  */
 export function stringifyRule(rule: Rule): string {
-	return `Rule[name: ${rule.name}, description: ${rule.description}, categories: ${rule.categories.join(',')}, rulesets: ${rule.rulesets.join(',')}, languages: ${rule.languages.join(',')}]`;
+	return `Rule[name: ${rule.name}, description: ${rule.description}, categories: ${rule.categories.join(',')}, rulesets: ${rule.rulesets.join(',')}, languages: ${rule.languages.join(',')}, sourcepackage: ${rule.sourcepackage}]`;
 }
 
 /**
