@@ -1,18 +1,15 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Rule, Catalog, NamedPaths} from '../../types';
+import {Catalog, NamedPaths, Rule} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
-import {PmdCatalogWrapper} from './PmdCatalogWrapper';
-import PmdWrapper from './PmdWrapper';
 
-export class PmdEngine implements RuleEngine {
-	public static NAME = "pmd";
+export class ESLintEngine implements RuleEngine {
+	public static NAME = "eslint";
 
 	private logger: Logger;
-	private pmdCatalogWrapper: PmdCatalogWrapper;
 	private initialized: boolean;
 
 	public getName(): string {
-		return PmdEngine.NAME;
+		return ESLintEngine.NAME;
 	}
 
 	public matchPath(path: string): boolean {
@@ -23,28 +20,56 @@ export class PmdEngine implements RuleEngine {
 	public async init(): Promise<void> {
 		if (this.initialized) return;
 
-		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
 		this.logger = await Logger.child(this.getName());
 
 		this.initialized = true;
 	}
 
 	getCatalog(): Promise<Catalog> {
-		return this.pmdCatalogWrapper.getCatalog();
+		return Promise.resolve({rulesets: [], categories: [], rules: []});
 	}
 
 	public async getAll(): Promise<Rule[]> {
 		// PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
 		this.logger.trace('Getting PMD rules.');
-		const catalog = await this.pmdCatalogWrapper.getCatalog();
-		return catalog.rules;
+		return Promise.resolve([]);
 	}
 
 	public async run(paths: NamedPaths[], target: string[]): Promise<string> {
-		this.logger.trace(`About to run PMD rules. Targets: ${target.length}, named paths: ${paths.length}`);
+		this.logger.trace(`About to run eslint rules. Target count: ${target.length}, filter count: ${paths.length}`);
 		try {
-			// TODO: Weird translation to next layer. target=path and path=rule path. Consider renaming
-			const [violationsFound, stdout] = await PmdWrapper.execute(target.join(','), paths.map(np => np.paths).join(','));
+			/*
+			const linter = new Linter();
+
+			const sample =
+				{
+					fatal: false,
+					ruleId: "semi",
+					severity: 2,
+					line: 1,
+					column: 23,
+					message: "Expected a semicolon.",
+					fix: {
+						range: [1, 15],
+						text: ";"
+					}
+				};
+
+			const messages = linter.verify("var foo;", {
+				rules: {
+					semi: 2
+				}
+			}, {filename: "foo.js"});
+*/
+
+			const paths: string[] = [];
+			// If we didn't find any paths, we're done.
+			if (paths == null || paths.length === 0) {
+				this.logger.trace('No Rule paths found. Nothing to execute.');
+				return '';
+			}
+			const [violationsFound, stdout] = [null, null];
+
 			if (violationsFound) {
 				this.logger.trace('Found rule violations.');
 				// If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.

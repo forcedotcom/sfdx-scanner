@@ -1,6 +1,6 @@
 import {flags} from '@salesforce/command';
 import {Messages} from '@salesforce/core';
-import {RuleManager} from '../../../lib/RuleManager';
+import {Controller} from '../../../ioc.config';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../scannerCommand';
 
@@ -10,7 +10,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
-const columns = ['name', 'languages', 'categories', 'rulesets'];
+const columns = ['name', 'languages', 'categories', 'rulesets', 'engine'];
 
 export default class List extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
@@ -64,9 +64,9 @@ export default class List extends ScannerCommand {
 
 	public async run(): Promise<Rule[]> {
 		const ruleFilters = this.buildRuleFilters();
-		const ruleManager = await RuleManager.create();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
+		const ruleManager = await Controller.createManager();
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
 		const formattedRules = this.formatRulesForDisplay(rules);
 		this.ux.table(formattedRules, columns);

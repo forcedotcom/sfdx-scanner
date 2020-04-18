@@ -1,9 +1,10 @@
 import path = require('path');
-import {Container,Services} from '../ioc.config';
+import {Logger, SfdxError} from '@salesforce/core';
+import {injectable, injectAll} from 'tsyringe';
+import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
+import {RulePathManager} from './RulePathManager';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
-import {Logger, SfdxError} from '@salesforce/core';
-import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
 import * as PrettyPrinter from './util/PrettyPrinter';
 
 type RulePathEntry = Map<string, Set<string>>;
@@ -12,39 +13,28 @@ type RulePathMap = Map<string, RulePathEntry>;
 const EMPTY_JSON_FILE = '{}';
 
 
-export class CustomRulePathManager {
-	public static async create(): Promise<CustomRulePathManager> {
-		const engines = Container.getAll<RuleEngine>(Services.RuleEngine);
-		const manager = new CustomRulePathManager(engines);
-		await manager.init();
-		return manager;
-	}
-
+@injectable()
+export class CustomRulePathManager implements RulePathManager {
+	private initialized: boolean;
 	private logger!: Logger;
 	private engines: RuleEngine[];
 	private pathsByLanguageByEngine: RulePathMap;
-	private initialized: boolean;
 	private fileHandler: FileHandler;
 
-	constructor(engines: RuleEngine[]) {
+	constructor(@injectAll("RuleEngine") engines?: RuleEngine[]) {
 		this.engines = engines;
 	}
 
-	protected async init(): Promise<void> {
-		this.logger = await Logger.child('CustomRulePathManager');
+	async init(): Promise<void> {
+		if (this.initialized)
+			return;
+
+		await Promise.all(this.engines.map(e => e.init()));
 		this.pathsByLanguageByEngine = new Map();
 		this.fileHandler = new FileHandler();
-		this.initialized = false;
-	}
-
-	private async initialize(): Promise<void> {
-		if (this.initialized) {
-			this.logger.trace(`CustomRulePathManager has already been initialized`);
-			return;
-		}
+		this.logger = await Logger.child('CustomRulePathManager');
 
 		this.logger.trace(`Initializing CustomRulePathManager.`);
-
 		// Read from the JSON and use it to populate the map.
 		let data = null;
 		try {
@@ -68,6 +58,7 @@ export class CustomRulePathManager {
 			this.logger.trace(`CustomRulePath file existed, but was empty.`);
 			data = EMPTY_JSON_FILE;
 		}
+
 		// Now that we've got the file contents, let's turn it into a JSON.
 		const json = JSON.parse(data);
 		this.pathsByLanguageByEngine = CustomRulePathManager.convertJsonDataToMap(json);
@@ -76,8 +67,6 @@ export class CustomRulePathManager {
 	}
 
 	public async addPathsForLanguage(language: string, paths: string[]): Promise<string[]> {
-		await this.initialize();
-
 		this.logger.trace(`About to add paths[${paths}] for language ${language}`);
 		const classpathEntries = await this.expandPaths(paths);
 		// Identify the engine for each path and put them in the appropriate map and inner map.
@@ -100,8 +89,6 @@ export class CustomRulePathManager {
 	}
 
 	public async getAllPaths(): Promise<string[]> {
-		await this.initialize();
-
 		// We'll combine every entry set for every language in every engine into a single array. We don't care about
 		// uniqueness right now.
 		let rawResults = [];
@@ -118,8 +105,6 @@ export class CustomRulePathManager {
 	}
 
 	public async getMatchingPaths(paths: string[]): Promise<string[]> {
-		await this.initialize();
-
 		this.logger.trace(`Returning paths that match patterns [${paths}]`);
 
 		// Expand the patterns into actual paths. E.g., expand directories into the rule objects they contain, etc.
@@ -140,8 +125,6 @@ export class CustomRulePathManager {
 	}
 
 	public async removePaths(paths: string[]): Promise<string[]> {
-		await this.initialize();
-
 		this.logger.trace(`Removing paths [${paths}]`);
 
 		// Expand the patterns into actual paths that we can delete.
@@ -169,8 +152,6 @@ export class CustomRulePathManager {
 	}
 
 	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
-		await this.initialize();
-
 		if (!this.pathsByLanguageByEngine.has(engine)) {
 			this.logger.trace(`CustomRulePath does not have entries for engine ${engine}`);
 			return new Map();
@@ -180,7 +161,6 @@ export class CustomRulePathManager {
 	}
 
 	private async saveCustomClasspaths(): Promise<void> {
-		await this.initialize();
 		try {
 			const fileContent = JSON.stringify(this.convertMapToJson(), null, 4);
 			this.logger.trace(`Writing file content to CustomRulePath file [${CustomRulePathManager.getFilePath()}]: ${fileContent}`);
@@ -208,7 +188,6 @@ export class CustomRulePathManager {
 		return map;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	private determineEngineForPath(path: string): RuleEngine {
 		return this.engines.find(e => e.matchPath(path));
 	}

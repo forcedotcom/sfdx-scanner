@@ -1,7 +1,7 @@
 import {flags, SfdxCommand} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {CustomRulePathManager} from '../../../lib/CustomRulePathManager';
+import {Controller} from '../../../ioc.config';
 import path = require('path');
 import untildify = require('untildify');
 
@@ -48,7 +48,7 @@ export default class Add extends SfdxCommand {
 		this.logger.trace(`Rule path: ${paths}`);
 
 		// Add to Custom Classpath registry
-		const manager = await CustomRulePathManager.create();
+		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
 		this.ux.log(`Successfully added rules for ${language}.`);
 		this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries}`);

@@ -1,5 +1,6 @@
 import {SfdxError} from '@salesforce/core';
 import {xml2js} from 'xml-js';
+import {PmdEngine} from './pmd/PmdEngine';
 import {OUTPUT_FORMAT} from './RuleManager';
 
 export class RuleResultRecombinator {
@@ -75,6 +76,9 @@ export class RuleResultRecombinator {
 		if (pmdResults === '') {
 			return '';
 		}
+
+		const engine = PmdEngine.NAME;
+
 		// TODO: This logic will definitely need to get more sophisticated so we can create a CSV with the columns that we
 		//  ultimately want. But for now, we'll take the coward's way out and convert the XML into an approximation of the CSV
 		//  that would have been produced by PMD if we'd requested it.
@@ -82,7 +86,7 @@ export class RuleResultRecombinator {
 		// to turn the XML into a JSON that we can easily iterate through.
 		const pmdJson = xml2js(pmdResults, {compact: false, ignoreDeclaration: true});
 		// We'll gradually build our CSV, starting with these columns.
-		let results = '"Problem","File","Priority","Line","Description","Category","Rule"\n';
+		let results = '"Problem","File","Priority","Line","Description","Category","Rule","Engine"\n';
 		let problemCount = 0;
 
 		// The top-level Element just has an 'property', which is a singleton list containing the 'pmd' Element, whose own
@@ -96,8 +100,8 @@ export class RuleResultRecombinator {
 			for (const violation of violations) {
 				const attrs = violation.attributes;
 				// The error message for the violation is a 'text' Element below it.
-				const msg = violation.elements[0].text.trim();
-				const row = [++problemCount, fileName, attrs.priority, attrs.beginline, msg, attrs.ruleset, attrs.rule];
+				const msg = violation.elements[0].text.trim().replace(",", ";");
+				const row = [++problemCount, fileName, attrs.priority, attrs.beginline, msg, attrs.ruleset, attrs.rule, engine];
 				results += '"' + row.join('","') + '"\n';
 			}
 		}

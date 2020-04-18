@@ -1,9 +1,9 @@
 import childProcess = require('child_process');
-import {ChildProcessWithoutNullStreams} from 'child_process';
-import {AsyncCreatable} from '@salesforce/kit';
-import {CustomRulePathManager} from '../CustomRulePathManager';
-import {PmdEngine} from './PmdEngine';
 import path = require('path');
+import {AsyncCreatable} from '@salesforce/kit';
+import {ChildProcessWithoutNullStreams} from 'child_process';
+import {Controller} from '../../ioc.config';
+import {PmdEngine} from './PmdEngine';
 
 export const PMD_VERSION = '6.22.0';
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
@@ -55,7 +55,7 @@ export abstract class PmdSupport extends AsyncCreatable {
 	}
 
 	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
-		const customRulePathManager = await CustomRulePathManager.create();
+		const customRulePathManager = await Controller.createRulePathManager();
 		return await customRulePathManager.getRulePathEntries(PmdEngine.NAME);
 	}
 }

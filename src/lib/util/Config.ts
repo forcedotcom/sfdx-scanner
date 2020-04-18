@@ -15,12 +15,17 @@ export class Config extends AsyncCreatable {
 	configContent!: JSON;
 	fileHandler!: FileHandler;
 	private logger!: Logger;
+	private initialized: boolean;
 
 	protected async init(): Promise<void> {
+		if (this.initialized) return;
+
 		this.fileHandler = new FileHandler();
 		this.logger = await Logger.child('Config');
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
+
+		this.initialized = true;
 	}
 
 	public async setJavaHome(value: string): Promise<void> {

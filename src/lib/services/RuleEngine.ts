@@ -1,14 +1,16 @@
-import {Rule} from '../../types';
-import {RuleFilter} from '../RuleManager';
+import {Rule, Catalog, NamedPaths} from '../../types';
 
 export interface RuleEngine {
 	getName(): string;
 
+	// TODO deprecate this.  Engines don't provide rules directly.  They provide catalogs.
 	getAll(): Promise<Rule[]>;
 
-	run(filters: RuleFilter[], target: string[] | string): Promise<string>;
+	getCatalog(): Promise<Catalog>;
 
-	init(): Promise<RuleEngine>;
+	run(paths: NamedPaths[], target: string[] | string): Promise<string>;
+
+	init(): Promise<void>;
 
 	matchPath(path: string): boolean;
 }

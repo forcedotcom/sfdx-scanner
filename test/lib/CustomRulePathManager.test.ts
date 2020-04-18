@@ -1,10 +1,10 @@
 import {expect} from 'chai';
 import {Stats} from 'fs';
-import {CustomRulePathManager} from '../../src/lib/CustomRulePathManager';
+import {Controller} from '../../src/ioc.config';
 import {PmdEngine} from '../../src/lib/pmd/PmdEngine';
 import {FileHandler} from '../../src/lib/util/FileHandler';
-import Sinon = require('sinon');
 import path = require('path');
+import Sinon = require('sinon');
 
 /**
  * Unit tests to verify CustomRulePathManager
@@ -32,7 +32,7 @@ describe('CustomRulePathManager tests', () => {
 			});
 
 			it('should read CustomPaths.json to get Rule Path Entries', async () => {
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 
 				// Execute test
 				const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
@@ -55,7 +55,7 @@ describe('CustomRulePathManager tests', () => {
 			});
 
 			it('should initialize only once', async () => {
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 
 				// Execute test
 				await manager.getRulePathEntries(PmdEngine.NAME);
@@ -71,7 +71,7 @@ describe('CustomRulePathManager tests', () => {
 		it('should handle empty Rule Path file gracefully', async () => {
 			// Setup stub
 			const readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-			const manager = await CustomRulePathManager.create();
+			const manager = await Controller.createRulePathManager();
 
 			// Execute test
 			const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
@@ -89,7 +89,7 @@ describe('CustomRulePathManager tests', () => {
 		// For all tests, we'll want to stub out the writeFile and mkdir methods with no-ops.
 		before(() => {
 			Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
-			Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves()
+			Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves();
 		});
 
 		// We'll also want to stub out the readFile method, but what we'll replace it with varies by test. Regardless, we'll
@@ -120,7 +120,7 @@ describe('CustomRulePathManager tests', () => {
 
 			it('Should reflect any new entries', async () => {
 				readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 				const language = 'javascript';
 				const paths = ['/absolute/path/to/SomeJar.jar', '/another/absolute/path/to/AnotherJar.jar'];
 
@@ -143,7 +143,7 @@ describe('CustomRulePathManager tests', () => {
 				const fileContent = '{"pmd": {"apex": ["/some/user/path/customRule.jar"]}}';
 				readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(fileContent);
 
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 				const language = 'apex';
 				const newPaths = ['/absolute/path/to/SomeJar.jar', '/different/absolute/path/to/OtherJar.jar'];
 
@@ -186,7 +186,7 @@ describe('CustomRulePathManager tests', () => {
 
 			it('Should reflect newly added entries', async () => {
 				readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(emptyFile);
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 				const language = 'javascript';
 				const paths = ['path1', 'path2'];
 
@@ -211,7 +211,7 @@ describe('CustomRulePathManager tests', () => {
 				const fileContent = '{"pmd": {"apex": ["/some/user/path/customRule.jar"]}}';
 				readStub = Sinon.stub(FileHandler.prototype, 'readFile').resolves(fileContent);
 
-				const manager = await CustomRulePathManager.create();
+				const manager = await Controller.createRulePathManager();
 				const language = 'apex';
 				const newPath = '/my/new/path';
 
