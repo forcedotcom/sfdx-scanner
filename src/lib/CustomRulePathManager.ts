@@ -26,8 +26,9 @@ export class CustomRulePathManager implements RulePathManager {
 	}
 
 	async init(): Promise<void> {
-		if (this.initialized)
+		if (this.initialized) {
 			return;
+		}
 
 		await Promise.all(this.engines.map(e => e.init()));
 		this.pathsByLanguageByEngine = new Map();

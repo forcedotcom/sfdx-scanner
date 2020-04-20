@@ -2,7 +2,7 @@ import {Logger, SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {injectable, injectAll} from 'tsyringe';
 import {CATALOG_JSON, SFDX_SCANNER_PATH} from '../../Constants';
-import {Catalog, NamedPaths, Rule, RuleEvent} from '../../types';
+import {Catalog, PathGroup, Rule, RuleEvent} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {FilterType, RuleFilter} from '../RuleFilter';
 import {FileHandler} from '../util/FileHandler';
@@ -26,7 +26,9 @@ export default class LocalCatalog implements RuleCatalog {
 	}
 
 	async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		await Promise.all(this.engines.map(e => e.init()));
 		this.logger = await Logger.child("LocalCatalog"); // TODO should be an injected service
@@ -40,7 +42,7 @@ export default class LocalCatalog implements RuleCatalog {
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
 	 */
-	public async getNamedPathsMatchingFilters(filters: RuleFilter[]): Promise<NamedPaths[]> {
+	public async getNamedPathsMatchingFilters(filters: RuleFilter[]): Promise<PathGroup[]> {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
@@ -52,13 +54,13 @@ export default class LocalCatalog implements RuleCatalog {
 		// correspond to a path in the catalog.
 		// Since categories and rulesets are both just NamedPaths, we can put both types of
 		// path into a single array and return that.
-		const foundPaths: NamedPaths[] = [];
+		const foundPaths: PathGroup[] = [];
 		for (const filter of filters) {
 			// For now, we only care about filters that act on rulesets and categories.
 			const type = filter.filterType;
 			if (type === FilterType.CATEGORY || type === FilterType.RULESET) {
 				// We only want to evaluate category filters against category names, and ruleset filters against ruleset names.
-				const namedPaths: NamedPaths[] = type === FilterType.CATEGORY ? this.catalog.categories : this.catalog.rulesets;
+				const namedPaths: PathGroup[] = type === FilterType.CATEGORY ? this.catalog.categories : this.catalog.rulesets;
 				for (const value of filter.filterValues) {
 					// If there's a matching category/ruleset for the specified filter, we'll need to add all the
 					// corresponding paths to our list.
@@ -82,7 +84,7 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 	}
 
-	private getAllCategoryPaths(): NamedPaths[] {
+	private getAllCategoryPaths(): PathGroup[] {
 		// Since this method is run when no filter criteria are provided, it might be nice to provide a level of visibility
 		// into all of the categories that were run. So before returning the category paths, loop through them
 		// and emit events for each path.

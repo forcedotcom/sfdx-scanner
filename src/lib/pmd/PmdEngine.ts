@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Rule, Catalog, NamedPaths} from '../../types';
+import {Rule, Catalog, PathGroup} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
@@ -21,7 +21,9 @@ export class PmdEngine implements RuleEngine {
 	}
 
 	public async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
 		this.logger = await Logger.child(this.getName());
@@ -40,7 +42,7 @@ export class PmdEngine implements RuleEngine {
 		return catalog.rules;
 	}
 
-	public async run(paths: NamedPaths[], target: string[]): Promise<string> {
+	public async run(paths: PathGroup[], target: string[]): Promise<string> {
 		this.logger.trace(`About to run PMD rules. Targets: ${target.length}, named paths: ${paths.length}`);
 		try {
 			// TODO: Weird translation to next layer. target=path and path=rule path. Consider renaming

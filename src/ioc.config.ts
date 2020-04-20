@@ -2,7 +2,7 @@ import "reflect-metadata";
 
 import {container} from "tsyringe";
 import {CustomRulePathManager} from './lib/CustomRulePathManager';
-import {DefaultManager} from './lib/DefaultManager';
+import {DefaultRuleManager} from './lib/DefaultRuleManager';
 import {ESLintEngine} from './lib/eslint/ESLintEngine';
 import {PmdEngine} from './lib/pmd/PmdEngine';
 import {RuleManager} from './lib/RuleManager';
@@ -17,7 +17,7 @@ export const Services = {
 };
 
 container.register(Services.RuleManager, {
-	useClass: DefaultManager
+	useClass: DefaultRuleManager
 });
 container.register(Services.RuleEngine, {
 	useClass: PmdEngine
@@ -34,7 +34,7 @@ container.register(Services.RulePathManager, {
 
 export const Controller = {
 	container,
-	createManager: async (): Promise<RuleManager> => {
+	createRuleManager: async (): Promise<RuleManager> => {
 		try {
 			const manager = container.resolve<RuleManager>(Services.RuleManager);
 			await manager.init();

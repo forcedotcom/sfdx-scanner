@@ -66,7 +66,7 @@ export default class List extends ScannerCommand {
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
-		const ruleManager = await Controller.createManager();
+		const ruleManager = await Controller.createRuleManager();
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
 		const formattedRules = this.formatRulesForDisplay(rules);
 		this.ux.table(formattedRules, columns);

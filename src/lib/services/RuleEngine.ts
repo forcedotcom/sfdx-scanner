@@ -1,4 +1,4 @@
-import {Rule, Catalog, NamedPaths} from '../../types';
+import {Rule, Catalog, PathGroup} from '../../types';
 
 export interface RuleEngine {
 	getName(): string;
@@ -8,7 +8,7 @@ export interface RuleEngine {
 
 	getCatalog(): Promise<Catalog>;
 
-	run(paths: NamedPaths[], target: string[] | string): Promise<string>;
+	run(paths: PathGroup[], target: string[] | string): Promise<string>;
 
 	init(): Promise<void>;
 

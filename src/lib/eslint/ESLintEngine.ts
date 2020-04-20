@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, NamedPaths, Rule} from '../../types';
+import {Catalog, PathGroup, Rule} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 
 export class ESLintEngine implements RuleEngine {
@@ -18,7 +18,9 @@ export class ESLintEngine implements RuleEngine {
 	}
 
 	public async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		this.logger = await Logger.child(this.getName());
 
@@ -35,7 +37,7 @@ export class ESLintEngine implements RuleEngine {
 		return Promise.resolve([]);
 	}
 
-	public async run(paths: NamedPaths[], target: string[]): Promise<string> {
+	public async run(paths: PathGroup[], target: string[]): Promise<string> {
 		this.logger.trace(`About to run eslint rules. Target count: ${target.length}, filter count: ${paths.length}`);
 		try {
 			/*

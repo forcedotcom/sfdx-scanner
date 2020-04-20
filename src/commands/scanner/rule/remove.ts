@@ -84,7 +84,7 @@ export default class Remove extends ScannerCommand {
 			filters.push(new RuleFilter(FilterType.SOURCEPACKAGE, deletablePaths));
 
 			// Step 6b: We'll want to retrieve the matching rules.
-			const rm = await Controller.createManager();
+			const rm = await Controller.createRuleManager();
 			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 
 			// Step 6c: Ask the user to confirm that they actually want to delete the rules in question.

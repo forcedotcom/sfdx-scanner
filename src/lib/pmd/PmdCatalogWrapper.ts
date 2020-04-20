@@ -23,7 +23,9 @@ export class PmdCatalogWrapper extends PmdSupport {
 	private initialized: boolean;
 
 	protected async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		this.outputProcessor = await OutputProcessor.create({});
 		this.logger = await Logger.child('PmdCatalogWrapper');

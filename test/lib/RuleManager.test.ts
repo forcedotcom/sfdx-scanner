@@ -30,7 +30,7 @@ describe('RuleManager', () => {
 		});
 
 		// Declare our rule manager.
-		ruleManager = await Controller.createManager();
+		ruleManager = await Controller.createRuleManager();
 	});
 
 	describe('getRulesMatchingCriteria()', () => {

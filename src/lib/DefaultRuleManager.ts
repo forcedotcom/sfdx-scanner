@@ -1,6 +1,6 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {inject, injectable, injectAll} from 'tsyringe';
-import {NamedPaths, Rule} from '../types';
+import {PathGroup, Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
@@ -8,7 +8,7 @@ import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 
 @injectable()
-export class DefaultManager implements RuleManager {
+export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
 
 	// noinspection JSMismatchedCollectionQueryUpdate
@@ -25,7 +25,9 @@ export class DefaultManager implements RuleManager {
 	}
 
 	async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		await Promise.all(this.engines.map(e => e.init()));
 		await this.catalog.init();
@@ -46,7 +48,7 @@ export class DefaultManager implements RuleManager {
 		}
 
 		// Convert our filters into paths that we can feed to the engines. If we didn't find any paths, we're done.
-		const paths: NamedPaths[] = await this.catalog.getNamedPathsMatchingFilters(filters);
+		const paths: PathGroup[] = await this.catalog.getNamedPathsMatchingFilters(filters);
 		if (paths == null || paths.length === 0) {
 			this.logger.trace('No Rule paths found. Nothing to execute.');
 			return '';

@@ -99,7 +99,8 @@ export class RuleResultRecombinator {
 			const violations = fileElement.elements;
 			for (const violation of violations) {
 				const attrs = violation.attributes;
-				// The error message for the violation is a 'text' Element below it.
+				// The error message for the violation is a 'text' Element below it. And since we are creating
+				// CSVs, make sure we escape any commas in our violation messages.  Just replace with semi-colon.
 				const msg = violation.elements[0].text.trim().replace(",", ";");
 				const row = [++problemCount, fileName, attrs.priority, attrs.beginline, msg, attrs.ruleset, attrs.rule, engine];
 				results += '"' + row.join('","') + '"\n';

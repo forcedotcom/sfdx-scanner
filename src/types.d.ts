@@ -8,7 +8,7 @@ export type Rule = {
 	languages: string[];
 }
 
-export type NamedPaths = {
+export type PathGroup = {
 	engine: string;
 	name: string;
 	paths: string[];
@@ -16,8 +16,8 @@ export type NamedPaths = {
 
 export type Catalog = {
 	rules: Rule[];
-	categories: NamedPaths[];
-	rulesets: NamedPaths[];
+	categories: PathGroup[];
+	rulesets: PathGroup[];
 };
 
 export type RuleEvent = {

@@ -29,7 +29,9 @@ export default class PmdWrapper extends PmdSupport {
 	private initialized: boolean;
 
 	protected async init(): Promise<void> {
-		if (this.initialized) return;
+		if (this.initialized) {
+			return;
+		}
 
 		this.logger = await Logger.child('PmdWrapper');
 
