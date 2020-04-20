@@ -1,7 +1,8 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {OUTPUT_FORMAT, RuleManager} from '../../lib/RuleManager';
+import {Controller} from '../../ioc.config';
+import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
 import fs = require('fs');
 import globby = require('globby');
@@ -105,7 +106,7 @@ export default class Run extends ScannerCommand {
 		// Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
 		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
 		const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
-		const ruleManager = await RuleManager.create();
+		const ruleManager = await Controller.createRuleManager();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);

@@ -1,12 +1,13 @@
 import {expect} from 'chai';
+import {Controller} from '../../src/ioc.config';
 import {PmdCatalogWrapper} from "../../src/lib/pmd/PmdCatalogWrapper";
-import {RULE_FILTER_TYPE, RuleFilter, RuleManager} from '../../src/lib/RuleManager';
+import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 
 const PMD_CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultPmdCatalogFixture.json');
-const PMD_FIXTURE_RULE_COUNT = 70;
+const PMD_FIXTURE_RULE_COUNT = 73;
 let ruleManager = null;
 
 describe('RuleManager', () => {
@@ -29,7 +30,7 @@ describe('RuleManager', () => {
 		});
 
 		// Declare our rule manager.
-		ruleManager = await RuleManager.create();
+		ruleManager = await Controller.createRuleManager();
 	});
 
 	describe('getRulesMatchingCriteria()', () => {
@@ -46,7 +47,7 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by category only', () => {
 			it('Filtering by one category returns only rules in that category', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.CATEGORY, ['Best Practices'])];
+				const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -57,20 +58,20 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple categories returns any rule in either category', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.CATEGORY, ['Best Practices', 'Design'])];
+				const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(22, 'Exactly 22 rules are categorized as "Best Practices" or "Design"');
+				expect(matchingRules).to.have.lengthOf(23, 'Exactly 23 rules are categorized as "Best Practices" or "Design"');
 			});
 		});
 
 		describe('Test Case: Filtering by ruleset only', () => {
 			it('Filtering by a single ruleset returns only the rules in that ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.RULESET, ['Braces'])];
+				const filters = [new RuleFilter(FilterType.RULESET, ['Braces'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -81,7 +82,7 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple rulesets returns any rule in either ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.RULESET, ['Braces', 'ApexUnit'])];
+				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'ApexUnit'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -94,24 +95,24 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by language', () => {
 			it('Filtering by a single language returns only rules targeting that language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, ['apex'])];
+				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(53, 'There are 53 rules that target Apex');
+				expect(matchingRules).to.have.lengthOf(56, 'There are 56 rules that target Apex');
 			});
 
 			it('Filtering by multiple languages returns any rule targeting either language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, ['apex', 'javascript'])];
+				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex', 'javascript'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(70, 'There are 70 rules targeting either Apex or JS');
+				expect(matchingRules).to.have.lengthOf(73, 'There are 73 rules targeting either Apex or JS');
 			});
 		});
 
@@ -119,8 +120,8 @@ describe('RuleManager', () => {
 			it('Filtering on multiple columns at once returns only rules that satisfy ALL filters', async () => {
 				// Set up our filter array.
 				const filters = [
-					new RuleFilter(RULE_FILTER_TYPE.LANGUAGE, ['apex']),
-					new RuleFilter(RULE_FILTER_TYPE.CATEGORY, ['Best Practices'])
+					new RuleFilter(FilterType.LANGUAGE, ['apex']),
+					new RuleFilter(FilterType.CATEGORY, ['Best Practices'])
 				];
 
 				// Pass the filter array into the manager.
@@ -134,7 +135,7 @@ describe('RuleManager', () => {
 		describe('Edge Case: No rules match criteria', () => {
 			it('When no rules match the given criteria, an empty list is returned', async () => {
 				// Define our preposterous filter array.
-				const impossibleFilters = [new RuleFilter(RULE_FILTER_TYPE.CATEGORY, ['beebleborp'])];
+				const impossibleFilters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
 				// Pass our filters into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(impossibleFilters);

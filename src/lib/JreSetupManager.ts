@@ -28,11 +28,18 @@ class JreSetupManager extends AsyncCreatable {
 	private logger!: Logger;
 	private config!: Config;
 	private dependencies: JreSetupManagerDependencies;
+	private initialized: boolean;
 
 	protected async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
 		this.logger = await Logger.child('verifyJRE');
 		this.config = await Config.create({});
 		this.dependencies = new JreSetupManagerDependencies();
+
+		this.initialized = true;
 	}
 
 	async verifyJreSetup(): Promise<string> {

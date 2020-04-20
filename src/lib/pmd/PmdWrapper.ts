@@ -26,9 +26,16 @@ export default class PmdWrapper extends PmdSupport {
 	reportFormat: Format;
 	reportFile: string;
 	logger: Logger; // TODO: Add relevant trace log lines
+	private initialized: boolean;
 
 	protected async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
 		this.logger = await Logger.child('PmdWrapper');
+
+		this.initialized = true;
 	}
 
 	public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<[boolean, string]> {

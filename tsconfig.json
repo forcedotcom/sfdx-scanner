@@ -1,14 +1,16 @@
 {
 	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
 	"compilerOptions": {
+		// Much of this is here because of Inversify.  If we swap it out in the future, remember to
+		// clean these bits up.
 		"outDir": "./lib",
 		"rootDir": "./src",
 		"allowJs": false,
-		"target": "es6",
-		"lib": ["es6", "dom"],
-		"types": ["reflect-metadata", "node", "mocha"],
-		"module": "commonjs",
-		"moduleResolution": "node",
+//		"target": "es6",
+//		"lib": ["es6", "dom"],
+//		"types": ["reflect-metadata", "node", "mocha"],
+//		"module": "commonjs",
+//		"moduleResolution": "node",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
 	},
