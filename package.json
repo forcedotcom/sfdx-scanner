@@ -43,8 +43,7 @@
 		"mocha-junit-reporter": "^1.23.3",
 		"nyc": "^15.0.0",
 		"sinon": "^9.0.0",
-		"tildify": "^2.0.0",
-		"tslint": "^6.0.0"
+		"tildify": "^2.0.0"
 	},
 	"engines": {
 		"node": ">=8.0.0"

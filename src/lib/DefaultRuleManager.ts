@@ -1,6 +1,6 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {inject, injectable, injectAll} from 'tsyringe';
-import {PathGroup, Rule} from '../types';
+import {Rule, RuleGroup, RuleResult} from '../types';
 import {RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
@@ -28,10 +28,11 @@ export class DefaultRuleManager implements RuleManager {
 		if (this.initialized) {
 			return;
 		}
-
-		await Promise.all(this.engines.map(e => e.init()));
-		await this.catalog.init();
 		this.logger = await Logger.child('DefaultManager');
+		for (const engine of this.engines) {
+			await engine.init();
+		}
+		await this.catalog.init();
 
 		this.initialized = true;
 	}
@@ -40,27 +41,28 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], target: string[] | string, format: OUTPUT_FORMAT): Promise<string> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], target: string[] | string, format: OUTPUT_FORMAT): Promise<string | { columns; rows }> {
 		// If target is a string, it means it's an alias for an org, instead of a bunch of local file paths. We can't handle
 		// running rules against an org yet, so we'll just throw an error for now.
 		if (typeof target === 'string') {
 			throw new SfdxError('Running rules against orgs is not yet supported');
 		}
 
-		// Convert our filters into paths that we can feed to the engines. If we didn't find any paths, we're done.
-		const paths: PathGroup[] = await this.catalog.getNamedPathsMatchingFilters(filters);
-		if (paths == null || paths.length === 0) {
-			this.logger.trace('No Rule paths found. Nothing to execute.');
-			return '';
+		let results: RuleResult[] = [];
+
+		// Derives rules from our filters to feed the engines.
+		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters);
+		const rules: Rule[] = await this.catalog.getRulesMatchingFilters(filters);
+		const ps: Promise<RuleResult[]>[] = [];
+		for (const e of this.engines) {
+			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
+			const engineRules = rules.filter(r => r.engine === e.getName());
+			ps.push(e.run(engineGroups, engineRules, target));
 		}
-
-		const ps = this.engines.map(e => e.run(paths, target));
-		const [results] = await Promise.all(ps);
+		const psResults: RuleResult[][] = await Promise.all(ps);
+		psResults.forEach(r => results = results.concat(r));
 		this.logger.trace(`Received rule violations: ${results}`);
-
-		// Once all of the rules finish running, we'll need to combine their results into a single set of the desired type,
-		// which we can then return.
 		this.logger.trace(`Recombining results into requested format ${format}`);
-		return RuleResultRecombinator.recombineAndReformatResults([results], format);
+		return RuleResultRecombinator.recombineAndReformatResults(results, format);
 	}
 }

@@ -1,14 +1,14 @@
 import path = require('path');
 import {Logger, SfdxError} from '@salesforce/core';
 import {injectable, injectAll} from 'tsyringe';
-import {CUSTOM_PATHS, SFDX_SCANNER_PATH} from '../Constants';
+import {CUSTOM_PATHS_FILE, SFDX_SCANNER_PATH} from '../Constants';
 import {RulePathManager} from './RulePathManager';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import * as PrettyPrinter from './util/PrettyPrinter';
 
-type RulePathEntry = Map<string, Set<string>>;
-type RulePathMap = Map<string, RulePathEntry>;
+export type RulePathEntry = Map<string, Set<string>>;
+export type RulePathMap = Map<string, RulePathEntry>;
 
 const EMPTY_JSON_FILE = '{}';
 
@@ -29,11 +29,14 @@ export class CustomRulePathManager implements RulePathManager {
 		if (this.initialized) {
 			return;
 		}
+		this.logger = await Logger.child('CustomRulePathManager');
 
-		await Promise.all(this.engines.map(e => e.init()));
+		for (const engine of this.engines) {
+			await engine.init();
+		}
+
 		this.pathsByLanguageByEngine = new Map();
 		this.fileHandler = new FileHandler();
-		this.logger = await Logger.child('CustomRulePathManager');
 
 		this.logger.trace(`Initializing CustomRulePathManager.`);
 		// Read from the JSON and use it to populate the map.
@@ -64,6 +67,7 @@ export class CustomRulePathManager implements RulePathManager {
 		const json = JSON.parse(data);
 		this.pathsByLanguageByEngine = CustomRulePathManager.convertJsonDataToMap(json);
 		this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMaps(this.pathsByLanguageByEngine)}`);
+
 		this.initialized = true;
 	}
 
@@ -73,15 +77,15 @@ export class CustomRulePathManager implements RulePathManager {
 		// Identify the engine for each path and put them in the appropriate map and inner map.
 		classpathEntries.forEach((entry) => {
 			const engine = this.determineEngineForPath(entry);
-			if (!this.pathsByLanguageByEngine.has(engine.getName())) {
+			if (!this.hasPathsForEngine(engine.getName())) {
 				this.logger.trace(`Creating new entry for engine ${engine.getName()}`);
-				this.pathsByLanguageByEngine.set(engine.getName(), new Map());
+				this.addPathsForEngine(engine.getName());
 			}
-			if (!this.pathsByLanguageByEngine.get(engine.getName()).has(language)) {
+			if (!this.getPathsByEngine(engine.getName()).has(language)) {
 				this.logger.trace(`Creating new entry for language ${language} in engine ${engine.getName()}`);
-				this.pathsByLanguageByEngine.get(engine.getName()).set(language, new Set([entry]));
+				this.getPathsByEngine(engine.getName()).set(language, new Set([entry]));
 			} else {
-				this.pathsByLanguageByEngine.get(engine.getName()).get(language).add(entry);
+				this.getPathsByEngine(engine.getName()).get(language).add(entry);
 			}
 		});
 		// Now, write the changes to the file.
@@ -89,14 +93,25 @@ export class CustomRulePathManager implements RulePathManager {
 		return classpathEntries;
 	}
 
+	private hasPathsForEngine(name: string): boolean {
+		return this.pathsByLanguageByEngine.has(name);
+	}
+
+	private addPathsForEngine(name: string): void {
+		this.pathsByLanguageByEngine.set(name, new Map());
+	}
+
+	private getPathsByEngine(name: string): RulePathEntry {
+		return this.pathsByLanguageByEngine.get(name);
+	}
 	public async getAllPaths(): Promise<string[]> {
 		// We'll combine every entry set for every language in every engine into a single array. We don't care about
 		// uniqueness right now.
 		let rawResults = [];
 
 		this.engines.forEach((engine) => {
-			if (this.pathsByLanguageByEngine.has(engine.getName())) {
-				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine.getName());
+			if (this.hasPathsForEngine(engine.getName())) {
+				const pathsByLanguage = this.getPathsByEngine(engine.getName());
 				for (const pathSet of pathsByLanguage.values()) {
 					rawResults = [...rawResults, ...Array.from(pathSet)];
 				}
@@ -117,8 +132,8 @@ export class CustomRulePathManager implements RulePathManager {
 			const engine = this.determineEngineForPath(p).getName();
 			// If there's anything mapped for that engine, check whether this path is mapped to any of the languages
 			// under that engine.
-			if (this.pathsByLanguageByEngine.has(engine)) {
-				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine);
+			if (this.hasPathsForEngine(engine)) {
+				const pathsByLanguage = this.getPathsByEngine(engine);
 				return Array.from(pathsByLanguage.values()).some(pathSet => pathSet.has(p));
 			}
 			return false;
@@ -138,8 +153,8 @@ export class CustomRulePathManager implements RulePathManager {
 			const engine = this.determineEngineForPath(p).getName();
 			// If we have custom rules associated with that engine, attempt to delete the path from any languages on that
 			// engine.
-			if (this.pathsByLanguageByEngine.has(engine)) {
-				const pathsByLanguage = this.pathsByLanguageByEngine.get(engine);
+			if (this.hasPathsForEngine(engine)) {
+				const pathsByLanguage = this.getPathsByEngine(engine);
 				Array.from(pathsByLanguage.values()).forEach((pathSet) => {
 					if (pathSet.delete(p)) {
 						deletedPaths.push(p);
@@ -153,12 +168,12 @@ export class CustomRulePathManager implements RulePathManager {
 	}
 
 	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
-		if (!this.pathsByLanguageByEngine.has(engine)) {
+		if (!this.hasPathsForEngine(engine)) {
 			this.logger.trace(`CustomRulePath does not have entries for engine ${engine}`);
 			return new Map();
 		}
 
-		return this.pathsByLanguageByEngine.get(engine);
+		return this.getPathsByEngine(engine);
 	}
 
 	private async saveCustomClasspaths(): Promise<void> {
@@ -167,7 +182,6 @@ export class CustomRulePathManager implements RulePathManager {
 			this.logger.trace(`Writing file content to CustomRulePath file [${CustomRulePathManager.getFilePath()}]: ${fileContent}`);
 			await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
 			await this.fileHandler.writeFile(CustomRulePathManager.getFilePath(), fileContent);
-
 		} catch (e) {
 			// If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
 			// so it's at least obvious what failed, if not how or why.
@@ -208,7 +222,7 @@ export class CustomRulePathManager implements RulePathManager {
 	private static getFileName(): string {
 		// We must allow for env variables to override the default catalog name. This must be recomputed in case those variables
 		// have different values in different test runs.
-		return process.env.CUSTOM_PATH_FILE || CUSTOM_PATHS;
+		return process.env.CUSTOM_PATHS_FILE || CUSTOM_PATHS_FILE;
 	}
 
 	private static getFilePath(): string {

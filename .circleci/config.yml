@@ -64,19 +64,19 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
-      - run: md .\test-results
+      - run: md test-results
 
       - run:
           name: "List rules"
-          command: .\bin\run.cmd scanner:rule:list
+          command: bin\run.cmd scanner:rule:list
 
       - run:
           name: "Run rules"
-          command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
+          command: bin\run.cmd scanner:run --target test\projects\dx --format junit --outfile test-results\dx.xml
 
       # Upload results
       - store_test_results:
-          path: .\test-results
+          path: test-results
 
   packaged-sanity:
     executor:
@@ -102,11 +102,11 @@ jobs:
 
       - run:
           name: "Run rules"
-          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes --format junit --outfile .\test-results\vulnerable.xml
+          command: sfdx scanner:run --target test\projects\dx --format junit --outfile test-results\dx.xml
 
       # Upload results
       - store_test_results:
-          path: .\test-results
+          path: test-results
 
   auto-merge-release:
     <<: *defaults

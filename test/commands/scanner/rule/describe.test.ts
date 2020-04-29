@@ -1,23 +1,27 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
+import {Controller} from '../../../../src/ioc.config';
 import fs = require('fs');
 import path = require('path');
 import messages = require('../../../../messages/describe');
 
-const CATALOG_OVERRIDE = 'DescribeTestPmdCatalog.json';
-const CUSTOM_PATH_OVERRIDE = 'DescribeTestCustomPaths.json';
+const CATALOG_OVERRIDE = 'DescribeTestCatalog.json';
+const CUSTOM_PATHS_OVERRIDE = 'DescribeTestCustomPaths.json';
 
 // Before our tests, delete any existing catalog and/or custom path associated with our override.
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
 	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
 }
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE));
+if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
+	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
 }
 
-let describeTest = test.env({PMD_CATALOG_NAME: CATALOG_OVERRIDE, CUSTOM_PATH_FILE: CUSTOM_PATH_OVERRIDE});
+let describeTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
 
 describe('scanner:rule:describe', () => {
+	// Reset our controller since we are using alternate file locations
+	before(() => Controller.reset());
+
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');

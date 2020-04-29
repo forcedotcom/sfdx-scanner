@@ -1,21 +1,22 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
 import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
+import {Controller} from '../../../../src/ioc.config';
 import fs = require('fs');
 import path = require('path');
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
 
-const CATALOG_OVERRIDE = 'RemoveTestPmdCatalog.json';
-const CUSTOM_PATH_OVERRIDE = 'RemoveTestCustomPaths.json';
+const CATALOG_OVERRIDE = 'RemoveTestCatalog.json';
+const CUSTOM_PATHS_OVERRIDE = 'RemoveTestCustomPaths.json';
 
 // Delete any existing JSONs associated with the tests so they run fresh each time.
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
 	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
 }
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE));
+if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
+	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
 }
 
 // NOTE: The relative paths are relative to the root of the project instead of to the location of this file,
@@ -32,13 +33,16 @@ const customPathDescriptor = {
 	}
 };
 
-let removeTest = test
-	.env({PMD_CATALOG_NAME: CATALOG_OVERRIDE, CUSTOM_PATH_FILE: CUSTOM_PATH_OVERRIDE})
+const removeTest = test
+	.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE})
 	.do(() => {
-		fs.writeFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE), JSON.stringify(customPathDescriptor));
+		fs.writeFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE), JSON.stringify(customPathDescriptor));
 	});
 
 describe('scanner:rule:remove', () => {
+	// Reset our controller for each test because a) we are using file overrides and b) these tests muck with them.
+	beforeEach(() => Controller.reset());
+
 	describe('E2E', () => {
 		describe('Dry-Run (omitting --path parameter)', () => {
 			removeTest
@@ -69,12 +73,12 @@ describe('scanner:rule:remove', () => {
 							messages.getMessage('output.resultSummary', [pathToApexJar1]),
 							'Console should report deletion.'
 						);
-						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
 							'pmd': {
 								'apex': [pathToApexJar2, pathToApexJar3]
 							}
-						}, 'Deletion should have been persisted');
+						}, `Deletion should have been persisted ${JSON.stringify(updatedCustomPathJson)}`);
 					});
 			});
 
@@ -93,7 +97,7 @@ describe('scanner:rule:remove', () => {
 							messages.getMessage('output.resultSummary', [[pathToApexJar1, pathToApexJar2].join(', ')]),
 							'Console should report deletion'
 						);
-						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
 							'pmd': {
 								'apex': [pathToApexJar3]
@@ -117,7 +121,7 @@ describe('scanner:rule:remove', () => {
 							messages.getMessage('output.resultSummary', [[pathToApexJar1, pathToApexJar2, pathToApexJar3].join(', ')]),
 							'Console should report deletion'
 						);
-						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
 							'pmd': {
 								'apex': []
@@ -155,7 +159,7 @@ describe('scanner:rule:remove', () => {
 					])
 					.it('Request is successfully cancelled', ctx => {
 						expect(ctx.stdout).to.contain(messages.getMessage('output.aborted'), 'Transaction should have been aborted');
-						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal(customPathDescriptor, 'Custom paths should not have changed');
 					});
 			});
@@ -173,7 +177,7 @@ describe('scanner:rule:remove', () => {
 							messages.getMessage('output.resultSummary', [pathToApexJar1]),
 							'Console should report deletion.'
 						);
-						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE)).toString());
+						const updatedCustomPathJson = JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE)).toString());
 						expect(updatedCustomPathJson).to.deep.equal({
 							'pmd': {
 								'apex': [pathToApexJar2, pathToApexJar3]

@@ -26,7 +26,8 @@ function createRule(): {rule: Rule; expectedRuleString: string} {
 		rulesets: ["Ruleset1", "Ruleset2"],
 		languages: ["apex", "javascript"],
 		engine: "pmd",
-		sourcepackage: "/some/path/to/a/package.jar"
+		sourcepackage: "/some/path/to/a/package.jar",
+		defaultEnabled: true
 	};
 	const expectedRuleString = "Rule[name: RuleName1, description: rule description, categories: Category1,Category2, rulesets: Ruleset1,Ruleset2, languages: apex,javascript, engine: pmd, sourcepackage: /some/path/to/a/package.jar]";
 	return {rule, expectedRuleString};

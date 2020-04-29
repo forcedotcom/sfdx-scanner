@@ -18,21 +18,22 @@ public class PmdCatalogRule {
 	public static final String JSON_CATEGORIES = "categories";
 	public static final String JSON_RULESETS = "rulesets";
 	public static final String JSON_SOURCEPACKAGE = "sourcepackage";
+	public static final String JSON_DEFAULTENABLED = "defaultEnabled";
 
-	private String name;
-	private String message;
-	private String description;
-	private String language;
-	private String sourceJar;
+	private final String name;
+	private final String message;
+	private final String description;
+	private final String language;
+	private final String sourceJar;
 	/**
 	 * Seemingly all rules are defined in category XML files, so we can reasonably assume that each rule is a member of only
 	 * one category.
 	 */
-	private PmdCatalogCategory category;
+	private final PmdCatalogCategory category;
 	/**
 	 * Rules can be included in an arbitrary number of rulesets.
 	 */
-	private Set<PmdCatalogRuleset> rulesets = new HashSet<>();
+	private final Set<PmdCatalogRuleset> rulesets = new HashSet<>();
 
 
 	public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
@@ -72,7 +73,7 @@ public class PmdCatalogRule {
 	private String getDescription(Element element) {
 		// The rule node should have at most one "description" node, so get that.
 		NodeList nl = element.getElementsByTagName(ATTR_DESCRIPTION);
-		String res = null;
+		String res;
 		switch (nl.getLength()) {
 			case 0:
 				// Technically there should always be a description node, but if there wasn't one, we'll just return an empty string.
@@ -101,6 +102,7 @@ public class PmdCatalogRule {
 		m.put(JSON_MESSAGE, this.message);
 		m.put(JSON_DESCRIPTION, this.description);
 		m.put(JSON_SOURCEPACKAGE, this.sourceJar);
+		m.put(JSON_DEFAULTENABLED, true);
 
 		// We want 'languages' to be represented as an array even though PMD rules only run against one language, because
 		// this way it's easier to integrate with the language-agnostic framework that we ultimately want.

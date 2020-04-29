@@ -135,10 +135,17 @@ export default class Run extends ScannerCommand {
 		// First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
 		// Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
 		const normalizedPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
-		// If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
+
+		// Add any default target patterns from config.
+		const config = await Controller.getConfig();
+		if (config.getDefaultTargetPatterns()) {
+			normalizedPaths.push(...config.getDefaultTargetPatterns());
+		}
+
+		// If any of the target paths have glob patterns, find all matching files. Otherwise, just return
 		// the target paths.
 		if (globby.hasMagic(normalizedPaths)) {
-			return await globby(normalizedPaths);
+			return globby(normalizedPaths);
 		} else {
 			return normalizedPaths;
 		}
@@ -162,7 +169,7 @@ export default class Run extends ScannerCommand {
 		}
 	}
 
-	private processOutput(output: string): void {
+	private processOutput(output: string | {columns; rows}): void {
 		// If the output is an empty string, it means no violations were found, and we should log that information to the console
 		// so the user doesn't get confused.
 		if (output === '') {
@@ -181,16 +188,15 @@ export default class Run extends ScannerCommand {
 			// Default properly, again, as we did earlier.
 			const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
 			// If we're just supposed to dump the output to the console, what precisely we do depends on the format.
-			if (format === OUTPUT_FORMAT.CSV) {
+			if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
 				// The CSV is just one giant string that we can dump directly to the console.
 				this.ux.log(output);
-			} else if (format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) {
+			} else if ((format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) && typeof output === 'string') {
 				// For XML, we can just dump it to the console.
 				this.ux.log(output);
-			} else if (format === OUTPUT_FORMAT.TABLE && output.length > 0) {
+			} else if (format === OUTPUT_FORMAT.TABLE && typeof output === 'object') {
 				// For tables, don't even bother printing anything unless we have something to print.
-				const outputObj = JSON.parse(output);
-				this.ux.table(outputObj.rows, outputObj.columns);
+				this.ux.table(output.rows, output.columns);
 			}
 		}
 	}

@@ -1,15 +1,106 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, PathGroup, Rule} from '../../types';
+import {CLIEngine} from 'eslint';
+import * as path from 'path';
+import {Controller} from '../../ioc.config';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleViolation} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
+import {Config} from '../util/Config';
+import {FileHandler} from '../util/FileHandler';
+
+/**
+ * Format of rules returned from Linter
+ */
+type ESRule = {
+	meta: {
+		docs: {
+			description: string;
+			category: string;
+			recommended: boolean;
+			url: string;
+		};
+		schema: Record<string, any>[];
+	};
+	create: Function;
+}
+
+type ESReport = {
+	results: [
+		{
+			filePath: string;
+			messages: ESMessage[];
+		}
+	];
+	errorCount: number;
+	warningCount: number;
+	fixableErrorCount: number;
+	fixableWarningCount: number;
+	usedDeprecatedRules: string[];
+}
+
+type ESMessage = {
+	fatal: boolean;
+	ruleId: string;
+	severity: number;
+	line: number;
+	column: number;
+	message: string;
+	fix: {
+		range: [number, number];
+		text: string;
+	};
+}
+
+const DEFAULT_ESCONFIG = {
+	"extends": ["eslint:recommended"],
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": 2018,
+	},
+	"ignorePatterns": [
+		"node_modules/!**"
+	],
+	"useEslintrc": false
+};
+
+const DEFAULT_ESCONFIG_TS = {
+	"parser": "@typescript-eslint/parser",
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/eslint-recommended"
+	],
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": 2018,
+		"project": "./tsconfig.json"
+	},
+	"extensions": ["ts"],
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"useEslintrc": false
+};
 
 export class ESLintEngine implements RuleEngine {
 	public static NAME = "eslint";
+	public static JAVASCRIPT_LANGUAGE = "javascript";
+	public static JAVASCRIPT_EXTENSION = ".js";
+	public static TYPESCRIPT_LANGUAGE = "typescript";
+	public static TYPESCRIPT_EXTENSION = ".ts";
 
 	private logger: Logger;
 	private initialized: boolean;
+	private fileHandler: FileHandler;
+	private esconfig: any;
+	private config: Config;
 
 	public getName(): string {
 		return ESLintEngine.NAME;
+	}
+
+	public isEnabled(): boolean {
+		return this.config.isEngineEnabled(this.getName());
 	}
 
 	public matchPath(path: string): boolean {
@@ -21,74 +112,132 @@ export class ESLintEngine implements RuleEngine {
 		if (this.initialized) {
 			return;
 		}
-
 		this.logger = await Logger.child(this.getName());
+
+		this.fileHandler = new FileHandler();
+		this.config = await Controller.getConfig();
+		this.esconfig = await this.fileHandler.exists("tsconfig.json") ?
+			DEFAULT_ESCONFIG_TS : DEFAULT_ESCONFIG;
 
 		this.initialized = true;
 	}
 
 	getCatalog(): Promise<Catalog> {
-		return Promise.resolve({rulesets: [], categories: [], rules: []});
+		const categoryMap: Map<string, RuleGroup> = new Map();
+		const catalog: Catalog = {rulesets: [], categories: [], rules: []};
+		const rules: Rule[] = [];
+		const cli = new CLIEngine(this.esconfig);
+		cli.getRules().forEach((rule: ESRule, key: string) => {
+			const docs = rule.meta.docs;
+			const categoryName = docs.category;
+			let category = categoryMap.get(categoryName);
+			if (!category) {
+				category = {name: categoryName, engine: ESLintEngine.NAME, paths: []};
+				categoryMap.set(categoryName, category);
+			}
+			category.paths.push(docs.url);
+
+			const r = {
+				engine: ESLintEngine.NAME,
+				sourcepackage: ESLintEngine.NAME,
+				name: key,
+				description: docs.description,
+				categories: [docs.category],
+				rulesets: [docs.category],
+				languages: [ESLintEngine.JAVASCRIPT_LANGUAGE],
+				defaultEnabled: docs.recommended,
+				url: docs.url
+			};
+			if (key.startsWith("@typescript")) {
+				// Typescript is superset of javascript, so add it on top here.
+				r.languages.push(ESLintEngine.TYPESCRIPT_LANGUAGE);
+			}
+			rules.push(r)
+		});
+
+		catalog.categories = Array.from(categoryMap.values());
+		catalog.rules = rules;
+		return Promise.resolve(catalog);
 	}
 
 	public async getAll(): Promise<Rule[]> {
-		// PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
-		this.logger.trace('Getting PMD rules.');
+		this.logger.trace('Getting eslint rules.');
 		return Promise.resolve([]);
 	}
 
-	public async run(paths: PathGroup[], target: string[]): Promise<string> {
-		this.logger.trace(`About to run eslint rules. Target count: ${target.length}, filter count: ${paths.length}`);
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: string[]): Promise<RuleResult[]> {
+		const targetPaths: string[] = await this.resolvePaths(targets);
+		// If we didn't find any paths, we're done.
+		if (targetPaths == null || targetPaths.length === 0) {
+			this.logger.trace('No matching target files found. Nothing to execute.');
+			return [];
+		}
+
+		if (rules.length === 0) {
+			this.logger.trace('No matching eslint rules found. Nothing to execute.');
+			return [];
+		}
+
+		this.logger.trace(`About to run eslint engine. Files: ${targetPaths.length}, rules: ${rules.length}`);
 		try {
-			/*
-			const linter = new Linter();
-
-			const sample =
-				{
-					fatal: false,
-					ruleId: "semi",
-					severity: 2,
-					line: 1,
-					column: 23,
-					message: "Expected a semicolon.",
-					fix: {
-						range: [1, 15],
-						text: ";"
-					}
-				};
-
-			const messages = linter.verify("var foo;", {
-				rules: {
-					semi: 2
-				}
-			}, {filename: "foo.js"});
-*/
-
-			const paths: string[] = [];
-			// If we didn't find any paths, we're done.
-			if (paths == null || paths.length === 0) {
-				this.logger.trace('No Rule paths found. Nothing to execute.');
-				return '';
-			}
-			const [violationsFound, stdout] = [null, null];
-
-			if (violationsFound) {
-				this.logger.trace('Found rule violations.');
-				// If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
-				const xmlStart = stdout.indexOf('<?xml');
-				const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
-				const ruleViolationsXml = stdout.slice(xmlStart, xmlEnd);
-
-				this.logger.trace(`Rule violations in the original XML format: ${ruleViolationsXml}`);
-				return ruleViolationsXml;
-			} else {
-				// If we didn't find any violations, we can just return an empty string.
-				this.logger.trace('No rule violations found.');
-				return '';
-			}
+			const config = {
+				rules: {}
+			};
+			rules.forEach(r => {config.rules[r.name] = "error"});
+			Object.assign(config, this.esconfig);
+			const cli = new CLIEngine(config);
+			const report = cli.executeOnFiles(targetPaths);
+			return this.reportToRuleResults(report, cli.getRules());
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
 	}
 
+	/**
+	 * Return a subset of the given paths, suitable for this engine, delving into any
+	 * directories to find all valid file paths.
+	 */
+	private async resolvePaths(filenames: string[], base?: string): Promise<string[]> {
+		const results: string[] = [];
+		for (const filename of filenames) {
+			const filepath = path.resolve(base || process.cwd(), filename);
+			const stats = await this.fileHandler.stats(filepath);
+			if(stats.isFile()) {
+				// Rudimentary check for now.  TODO check file contents?
+				if (filepath.endsWith(ESLintEngine.JAVASCRIPT_EXTENSION) || filepath.endsWith(ESLintEngine.TYPESCRIPT_EXTENSION)) {
+					results.push(filepath);
+				}
+			} else if(stats.isDirectory()) {
+				const children = await this.fileHandler.readDir(filepath);
+				const descendants = await this.resolvePaths(children, filepath);
+				results.push(...descendants);
+			}
+		}
+		return results;
+	}
+
+	private reportToRuleResults(report: ESReport, ruleMap: Map<string,ESRule>): RuleResult[] {
+		return report.results.map(r => this.toRuleResult(r.filePath, r.messages, ruleMap));
+	}
+
+	private toRuleResult(fileName: string, messages: ESMessage[], ruleMap: Map<string,ESRule>): RuleResult {
+		return {
+			engine: ESLintEngine.NAME,
+			fileName,
+			violations: messages.map(
+				(v): RuleViolation => {
+					const rule = ruleMap.get(v.ruleId);
+					const category = rule ? rule.meta.docs.category : "";
+					return {
+						line: v.line,
+						column: v.column,
+						severity: v.severity,
+						message: v.message,
+						ruleName: v.ruleId,
+						category
+					};
+				}
+			)
+		};
+	}
 }
