@@ -22,14 +22,6 @@ export class RuleResultRecombinator {
 		}
 	}
 
-	private static constructCsv(results: RuleResult[]): string {
-		return this.toCsv(results);
-	}
-
-	private static constructJunit(results: RuleResult[]): string {
-		return this.toJunitXml(results);
-	}
-
 	private static constructXml(results: RuleResult[]): string {
 		let resultXml = ``;
 
@@ -40,13 +32,18 @@ export class RuleResultRecombinator {
 
 		let problemCount = 0;
 
-		// The top-level Element just has an 'property', which is a singleton list containing the 'pmd' Element, whose own
-		// 'elements' property is a list of 'file' Elements.
+		// Iterate through the results to create an XML string format:
+		// <results...>
+		//   <result...>
+		//     <violation severity="1" line="4" column="7" ...>Message</violation>
+		//     <violation severity="2" line="5" column="8" ...>Message</violation>
+		//     <violation severity="3" line="6" column="9" ...>Message</violation>
+		//     ...
+		//   </result>
+		// </results>
 		for (const result of results) {
 			const from = process.cwd();
 			const fileName = path.relative(from, result.fileName);
-			// Each 'file' Element should contain in its 'elements' property a list of 'violation' Elements describing the ways
-			// rules were violated.
 			let violations = '';
 			for (const v of result.violations) {
 				problemCount++;
@@ -66,7 +63,7 @@ ${v.message.trim()}
 </results>`;
 	}
 
-	private static toJunitXml(results: RuleResult[]): string {
+	private static constructJunit(results: RuleResult[]): string {
 		let junitXml = ``;
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
@@ -74,12 +71,8 @@ ${v.message.trim()}
 		}
 		let problemCount = 0;
 
-		// The top-level Element just has an 'property', which is a singleton list containing the 'pmd' Element, whose own
-		// 'elements' property is a list of 'file' Elements.
 		for (const result of results) {
 			const fileName = result.fileName;
-			// Each 'file' Element should contain in its 'elements' property a list of 'violation' Elements describing the ways
-			// rules were violated.
 			let failures = '';
 			for (const v of result.violations) {
 				problemCount++;
@@ -135,7 +128,7 @@ Column: ${v.column}
 		return {columns, rows};
 	}
 
-	private static toCsv(results: RuleResult[]): string {
+	private static constructCsv(results: RuleResult[]): string {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
@@ -149,11 +142,9 @@ Column: ${v.column}
 
 		for (const result of results) {
 			const fileName = result.fileName;
-			// Each 'file' Element should contain in its 'elements' property a list of 'violation' Elements describing the ways
-			// rules were violated.
 			for (const v of result.violations) {
-				// Since we are creating CSVs, make sure we escape any commas in our violation messages.  Just replace with
-				// semi-colon.
+				// Since we are creating CSVs, make sure we escape any commas in our violation messages.
+				// Just replace with semi-colon.
 				const msg = v.message.trim().replace(",", ";");
 				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.category, engine];
 				csvString += '"' + row.join('","') + '"\n';

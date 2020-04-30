@@ -12,6 +12,7 @@ import {RuleEngine} from './services/RuleEngine';
 import {EngineConfigContent} from './util/Config';
 import {FileHandler} from './util/FileHandler';
 import globby = require('globby');
+import picomatch = require('picomatch');
 
 @injectable()
 export class DefaultRuleManager implements RuleManager {
@@ -86,7 +87,16 @@ export class DefaultRuleManager implements RuleManager {
 					const relativePaths = await globby(engineConfig.targetPatterns, {cwd: target});
 					targetPaths.push(...relativePaths.map(rp => path.join(target, rp)));
 				} else {
-					targetPaths.push(target);
+					// Files are slightly different from dirs.  We need to treat inclusive patterns separate from exclusive.
+					// (Note: picomatch is the pattern matching library used by globby.)
+					const isInclusiveMatch = picomatch(engineConfig.targetPatterns.filter(p => !p.startsWith("!")));
+					if (isInclusiveMatch(target)) {
+						// If target matches inclusive patterns, only then check if it matches exclusive patterns.
+						const isExclusiveMatch = picomatch(engineConfig.targetPatterns.filter(p => p.startsWith("!")));
+						if (isExclusiveMatch(target)) {
+							targetPaths.push(target);
+						}
+					}
 				}
 			}
 		}

@@ -111,11 +111,9 @@ export default class Run extends ScannerCommand {
 		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
 		const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
 		const ruleManager = await Controller.createRuleManager();
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
-		// allow to boil over.
 
-		// First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
-		// Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
+		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
+		// sometimes shells are stupid and will leave them in there.
 		const targetPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
 		this.processOutput(output);
@@ -185,6 +183,8 @@ export default class Run extends ScannerCommand {
 			} else if (format === OUTPUT_FORMAT.TABLE && typeof output === 'object') {
 				// For tables, don't even bother printing anything unless we have something to print.
 				this.ux.table(output.rows, output.columns);
+			} else {
+				throw new SfdxError(`Invalid combination of format ${format} and output type ${typeof output}`);
 			}
 		}
 	}

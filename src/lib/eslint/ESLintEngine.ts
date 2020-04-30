@@ -196,28 +196,6 @@ export class ESLintEngine implements RuleEngine {
 		}
 	}
 
-	/**
-	 * Return a subset of the given paths, suitable for this engine, delving into any
-	 * directories to find all valid file paths.
-	 */
-/*
-	private async resolvePaths(filenames: string[], base?: string): Promise<string[]> {
-		const results: string[] = [];
-		for (const filename of filenames) {
-			const filepath = path.resolve(base || process.cwd(), filename);
-			const stats = await this.fileHandler.stats(filepath);
-			if(stats.isFile()) {
-				results.push(filepath);
-			} else if(stats.isDirectory()) {
-				const children = await this.fileHandler.readDir(filepath);
-				const descendants = await this.resolvePaths(children, filepath);
-				results.push(...descendants);
-			}
-		}
-		return results;
-	}
-*/
-
 	private reportToRuleResults(report: ESReport, ruleMap: Map<string,ESRule>): RuleResult[] {
 		return report.results.map(r => this.toRuleResult(r.filePath, r.messages, ruleMap));
 	}
