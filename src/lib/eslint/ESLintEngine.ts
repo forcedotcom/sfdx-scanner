@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Logger, SfdxError} from '@salesforce/core';
 import {CLIEngine} from 'eslint';
-import * as path from 'path';
 import {Controller} from '../../ioc.config';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleViolation} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
@@ -85,9 +84,7 @@ const DEFAULT_ESCONFIG_TS = {
 export class ESLintEngine implements RuleEngine {
 	public static NAME = "eslint";
 	public static JAVASCRIPT_LANGUAGE = "javascript";
-	public static JAVASCRIPT_EXTENSION = ".js";
 	public static TYPESCRIPT_LANGUAGE = "typescript";
-	public static TYPESCRIPT_EXTENSION = ".ts";
 
 	private logger: Logger;
 	private initialized: boolean;
@@ -116,6 +113,12 @@ export class ESLintEngine implements RuleEngine {
 
 		this.fileHandler = new FileHandler();
 		this.config = await Controller.getConfig();
+
+		// We currently assume you must execute the engine from your project directory.  This doesn't matter for all
+		// situations, but it is critical at least for typescript.  TS rules require tsconfig.  In the future we could
+		// change to treat targetPaths which are directories as project directories, and look inside them for a
+		// tsconfig.json file.  Until then, just require that if you want to run against *.ts, you better do so from a
+		// working directory that contains tsconfig.
 		this.esconfig = await this.fileHandler.exists("tsconfig.json") ?
 			DEFAULT_ESCONFIG_TS : DEFAULT_ESCONFIG;
 
@@ -166,7 +169,7 @@ export class ESLintEngine implements RuleEngine {
 	}
 
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: string[]): Promise<RuleResult[]> {
-		const targetPaths: string[] = await this.resolvePaths(targets);
+		const targetPaths: string[] = targets;
 		// If we didn't find any paths, we're done.
 		if (targetPaths == null || targetPaths.length === 0) {
 			this.logger.trace('No matching target files found. Nothing to execute.');
@@ -197,16 +200,14 @@ export class ESLintEngine implements RuleEngine {
 	 * Return a subset of the given paths, suitable for this engine, delving into any
 	 * directories to find all valid file paths.
 	 */
+/*
 	private async resolvePaths(filenames: string[], base?: string): Promise<string[]> {
 		const results: string[] = [];
 		for (const filename of filenames) {
 			const filepath = path.resolve(base || process.cwd(), filename);
 			const stats = await this.fileHandler.stats(filepath);
 			if(stats.isFile()) {
-				// Rudimentary check for now.  TODO check file contents?
-				if (filepath.endsWith(ESLintEngine.JAVASCRIPT_EXTENSION) || filepath.endsWith(ESLintEngine.TYPESCRIPT_EXTENSION)) {
-					results.push(filepath);
-				}
+				results.push(filepath);
 			} else if(stats.isDirectory()) {
 				const children = await this.fileHandler.readDir(filepath);
 				const descendants = await this.resolvePaths(children, filepath);
@@ -215,6 +216,7 @@ export class ESLintEngine implements RuleEngine {
 		}
 		return results;
 	}
+*/
 
 	private reportToRuleResults(report: ESReport, ruleMap: Map<string,ESRule>): RuleResult[] {
 		return report.results.map(r => this.toRuleResult(r.filePath, r.messages, ruleMap));

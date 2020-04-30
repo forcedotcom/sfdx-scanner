@@ -72,7 +72,8 @@ jobs:
 
       - run:
           name: "Run rules"
-          command: bin\run.cmd scanner:run --target test\projects\dx --format junit --outfile test-results\dx.xml
+          working_directory: test\projects\app
+          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile test-results\app.xml
 
       # Upload results
       - store_test_results:
@@ -102,7 +103,8 @@ jobs:
 
       - run:
           name: "Run rules"
-          command: sfdx scanner:run --target test\projects\dx --format junit --outfile test-results\dx.xml
+          working_directory: test\projects\app
+          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile test-results\app.xml
 
       # Upload results
       - store_test_results:

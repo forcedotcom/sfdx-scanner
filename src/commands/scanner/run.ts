@@ -5,9 +5,8 @@ import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
 import fs = require('fs');
-import globby = require('globby');
-import normalize = require('normalize-path');
 import untildify = require('untildify');
+import normalize = require('normalize-path');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -99,9 +98,14 @@ export default class Run extends ScannerCommand {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
 
+		// We don't yet support running rules against an org, so we'll just throw an error for now.
+		if (this.flags.org) {
+			throw new SfdxError('Running rules against orgs is not yet supported');
+		}
+
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
-		const target: string[] | string = this.flags.org || await this.unpackTargets();
+
 		// If format is specified, use it.  Otherwise, if outfile is specified, infer the format from its extension.
 		// Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
 		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
@@ -109,7 +113,11 @@ export default class Run extends ScannerCommand {
 		const ruleManager = await Controller.createRuleManager();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
-		const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);
+
+		// First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
+		// Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
+		const targetPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
+		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
 		this.processOutput(output);
 		return {};
 	}
@@ -128,26 +136,6 @@ export default class Run extends ScannerCommand {
 			if (derivedFormat !== chosenFormat) {
 				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format, derivedFormat]));
 			}
-		}
-	}
-
-	private async unpackTargets(): Promise<string[]> {
-		// First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
-		// Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
-		const normalizedPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
-
-		// Add any default target patterns from config.
-		const config = await Controller.getConfig();
-		if (config.getDefaultTargetPatterns()) {
-			normalizedPaths.push(...config.getDefaultTargetPatterns());
-		}
-
-		// If any of the target paths have glob patterns, find all matching files. Otherwise, just return
-		// the target paths.
-		if (globby.hasMagic(normalizedPaths)) {
-			return globby(normalizedPaths);
-		} else {
-			return normalizedPaths;
 		}
 	}
 

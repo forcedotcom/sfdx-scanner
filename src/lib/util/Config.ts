@@ -3,22 +3,35 @@ import {Logger, LoggerLevel} from '@salesforce/core';
 import {CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
 import path = require('path');
 
-type ConfigContent = {
+export type ConfigContent = {
 	javaHome?: string;
 	engines?: EngineConfigContent[];
-	targetDefaultPatterns?: string[];
+	targetPatterns?: string[];
 }
 
-type EngineConfigContent = {
+export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
+	targetPatterns: string[];
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
 const DEFAULT_CONFIG: ConfigContent = {
-	engines: [],
-	targetDefaultPatterns: [
-		"!node_modules/**"
+	engines: [
+		{
+			name: "pmd",
+			targetPatterns: [
+				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
+				"!node_modules/**","!**/*-meta.xml"
+			]
+		},
+		{
+			name: "eslint",
+			targetPatterns: [
+				"**/*.js","**/*.ts",
+				"!node_modules/**",
+			]
+		}
 	]
 }
 
@@ -62,8 +75,8 @@ export class Config {
 		return !e || e.disabled;
 	}
 
-	public getDefaultTargetPatterns(): string[] {
-		return this.configContent.targetDefaultPatterns;
+	public getEngineConfig(name: string): EngineConfigContent {
+		return this.configContent.engines.find(e => e.name === name);
 	}
 
 	private async writeConfig(): Promise<void> {
@@ -91,6 +104,7 @@ export class Config {
 			// Should never happen, only in odd cases.
 			const oldFile = await this.uniqueFilenameFor(CONFIG_FILE_PATH + '.bak');
 			await this.fileHandler.writeFile(oldFile, fileContent);
+			await this.createNewConfigFile(DEFAULT_CONFIG);
 			this.logger.error(`Problem loading existing configuration file.  Backed up original config to ${oldFile} and created ${CONFIG_FILE_PATH} fresh.`)
 		}
 	}
