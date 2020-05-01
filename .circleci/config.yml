@@ -39,19 +39,19 @@ jobs:
       # UNIT TESTS
       - run:
           name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
       - run:
           name: eslint
-          command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
 
       - store_test_results:
-          path: ./test-results
+          path: test-results
 
       - store_artifacts: # upload test coverage as artifact.
-          path: ./test-coverage
+          path: test-coverage
 
   unpackaged-sanity:
     executor:
@@ -73,7 +73,7 @@ jobs:
       - run:
           name: "Run rules"
           working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile test-results\app.xml
+          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
 
       # Upload results
       - store_test_results:
@@ -104,7 +104,7 @@ jobs:
       - run:
           name: "Run rules"
           working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile test-results\app.xml
+          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
 
       # Upload results
       - store_test_results:

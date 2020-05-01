@@ -163,16 +163,11 @@ export class ESLintEngine implements RuleEngine {
 		return Promise.resolve(catalog);
 	}
 
-	public async getAll(): Promise<Rule[]> {
-		this.logger.trace('Getting eslint rules.');
-		return Promise.resolve([]);
-	}
-
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: string[]): Promise<RuleResult[]> {
 		const targetPaths: string[] = targets;
 		// If we didn't find any paths, we're done.
 		if (targetPaths == null || targetPaths.length === 0) {
-			this.logger.trace('No matching target files found. Nothing to execute.');
+			this.logger.trace('No matching eslint target files found. Nothing to execute.');
 			return [];
 		}
 

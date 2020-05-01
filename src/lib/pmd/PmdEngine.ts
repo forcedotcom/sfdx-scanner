@@ -58,13 +58,6 @@ export class PmdEngine implements RuleEngine {
 		return this.pmdCatalogWrapper.getCatalog();
 	}
 
-	public async getAll(): Promise<Rule[]> {
-		// PmdCatalogWrapper is a layer of abstraction between the commands and PMD, facilitating code reuse and other goodness.
-		this.logger.trace('Getting PMD rules.');
-		const catalog = await this.pmdCatalogWrapper.getCatalog();
-		return catalog.rules;
-	}
-
 	/**
 	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by

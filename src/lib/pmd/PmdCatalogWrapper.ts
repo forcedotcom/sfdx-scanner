@@ -70,19 +70,14 @@ export class PmdCatalogWrapper extends PmdSupport {
 	}
 
 	private async buildCatalogerParameters(): Promise<string[]> {
-		// Get custom rule path entries
-		const customEntries = await this.getRulePathEntries();
-
-		// Add inbuilt PMD rule path entries
-		const allPaths = this.addPmdJarPaths(customEntries);
-
+		const pathSetMap = await this.getRulePathEntries();
 		const parameters = [];
 		const divider = '=';
 		const joiner = ',';
 
 		// For each language, build an argument that looks like:
 		// "language=path1,path2,path3"
-		allPaths.forEach((entries, language) => {
+		pathSetMap.forEach((entries, language) => {
 			const paths = Array.from(entries.values());
 			parameters.push(language + divider + paths.join(joiner));
 		});
@@ -95,28 +90,30 @@ export class PmdCatalogWrapper extends PmdSupport {
 	 * Return a map where the key is the language and the value is a set of class/jar paths.  Start with the given
 	 * default values, if provided.
 	 */
-	private addPmdJarPaths(defaults?: Map<string, Set<string>>): Map<string, Set<string>> {
-		const result = new Map<string, Set<string>>();
+	private async getRulePathEntries(): Promise<Map<string, Set<string>>> {
+		const pathSetMap = new Map<string, Set<string>>();
+
+		const customPathEntries = await this.getCustomRulePathEntries();
 
 		// For each supported language, add path to PMD's inbuilt rules
 		SUPPORTED_LANGUAGES.forEach((language) => {
 			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
-			const defaultSet = defaults ? defaults.get(language) : null;
-			let resultSet = result.get(language);
-			if (!resultSet) {
-				resultSet = new Set<string>();
-				result.set(language, resultSet);
+			const customPathSet = customPathEntries ? customPathEntries.get(language) : null;
+			let pathSet = pathSetMap.get(language);
+			if (!pathSet) {
+				pathSet = new Set<string>();
+				pathSetMap.set(language, pathSet);
 			}
-			if (defaultSet) {
-				for (const value of defaultSet.values()) {
-					resultSet.add(value);
+			if (customPathSet) {
+				for (const value of customPathSet.values()) {
+					pathSet.add(value);
 				}
 			}
-			resultSet.add(pmdJarName);
+			pathSet.add(pmdJarName);
 		});
-		this.logger.trace(`Added PMD Jar paths: ${PrettyPrinter.stringifyMapofSets(result)}`);
 
-		return result;
+		this.logger.trace(`Found PMD rule paths: ${PrettyPrinter.stringifyMapofSets(pathSetMap)}`);
+		return pathSetMap;
 	}
 
 
