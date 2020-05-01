@@ -1,18 +1,23 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.json.simple.*;
 
 public class PmdCatalogJson {
-	public static final String JSON_RULES = "rules";
+	public static final String PMD_ENGINE_NAME = "pmd";
+
+	public static final String JSON_ENGINE = "engine";
+	public static final String JSON_NAME = "name";
 	public static final String JSON_CATEGORIES = "categories";
 	public static final String JSON_RULESETS = "rulesets";
-	public static final String JSON_NAME = "name";
 	public static final String JSON_PATHS = "paths";
+	public static final String JSON_RULES = "rules";
+	public static final String JSON_MESSAGE = "message";
+	public static final String JSON_DESCRIPTION = "description";
+	public static final String JSON_LANGUAGES = "languages";
+	public static final String JSON_SOURCEPACKAGE = "sourcepackage";
+	public static final String JSON_DEFAULTENABLED = "defaultEnabled";
 
 	private final List<PmdCatalogRule> rules;
 	private final List<PmdCatalogCategory> categories;
@@ -82,6 +87,7 @@ public class PmdCatalogJson {
 		JSONObject obj = pathsByAlias.get(alias);
 		if (obj == null) {
 			obj = new JSONObject();
+			obj.put(JSON_ENGINE, PMD_ENGINE_NAME);
 			obj.put(JSON_NAME, alias);
 			obj.put(JSON_PATHS, new ArrayList<String>());
 			pathsByAlias.put(alias, obj);

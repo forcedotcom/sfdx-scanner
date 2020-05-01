@@ -7,18 +7,12 @@ import org.json.simple.*;
 import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.EventKey;
 
+import static sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson.*;
+
 public class PmdCatalogRule {
 	public static final String ATTR_NAME = "name";
 	public static final String ATTR_MESSAGE = "message";
 	public static final String ATTR_DESCRIPTION = "description";
-	public static final String JSON_NAME = "name";
-	public static final String JSON_MESSAGE = "message";
-	public static final String JSON_DESCRIPTION = "description";
-	public static final String JSON_LANGUAGES = "languages";
-	public static final String JSON_CATEGORIES = "categories";
-	public static final String JSON_RULESETS = "rulesets";
-	public static final String JSON_SOURCEPACKAGE = "sourcepackage";
-	public static final String JSON_DEFAULTENABLED = "defaultEnabled";
 
 	private final String name;
 	private final String message;
@@ -98,6 +92,7 @@ public class PmdCatalogRule {
 	 */
 	JSONObject toJson() {
 		Map<String, Object> m = new HashMap<>();
+		m.put(JSON_ENGINE, PMD_ENGINE_NAME);
 		m.put(JSON_NAME, this.name);
 		m.put(JSON_MESSAGE, this.message);
 		m.put(JSON_DESCRIPTION, this.description);

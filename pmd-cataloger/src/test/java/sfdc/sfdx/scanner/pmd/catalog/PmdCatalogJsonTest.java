@@ -34,11 +34,13 @@ public class PmdCatalogJsonTest {
 
 		// Verify
 		//[{"paths":["rule path"],"name":"rule name"}]
-		final String expectedRulesetJson = String.format("[{\"paths\":[\"%s\"],\"name\":\"%s\"}]", RULE_PATH, RULE_NAME);
-		assertEquals(jsonObject.get(PmdCatalogJson.JSON_RULESETS).toString(), expectedRulesetJson);
+		final String expectedRulesetJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
+			PmdCatalogJson.PMD_ENGINE_NAME, RULE_PATH, RULE_NAME);
+		assertEquals(expectedRulesetJson, jsonObject.get(PmdCatalogJson.JSON_RULESETS).toString());
 
-		final String expectedCategoryJson = String.format("[{\"paths\":[\"%s\"],\"name\":\"%s\"}]", CATEGORY_PATH, CATEGORY_NAME);
-		assertEquals(jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString(), expectedCategoryJson);
+		final String expectedCategoryJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
+			PmdCatalogJson.PMD_ENGINE_NAME, CATEGORY_PATH, CATEGORY_NAME);
+		assertEquals(expectedCategoryJson, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString());
 
 		// Rules json has its own test where we verify the Json contents. Here, we only confirm that it exists
 		assertTrue("JSON should contain 'rules' element", jsonObject.containsKey(PmdCatalogJson.JSON_RULES));

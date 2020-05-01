@@ -145,22 +145,16 @@ export default class LocalCatalog implements RuleCatalog {
 		return this.rebuildCatalog();
 	}
 
+	/**
+	 * Recreate the catalog from the catalogs of each engine and write the catalog json to disk.
+	 */
 	private async rebuildCatalog(): Promise<[boolean, string]> {
 		const catalog = this.catalog = {rulesets: [], categories: [], rules: []};
 		for (const engine of this.engines) {
 			const engineCatalog: Catalog = await engine.getCatalog();
-			engineCatalog.rulesets.forEach(rs => {
-				rs.engine = engine.getName();
-				catalog.rulesets.push(rs);
-			});
-			engineCatalog.categories.forEach(c => {
-				c.engine = engine.getName();
-				catalog.categories.push(c);
-			});
-			engineCatalog.rules.forEach(r => {
-				r.engine = engine.getName();
-				catalog.rules.push(r);
-			});
+			catalog.rulesets.push(...engineCatalog.rulesets);
+			catalog.categories.push(...engineCatalog.categories);
+			catalog.rules.push(...engineCatalog.rules);
 		}
 		await LocalCatalog.writeCatalogJson(this.catalog);
 		return Promise.resolve([true, 'rebuilt catalog']);
