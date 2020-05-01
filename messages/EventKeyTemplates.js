@@ -1,6 +1,6 @@
 module.exports = {
 	 "info": {
-		"pmdJarImplicitlyRun": "Implicitly running PMD Category '%s' defined in '%s'.",
+		"categoryImplicitlyRun": "Implicitly including %s rules from category '%s'",
 		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s"
 	},
 	"warning": {

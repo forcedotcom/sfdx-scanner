@@ -13,5 +13,5 @@ export interface RuleManager {
 
 	getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]>;
 
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[] | string, format: OUTPUT_FORMAT): Promise<string>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], format: OUTPUT_FORMAT): Promise<string | {columns; rows}>;
 }

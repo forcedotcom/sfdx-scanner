@@ -1,32 +1,33 @@
 import {expect} from 'chai';
 import {Controller} from '../../src/ioc.config';
-import {PmdCatalogWrapper} from "../../src/lib/pmd/PmdCatalogWrapper";
 import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
+import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 
-const PMD_CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultPmdCatalogFixture.json');
-const PMD_FIXTURE_RULE_COUNT = 73;
+const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
+const CATALOG_FIXTURE_RULE_COUNT = 10;
+const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 8;
 let ruleManager = null;
 
 describe('RuleManager', () => {
 	before(async () => {
 		// Make sure all catalogs exist where they're supposed to.
-		if (!fs.existsSync(PMD_CATALOG_FIXTURE_PATH)) {
+		if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
 			throw new Error('Fake catalog does not exist');
 		}
 
 		// Make sure all catalogs have the expected number of rules.
-		const catalogJson = JSON.parse(fs.readFileSync(PMD_CATALOG_FIXTURE_PATH).toString());
-		if (catalogJson.rules.length !== PMD_FIXTURE_RULE_COUNT) {
-			throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + PMD_FIXTURE_RULE_COUNT);
+		const catalogJson = JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
+		if (catalogJson.rules.length !== CATALOG_FIXTURE_RULE_COUNT) {
+			throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + CATALOG_FIXTURE_RULE_COUNT);
 		}
 
-		// Stub out the PmdCatalogWrapper's getCatalog method so it always returns the fake catalog, whose contents are known,
-		// and never overwrites the real catalog.
-		Sinon.stub(PmdCatalogWrapper.prototype, 'getCatalog').callsFake(async () => {
-			return JSON.parse(fs.readFileSync(PMD_CATALOG_FIXTURE_PATH).toString());
+		// Stub out the LocalCatalog's getCatalog method so it always returns the fake catalog, whose contents are known,
+		// and never overwrites the real catalog. (Or we could use the IOC container to do this without sinon.)
+		Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
+			return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
 		});
 
 		// Declare our rule manager.
@@ -35,25 +36,27 @@ describe('RuleManager', () => {
 
 	describe('getRulesMatchingCriteria()', () => {
 		describe('Test Case: No filters provided', () => {
-			it('When no filters are provided, all rules are returned', async () => {
+			it('When no filters are provided, all default-enabled rules are returned', async () => {
 				// If we pass an empty list into the method, that's treated as the absence of filter criteria.
 				const allRules = await ruleManager.getRulesMatchingCriteria([]);
 
-				// Expect all rules to have been returned.
-				expect(allRules).to.have.lengthOf(PMD_FIXTURE_RULE_COUNT, 'All rules should have been returned');
+				// Expect all default-enabled rules to have been returned.
+				expect(allRules).to.have.lengthOf(CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
 			});
 		});
 
 		describe('Test Case: Filtering by category only', () => {
 			it('Filtering by one category returns only rules in that category', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
+				const filters = [
+					new RuleFilter(FilterType.CATEGORY, ['Best Practices']),
+					new RuleFilter(FilterType.ENGINE, ['pmd'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(12, 'Exactly 12 rules are categorized as "Best Practices".');
+				expect(matchingRules).to.have.lengthOf(2, 'Exactly 2 pmd rules are categorized as "Best Practices".');
 			});
 
 			it('Filtering by multiple categories returns any rule in either category', async () => {
@@ -64,7 +67,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(23, 'Exactly 23 rules are categorized as "Best Practices" or "Design"');
+				expect(matchingRules).to.have.lengthOf(6, 'Exactly 6 rules are categorized as "Best Practices" or "Design"');
 			});
 		});
 
@@ -77,18 +80,18 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(8, 'Exactly 8 rules are in the "Braces" ruleset');
+				expect(matchingRules).to.have.lengthOf(3, 'Exactly 8 rules are in the "Braces" ruleset');
 			});
 
 			it('Filtering by multiple rulesets returns any rule in either ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'ApexUnit'])];
+				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'Best Practices'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(10, 'Exactly 10 rules are in the "Braces" or "ApexUnit" rulesets');
+				expect(matchingRules).to.have.lengthOf(5, 'Exactly 5 rules are in the "Braces" or "Best Practices" rulesets');
 			});
 		});
 
@@ -101,7 +104,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(56, 'There are 56 rules that target Apex');
+				expect(matchingRules).to.have.lengthOf(2, 'There are 2 rules that target Apex');
 			});
 
 			it('Filtering by multiple languages returns any rule targeting either language', async () => {
@@ -112,7 +115,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(73, 'There are 73 rules targeting either Apex or JS');
+				expect(matchingRules).to.have.lengthOf(10, 'There are 10 rules targeting either Apex or JS');
 			});
 		});
 
@@ -120,7 +123,7 @@ describe('RuleManager', () => {
 			it('Filtering on multiple columns at once returns only rules that satisfy ALL filters', async () => {
 				// Set up our filter array.
 				const filters = [
-					new RuleFilter(FilterType.LANGUAGE, ['apex']),
+					new RuleFilter(FilterType.LANGUAGE, ['javascript']),
 					new RuleFilter(FilterType.CATEGORY, ['Best Practices'])
 				];
 
@@ -128,7 +131,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(7, 'Exactly 7 rules target Apex and are categorized as "Best Practices".');
+				expect(matchingRules).to.have.lengthOf(4, 'Exactly 4 rules target Apex and are categorized as "Best Practices".');
 			});
 		});
 

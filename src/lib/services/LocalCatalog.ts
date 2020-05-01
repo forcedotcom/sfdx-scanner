@@ -1,8 +1,8 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {injectable, injectAll} from 'tsyringe';
-import {CATALOG_JSON, SFDX_SCANNER_PATH} from '../../Constants';
-import {Catalog, PathGroup, Rule, RuleEvent} from '../../types';
+import {CATALOG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
+import {Catalog, Rule, RuleEvent, RuleGroup} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {FilterType, RuleFilter} from '../RuleFilter';
 import {FileHandler} from '../util/FileHandler';
@@ -29,9 +29,12 @@ export default class LocalCatalog implements RuleCatalog {
 		if (this.initialized) {
 			return;
 		}
+		this.logger = await Logger.child("LocalCatalog");
 
-		await Promise.all(this.engines.map(e => e.init()));
-		this.logger = await Logger.child("LocalCatalog"); // TODO should be an injected service
+		for (const engine of this.engines) {
+			await engine.init();
+		}
+
 		this.outputProcessor = await OutputProcessor.create({}); // TODO should be an injected service
 		this.catalog = await this.getCatalog();
 
@@ -42,7 +45,7 @@ export default class LocalCatalog implements RuleCatalog {
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
 	 */
-	public async getNamedPathsMatchingFilters(filters: RuleFilter[]): Promise<PathGroup[]> {
+	public async getRuleGroupsMatchingFilters(filters: RuleFilter[]): Promise<RuleGroup[]> {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
@@ -54,18 +57,18 @@ export default class LocalCatalog implements RuleCatalog {
 		// correspond to a path in the catalog.
 		// Since categories and rulesets are both just NamedPaths, we can put both types of
 		// path into a single array and return that.
-		const foundPaths: PathGroup[] = [];
+		const foundPaths: RuleGroup[] = [];
 		for (const filter of filters) {
 			// For now, we only care about filters that act on rulesets and categories.
 			const type = filter.filterType;
 			if (type === FilterType.CATEGORY || type === FilterType.RULESET) {
 				// We only want to evaluate category filters against category names, and ruleset filters against ruleset names.
-				const namedPaths: PathGroup[] = type === FilterType.CATEGORY ? this.catalog.categories : this.catalog.rulesets;
+				const namedPaths: RuleGroup[] = type === FilterType.CATEGORY ? this.catalog.categories : this.catalog.rulesets;
 				for (const value of filter.filterValues) {
 					// If there's a matching category/ruleset for the specified filter, we'll need to add all the
 					// corresponding paths to our list.
-					const np = namedPaths.find(np => np.name === value);
-					foundPaths.push(np);
+					const np = namedPaths.filter(np => np.name === value);
+					foundPaths.push(...np);
 				}
 			}
 		}
@@ -84,24 +87,21 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 	}
 
-	private getAllCategoryPaths(): PathGroup[] {
+	private getAllCategoryPaths(): RuleGroup[] {
 		// Since this method is run when no filter criteria are provided, it might be nice to provide a level of visibility
 		// into all of the categories that were run. So before returning the category paths, loop through them
 		// and emit events for each path.
 
 		const events: RuleEvent[] = [];
-		this.catalog.categories.forEach(np => {
-			// For each path, build an event indicating that the path was implicitly included.
-			for (const p of np.paths) {
-				events.push({
-					messageKey: 'info.pmdJarImplicitlyRun',
-					args: [np.name, p],
-					type: 'INFO',
-					handler: 'UX',
-					verbose: true,
-					time: Date.now()
-				});
-			}
+		this.catalog.categories.forEach(cat => {
+			events.push({
+				messageKey: 'info.categoryImplicitlyRun',
+				args: [cat.engine, cat.name],
+				type: 'INFO',
+				handler: 'UX',
+				verbose: true,
+				time: Date.now()
+			});
 		});
 
 		this.outputProcessor.emitEvents(events);
@@ -110,7 +110,7 @@ export default class LocalCatalog implements RuleCatalog {
 
 	private static getCatalogName(): string {
 		// For test mocking purposes, we allow for env variables to override the default catalog name.
-		return process.env.CATALOG_JSON || CATALOG_JSON;
+		return process.env.CATALOG_FILE || CATALOG_FILE;
 	}
 
 	private static getCatalogPath(): string {
@@ -123,10 +123,10 @@ export default class LocalCatalog implements RuleCatalog {
 	}
 
 	private static async writeCatalogJson(content: Catalog): Promise<void> {
-		return new FileHandler().writeFile(LocalCatalog.getCatalogPath(), JSON.stringify(content));
+		return new FileHandler().writeFile(LocalCatalog.getCatalogPath(), JSON.stringify(content, null, 2));
 	}
 
-	private async getCatalog(): Promise<Catalog> {
+	public async getCatalog(): Promise<Catalog> {
 		// If we haven't read in a catalog yet, do so now.
 		if (!this.catalog) {
 			this.logger.trace(`Populating Catalog JSON.`);
@@ -145,13 +145,16 @@ export default class LocalCatalog implements RuleCatalog {
 		return this.rebuildCatalog();
 	}
 
+	/**
+	 * Recreate the catalog from the catalogs of each engine and write the catalog json to disk.
+	 */
 	private async rebuildCatalog(): Promise<[boolean, string]> {
-		this.catalog = {rulesets:[], categories:[], rules: []};
-		for(const engine of this.engines) {
-			const catalog: Catalog = await engine.getCatalog();
-			catalog.rulesets.forEach(rs => {rs.engine = engine.getName(); this.catalog.rulesets.push(rs);});
-			catalog.categories.forEach(c => {c.engine = engine.getName(); this.catalog.categories.push(c);});
-			catalog.rules.forEach(r => {r.engine = engine.getName(); this.catalog.rules.push(r);});
+		const catalog = this.catalog = {rulesets: [], categories: [], rules: []};
+		for (const engine of this.engines) {
+			const engineCatalog: Catalog = await engine.getCatalog();
+			catalog.rulesets.push(...engineCatalog.rulesets);
+			catalog.categories.push(...engineCatalog.categories);
+			catalog.rules.push(...engineCatalog.rules);
 		}
 		await LocalCatalog.writeCatalogJson(this.catalog);
 		return Promise.resolve([true, 'rebuilt catalog']);
@@ -164,9 +167,9 @@ export default class LocalCatalog implements RuleCatalog {
 	}
 
 	private ruleSatisfiesFilterConstraints(rule: Rule, filters: RuleFilter[]): boolean {
-		// If no filters were provided, then the rule is vacuously acceptable and we can just return true.
+		// If no filters were provided, then the rule is acceptable if enabled by default
 		if (filters == null || filters.length === 0) {
-			return true;
+			return rule.defaultEnabled;
 		}
 
 		// Otherwise, we'll iterate over all provided criteria and make sure that the rule satisfies them.
@@ -192,8 +195,12 @@ export default class LocalCatalog implements RuleCatalog {
 					ruleValues = [rule.name];
 					break;
 				case FilterType.SOURCEPACKAGE:
-					// Rules also only have one source package, so we'll turn it into a singleton list just like we do with 'name'.
+					// Rules have one source package, so we'll turn it into a singleton list just like we do with 'name'.
 					ruleValues = [rule.sourcepackage];
+					break;
+				case FilterType.ENGINE:
+					// Rules have one engine, so we'll turn it into a singleton list just like we do with 'name'.
+					ruleValues = [rule.engine];
 					break;
 			}
 

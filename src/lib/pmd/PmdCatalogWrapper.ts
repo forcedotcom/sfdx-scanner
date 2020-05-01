@@ -1,6 +1,6 @@
 import {Logger, Messages} from '@salesforce/core';
 import {ChildProcessWithoutNullStreams} from "child_process";
-import {PMD_CATALOG, SFDX_SCANNER_PATH} from '../../Constants';
+import {SFDX_SCANNER_PATH} from '../../Constants';
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
@@ -16,6 +16,8 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemp
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
 const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
+const PMD_CATALOG_FILE = 'PmdCatalog.json';
+
 
 export class PmdCatalogWrapper extends PmdSupport {
 	private outputProcessor: OutputProcessor;
@@ -26,9 +28,8 @@ export class PmdCatalogWrapper extends PmdSupport {
 		if (this.initialized) {
 			return;
 		}
-
-		this.outputProcessor = await OutputProcessor.create({});
 		this.logger = await Logger.child('PmdCatalogWrapper');
+		this.outputProcessor = await OutputProcessor.create({});
 
 		this.initialized = true;
 	}
@@ -39,14 +40,8 @@ export class PmdCatalogWrapper extends PmdSupport {
 		return PmdCatalogWrapper.readCatalogFromFile();
 	}
 
-	private static getCatalogName(): string {
-		// We must allow for env variables to override the default catalog name. This must be recomputed in case those variables
-		// have different values in different test runs.
-		return process.env.PMD_CATALOG_NAME || PMD_CATALOG;
-	}
-
 	private static getCatalogPath(): string {
-		return path.join(SFDX_SCANNER_PATH, PmdCatalogWrapper.getCatalogName());
+		return path.join(SFDX_SCANNER_PATH, PMD_CATALOG_FILE);
 	}
 
 	private static async readCatalogFromFile(): Promise<Catalog> {
@@ -61,7 +56,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
-		const args = [`-DcatalogName=${PmdCatalogWrapper.getCatalogName()}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
+		const args = [`-DcatalogName=${PMD_CATALOG_FILE}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
 		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${args}"`);
 		return [command, args];
@@ -75,19 +70,14 @@ export class PmdCatalogWrapper extends PmdSupport {
 	}
 
 	private async buildCatalogerParameters(): Promise<string[]> {
-		// Get custom rule path entries
-		const rulePathEntries = await this.getRulePathEntries();
-
-		// Add inbuilt PMD rule path entries
-		this.addPmdJarPaths(rulePathEntries);
-
+		const pathSetMap = await this.getRulePathEntries();
 		const parameters = [];
 		const divider = '=';
 		const joiner = ',';
 
 		// For each language, build an argument that looks like:
 		// "language=path1,path2,path3"
-		rulePathEntries.forEach((entries, language) => {
+		pathSetMap.forEach((entries, language) => {
 			const paths = Array.from(entries.values());
 			parameters.push(language + divider + paths.join(joiner));
 		});
@@ -96,19 +86,34 @@ export class PmdCatalogWrapper extends PmdSupport {
 		return parameters;
 	}
 
-	private addPmdJarPaths(rulePathEntries: Map<string, Set<string>>): void {
+	/**
+	 * Return a map where the key is the language and the value is a set of class/jar paths.  Start with the given
+	 * default values, if provided.
+	 */
+	private async getRulePathEntries(): Promise<Map<string, Set<string>>> {
+		const pathSetMap = new Map<string, Set<string>>();
+
+		const customPathEntries = await this.getCustomRulePathEntries();
+
 		// For each supported language, add path to PMD's inbuilt rules
 		SUPPORTED_LANGUAGES.forEach((language) => {
 			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
-
-			// TODO: logic to add entries should be encapsulated away from here.
-			// Duplicates some logic in CustomRulePathManager. Consider refactoring
-			if (!rulePathEntries.has(language)) {
-				rulePathEntries.set(language, new Set<string>());
+			const customPathSet = customPathEntries ? customPathEntries.get(language) : null;
+			let pathSet = pathSetMap.get(language);
+			if (!pathSet) {
+				pathSet = new Set<string>();
+				pathSetMap.set(language, pathSet);
 			}
-			rulePathEntries.get(language).add(pmdJarName);
+			if (customPathSet) {
+				for (const value of customPathSet.values()) {
+					pathSet.add(value);
+				}
+			}
+			pathSet.add(pmdJarName);
 		});
-		this.logger.trace(`Added PMD Jar paths: ${PrettyPrinter.stringifyMapofSets(rulePathEntries)}`);
+
+		this.logger.trace(`Found PMD rule paths: ${PrettyPrinter.stringifyMapofSets(pathSetMap)}`);
+		return pathSetMap;
 	}
 
 

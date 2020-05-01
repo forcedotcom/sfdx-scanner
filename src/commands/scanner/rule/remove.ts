@@ -48,7 +48,6 @@ export default class Remove extends ScannerCommand {
 
 		// Step 2: Pull out and process our flag.
 		const paths = this.flags.path ? this.resolvePaths() : null;
-
 		this.logger.trace(`Rule path: ${paths}`);
 
 		// Step 3: Get all rule entries matching the criteria they provided.
@@ -87,8 +86,8 @@ export default class Remove extends ScannerCommand {
 			const rm = await Controller.createRuleManager();
 			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 
-			// Step 6c: Ask the user to confirm that they actually want to delete the rules in question.
-			if (await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
+			// Step 6c: If any rules are found, ask the user to confirm that they actually want to delete them.
+			if (matchingRules.length > 0 && await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
 				this.ux.log(messages.getMessage('output.aborted'));
 				return [];
 			}

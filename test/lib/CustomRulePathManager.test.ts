@@ -19,6 +19,9 @@ describe('CustomRulePathManager tests', () => {
 	// One entry for apex, two for java
 	const populatedFile = '{"pmd": {"apex": ["/some/user/path/customRule.jar"],"java": ["/abc/def/ghi","/home/lib/jars"]}}';
 
+	// Most tests rely on the singletons being clean
+	beforeEach(() => Controller.reset());
+
 	describe('Rule path entries creation', () => {
 
 		describe('with pre-populated file', () => {
@@ -38,7 +41,7 @@ describe('CustomRulePathManager tests', () => {
 				const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
 
 				// Validate run
-				expect(readStub.calledOnce).to.be.true;
+				expect(readStub.calledTwice).to.be.true;
 				expect(rulePathMap).to.be.lengthOf(2);
 
 				//Validate each entry
@@ -63,7 +66,9 @@ describe('CustomRulePathManager tests', () => {
 				await manager.getRulePathEntries(PmdEngine.NAME);
 
 				// Validate
-				expect(readStub.calledOnce).to.be.true;
+				expect(readStub.calledTwice).to.be.true;
+				expect(readStub.firstCall.lastArg.endsWith('Config.json'))
+				expect(readStub.secondCall.lastArg.endsWith('CustomPaths.json'))
 			});
 		});
 
@@ -77,7 +82,7 @@ describe('CustomRulePathManager tests', () => {
 			const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
 
 			// Validate
-			expect(readStub.calledOnce).to.be.true;
+			expect(readStub.calledTwice).to.be.true;
 			expect(rulePathMap).is.not.null;
 			expect(rulePathMap).to.be.lengthOf(0);
 

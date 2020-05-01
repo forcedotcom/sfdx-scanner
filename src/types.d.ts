@@ -6,18 +6,38 @@ export type Rule = {
 	categories: string[];
 	rulesets: string[];
 	languages: string[];
+	defaultEnabled: boolean;
+	url?: string;
 }
 
-export type PathGroup = {
+export type RuleGroup = {
 	engine: string;
 	name: string;
 	paths: string[];
 }
 
+export type RuleResult = {
+	engine: string;
+	fileName: string;
+	violations: RuleViolation[];
+};
+
+export type RuleViolation = {
+	line: number;
+	column: number;
+	endLine?: number;
+	endColumn?: number;
+	ruleName: string;
+	severity: number;
+	message: string;
+	category: string;
+	url?: string;
+};
+
 export type Catalog = {
 	rules: Rule[];
-	categories: PathGroup[];
-	rulesets: PathGroup[];
+	categories: RuleGroup[];
+	rulesets: RuleGroup[];
 };
 
 export type RuleEvent = {

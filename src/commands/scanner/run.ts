@@ -5,9 +5,8 @@ import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
 import fs = require('fs');
-import globby = require('globby');
-import normalize = require('normalize-path');
 import untildify = require('untildify');
+import normalize = require('normalize-path');
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -99,17 +98,24 @@ export default class Run extends ScannerCommand {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
 
+		// We don't yet support running rules against an org, so we'll just throw an error for now.
+		if (this.flags.org) {
+			throw new SfdxError('Running rules against orgs is not yet supported');
+		}
+
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
-		const target: string[] | string = this.flags.org || await this.unpackTargets();
+
 		// If format is specified, use it.  Otherwise, if outfile is specified, infer the format from its extension.
 		// Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
 		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
 		const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
 		const ruleManager = await Controller.createRuleManager();
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
-		// allow to boil over.
-		const output = await ruleManager.runRulesMatchingCriteria(filters, target, format);
+
+		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
+		// sometimes shells are stupid and will leave them in there.
+		const targetPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
+		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
 		this.processOutput(output);
 		return {};
 	}
@@ -131,19 +137,6 @@ export default class Run extends ScannerCommand {
 		}
 	}
 
-	private async unpackTargets(): Promise<string[]> {
-		// First, turn the paths into normalized Unix-formatted paths. Otherwise, globby will just get confused.
-		// Also, strip out any single- or double-quotes, because sometimes shells are stupid and will leave them in there.
-		const normalizedPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
-		// If any of the target paths are actually glob patterns, find all files that match the pattern. Otherwise, just return
-		// the target paths.
-		if (globby.hasMagic(normalizedPaths)) {
-			return await globby(normalizedPaths);
-		} else {
-			return normalizedPaths;
-		}
-	}
-
 	private deriveFormatFromOutfile(): OUTPUT_FORMAT {
 		const outfile = this.flags.outfile;
 		const lastPeriod = outfile.lastIndexOf('.');
@@ -162,7 +155,7 @@ export default class Run extends ScannerCommand {
 		}
 	}
 
-	private processOutput(output: string): void {
+	private processOutput(output: string | {columns; rows}): void {
 		// If the output is an empty string, it means no violations were found, and we should log that information to the console
 		// so the user doesn't get confused.
 		if (output === '') {
@@ -181,16 +174,17 @@ export default class Run extends ScannerCommand {
 			// Default properly, again, as we did earlier.
 			const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
 			// If we're just supposed to dump the output to the console, what precisely we do depends on the format.
-			if (format === OUTPUT_FORMAT.CSV) {
+			if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
 				// The CSV is just one giant string that we can dump directly to the console.
 				this.ux.log(output);
-			} else if (format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) {
+			} else if ((format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) && typeof output === 'string') {
 				// For XML, we can just dump it to the console.
 				this.ux.log(output);
-			} else if (format === OUTPUT_FORMAT.TABLE && output.length > 0) {
+			} else if (format === OUTPUT_FORMAT.TABLE && typeof output === 'object') {
 				// For tables, don't even bother printing anything unless we have something to print.
-				const outputObj = JSON.parse(output);
-				this.ux.table(outputObj.rows, outputObj.columns);
+				this.ux.table(output.rows, output.columns);
+			} else {
+				throw new SfdxError(`Invalid combination of format ${format} and output type ${typeof output}`);
 			}
 		}
 	}
