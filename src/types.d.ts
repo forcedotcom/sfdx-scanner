@@ -16,6 +16,11 @@ export type RuleGroup = {
 	paths: string[];
 }
 
+export type RuleTarget = {
+	target: string;
+	isDirectory?: boolean;
+	paths: string[];
+}
 export type RuleResult = {
 	engine: string;
 	fileName: string;

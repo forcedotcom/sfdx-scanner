@@ -4,3 +4,5 @@
 **/lwc/**/*.svg
 **/lwc/**/*.xml
 .sfdx
+lib/**
+node_modules/**

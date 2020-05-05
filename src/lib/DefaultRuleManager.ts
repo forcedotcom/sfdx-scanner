@@ -1,15 +1,13 @@
-import {Logger,} from '@salesforce/core';
+import {Logger, SfdxError,} from '@salesforce/core';
+import * as assert from 'assert';
 import {Stats} from 'fs';
-import * as path from 'path';
 import {inject, injectable, injectAll} from 'tsyringe';
-import {Controller} from '../ioc.config';
-import {Rule, RuleGroup, RuleResult} from '../types';
+import {Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
-import {EngineConfigContent} from './util/Config';
 import {FileHandler} from './util/FileHandler';
 import globby = require('globby');
 import picomatch = require('picomatch');
@@ -68,11 +66,15 @@ export class DefaultRuleManager implements RuleManager {
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
 		// all of the results together from all engines into one report.
-		const psResults: RuleResult[][] = await Promise.all(ps);
-		psResults.forEach(r => results = results.concat(r));
-		this.logger.trace(`Received rule violations: ${results}`);
-		this.logger.trace(`Recombining results into requested format ${format}`);
-		return RuleResultRecombinator.recombineAndReformatResults(results, format);
+		try {
+			const psResults: RuleResult[][] = await Promise.all(ps);
+			psResults.forEach(r => results = results.concat(r));
+			this.logger.trace(`Received rule violations: ${results}`);
+			this.logger.trace(`Recombining results into requested format ${format}`);
+			return RuleResultRecombinator.recombineAndReformatResults(results, format);
+		} catch (e) {
+			throw new SfdxError(e.stack || e);
+		}
 	}
 
 	/**
@@ -82,48 +84,52 @@ export class DefaultRuleManager implements RuleManager {
 	 * 2. If a target is a directory, get its contents using the target patterns specified for the engine.
 	 * 3. If the target is a file, make sure it matches the engine's target patterns.
 	 */
-	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<string[]> {
-		// Add any default target patterns from config.
-		const config = await Controller.getConfig();
-		const engineConfig: EngineConfigContent = config.getEngineConfig(engine.getName());
-		const targetPaths: string[] = [];
+	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
+		const ruleTargets: RuleTarget[] = [];
 		for (const target of targets) {
+			// Ask engines for their desired target patterns.
+			const targetPatterns: string[] = await engine.getTargetPatterns(target);
+			assert(targetPatterns);
+			const isInclusiveMatch = picomatch(targetPatterns.filter(p => !p.startsWith("!")));
+			const isExclusiveMatch = picomatch(targetPatterns.filter(p => p.startsWith("!")));
+
+			const fileExists = await this.fileHandler.exists(target);
 			if (globby.hasMagic(target)) {
-				// The target is a magic globby glob.  Retrieve paths in the working dir that match it.
-				targetPaths.push(...await globby(target));
-			} else if (await this.fileHandler.exists(target)) {
-				const stats: Stats = await this.fileHandler.stats(target);
-				if (stats.isDirectory()) {
-					// The target is a directory.  If the engine has target patterns, which is always should,
-					// call globby with the directory as the working dir, and use the patterns to match its contents.
-					if (engineConfig.targetPatterns) {
-						// If dir, use globby { cwd: process.cwd() } option
-						const relativePaths = await globby(engineConfig.targetPatterns, {cwd: target});
-						targetPaths.push(...relativePaths.map(rp => path.join(target, rp)));
+				// The target is a magic globby glob.  Retrieve paths in the working dir that match it, and then
+				// filter each with the engine's own patterns.  First test any inclusive patterns, then AND them with
+				// any exclusive patterns.
+				const matchingTargets = await globby(target);
+				const ruleTarget = {
+					target,
+					paths: matchingTargets.filter(t => isInclusiveMatch(t) && isExclusiveMatch(t))
+				};
+				if (ruleTarget.paths.length > 0) {
+					ruleTargets.push(ruleTarget);
+				}
+			} else {
+				if (fileExists) {
+					const stats: Stats = await this.fileHandler.stats(target);
+					if (stats.isDirectory()) {
+						// The target is a directory.  If the engine has target patterns, which is always should,
+						// call globby with the directory as the working dir, and use the patterns to match its contents.
+						if (targetPatterns) {
+							// If dir, use globby { cwd: process.cwd() } option
+							const relativePaths = await globby(targetPatterns, {cwd: target});
+							ruleTargets.push({target, isDirectory: true, paths: relativePaths});
+						} else {
+							// Without target patterns for the engine, just add the dir itself and hope for the best.
+							ruleTargets.push({target, isDirectory: true, paths: ["."]});
+						}
 					} else {
-						// Without target patterns for the engine, just add the dir itself and hope for the best.
-						targetPaths.push(target);
-					}
-				} else {
-					// Files are trickier than dirs.  We need to treat inclusive patterns separate from exclusive.
-					// First see if the file path matches the inclusive patterns (is this file included?).  If so,
-					// then run the exclusive patterns to see if the file was expressly excluded.
-					// Why? Globby treats all given patterns as an OR operation.  Say we scan a .cls file using eslint.
-					// The inclusive patterns (**/*.js, **/*.ts) return false, yes.  But the exclusive pattern
-					// (!node_modules/*) returns true, which is correct, but since globby ORs them together, it gives
-					// a positive match when it should do the opposite.
-					// (Note: picomatch is the pattern matching library used by globby.)
-					const isInclusiveMatch = picomatch(engineConfig.targetPatterns.filter(p => !p.startsWith("!")));
-					if (isInclusiveMatch(target)) {
-						// If target matches inclusive patterns, only then check if it matches exclusive patterns.
-						const isExclusiveMatch = picomatch(engineConfig.targetPatterns.filter(p => p.startsWith("!")));
-						if (isExclusiveMatch(target)) {
-							targetPaths.push(target);
+						// The target is a simple file.  Validate it against the engine's own patterns.  First test
+						// any inclusive patterns, then with any exclusive patterns.
+						if (isInclusiveMatch(target) && isExclusiveMatch(target)) {
+							ruleTargets.push({target, paths: [target]});
 						}
 					}
 				}
 			}
 		}
-		return targetPaths;
+		return ruleTargets;
 	}
 }

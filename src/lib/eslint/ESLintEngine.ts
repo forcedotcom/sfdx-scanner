@@ -1,14 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Logger, SfdxError} from '@salesforce/core';
 import {CLIEngine} from 'eslint';
+import * as path from 'path';
 import {Controller} from '../../ioc.config';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleViolation} from '../../types';
+import {Catalog, Rule, RuleEvent, RuleGroup, RuleResult, RuleTarget, RuleViolation} from '../../types';
+import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {FileHandler} from '../util/FileHandler';
 
 /**
- * Format of rules returned from Linter
+ * Type mapping to rules returned from eslint
  */
 type ESRule = {
 	meta: {
@@ -23,6 +25,9 @@ type ESRule = {
 	create: Function;
 }
 
+/**
+ * Type mapping to report output by eslint
+ */
 type ESReport = {
 	results: [
 		{
@@ -37,6 +42,9 @@ type ESReport = {
 	usedDeprecatedRules: string[];
 }
 
+/**
+ * Type mapping to report messages output by eslint
+ */
 type ESMessage = {
 	fatal: boolean;
 	ruleId: string;
@@ -50,7 +58,21 @@ type ESMessage = {
 	};
 }
 
-const DEFAULT_ESCONFIG = {
+/**
+ * Type mapping to tsconfig.json files
+ */
+type TSConfig = {
+	compilerOptions: {
+		allowJs: boolean;
+		outDir: string;
+		outFile: string;
+	};
+	include: string[];
+	exclude: string[];
+	files: string[];
+}
+
+const ES_CONFIG = {
 	"extends": ["eslint:recommended"],
 	"parserOptions": {
 		"sourceType": "module",
@@ -59,10 +81,10 @@ const DEFAULT_ESCONFIG = {
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
-	"useEslintrc": false
+	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
 };
 
-const DEFAULT_ESCONFIG_TS = {
+const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
 	"extends": [
 		"eslint:recommended",
@@ -72,14 +94,18 @@ const DEFAULT_ESCONFIG_TS = {
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
-		"project": "./tsconfig.json"
 	},
-	"extensions": ["ts"],
 	"plugins": [
 		"@typescript-eslint"
 	],
-	"useEslintrc": false
+	"ignorePatterns": [
+		"lib/**",
+		"node_modules/**"
+	],
+	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
 };
+
+const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
 export class ESLintEngine implements RuleEngine {
 	public static NAME = "eslint";
@@ -88,16 +114,28 @@ export class ESLintEngine implements RuleEngine {
 
 	private logger: Logger;
 	private initialized: boolean;
+	private outputProcessor: OutputProcessor;
 	private fileHandler: FileHandler;
-	private esconfig: any;
 	private config: Config;
+
+	public async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+		this.logger = await Logger.child(ESLintEngine.NAME);
+		this.outputProcessor = await OutputProcessor.create({});
+
+		this.fileHandler = new FileHandler();
+		this.config = await Controller.getConfig();
+		this.initialized = true;
+	}
 
 	public getName(): string {
 		return ESLintEngine.NAME;
 	}
 
 	public isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
+		return this.config.isEngineEnabled(ESLintEngine.NAME);
 	}
 
 	public matchPath(path: string): boolean {
@@ -105,31 +143,12 @@ export class ESLintEngine implements RuleEngine {
 		return path != null;
 	}
 
-	public async init(): Promise<void> {
-		if (this.initialized) {
-			return;
-		}
-		this.logger = await Logger.child(this.getName());
-
-		this.fileHandler = new FileHandler();
-		this.config = await Controller.getConfig();
-
-		// We currently assume you must execute the engine from your project directory.  This doesn't matter for all
-		// situations, but it is critical at least for typescript.  TS rules require tsconfig.  In the future we could
-		// change to treat targetPaths which are directories as project directories, and look inside them for a
-		// tsconfig.json file.  Until then, just require that if you want to run against *.ts, you better do so from a
-		// working directory that contains tsconfig.
-		this.esconfig = await this.fileHandler.exists("tsconfig.json") ?
-			DEFAULT_ESCONFIG_TS : DEFAULT_ESCONFIG;
-
-		this.initialized = true;
-	}
-
 	getCatalog(): Promise<Catalog> {
 		const categoryMap: Map<string, RuleGroup> = new Map();
 		const catalog: Catalog = {rulesets: [], categories: [], rules: []};
 		const rules: Rule[] = [];
-		const cli = new CLIEngine(this.esconfig);
+		// To get the full list of available rules for both js and ts, use the ts config here.
+		const cli = new CLIEngine(ES_PLUS_TS_CONFIG);
 		cli.getRules().forEach((rule: ESRule, key: string) => {
 			const docs = rule.meta.docs;
 			const categoryName = docs.category;
@@ -155,7 +174,7 @@ export class ESLintEngine implements RuleEngine {
 				// Typescript is superset of javascript, so add it on top here.
 				r.languages.push(ESLintEngine.TYPESCRIPT_LANGUAGE);
 			}
-			rules.push(r)
+			rules.push(r);
 		});
 
 		catalog.categories = Array.from(categoryMap.values());
@@ -163,39 +182,111 @@ export class ESLintEngine implements RuleEngine {
 		return Promise.resolve(catalog);
 	}
 
-	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: string[]): Promise<RuleResult[]> {
-		const targetPaths: string[] = targets;
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[]): Promise<RuleResult[]> {
 		// If we didn't find any paths, we're done.
-		if (targetPaths == null || targetPaths.length === 0) {
+		if (targets == null || targets.length === 0) {
 			this.logger.trace('No matching eslint target files found. Nothing to execute.');
 			return [];
 		}
 
-		if (rules.length === 0) {
-			this.logger.trace('No matching eslint rules found. Nothing to execute.');
-			return [];
-		}
+		const events: RuleEvent[] = [];
 
-		this.logger.trace(`About to run eslint engine. Files: ${targetPaths.length}, rules: ${rules.length}`);
 		try {
-			const config = {
-				rules: {}
-			};
-			rules.forEach(r => {config.rules[r.name] = "error"});
-			Object.assign(config, this.esconfig);
-			const cli = new CLIEngine(config);
-			const report = cli.executeOnFiles(targetPaths);
-			return this.reportToRuleResults(report, cli.getRules());
+			const results: RuleResult[] = [];
+			for (const target of targets) {
+				const cwd = target.isDirectory ? path.resolve(target.target) : process.cwd();
+				const config = {cwd};
+				const tsconfigPath = await this.findTSConfig(target.target);
+				if (tsconfigPath) {
+					events.push({
+						// Alert the user we found a config file, if --verbose
+						messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
+					});
+					Object.assign(config, ES_PLUS_TS_CONFIG);
+					config["parserOptions"].project = tsconfigPath;
+				} else {
+					Object.assign(config, ES_CONFIG);
+				}
+
+				const filteredRules = {};
+				let ruleCount = 0;
+				for (const rule of rules) {
+					if (tsconfigPath || !rule.name.startsWith(TYPESCRIPT_RULE_PREFIX)) {
+						filteredRules[rule.name] = "error";
+						ruleCount++;
+					}
+				}
+				config["rules"] = filteredRules;
+				this.logger.trace(`About to run eslint engine; targets: ${target.paths.length}, rules: ${ruleCount}`);
+
+				const cli = new CLIEngine(config);
+				const report = cli.executeOnFiles(target.paths);
+				this.addRuleResultsFromReport(results, report, cli.getRules());
+			}
+
+			return results;
 		} catch (e) {
 			throw new SfdxError(e.message || e);
+		} finally {
+			this.outputProcessor.emitEvents(events);
 		}
 	}
 
-	private reportToRuleResults(report: ESReport, ruleMap: Map<string,ESRule>): RuleResult[] {
-		return report.results.map(r => this.toRuleResult(r.filePath, r.messages, ruleMap));
+	private async findTSConfig(target: string): Promise<string> {
+		let tsconfigPath;
+		if (await this.fileHandler.isDir(target) && await this.fileHandler.exists(path.resolve(target, "tsconfig.json"))) {
+			// Found a config file under the target dir.
+			tsconfigPath = path.resolve(target, "tsconfig.json");
+		} else if (await this.fileHandler.exists(path.resolve("tsconfig.json"))) {
+			// Check if one exists in the root.
+			tsconfigPath = path.resolve("tsconfig.json");
+		}
+		return tsconfigPath;
 	}
 
-	private toRuleResult(fileName: string, messages: ESMessage[], ruleMap: Map<string,ESRule>): RuleResult {
+	async getTargetPatterns(target?: string): Promise<string[]> {
+		// TODO derive from existing eslintrc here if found and desired
+		const engineConfig = this.config.getEngineConfig(ESLintEngine.NAME);
+
+		// Find the typescript config file, if any
+		const tsconfigPath = await this.findTSConfig(target);
+
+		const targetPatterns: string[] = [];
+		if (tsconfigPath) {
+			const tsconfig: TSConfig = JSON.parse(await this.fileHandler.readFile(tsconfigPath));
+
+			// Found a tsconfig.  Load up its patterns.
+			if (tsconfig.include) {
+				targetPatterns.push(...tsconfig.include);
+			}
+
+			if (tsconfig.exclude) {
+				// Negate the exclude pattern (because that's how we like it)
+				targetPatterns.push(...tsconfig.exclude.map(e => "!" + e));
+			} else if (tsconfig.compilerOptions && tsconfig.compilerOptions.outDir) {
+				// TS likes to auto-exclude the outDir but only if exclude is not specified.
+				targetPatterns.push("!" + path.join(tsconfig.compilerOptions.outDir, "**"));
+			} else if (tsconfig.compilerOptions && tsconfig.compilerOptions.outFile) {
+				// Same reasoning as outDir
+				targetPatterns.push("!" + tsconfig.compilerOptions.outFile);
+			}
+
+			if (tsconfig.files) {
+				targetPatterns.push(...tsconfig.files);
+			}
+		}
+
+		// Join forces.  TODO or maybe not?  Should we just rely only on tsconfig if provided?
+		return engineConfig.targetPatterns.concat(targetPatterns);
+	}
+
+	private addRuleResultsFromReport(results: RuleResult[], report: ESReport, ruleMap: Map<string, ESRule>): void {
+		for (const r of report.results) {
+			results.push(this.toRuleResult(r.filePath, r.messages, ruleMap));
+		}
+	}
+
+	private toRuleResult(fileName: string, messages: ESMessage[], ruleMap: Map<string, ESRule>): RuleResult {
 		return {
 			engine: ESLintEngine.NAME,
 			fileName,
@@ -203,13 +294,15 @@ export class ESLintEngine implements RuleEngine {
 				(v): RuleViolation => {
 					const rule = ruleMap.get(v.ruleId);
 					const category = rule ? rule.meta.docs.category : "";
+					const url = rule ? rule.meta.docs.url : "";
 					return {
 						line: v.line,
 						column: v.column,
 						severity: v.severity,
 						message: v.message,
 						ruleName: v.ruleId,
-						category
+						category,
+						url
 					};
 				}
 			)
