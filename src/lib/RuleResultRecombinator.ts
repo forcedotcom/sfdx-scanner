@@ -3,6 +3,7 @@ import * as path from 'path';
 import {RuleResult} from '../types';
 import {PmdEngine} from './pmd/PmdEngine';
 import {OUTPUT_FORMAT} from './RuleManager';
+import * as wrap from 'word-wrap';
 
 export class RuleResultRecombinator {
 
@@ -32,15 +33,17 @@ export class RuleResultRecombinator {
 
 		let problemCount = 0;
 
-		// Iterate through the results to create an XML string format:
-		// <results...>
-		//   <result...>
-		//     <violation severity="1" line="4" column="7" ...>Message</violation>
-		//     <violation severity="2" line="5" column="8" ...>Message</violation>
-		//     <violation severity="3" line="6" column="9" ...>Message</violation>
-		//     ...
-		//   </result>
-		// </results>
+		/*
+		 Iterate through the results to create an XML string format:
+		 <results...>
+		   <result...>
+		     <violation severity="1" line="4" column="7" ...>Message</violation>
+		     <violation severity="2" line="5" column="8" ...>Message</violation>
+		     <violation severity="3" line="6" column="9" ...>Message</violation>
+		     ...
+		   </result>
+		 </results>
+		*/
 		for (const result of results) {
 			const from = process.cwd();
 			const fileName = path.relative(from, result.fileName);
@@ -106,7 +109,7 @@ URL: ${v.url}
 			return '';
 		}
 
-		const columns = ["Location", "Description", "URL", "Category", "Rule", "Severity", "Line", "Column", "Engine"];
+		const columns = ["Location", "Description", "Category", "URL"];
 		const rows = [];
 		for (const result of results) {
 			const fileName = result.fileName;
@@ -116,7 +119,7 @@ URL: ${v.url}
 				rows.push({
 					Location: `${relativeFile}:${v.line}`,
 					Rule: v.ruleName,
-					Description: msg,
+					Description: wrap(msg),
 					URL: v.url,
 					Category: v.category,
 					Severity: v.severity,

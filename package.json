@@ -20,6 +20,7 @@
 		"tsyringe": "^4.1.0",
 		"typescript": "^3.8.2",
 		"untildify": "^4.0.0",
+		"word-wrap": "^1.2.3",
 		"xml-js": "^1.6.11"
 	},
 	"devDependencies": {
