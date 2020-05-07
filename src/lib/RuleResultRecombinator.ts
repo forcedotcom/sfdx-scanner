@@ -1,7 +1,6 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {RuleResult} from '../types';
-import {PmdEngine} from './pmd/PmdEngine';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
 
@@ -10,6 +9,8 @@ export class RuleResultRecombinator {
 	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): string | { columns; rows } {
 		// We need to change the results we were given into the desired final format.
 		switch (format) {
+			case OUTPUT_FORMAT.JSON:
+				return this.constructJson(results);
 			case OUTPUT_FORMAT.CSV:
 				return this.constructCsv(results);
 			case OUTPUT_FORMAT.XML:
@@ -133,13 +134,15 @@ URL: ${v.url}
 		return {columns, rows};
 	}
 
+	private static constructJson(results: RuleResult[]): string {
+		return JSON.stringify(results.filter(r => r.violations.length > 0));
+	}
+
 	private static constructCsv(results: RuleResult[]): string {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
-
-		const engine = PmdEngine.NAME;
 
 		// Gradually build our CSV, starting with these columns.
 		let csvString = '"Problem","File","Severity","Line","Column","Rule","Description","URL","Category","Engine"\n';
@@ -151,7 +154,7 @@ URL: ${v.url}
 				// Since we are creating CSVs, make sure we escape any commas in our violation messages.
 				// Just replace with semi-colon.
 				const msg = v.message.trim().replace(",", ";");
-				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.url, v.category, engine];
+				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.url, v.category, result.engine];
 				csvString += '"' + row.join('","') + '"\n';
 			}
 		}

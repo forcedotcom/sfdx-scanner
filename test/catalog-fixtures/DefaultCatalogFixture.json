@@ -52,6 +52,23 @@
 	],
 	"rules": [
 		{
+			"engine": "eslint",
+			"sourcepackage": "eslint",
+			"name": "no-unreachable",
+			"description": "disallow unreachable code after `return`, `throw`, `continue`, and `break` statements",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"javascript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-unreachable"
+		},
+		{
 			"rulesets": [
 				"Default ruleset used by the CodeClimate Engine for Salesforce.com Apex",
 				"Complexity",

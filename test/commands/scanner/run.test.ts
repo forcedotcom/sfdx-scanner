@@ -1,12 +1,12 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import fs = require('fs');
-import path = require('path');
 import {SFDX_SCANNER_PATH} from '../../../src/Constants';
 import {Controller} from '../../../src/ioc.config';
-import events = require('../../../messages/EventKeyTemplates');
+import fs = require('fs');
+import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
+import events = require('../../../messages/EventKeyTemplates');
 
 const CATALOG_OVERRIDE = 'RunTestCatalog.json';
 const CUSTOM_PATHS_OVERRIDE = 'RunTestCustomPaths.json';
@@ -25,16 +25,13 @@ if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
 
 const runTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
 
-describe('scanner:run', function() {
+describe('scanner:run', function () {
 	// Reset our controller since we are using alternate file locations
 	before(() => Controller.reset());
 
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('E2E', () => {
-		// XML output is more thoroughly tested than other output types because, at time of writing (2/21/2020), the only engine
-		// supported is PMD, whose output is already an XML. So we're really just testing the other formats to make sure that
-		// we properly convert the output from an XML.
 		describe('Output Type: XML', () => {
 			describe('Test Case: Running rules against a single file', () => {
 				runTest
@@ -213,7 +210,7 @@ describe('scanner:run', function() {
 						expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 						expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 						expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					})
+					});
 			});
 		});
 
@@ -336,15 +333,12 @@ describe('scanner:run', function() {
 					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
 					// That will leave us with just the rows.
 					const rows = ctx.stdout.trim().split('\n');
-					rows.shift();
-					rows.shift();
 
-					// There should be four rows, and those rows should contain the appropriate data.
-					expect(rows.length).to.equal(4, 'Should be four violations detected');
-					expect(rows[0]).to.contain("68", 'Violation #1 should occur at expected line');
-					expect(rows[1]).to.contain("72", 'Violation #2 should occur at expected line');
-					expect(rows[2]).to.contain("76", 'Violation #3 should occur at expected line');
-					expect(rows[3]).to.contain("80", 'Violation #4 should occur at expected line');
+					// Assert rows have the right error on the right line.
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:68") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:72") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:76") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
 				});
 
 			runTest
@@ -444,12 +438,11 @@ describe('scanner:run', function() {
 						rows.shift();
 						rows.shift();
 
-						// There should be four rows, and those rows should contain the appropriate data.
-						expect(rows.length).to.equal(4, 'Should be four violations detected');
-						expect(rows[0]).to.contain("68", 'Violation #1 should occur at expected line');
-						expect(rows[1]).to.contain("72", 'Violation #2 should occur at expected line');
-						expect(rows[2]).to.contain("76", 'Violation #3 should occur at expected line');
-						expect(rows[3]).to.contain("80", 'Violation #4 should occur at expected line');
+						// Assert rows have the right error on the right line.
+						expect(rows.find(r => r.indexOf("AccountServiceTests.cls:68") > 0)).to.contain('Apex unit tests should System.assert()');
+						expect(rows.find(r => r.indexOf("AccountServiceTests.cls:72") > 0)).to.contain('Apex unit tests should System.assert()');
+						expect(rows.find(r => r.indexOf("AccountServiceTests.cls:76") > 0)).to.contain('Apex unit tests should System.assert()');
+						expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
 					});
 			});
 
@@ -567,6 +560,29 @@ describe('scanner:run', function() {
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
 				.it('Warning logged when output file format does not match format', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
+				});
+		});
+	});
+
+	describe('MultiEngine', () => {
+		describe('Project: JS', () => {
+			before(() => {
+				process.chdir(path.join('test', 'projects'))
+			});
+			after(() => {
+				process.chdir("../..");
+			});
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run', '--target', 'js', '--format', 'json'])
+				.it('JS project triggers pmd and eslint rules', ctx => {
+					expect(ctx.stderr).to.be.empty;
+					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{")));
+					expect(results).to.be.an("array").that.has.length(2);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+					}
 				});
 		});
 	});
