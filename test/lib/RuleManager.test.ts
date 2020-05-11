@@ -154,7 +154,7 @@ describe('RuleManager', () => {
 	describe('runRulesMatchingCriteria()', () => {
 		describe('Test Case: Run against test projects', () => {
 			before(() => {
-				process.chdir(path.join('test', 'projects'));
+				process.chdir(path.join('test', 'code-fixtures'));
 			});
 			after(() => {
 				process.chdir("../..");
@@ -162,7 +162,7 @@ describe('RuleManager', () => {
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['js'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria([], ['projects/js'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
@@ -178,7 +178,7 @@ describe('RuleManager', () => {
 
 				it('TS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['ts'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria([], ['projects/ts'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
@@ -194,7 +194,7 @@ describe('RuleManager', () => {
 
 				it('App project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['app'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria([], ['projects/app'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
@@ -215,7 +215,7 @@ describe('RuleManager', () => {
 					const filters = [
 						new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['projects/app'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
@@ -233,7 +233,7 @@ describe('RuleManager', () => {
 					// Set up our filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['projects/app'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
@@ -253,7 +253,7 @@ describe('RuleManager', () => {
 					// Define our preposterous filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['projects/app'], OUTPUT_FORMAT.JSON);
 					let results = null;
 					if (typeof output !== "string") {
 						expect(false, `Invalid output: ${output}`);
