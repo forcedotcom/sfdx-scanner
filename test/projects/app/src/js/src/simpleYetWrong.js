@@ -10,6 +10,7 @@ class Dookie {
 
 	mandalorianTrip() {
 		const donk = boofTime();
+		return;
 		switch(donk) {
 			case 1:
 				break;

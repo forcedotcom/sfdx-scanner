@@ -1,15 +1,17 @@
 import {expect} from 'chai';
 import {Controller} from '../../src/ioc.config';
 import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
+import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
 import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 
 const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-const CATALOG_FIXTURE_RULE_COUNT = 10;
-const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 8;
-let ruleManager = null;
+const CATALOG_FIXTURE_RULE_COUNT = 11;
+const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 9;
+
+let ruleManager: RuleManager = null;
 
 describe('RuleManager', () => {
 	before(async () => {
@@ -115,7 +117,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(10, 'There are 10 rules targeting either Apex or JS');
+				expect(matchingRules).to.have.lengthOf(11, 'There are 11 rules targeting either Apex or JS');
 			});
 		});
 
@@ -145,6 +147,122 @@ describe('RuleManager', () => {
 
 				// There shouldn't be anything in the array.
 				expect(matchingRules).to.have.lengthOf(0, 'Should be no matching rules');
+			});
+		});
+	});
+
+	describe('runRulesMatchingCriteria()', () => {
+		describe('Test Case: Run against test projects', () => {
+			before(() => {
+				process.chdir(path.join('test', 'projects'));
+			});
+			after(() => {
+				process.chdir("../..");
+			});
+			describe('Test Case: Run without filters', () => {
+				it('JS project files', async () => {
+					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
+					const output = await ruleManager.runRulesMatchingCriteria([], ['js'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.an("array").that.has.length(2);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+					}
+				});
+
+				it('TS project files', async () => {
+					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
+					const output = await ruleManager.runRulesMatchingCriteria([], ['ts'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.an("array").that.has.length(1);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+					}
+				});
+
+				it('App project files', async () => {
+					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
+					const output = await ruleManager.runRulesMatchingCriteria([], ['app'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.an("array").that.has.length(6);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					}
+				});
+			});
+
+			describe('Test Case: Run by category', () => {
+				it('Filtering by one category runs only rules in that category', async () => {
+					// Set up our filter array.
+					const filters = [
+						new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
+
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.an("array").that.has.length(4);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					}
+				});
+
+				it('Filtering by multiple categories runs any rule in either category', async () => {
+					// Set up our filter array.
+					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
+
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.an("array").that.has.length(4);
+					for (const result of results) {
+						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					}
+				});
+			});
+
+			describe('Edge Case: No rules match criteria', () => {
+				it('When no rules match the given criteria, an empty list is returned', async () => {
+					// Define our preposterous filter array.
+					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
+
+					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON);
+					let results = null;
+					if (typeof output !== "string") {
+						expect(false, `Invalid output: ${output}`);
+					} else {
+						results = JSON.parse(output);
+					}
+
+					expect(results).to.be.empty;
+				});
 			});
 		});
 	});

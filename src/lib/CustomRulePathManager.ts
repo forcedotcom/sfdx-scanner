@@ -42,9 +42,7 @@ export class CustomRulePathManager implements RulePathManager {
 		// Read from the JSON and use it to populate the map.
 		let data = null;
 		try {
-			const customRulePathFile = CustomRulePathManager.getFilePath();
-			data = await this.fileHandler.readFile(customRulePathFile);
-			this.logger.trace(`CustomRulePath content from ${customRulePathFile}: ${data}`);
+			data = await this.readRulePathFile();
 		} catch (e) {
 			// An ENOENT error is fine, because it just means the file doesn't exist yet. We'll respond by spoofing a JSON with
 			// no information in it.
@@ -104,6 +102,7 @@ export class CustomRulePathManager implements RulePathManager {
 	private getPathsByEngine(name: string): RulePathEntry {
 		return this.pathsByLanguageByEngine.get(name);
 	}
+
 	public async getAllPaths(): Promise<string[]> {
 		// We'll combine every entry set for every language in every engine into a single array. We don't care about
 		// uniqueness right now.
@@ -179,9 +178,9 @@ export class CustomRulePathManager implements RulePathManager {
 	private async saveCustomClasspaths(): Promise<void> {
 		try {
 			const fileContent = JSON.stringify(this.convertMapToJson(), null, 4);
-			this.logger.trace(`Writing file content to CustomRulePath file [${CustomRulePathManager.getFilePath()}]: ${fileContent}`);
+			this.logger.trace(`Writing file content to CustomRulePath file [${this.getRulePathFile()}]: ${fileContent}`);
 			await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
-			await this.fileHandler.writeFile(CustomRulePathManager.getFilePath(), fileContent);
+			await this.fileHandler.writeFile(this.getRulePathFile(), fileContent);
 		} catch (e) {
 			// If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
 			// so it's at least obvious what failed, if not how or why.
@@ -219,14 +218,21 @@ export class CustomRulePathManager implements RulePathManager {
 		return json;
 	}
 
-	private static getFileName(): string {
+	private getFileName(): string {
 		// We must allow for env variables to override the default catalog name. This must be recomputed in case those variables
 		// have different values in different test runs.
 		return process.env.CUSTOM_PATHS_FILE || CUSTOM_PATHS_FILE;
 	}
 
-	private static getFilePath(): string {
+	private getRulePathFile(): string {
 		return path.join(SFDX_SCANNER_PATH, this.getFileName());
+	}
+
+	public async readRulePathFile(): Promise<string> {
+		const rulePathFile = this.getRulePathFile();
+		const data = await this.fileHandler.readFile(rulePathFile);
+		this.logger.trace(`CustomRulePath content from ${rulePathFile}: ${data}`);
+		return data;
 	}
 
 	private async expandPaths(paths: string[]): Promise<string[]> {

@@ -85,7 +85,7 @@ export default class Run extends ScannerCommand {
 			char: 'f',
 			description: messages.getMessage('flags.formatDescription'),
 			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE]
+			options: [OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE]
 		}),
 		outfile: flags.string({
 			char: 'o',
@@ -145,6 +145,8 @@ export default class Run extends ScannerCommand {
 		} else {
 			const fileExtension = outfile.slice(lastPeriod + 1);
 			switch (fileExtension) {
+				case OUTPUT_FORMAT.JSON:
+					return OUTPUT_FORMAT.JSON;
 				case OUTPUT_FORMAT.CSV:
 					return OUTPUT_FORMAT.CSV;
 				case OUTPUT_FORMAT.XML:
@@ -174,8 +176,11 @@ export default class Run extends ScannerCommand {
 			// Default properly, again, as we did earlier.
 			const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
 			// If we're just supposed to dump the output to the console, what precisely we do depends on the format.
-			if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
-				// The CSV is just one giant string that we can dump directly to the console.
+			if (format === OUTPUT_FORMAT.JSON && typeof output === 'string') {
+				// JSON is just one giant string that we can dump directly to the console.
+				this.ux.log(output);
+			} else if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
+				// Also just one giant string that we can dump directly to the console.
 				this.ux.log(output);
 			} else if ((format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) && typeof output === 'string') {
 				// For XML, we can just dump it to the console.
