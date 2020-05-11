@@ -73,7 +73,7 @@ export class DefaultRuleManager implements RuleManager {
 			this.logger.trace(`Recombining results into requested format ${format}`);
 			return RuleResultRecombinator.recombineAndReformatResults(results, format);
 		} catch (e) {
-			throw new SfdxError(e.stack || e);
+			throw new SfdxError(e.message || e);
 		}
 	}
 

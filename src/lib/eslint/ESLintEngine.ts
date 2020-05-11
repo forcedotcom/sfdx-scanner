@@ -196,6 +196,8 @@ export class ESLintEngine implements RuleEngine {
 			for (const target of targets) {
 				const cwd = target.isDirectory ? path.resolve(target.target) : process.cwd();
 				const config = {cwd};
+
+				// TYPESCRIPT HANDLING: Enable typescript by registering its project config file, if found.
 				const tsconfigPath = await this.findTSConfig(target.target);
 				if (tsconfigPath) {
 					events.push({
@@ -211,6 +213,7 @@ export class ESLintEngine implements RuleEngine {
 				const filteredRules = {};
 				let ruleCount = 0;
 				for (const rule of rules) {
+					// TYPESCRIPT HANDLING: Include typescript rules only if we are running with a typescript project.
 					if (tsconfigPath || !rule.name.startsWith(TYPESCRIPT_RULE_PREFIX)) {
 						filteredRules[rule.name] = "error";
 						ruleCount++;
@@ -220,7 +223,10 @@ export class ESLintEngine implements RuleEngine {
 				this.logger.trace(`About to run eslint engine; targets: ${target.paths.length}, rules: ${ruleCount}`);
 
 				const cli = new CLIEngine(config);
-				const report = cli.executeOnFiles(target.paths);
+
+				// TYPESCRIPT HANDLING: Strip out any typescript files if we are not running with a typescript project.
+				const targetPaths = tsconfigPath ? target.paths : target.paths.filter(p => !p.endsWith(".ts"));
+				const report = cli.executeOnFiles(targetPaths);
 				this.addRuleResultsFromReport(results, report, cli.getRules());
 			}
 

@@ -177,10 +177,10 @@ export default class Run extends ScannerCommand {
 			const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
 			// If we're just supposed to dump the output to the console, what precisely we do depends on the format.
 			if (format === OUTPUT_FORMAT.JSON && typeof output === 'string') {
-				// JSON is also just one giant string that we can dump directly to the console.
+				// JSON is just one giant string that we can dump directly to the console.
 				this.ux.log(output);
 			} else if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
-				// The CSV is just one giant string that we can dump directly to the console.
+				// Also just one giant string that we can dump directly to the console.
 				this.ux.log(output);
 			} else if ((format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) && typeof output === 'string') {
 				// For XML, we can just dump it to the console.

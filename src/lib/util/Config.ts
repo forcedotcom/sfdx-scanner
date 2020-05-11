@@ -22,14 +22,14 @@ const DEFAULT_CONFIG: ConfigContent = {
 			name: "pmd",
 			targetPatterns: [
 				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
-				"!node_modules/**","!**/*-meta.xml"
+				"!**/node_modules/**","!**/*-meta.xml"
 			]
 		},
 		{
 			name: "eslint",
 			targetPatterns: [
 				"**/*.js","**/*.ts",
-				"!node_modules/**",
+				"!**/node_modules/**",
 			]
 		}
 	]
