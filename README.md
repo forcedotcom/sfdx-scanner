@@ -6,7 +6,6 @@ Static code scanner that applies quality and security rules to Apex code, and pr
 [![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/master/package.json)
 
 <!-- toc -->
-* [Debugging your plugin](#debugging-your-plugin)
 * [sfdx-scanner](#sfdx-scanner)
 <!-- tocstop -->
 <!-- install -->
