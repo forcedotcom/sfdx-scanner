@@ -34,6 +34,7 @@ export class PmdEngine implements RuleEngine {
 		return PmdEngine.NAME;
 	}
 
+	/* eslint-disable @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
 		const engineConfig = this.config.getEngineConfig(PmdEngine.NAME);
 		return Promise.resolve(engineConfig.targetPatterns);
