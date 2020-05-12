@@ -1,21 +1,12 @@
-import {Logger, Messages, LoggerLevel} from '@salesforce/core';
+import {Logger, LoggerLevel, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
+import {RuleEvent} from '../../types';
 import {uxEvents} from '../ScannerEvents';
 
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 const genericMessageKey = 'error.external.genericErrorMessage';
-
-export type PmdCatalogEvent = {
-	messageKey: string;
-	args: string[];
-	type: string;
-	internalLog: string;
-	handler: string;
-	verbose: boolean;
-	time: number;
-};
 
 /**
  * Helps with processing output from PmdCatalog java module and converting messages into usable events
@@ -24,12 +15,19 @@ export class OutputProcessor extends AsyncCreatable {
 
 	private logger!: Logger;
 	private messageLogger!: Logger;
+	private initialized: boolean;
 
 	protected async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
 		this.logger = await Logger.child('OutputProcessor');
 		this.messageLogger = await Logger.child('MessageLog');
 		// this.logger.setLevel(LoggerLevel.TRACE);
 		this.messageLogger.setLevel(LoggerLevel.TRACE);
+
+		this.initialized = true;
 	}
 
 	// We want to find any events that were dumped into stdout or stderr and turn them back into events that can be thrown.
@@ -42,14 +40,14 @@ export class OutputProcessor extends AsyncCreatable {
 			return;
 		}
 
-		const outEvents: PmdCatalogEvent[] = this.getEventsFromString(out);
+		const outEvents: RuleEvent[] = this.getEventsFromString(out);
 		this.logger.trace(`Total count of events found: ${outEvents.length}`);
 
 		this.emitEvents(outEvents);
 	}
 
 	// TODO: consider moving all message creation logic to a separate place and making this method private
-	public emitEvents(outEvents: PmdCatalogEvent[]): void {
+	public emitEvents(outEvents: RuleEvent[]): void {
 		this.logger.trace('About to order and emit');
 		// If list is empty, we can just be done now.
 		if (outEvents.length == 0) {
@@ -75,8 +73,8 @@ export class OutputProcessor extends AsyncCreatable {
 		uxEvents.emit(eventType, messages.getMessage(messageKey, args));
 	}
 
-	private getEventsFromString(str: string): PmdCatalogEvent[] {
-		const events: PmdCatalogEvent[] = [];
+	private getEventsFromString(str: string): RuleEvent[] {
+		const events: RuleEvent[] = [];
 
 		const regex = /SFDX-START(.*)SFDX-END/g;
 		const headerLength = 'SFDX-START'.length;
@@ -93,7 +91,7 @@ export class OutputProcessor extends AsyncCreatable {
 		return events;
 	}
 
-	private logEvent(event: PmdCatalogEvent): void {
+	private logEvent(event: RuleEvent): void {
 		const message = `Event: messageKey = ${event.messageKey}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, internalLog = ${event.internalLog}`;
 		this.messageLogger.info(message);
 	}

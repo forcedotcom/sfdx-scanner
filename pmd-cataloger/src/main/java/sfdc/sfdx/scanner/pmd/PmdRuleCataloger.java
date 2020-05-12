@@ -96,7 +96,7 @@ class PmdRuleCataloger {
 			List<String> filePaths = rulePathEntries.get(language);
 			filePaths.forEach(filePath -> {
 				List<String> xmlFiles = xmlFileFinder.findXmlFilesInPath(filePath);
-				languageXmlFileMapping.addPathsForLanguage(xmlFiles, language);
+				languageXmlFileMapping.addPathsForLanguage(xmlFiles, language, filePath);
 			});
 		});
 
@@ -115,7 +115,7 @@ class PmdRuleCataloger {
 
 		// STEP 2: Use the root element to derive a Category representation, and put it in the master list.
 		String categoryName = root.getAttribute("name");
-		PmdCatalogCategory category = new PmdCatalogCategory(categoryName, path);
+		PmdCatalogCategory category = new PmdCatalogCategory(categoryName, path, languageXmlFileMapping.getSourceJarForCategory(path));
 		this.masterCategoryList.add(category);
 
 		// STEP 3: Get the "rule"-type nodes and use them to create Rule representations, which we should map to the target

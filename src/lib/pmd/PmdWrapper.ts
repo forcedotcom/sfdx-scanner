@@ -26,9 +26,16 @@ export default class PmdWrapper extends PmdSupport {
 	reportFormat: Format;
 	reportFile: string;
 	logger: Logger; // TODO: Add relevant trace log lines
+	private initialized: boolean;
 
 	protected async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
 		this.logger = await Logger.child('PmdWrapper');
+
+		this.initialized = true;
 	}
 
 	public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<[boolean, string]> {
@@ -61,12 +68,15 @@ export default class PmdWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const classpath = await super.buildClasspath();
-		let args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-rulesets', this.rules, '-dir', this.path,
+		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-dir', this.path,
 			'-format', this.reportFormat];
+		if (this.rules.length > 0) {
+			args.push('-rulesets', this.rules);
+		}
 
 		// Then add anything else that's dynamically included based on other input.
 		if (this.reportFile) {
-			args = [...args, '-reportfile', this.reportFile];
+			args.push('-reportfile', this.reportFile);
 		}
 
 		this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${args}"`);

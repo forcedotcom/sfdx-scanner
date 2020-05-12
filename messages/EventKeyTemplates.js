@@ -1,7 +1,8 @@
 module.exports = {
 	 "info": {
-		"pmdJarImplicitlyRun": "Implicitly running PMD Category '%s' defined in '%s'.",
-		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s"
+		"categoryImplicitlyRun": "Implicitly including %s rules from category '%s'",
+		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s",
+		"usingEngineConfigFile": "Using engine configuration file at %s"
 	},
 	"warning": {
 		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
