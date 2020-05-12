@@ -1,13 +1,8 @@
 
 Static code scanner that applies quality and security rules to Apex code, and provides feedback.
 
-[![Version](https://img.shields.io/npm/v/scanner.svg)](https://npmjs.org/package/scanner)
 [![CircleCI](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master.svg?style=shield)](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master)
-[![Appveyor CI](https://ci.appveyor.com/api/projects/status/github/forcedotcom/sfdx-scanner?branch=master&svg=true)](https://ci.appveyor.com/project/heroku/sfdx-scanner/branch/master)
 [![Codecov](https://codecov.io/gh/forcedotcom/sfdx-scanner/branch/master/graph/badge.svg)](https://codecov.io/gh/forcedotcom/sfdx-scanner)
-[![Greenkeeper](https://badges.greenkeeper.io/forcedotcom/sfdx-scanner.svg)](https://greenkeeper.io/)
-[![Known Vulnerabilities](https://snyk.io/test/github/forcedotcom/sfdx-scanner/badge.svg)](https://snyk.io/test/github/forcedotcom/sfdx-scanner)
-[![Downloads/week](https://img.shields.io/npm/dw/scanner.svg)](https://npmjs.org/package/scanner)
 [![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/master/package.json)
 
 <!-- toc -->
@@ -17,15 +12,9 @@ Static code scanner that applies quality and security rules to Apex code, and pr
 <!-- install -->
 <!-- usage -->
 ```sh-session
-$ npm install -g scanner
-$ sfdx COMMAND
-running command...
-$ sfdx (-v|--version|version)
-scanner/0.0.0 darwin-x64 node-v12.16.1
-$ sfdx --help [COMMAND]
+$ sfdx plugins:install @salesforce/sfdx-scanner
 USAGE
-  $ sfdx COMMAND
-...
+$ sfdx scanner
 ```
 <!-- usagestop -->
 <!-- commands -->
