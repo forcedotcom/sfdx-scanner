@@ -114,15 +114,19 @@ export default class Run extends ScannerCommand {
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
-		const targetPaths = this.flags.target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
+		const target = this.flags.target || [];
+		if (this.args.file) {
+			target.push(this.args.file);
+		}
+		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
 		this.processOutput(output);
 		return {};
 	}
 
 	private validateFlags(): void {
-		// --target and --org are mutually exclusive, but they can't both be null.
-		if (!this.flags.target && !this.flags.org) {
+		// file, --target and --org are mutually exclusive, but they can't all be null.
+		if (!this.args.file && !this.flags.target && !this.flags.org) {
 			throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
 		}
 

@@ -38,7 +38,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
@@ -61,7 +61,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
@@ -75,7 +75,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls') + ',' + path.join('test', 'code-samples', 'apex', 'InstallProcessorTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls') + ',' + path.join('test', 'code-fixtures', 'apex', 'InstallProcessorTests.cls'),
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
@@ -85,8 +85,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-samples\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-samples\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -113,7 +113,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex'),
+						'--target', path.join('test', 'code-fixtures', 'apex'),
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
@@ -124,8 +124,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-samples\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-samples\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -152,7 +152,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit,Style',
 						'--format', 'xml'
 					])
@@ -184,7 +184,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit',
 						'--outfile', 'testout.xml'
 					])
@@ -219,7 +219,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'csv'
 				])
@@ -248,7 +248,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--outfile', 'testout.csv'
 				])
@@ -290,7 +290,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'csv'
 				])
@@ -302,7 +302,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--outfile', 'testout.csv'
 				])
@@ -325,7 +325,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'table'
 				])
@@ -345,7 +345,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
-					'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'table'
 				])
@@ -361,7 +361,7 @@ describe('scanner:run', function () {
 					.stderr()
 					.command(['scanner:run',
 						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES. But the tests sidestep that, somehow.
-						'--target', 'test/code-samples/apex/*Tests.cls',
+						'--target', 'test/code-fixtures/apex/*Tests.cls',
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
@@ -372,8 +372,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-samples\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-samples\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -396,7 +396,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Using ~/ shorthand in target', () => {
-				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-samples', 'apex', 'AccountServiceTests.cls'));
+				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'));
 				runTest
 					.stdout()
 					.stderr()
@@ -428,7 +428,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit'
 					])
 					.it('When no format is specified, we default to a TABLE', ctx => {
@@ -451,7 +451,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--format', 'xml'
 					])
 					.it('When no rules are explicitly specified, all rules are run', ctx => {
@@ -468,7 +468,7 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
-						'--target', path.join('test', 'code-samples', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--format', 'xml',
 						'--verbose'
 					])
@@ -483,8 +483,8 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Evaluating rules against invalid code', () => {
-				const pathToBadSyntax = path.join('test', 'code-samples', 'invalid-apex', 'BadSyntax1.cls');
-				const pathToGoodSyntax = path.join('test', 'code-samples', 'apex', 'AccountServiceTests.cls');
+				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
+				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls');
 				runTest
 					.stdout()
 					.stderr()
@@ -567,10 +567,10 @@ describe('scanner:run', function () {
 	describe('MultiEngine', () => {
 		describe('Project: JS', () => {
 			before(() => {
-				process.chdir(path.join('test', 'projects'))
+				process.chdir(path.join('test', 'code-fixtures', 'projects'))
 			});
 			after(() => {
-				process.chdir("../..");
+				process.chdir("../../..");
 			});
 			runTest
 				.stdout()
