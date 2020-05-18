@@ -22,14 +22,14 @@ const DEFAULT_CONFIG: ConfigContent = {
 			name: "pmd",
 			targetPatterns: [
 				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
-				"!node_modules/**","!**/*-meta.xml"
+				"!**/node_modules/**","!**/*-meta.xml"
 			]
 		},
 		{
 			name: "eslint",
 			targetPatterns: [
 				"**/*.js","**/*.ts",
-				"!node_modules/**",
+				"!**/node_modules/**",
 			]
 		}
 	]
@@ -92,20 +92,12 @@ export class Config {
 		}
 		const fileContent = await this.fileHandler.readFile(CONFIG_FILE_PATH);
 		this.logger.trace(`Config content to be set as ${fileContent}`);
-		try {
-			this.configContent = JSON.parse(fileContent);
+		this.configContent = JSON.parse(fileContent);
 
-			// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
-			if (this.configContent['java-home']) {
-				// Prior version.  Migrate.
-				await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
-			}
-		} catch (e) {
-			// Should never happen, only in odd cases.
-			const oldFile = await this.uniqueFilenameFor(CONFIG_FILE_PATH + '.bak');
-			await this.fileHandler.writeFile(oldFile, fileContent);
-			await this.createNewConfigFile(DEFAULT_CONFIG);
-			this.logger.error(`Problem loading existing configuration file.  Backed up original config to ${oldFile} and created ${CONFIG_FILE_PATH} fresh.`)
+		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
+		if (this.configContent['java-home']) {
+			// Prior version.  Migrate.
+			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
 		}
 	}
 
@@ -114,17 +106,5 @@ export class Config {
 		await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
 		await this.fileHandler.writeFile(CONFIG_FILE_PATH, JSON.stringify(configContent, null, 2));
 		this.configContent = configContent;
-	}
-
-	private async uniqueFilenameFor(filename: string): Promise<string> {
-		let ext = '';
-		for(let i = 1; i < 100; i++) {
-			if(await this.fileHandler.exists(filename + ext)) {
-				ext = String(i);
-			} else {
-				return filename + ext;
-			}
-		}
-		throw new Error(`Something is very wrong.  Please clear out your backups of ${filename} and try again`);
 	}
 }

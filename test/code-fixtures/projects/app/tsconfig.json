@@ -7,6 +7,9 @@
 		"emitDecoratorMetadata": true
 	},
 	"include": [
-		"./src/**/*","./force-app/**/*"
+		"./src/**/*.js",
+		"./src/**/*.ts",
+		"./force-app/**/*.js",
+		"./force-app/**/*.ts"
 	]
 }

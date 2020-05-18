@@ -1,13 +1,17 @@
-function boofTime(): number {
+function boofTime() {
 	return new Date().getTime() % 3;
 }
 
 class Dookie {
-	private bobafettish = "sarlacc";
-	bobafart = "disappointing rocket poop";
-	public mandalorianTrip(): void {
+	constructor() {
+		this.bobafettish = "sarlacc";
+		this.bobafart = "disappointing rocket poop";
+	}
+
+	mandalorianTrip() {
 		const donk = boofTime();
-		switch (donk) {
+		return;
+		switch(donk) {
 			case 1:
 				break;
 			case 2:
@@ -16,7 +20,6 @@ class Dookie {
 				break;
 		}
 	}
-
 }
 
 new Dookie().mandalorianTrip();

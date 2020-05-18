@@ -18,7 +18,7 @@ export const Services = {
 	RulePathManager: "RulePathManager"
 };
 
-function registerAll() {
+function registerAll(): void {
 	container.registerSingleton(Services.Config, Config);
 	container.registerSingleton(Services.RuleManager, DefaultRuleManager);
 	container.registerSingleton(Services.RuleEngine, PmdEngine);
@@ -29,7 +29,7 @@ function registerAll() {
 
 export const Controller = {
 	container,
-	reset: () => {
+	reset: (): void => {
 		container.reset();
 		registerAll();
 	},

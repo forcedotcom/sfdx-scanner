@@ -1,7 +1,8 @@
 import {Logger, SfdxError} from '@salesforce/core';
+import * as path from 'path';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../ioc.config';
-import {Catalog, Rule, RuleGroup, RuleResult} from '../../types';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
@@ -33,6 +34,12 @@ export class PmdEngine implements RuleEngine {
 		return PmdEngine.NAME;
 	}
 
+	/* eslint-disable @typescript-eslint/no-unused-vars */
+	getTargetPatterns(path?: string): Promise<string[]> {
+		const engineConfig = this.config.getEngineConfig(PmdEngine.NAME);
+		return Promise.resolve(engineConfig.targetPatterns);
+	}
+
 	public matchPath(path: string): boolean {
 		// TODO implement this for realz
 		return path != null;
@@ -46,7 +53,6 @@ export class PmdEngine implements RuleEngine {
 
 		this.config = await Controller.getConfig();
 		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
-
 		this.initialized = true;
 	}
 
@@ -63,19 +69,30 @@ export class PmdEngine implements RuleEngine {
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
 	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
 	 */
-	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: string[]): Promise<RuleResult[]> {
-		this.logger.trace(`About to run PMD rules. Targets: ${targets.length}, rule groups: ${ruleGroups.length}`);
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[]): Promise<RuleResult[]> {
 		if (ruleGroups.length === 0) {
 			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
 			return [];
 		}
 		try {
-			// TODO: Weird translation to next layer. target=path and path=rule path. Consider renaming
-			const [violationsFound, stdout] = await PmdWrapper.execute(targets.join(','), ruleGroups.map(np => np.paths).join(','));
+			const targetPaths: string[] = [];
+			for (const target of targets) {
+				if (target.isDirectory) {
+					targetPaths.push(...target.paths.map(p => path.join(target.target, p)));
+				} else {
+					targetPaths.push(...target.paths);
+				}
+			}
+			if (targetPaths.length === 0) {
+				this.logger.trace('No matching pmd target files found. Nothing to execute.');
+				return [];
+			}
+			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, rule groups: ${ruleGroups.length}`);
+			const [violationsFound, stdout] = await PmdWrapper.execute(targetPaths.join(','), ruleGroups.map(np => np.paths).join(','));
 			if (violationsFound) {
 				this.logger.trace('Found rule violations.');
-				// If we found any violations, they'll be in an XML document somewhere in stdout, which we'll need to find and process.
 
+				// Violations are in an XML document somewhere in stdout, which we'll need to find and process.
 				const xmlStart = stdout.indexOf('<?xml');
 				const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
 				return this.xmlToRuleResults(stdout.slice(xmlStart, xmlEnd));

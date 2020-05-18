@@ -1,14 +1,16 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {RuleResult} from '../types';
-import {PmdEngine} from './pmd/PmdEngine';
 import {OUTPUT_FORMAT} from './RuleManager';
+import * as wrap from 'word-wrap';
 
 export class RuleResultRecombinator {
 
 	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): string | { columns; rows } {
 		// We need to change the results we were given into the desired final format.
 		switch (format) {
+			case OUTPUT_FORMAT.JSON:
+				return this.constructJson(results);
 			case OUTPUT_FORMAT.CSV:
 				return this.constructCsv(results);
 			case OUTPUT_FORMAT.XML:
@@ -32,15 +34,17 @@ export class RuleResultRecombinator {
 
 		let problemCount = 0;
 
-		// Iterate through the results to create an XML string format:
-		// <results...>
-		//   <result...>
-		//     <violation severity="1" line="4" column="7" ...>Message</violation>
-		//     <violation severity="2" line="5" column="8" ...>Message</violation>
-		//     <violation severity="3" line="6" column="9" ...>Message</violation>
-		//     ...
-		//   </result>
-		// </results>
+		/*
+		 Iterate through the results to create an XML string format:
+		 <results...>
+		   <result...>
+		     <violation severity="1" line="4" column="7" ...>Message</violation>
+		     <violation severity="2" line="5" column="8" ...>Message</violation>
+		     <violation severity="3" line="6" column="9" ...>Message</violation>
+		     ...
+		   </result>
+		 </results>
+		*/
 		for (const result of results) {
 			const from = process.cwd();
 			const fileName = path.relative(from, result.fileName);
@@ -48,7 +52,7 @@ export class RuleResultRecombinator {
 			for (const v of result.violations) {
 				problemCount++;
 				violations += `
-            <violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${v.ruleName}" category="${v.category}">
+            <violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${v.ruleName}" category="${v.category}" url="${v.url}">
 ${v.message.trim()}
             </violation>`;
 			}
@@ -84,6 +88,7 @@ Category: ${v.category} - ${v.ruleName}
 File: ${fileName}
 Line: ${v.line}
 Column: ${v.column}
+URL: ${v.url}
             </failure>`;
 			}
 			junitXml += `
@@ -105,7 +110,7 @@ Column: ${v.column}
 			return '';
 		}
 
-		const columns = ["Location", "Description", "Rule", "Category", "Severity", "Line", "Column", "Engine"];
+		const columns = ["Location", "Description", "Category", "URL"];
 		const rows = [];
 		for (const result of results) {
 			const fileName = result.fileName;
@@ -114,8 +119,9 @@ Column: ${v.column}
 				const relativeFile = path.relative(process.cwd(), fileName);
 				rows.push({
 					Location: `${relativeFile}:${v.line}`,
-					Description: msg,
 					Rule: v.ruleName,
+					Description: wrap(msg),
+					URL: v.url,
 					Category: v.category,
 					Severity: v.severity,
 					Line: v.line,
@@ -128,16 +134,18 @@ Column: ${v.column}
 		return {columns, rows};
 	}
 
+	private static constructJson(results: RuleResult[]): string {
+		return JSON.stringify(results.filter(r => r.violations.length > 0));
+	}
+
 	private static constructCsv(results: RuleResult[]): string {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
 
-		const engine = PmdEngine.NAME;
-
 		// Gradually build our CSV, starting with these columns.
-		let csvString = '"Problem","File","Severity","Line","Column","Description","Rule","Category","Engine"\n';
+		let csvString = '"Problem","File","Severity","Line","Column","Rule","Description","URL","Category","Engine"\n';
 		let problemCount = 0;
 
 		for (const result of results) {
@@ -146,7 +154,7 @@ Column: ${v.column}
 				// Since we are creating CSVs, make sure we escape any commas in our violation messages.
 				// Just replace with semi-colon.
 				const msg = v.message.trim().replace(",", ";");
-				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.category, engine];
+				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.url, v.category, result.engine];
 				csvString += '"' + row.join('","') + '"\n';
 			}
 		}

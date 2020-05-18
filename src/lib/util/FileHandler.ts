@@ -6,7 +6,6 @@ import {Stats} from 'fs';
  * Mock this class to override file change behavior from unit tests.
  */
 export class FileHandler {
-
 	exists(filename: string): Promise<boolean> {
 		return new Promise<boolean>((resolve) => {
 			fs.access(filename, fs.constants.F_OK, (err) => {
@@ -25,6 +24,10 @@ export class FileHandler {
 				}
 			}));
 		});
+	}
+
+	async isDir(filename: string): Promise<boolean> {
+		return await this.exists(filename) && (await this.stats(filename)).isDirectory();
 	}
 
 	readDir(filename: string): Promise<string[]> {
