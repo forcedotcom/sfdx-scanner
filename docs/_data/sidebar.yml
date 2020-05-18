@@ -1,0 +1,37 @@
+- title:
+    en: Get Started
+  baseUrl: /getting-started/
+  children:
+    - title:
+        en: Prerequisites
+      url: /getting-started/prerequisites
+    - title:
+        en: Installation
+      url: /getting-started/install
+- title:
+    en: How to use the Plugin
+  baseUrl: /scanner-commands/
+  children:
+    - title:
+        en: Commands
+      url: /scanner-commands/commands
+- title:
+    en: Custom Rules
+  baseUrl: /custom-rules/
+  children:
+    - title:
+        en: Manage Custom Rules
+      url: /custom-rules/manage
+- title:
+    en: Architecture
+  baseUrl: /architecture/
+  children:
+    - title:
+        en: Design
+      url: /architecture/design
+- title:
+    en: FAQ
+  url: /faq
+- title:
+    en: Troubleshooting
+  url: /troubleshooting
