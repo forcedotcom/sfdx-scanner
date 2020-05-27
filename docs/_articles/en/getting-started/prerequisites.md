@@ -3,7 +3,9 @@ title: Prerequisites
 lang: en
 ---
 
-Before you get started, install the required software on your computer.
+## Prerequisites
+
+Before you get started, install the following required software on your computer.
 
 ## Java Platform, Standard Edition Development Kit
 

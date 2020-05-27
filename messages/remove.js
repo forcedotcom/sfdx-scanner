@@ -1,5 +1,5 @@
 module.exports = {
-	"commandDescription": "Removes custom rules from the registry of available rules.",
+	"commandDescription": "removes custom rules from the registry of available rules",
 	"commandDescriptionLong": `Removes custom rules from the registry of available rules. Use the --path parameter to
 specify one or more paths to remove, or omit it to receive a list of all valid custom paths.`,
 	"flags": {

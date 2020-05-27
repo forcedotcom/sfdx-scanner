@@ -68,10 +68,10 @@
 		"bin": "sfdx",
 		"topics": {
 			"scanner": {
-				"description": "Scan code to preemptively detect code quality issues and security vulnerabilities.",
+				"description": "scan code to detect code quality issues and security vulnerabilities",
 				"subtopics": {
 					"rule": {
-						"description": "View/add rules that are used to scan code."
+						"description": "view or add rules to scan code"
 					}
 				}
 			},
