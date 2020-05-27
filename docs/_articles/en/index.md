@@ -4,7 +4,13 @@ permalink: /
 lang: en
 ---
 
-This a new Sfdx plugin to scan your code for security violations
+## Scanner Plugin
+
+The Salesforce SFDX Scanner Plugin is a unified tool for static analysis of source code, in multiple languages (including Apex) with a consistent command line interface and report output. At the time of this beta program, we support PMD rule engine (<https://pmd.github.io/>). We are adding support for more engines going forward.
+
+The SFDX Scanner Plugin creates "Rule Violations" when the scanner identifies issues. Developers can use this information as a feedback to fix their code. 
+
+This Plugin can be integrated into the CI/CD to enforce the rules and expect high quality code.
 
 ## Additional Resources
 

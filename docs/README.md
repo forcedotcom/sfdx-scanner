@@ -49,7 +49,7 @@ For links the path is relative to the base path (i.e. `/tools/vscode/`). The url
 [My Link](./en/getting-started/orgbrowser)
 ```
 
-## Localization
+## Localization (NOT Supported Yet, Ignore this section)
 
 The site is localized in english and japanese. All articles must specify their language (`en` or `ja`) in the front matter:
 
