@@ -11,6 +11,7 @@ import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import globby = require('globby');
 import picomatch = require('picomatch');
+import path = require('path');
 
 @injectable()
 export class DefaultRuleManager implements RuleManager {
@@ -101,7 +102,7 @@ export class DefaultRuleManager implements RuleManager {
 				const matchingTargets = await globby(target);
 				const ruleTarget = {
 					target,
-					paths: matchingTargets.filter(t => isInclusiveMatch(t) && isExclusiveMatch(t))
+					paths: matchingTargets.filter(t => isInclusiveMatch(path.resolve(t)) && isExclusiveMatch(path.resolve(t)))
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
@@ -123,7 +124,7 @@ export class DefaultRuleManager implements RuleManager {
 					} else {
 						// The target is a simple file.  Validate it against the engine's own patterns.  First test
 						// any inclusive patterns, then with any exclusive patterns.
-						if (isInclusiveMatch(target) && isExclusiveMatch(target)) {
+						if (isInclusiveMatch(path.resolve(target)) && isExclusiveMatch(path.resolve(target))) {
 							ruleTargets.push({target, paths: [target]});
 						}
 					}
