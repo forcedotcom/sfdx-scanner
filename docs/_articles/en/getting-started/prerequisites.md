@@ -11,7 +11,7 @@ Before you get started, install the following required software on your computer
 
 Some features in Salesforce Extensions for VS Code depend upon the Java Platform, Standard Edition Development Kit (JDK). You need to have either version 8 or version 11 of the JDK installed.
 
-If you don’t already have version 11 or 8 of the JDK installed, see the [instructions on how to install and configure Java](./en/getting-started/java-setup).
+If you don’t already have version 11 or 8 of the JDK installed, see the _[instructions on how to install and configure Java](./en/getting-started/java-setup)_.
 
 ## Salesforce CLI
 
