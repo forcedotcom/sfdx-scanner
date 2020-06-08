@@ -44,3 +44,4 @@ $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
 ```
 
 ## Demo
+![Describe Example](./assets/images/add.gif) 

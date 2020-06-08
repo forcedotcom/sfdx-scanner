@@ -41,3 +41,4 @@ $ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
 ```
 
 ## Demo
+![Describe Example](./assets/images/list.gif) 
