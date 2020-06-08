@@ -39,11 +39,7 @@
       url: /custom-rules/manage
 - title:
     en: Architecture
-  baseUrl: /architecture/
-  children:
-    - title:
-        en: Design
-      url: /architecture/design
+  url: /architecture
 - title:
     en: FAQ
   url: /faq

@@ -51,3 +51,4 @@ Windows example:
 ```
 
 ## Demo
+![Run Example](./assets/images/run.gif) 
