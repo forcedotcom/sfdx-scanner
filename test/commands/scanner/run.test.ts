@@ -61,6 +61,29 @@ describe('scanner:run', function () {
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
+						'--target', path.join('.', 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+						'--ruleset', 'ApexUnit',
+						'--format', 'xml'
+					])
+					.it('Target path may be relative or absolute', ctx => {
+						// We'll split the output by the <violation> tag, so we can get individual violations.
+						const violations = ctx.stdout.split('<violation');
+						// The first list item is going to be the header, so we need to pull that off.
+						violations.shift();
+						// There should be four violations.
+						expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+						// expected order.
+						expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					});
+
+				runTest
+					.stdout()
+					.stderr()
+					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
