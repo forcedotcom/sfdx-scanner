@@ -6,7 +6,7 @@ lang: en
 ## sfdx scanner:run
 Evaluate a selection of rules against a codebase. Scan codebase with all rules by default or with a chosen set of rules if using rulename/category/ruleset filters.
 
-You can choose the format of output and decide between printing the results directly or as contents of a file that you provide with --outfile flag.
+You can choose the format of the output and decide between printing the results directly or as contents of a file that you provide with --outfile flag.
 
 ## Usage
 
@@ -28,18 +28,18 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|ju
   
 ## Example
 
-Invoking without specifying any rules causes all rules to be run. Following evaluates all rules against somefile.js.
+Invoking without specifying any rules causes all rules to be run. The following evaluates all rules against somefile.js.
 
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js"
 ```
 
-Specifying multiple categories or rulesets is treated as a logical OR. Following example evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
+Specifying multiple categories or rulesets is treated as a logical OR. The following example evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
 ```       
 
-Wrap globs in quotes.  Following example evaluates rules against all .js files below the current directory, except for IgnoreMe.js.
+Wrap globs in quotes.  The following example evaluates rules against all .js files below the current directory, except for IgnoreMe.js.
 
 Unix example:
 ```bash    
@@ -52,3 +52,5 @@ Windows example:
 
 ## Demo
 ![Run Example](./assets/images/run.gif) 
+
+

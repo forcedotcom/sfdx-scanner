@@ -6,11 +6,11 @@ lang: en
 
 ## Scanner Plugin
 
-The Salesforce SFDX Scanner Plugin is a unified tool for static analysis of source code, in multiple languages (including Apex) with a consistent command line interface and report output. At the time of this beta program, we support [PMD rule engine](https://pmd.github.io/) and [ESLint](https://eslint.org/). We may be adding support for more engines going forward.
+The Salesforce SFDX Scanner Plugin is a unified tool for static analysis of source code, in multiple languages (including Apex) with a consistent command-line interface and report output. At the time of this beta program, we support [PMD rule engine](https://pmd.github.io/) and [ESLint](https://eslint.org/). We may be adding support for more engines going forward.
 
-The SFDX Scanner Plugin creates "Rule Violations" when the scanner identifies issues. Developers can use this information as a feedback to fix their code. 
+The SFDX Scanner Plugin creates "Rule Violations" when the scanner identifies issues. Developers can use this information as feedback to fix their code. 
 
-This Plugin can be integrated into the CI/CD to enforce the rules and expect high quality code.
+This Plugin can be integrated into the CI/CD to enforce the rules and expect high-quality code.
 
 ## Additional Resources
 
@@ -25,3 +25,5 @@ This Plugin can be integrated into the CI/CD to enforce the rules and expect hig
 ## Bugs and Feedback
 
 To report issues with Salesforce Scanner, open a [bug on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Bug_report.md). If you would like to suggest a feature, create a [feature request on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Feature_request.md).
+
+
