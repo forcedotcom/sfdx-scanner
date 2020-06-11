@@ -288,7 +288,10 @@ export class ESLintEngine implements RuleEngine {
 
 	private addRuleResultsFromReport(results: RuleResult[], report: ESReport, ruleMap: Map<string, ESRule>): void {
 		for (const r of report.results) {
-			results.push(this.toRuleResult(r.filePath, r.messages, ruleMap));
+			// Only add report entries that have actual violations to report.
+			if (r.messages && r.messages.length > 0) {
+				results.push(this.toRuleResult(r.filePath, r.messages, ruleMap));
+			}
 		}
 	}
 
