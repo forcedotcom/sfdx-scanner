@@ -1,22 +1,15 @@
 <section class="site site-sidebar slds-order_2">
   <div class="site-banner">
-    <div class="site-skip-content">
-      <a
-        href="#site-main-content"
-        class="slds-assistive-text slds-assistive-text_focus"
-        >Skip to Content</a
-      >
-    </div>
+  	<br/>
     <div class="site-logo">
       {% assign rootLink = site.baseurl | append: '/' %} {% if page.lang != 'en'
       %} {% assign rootLink = site.baseurl | append: '/' | append: page.lang %}
       {% endif %}
-      <a href="{{ rootLink }}"
-        ><span class="site-logo__graphic"
-          ><span class="slds-assistive-text">Salesforce</span> </span
-        >Salesforce Scanner CLI Plugin</a
-      >
-  </div>
+      <a href="{{ rootLink }}" class="slds-m-vertical--x-small D(b)">
+      	<span class="site-logo__graphic"><img src="./assets/images/sfdx_scanner_logo.png"/>
+        </span>
+        </a>
+  </div><br/><br/><br/>
   <div
     id="site-navigation"
     class="site site-navigation site-navigation--has-search"
