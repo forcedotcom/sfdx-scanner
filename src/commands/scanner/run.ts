@@ -106,10 +106,10 @@ export default class Run extends ScannerCommand {
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
 
-		// If format is specified, use it.  Otherwise, if outfile is specified, infer the format from its extension.
-		// Else, default to table format.  We can't use the default attribute of the flag here because we need to differentiate
-		// between 'table' being defaulted and 'table' being explicitly chosen by the user.
-		const format: OUTPUT_FORMAT = this.flags.format || (this.flags.outfile ? this.deriveFormatFromOutfile() : OUTPUT_FORMAT.TABLE);
+		// We need to derive the output format, either from information that was explicitly provided or from default values.
+		// We can't use the defaultValue property for the flag, because there needs to be a difference between defaulting
+		// to a value and having the user explicitly select it.
+		const format: OUTPUT_FORMAT = this.determineOutputFormat();
 		const ruleManager = await Controller.createRuleManager();
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
@@ -120,9 +120,9 @@ export default class Run extends ScannerCommand {
 		}
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
-		this.processOutput(output);
-		return {};
+		return this.processOutput(output);
 	}
+
 
 	private validateFlags(): void {
 		// file, --target and --org are mutually exclusive, but they can't all be null.
@@ -138,6 +138,22 @@ export default class Run extends ScannerCommand {
 			if (derivedFormat !== chosenFormat) {
 				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format, derivedFormat]));
 			}
+		}
+	}
+
+	private determineOutputFormat(): OUTPUT_FORMAT {
+		// If an output format is explicitly specified, use that.
+		if (this.flags.format) {
+			return this.flags.format;
+		} else if (this.flags.outfile) {
+			// Else If an outfile is explicitly specified, infer the format from its extension.
+			return this.deriveFormatFromOutfile();
+		} else if (this.flags.json) {
+			// Else If the --json flag is present, then we'll default to JSON format.
+			return OUTPUT_FORMAT.JSON;
+		} else {
+			// Otherwise, we'll default to the Table format.
+			return OUTPUT_FORMAT.TABLE;
 		}
 	}
 
@@ -161,37 +177,47 @@ export default class Run extends ScannerCommand {
 		}
 	}
 
-	private processOutput(output: string | {columns; rows}): void {
+	private processOutput(output: string | {columns; rows}): AnyJson {
 		// If the output is an empty string, it means no violations were found, and we should log that information to the console
 		// so the user doesn't get confused.
 		if (output === '') {
-			this.ux.log(messages.getMessage('output.noViolationsDetected'));
-			return;
+			const msg = messages.getMessage('output.noViolationsDetected');
+			this.ux.log(msg);
+			return msg;
 		}
 		if (this.flags.outfile) {
 			// If we were given a file, we should write the output to that file.
 			try {
 				fs.writeFileSync(this.flags.outfile, output);
-				this.ux.log(messages.getMessage('output.writtenToOutFile', [this.flags.outfile]));
+				const msg = messages.getMessage('output.writtenToOutFile', [this.flags.outfile]);
+				this.ux.log(msg);
+				return msg;
 			} catch (e) {
 				throw new SfdxError(e.message || e);
 			}
 		} else {
 			// Default properly, again, as we did earlier.
-			const format: OUTPUT_FORMAT = this.flags.format || OUTPUT_FORMAT.TABLE;
+			const format: OUTPUT_FORMAT = this.determineOutputFormat();
 			// If we're just supposed to dump the output to the console, what precisely we do depends on the format.
 			if (format === OUTPUT_FORMAT.JSON && typeof output === 'string') {
-				// JSON is just one giant string that we can dump directly to the console.
+				// JSON is just one giant string that we can dump directly to the console. We'll want to parse it into
+				// an object before we return it for the --json output, though.
 				this.ux.log(output);
+				return JSON.parse(output);
 			} else if (format === OUTPUT_FORMAT.CSV && typeof output === 'string') {
-				// Also just one giant string that we can dump directly to the console.
+				// Also just one giant string that we can dump directly to the console. This time, we'll want to return
+				// the string for --json output.
 				this.ux.log(output);
+				return output;
 			} else if ((format === OUTPUT_FORMAT.XML || format === OUTPUT_FORMAT.JUNIT) && typeof output === 'string') {
-				// For XML, we can just dump it to the console.
+				// For XML, we can just dump it to the console. Again, return the string for --json.
 				this.ux.log(output);
+				return output;
 			} else if (format === OUTPUT_FORMAT.TABLE && typeof output === 'object') {
-				// For tables, don't even bother printing anything unless we have something to print.
+				// For tables, don't even bother printing anything unless we have something to print. For this one, we'll
+				// return the `columns` property, since that's a bunch of JSONs.
 				this.ux.table(output.rows, output.columns);
+				return output.columns;
 			} else {
 				throw new SfdxError(`Invalid combination of format ${format} and output type ${typeof output}`);
 			}
