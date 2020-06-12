@@ -217,7 +217,7 @@ export default class Run extends ScannerCommand {
 				// For tables, don't even bother printing anything unless we have something to print. For this one, we'll
 				// return the `columns` property, since that's a bunch of JSONs.
 				this.ux.table(output.rows, output.columns);
-				return output.columns;
+				return output.rows;
 			} else {
 				throw new SfdxError(`Invalid combination of format ${format} and output type ${typeof output}`);
 			}
