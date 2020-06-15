@@ -1,5 +1,5 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel} from '@salesforce/core';
+import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
 import path = require('path');
 
@@ -13,6 +13,8 @@ export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
 	targetPatterns: string[];
+	useDefaultConfig?: boolean; //TODO: this parameter doesn't make sense for PMD. Make it optional.
+	overriddenConfigPath?: string;
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
@@ -28,10 +30,19 @@ const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: "eslint",
 			targetPatterns: [
-				"**/*.js","**/*.ts",
+				"**/*.js",
 				"!**/node_modules/**",
-			]
-		}
+			],
+			useDefaultConfig: true
+		},
+		{
+            name: "@typescript-eslint",
+            targetPatterns: [
+                "**/*.ts",
+                "!**/node_modules/**"
+			],
+			useDefaultConfig: true
+        }
 	]
 }
 
@@ -77,6 +88,31 @@ export class Config {
 
 	public getEngineConfig(name: string): EngineConfigContent {
 		return this.configContent.engines.find(e => e.name === name);
+	}
+
+	public getOverriddenConfigPath(name: string): string {
+		const defaultValue = '';
+		const engineConfig = this.getEngineConfig(name);
+
+		if (!this.shouldUseDefaultConfig(name)) {
+			if (!engineConfig || !engineConfig.overriddenConfigPath) {
+				throw new SfdxError(`Please set "overriddenConfigPath" with config path to override for engine ${name} in ${CONFIG_FILE_PATH}`);
+			}
+			return engineConfig.overriddenConfigPath;
+		}
+		return defaultValue;
+	}
+
+	private shouldUseDefaultConfig(name: string): boolean {
+		const engineConfig = this.getEngineConfig(name);
+		const defaultValue = true;
+
+		if (engineConfig) {
+			if (engineConfig.useDefaultConfig != null) {
+				return engineConfig.useDefaultConfig;
+			}
+		}
+		return defaultValue;
 	}
 
 	private async writeConfig(): Promise<void> {
