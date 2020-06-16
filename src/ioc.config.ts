@@ -3,7 +3,7 @@ import "reflect-metadata";
 import {container} from "tsyringe";
 import {CustomRulePathManager} from './lib/CustomRulePathManager';
 import {DefaultRuleManager} from './lib/DefaultRuleManager';
-import {JavascriptEslintEngine} from './lib/eslint/JavascriptEslintEngine';
+import {EslintEngine} from './lib/eslint/EslintEngine';
 import {TypescriptEslintEngine} from './lib/eslint/TypescriptEslintEngine';
 import {PmdEngine} from './lib/pmd/PmdEngine';
 import {RuleManager} from './lib/RuleManager';
@@ -23,7 +23,7 @@ function registerAll(): void {
 	container.registerSingleton(Services.Config, Config);
 	container.registerSingleton(Services.RuleManager, DefaultRuleManager);
 	container.registerSingleton(Services.RuleEngine, PmdEngine);
-	container.registerSingleton(Services.RuleEngine, JavascriptEslintEngine);
+	container.registerSingleton(Services.RuleEngine, EslintEngine);
 	container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
 	container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 	container.registerSingleton(Services.RulePathManager, CustomRulePathManager);

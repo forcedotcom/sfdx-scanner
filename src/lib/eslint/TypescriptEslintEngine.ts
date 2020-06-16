@@ -1,11 +1,11 @@
 import * as path from 'path';
-import { ESLintEngine } from "./ESLintEngine";
-import {TYPESCRIPT_RULE_PREFIX} from '../../Constants';
+import { BaseEslintEngine } from "./BaseEslintEngine";
 import { Rule } from "../../types";
 import {FileHandler} from '../util/FileHandler';
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import { SfdxError } from '@salesforce/core';
+import { TYPESCRIPT_RULE_PREFIX } from '../../Constants';
 
 /**
  * Type mapping to tsconfig.json files
@@ -39,14 +39,14 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
 };
 
 const TS_CONFIG = "tsconfig.json";
 
-export class TypescriptEslintEngine extends ESLintEngine {
+export class TypescriptEslintEngine extends BaseEslintEngine {
 	private static ENGINE_NAME = "@typescript-eslint";
-	private static LANGUAGE = "typescript";
+	private static LANGUAGE = ["typescript"];
 
 	private fileHandler: FileHandler;
 	private config: Config;
@@ -73,7 +73,7 @@ export class TypescriptEslintEngine extends ESLintEngine {
 		return ES_PLUS_TS_CONFIG;
 	}
 
-	getLanguage(): string {
+	getLanguage(): string[] {
 		return TypescriptEslintEngine.LANGUAGE;
 	}
 
@@ -130,16 +130,17 @@ export class TypescriptEslintEngine extends ESLintEngine {
 			throw new Error(`Unable to find ${TS_CONFIG}. Please provide ${TS_CONFIG} in the target ${target} or the current working directory or in Config.`);
 		}
 
+				// TODO: enable event after cleaning up OutputProcessor
+		// events.push({
+		// 	// Alert the user we found a config file, if --verbose
+		// 	messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
+		// });
+
 		// const tsconfigContent = await this.fileHandler.readFile(tsconfigPath);
 		// const tsconfig = JSON.parse(tsconfigContent);
 
 		const config = {};
 
-		// TODO: enable event after cleaning up OutputProcessor
-		// events.push({
-		// 	// Alert the user we found a config file, if --verbose
-		// 	messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
-		// });
 		Object.assign(config, ES_PLUS_TS_CONFIG);
 		// Object.assign(config, tsconfig);
 
@@ -152,7 +153,7 @@ export class TypescriptEslintEngine extends ESLintEngine {
 	}
 
 	private async findTSConfig(target: string): Promise<string> {
-		let tsconfigPath;
+		let tsconfigPath: string;
 
 		// Check config
 		tsconfigPath = await this.getTsconfigFromConfig();
