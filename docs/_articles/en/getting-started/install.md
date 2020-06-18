@@ -3,28 +3,26 @@ title: Install Salesforce Scanner CLI Plugin
 lang: en
 ---
 
-## Install the plugin
+## Install the plug-in
 
-Similar to all the SFDX CLI plugins, the Scanner CLI plugin can be installed with one simple step. Please note: you must have installed the [prerequisites](./en/getting-started/prerequisites/) prior to the installation of this plugin.
+Like all the Salesforce CLI plug-ins, you install the Scanner CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in.
 
 
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner
-This plugin is not digitally signed and its
-authenticity cannot be verified. Continue
-installation y/n?: y
+This plugin is not digitally signed and its authenticity cannot be verified. Continue installation y/n?: y
 Finished digital signature check.
 Installing plugin @salesforce/sfdx-scanner...
 installed v1.0.30 
 ```
 
-#### Check to make sure that the scanner plugin is installed
+#### Check that the scanner plug-in is installed
 ```bash
 $ sfdx plugins
 @salesforce/sfdx-scanner 1.0.30
 ```
 
-#### To see the usage and help for the scanner commands
+#### Display the usage and help for the scanner commands
 ```bash
 $ sfdx scanner --help
 Scan code to detect code quality issues and security vulnerabilities.
