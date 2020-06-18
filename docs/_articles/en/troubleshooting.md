@@ -3,25 +3,26 @@ title: Troubleshooting Common Issues
 lang: en
 ---
 
-Here’s some information on how to get past roadblocks that you might encounter while using Salesforce Scanner CLI Plugin
+Here are some troubleshooting tips to fix common issues when you use the Salesforce CLI Scanner plug-in.
 
-### My Custom Rule Java file doesn’t compile
-Make sure you DO NOT use PMD features/classes that are not available in version 6.22.0. Please check for basic syntax, etc. Validate that the compilation classpath contain the correct version of the PMD binary.
+### My custom rule Java file doesn’t compile.
+* Make sure that you reference only PMD features and classes that are available in version 6.22.0.
+* Check that you're using correct syntax. 
+* Check that the compilation CLASSPATH contains the correct version of the PMD binary.
 
-### I successfully created the JAR file and added it using the ```scanner:rule:add``` command, but ```scanner:rule:list``` does not display my custom rules.
+### I successfully created the JAR file and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn't display my custom rules.
 
-Validate that the XML Rule Definition file is included in the JAR. You can run ```jar tf /your/jar/file.JAR```. 
-
-Make sure your XML file is in a path that includes ```category``` as a directory. Check that your class files included. Confirm that the path to the class files reflect the package structure from the Java file
+* Check that the XML Rule Definition file is included in the JAR. Run `jar tf /your/jar/file.JAR` to list the files in your JAR. 
+* Make sure your XML file is in a PATH that includes `category` as a directory. 
+* Check that your class files are included in the JAR. 
+* Confirm that the PATH to the class files reflects the package structure in the Java file.
     
-### ```scanner:rule:list``` command displays my new Custom Rules in the catalog, but when I run them, I get an error related to Java version.
+### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
 
-Highly possible that the java version used for building your code is different from the version in which PMD is invoked from Sfdx Scanner. 
+One possible reason is that the Java version you used to build your code is different from the version the Salesforce CLI Scanner plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
 
-Make sure you compiled your Java code with the same Java version and path that’s noted in ```java-home``` key in ```<HOME_DIR>/.sfdx-scanner/Config.json```
+### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
 
-### ```scanner:rule:list``` command displays my new Custom Rules in the catalog, but when I run them, I get a ClassNotFoundException.
-
-Highly possible that you referenced a class in your Custom Rule Java code from the PMD library which is not available in version 6.22.0. Make sure that you reference only PMD features/classes that are available in 6.22.0
+One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version 6.22.0. Make sure that you reference only PMD features and classes that are available in version 6.22.0.
 
 
