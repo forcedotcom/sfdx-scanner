@@ -135,6 +135,9 @@ URL: ${v.url}
 	}
 
 	private static constructJson(results: RuleResult[]): string {
+		if (results.length === 0) {
+			return '';
+		}
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 

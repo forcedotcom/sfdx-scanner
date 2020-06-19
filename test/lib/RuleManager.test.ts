@@ -249,19 +249,13 @@ describe('RuleManager', () => {
 			});
 
 			describe('Edge Case: No rules match criteria', () => {
-				it('When no rules match the given criteria, an empty list is returned', async () => {
+				it('When no rules match the given criteria, an empty string is returned', async () => {
 					// Define our preposterous filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
 					const output = await ruleManager.runRulesMatchingCriteria(filters, ['projects/app'], OUTPUT_FORMAT.JSON);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
-					} else {
-						results = JSON.parse(output);
-					}
-
-					expect(results).to.be.empty;
+					expect(typeof output).to.equal('string', `Output ${output} should have been a string`);
+					expect(output).to.equal('', `Output ${output} should have been an empty string`);
 				});
 			});
 		});
