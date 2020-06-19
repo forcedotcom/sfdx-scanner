@@ -26,7 +26,8 @@ module.exports = {
 			"multipleRuleDesc": "ERROR: PMD Rule [%s] has %s 'description' elements. Please reduce this number to 1.",
 			"recursionLimitReached": "ERROR: PMD Ruleset [%s] references rule [%s] through 10 or more layers of indirection. Please reduce this number.",
 			"xmlNotReadable": "ERROR: Error occurred while reading file [%s]: %s",
-			"xmlNotParsable": "ERROR: Could not parse XML file [%s]: %s"
+			"xmlNotParsable": "ERROR: Could not parse XML file [%s]: %s",
+			"duplicateXmlPath": "XML path [%s] defined in jar [%s] collides with previously defined path in jar [%s]. You will need to remove one of the jars by executing the following command 'sfdx scanner:rule:remove --force --path <jar-to-remove>'"
 		}
 	}
 
