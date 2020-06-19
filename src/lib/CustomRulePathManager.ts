@@ -248,7 +248,7 @@ export class CustomRulePathManager implements RulePathManager {
 			if (stats.isFile()) {
 				if (p.endsWith(".jar") || p.endsWith(".xml")) {
 					// Simple filename check for .jar is enough.
-					this.logger.trace(`Adding JAR directly provided as a path: ${p}`);
+					this.logger.trace(`Adding File directly provided as a path: ${p}`);
 					classpathEntries.push(p);
 				}
 			} else if (stats.isDirectory()) {
@@ -258,7 +258,7 @@ export class CustomRulePathManager implements RulePathManager {
 				for (const file of files) {
 					if (file.endsWith(".jar") || file.endsWith(".xml")) {
 						const filePath = path.resolve(p, file);
-						this.logger.trace(`Adding JAR found inside a directory provided as a path: ${filePath}`);
+						this.logger.trace(`Adding File found inside a directory provided as a path: ${filePath}`);
 						classpathEntries.push(filePath);
 					}
 				}

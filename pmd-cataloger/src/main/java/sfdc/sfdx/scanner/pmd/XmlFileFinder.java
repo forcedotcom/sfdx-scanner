@@ -40,7 +40,15 @@ public class XmlFileFinder {
 	 * file that contains itself.
 	 */
 	public static final class XmlContainer {
+		/**
+		 * This is the file path to either a Jar file or an XML file.
+		 */
 		public final String filePath;
+
+		/**
+		 * In the case of a Java Jar, this contains path to all XML files in that Jar. In the case of an XML file, this
+		 * contains a single value that is the same as {@link #filePath}. This allows the caller to treat them the same.
+		 */
 		public final List<String> containedFilePaths;
 
 		public XmlContainer(String filePath) {
