@@ -27,7 +27,7 @@ public class XmlFileFinderTest {
 				.findXmlFilesInPath(TEST_JAR_DIR.toAbsolutePath().toString());
 		assertThat(xmlContainers, hasSize(equalTo(7)));
 
-		// Sanity check the
+		// Verify the contents of each jar
 		assertEquals("category/joshapex/somecat1.xml", getSingleFile(xmlContainers, "testjar1.jar"));
 		assertEquals("category/joshapex/somecat2.xml", getSingleFile(xmlContainers, "testjar2.jar"));
 		assertEquals("category/joshapex/somecat3.xml", getSingleFile(xmlContainers, "testjar3.jar"));
