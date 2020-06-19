@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static sfdc.sfdx.scanner.TestConstants.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
@@ -95,7 +96,8 @@ public class PmdRuleCatalogerTest {
 	public void testExceptionIsThrownWhenCollisionOccurs() {
 		Map<String, List<String>> rulePathEntries = new Hashtable<>();
 		
-		rulePathEntries.put(APEX, Collections.singletonList(COLLISION_DIR.toAbsolutePath().toString()));
+		rulePathEntries.put(APEX, Arrays.asList(COLLISION_JAR_1.toAbsolutePath().toString(),
+				COLLISION_JAR_2.toAbsolutePath().toString()));
 		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
 		
 		thrown.expect(new SfdxScannerExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
