@@ -342,6 +342,95 @@ describe('scanner:run', function () {
 				});
 		});
 
+		describe('Output Type: JSON', () => {
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'json'
+				])
+				.it('Properly writes JSON to console', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					// Only PMD rules should have run.
+					expect(output.length).to.equal(1, 'Should only be violations from one engine');
+					expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
+
+					expect(output[0].violations.length).to.equal(4, 'Should be 4 violations');
+					expect(output[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
+					expect(output[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
+					expect(output[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
+					expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--outfile', 'testout.json'
+				])
+				.finally(ctx => {
+					// Regardless of what happens in the test itself, we need to delete the file we created.
+					if (fs.existsSync('testout.json')) {
+						fs.unlinkSync('testout.json');
+					}
+				})
+				.it('Properly writes JSON to file', ctx => {
+					// Verify that the correct message is displayed to user
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
+					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+
+					// Verify that the file we wanted was actually created.
+					expect(fs.existsSync('testout.json')).to.equal(true, 'The command should have created the expected output file');
+					const fileContents = JSON.parse(fs.readFileSync('testout.json').toString());
+					// Only PMD rules should have run.
+					expect(fileContents.length).to.equal(1, 'Should only be violations from one engine');
+					expect(fileContents[0].engine).to.equal('pmd', 'Engine should be PMD');
+
+					expect(fileContents[0].violations.length).to.equal(4, 'Should be 4 violations');
+					expect(fileContents[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
+					expect(fileContents[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
+					expect(fileContents[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
+					expect(fileContents[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'json'
+				])
+				.it('When no violations are detected, a message is logged to the console', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--outfile', 'testout.json'
+				])
+				.finally(ctx => {
+					// Regardless of what happens in the test itself, we need to delete the file we created.
+					if (fs.existsSync('testout.json')) {
+						fs.unlinkSync('testout.json');
+					}
+				})
+				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
+					expect(fs.existsSync('testout.json')).to.be.false;
+				});
+
+		});
+
 		describe('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
 			runTest
@@ -374,6 +463,109 @@ describe('scanner:run', function () {
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+				});
+		});
+
+		describe('--json flag', () => {
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--json'
+				])
+				.it('--json flag uses default format of JSON', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					expect(output.status).to.equal(0, 'Should have finished properly');
+					const result = output.result;
+					// Only PMD rules should have run.
+					expect(result.length).to.equal(1, 'Should only be violations from one engine');
+					expect(result[0].engine).to.equal('pmd', 'Engine should be PMD');
+
+					expect(result[0].violations.length).to.equal(4, 'Should be 4 violations');
+					expect(result[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
+					expect(result[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
+					expect(result[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
+					expect(result[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'xml',
+					'--json'
+				])
+				.it('--json flag wraps other formats in a string', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					expect(output.status).to.equal(0, 'Should have finished properly');
+					// We'll split the output by the <violation> tag, so we can get individual violations.
+					const violations = output.result.split('<violation');
+					// The first list item is going to be the header, so we need to pull that off.
+					violations.shift();
+					// There should be four violations.
+					expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--outfile', 'testout.xml',
+					'--json'
+				])
+				.finally(ctx => {
+					// Regardless of what happens in the test itself, we need to delete the file we created.
+					if (fs.existsSync('testout.xml')) {
+						fs.unlinkSync('testout.xml');
+					}
+				})
+				.it('--json flag wraps message about writing to outfile', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					expect(output.status).to.equal(0, 'Should finish properly');
+					const result = output.result;
+					expect(result).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.xml']));
+					expect(result).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					// Verify that the file we wanted was actually created.
+					expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
+					const fileContents = fs.readFileSync('testout.xml').toString();
+					// We'll split the output by the <violation> tag, so we can get individual violations.
+					const violations = fileContents.split('<violation');
+					// The first list item is going to be the header, so we need to pull that off.
+					violations.shift();
+					// There should be four violations.
+					expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				});
+
+			runTest
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--json'
+				])
+				.it('--json flag wraps message about no violations occuring', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					expect(output.status).to.equal(0, 'Should have finished properly');
+					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 		});
 
