@@ -17,9 +17,9 @@ $ sfdx scanner:rule:add -l <string> -p <array> [--json]
 ## Options
 
 ```bash
-  -l, --language=language	(required) language against which the custom rules will evaluate
-  -p, --path=path		(required) one or more paths (such as a directory or JAR file) to custom rule definitions. Specify multiple values as a comma-separated list.
-  --json			format output as json
+  -l, --language=language	(required) Language against which the custom rules will evaluate
+  -p, --path=path		(required) One or more paths (such as a directory or JAR file) to custom rule definitions. Specify multiple values as a comma-separated list.
+  --json			Format output as json
 
 ```
   
