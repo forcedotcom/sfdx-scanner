@@ -3,22 +3,6 @@ title: 'Frequently Asked Questions'
 lang: en
 ---
 
-## Table of Contents
-
-#### [Questions about `sfdx-scanner`](#questions-about--sfdx-scanner-)
-  * [What is `sfdx-scanner`?](#q--what-is--sfdx-scanner--)
-  * [Is `sfdx-scanner` part of the App Exchange security review process?](#q--is--sfdx-scanner--part-of-the-app-exchange-security-review-process-)
-  * [Is `sfdx-scanner` only for Salesforce CLI (`sfdx`) projects?](#q--is--sfdx-scanner--only-for-salesforce-cli---sfdx---projects-)
-#### [Questions about language support](#questions-about-language-support)
-  * [What languages does `sfdx-scanner` support?](#q--what-languages-does--sfdx-scanner--support-)
-  * [How do I add a language to `sfdx-scanner`?](#q--how-do-i-add-a-language-to--sfdx-scanner--)
-  *  [How do I remove a language from `sfdx-scanner`?](#q--how-do-i-remove-a-language-from--sfdx-scanner--)
-#### [Questions about adding and removing rules](#questions-about-adding-and-removing-rules)
-  * [How do I add new rules for Language X?](#q--how-do-i-add-new-rules-for-language-x-)
-#### [Questions about dependencies and setup](#questions-about-dependencies-and-setup)
-  * [What else do I need before I can use `sfdx-scanner`?](#q--what-else-do-i-need-before-i-can-use--sfdx-scanner--)
-
-
 ## Questions about `sfdx-scanner`
 
 #### Q: What is `sfdx-scanner`?
