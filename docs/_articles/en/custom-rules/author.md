@@ -5,27 +5,29 @@ lang: en
 
 ## What are Custom Rules?
 
-Any codebase could have __specific__, repetitive coding issues that you would like to address and clean up. A Rule Violation from Sfdx Scanner would be ideal, but this is possibly a problem only in your codebase’s context.
+Let's say your codebase has specific and repetitive coding issues that you want to address and clean up. Ideally you'd use the built-in rules of the Salesforce CLI Scanner to find these rule violations. But sometimes the problems exist only in the context of your codebase, and the built-in rules may not catch them. In this case, create your own _custom rules_ to highlight these issues as rule violations when you scan your code. 
 
-You can create your own rules to highlight these issues as Rule Violations when you scan your code. We call these rules as __Custom Rules__. Currently, the Sfdx Scanner only supports Custom Rules for PMD.
+The scanner plug-in currently supports only PMD custom rules.
 
 ## Writing PMD Custom Rules
 
-Each of the engines that are used to scan your code has different ways to write Custom Rules. You can find [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) for PMD. 
+Each engine used to scan your code has its own way of writing custom rules. See these [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) for PMD. 
 
 ## Compiling PMD Custom Rules
-You can write the new rules according to PMD’s instructions and compile your new rule(s) with ```$PMD_BIN_HOME/lib/*``` in the classpath. Make sure that the Java setup that you use for compiling your rules is the same as the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config.json```.  
+When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config.json```.  
 
-If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to the classpath. To compile from the command line. 
+If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To compile from the command line, use the ```javac``` command. For example:
+
 ```$ javac -cp ".:$PMD_BIN_HOME/lib/*" /path/to/your/Rule.java```
 
-Please use [v6.22.0](https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.22.0/pmd-bin-6.22.0.zip) of PMD for writing the custom rules. 
+Use only [version 6.22.0](https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.22.0/pmd-bin-6.22.0.zip) of PMD for writing the custom rules. 
 
 ## Bundling PMD Custom Rules
-Create the XML rule [definition file](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) for your new rule(s), if you haven’t yet. Place them in a directory structure like this: 
+If you haven't already, create the XML rule [definition file](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) for your new rule(s). Add them to a directory structure like this: 
 ```<some base dir>/category/<language>/yourRuleDefinition.xml```
 
-Once your new Java files compile and your XML rule definition matches the Custom Rule(s) that you’ve created, create a JAR file that contains your class files in the correct directory structure according to its package name and the XML file in the directory path as described in the previous step. A single JAR file could have multiple Rule classes.
+When your new Java files compile and your XML rule definition matches your new custom rule(s) that you’ve created, create a JAR file that contains your class files. Be sure to use the correct directory structure according to its package name and the XML file in the directory path as described in the previous step. A single JAR file can contain multiple custom rule classes.
 
-Jar file creation command: 
-```jar -cp <customRule.jar> <rule_package_base_dir> <xml_base_dir>```
+Here's an example of using ```jar``` to create a JAR file: 
+
+```$ jar -cp <customRule.jar> <rule_package_base_dir> <xml_base_dir>```
