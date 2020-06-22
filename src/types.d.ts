@@ -54,3 +54,52 @@ export type RuleEvent = {
 	time: number;
 	internalLog?: string;
 }
+
+/**
+ * Type mapping to rules returned from eslint
+ */
+type ESRule = {
+	meta: {
+		docs: {
+			description: string;
+			category: string;
+			recommended: boolean;
+			url: string;
+		};
+		schema: Record<string, any>[];
+	};
+	create: Function;
+}
+
+/**
+ * Type mapping to report output by eslint
+ */
+type ESReport = {
+	results: [
+		{
+			filePath: string;
+			messages: ESMessage[];
+		}
+	];
+	errorCount: number;
+	warningCount: number;
+	fixableErrorCount: number;
+	fixableWarningCount: number;
+	usedDeprecatedRules: string[];
+}
+
+/**
+ * Type mapping to report messages output by eslint
+ */
+type ESMessage = {
+	fatal: boolean;
+	ruleId: string;
+	severity: number;
+	line: number;
+	column: number;
+	message: string;
+	fix: {
+		range: [number, number];
+		text: string;
+	};
+}

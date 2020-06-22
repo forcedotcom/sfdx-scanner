@@ -1,11 +1,10 @@
 import * as path from 'path';
-import { BaseEslintEngine } from "./BaseEslintEngine";
-import { Rule } from "../../types";
+import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
-import { SfdxError } from '@salesforce/core';
-import { TYPESCRIPT_RULE_PREFIX } from '../../Constants';
+import { SfdxError, Logger } from '@salesforce/core';
+import { OutputProcessor } from '../pmd/OutputProcessor';
 
 /**
  * Type mapping to tsconfig.json files
@@ -40,46 +39,52 @@ const ES_PLUS_TS_CONFIG = {
 		"node_modules/**"
 	],
 	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
+
 };
 
 const TS_CONFIG = "tsconfig.json";
 
-export class TypescriptEslintEngine extends BaseEslintEngine {
-	private static ENGINE_NAME = "@typescript-eslint";
+export class TypescriptEslintStrategy implements EslintStrategy {
+	private static ENGINE_NAME = "eslint-typescript";
 	private static LANGUAGE = ["typescript"];
 
+	private initialized: boolean;
+	protected logger: Logger;
 	private fileHandler: FileHandler;
 	private config: Config;
+	private outputProcessor: OutputProcessor;
 
 	public async init(): Promise<void> {
-		await super.init();
+		if (this.initialized) {
+			return;
+		}
+		this.logger = await Logger.child(this.getName());
 		this.fileHandler = new FileHandler();
 		this.config = await Controller.getConfig();
+		this.outputProcessor = await OutputProcessor.create({});
+		this.initialized = true;
 	}
 
-	public isEnabled(): boolean {
+	isEnabled(): boolean {
 		return this.config.isEngineEnabled(this.getName());
 	}
 
-	public getName(): string {
-		return TypescriptEslintEngine.ENGINE_NAME;
+	getName(): string {
+		return TypescriptEslintStrategy.ENGINE_NAME;
 	}
 
-	protected isRuleKeySupported(key: string): boolean {
-		return key.startsWith(TYPESCRIPT_RULE_PREFIX);
+	isRuleKeySupported(): boolean {
+		// Javascript rules written for only eslint work for typescript as well,
+		// though they require the parser information that is specific to typescript.
+		return true;
 	}
 
-	getCatalogConfig(): Object {
+	getCatalogConfig(): Record<string, any> {
 		return ES_PLUS_TS_CONFIG;
 	}
 
 	getLanguage(): string[] {
-		return TypescriptEslintEngine.LANGUAGE;
-	}
-
-	isRuleRelevant(rule: Rule) {
-		// TODO: is this sufficient or do we need to check something else?
-		return this.getName() === rule.engine;
+		return TypescriptEslintStrategy.LANGUAGE;
 	}
 
 	async getTargetPatterns(target?: string): Promise<string[]> {
@@ -87,7 +92,7 @@ export class TypescriptEslintEngine extends BaseEslintEngine {
 
 		
 		// Find the typescript config file, if any
-		const tsconfigPath = await this.findTSConfig(target);
+		const tsconfigPath = await this.findTsconfig(target);
 
 		const targetPatterns: string[] = [];
 		if (tsconfigPath) {
@@ -120,29 +125,23 @@ export class TypescriptEslintEngine extends BaseEslintEngine {
 
 	filterUnsupportedPaths(paths: string[]): string[] {
 		const filteredPaths = paths.filter(p => p.endsWith(".ts"));
+		this.logger.trace(`Input paths: ${paths}, Filtered paths: ${filteredPaths}`);
 		return filteredPaths;
 	}
 
-	async getRunConfig(target?: string): Promise<Object> {
-		const tsconfigPath = await this.findTSConfig(target);
+	async getRunConfig(target?: string): Promise<Record<string, any>> {
+		const tsconfigPath = await this.findTsconfig(target);
 
 		if (!tsconfigPath) {
 			throw new Error(`Unable to find ${TS_CONFIG}. Please provide ${TS_CONFIG} in the target ${target} or the current working directory or in Config.`);
 		}
 
-				// TODO: enable event after cleaning up OutputProcessor
-		// events.push({
-		// 	// Alert the user we found a config file, if --verbose
-		// 	messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
-		// });
-
-		// const tsconfigContent = await this.fileHandler.readFile(tsconfigPath);
-		// const tsconfig = JSON.parse(tsconfigContent);
+		// Alert the user we found a config file, if --verbose
+		this.alertUser(tsconfigPath);
 
 		const config = {};
 
 		Object.assign(config, ES_PLUS_TS_CONFIG);
-		// Object.assign(config, tsconfig);
 
 		// Enable typescript by registering its project config file
 		config["parserOptions"].project = tsconfigPath;
@@ -152,7 +151,14 @@ export class TypescriptEslintEngine extends BaseEslintEngine {
 		return config;
 	}
 
-	private async findTSConfig(target: string): Promise<string> {
+	private alertUser(tsconfigPath: string): void {
+		const event = {
+			messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
+		};
+		this.outputProcessor.emitEvents([event]);
+	}
+
+	async findTsconfig(target: string): Promise<string> {
 		let tsconfigPath: string;
 
 		// Check config
@@ -183,7 +189,7 @@ export class TypescriptEslintEngine extends BaseEslintEngine {
 
 		// Complain if overriddenConfig does not exist.
 		if (!(await this.fileHandler.exists(path.resolve(overriddenConfig)))) {
-			throw new SfdxError(`Invalid path in Config: ${overriddenConfig}`);
+			throw new SfdxError(`Invalid path in Config: ${overriddenConfig}`); // FIXME: move to messages.js
 		}
 
 		// If overriddenConfig is a directory, look for tsconfig.json file.
@@ -223,3 +229,4 @@ export class TypescriptEslintEngine extends BaseEslintEngine {
 	}
 
 }
+

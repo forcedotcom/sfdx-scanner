@@ -36,7 +36,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 			useDefaultConfig: true
 		},
 		{
-            name: "@typescript-eslint",
+            name: "eslint-typescript",
             targetPatterns: [
                 "**/*.ts",
                 "!**/node_modules/**"
@@ -96,7 +96,7 @@ export class Config {
 
 		if (!this.shouldUseDefaultConfig(name)) {
 			if (!engineConfig || !engineConfig.overriddenConfigPath) {
-				throw new SfdxError(`Please set "overriddenConfigPath" with config path to override for engine ${name} in ${CONFIG_FILE_PATH}`);
+				throw new SfdxError(`Please set "overriddenConfigPath" with config path to override for engine ${name} in ${CONFIG_FILE_PATH}. If you want to use default value, please set "useDefaultConfig" to true.`);
 			}
 			return engineConfig.overriddenConfigPath;
 		}

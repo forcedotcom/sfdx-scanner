@@ -1,109 +1,93 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {Logger, SfdxError, LoggerLevel} from '@salesforce/core';
-import {CLIEngine} from 'eslint';
-import {Catalog, Rule, RuleEvent, RuleGroup, RuleResult, RuleTarget, RuleViolation} from '../../types';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
+import {CLIEngine} from 'eslint';
 import * as path from 'path';
 
-/**
- * Type mapping to rules returned from eslint
- */
-type ESRule = {
-	meta: {
-		docs: {
-			description: string;
-			category: string;
-			recommended: boolean;
-			url: string;
-		};
-		schema: Record<string, any>[];
-	};
-	create: Function;
-}
 
-/**
- * Type mapping to report output by eslint
- */
-type ESReport = {
-	results: [
-		{
-			filePath: string;
-			messages: ESMessage[];
-		}
-	];
-	errorCount: number;
-	warningCount: number;
-	fixableErrorCount: number;
-	fixableWarningCount: number;
-	usedDeprecatedRules: string[];
-}
+export interface EslintStrategy {
 
-/**
- * Type mapping to report messages output by eslint
- */
-type ESMessage = {
-	fatal: boolean;
-	ruleId: string;
-	severity: number;
-	line: number;
-	column: number;
-	message: string;
-	fix: {
-		range: [number, number];
-		text: string;
-	};
+	init(): Promise<void>;
+
+	getName(): string;
+
+	isEnabled(): boolean;
+
+	getTargetPatterns(target?: string): Promise<string[]>;
+
+	getCatalogConfig(): Record<string, any>;
+
+	getRunConfig(target?: string): Promise<Record<string, any>>;
+
+	getLanguage(): string[];
+
+	isRuleKeySupported(key: string): boolean;
+
+	filterUnsupportedPaths(paths: string[]): string[];
+}
+export class StaticDependencies {
+	public createCLIEngine(config: Record<string,any>): CLIEngine {
+		return new CLIEngine(config);
+	}
+	
+	public resolveTargetPath(target: string): string {
+		return path.resolve(target);
+	}
+	
+	public getCurrentWorkingDirectory(): string {
+		return process.cwd();
+	}
 }
 
 export abstract class BaseEslintEngine implements RuleEngine {
 
+	private strategy: EslintStrategy;
 	protected logger: Logger;
-	private initialized: boolean;
+	private initializedBase: boolean;
 	protected outputProcessor: OutputProcessor;
+	private baseDependencies: StaticDependencies;
 
-	public async init(): Promise<void> {
-		if (this.initialized) {
+	public async abstract init(): Promise<void>;
+
+	public async initializeContents(strategy: EslintStrategy, baseDependencies = new StaticDependencies()): Promise<void> {
+		if (this.initializedBase) {
 			return;
 		}
-		this.logger = await Logger.child("eslint");
+		this.strategy = strategy;
+		this.logger = await Logger.child(strategy.getName());
 		this.logger.setLevel(LoggerLevel.TRACE); //TODO: remove this before merge
-		this.outputProcessor = await OutputProcessor.create({});
+		// this.outputProcessor = await OutputProcessor.create({});
+		this.baseDependencies = baseDependencies;
 
-		this.initialized = true;
+		this.initializedBase = true;
 	}
 
 	public matchPath(path: string): boolean {
-		// TODO implement this for realz
-		return path != null;
+		// TODO implement matchPath when Custom Rules are handled for eslint
+		this.logger.trace(`Custom rules for eslint is not supported yet: ${path}`);
+		return false;
 	}
 
-	// TODO: this method is already defined in RuleEngine - can't I not declare this method again?
-	public abstract getName(): string;
+	public getName(): string {
+		return this.strategy.getName();
+	}
 
-	// TODO: this method is already defined in RuleEngine - can't I not declare this method again?
-	public abstract isEnabled(): boolean;
+	public isEnabled(): boolean {
+		return this.strategy.isEnabled();
+	}
 
-	// TODO: this method is already defined in RuleEngine - can't I not declare this method again?
-	public abstract async getTargetPatterns(target?: string): Promise<string[]>;
-
-	protected abstract getCatalogConfig(): Object;
-
-	protected abstract async getRunConfig(target?: string): Promise<Object>;
-
-	protected abstract getLanguage(): string[];
-
-	protected abstract isRuleKeySupported(key: string): boolean;
-
-	protected abstract isRuleRelevant(rule: Rule): boolean;
-
-	protected abstract filterUnsupportedPaths(paths: string[]): string[];
+	public async getTargetPatterns(target?: string): Promise<string[]> {
+		return await this.strategy.getTargetPatterns(target);
+	}
 
 	getCatalog(): Promise<Catalog> {
 		const categoryMap: Map<string, RuleGroup> = new Map();
 		const catalog: Catalog = {rulesets: [], categories: [], rules: []};
 		const rules: Rule[] = [];
 
-		const cli = new CLIEngine(this.getCatalogConfig());
+		const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
 		const allRules = cli.getRules();
 		allRules.forEach((esRule: ESRule, key: string) => {
 			const docs = esRule.meta.docs;
@@ -128,7 +112,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	private processRule(key: string, docs: any): Rule {
 
-		if (this.isRuleKeySupported(key)) {
+		if (this.strategy.isRuleKeySupported(key)) {
 
 			const rule = {
 				engine: this.getName(),
@@ -137,7 +121,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				description: docs.description,
 				categories: [docs.category],
 				rulesets: [docs.category],
-				languages: [...this.getLanguage()],
+				languages: [...this.strategy.getLanguage()],
 				defaultEnabled: docs.recommended,
 				url: docs.url
 			};
@@ -151,63 +135,62 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 		// If we didn't find any paths, we're done.
 		if (targets == null || targets.length === 0) {
-			this.logger.trace('No matching eslint target files found. Nothing to execute.');
+			this.logger.trace('No matching target files found. Nothing to execute.');
 			return [];
 		}
 
-		const events: RuleEvent[] = [];
+		const filteredRules = this.selectRelevantRules(rules);
+		if (Object.keys(filteredRules).length === 0 && filteredRules.constructor === Object) {
+			// No rules to run
+			this.logger.trace('No matching rules to run. Nothing to execute.');
+			return [];
+		}
 
 		try {
 			const results: RuleResult[] = [];
-			for (const target of targets) {
-				const cwd = target.isDirectory ? path.resolve(target.target) : process.cwd();
-				const config = {cwd};
 
-				const filteredRules = this.selectRelevantRules(rules);
-				if (Object.keys(filteredRules).length === 0 && filteredRules.constructor === Object) {
-					// No rules to run
-					this.logger.trace(`No matching rules to run for ${this.getName()}`);
-					return [];
-				}
+			for (const target of targets) {
+				const cwd = target.isDirectory ? this.baseDependencies.resolveTargetPath(target.target) : this.baseDependencies.getCurrentWorkingDirectory();
+				this.logger.trace(`Using current working directory in config as ${cwd}`);
+				const config = {cwd};
 
 				config["rules"] = filteredRules;
 
-				target.paths = this.filterUnsupportedPaths(target.paths);
+				target.paths = this.strategy.filterUnsupportedPaths(target.paths);
 
 				if (target.paths.length === 0) {
 					// No target files to analyze
-					this.logger.trace(`No target files to analyze for ${this.getName()}.`);
-					return [];
+					this.logger.trace(`No target files to analyze from ${target.paths}`);
+					continue; // to the next target
 				}
 
-				Object.assign(config, await this.getRunConfig(target.target));
+				Object.assign(config, await this.strategy.getRunConfig(target.target));
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
 
-				const cli = new CLIEngine(config);
+				const cli = this.baseDependencies.createCLIEngine(config);
 
 				const report = cli.executeOnFiles(target.paths);
+				this.logger.trace(`Finished running ${this.getName()}`);
 				this.addRuleResultsFromReport(results, report, cli.getRules());
 			}
 
 			return results;
 		} catch (e) {
 			throw new SfdxError(e.message || e);
-		} finally {
-			this.outputProcessor.emitEvents(events);
 		}
 	}
 
-	private selectRelevantRules(rules: Rule[]) {
+	private selectRelevantRules(rules: Rule[]): Record<string,any> {
 		const filteredRules = {};
 		let ruleCount = 0;
 		for (const rule of rules) {
-			if (this.isRuleRelevant(rule)) {
+			if (rule.engine === this.strategy.getName()) {
 				filteredRules[rule.name] = "error";
 				ruleCount++;
 			}
 		}
-		this.logger.trace(`Count of rules selected for ${this.getName}: ${ruleCount}`);
+		this.logger.trace(`Count of rules selected for ${this.getName()}: ${ruleCount}`);
 		return filteredRules;
 	}
 
