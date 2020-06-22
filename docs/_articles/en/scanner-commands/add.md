@@ -1,12 +1,12 @@
 ---
-title: SFDX Scanner Command Reference
+title: Salesforce CLI Scanner Plug-In Command Reference
 lang: en
 ---
 
 ## sfdx scanner:rule:add
-Add custom rules to Sfdx Scanner's registry to run them along with built-in rules. Rules should have been compiled and tested separately.
+Add custom rules to the Salesforce CLI Scanner plug-in's registry so you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
 
-Please refer to our Custom Rules [help page](./en/custom-rules/author/) for more information.
+See [Authoring Custom Rules](../custom-rules/author.md) for more information.
 
 ## Usage
 
@@ -18,16 +18,17 @@ $ sfdx scanner:rule:add -l <string> -p <array> [--json]
 
 ```bash
   -l, --language=language	(required) language against which the custom rules will evaluate
-  -p, --path=path		(required) One or more paths to custom rule definitions. Specify multiple values with a comma-separated list.
+  -p, --path=path		(required) one or more paths (such as a directory or JAR file) to custom rule definitions. Specify multiple values as a comma-separated list.
   --json			format output as json
 
 ```
   
 ## Example
-PMD: Custom PMD rules should be in JARs. Adhere to PMD conventions, including defining rules in XMLs under a /category directory.
-  Refer to PMD's documentation for information on writing rules: [here](https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html)
+Bundle custom PMD rules in JAR files. Be sure to adhere to PMD conventions, such as defining the custom rules in XML files under a ```/category``` directory.
+
+See the [PMD documentation](https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html) for information about writing rules. 
   
-You may specify one or more JARs directly.
+This example shows how to specify two JAR files directly.
 ```bash
 $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
          Successfully added rules for apex.
@@ -35,7 +36,7 @@ $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/
          /Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
 ```
 
-You may also specify a directory containing one or more JARs, all of which will be added.
+This example shows how to specify a directory that contains one or more JAR files, all of which are added to the registry.
 ```bash
 $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
          Successfully added rules for apex.
@@ -44,4 +45,4 @@ $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
 ```
 
 ## Demo
-![Describe Example](./assets/images/add.gif) 
+![Example of adding a custom rule](../../../assets/images/add.gif) 
