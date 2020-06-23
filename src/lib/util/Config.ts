@@ -13,6 +13,7 @@ export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
 	targetPatterns: string[];
+	supportedLanguages?: string[];
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
@@ -23,7 +24,8 @@ const DEFAULT_CONFIG: ConfigContent = {
 			targetPatterns: [
 				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
-			]
+			],
+			supportedLanguages: ['apex', 'javascript']
 		},
 		{
 			name: "eslint",
@@ -77,6 +79,18 @@ export class Config {
 
 	public getEngineConfig(name: string): EngineConfigContent {
 		return this.configContent.engines.find(e => e.name === name);
+	}
+
+	public async setEngineConfig(name: string, ecc: EngineConfigContent): Promise<void> {
+		// If there's an entry in the Engine array that has the same name as the one we were provided, override it with
+		// the new one.
+		const idx = this.configContent.engines.findIndex(e => e.name === name);
+		if (idx !== -1) {
+			this.configContent.engines[idx] = ecc;
+		} else {
+			this.configContent.engines.push(ecc);
+		}
+		await this.writeConfig();
 	}
 
 	private async writeConfig(): Promise<void> {
