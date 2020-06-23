@@ -58,7 +58,7 @@ export type RuleEvent = {
 /**
  * Type mapping to rules returned from eslint
  */
-type ESRule = {
+export type ESRule = {
 	meta: {
 		docs: {
 			description: string;
@@ -66,6 +66,7 @@ type ESRule = {
 			recommended: boolean;
 			url: string;
 		};
+		/* eslint-disable @typescript-eslint/no-explicit-any */
 		schema: Record<string, any>[];
 	};
 	create: Function;
@@ -74,7 +75,7 @@ type ESRule = {
 /**
  * Type mapping to report output by eslint
  */
-type ESReport = {
+export type ESReport = {
 	results: [
 		{
 			filePath: string;
@@ -91,7 +92,7 @@ type ESReport = {
 /**
  * Type mapping to report messages output by eslint
  */
-type ESMessage = {
+export type ESMessage = {
 	fatal: boolean;
 	ruleId: string;
 	severity: number;

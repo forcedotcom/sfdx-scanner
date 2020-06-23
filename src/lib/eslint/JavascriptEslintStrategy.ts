@@ -18,13 +18,13 @@ const ES_CONFIG = {
 
 export class JavascriptEslintStrategy implements EslintStrategy {
 	private static ENGINE_NAME = "eslint";
-	private static LANGUAGE = ["javascript"];
+	private static LANGUAGES = ["javascript"];
 
 	private initialized: boolean;
 	protected logger: Logger;
 	private config: Config;
 
-	public async init(): Promise<void> {
+	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
@@ -33,33 +33,35 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		this.initialized = true;
 	}
 
-	public isEnabled(): boolean {
+	isEnabled(): boolean {
 		return this.config.isEngineEnabled(this.getName());
 	}
 
-	getLanguage(): string[] {
-		return JavascriptEslintStrategy.LANGUAGE;
+	getLanguages(): string[] {
+		return JavascriptEslintStrategy.LANGUAGES;
 	}
 
-	public getName(): string {
+	getName(): string {
 		return JavascriptEslintStrategy.ENGINE_NAME;
 	}
 
-	public isRuleKeySupported(key: string): boolean {
+	isRuleKeySupported(key: string): boolean {
 		return !key.startsWith(TYPESCRIPT_RULE_PREFIX);
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string,any> {
 		return ES_CONFIG;
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	async getRunConfig(): Promise<Record<string, any>> {
 		//TODO: find a way to override with eslintrc if Config asks for it
 		return ES_CONFIG;
 	}
 
 	filterUnsupportedPaths(paths: string[]): string[] {
-		// TODO: fill in the filtering logic
+		// TODO: fill in the filtering logic - this method could be removed if we fix an issue with getTargetPatterns in TypescriptEslintStrategy
 		return paths;
 	}
 

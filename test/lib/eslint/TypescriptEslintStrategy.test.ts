@@ -5,6 +5,9 @@ import { Config } from '../../../src/lib/util/Config';
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import { fail } from 'assert';
 import * as path from 'path';
+import {Messages} from '@salesforce/core';
+
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'eslintEngine');
 
 describe('TypescriptEslint Strategy', () => {
 	describe('Test cases with #findTsConfig', () => {
@@ -32,7 +35,7 @@ describe('TypescriptEslint Strategy', () => {
 					await tsStrategy.findTsconfig(target);
 					fail("Invalid path in Config.json's OverriddenConfigPath should cause an error");
 				} catch (error) {
-					expect(error.message).equals(`Invalid path in Config: ${invalidPath}`);
+					expect(error.message).equals(messages.getMessage('InvalidPath', [invalidPath]));
 				}
 
 			});

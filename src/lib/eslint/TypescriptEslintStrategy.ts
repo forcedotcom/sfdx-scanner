@@ -42,19 +42,20 @@ const ES_PLUS_TS_CONFIG = {
 
 };
 
-const TS_CONFIG = "tsconfig.json";
+const TS_CONFIG = 'tsconfig.json';
+const NO_TS_CONFIG = '';
 
 export class TypescriptEslintStrategy implements EslintStrategy {
 	private static ENGINE_NAME = "eslint-typescript";
-	private static LANGUAGE = ["typescript"];
+	private static LANGUAGES = ["typescript"];
 
 	private initialized: boolean;
-	protected logger: Logger;
+	private logger: Logger;
 	private fileHandler: FileHandler;
 	private config: Config;
 	private outputProcessor: OutputProcessor;
 
-	public async init(): Promise<void> {
+	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
@@ -79,12 +80,13 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return true;
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string, any> {
 		return ES_PLUS_TS_CONFIG;
 	}
 
-	getLanguage(): string[] {
-		return TypescriptEslintStrategy.LANGUAGE;
+	getLanguages(): string[] {
+		return TypescriptEslintStrategy.LANGUAGES;
 	}
 
 	async getTargetPatterns(target?: string): Promise<string[]> {
@@ -119,7 +121,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			}
 		}
 
-		// Join forces.  TODO or maybe not?  Should we just rely only on tsconfig if provided?
+		// TODO: the files returned from here also include .js files even if our target pattern asks not to include them.
+		// We should handle the combination more meaningfully than a simple concatenation.
+
 		return engineConfig.targetPatterns.concat(targetPatterns);
 	}
 
@@ -129,10 +133,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return filteredPaths;
 	}
 
+	/* eslint-disable @typescript-eslint/no-explicit-any */
 	async getRunConfig(target?: string): Promise<Record<string, any>> {
 		const tsconfigPath = await this.findTsconfig(target);
 
-		if (!tsconfigPath) {
+		if (tsconfigPath === NO_TS_CONFIG) {
 			throw new Error(`Unable to find ${TS_CONFIG}. Please provide ${TS_CONFIG} in the target ${target} or the current working directory or in Config.`);
 		}
 
@@ -179,7 +184,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	private async getTsconfigFromConfig(): Promise<string> {
-		let tsconfigPath = '';
+		let tsconfigPath = NO_TS_CONFIG;
 		// Check if overriddenConfig is available
 		const overriddenConfig = this.config.getOverriddenConfigPath(this.getName());
 		if (!overriddenConfig) {
@@ -189,7 +194,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 		// Complain if overriddenConfig does not exist.
 		if (!(await this.fileHandler.exists(path.resolve(overriddenConfig)))) {
-			throw new SfdxError(`Invalid path in Config: ${overriddenConfig}`); // FIXME: move to messages.js
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'eslintEngine', 'InvalidPath', [overriddenConfig]);
 		}
 
 		// If overriddenConfig is a directory, look for tsconfig.json file.
@@ -201,17 +206,18 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 				throw new SfdxError(`Overridden path [${overriddenConfig}] does not contain ${TS_CONFIG}`);
 			}
 		} else if (overriddenConfig.endsWith(TS_CONFIG)) { // If overriddenConfig is a file, check if the file is tsconfig.json
+			// TODO: what if the user has a config file with a different name? How would eslint react to it if we set the value?
 			this.logger.trace(`Found ${TS_CONFIG} directly as overridden path in Config, ${overriddenConfig}`);
 			tsconfigPath = overriddenConfig;
 		} else { // Complain if the file is something else
-			throw new SfdxError(`Cannot find ${TS_CONFIG} with overridden path ${overriddenConfig}`);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'eslintEngine', 'ConfigFileMissing', [TS_CONFIG, overriddenConfig]);
 		}
 
 		return tsconfigPath;
 	}
 
 	private async getTsconfigFromTarget(target: string): Promise<string> {
-		let tsconfigPath = '';
+		let tsconfigPath = NO_TS_CONFIG;
 		if (await this.fileHandler.isDir(target)) {
 			tsconfigPath = await this.checkDirectoryForTsconfig(target);
 		}
@@ -225,7 +231,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			this.logger.trace(`Found ${TS_CONFIG} in directory ${givenPath}`);
 			return tsconfigPath;
 		}
-		return '';
+		return NO_TS_CONFIG;
 	}
 
 }

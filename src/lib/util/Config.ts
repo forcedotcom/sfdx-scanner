@@ -1,5 +1,5 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
+import {Logger, LoggerLevel} from '@salesforce/core';
 import {CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
 import path = require('path');
 
@@ -13,7 +13,7 @@ export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
 	targetPatterns: string[];
-	useDefaultConfig?: boolean; //TODO: this parameter doesn't make sense for PMD. Make it optional.
+	useDefaultConfig?: boolean;
 	overriddenConfigPath?: string;
 }
 
@@ -94,10 +94,7 @@ export class Config {
 		const defaultValue = '';
 		const engineConfig = this.getEngineConfig(name);
 
-		if (!this.shouldUseDefaultConfig(name)) {
-			if (!engineConfig || !engineConfig.overriddenConfigPath) {
-				throw new SfdxError(`Please set "overriddenConfigPath" with config path to override for engine ${name} in ${CONFIG_FILE_PATH}. If you want to use default value, please set "useDefaultConfig" to true.`);
-			}
+		if (this.shouldUseDefaultConfig(name)) {
 			return engineConfig.overriddenConfigPath;
 		}
 		return defaultValue;
@@ -105,7 +102,7 @@ export class Config {
 
 	private shouldUseDefaultConfig(name: string): boolean {
 		const engineConfig = this.getEngineConfig(name);
-		const defaultValue = true;
+		const defaultValue = false;
 
 		if (engineConfig) {
 			if (engineConfig.useDefaultConfig != null) {
