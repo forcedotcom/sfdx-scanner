@@ -157,7 +157,7 @@ URL: ${v.url}
 				// Since we are creating CSVs, make sure we escape any commas in our violation messages.
 				// Just replace with semi-colon.
 				const msg = v.message.trim().replace(",", ";");
-				const row = [++problemCount, fileName, v.severity, v.line, v.column, msg, v.ruleName, v.url, v.category, result.engine];
+				const row = [++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine];
 				csvString += '"' + row.join('","') + '"\n';
 			}
 		}

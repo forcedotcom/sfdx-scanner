@@ -10,6 +10,9 @@
 		"@oclif/errors": "^1",
 		"@salesforce/command": "^2.1.4",
 		"@salesforce/core": "^2.1.6",
+		"@typescript-eslint/eslint-plugin": "^2.21.0",
+		"@typescript-eslint/parser": "^2.21.0",
+		"eslint": "^6.8.0",
 		"find-java-home": "^1.1.0",
 		"globby": "^11.0.0",
 		"normalize-path": "^3.0.0",
@@ -33,20 +36,14 @@
 		"@types/chai": "^4",
 		"@types/mocha": "^7.0.2",
 		"@types/node": "^13.11.1",
-		"@typescript-eslint/eslint-plugin": "^2.21.0",
-		"@typescript-eslint/parser": "^2.21.0",
 		"chai": "^4",
 		"eslint": "^6.8.0",
-		"eslint-config-standard": "^14.1.0",
-		"eslint-plugin-import": "^2.20.1",
-		"eslint-plugin-node": "^11.0.0",
-		"eslint-plugin-promise": "^4.2.1",
-		"eslint-plugin-standard": "^4.0.1",
-		"mocha": "^7.0.0",
+		"mocha": "^7.2.0",
 		"mocha-junit-reporter": "^1.23.3",
 		"nyc": "^15.0.0",
 		"sinon": "^9.0.0",
-		"tildify": "^2.0.0"
+		"tildify": "^2.0.0",
+		"ts-mockito": "^2.6.1"
 	},
 	"engines": {
 		"node": ">=8.0.0"
