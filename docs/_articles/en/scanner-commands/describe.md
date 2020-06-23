@@ -36,4 +36,4 @@ $ sfdx scanner:rule:describe -n <string> [--verbose] [--json]
 ```  
 
 ## Demo
-![Example](../../../assets/images/describe.gif) 
+![Describe Example](./assets/images/describe.gif) 
