@@ -15,7 +15,7 @@ Version 2.0 of the sfdx-scanner plug-in uses PMD v6.23.0 and ESlint v6.8.0.
 
 -------
 
-![Plugin Design](../../assets/images/ScannerPlugin.jpeg)
+![Plugin Design](./assets/images/ScannerPlugin.jpeg)
 
 -------
 
