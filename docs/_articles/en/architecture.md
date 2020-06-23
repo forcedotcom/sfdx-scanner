@@ -5,37 +5,37 @@ lang: en
 
 ## sfdx-scanner Architecture
 
-sfdx-scanner is built as an open-source Sfdx Plugin in the [Salesforce CLI framework](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_plugins.meta/sfdx_cli_plugins/cli_plugins_architecture.htm). Most of the code is written in Typescript in NodeJS framework and holds a small portion of Java code. 
+sfdx-scanner is an open-source [Salesforce CLI plugin](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_plugins.meta/sfdx_cli_plugins/cli_plugins_architecture.htm). Most of the code is written in Typescript in the NodeJS framework. Some of the code is written in Java.
 
 ## sfdx-scanner Internals
 
-sfdx-scanner is powered by multiple static analyzers that we refer to as Rule Engines. These Rule Engines specialize in different aspects of static analysis as well as support different languages. Also, each Rule Engine has its own unique set of rules, input parameters, and different formats of reporting the results. sfdx-scanner unifies these as a single static analyzer and provides a common user experience to benefit from the different specialties.
+The sfdx-scanner plug-in is powered by multiple static analyzers, also known as rule engines. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. The sfdx-scanner plug-in unifies these rules engines as a single static analyzer and provides a common user experience to benefit from the different specialties.
 
-For now, sfdx-scanner version 2.0 has incorporated PMD v6.23.0 and Eslint v6.8.0.
+Version 2.0 of the sfdx-scanner plug-in uses PMD v6.23.0 and ESlint v6.8.0.
 
 -------
 
-![Plugin Design](./assets/images/ScannerPlugin.jpeg) 
+![Plugin Design](./assets/images/ScannerPlugin.jpeg)
 
 -------
 
 ## Rule Engine Unification
 
-In order to provide a uniform experience while using multiple Rule Engines, sfdx-scanner has two bridging blocks.
+To provide a uniform experience while using multiple rule engines, sfdx-scanner has two bridging blocks.
 
 ### Rule Catalog
 
-Since each Rule Engine has a different set of rules and different formats for representing them, we talk to each engine separately to pull the default rules they offer and populate them together in the Rule Catalog. This contains information on the name of a rule, a short description, the category they can be classified under, and the language of the code source the rule can analyze. You can view this catalog as the output of ```scanner:rule:list``` command. Notice that this list includes the name of the Rule Engine a particular rule belongs to.
+Each rule engine has a different set of rules and different formats for representing them. The sfdx-scanner plug-in communicates with each rule engine separately to pull the default rules they offer and populate them together in the rule catalog. This catalog contains the name of a rule, a short description, its classification category, and the code source language that the rule can analyze. Run the ```scanner:rule:list``` command to view this catalog. The output includes the rule engine name that a particular rule belongs to.
 
 ### Rule Engine Bridge
 
-By unifying the representation of the rules into a Rule Catalog, sfdx-scanner has the capability to take a uniform set of input parameters. The bridge then detects the selected engines through the rules selected for input. It also figures out the target files based on the file types defined in ```~/.sfdx-scanner/Config.json```. From the selected rules and target files, it tailors the input for each relevant Rule Engine and hands off the input to the Rule Engine for the actual scan.
+By unifying the representation of the rules into a rule catalog, sfdx-scanner can take a uniform set of input parameters. The bridge then detects the selected engines using the rules selected for input. It also determines the target files based on the file types defined in ```~/.sfdx-scanner/Config.json```. From the selected rules and target files, it tailors the input for each relevant rule engine and hands off the input to the rule engine for the actual scan.
 
-Once the scan completes and the Rule Engine provides the results, the bridge surfaces the results in a normalized format.
+After the scan completes and the rule engine provides the results, the bridge surfaces the results in a normalized format.
 
 ## Source Code and Contribution
 
-sfdx-scanner code resides [here](https://github.com/forcedotcom/sfdx-scanner). At the moment, a Salesforce team is actively working on expanding and improving the tool. The project will soon be open for external contributions.
+The code for the sfdx-scanner plug-in is in [this GitHub repo](https://github.com/forcedotcom/sfdx-scanner). Salesforce is actively working on expanding and improving the tool. The project will soon be open for external contributions.
 
 
 
