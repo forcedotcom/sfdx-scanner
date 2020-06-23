@@ -40,4 +40,4 @@ $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
 ```
 
 ## Demo
-![Example](../../../assets/images/remove.gif) 
+![Remove Example](./assets/images/remove.gif) 
