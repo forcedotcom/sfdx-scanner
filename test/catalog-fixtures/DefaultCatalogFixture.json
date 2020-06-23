@@ -30,6 +30,21 @@
 			"paths": [
 				"https://eslint.org/docs/rules/no-inner-declarations"
 			]
+		},
+		{
+			"name": "Best Practices",
+			"engine": "eslint-typescript",
+			"paths": [
+				"https://eslint.org/docs/rules/no-implicit-globals",
+				"https://eslint.org/docs/rules/no-implicit-coercion"
+			]
+		},
+		{
+			"name": "Possible Errors",
+			"engine": "eslint-typescript",
+			"paths": [
+				"https://eslint.org/docs/rules/no-inner-declarations"
+			]
 		}
 	],
 	"rulesets": [
@@ -64,6 +79,23 @@
 			],
 			"languages": [
 				"javascript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-unreachable"
+		},
+		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-unreachable",
+			"description": "disallow unreachable code after `return`, `throw`, `continue`, and `break` statements",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"typescript"
 			],
 			"defaultEnabled": true,
 			"url": "https://eslint.org/docs/rules/no-unreachable"
@@ -158,6 +190,23 @@
 			"url": "https://eslint.org/docs/rules/no-implicit-coercion"
 		},
 		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-implicit-coercion",
+			"description": "disallow shorthand type conversions",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-coercion"
+		},
+		{
 			"engine": "eslint",
 			"sourcepackage": "eslint",
 			"name": "no-implicit-globals",
@@ -175,6 +224,23 @@
 			"url": "https://eslint.org/docs/rules/no-implicit-globals"
 		},
 		{
+			"engine": "eslint-typecsript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-implicit-globals",
+			"description": "disallow declarations in the global scope",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-globals"
+		},
+		{
 			"engine": "eslint",
 			"sourcepackage": "eslint",
 			"name": "no-inner-declarations",
@@ -187,6 +253,23 @@
 			],
 			"languages": [
 				"javascript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-inner-declarations"
+		},
+		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-inner-declarations",
+			"description": "disallow variable or `function` declarations in nested blocks",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"typescript"
 			],
 			"defaultEnabled": true,
 			"url": "https://eslint.org/docs/rules/no-inner-declarations"

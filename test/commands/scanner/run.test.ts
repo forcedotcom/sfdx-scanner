@@ -261,10 +261,10 @@ describe('scanner:run', function () {
 					expect(data[1][3]).to.equal('"72"', 'Violation #2 should occur on the expected line');
 					expect(data[2][3]).to.equal('"76"', 'Violation #3 should occur on the expected line');
 					expect(data[3][3]).to.equal('"80"', 'Violation #4 should occur on the expected line');
-					expect(data[0][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
-					expect(data[1][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
-					expect(data[2][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
-					expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
+					expect(data[0][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
+					expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
+					expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
+					expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
 				});
 
 			runTest
@@ -303,10 +303,10 @@ describe('scanner:run', function () {
 					expect(data[1][3]).to.equal('"72"', 'Violation #2 should occur on the expected line');
 					expect(data[2][3]).to.equal('"76"', 'Violation #3 should occur on the expected line');
 					expect(data[3][3]).to.equal('"80"', 'Violation #4 should occur on the expected line');
-					expect(data[0][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
-					expect(data[1][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
-					expect(data[2][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
-					expect(data[3][6]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
+					expect(data[0][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
+					expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
+					expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
+					expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
 				});
 
 			runTest
@@ -693,7 +693,7 @@ describe('scanner:run', function () {
 						// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 						const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 						const implicitMessages = violations[0].match(regex);
-						expect(implicitMessages || []).to.have.lengthOf(15, 'Should be 15 log entries for implicitly added categories from pmd and eslint');
+						expect(implicitMessages || []).to.have.lengthOf(22, 'Should be 22 log entries for implicitly added categories from pmd and eslint');
 					});
 			});
 

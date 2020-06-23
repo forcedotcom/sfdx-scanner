@@ -5,3 +5,5 @@ export const SFDX_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
+
+export const TYPESCRIPT_RULE_PREFIX = '@typescript';
