@@ -14,6 +14,8 @@ export type EngineConfigContent = {
 	disabled?: boolean;
 	targetPatterns: string[];
 	supportedLanguages?: string[];
+	useDefaultConfig?: boolean;
+	overriddenConfigPath?: string;
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
@@ -30,12 +32,21 @@ const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: "eslint",
 			targetPatterns: [
-				"**/*.js","**/*.ts",
+				"**/*.js",
 				"!**/node_modules/**",
-			]
-		}
+			],
+			useDefaultConfig: true
+		},
+		{
+            name: "eslint-typescript",
+            targetPatterns: [
+                "**/*.ts",
+                "!**/node_modules/**"
+			],
+			useDefaultConfig: true
+        }
 	]
-}
+};
 
 export class Config {
 
@@ -91,6 +102,28 @@ export class Config {
 			this.configContent.engines.push(ecc);
 		}
 		await this.writeConfig();
+	}
+
+	public getOverriddenConfigPath(name: string): string {
+		const defaultValue = '';
+		const engineConfig = this.getEngineConfig(name);
+
+		if (this.shouldUseDefaultConfig(name)) {
+			return engineConfig.overriddenConfigPath;
+		}
+		return defaultValue;
+	}
+
+	private shouldUseDefaultConfig(name: string): boolean {
+		const engineConfig = this.getEngineConfig(name);
+		const defaultValue = false;
+
+		if (engineConfig) {
+			if (engineConfig.useDefaultConfig != null) {
+				return engineConfig.useDefaultConfig;
+			}
+		}
+		return defaultValue;
 	}
 
 	private async writeConfig(): Promise<void> {

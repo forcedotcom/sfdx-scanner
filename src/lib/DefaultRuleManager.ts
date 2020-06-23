@@ -1,4 +1,4 @@
-import {Logger, SfdxError,} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable, injectAll} from 'tsyringe';
@@ -62,7 +62,14 @@ export class DefaultRuleManager implements RuleManager {
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
 			const engineRules = rules.filter(r => r.engine === e.getName());
 			const engineTargets = await this.unpackTargets(e, targets);
-			ps.push(e.run(engineGroups, engineRules, engineTargets));
+			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
+			if (engineRules.length > 0 && engineTargets.length > 0) {
+				this.logger.trace(`${e.getName()} is eligible to execute.`);
+				ps.push(e.run(engineGroups, engineRules, engineTargets));
+			} else {
+				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
+			}
+			
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate

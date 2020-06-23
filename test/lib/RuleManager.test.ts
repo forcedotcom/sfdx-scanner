@@ -8,8 +8,8 @@ import path = require('path');
 import Sinon = require('sinon');
 
 const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-const CATALOG_FIXTURE_RULE_COUNT = 11;
-const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 9;
+const CATALOG_FIXTURE_RULE_COUNT = 15;
+const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 11;
 
 let ruleManager: RuleManager = null;
 
@@ -69,7 +69,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(6, 'Exactly 6 rules are categorized as "Best Practices" or "Design"');
+				expect(matchingRules).to.have.lengthOf(8, 'Exactly 8 rules are categorized as "Best Practices" or "Design"');
 			});
 		});
 
@@ -93,7 +93,7 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(5, 'Exactly 5 rules are in the "Braces" or "Best Practices" rulesets');
+				expect(matchingRules).to.have.lengthOf(7, 'Exactly 7 rules are in the "Braces" or "Best Practices" rulesets');
 			});
 		});
 
@@ -201,7 +201,6 @@ describe('RuleManager', () => {
 					} else {
 						results = JSON.parse(output);
 					}
-
 					expect(results).to.be.an("array").that.has.length(6);
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
