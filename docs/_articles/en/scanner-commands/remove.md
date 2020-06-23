@@ -1,10 +1,10 @@
 ---
-title: SFDX Scanner Command Reference
+title: Salesforce CLI Scanner Plug-In Command Reference
 lang: en
 ---
 
 ## sfdx scanner:rule:remove
-Removes custom rules from the registry of available rules. Use the --path parameter to specify one or more paths to remove, or omit it to receive a list of all valid custom paths.
+Removes custom rules from the registry of available rules. Use the ```-p|--path``` parameter to specify one or more paths to remove. If you don't specify any parameters, the command lists all valid custom paths but doesn't remove any.
 
 ## Usage
 
@@ -15,29 +15,29 @@ $ sfdx scanner:rule:remove [-f] [-p <array>] [--verbose] [--json]
 ## Options
 
 ```bash
-  -f, --force		bypass the confirmation prompt and immediately unregister the rules
-  -p, --path=path	one or more paths to deregister
-  --json      		format output as json
-  --verbose      	emit additional command output to stdout
+  -f, --force		Bypass the confirmation prompt and immediately remove the rules
+  -p, --path=path	One or more paths to remove
+  --json      		Format output as json
+  --verbose      	Emit additional command output to stdout
 ```
   
 ## Example
 
-Run the command with no arguments to see a list of all currently registered custom paths.
+Run the command with no parameters to see a list of all currently registered custom paths.
 ```bash
 $ sfdx scanner:rule:remove
 ```
 
-You may use the --path parameter to specify one or more paths to remove. It deregisters the rules defined in somerules.jar and any JARs contained in the rules folder.
+Use the ```-p|--path``` parameter to specify the path or paths you want to remove from the registry. This example removes the rules defined in ```somerules.jar``` and all JARs contained in the ```rules``` folder.
   
 ```bash
 $ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
 ```  
   		
-  By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed. The --force flag may be used to bypass that confirmation. 
+By default, this command lists the rules that will be removed and prompts you for confirmation. Use the ```-f|--force``` flag to bypass that confirmation. 
 ```bash
 $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
 ```
 
 ## Demo
-![Describe Example](./assets/images/remove.gif) 
+![Example](../../../assets/images/remove.gif) 
