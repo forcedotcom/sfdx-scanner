@@ -132,3 +132,11 @@ dist
 
 # Ignore Gradle build output directory
 build
+
+# Eclipse
+.classpath
+.project
+.settings
+
+pmd-cataloger/bin
+
