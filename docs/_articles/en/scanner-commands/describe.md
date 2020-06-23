@@ -1,12 +1,10 @@
 ---
-title: SFDX Scanner Command Reference
+title: Salesforce CLI Scanner Plug-In Command Reference
 lang: en
 ---
 
 ## sfdx scanner:rule:describe
-Provides detailed information about a rule. Use this command to better understand a particular rule.
-
-For each rule, you can find information about the language it works on, the violation it detects as well as an example code of how the violation looks. The description also includes the categories and rulesets that the rule belongs to.
+Provides detailed information about a rule. Information includes its language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.
 
 ## Usage
 
@@ -17,9 +15,9 @@ $ sfdx scanner:rule:describe -n <string> [--verbose] [--json]
 ## Options
 
 ```bash
-  -n, --rulename=rulename	(required) The name of a rule.
-  --json			format output as json
-  --verbose 			emit additional command output to stdout
+  -n, --rulename=rulename	(required) The name of the rule.
+  --json			Format output as json
+  --verbose 			Emit additional command output to stdout
 
 ```
   
