@@ -23,7 +23,7 @@ A: No! `sfdx-scanner` can be used on any codebase.
 #### Q: What languages does `sfdx-scanner` support?
 A: By default, `sfdx-scanner` supports code written in Apex, VisualForce, Java, JavaScript, and TypeScript. You can extend it to support any language.
 
-#### <a name="q-how-do-i-add-a-new-language-to-sfdx-scanner" />Q: How do I add a language to `sfdx-scanner`?
+#### Q: How do I add a language to `sfdx-scanner`?
 A: The file types targeted by each rule engine are defined in `~/.sfdx-scanner/Config.json` in the `targetPatterns` property for each entry.
 
 To make a particular rule engine scan a new language, add that language's file extension to the `targetPatterns` property for that rule engine in `~/.sfdx-scanner/Config.json`. For example, to start scanning Python files with PMD, add `**/*.py` to the `targetPatterns` property for PMD.
@@ -48,7 +48,7 @@ outlined in ["How do I add a new language to `sfdx-scanner`?"](/en/faq/#q-how-do
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the `scanner:rule:add` command.
 
-If the language is not already supported, follow the steps in ["How do I add a new language to `sfdx-scanner`?"](#q-how-do-i-add-a-new-language-to-sfdx-scanner).
+If the language is not already supported, follow the steps in "How do I add a new language to `sfdx-scanner`?"
 
 ## Questions about dependencies and setup
 
