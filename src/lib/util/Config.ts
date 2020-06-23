@@ -13,6 +13,7 @@ export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
 	targetPatterns: string[];
+	supportedLanguages?: string[];
 	useDefaultConfig?: boolean;
 	overriddenConfigPath?: string;
 }
@@ -25,7 +26,8 @@ const DEFAULT_CONFIG: ConfigContent = {
 			targetPatterns: [
 				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
-			]
+			],
+			supportedLanguages: ['apex', 'javascript']
 		},
 		{
 			name: "eslint",
@@ -44,7 +46,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 			useDefaultConfig: true
         }
 	]
-}
+};
 
 export class Config {
 
@@ -88,6 +90,26 @@ export class Config {
 
 	public getEngineConfig(name: string): EngineConfigContent {
 		return this.configContent.engines.find(e => e.name === name);
+	}
+
+	public async getSupportedLanguages(engineName: string): Promise<string[]> {
+		const ecc = this.getEngineConfig(engineName);
+		// If the config specifies supported languages, use those.
+		if (ecc.supportedLanguages && ecc.supportedLanguages.length > 0) {
+			this.logger.trace(`Retrieving supported languages ${ecc.supportedLanguages} from engine ${engineName}`);
+			return ecc.supportedLanguages;
+		} else {
+			// If the config doesn't specify supported languages, see if we have any default values.
+			const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name === engineName);
+			// If we find default values, persist those to the config.
+			if (defaultConfig.supportedLanguages) {
+				ecc.supportedLanguages = defaultConfig.supportedLanguages;
+				this.logger.trace(`Persisting default languages ${ecc.supportedLanguages} for engine ${engineName}`);
+				await this.writeConfig();
+			}
+			// Return whatever we came back with.
+			return ecc.supportedLanguages;
+		}
 	}
 
 	public getOverriddenConfigPath(name: string): string {

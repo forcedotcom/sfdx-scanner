@@ -6,6 +6,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
 import * as JreSetupManager from './../JreSetupManager';
 import {OutputProcessor} from './OutputProcessor';
+import * as PmdLanguageManager from './PmdLanguageManager';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import path = require('path');
 
@@ -14,7 +15,6 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemp
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
-const SUPPORTED_LANGUAGES = ['apex', 'javascript'];
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
@@ -95,8 +95,10 @@ export class PmdCatalogWrapper extends PmdSupport {
 
 		const customPathEntries = await this.getCustomRulePathEntries();
 
+		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
+
 		// For each supported language, add path to PMD's inbuilt rules
-		SUPPORTED_LANGUAGES.forEach((language) => {
+		supportedLanguages.forEach((language) => {
 			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
 			const customPathSet = customPathEntries ? customPathEntries.get(language) : null;
 			let pathSet = pathSetMap.get(language);

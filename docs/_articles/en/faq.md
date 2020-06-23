@@ -2,7 +2,6 @@
 title: 'Frequently Asked Questions'
 lang: en
 ---
-
 ## Questions about `sfdx-scanner`
 
 #### Q: What is `sfdx-scanner`?
@@ -37,6 +36,14 @@ A: Remove the language's file extensions from all `targetPatterns` properties in
 Removing this information from the `~/.sfdx-scanner/Config.json`file doesn't remove existing custom rules from the registry. To remove existing custom rules, run the `scanner:rule:remove` command.
 
 ## Questions about adding and removing rules
+
+#### Q: How do I enable Engine X's default rules for Language Y?
+A: That depends on the engine in question.
+- __PMD__: Add the language's name to the PMD's `supportedLanguages` array in
+`~/.sfdx-scanner/Config.json`.
+<br/>
+If the language is not already supported, you must additionally follow the steps
+outlined in ["How do I add a new language to `sfdx-scanner`?"](/en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
 
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the `scanner:rule:add` command.
