@@ -10,7 +10,7 @@ The Salesforce CLI Scanner plug-in is a unified tool for static analysis of sour
 
 The Salesforce CLI Scanner Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code. 
 
-You can integration this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
+You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
 
 ## Additional Resources
 
