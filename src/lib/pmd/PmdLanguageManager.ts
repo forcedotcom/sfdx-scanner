@@ -2,10 +2,10 @@ import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import {PmdEngine} from './PmdEngine';
 
-import {Logger} from '@salesforce/core';
+import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 
-const DEFAULT_LANGUAGES = ['apex', 'javascript'];
+Messages.importMessagesDirectory(__dirname);
 const LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['apex', 'apex'],
 	['java', 'java'],
@@ -48,27 +48,16 @@ class PmdLanguageManager extends AsyncCreatable {
 				this.logger.trace(`Resolving language alias ${alias} to ${lang}`);
 				resolvedLangs.push(lang);
 			} else {
-				// TODO: Perhaps this should throw an error?
 				this.logger.trace(`No language found for alias ${alias}`);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);
 			}
 		}
 		return resolvedLangs;
 	}
 
 	public async getSupportedLanguages(): Promise<string[]> {
-		const pmdConfig = await this.config.getEngineConfig(PmdEngine.NAME);
-		// If the config specifies default languages, use those.
-		if (pmdConfig.supportedLanguages && pmdConfig.supportedLanguages.length > 0) {
-			this.logger.trace(`Pulled languages ${pmdConfig.supportedLanguages} from Config.json`);
-			return this.resolveLanguageAliases(pmdConfig.supportedLanguages);
-		} else {
-			// Otherwise, assume they're using an old config that predates the property, and we'll set it to the default
-			// value for them.
-			pmdConfig.supportedLanguages = DEFAULT_LANGUAGES;
-			await this.config.setEngineConfig(PmdEngine.NAME, pmdConfig);
-			this.logger.trace(`Saving languages ${DEFAULT_LANGUAGES} to Config.json`);
-			return DEFAULT_LANGUAGES;
-		}
+		const aliases = await this.config.getSupportedLanguages(PmdEngine.NAME);
+		return this.resolveLanguageAliases(aliases);
 	}
 }
 

@@ -92,16 +92,24 @@ export class Config {
 		return this.configContent.engines.find(e => e.name === name);
 	}
 
-	public async setEngineConfig(name: string, ecc: EngineConfigContent): Promise<void> {
-		// If there's an entry in the Engine array that has the same name as the one we were provided, override it with
-		// the new one.
-		const idx = this.configContent.engines.findIndex(e => e.name === name);
-		if (idx !== -1) {
-			this.configContent.engines[idx] = ecc;
+	public async getSupportedLanguages(engineName: string): Promise<string[]> {
+		const ecc = this.getEngineConfig(engineName);
+		// If the config specifies supported languages, use those.
+		if (ecc.supportedLanguages && ecc.supportedLanguages.length > 0) {
+			this.logger.trace(`Retrieving supported languages ${ecc.supportedLanguages} from engine ${engineName}`);
+			return ecc.supportedLanguages;
 		} else {
-			this.configContent.engines.push(ecc);
+			// If the config doesn't specify supported languages, see if we have any default values.
+			const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name === engineName);
+			// If we find default values, persist those to the config.
+			if (defaultConfig.supportedLanguages) {
+				ecc.supportedLanguages = defaultConfig.supportedLanguages;
+				this.logger.trace(`Persisting default languages ${ecc.supportedLanguages} for engine ${engineName}`);
+				await this.writeConfig();
+			}
+			// Return whatever we came back with.
+			return ecc.supportedLanguages;
 		}
-		await this.writeConfig();
 	}
 
 	public getOverriddenConfigPath(name: string): string {
