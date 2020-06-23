@@ -1,12 +1,12 @@
 ---
-title: SFDX Scanner Command Reference
+title: Salesforce CLI Scanner Plug-In Command Reference
 lang: en
 ---
 
 ## sfdx scanner:run
-Evaluate a selection of rules against a codebase. Scan codebase with all rules by default or with a chosen set of rules if using rulename/category/ruleset filters.
+Scan a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. 
 
-You can choose the format of the output and decide between printing the results directly or as contents of a file that you provide with --outfile flag.
+You can specify the format of the output, such as XML or Junit. You can print the output to the console (default) or to a file using the ```--outfile``` parameter. 
 
 ## Usage
 
@@ -17,29 +17,29 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|ju
 ## Options
 
 ```bash
-  -c, --category=category		One or more categories of rules to run. Multiple values can be specified as a comma-separated list.
+  -c, --category=category		One or more categories of rules to run. Specify multiple values as a comma-separated list.
   -f, --format=(xml|junit|csv|table) 	Specifies output format with results written directly to the console.
-  -o, --outfile=outfile			write output to a file
-  -r, --ruleset=ruleset			One or more rulesets to run. Multiple values can be specified as a comma-separated list.
-  -t, --target=target			Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list
-  --json				format output as json
-  --verbose				emit additional command output to stdout
+  -o, --outfile=outfile			Write output to a file
+  -r, --ruleset=ruleset			One or more rulesets to run. Specify multiple values as a comma-separated list.
+  -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
+  --json				Format output as json
+  --verbose				Emit additional command output to stdout
 ```
   
 ## Example
 
-Invoking without specifying any rules causes all rules to be run. The following evaluates all rules against somefile.js.
+This example evaluates all rules against ```somefile.js```.
 
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js"
 ```
 
-Specifying multiple categories or rulesets is treated as a logical OR. The following example evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
+When you specify multiple categories or rulesets, the results are combined with a logical OR. This example evaluates all rules in the Design and Best Practices categories and all rules in the Braces ruleset.
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
 ```       
 
-Wrap globs in quotes.  The following example evaluates rules against all .js files below the current directory, except for IgnoreMe.js.
+Wrap globs in quotes.  This example evaluates rules against all ```*.js``` files in the current directory, except for ```IgnoreMe.js```.
 
 Unix example:
 ```bash    
@@ -51,6 +51,6 @@ Windows example:
 ```
 
 ## Demo
-![Run Example](./assets/images/run.gif) 
+![Run Example](../../../assets/images/run.gif) 
 
 
