@@ -4,6 +4,9 @@ import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import {uxEvents} from '../ScannerEvents';
 import path = require('path');
+import fs = require('fs');
+import tmp = require('tmp');
+import { FileResult } from 'tmp'
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
@@ -26,6 +29,7 @@ export default class PmdWrapper extends PmdSupport {
 	reportFormat: Format;
 	reportFile: string;
 	logger: Logger; // TODO: Add relevant trace log lines
+	private tempFile: FileResult;
 	private initialized: boolean;
 
 	protected async init(): Promise<void> {
@@ -68,7 +72,9 @@ export default class PmdWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const classpath = await super.buildClasspath();
-		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-dir', this.path,
+		this.tempFile = await tmp.fileSync();
+		fs.writeFileSync(this.tempFile.name, this.path);
+		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-filelist', this.tempFile.name,
 			'-format', this.reportFormat];
 		if (this.rules.length > 0) {
 			args.push('-rulesets', this.rules);
@@ -104,6 +110,8 @@ export default class PmdWrapper extends PmdSupport {
 
 		cp.on('exit', code => {
 			this.logger.trace(`monitorChildProcess has received exit code ${code}`);
+			// Cleanup the temp file
+			this.tempFile.removeCallback();
 			if (code === 0 || code === 4) {
 				const processedStdout = this.turnErrorsIntoWarnings(stdout);
 				// If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
