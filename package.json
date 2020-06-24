@@ -1,94 +1,98 @@
 {
-	"name": "@salesforce/sfdx-scanner",
-	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "1.0.30",
-	"author": "ISV SWAT",
-	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
-	"dependencies": {
-		"@oclif/command": "^1",
-		"@oclif/config": "^1",
-		"@oclif/errors": "^1",
-		"@salesforce/command": "^2.1.4",
-		"@salesforce/core": "^2.1.6",
-		"@typescript-eslint/eslint-plugin": "^2.21.0",
-		"@typescript-eslint/parser": "^2.21.0",
-		"eslint": "^6.8.0",
-		"find-java-home": "^1.1.0",
-		"globby": "^11.0.0",
-		"normalize-path": "^3.0.0",
-		"picomatch": "^2.2.2",
-		"reflect-metadata": "^0.1.13",
-		"ts-node": "^8",
-		"tslib": "^1",
-		"tsyringe": "^4.1.0",
-		"typescript": "^3.8.2",
-		"untildify": "^4.0.0",
-		"word-wrap": "^1.2.3",
-		"xml-js": "^1.6.11"
-	},
-	"devDependencies": {
-		"@istanbuljs/nyc-config-typescript": "^1.0.1",
-		"@oclif/dev-cli": "^1",
-		"@oclif/plugin-help": "^2",
-		"@oclif/test": "^1",
-		"@salesforce/dev-config": "1.5.0",
-		"@salesforce/ts-sinon": "^1.1.2",
-		"@types/chai": "^4",
-		"@types/mocha": "^7.0.2",
-		"@types/node": "^13.11.1",
-		"chai": "^4",
-		"eslint": "^6.8.0",
-		"mocha": "^7.2.0",
-		"mocha-junit-reporter": "^1.23.3",
-		"nyc": "^15.0.0",
-		"sinon": "^9.0.0",
-		"tildify": "^2.0.0",
-		"ts-mockito": "^2.6.1"
-	},
-	"engines": {
-		"node": ">=8.0.0"
-	},
-	"files": [
-		"/dist",
-		"/lib",
-		"/messages",
-		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json"
-	],
-	"homepage": "https://github.com/forcedotcom/sfdx-scanner",
-	"keywords": [
-		"sfdx-plugin"
-	],
-	"license": "MIT",
-	"oclif": {
-		"commands": "./lib/commands",
-		"bin": "sfdx",
-		"topics": {
-			"scanner": {
-				"description": "scan code to detect code quality issues and security vulnerabilities",
-				"subtopics": {
-					"rule": {
-						"description": "view or add rules to scan code"
-					}
-				}
-			},
-			"scanner:scannerCommand": {
-				"hidden": true
-			}
-		},
-		"devPlugins": [
-			"@oclif/plugin-help"
-		]
-	},
-	"repository": "forcedotcom/sfdx-scanner",
-	"scripts": {
-		"build": "./gradlew build",
-		"prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-		"postpack": "rm -f oclif.manifest.json",
-		"lint": "eslint ./src --ext .ts",
-		"test": "./gradlew test && nyc mocha \"./test/**/*.test.ts\"",
-		"postinstall": "ts-node  -e \"require('./lib/lib/postinstall').execute()\"",
-		"coverage": "nyc report --reporter text",
-		"version": "oclif-dev readme && git add README.md"
-	}
+  "name": "@salesforce/sfdx-scanner",
+  "description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
+  "version": "1.0.30",
+  "author": "ISV SWAT",
+  "bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/errors": "^1",
+    "@salesforce/command": "^2.1.4",
+    "@salesforce/core": "^2.1.6",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "eslint": "^6.8.0",
+    "find-java-home": "^1.1.0",
+    "globby": "^11.0.0",
+    "normalize-path": "^3.0.0",
+    "picomatch": "^2.2.2",
+    "reflect-metadata": "^0.1.13",
+    "ts-node": "^8",
+    "tslib": "^1",
+    "tsyringe": "^4.1.0",
+    "typescript": "^3.8.2",
+    "untildify": "^4.0.0",
+    "word-wrap": "^1.2.3",
+    "xml-js": "^1.6.11",
+    "snyk": "^1.348.1"
+  },
+  "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
+    "@oclif/dev-cli": "^1",
+    "@oclif/plugin-help": "^2",
+    "@oclif/test": "^1",
+    "@salesforce/dev-config": "1.5.0",
+    "@salesforce/ts-sinon": "^1.1.2",
+    "@types/chai": "^4",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.1",
+    "chai": "^4",
+    "eslint": "^6.8.0",
+    "mocha": "^7.2.0",
+    "mocha-junit-reporter": "^1.23.3",
+    "nyc": "^15.0.0",
+    "sinon": "^9.0.0",
+    "tildify": "^2.0.0",
+    "ts-mockito": "^2.6.1"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/dist",
+    "/lib",
+    "/messages",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/forcedotcom/sfdx-scanner",
+  "keywords": [
+    "sfdx-plugin"
+  ],
+  "license": "MIT",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "sfdx",
+    "topics": {
+      "scanner": {
+        "description": "scan code to detect code quality issues and security vulnerabilities",
+        "subtopics": {
+          "rule": {
+            "description": "view or add rules to scan code"
+          }
+        }
+      },
+      "scanner:scannerCommand": {
+        "hidden": true
+      }
+    },
+    "devPlugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "forcedotcom/sfdx-scanner",
+  "scripts": {
+    "build": "./gradlew build",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "postpack": "rm -f oclif.manifest.json",
+    "lint": "eslint ./src --ext .ts",
+    "test": "./gradlew test && nyc mocha \"./test/**/*.test.ts\"",
+    "postinstall": "ts-node  -e \"require('./lib/lib/postinstall').execute()\"",
+    "coverage": "nyc report --reporter text",
+    "version": "oclif-dev readme && git add README.md",
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
+  },
+  "snyk": true
 }
