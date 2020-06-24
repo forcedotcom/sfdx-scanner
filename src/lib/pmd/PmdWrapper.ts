@@ -4,9 +4,8 @@ import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import {uxEvents} from '../ScannerEvents';
 import path = require('path');
-import fs = require('fs');
-import tmp = require('tmp');
-import { FileResult } from 'tmp'
+import {FileHandler} from '../util/FileHandler';
+import {FileResult} from 'tmp'
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
@@ -72,8 +71,12 @@ export default class PmdWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const classpath = await super.buildClasspath();
-		this.tempFile = tmp.fileSync();
-		fs.writeFileSync(this.tempFile.name, this.path);
+		// Operating systems impose limits on the maximum length of a command line invocation. This can be problematic
+		// when scannning a large number of files. Store the list of files to scan in a temp file. Pass the location
+		// of the temp file to PMD. The temp file is cleaned up in #monitorChildProcess after the PMD process exits.
+		const fileHandler = new FileHandler();
+		this.tempFile = await fileHandler.tmpFile();
+		await fileHandler.writeFile(this.tempFile.name, this.path);
 		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-filelist', this.tempFile.name,
 			'-format', this.reportFormat];
 		if (this.rules.length > 0) {

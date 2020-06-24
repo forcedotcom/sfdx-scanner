@@ -1,5 +1,7 @@
 import fs = require('fs');
 import {Stats} from 'fs';
+import tmp = require('tmp');
+import {FileResult} from 'tmp'
 
 /**
  * Handles all File and IO operations.
@@ -71,6 +73,18 @@ export class FileHandler {
 			return fs.writeFile(filename, fileContent, (err) => {
 				if(!err) {
 					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		});
+	}
+
+	tmpFile(options: object = {}): Promise<FileResult> {
+		return new Promise<FileResult>((resolve, reject) => {
+			return tmp.file(options, (err, name, fd, removeCallback) => {
+				if (!err) {
+					resolve({ name: name, fd:fd, removeCallback:removeCallback });
 				} else {
 					reject(err);
 				}
