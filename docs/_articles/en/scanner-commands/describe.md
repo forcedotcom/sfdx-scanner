@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## sfdx scanner:rule:describe
-Provides detailed information about a rule. Information includes its language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.
+Provides detailed information about a rule. Information includes its description, language (such as Apex or Java) and the error message that user can expect if this rule violation occurs. The command output also includes the rule's categories and rulesets.
 
 ## Usage
 
