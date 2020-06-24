@@ -5,7 +5,6 @@ import * as JreSetupManager from './../JreSetupManager';
 import {uxEvents} from '../ScannerEvents';
 import path = require('path');
 import {FileHandler} from '../util/FileHandler';
-import {FileResult} from 'tmp'
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
@@ -28,7 +27,6 @@ export default class PmdWrapper extends PmdSupport {
 	reportFormat: Format;
 	reportFile: string;
 	logger: Logger; // TODO: Add relevant trace log lines
-	private tempFile: FileResult;
 	private initialized: boolean;
 
 	protected async init(): Promise<void> {
@@ -73,11 +71,11 @@ export default class PmdWrapper extends PmdSupport {
 		const classpath = await super.buildClasspath();
 		// Operating systems impose limits on the maximum length of a command line invocation. This can be problematic
 		// when scannning a large number of files. Store the list of files to scan in a temp file. Pass the location
-		// of the temp file to PMD. The temp file is cleaned up in #monitorChildProcess after the PMD process exits.
+		// of the temp file to PMD. The temp file is cleaned up when the process exits.
 		const fileHandler = new FileHandler();
-		this.tempFile = await fileHandler.tmpFile();
-		await fileHandler.writeFile(this.tempFile.name, this.path);
-		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-filelist', this.tempFile.name,
+		const tmpPath = await fileHandler.tmpFileWithCleanup();
+		await fileHandler.writeFile(tmpPath, this.path);
+		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-filelist', tmpPath,
 			'-format', this.reportFormat];
 		if (this.rules.length > 0) {
 			args.push('-rulesets', this.rules);
@@ -113,8 +111,6 @@ export default class PmdWrapper extends PmdSupport {
 
 		cp.on('exit', code => {
 			this.logger.trace(`monitorChildProcess has received exit code ${code}`);
-			// Cleanup the temp file
-			this.tempFile.removeCallback();
 			if (code === 0 || code === 4) {
 				const processedStdout = this.turnErrorsIntoWarnings(stdout);
 				// If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
