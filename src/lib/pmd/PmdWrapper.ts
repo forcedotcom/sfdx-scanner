@@ -72,7 +72,7 @@ export default class PmdWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const classpath = await super.buildClasspath();
-		this.tempFile = await tmp.fileSync();
+		this.tempFile = tmp.fileSync();
 		fs.writeFileSync(this.tempFile.name, this.path);
 		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '-filelist', this.tempFile.name,
 			'-format', this.reportFormat];
