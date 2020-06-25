@@ -100,6 +100,7 @@ export class PmdEngine implements RuleEngine {
 				return [];
 			}
 		} catch (e) {
+			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(e.message || e);
 		}
 	}
@@ -107,6 +108,7 @@ export class PmdEngine implements RuleEngine {
 	private xmlToRuleResults(pmdXml: string): RuleResult[] {
 		// If the results were just an empty string, we can return it.
 		if (pmdXml === '') {
+			this.logger.trace('No PMD results to convert');
 			return [];
 		}
 
