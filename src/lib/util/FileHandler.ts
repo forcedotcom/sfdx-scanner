@@ -1,5 +1,6 @@
 import fs = require('fs');
 import {Stats} from 'fs';
+import tmp = require('tmp');
 
 /**
  * Handles all File and IO operations.
@@ -71,6 +72,22 @@ export class FileHandler {
 			return fs.writeFile(filename, fileContent, (err) => {
 				if(!err) {
 					resolve();
+				} else {
+					reject(err);
+				}
+			});
+		});
+	}
+
+	// Create a temp file that will automatically be cleaned up when the process exits.
+	// Returns the absolute path of the temp file
+	tmpFileWithCleanup(): Promise<string> {
+		return new Promise<string>((resolve, reject) => {
+			// Ask tmp to clean up the file on process exit
+			tmp.setGracefulCleanup();
+			return tmp.file({}, (err, name) => {
+				if (!err) {
+					resolve(name);
 				} else {
 					reject(err);
 				}
