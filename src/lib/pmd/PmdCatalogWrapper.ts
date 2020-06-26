@@ -93,28 +93,37 @@ export class PmdCatalogWrapper extends PmdSupport {
 	private async getRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const pathSetMap = new Map<string, Set<string>>();
 
-		const customPathEntries = await this.getCustomRulePathEntries();
+		const customPathEntries: Map<string, Set<string>> = await this.getCustomRulePathEntries();
+		// Iterate through the custom paths.
+		customPathEntries.forEach(async (paths: Set<string>, langKey: string) => {
+			// If the language by which these paths are mapped can be de-aliased into one of PMD's default-supported
+			// languages, we should use the name PMD recognizes. That way, if they have custom paths for 'ecmascript'
+			// and 'js', we'll turn both of those into 'javascript'.
+			// If we can't de-alias the key, we should at least convert it to lowercase. Otherwise 'python', 'PYTHON',
+			// and 'PyThOn' would all be considered different languages.
+			const lang = (await PmdLanguageManager.resolveLanguageAlias(langKey)) || langKey.toLowerCase();
+			this.logger.trace(`Custom paths mapped to ${langKey} are using converted key ${lang}`);
 
-		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
-
-		// For each supported language, add path to PMD's inbuilt rules
-		supportedLanguages.forEach((language) => {
-			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
-			const customPathSet = customPathEntries ? customPathEntries.get(language) : null;
-			let pathSet = pathSetMap.get(language);
-			if (!pathSet) {
-				pathSet = new Set<string>();
-				pathSetMap.set(language, pathSet);
-			}
-			if (customPathSet) {
-				for (const value of customPathSet.values()) {
+			// Add this language's custom paths to the pathSetMap so they're cataloged properly.
+			let pathSet = pathSetMap.get(lang) || new Set<string>();
+			if (paths) {
+				for (const value of paths.values()) {
 					pathSet.add(value);
 				}
 			}
-			pathSet.add(pmdJarName);
+			pathSetMap.set(lang, pathSet);
 		});
 
-		this.logger.trace(`Found PMD rule paths: ${PrettyPrinter.stringifyMapofSets(pathSetMap)}`);
+		// Now, we'll want to add the default PMD JARs for any activated languages.
+		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
+		supportedLanguages.forEach((language) => {
+			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
+			const pathSet = pathSetMap.get(language) || new Set<string>();
+			pathSet.add(pmdJarName);
+			this.logger.trace(`Adding JAR ${pmdJarName}, the default PMD JAR for language ${language}`);
+			pathSetMap.set(language, pathSet);
+		});
+		this.logger.trace(`Found PMD rule paths ${PrettyPrinter.stringifyMapOfSets(pathSetMap)}`);
 		return pathSetMap;
 	}
 

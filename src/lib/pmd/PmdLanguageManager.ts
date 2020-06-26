@@ -25,6 +25,8 @@ const LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['xsl', 'xml']
 ]);
 
+let INSTANCE: PmdLanguageManager = null;
+
 class PmdLanguageManager extends AsyncCreatable {
 	private logger: Logger;
 	private config: Config;
@@ -39,29 +41,39 @@ class PmdLanguageManager extends AsyncCreatable {
 		this.initialized = true;
 	}
 
-	private resolveLanguageAliases(aliases: string[]): string[] {
-		const resolvedLangs = [];
-		for (let i = 0; i < aliases.length; i++) {
-			const alias = aliases[i];
-			if (LANGUAGES_BY_ALIAS.has(alias.toLowerCase())) {
-				const lang = LANGUAGES_BY_ALIAS.get(alias.toLowerCase());
-				this.logger.trace(`Resolving language alias ${alias} to ${lang}`);
-				resolvedLangs.push(lang);
-			} else {
-				this.logger.trace(`No language found for alias ${alias}`);
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);
-			}
+	public resolveLanguageAlias(alias: string): string {
+		if (LANGUAGES_BY_ALIAS.has(alias.toLowerCase())) {
+			const lang = LANGUAGES_BY_ALIAS.get(alias.toLowerCase());
+			this.logger.trace(`Resolving language alias ${alias} to ${lang}`);
+			return lang;
+		} else {
+			this.logger.trace(`No language found for alias ${alias}`);
+			return null;
 		}
-		return resolvedLangs;
 	}
 
 	public async getSupportedLanguages(): Promise<string[]> {
 		const aliases = await this.config.getSupportedLanguages(PmdEngine.NAME);
-		return this.resolveLanguageAliases(aliases);
+		const langs: string[] = [];
+		for (const alias of aliases) {
+			const lang = this.resolveLanguageAlias(alias);
+			if (lang) {
+				langs.push(lang);
+			} else {
+				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);
+			}
+		}
+		return langs;
 	}
 }
 
 export async function getSupportedLanguages(): Promise<string[]> {
-	const manager = await PmdLanguageManager.create({});
-	return await manager.getSupportedLanguages();
+	INSTANCE = INSTANCE || await PmdLanguageManager.create({});
+	return await INSTANCE.getSupportedLanguages();
+}
+
+export async function resolveLanguageAlias(alias: string): Promise<string> {
+	INSTANCE = INSTANCE || await PmdLanguageManager.create({});
+	return INSTANCE.resolveLanguageAlias(alias);
 }
