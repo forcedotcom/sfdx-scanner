@@ -5,6 +5,7 @@ import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import { SfdxError, Logger } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
+import * as stripJsonComments from 'strip-json-comments';
 
 /**
  * Type mapping to tsconfig.json files
@@ -98,7 +99,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 		const targetPatterns: string[] = [];
 		if (tsconfigPath) {
-			const tsconfig: TSConfig = JSON.parse(await this.fileHandler.readFile(tsconfigPath));
+			const json: string = await this.fileHandler.readFile(tsconfigPath);
+			// The default TSConfig has JSON comments. Strip them out before parsing
+			const tsconfig: TSConfig = JSON.parse(stripJsonComments(json));
 
 			// Found a tsconfig.  Load up its patterns.
 			if (tsconfig.include) {

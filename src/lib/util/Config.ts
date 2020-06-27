@@ -24,7 +24,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: "pmd",
 			targetPatterns: [
-				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
+				"**/*.cls","**/*.trigger","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
 			],
 			supportedLanguages: ['apex', 'javascript']
