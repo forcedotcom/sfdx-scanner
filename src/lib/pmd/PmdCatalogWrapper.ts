@@ -105,7 +105,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 			this.logger.trace(`Custom paths mapped to ${langKey} are using converted key ${lang}`);
 
 			// Add this language's custom paths to the pathSetMap so they're cataloged properly.
-			let pathSet = pathSetMap.get(lang) || new Set<string>();
+			const pathSet = pathSetMap.get(lang) || new Set<string>();
 			if (paths) {
 				for (const value of paths.values()) {
 					pathSet.add(value);
