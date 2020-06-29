@@ -39,8 +39,9 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
-
+	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
+	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
 
 const TS_CONFIG = 'tsconfig.json';
