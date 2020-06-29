@@ -76,17 +76,20 @@ export type ESRule = {
  * Type mapping to report output by eslint
  */
 export type ESReport = {
-	results: [
-		{
-			filePath: string;
-			messages: ESMessage[];
-		}
-	];
+	results: ESResult[];
 	errorCount: number;
 	warningCount: number;
 	fixableErrorCount: number;
 	fixableWarningCount: number;
 	usedDeprecatedRules: string[];
+}
+
+/**
+ * Type mapping for eslint's results within a report
+ */
+export type ESResult = {
+	filePath: string;
+	messages: ESMessage[];
 }
 
 /**
