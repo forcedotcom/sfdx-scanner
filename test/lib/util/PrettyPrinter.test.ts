@@ -75,7 +75,7 @@ describe(('PrettyPrinter tests'), () => {
 
 	it('should print Map<string, Set<string>>', () => {
 		const {mapOfSet, expectedMapString} = createMapOfSet();
-		expect(PrettyPrinter.stringifyMapofSets(mapOfSet)).equals(expectedMapString);
+		expect(PrettyPrinter.stringifyMapOfSets(mapOfSet)).equals(expectedMapString);
 	});
 
 	it('should print Map<string, Map<string, Set<string>>>', () => {
