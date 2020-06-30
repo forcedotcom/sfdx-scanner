@@ -76,7 +76,7 @@ describe('Config.js tests', () => {
 
 		it('should update config with default value if config does not exist', async () => {
 			const writeFileStub = Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
-			const config = await createConfig(testConfig);
+			const config = await createConfig(testConfig, false);
 
 			// supportedLanguages is not set in testConfig. Expect that default value is returned
 			await config.getSupportedLanguages(ENGINE.PMD);
@@ -85,7 +85,7 @@ describe('Config.js tests', () => {
 
 		it("should update config with default engine value if config does not contain the engine's information", async () => {
 			const writeFileStub = Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
-			const config = await createConfig(testConfig);
+			const config = await createConfig(testConfig, false);
 
 			// testConfig does not have an eslint section
 			const targetPatterns = await config.getTargetPatterns(ENGINE.ESLINT);
@@ -100,7 +100,7 @@ describe('Config.js tests', () => {
 			afterEach(() => {
 				Sinon.restore();
 			});
-			
+
 			it('should fail for a value that is not an array', async () => {
 				const invalidUserConfig = {
 					"engines": [
@@ -148,9 +148,14 @@ describe('Config.js tests', () => {
 
 });
 
-async function createConfig(testConfig: Object) {
+async function createConfig(testConfig: Object, stubWrite: boolean = true) {
 	Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 	Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(testConfig));
+	
+	if (stubWrite) {
+		Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
+	}
+
 	const config = new Config();
 	await config.init();
 	return config;
