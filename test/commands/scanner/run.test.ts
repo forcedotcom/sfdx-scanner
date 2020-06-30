@@ -801,4 +801,18 @@ describe('scanner:run', function () {
 				});
 		});
 	});
+
+	describe('BaseConfig Environment Tests For Javascript', () => {
+		runTest
+		.stdout()
+		.stderr()
+		.command(['scanner:run',
+			'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js'),
+			'--format', 'csv'
+		])
+		.it('The baseConfig enables the usage of default Javascript Types', ctx => {
+			// There should be no violations.
+			expect(ctx.stdout).to.contains('No rule violations found.', 'Should be no violations found in the file.');
+		});
+	});
 });
