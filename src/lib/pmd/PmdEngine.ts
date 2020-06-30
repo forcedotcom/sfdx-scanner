@@ -1,5 +1,4 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import * as path from 'path';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../ioc.config';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
@@ -77,11 +76,7 @@ export class PmdEngine implements RuleEngine {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
-				if (target.isDirectory) {
-					targetPaths.push(...target.paths.map(p => path.join(target.target, p)));
-				} else {
-					targetPaths.push(...target.paths);
-				}
+				targetPaths.push(...target.paths);
 			}
 			if (targetPaths.length === 0) {
 				this.logger.trace('No matching pmd target files found. Nothing to execute.');
