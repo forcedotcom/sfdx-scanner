@@ -17,6 +17,14 @@
 			"engine": "pmd"
 		},
 		{
+			"paths": [
+				"category/ecmascript/errorprone.xml",
+				"category/apex/errorprone.xml"
+			],
+			"name": "Error Prone",
+			"engine": "pmd"
+		},
+		{
 			"name": "Best Practices",
 			"engine": "eslint",
 			"paths": [
