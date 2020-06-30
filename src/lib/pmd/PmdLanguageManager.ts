@@ -1,9 +1,10 @@
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
-import {PmdEngine} from './PmdEngine';
+
 
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
+import { ENGINE } from '../../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
@@ -56,7 +57,7 @@ class PmdLanguageManager extends AsyncCreatable {
 	}
 
 	public async getSupportedLanguages(): Promise<string[]> {
-		const aliases = await this.config.getSupportedLanguages(PmdEngine.NAME);
+		const aliases = await this.config.getSupportedLanguages(ENGINE.PMD);
 		return this.resolveLanguageAliases(aliases);
 	}
 }

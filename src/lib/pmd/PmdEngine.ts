@@ -5,6 +5,7 @@ import {Controller} from '../../ioc.config';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
+import {ENGINE} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 
@@ -22,7 +23,7 @@ interface PmdViolation extends Element {
 }
 
 export class PmdEngine implements RuleEngine {
-	public static NAME = "pmd";
+	public static NAME: string = ENGINE.PMD.valueOf();
 
 	private logger: Logger;
 	private config: Config;
@@ -36,8 +37,7 @@ export class PmdEngine implements RuleEngine {
 
 	/* eslint-disable @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
-		const engineConfig = this.config.getEngineConfig(PmdEngine.NAME);
-		return Promise.resolve(engineConfig.targetPatterns);
+		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
 
 	public matchPath(path: string): boolean {
