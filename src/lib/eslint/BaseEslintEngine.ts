@@ -40,6 +40,18 @@ export interface EslintStrategy {
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	createCLIEngine(config: Record<string,any>): CLIEngine {
+		// From https://eslint.org/docs/developer-guide/nodejs-api:
+		// options.baseConfig. Configuration object, extended by all configurations used with this instance.
+		// You can use this option to define the default settings that will be used if your configuration files don't configure it.
+		config["baseConfig"] = {
+			// Include the following environment variables in order to support the objects declared in the comment
+			"env": {
+				"es6": true, // Map
+				"node": true, // process
+				"browser": true, // document
+				"webextensions": true // chrome
+			}
+		};
 		return new CLIEngine(config);
 	}
 	
@@ -148,7 +160,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[]): Promise<RuleResult[]> {
-
 		// If we didn't find any paths, we're done.
 		if (!targets || targets.length === 0) {
 			this.logger.trace('No matching target files found. Nothing to execute.');
