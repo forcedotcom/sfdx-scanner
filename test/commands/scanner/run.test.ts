@@ -791,7 +791,7 @@ describe('scanner:run', function () {
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
-				.it('Poloyglot project triggers pmd and eslint rules', ctx => {
+				.it('Polyglot project triggers pmd and eslint rules', ctx => {
 					expect(ctx.stderr).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{")));
 					// Look through all of the results and gather a set of unique engines
