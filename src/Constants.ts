@@ -8,6 +8,12 @@ export const CONFIG_FILE = 'Config.json';
 
 export const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
+export enum ENGINE {
+	PMD = 'pmd',
+	ESLINT = 'eslint',
+	ESLINT_TYPESCRIPT = 'eslint-typescript'
+}
+
 export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',

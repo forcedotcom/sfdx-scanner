@@ -3,8 +3,8 @@ import Sinon = require('sinon');
 import {Config} from '../../../src/lib/util/Config';
 import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
-import {PmdEngine} from '../../../src/lib/pmd/PmdEngine';
 import messages = require('../../../messages/PmdLanguageManager');
+import { ENGINE } from '../../../src/Constants';
 
 describe('PmdLanguageManager', () => {
 	describe('getSupportedLanguages()', () => {
@@ -14,7 +14,7 @@ describe('PmdLanguageManager', () => {
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies Apex, JavaScript, and Java.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(exactFakeLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(exactFakeLangs);
 			});
 
 			after(() => {
@@ -33,7 +33,7 @@ describe('PmdLanguageManager', () => {
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies some languages using some weird casing and aliases.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(weirdlyAliasedLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(weirdlyAliasedLangs);
 			});
 
 			after(() => {
@@ -52,7 +52,7 @@ describe('PmdLanguageManager', () => {
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies some nonsensical alias.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(invalidAliasLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(invalidAliasLangs);
 			});
 
 			after(() => {
@@ -75,7 +75,7 @@ describe('PmdLanguageManager', () => {
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies javascript.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(langsContainingJavaScript);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(langsContainingJavaScript);
 			});
 
 			after(() => {

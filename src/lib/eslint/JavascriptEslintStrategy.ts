@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {TYPESCRIPT_RULE_PREFIX} from '../../Constants';
+import {TYPESCRIPT_RULE_PREFIX, ENGINE} from '../../Constants';
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import { Logger } from '@salesforce/core';
@@ -17,7 +17,7 @@ const ES_CONFIG = {
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
-	private static ENGINE_NAME = "eslint";
+	private static ENGINE_NAME = ENGINE.ESLINT.valueOf();
 	private static LANGUAGES = ["javascript"];
 
 	private initialized: boolean;
@@ -66,9 +66,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	async getTargetPatterns(): Promise<string[]> {
-		const engineConfig = this.config.getEngineConfig(this.getName());
 
 		// TODO: extract target patterns from overridden config, if available
-		return engineConfig.targetPatterns/*.concat(targetPatterns)*/;
+		return this.config.getTargetPatterns(ENGINE.ESLINT);
 	}
 }
