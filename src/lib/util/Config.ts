@@ -14,9 +14,7 @@ export type EngineConfigContent = {
 	name: string;
 	disabled?: boolean;
 	targetPatterns: string[];
-	supportedLanguages?: string[];
-	useDefaultConfig?: boolean;
-	overriddenConfigPath?: string;
+	supportedLanguages?: string[]
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
@@ -35,16 +33,14 @@ export const DEFAULT_CONFIG: ConfigContent = {
 			targetPatterns: [
 				"**/*.js",
 				"!**/node_modules/**",
-			],
-			useDefaultConfig: true
+			]
 		},
 		{
             name: ENGINE.ESLINT_TYPESCRIPT,
             targetPatterns: [
                 "**/*.ts",
                 "!**/node_modules/**"
-			],
-			useDefaultConfig: true
+			]
         }
 	]
 };
@@ -60,7 +56,7 @@ class TypeChecker {
 				}
 			});
 			return true;
-		} 
+		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
 	}
 
@@ -155,30 +151,6 @@ export class Config {
 
 	private getEngineConfig(name: ENGINE): EngineConfigContent {
 		return this.configContent.engines.find(e => e.name === name);
-	}
-
-	// TODO: remove this method and the associated config
-	public getOverriddenConfigPath(name: ENGINE): string {
-		const defaultValue = '';
-		const engineConfig = this.getEngineConfig(name);
-
-		if (this.shouldUseDefaultConfig(name)) {
-			return engineConfig.overriddenConfigPath;
-		}
-		return defaultValue;
-	}
-
-	// TODO: remove this method and the associated config
-	private shouldUseDefaultConfig(name: ENGINE): boolean {
-		const engineConfig = this.getEngineConfig(name);
-		const defaultValue = false;
-
-		if (engineConfig) {
-			if (engineConfig.useDefaultConfig != null) {
-				return engineConfig.useDefaultConfig;
-			}
-		}
-		return defaultValue;
 	}
 
 	private async writeConfig(): Promise<void> {

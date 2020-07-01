@@ -58,3 +58,9 @@ The annotated JSON below shows you what you should remove
         },
 ... Rest of file removed for clarity ...
 ```
+
+### The `scanner:run` command output contains the message `'<file_name>' does not reside in a location that is included by your tsconfig.json 'include' attribute`.
+
+The ESLint engine requires that any typescript files that are scanned must be included by the tsconfig. [More Information](https://github.com/typescript-eslint/typescript-eslint/releases/tag/v2.0.0)
+
+Update your tsconfig's `include` attribute to include `<file_name>`

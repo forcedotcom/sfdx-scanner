@@ -70,4 +70,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		// TODO: extract target patterns from overridden config, if available
 		return this.config.getTargetPatterns(ENGINE.ESLINT);
 	}
+
+	convertLintMessage(fileName: string, message: string): string {
+		return message;
+	}
 }

@@ -4,23 +4,11 @@ import {FileHandler} from '../util/FileHandler';
 import {Config} from '../util/Config';
 import {ENGINE} from '../../Constants';
 import {Controller} from '../../ioc.config';
-import { SfdxError, Logger } from '@salesforce/core';
+import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
-import * as stripJsonComments from 'strip-json-comments';
 
-/**
- * Type mapping to tsconfig.json files
- */
-type TSConfig = {
-	compilerOptions: {
-		allowJs: boolean;
-		outDir: string;
-		outFile: string;
-	};
-	include: string[];
-	exclude: string[];
-	files: string[];
-}
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
@@ -46,7 +34,6 @@ const ES_PLUS_TS_CONFIG = {
 };
 
 const TS_CONFIG = 'tsconfig.json';
-const NO_TS_CONFIG = '';
 
 export class TypescriptEslintStrategy implements EslintStrategy {
 	private static ENGINE_NAME = ENGINE.ESLINT_TYPESCRIPT.valueOf();
@@ -92,44 +79,8 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return TypescriptEslintStrategy.LANGUAGES;
 	}
 
-	async getTargetPatterns(target?: string): Promise<string[]> {
-		const configTargetPatterns = await this.config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
-
-		
-		// Find the typescript config file, if any
-		const tsconfigPath = await this.findTsconfig(target);
-
-		const targetPatterns: string[] = [];
-		if (tsconfigPath) {
-			const json: string = await this.fileHandler.readFile(tsconfigPath);
-			// The default TSConfig has JSON comments. Strip them out before parsing
-			const tsconfig: TSConfig = JSON.parse(stripJsonComments(json));
-
-			// Found a tsconfig.  Load up its patterns.
-			if (tsconfig.include) {
-				targetPatterns.push(...tsconfig.include);
-			}
-
-			if (tsconfig.exclude) {
-				// Negate the exclude pattern (because that's how we like it)
-				targetPatterns.push(...tsconfig.exclude.map(e => "!" + e));
-			} else if (tsconfig.compilerOptions && tsconfig.compilerOptions.outDir) {
-				// TS likes to auto-exclude the outDir but only if exclude is not specified.
-				targetPatterns.push("!" + path.join(tsconfig.compilerOptions.outDir, "**"));
-			} else if (tsconfig.compilerOptions && tsconfig.compilerOptions.outFile) {
-				// Same reasoning as outDir
-				targetPatterns.push("!" + tsconfig.compilerOptions.outFile);
-			}
-
-			if (tsconfig.files) {
-				targetPatterns.push(...tsconfig.files);
-			}
-		}
-
-		// TODO: the files returned from here also include .js files even if our target pattern asks not to include them.
-		// We should handle the combination more meaningfully than a simple concatenation.
-
-		return configTargetPatterns.concat(targetPatterns);
+	async getTargetPatterns(): Promise<string[]> {
+		return this.config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
 	}
 
 	filterUnsupportedPaths(paths: string[]): string[] {
@@ -139,12 +90,8 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	async getRunConfig(target?: string): Promise<Record<string, any>> {
-		const tsconfigPath = await this.findTsconfig(target);
-
-		if (tsconfigPath === NO_TS_CONFIG) {
-			throw new Error(`Unable to find ${TS_CONFIG}. Please provide ${TS_CONFIG} in the target ${target} or the current working directory or in Config.`);
-		}
+	async getRunConfig(): Promise<Record<string, any>> {
+		const tsconfigPath = await this.findTsconfig();
 
 		// Alert the user we found a config file, if --verbose
 		this.alertUser(tsconfigPath);
@@ -168,75 +115,36 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.outputProcessor.emitEvents([event]);
 	}
 
-	async findTsconfig(target: string): Promise<string> {
-		let tsconfigPath: string;
-
-		// Check config
-		tsconfigPath = await this.getTsconfigFromConfig();
-
-		// Check target
-		if (!tsconfigPath) {
-			tsconfigPath = await this.getTsconfigFromTarget(target);
+	convertLintMessage(fileName: string, message: string):string {
+		if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
+			message.endsWith('The file must be included in at least one of the projects provided.')) {
+			return messages.getMessage('FileNotIncludedByTSConfig', [fileName, TS_CONFIG]);
+		} else {
+			return message;
 		}
-
-		// Check current working directory
-		if (!tsconfigPath) {
-			tsconfigPath = await this.checkDirectoryForTsconfig('');
-		}
-
-		this.logger.trace(`Using ${TS_CONFIG} from ${tsconfigPath}`);
-		return tsconfigPath;
 	}
 
-	private async getTsconfigFromConfig(): Promise<string> {
-		let tsconfigPath = NO_TS_CONFIG;
-		// Check if overriddenConfig is available
-		const overriddenConfig = this.config.getOverriddenConfigPath(ENGINE.ESLINT_TYPESCRIPT);
-		if (!overriddenConfig) {
-			this.logger.trace(`Did not find an overridden path from Config`);
+	async findTsconfig(): Promise<string> {
+		const tsconfigFromWorkingDirectory = await this.checkWorkingDirectoryForTsconfig();
+
+		if (!tsconfigFromWorkingDirectory) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfig', [TS_CONFIG, path.resolve()]);
+		}
+
+		this.logger.trace(`Using ${TS_CONFIG} from ${tsconfigFromWorkingDirectory}`);
+
+		return tsconfigFromWorkingDirectory;
+	}
+
+	private async checkWorkingDirectoryForTsconfig(): Promise<string> {
+		const tsconfigPath = path.resolve(TS_CONFIG);
+
+		if (await this.fileHandler.exists(tsconfigPath)) {
+			this.logger.trace(`Found ${TS_CONFIG} in current working directory ${tsconfigPath}`);
 			return tsconfigPath;
 		}
 
-		// Complain if overriddenConfig does not exist.
-		if (!(await this.fileHandler.exists(path.resolve(overriddenConfig)))) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'eslintEngine', 'InvalidPath', [overriddenConfig]);
-		}
-
-		// If overriddenConfig is a directory, look for tsconfig.json file.
-		if (await this.fileHandler.isDir(overriddenConfig)) {
-			this.logger.trace(`Looking for ${TS_CONFIG} inside overridden dir from config ${overriddenConfig}`);
-			tsconfigPath = await this.checkDirectoryForTsconfig(overriddenConfig);
-			// Complain if we can't find a tsconfig.json inside.
-			if (!tsconfigPath) {
-				throw new SfdxError(`Overridden path [${overriddenConfig}] does not contain ${TS_CONFIG}`);
-			}
-		} else if (overriddenConfig.endsWith(TS_CONFIG)) { // If overriddenConfig is a file, check if the file is tsconfig.json
-			// TODO: what if the user has a config file with a different name? How would eslint react to it if we set the value?
-			this.logger.trace(`Found ${TS_CONFIG} directly as overridden path in Config, ${overriddenConfig}`);
-			tsconfigPath = overriddenConfig;
-		} else { // Complain if the file is something else
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'eslintEngine', 'ConfigFileMissing', [TS_CONFIG, overriddenConfig]);
-		}
-
-		return tsconfigPath;
-	}
-
-	private async getTsconfigFromTarget(target: string): Promise<string> {
-		let tsconfigPath = NO_TS_CONFIG;
-		if (await this.fileHandler.isDir(target)) {
-			tsconfigPath = await this.checkDirectoryForTsconfig(target);
-		}
-		// TODO: if this is a pattern, should we look at each directory from bottom to top?
-		return tsconfigPath;
-	}
-
-	private async checkDirectoryForTsconfig(givenPath: string): Promise<string> {
-		if (await this.fileHandler.exists(path.resolve(givenPath, TS_CONFIG))) {
-			const tsconfigPath = path.resolve(givenPath, TS_CONFIG);
-			this.logger.trace(`Found ${TS_CONFIG} in directory ${givenPath}`);
-			return tsconfigPath;
-		}
-		return NO_TS_CONFIG;
+		return null;
 	}
 
 }

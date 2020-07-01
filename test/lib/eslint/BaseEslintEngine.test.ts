@@ -124,6 +124,8 @@ describe('Tests for BaseEslintEngine', () => {
 					const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
 					const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
+					Mockito.when(MockStrategy.convertLintMessage("filePath", message)).thenReturn(message);
+
 					const results = await engine.run(
 						[getDummyRuleGroup()],
 						[getDummyRule()],
@@ -144,7 +146,7 @@ describe('Tests for BaseEslintEngine', () => {
 				});
 
 
-			
+
 		});
 	});
 
