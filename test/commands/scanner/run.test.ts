@@ -782,19 +782,24 @@ describe('scanner:run', function () {
 	describe('MultiEngine', () => {
 		describe('Project: JS', () => {
 			before(() => {
-				process.chdir(path.join('test', 'code-fixtures', 'projects'))
+				process.chdir(path.join('test', 'code-fixtures', 'projects', 'app'))
 			});
 			after(() => {
-				process.chdir("../../..");
+				process.chdir("../../../..");
 			});
 			runTest
 				.stdout()
 				.stderr()
-				.command(['scanner:run', '--target', 'js', '--format', 'json'])
-				.it('JS project triggers pmd and eslint rules', ctx => {
+				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
+				.it('Polyglot project triggers pmd and eslint rules', ctx => {
 					expect(ctx.stderr).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{")));
-					expect(results).to.be.an("array").that.has.length(2);
+					// Look through all of the results and gather a set of unique engines
+					const uniqueEngines = new Set(results.map(r => { return r.engine }));
+					expect(uniqueEngines).to.be.an("Set").that.has.length(2);
+					expect(uniqueEngines).to.contain("eslint");
+					expect(uniqueEngines).to.contain("pmd");
+					// Validate that all of the results have an expected property
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
