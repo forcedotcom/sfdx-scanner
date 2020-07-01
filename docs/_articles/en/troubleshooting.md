@@ -25,4 +25,36 @@ One possible reason is that the Java version you used to build your code is diff
 
 One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version 6.22.0. Make sure that you reference only PMD features and classes that are available in version 6.22.0.
 
+### Commands display `Javascript is not currently supported by the PMD engine`.
 
+Version 6.22.0 of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
+
+Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
+
+1. Remove the `**/*.js` element from the PMD engine's `targetpatterns` array
+2. Remove the `javascript` element from PMD engine's `supportedLanguages` array
+
+The annotated JSON below shows you what you should remove
+```json
+{
+    "engines": [
+        {
+            "name": "pmd",
+            "targetPatterns": [
+                "**/*.cls",
+                "**/*.trigger",
+                "**/*.java",
+                "**/*.js",          // REMOVE THIS LINE
+                "**/*.page",
+                "**/*.component",
+                "**/*.xml",
+                "!**/node_modules/**",
+                "!**/*-meta.xml"
+            ],
+            "supportedLanguages": [
+                "apex",             // REMOVE THIS TRAILING COMMA
+                "javascript"        // REMOVE THIS
+            ]
+        },
+... Rest of file removed for clarity ...
+```
