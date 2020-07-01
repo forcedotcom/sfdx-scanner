@@ -1,6 +1,6 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages} from '@salesforce/core';
 import {ChildProcessWithoutNullStreams} from "child_process";
-import {LANGUAGES, SFDX_SCANNER_PATH} from '../../Constants';
+import {SFDX_SCANNER_PATH} from '../../Constants';
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
@@ -117,9 +117,6 @@ export class PmdCatalogWrapper extends PmdSupport {
 		// Now, we'll want to add the default PMD JARs for any activated languages.
 		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
 		supportedLanguages.forEach((language) => {
-			if (LANGUAGES.JAVASCRIPT === language) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdCatalogWrapper', 'JavascriptNotSupported');
-			}
 			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
 			const pathSet = pathSetMap.get(language) || new Set<string>();
 			pathSet.add(pmdJarName);

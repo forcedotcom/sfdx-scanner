@@ -1,7 +1,7 @@
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import {PmdEngine} from './PmdEngine';
-
+import {LANGUAGE} from '../../Constants'
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 
@@ -58,7 +58,10 @@ class PmdLanguageManager extends AsyncCreatable {
 		for (const alias of aliases) {
 			const lang = this.resolveLanguageAlias(alias);
 			if (lang) {
-				langs.push(lang);
+				if (LANGUAGE.JAVASCRIPT === lang) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdCatalogWrapper', 'JavascriptNotSupported');
+				}
+					langs.push(lang);
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);

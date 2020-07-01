@@ -8,8 +8,9 @@ export const CONFIG_FILE = 'Config.json';
 
 export const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
-export const LANGUAGES = {
-    APEX: "apex",
-    JAVA: "java",
-    JAVASCRIPT: "javascript"
-};
+export enum LANGUAGE {
+	APEX = 'apex',
+	JAVA = 'java',
+	JAVASCRIPT = 'javascript',
+	PLSQL = 'plsql'
+}
