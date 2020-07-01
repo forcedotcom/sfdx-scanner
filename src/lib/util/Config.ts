@@ -25,10 +25,10 @@ export const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: ENGINE.PMD,
 			targetPatterns: [
-				"**/*.cls","**/*.trigger","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
+				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
 			],
-			supportedLanguages: ['apex', 'javascript']
+			supportedLanguages: ['apex']
 		},
 		{
 			name: ENGINE.ESLINT,

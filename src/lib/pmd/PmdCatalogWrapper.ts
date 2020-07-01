@@ -90,7 +90,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 	 * Return a map where the key is the language and the value is a set of class/jar paths.  Start with the given
 	 * default values, if provided.
 	 */
-	private async getRulePathEntries(): Promise<Map<string, Set<string>>> {
+	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const pathSetMap = new Map<string, Set<string>>();
 
 		const customPathEntries: Map<string, Set<string>> = await this.getCustomRulePathEntries();

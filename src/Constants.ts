@@ -13,3 +13,10 @@ export enum ENGINE {
 	ESLINT = 'eslint',
 	ESLINT_TYPESCRIPT = 'eslint-typescript'
 }
+
+export enum LANGUAGE {
+	APEX = 'apex',
+	JAVA = 'java',
+	JAVASCRIPT = 'javascript',
+	PLSQL = 'plsql'
+}

@@ -11,6 +11,10 @@ class TestablePmdCatalogWrapper extends PmdCatalogWrapper {
 	public async buildCommandArray(): Promise<[string, string[]]> {
 		return super.buildCommandArray();
 	}
+
+	public async getRulePathEntries(): Promise<Map<string, Set<string>>> {
+		return super.getRulePathEntries();
+	}
 }
 
 describe('PmdCatalogWrapper', () => {
