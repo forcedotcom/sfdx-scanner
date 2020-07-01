@@ -26,3 +26,6 @@ One possible reason is that the Java version you used to build your code is diff
 One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version 6.22.0. Make sure that you reference only PMD features and classes that are available in version 6.22.0.
 
 
+### I sometimes see more rules violations when I specify the categories with `scanner:run` command than when I execute it for the same target without filters. What is this inconsistency?
+
+This is working as designed. Some rules are default-enabled by eslint while some other rules are not. Executing `scanner:run` without filters causes only default-enabled rules to be invoked, and specifying a category filter with `scanner:run` includes all rules under the selected categories to be invoked irrespective of their default-enabled setting. As of today, we do not provide a way to modify default-enable settings for rules.
