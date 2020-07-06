@@ -206,11 +206,9 @@ describe('TypescriptEslint Strategy', () => {
 
 			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
 				const output = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-				expect(output).to.contain("test/code-fixtures/projects/invalid-ts/src/simpleYetWrong.ts' does not reside in a location that is included by your tsconfig.json 'include' attribute.");
+				expect(output).to.contain("test/code-fixtures/projects/invalid-ts/src/notSpecifiedInTsConfig.ts' does not reside in a location that is included by your tsconfig.json 'include' attribute.");
 				expect(output).to.not.contain('Parsing error: \\"parserOptions.project\\" has been set');
 			});
-
-			// TODO: test cases that set exists to true/false depending on call order
 		});
 	});
 });

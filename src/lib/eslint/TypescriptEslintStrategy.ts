@@ -120,6 +120,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.outputProcessor.emitEvents([event]);
 	}
 
+	/**
+	 * Converts the eslint message that requires the scanned files to be a subset of the files specified by tsconfig.json
+	 */
 	convertLintMessage(fileName: string, message: string):string {
 		if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
 			message.endsWith('The file must be included in at least one of the projects provided.')) {
@@ -129,6 +132,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		}
 	}
 
+	/**
+	 * Try to find a tsconfig.json in the current working directory or in the engineOptions.
+	 * Throw an error if exactly one tsconfig.json file can't be found.
+	 */
 	async findTsconfig(engineOptions: Map<string, string>): Promise<string> {
 		const cwd = path.resolve();
 		const tsconfigFromWorkingDirectory = await this.checkWorkingDirectoryForTsconfig();
@@ -151,6 +158,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return foundTsConfig;
 	}
 
+	/**
+	 * Returns the tsconfig.json file specified in the engineOptions if it is specified and valid, or null if
+	 * engineOptions doesn't specify a tsconfig.json value.
+	 * Throw an error if the file specified in engineOptions is invalid for any reason.
+	 */
 	protected async checkEngineOptionsForTsconfig(engineOptions: Map<string, string>): Promise<string> {
 		const tsConfigFromOptions = engineOptions.get(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG);
 
@@ -171,6 +183,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return null;
 	}
 
+	/**
+	 * Return the path of a tsconfig.json file if it exists in the current working directory, or null if it doesn't.
+	 */
 	protected async checkWorkingDirectoryForTsconfig(): Promise<string> {
 		const tsconfigPath = path.resolve(TS_CONFIG);
 
