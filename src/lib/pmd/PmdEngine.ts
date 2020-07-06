@@ -1,10 +1,10 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import * as path from 'path';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../ioc.config';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
+import {ENGINE} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 
@@ -22,7 +22,7 @@ interface PmdViolation extends Element {
 }
 
 export class PmdEngine implements RuleEngine {
-	public static NAME = "pmd";
+	public static NAME: string = ENGINE.PMD.valueOf();
 
 	private logger: Logger;
 	private config: Config;
@@ -36,8 +36,7 @@ export class PmdEngine implements RuleEngine {
 
 	/* eslint-disable @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
-		const engineConfig = this.config.getEngineConfig(PmdEngine.NAME);
-		return Promise.resolve(engineConfig.targetPatterns);
+		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
 
 	public matchPath(path: string): boolean {
@@ -77,11 +76,7 @@ export class PmdEngine implements RuleEngine {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
-				if (target.isDirectory) {
-					targetPaths.push(...target.paths.map(p => path.join(target.target, p)));
-				} else {
-					targetPaths.push(...target.paths);
-				}
+				targetPaths.push(...target.paths);
 			}
 			if (targetPaths.length === 0) {
 				this.logger.trace('No matching pmd target files found. Nothing to execute.');
@@ -100,6 +95,7 @@ export class PmdEngine implements RuleEngine {
 				return [];
 			}
 		} catch (e) {
+			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(e.message || e);
 		}
 	}
@@ -107,6 +103,7 @@ export class PmdEngine implements RuleEngine {
 	private xmlToRuleResults(pmdXml: string): RuleResult[] {
 		// If the results were just an empty string, we can return it.
 		if (pmdXml === '') {
+			this.logger.trace('No PMD results to convert');
 			return [];
 		}
 

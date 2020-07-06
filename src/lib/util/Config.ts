@@ -1,7 +1,8 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel} from '@salesforce/core';
-import {CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
+import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
+import {ENGINE, CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
 import path = require('path');
+import { boolean } from '@oclif/command/lib/flags';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -19,18 +20,18 @@ export type EngineConfigContent = {
 }
 
 const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
-const DEFAULT_CONFIG: ConfigContent = {
+export const DEFAULT_CONFIG: ConfigContent = {
 	engines: [
 		{
-			name: "pmd",
+			name: ENGINE.PMD,
 			targetPatterns: [
-				"**/*.cls","**/*.java","**/*.js","**/*.page","**/*.component","**/*.xml",
+				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
 			],
-			supportedLanguages: ['apex', 'javascript']
+			supportedLanguages: ['apex']
 		},
 		{
-			name: "eslint",
+			name: ENGINE.ESLINT,
 			targetPatterns: [
 				"**/*.js",
 				"!**/node_modules/**",
@@ -38,7 +39,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 			useDefaultConfig: true
 		},
 		{
-            name: "eslint-typescript",
+            name: ENGINE.ESLINT_TYPESCRIPT,
             targetPatterns: [
                 "**/*.ts",
                 "!**/node_modules/**"
@@ -48,10 +49,35 @@ const DEFAULT_CONFIG: ConfigContent = {
 	]
 };
 
+class TypeChecker {
+
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	stringArrayCheck(value: any, propertyName: string, engine: ENGINE): boolean {
+		if (Array.isArray(value) && value.length > 0) {
+			value.forEach((item) => {
+				if (typeof item != 'string') {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'OnlyStringAllowedInStringArray', [propertyName, engine.valueOf(), String(value)]);
+				}
+			});
+			return true;
+		} 
+		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
+	}
+
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	booleanCheck(value: any, propertyName: string, engine: ENGINE): boolean {
+		if (value instanceof boolean) {
+			return true;
+		}
+		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidBooleanValue', [propertyName, engine.valueOf(), String(value)]);
+	}
+}
+
 export class Config {
 
 	configContent!: ConfigContent;
 	fileHandler!: FileHandler;
+	private typeChecker: TypeChecker;
 	private logger!: Logger;
 	private initialized: boolean;
 
@@ -61,6 +87,7 @@ export class Config {
 		}
 		this.logger = await Logger.child('Config');
 
+		this.typeChecker = new TypeChecker();
 		this.fileHandler = new FileHandler();
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
@@ -77,6 +104,8 @@ export class Config {
 		return this.configContent.javaHome;
 	}
 
+	// FIXME: Not supported yet - the logic is not hooked up to the actual call
+	// Leaving this as-is instead of moving to getConfigValue() style
 	public isEngineEnabled(name: string): boolean {
 		if (!this.configContent.engines) {
 			// Fast exit.  No definitions means all enabled.
@@ -88,31 +117,48 @@ export class Config {
 		return !e || e.disabled;
 	}
 
-	public getEngineConfig(name: string): EngineConfigContent {
-		return this.configContent.engines.find(e => e.name === name);
+	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
+		const value = await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
+		return value as Array<string>;
 	}
 
-	public async getSupportedLanguages(engineName: string): Promise<string[]> {
-		const ecc = this.getEngineConfig(engineName);
-		// If the config specifies supported languages, use those.
-		if (ecc.supportedLanguages && ecc.supportedLanguages.length > 0) {
-			this.logger.trace(`Retrieving supported languages ${ecc.supportedLanguages} from engine ${engineName}`);
-			return ecc.supportedLanguages;
+	public async getTargetPatterns(engine: ENGINE): Promise<string[]> {
+		const value = await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
+		return value as Array<string>;
+	}
+
+	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<string[]> {
+		let ecc = this.getEngineConfig(engine);
+		// If the config specifies property, use those.
+		if (ecc && ecc[propertyName] && typeChecker(ecc[propertyName], propertyName, engine)) {
+			this.logger.trace(`Retrieving ${propertyName} from engine ${engine}: ${ecc[propertyName]}`);
+			return ecc[propertyName];
 		} else {
-			// If the config doesn't specify supported languages, see if we have any default values.
-			const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name === engineName);
+			// If the config doesn't specify the property, see if we have any default values.
+			const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name.toLowerCase() === engine.valueOf().toLowerCase());
 			// If we find default values, persist those to the config.
-			if (defaultConfig.supportedLanguages) {
-				ecc.supportedLanguages = defaultConfig.supportedLanguages;
-				this.logger.trace(`Persisting default languages ${ecc.supportedLanguages} for engine ${engineName}`);
+			if (!ecc) {
+				ecc = defaultConfig;
+				this.logger.warn(`Persisting missing block for engine ${engine}`);
 				await this.writeConfig();
+			} else if (defaultConfig[propertyName]) {
+				ecc[propertyName] = defaultConfig[propertyName];
+				this.logger.warn(`Persisting default values ${ecc[propertyName]} for engine ${engine}`);
+				await this.writeConfig();
+			} else {
+				throw new Error(`Developer error: no default value set for ${propertyName} of ${engine} engine. Or invalid property call.`)
 			}
 			// Return whatever we came back with.
-			return ecc.supportedLanguages;
+			return ecc[propertyName];
 		}
 	}
 
-	public getOverriddenConfigPath(name: string): string {
+	private getEngineConfig(name: ENGINE): EngineConfigContent {
+		return this.configContent.engines.find(e => e.name === name);
+	}
+
+	// TODO: remove this method and the associated config
+	public getOverriddenConfigPath(name: ENGINE): string {
 		const defaultValue = '';
 		const engineConfig = this.getEngineConfig(name);
 
@@ -122,7 +168,8 @@ export class Config {
 		return defaultValue;
 	}
 
-	private shouldUseDefaultConfig(name: string): boolean {
+	// TODO: remove this method and the associated config
+	private shouldUseDefaultConfig(name: ENGINE): boolean {
 		const engineConfig = this.getEngineConfig(name);
 		const defaultValue = false;
 
@@ -163,3 +210,4 @@ export class Config {
 		this.configContent = configContent;
 	}
 }
+

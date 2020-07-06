@@ -2,9 +2,11 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {Config} from '../util/Config';
+import {ENGINE} from '../../Constants';
 import {Controller} from '../../ioc.config';
 import { SfdxError, Logger } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
+import * as stripJsonComments from 'strip-json-comments';
 
 /**
  * Type mapping to tsconfig.json files
@@ -38,15 +40,16 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false // TODO derive from existing eslintrc if found and desired
-
+	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
+	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
 
 const TS_CONFIG = 'tsconfig.json';
 const NO_TS_CONFIG = '';
 
 export class TypescriptEslintStrategy implements EslintStrategy {
-	private static ENGINE_NAME = "eslint-typescript";
+	private static ENGINE_NAME = ENGINE.ESLINT_TYPESCRIPT.valueOf();
 	private static LANGUAGES = ["typescript"];
 
 	private initialized: boolean;
@@ -90,7 +93,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	async getTargetPatterns(target?: string): Promise<string[]> {
-		const engineConfig = this.config.getEngineConfig(this.getName());
+		const configTargetPatterns = await this.config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
 
 		
 		// Find the typescript config file, if any
@@ -98,7 +101,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 		const targetPatterns: string[] = [];
 		if (tsconfigPath) {
-			const tsconfig: TSConfig = JSON.parse(await this.fileHandler.readFile(tsconfigPath));
+			const json: string = await this.fileHandler.readFile(tsconfigPath);
+			// The default TSConfig has JSON comments. Strip them out before parsing
+			const tsconfig: TSConfig = JSON.parse(stripJsonComments(json));
 
 			// Found a tsconfig.  Load up its patterns.
 			if (tsconfig.include) {
@@ -124,7 +129,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		// TODO: the files returned from here also include .js files even if our target pattern asks not to include them.
 		// We should handle the combination more meaningfully than a simple concatenation.
 
-		return engineConfig.targetPatterns.concat(targetPatterns);
+		return configTargetPatterns.concat(targetPatterns);
 	}
 
 	filterUnsupportedPaths(paths: string[]): string[] {
@@ -186,7 +191,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private async getTsconfigFromConfig(): Promise<string> {
 		let tsconfigPath = NO_TS_CONFIG;
 		// Check if overriddenConfig is available
-		const overriddenConfig = this.config.getOverriddenConfigPath(this.getName());
+		const overriddenConfig = this.config.getOverriddenConfigPath(ENGINE.ESLINT_TYPESCRIPT);
 		if (!overriddenConfig) {
 			this.logger.trace(`Did not find an overridden path from Config`);
 			return tsconfigPath;

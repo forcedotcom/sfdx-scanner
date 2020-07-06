@@ -170,7 +170,7 @@ describe('RuleManager', () => {
 						results = JSON.parse(output);
 					}
 
-					expect(results).to.be.an("array").that.has.length(2);
+					expect(results).to.be.an("array").that.has.length(1);
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -201,7 +201,7 @@ describe('RuleManager', () => {
 					} else {
 						results = JSON.parse(output);
 					}
-					expect(results).to.be.an("array").that.has.length(6);
+					expect(results).to.be.an("array").that.has.length(8);
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -222,7 +222,7 @@ describe('RuleManager', () => {
 						results = JSON.parse(output);
 					}
 
-					expect(results).to.be.an("array").that.has.length(4);
+					expect(results, JSON.stringify(results)).to.be.an("array").that.has.length(3);
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -230,7 +230,7 @@ describe('RuleManager', () => {
 
 				it('Filtering by multiple categories runs any rule in either category', async () => {
 					// Set up our filter array.
-					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
+					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Error Prone'])];
 
 					const output = await ruleManager.runRulesMatchingCriteria(filters, ['projects/app'], OUTPUT_FORMAT.JSON);
 					let results = null;
@@ -240,7 +240,7 @@ describe('RuleManager', () => {
 						results = JSON.parse(output);
 					}
 
-					expect(results).to.be.an("array").that.has.length(4);
+					expect(results).to.be.an("array").that.has.length(6);
 					for (const result of results) {
 						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}

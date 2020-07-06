@@ -107,9 +107,11 @@ export class DefaultRuleManager implements RuleManager {
 				// filter each with the engine's own patterns.  First test any inclusive patterns, then AND them with
 				// any exclusive patterns.
 				const matchingTargets = await globby(target);
+				// Map relative files to absolute paths. This solves ambiguity of current working directory
+				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				const ruleTarget = {
 					target,
-					paths: matchingTargets.filter(t => isInclusiveMatch(path.resolve(t)) && isExclusiveMatch(path.resolve(t)))
+					paths: absoluteMatchingTargets.filter(t => isInclusiveMatch(t) && isExclusiveMatch(t))
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
@@ -123,7 +125,11 @@ export class DefaultRuleManager implements RuleManager {
 						if (targetPatterns) {
 							// If dir, use globby { cwd: process.cwd() } option
 							const relativePaths = await globby(targetPatterns, {cwd: target});
-							ruleTargets.push({target, isDirectory: true, paths: relativePaths});
+							// Join the relative path to the files that were found
+							const joinedPaths = relativePaths.map(t => path.join(target, t));
+							// Resolve the relative paths to their absolute paths
+							const absolutePaths = joinedPaths.map(t => path.resolve(t));
+							ruleTargets.push({target, isDirectory: true, paths: absolutePaths});
 						} else {
 							// Without target patterns for the engine, just add the dir itself and hope for the best.
 							ruleTargets.push({target, isDirectory: true, paths: ["."]});
@@ -131,8 +137,9 @@ export class DefaultRuleManager implements RuleManager {
 					} else {
 						// The target is a simple file.  Validate it against the engine's own patterns.  First test
 						// any inclusive patterns, then with any exclusive patterns.
-						if (isInclusiveMatch(path.resolve(target)) && isExclusiveMatch(path.resolve(target))) {
-							ruleTargets.push({target, paths: [target]});
+						const absolutePath = path.resolve(target);
+						if (isInclusiveMatch(absolutePath) && isExclusiveMatch(absolutePath)) {
+							ruleTargets.push({target, paths: [absolutePath]});
 						}
 					}
 				}

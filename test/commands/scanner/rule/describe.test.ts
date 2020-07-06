@@ -80,19 +80,19 @@ describe('scanner:rule:describe', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.output.multipleMatchingRules
 				.replace('{0}', '2')
-				.replace('{1}', 'WhileLoopsMustUseBraces');
+				.replace('{1}', 'constructor-super');
 
 			describeTest
 				.stdout()
 				.stderr()
-				.command(['scanner:rule:describe', '--rulename', 'WhileLoopsMustUseBraces'])
+				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])
 				.it('Displayed output matches expectations', ctx => {
 					// First, verify that the warning was printed at the start like it should have been.
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should be formatted correctly');
 
 					// Next, verify that there are two rule descriptions that are distinctly identified.
-					const regex = /=== Rule #1\nname:\s+WhileLoopsMustUseBraces(.*\n)*=== Rule #2\nname:\s+WhileLoopsMustUseBraces/g;
-					expect(ctx.stdout).to.match(regex, 'Output should contain two rules named WhileLoopsMustUseBraces');
+					const regex = /=== Rule #1\nname:\s+constructor-super(.*\n)*=== Rule #2\nname:\s+constructor-super/g;
+					expect(ctx.stdout).to.match(regex, 'Output should contain two rules named constructor-super');
 				});
 
 			// TODO: THIS TEST IS FAILING BECAUSE THE WARNING FOR DEFINITELYFAKERULE IS BEING INCLUDED IN THE WARNINGS HERE.

@@ -1,19 +1,20 @@
 import {expect} from 'chai';
 import Sinon = require('sinon');
 import {Config} from '../../../src/lib/util/Config';
+import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
-import {PmdEngine} from '../../../src/lib/pmd/PmdEngine';
 import messages = require('../../../messages/PmdLanguageManager');
+import { ENGINE } from '../../../src/Constants';
 
 describe('PmdLanguageManager', () => {
 	describe('getSupportedLanguages()', () => {
 		describe('When Config specifies exact language names', () => {
-			const exactFakeLangs = ['apex', 'javascript', 'java'];
+			const exactFakeLangs = [LANGUAGE.APEX, LANGUAGE.JAVA];
 
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies Apex, JavaScript, and Java.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(exactFakeLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(exactFakeLangs);
 			});
 
 			after(() => {
@@ -22,17 +23,17 @@ describe('PmdLanguageManager', () => {
 
 			it('Explicitly supported languages are returned', async () => {
 				const langs = await PmdLanguageManager.getSupportedLanguages();
-				expect(langs).to.deep.equal(['apex', 'javascript', 'java'], 'Explicitly supported languages should have been returned');
+				expect(langs).to.deep.equal([LANGUAGE.APEX, LANGUAGE.JAVA], 'Explicitly supported languages should have been returned');
 			});
 		});
 
 		describe('When Config specifies weirdly aliased language names', () => {
-			const weirdlyAliasedLangs = ['ApEx', 'EcMaScRiPt', 'JaVa', 'Pl/SqL'];
+			const weirdlyAliasedLangs = ['ApEx', 'JaVa', 'Pl/SqL'];
 
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies some languages using some weird casing and aliases.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(weirdlyAliasedLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(weirdlyAliasedLangs);
 			});
 
 			after(() => {
@@ -41,7 +42,7 @@ describe('PmdLanguageManager', () => {
 
 			it('Aliases are successfully resolved into a viable language name', async () => {
 				const langs = await PmdLanguageManager.getSupportedLanguages();
-				expect(langs).to.deep.equal(['apex', 'javascript', 'java', 'plsql'], 'Aliases to languages should have been resolved');
+				expect(langs).to.deep.equal([LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.PLSQL], 'Aliases to languages should have been resolved');
 			});
 		});
 
@@ -51,7 +52,7 @@ describe('PmdLanguageManager', () => {
 			before(() => {
 				Sinon.createSandbox();
 				// Simulate a config that specifies some nonsensical alias.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(PmdEngine.NAME).resolves(invalidAliasLangs);
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(invalidAliasLangs);
 			});
 
 			after(() => {
@@ -64,6 +65,29 @@ describe('PmdLanguageManager', () => {
 					expect(true).to.equal(false, 'Error should have thrown');
 				} catch (e) {
 					expect(e.message).to.include(messages.InvalidLanguageAlias.replace('%s', 'NotRealLang'));
+				}
+			});
+		});
+
+		describe('When Javascript appears in config()', () => {
+			const langsContainingJavaScript = [LANGUAGE.APEX, LANGUAGE.JAVASCRIPT];
+
+			before(() => {
+				Sinon.createSandbox();
+				// Simulate a config that specifies javascript.
+				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(langsContainingJavaScript);
+			});
+
+			after(() => {
+				Sinon.restore();
+			});
+
+			it('Throws exception if javascript is found in supportedLanguages array', async () => {
+				try {
+					await PmdLanguageManager.getSupportedLanguages();
+					expect(true).to.equal(false, 'Error should have thrown');
+				} catch (ex) {
+					expect(ex.message).to.equal('Javascript is not currently supported by the PMD engine.');
 				}
 			});
 		});
