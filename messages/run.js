@@ -19,7 +19,9 @@ module.exports = {
 		"formatDescription": "format of results",
 		"formatDescriptionLong": "Specifies output format with results written directly to the console.",
 		"outfileDescription": "location of output file",
-		"outfileDescriptionLong": "Write output to a file."
+		"outfileDescriptionLong": "Write output to a file.",
+		"tsconfigDescription": "Location of tsconfig.json file",
+		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine."
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.

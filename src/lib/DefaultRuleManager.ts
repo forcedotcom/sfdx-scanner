@@ -49,7 +49,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT): Promise<string | { columns; rows }> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<string | { columns; rows }> {
 		let results: RuleResult[] = [];
 
 		// Derives rules from our filters to feed the engines.
@@ -65,11 +65,11 @@ export class DefaultRuleManager implements RuleManager {
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 			if (engineRules.length > 0 && engineTargets.length > 0) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
-				ps.push(e.run(engineGroups, engineRules, engineTargets));
+				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
 			}
-			
+
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate

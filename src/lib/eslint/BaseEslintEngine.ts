@@ -25,7 +25,7 @@ export interface EslintStrategy {
 	getCatalogConfig(): Record<string, any>;
 
 	/** Get eslint engine to use for scanning. */
-	getRunConfig(): Promise<Record<string, any>>;
+	getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>>;
 
 	/** Get languages supported by engine */
 	getLanguages(): string[];
@@ -161,7 +161,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return null;
 	}
 
-	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[]): Promise<RuleResult[]> {
+	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		// If we didn't find any paths, we're done.
 		if (!targets || targets.length === 0) {
 			this.logger.trace('No matching target files found. Nothing to execute.');
@@ -197,7 +197,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, await this.strategy.getRunConfig());
+				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
 
