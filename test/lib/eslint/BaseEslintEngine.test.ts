@@ -17,6 +17,7 @@ class TestHarnessEngine extends BaseEslintEngine {
 }
 
 const MockStrategy: EslintStrategy = Mockito.mock<EslintStrategy>();
+const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 describe('Tests for BaseEslintEngine', () => {
 	describe('Tests for run()', () => {
@@ -36,7 +37,9 @@ describe('Tests for BaseEslintEngine', () => {
 				const results = await engine.run(
 					[getDummyRuleGroup()],
 					[getDummyRule()],
-					[]); // no target
+					[], // no target
+					EMPTY_ENGINE_OPTIONS
+				);
 
 				expect(results).to.be.empty;
 			});
@@ -53,7 +56,8 @@ describe('Tests for BaseEslintEngine', () => {
 				await engine.run(
 					[getDummyRuleGroup()],
 					[getDummyRule()],
-					[target]
+					[target],
+					EMPTY_ENGINE_OPTIONS
 				);
 
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
@@ -81,7 +85,9 @@ describe('Tests for BaseEslintEngine', () => {
 				const results = await engine.run(
 					[getDummyRuleGroup()],
 					[], // no rules
-					[getDummyTarget(true)]);
+					[getDummyTarget(true)],
+					EMPTY_ENGINE_OPTIONS
+				);
 
 				expect(results).to.be.empty;
 			});
@@ -97,7 +103,9 @@ describe('Tests for BaseEslintEngine', () => {
 				const results = await engine.run(
 					[getDummyRuleGroup()],
 					[irrelevantRule],
-					[getDummyTarget(true)]);
+					[getDummyTarget(true)],
+					EMPTY_ENGINE_OPTIONS
+				);
 
 				expect(results).to.be.empty;
 			});
@@ -124,10 +132,13 @@ describe('Tests for BaseEslintEngine', () => {
 					const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
 					const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
+					Mockito.when(MockStrategy.convertLintMessage("filePath", message)).thenReturn(message);
+
 					const results = await engine.run(
 						[getDummyRuleGroup()],
 						[getDummyRule()],
-						[target]
+						[target],
+						EMPTY_ENGINE_OPTIONS
 					);
 
 					// verify results structure and content
@@ -144,7 +155,7 @@ describe('Tests for BaseEslintEngine', () => {
 				});
 
 
-			
+
 		});
 	});
 
