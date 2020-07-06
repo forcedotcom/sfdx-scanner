@@ -16,12 +16,12 @@ class TestablePmdCatalogWrapper extends PmdCatalogWrapper {
 		return super.getRulePathEntries();
 	}
 }
+const irrelevantPath = path.join('this', 'path', 'does', 'not', 'actually', 'matter');
 
 describe('PmdCatalogWrapper', () => {
 	describe('buildCommandArray()', () => {
 		describe('JAR parameters', () => {
 			describe('When Custom PMD JARs have been registered for a language whose default PMD rules are off...', () => {
-				const irrelevantPath = path.join('this', 'path', 'does', 'not', 'actually', 'matter');
 				before(() => {
 					Sinon.createSandbox();
 					// Spoof a config that claims that only Apex's default PMD JAR is enabled.
@@ -58,7 +58,6 @@ describe('PmdCatalogWrapper', () => {
 			});
 
 			describe('When Custom PMD JARs have been registered for a language under a weird alias...', () => {
-				const irrelevantPath = path.join('this', 'path', 'does', 'not', 'actually', 'matter');
 				before(() => {
 					Sinon.createSandbox();
 					// Spoof a config that claims that only Apex's default PMD JAR is enabled.
@@ -91,6 +90,40 @@ describe('PmdCatalogWrapper', () => {
 					expect(params[4]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific input, w/Custom Jar.');
 					// The sixth parameter should be the default Apex JAR.
 					expect(params[5]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
+				});
+			});
+
+			describe("When not all supported languages have an associated PMD JAR", () => {
+				before(() => {
+					Sinon.createSandbox();
+					// Spoof a config that claims that only apex is the supported language
+					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(['apex']);
+					const customJars: Map<string, Set<string>> = new Map();
+					customJars.set('pl/sql', new Set([irrelevantPath]));
+					customJars.set('java', new Set());
+					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
+				});
+
+				after(() => {
+					Sinon.restore();
+				});
+
+				it('should not include a supported language as input to PmdCataloger if the language has no associated path', async () => {
+					// Get our parameters.
+					const target = await TestablePmdCatalogWrapper.create({});
+					const params = (await target.buildCommandArray())[1];
+
+					// verify that there's no seventh parameter for java since there's no associated path
+					expect(params.length).equals(6, `Expected exactly six parameters. Last parameter is ${params[params.length - 1]}`);
+
+					// Confirm that the fourth parameter is the main class.
+					expect(params[3]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
+
+					// verify that the fifth parameter is for plsql
+					expect(params[4]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific');
+
+					// verify that the sixth parameter is for plsql
+					expect(params[5]).to.match(/^apex=.*jar$/, 'Sixth parameter should be apex-specific');
 				});
 			});
 		});
