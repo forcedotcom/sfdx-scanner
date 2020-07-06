@@ -24,9 +24,8 @@ export interface EslintStrategy {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string, any>;
 
-	/** Get eslint engine to use for scanning. For each implementation, 
-	 * this may or may not depend on the target files */
-	getRunConfig(target?: string): Promise<Record<string, any>>;
+	/** Get eslint engine to use for scanning. */
+	getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>>;
 
 	/** Get languages supported by engine */
 	getLanguages(): string[];
@@ -36,6 +35,9 @@ export interface EslintStrategy {
 
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
+
+	/** Allow the strategy to convert messages to more user friendly versions */
+	convertLintMessage(fileName: string, message: string): string;
 }
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -54,11 +56,11 @@ export class StaticDependencies {
 		};
 		return new CLIEngine(config);
 	}
-	
+
 	resolveTargetPath(target: string): string {
 		return path.resolve(target);
 	}
-	
+
 	getCurrentWorkingDirectory(): string {
 		return process.cwd();
 	}
@@ -159,7 +161,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return null;
 	}
 
-	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[]): Promise<RuleResult[]> {
+	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		// If we didn't find any paths, we're done.
 		if (!targets || targets.length === 0) {
 			this.logger.trace('No matching target files found. Nothing to execute.');
@@ -179,6 +181,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 			// Process one target path at a time to trigger eslint
 			for (const target of targets) {
+				// TODO: Will this break the typescript parser cwd setting?
 				const cwd = target.isDirectory ? this.baseDependencies.resolveTargetPath(target.target) : this.baseDependencies.getCurrentWorkingDirectory();
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
 				const config = {cwd};
@@ -194,7 +197,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, await this.strategy.getRunConfig(target.target));
+				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
 
@@ -217,7 +220,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	private selectRelevantRules(rules: Rule[]): Record<string,any> {
 		const filteredRules = {};
 		let ruleCount = 0;
-	
+
 		for (const rule of rules) {
 			// Find if a rule is relevant
 			if (rule.engine === this.strategy.getName()) {
@@ -252,7 +255,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 						line: v.line,
 						column: v.column,
 						severity: v.severity,
-						message: v.message,
+						message: this.strategy.convertLintMessage(fileName, v.message),
 						ruleName: v.ruleId,
 						category,
 						url

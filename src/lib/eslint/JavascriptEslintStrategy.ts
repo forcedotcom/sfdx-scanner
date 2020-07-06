@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {TYPESCRIPT_RULE_PREFIX, ENGINE} from '../../Constants';
+import {TYPESCRIPT_RULE_PREFIX, ENGINE, LANGUAGE} from '../../Constants';
 import {Config} from '../util/Config';
 import {Controller} from '../../ioc.config';
 import { Logger } from '@salesforce/core';
@@ -18,7 +18,7 @@ const ES_CONFIG = {
 
 export class JavascriptEslintStrategy implements EslintStrategy {
 	private static ENGINE_NAME = ENGINE.ESLINT.valueOf();
-	private static LANGUAGES = ["javascript"];
+	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
 	protected logger: Logger;
@@ -54,8 +54,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ES_CONFIG;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	async getRunConfig(): Promise<Record<string, any>> {
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
 		//TODO: find a way to override with eslintrc if Config asks for it
 		return ES_CONFIG;
 	}
@@ -69,5 +69,9 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 
 		// TODO: extract target patterns from overridden config, if available
 		return this.config.getTargetPatterns(ENGINE.ESLINT);
+	}
+
+	convertLintMessage(fileName: string, message: string): string {
+		return message;
 	}
 }
