@@ -123,7 +123,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	/**
 	 * Converts the eslint message that requires the scanned files to be a subset of the files specified by tsconfig.json
 	 */
-	convertLintMessage(fileName: string, message: string):string {
+	convertLintMessage(fileName: string, message: string): string {
 		if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
 			message.endsWith('The file must be included in at least one of the projects provided.')) {
 			return messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
