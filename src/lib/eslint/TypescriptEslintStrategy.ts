@@ -133,25 +133,21 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	/**
-	 * Try to find a tsconfig.json in the current working directory or in the engineOptions.
-	 * Throw an error if exactly one tsconfig.json file can't be found.
+	 * Try to find a tsconfig.json in the engineOptions map or current working directory, engineOptions takes precedence.
+	 * Throw an error if a tsconfig.json file can't be found.
 	 */
 	async findTsconfig(engineOptions: Map<string, string>): Promise<string> {
-		const cwd = path.resolve();
-		const tsconfigFromWorkingDirectory = await this.checkWorkingDirectoryForTsconfig();
-		const tsConfigFromOptions = await this.checkEngineOptionsForTsconfig(engineOptions);
+		let foundTsConfig = await this.checkEngineOptionsForTsconfig(engineOptions);
 
-		if (!tsconfigFromWorkingDirectory && !tsConfigFromOptions) {
-			// Unable to find in current directory and not specified in the engineOptions
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfigFromCwd',
-				[TS_CONFIG, cwd, TS_CONFIG]);
-		} else if (tsconfigFromWorkingDirectory && tsConfigFromOptions) {
-			// Found in current directory and specified in the engineOptions
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MultipleTsConfigs',
-				[TS_CONFIG, tsconfigFromWorkingDirectory, tsConfigFromOptions]);
+		if (!foundTsConfig) {
+			foundTsConfig = await this.checkWorkingDirectoryForTsconfig();
+			if (!foundTsConfig) {
+				const cwd = path.resolve();
+				// Not specified in engineOptions and not found in the current directory
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfigFromCwd',
+					[TS_CONFIG, cwd, TS_CONFIG]);
+			}
 		}
-
-		const foundTsConfig = tsconfigFromWorkingDirectory || tsConfigFromOptions;
 
 		this.logger.trace(`Using ${TS_CONFIG} from ${foundTsConfig}`);
 

@@ -58,6 +58,17 @@ describe('TypescriptEslint Strategy', () => {
 				expect(fileFound).equals(engineOptionsVal);
 			});
 
+
+			it('engineOptions.tsconfig should take precedence over tsconfig.json file found in the current working directory', async () => {
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(cwdVal);
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(engineOptionsVal);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+				const foundTsConfig = await tsStrategy.findTsconfig(null);
+				expect(foundTsConfig).to.equal(engineOptionsVal);
+			});
+
 			it('should throw an error if tsconfig is not in current working directory and not specified by engineOptions', async () => {
 				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(null);
 				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(null);
@@ -70,20 +81,6 @@ describe('TypescriptEslint Strategy', () => {
 					fail('findTsconfig should have thrown');
 				} catch(e) {
 					expect(e.message).to.contain(`Unable to find 'tsconfig.json' in current directory '${path.resolve()}'`)
-				}
-			});
-
-			it('should throw an error if tsconfig is in working directory and is also specified as engineOption', async () => {
-				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(cwdVal);
-				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(engineOptionsVal);
-
-				const tsStrategy = new TestTypescriptEslintStrategy();
-				await tsStrategy.init();
-				try {
-					await tsStrategy.findTsconfig(null);
-					fail("findTsconfig should have thrown");
-				} catch(e) {
-					expect(e.message).to.contain(`'tsconfig.json' was found in current directory at location '${cwdVal}', '${engineOptionsVal}' was also specified by the --tsconfig flag.`);
 				}
 			});
 		});
