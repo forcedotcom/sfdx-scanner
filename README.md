@@ -1,23 +1,61 @@
-
-Static code scanner that applies quality and security rules to Apex code, and provides feedback.
-
 [![CircleCI](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master.svg?style=shield)](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master)
 [![Codecov](https://codecov.io/gh/forcedotcom/sfdx-scanner/branch/master/graph/badge.svg)](https://codecov.io/gh/forcedotcom/sfdx-scanner)
 [![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/master/package.json)
 
-<!-- toc -->
-* [sfdx-scanner](#sfdx-scanner)
-<!-- tocstop -->
-<!-- install -->
+# Salesforce CLI Scanner Plug-in
+The Salesforce CLI Scanner plug-in is a unified tool for static analysis of source code, in multiple languages (including Apex), with a consistent command-line interface and report output. We currently support the PMD rule engine and ESLint. We may add support for more rule engines in the future.
+
+The Salesforce CLI Scanner Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code.
+
+You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
+
+# Official Documentation
+All the official documentation on the Salesforce CLI Scanner plug-in is hosted on [GitHub Pages](https://forcedotcom.github.io/sfdx-scanner/). These documents include instructions on how to install the plug-in, the command reference, writing and managing custom rules and an overview of the architecture of the plug-in.
+
+### Document Link
+https://forcedotcom.github.io/sfdx-scanner/
+
+
+# Debugging your plugin
+We recommend using the Visual Studio Code (VS Code) IDE for your plugin development. Included in the `.vscode` directory of this plugin is a `launch.json` config file, which allows you to attach a debugger to the node process when running your commands.
+
+To debug the `hello:org` command: 
+1. Start the inspector
+  
+If you linked your plugin to the sfdx cli, call your command with the `dev-suspend` switch: 
+```sh-session
+$ sfdx hello:org -u myOrg@example.com --dev-suspend
+```
+  
+Alternatively, to call your command using the `bin/run` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
+```sh-session
+$ NODE_OPTIONS=--inspect-brk bin/run hello:org -u myOrg@example.com
+```
+
+2. Set some breakpoints in your command code
+3. Click on the Debug icon in the Activity Bar on the side of VS Code to open up the Debug view.
+4. In the upper left hand corner of VS Code, verify that the "Attach to Remote" launch configuration has been chosen.
+5. Hit the green play button to the left of the "Attach to Remote" launch configuration window. The debugger should now be suspended on the first line of the program. 
+6. Hit the green play button at the top middle of VS Code (this play button will be to the right of the play button that you clicked in step #5).
+<br><img src=".images/vscodeScreenshot.png" width="480" height="278"><br>
+Congrats, you are debugging!
+=======
+
+# Usage
 <!-- usage -->
 ```sh-session
 $ npm install -g @salesforce/sfdx-scanner
-
+$ sfdx COMMAND
+running command...
+$ sfdx (-v|--version|version)
+@salesforce/sfdx-scanner/1.0.30 darwin-x64 node-v14.1.0
+$ sfdx --help [COMMAND]
 USAGE
-  $ sfdx scanner
+  $ sfdx COMMAND
 ...
 ```
 <!-- usagestop -->
+# Commands
 <!-- commands -->
 * [`sfdx scanner:rule:add -l <string> -p <array> [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerruleadd--l-string--p-array---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
 * [`sfdx scanner:rule:describe -n <string> [--verbose] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`](#sfdx-scannerruledescribe--n-string---verbose---json---loglevel-tracedebuginfowarnerrorfataltracedebuginfowarnerrorfatal)
@@ -28,7 +66,7 @@ USAGE
 
 ## `sfdx scanner:rule:add -l <string> -p <array> [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-Add custom rules to the scanner's registry.
+add custom rules to the scanner's registry
 
 ```
 USAGE
@@ -52,25 +90,24 @@ EXAMPLE
   directory.
   Refer to PMD's documentation for information on writing rules: 
   https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html
-	
+
   	You may specify one or more JARs directly.
   		E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
   			Successfully added rules for apex.
   			2 path(s) added:
   			/Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
-			
+
   	You may also specify a directory containing one or more JARs, all of which will be added.
   		E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
   			Successfully added rules for apex.
   			2 path(s) added:
   			/Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
 ```
-
 _See code: [lib/commands/scanner/rule/add.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/rule/add.js)_
 
 ## `sfdx scanner:rule:describe -n <string> [--verbose] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-Provide detailed information about a rule.
+provide detailed information about a rule
 
 ```
 USAGE
@@ -78,7 +115,7 @@ USAGE
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 
 OPTIONS
-  -n, --rulename=rulename                                                           (required) The name of a rule.
+  -n, --rulename=rulename                                                           (required) the name of a rule
   --json                                                                            format output as json
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
@@ -89,21 +126,18 @@ OPTIONS
 
 EXAMPLE
   $ sfdx scanner:rule:describe --rulename ExampleRule
-  	name:        ExampleRule
-  	categories:  ExampleCategory
-  	rulesets:    Ruleset1
-  							Ruleset2
-  							Ruleset3
-  	languages:   apex
-  	description: Short description of rule
-  	message:     ExampleRule Violated.
+  	name:        AvoidWithStatement
+  	categories:   Best Practices
+  	rulesets:    Controversial Ecmascript
+  	languages:   javascript
+  	description: Avoid using with - it's bad news
+  	message:     Avoid using with - it's bad news
 ```
-
 _See code: [lib/commands/scanner/rule/describe.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/rule/describe.js)_
 
 ## `sfdx scanner:rule:list [-c <array>] [-r <array>] [-l <array>] [--verbose] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-Lists basic information about all rules matching provided criteria
+lists basic information about all rules matching provided criteria
 
 ```
 USAGE
@@ -126,7 +160,7 @@ EXAMPLE
   Invoking with no filter criteria returns all rules.
   	E.g., $ sfdx scanner:rule:list
   		Returns a table containing all rules.
-	
+
   The values supplied to a single filter are handled with a logical OR.
   	E.g., $ sfdx scanner:rule:list --language apex,javascript
   		Returns all rules for Apex OR Javascript.
@@ -138,12 +172,11 @@ EXAMPLE
   		AND...
   		2) Are members of the Braces OR Security rulesets.
 ```
-
 _See code: [lib/commands/scanner/rule/list.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/rule/list.js)_
 
 ## `sfdx scanner:rule:remove [-f] [-p <array>] [--verbose] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-Removes custom rules from the registry of available rules.
+removes custom rules from the registry of available rules
 
 ```
 USAGE
@@ -178,12 +211,11 @@ EXAMPLE
   	E.g., $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
   		Deregisters somerules.jar without requiring confirmation.
 ```
-
 _See code: [lib/commands/scanner/rule/remove.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/rule/remove.js)_
 
 ## `sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f json|xml|junit|csv|table] [-o <string>] [--verbose] [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
 
-Evaluate a selection of rules against a codebase.
+evaluate a selection of rules against a codebase
 
 ```
 USAGE
@@ -218,7 +250,6 @@ EXAMPLE
   	Windows example: > sfdx scanner:run --target ".\**\*.js,!.\**\IgnoreMe.js" ...
   		Evaluate rules against all .js files below the current directory, except for IgnoreMe.js.
 ```
-
 _See code: [lib/commands/scanner/run.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/run.js)_
 
 ## `sfdx scanner:scannerCommand [--json] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]`
@@ -234,32 +265,6 @@ OPTIONS
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)  [default: warn] logging level for
                                                                                     this command invocation
 ```
-
 _See code: [lib/commands/scanner/scannerCommand.js](https://github.com/forcedotcom/sfdx-scanner/blob/v1.0.30/lib/commands/scanner/scannerCommand.js)_
+
 <!-- commandsstop -->
-<!-- debugging-your-plugin -->
-# Debugging your plugin
-We recommend using the Visual Studio Code (VS Code) IDE for your plugin development. Included in the `.vscode` directory of this plugin is a `launch.json` config file, which allows you to attach a debugger to the node process when running your commands.
-
-To debug the `hello:org` command: 
-1. Start the inspector
-  
-If you linked your plugin to the sfdx cli, call your command with the `dev-suspend` switch: 
-```sh-session
-$ sfdx hello:org -u myOrg@example.com --dev-suspend
-```
-  
-Alternatively, to call your command using the `bin/run` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
-```sh-session
-$ NODE_OPTIONS=--inspect-brk bin/run hello:org -u myOrg@example.com
-```
-
-2. Set some breakpoints in your command code
-3. Click on the Debug icon in the Activity Bar on the side of VS Code to open up the Debug view.
-4. In the upper left hand corner of VS Code, verify that the "Attach to Remote" launch configuration has been chosen.
-5. Hit the green play button to the left of the "Attach to Remote" launch configuration window. The debugger should now be suspended on the first line of the program. 
-6. Hit the green play button at the top middle of VS Code (this play button will be to the right of the play button that you clicked in step #5).
-<br><img src=".images/vscodeScreenshot.png" width="480" height="278"><br>
-Congrats, you are debugging!
-=======
-# sfdx-scanner

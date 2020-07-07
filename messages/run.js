@@ -19,7 +19,9 @@ module.exports = {
 		"formatDescription": "format of results",
 		"formatDescriptionLong": "Specifies output format with results written directly to the console.",
 		"outfileDescription": "location of output file",
-		"outfileDescriptionLong": "Write output to a file."
+		"outfileDescriptionLong": "Write output to a file.",
+		"tsconfigDescription": "Location of tsconfig.json file",
+		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine."
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
@@ -35,13 +37,17 @@ module.exports = {
 	E.g., $ sfdx scanner:run --format xml --target "somefile.js"
 		Evaluates all rules against somefile.js.
 
-Specifying multiple categories or rulesets is treated as a logical OR.
-	E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
-		Evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
+	Specifying multiple categories or rulesets is treated as a logical OR.
+		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
+			Evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
 
-Wrap globs in quotes.
-	Unix example:    $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
-	Windows example: > sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...
-		Evaluate rules against all .js files below the current directory, except for IgnoreMe.js.
+	Wrap globs in quotes.
+		Unix example:    $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
+		Windows example: > sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...
+			Evaluate rules against all .js files below the current directory, except for IgnoreMe.js.
+
+	Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
+		E.g., sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
+			Scans the project contained in '/my-project' if the current working directory is another directory.
 `
 };

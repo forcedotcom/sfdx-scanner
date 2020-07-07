@@ -79,7 +79,11 @@ export class PmdCatalogWrapper extends PmdSupport {
 		// "language=path1,path2,path3"
 		pathSetMap.forEach((entries, language) => {
 			const paths = Array.from(entries.values());
-			parameters.push(language + divider + paths.join(joiner));
+
+			// add parameter only if paths are available for real
+			if (paths && paths.length > 0) {
+				parameters.push(language + divider + paths.join(joiner));
+			}
 		});
 
 		this.logger.trace(`Cataloger parameters have been built: ${parameters}`);

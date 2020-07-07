@@ -4,6 +4,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
+import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import fs = require('fs');
 import untildify = require('untildify');
 import normalize = require('normalize-path');
@@ -91,6 +92,10 @@ export default class Run extends ScannerCommand {
 			char: 'o',
 			description: messages.getMessage('flags.outfileDescription'),
 			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+		}),
+		tsconfig: flags.string({
+			description: messages.getMessage('flags.tsconfigDescription'),
+			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
 		})
 	};
 
@@ -119,10 +124,22 @@ export default class Run extends ScannerCommand {
 			target.push(this.args.file);
 		}
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
-		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format);
+		const engineOptions = this.gatherEngineOptions();
+		const output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format, engineOptions);
 		return this.processOutput(output);
 	}
 
+	/**
+	 * Gather a map of options that will be passed to the RuleManager without validation.
+	 */
+	private gatherEngineOptions(): Map<string, string> {
+		const options = new Map();
+		if (this.flags.tsconfig) {
+			const tsconfig = normalize(untildify(this.flags.tsconfig));
+			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
+		}
+		return options;
+	}
 
 	private validateFlags(): void {
 		// file, --target and --org are mutually exclusive, but they can't all be null.

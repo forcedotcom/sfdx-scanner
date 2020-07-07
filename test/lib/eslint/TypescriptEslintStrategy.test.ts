@@ -1,109 +1,214 @@
 import { expect } from 'chai';
 import Sinon = require('sinon');
-import {TypescriptEslintStrategy} from '../../../src/lib/eslint/TypescriptEslintStrategy';
-import { Config } from '../../../src/lib/util/Config';
+import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/lib/eslint/TypescriptEslintStrategy';
 import { FileHandler } from '../../../src/lib/util/FileHandler';
-import { fail } from 'assert';
 import * as path from 'path';
-import {Messages} from '@salesforce/core';
+import {Controller} from '../../../src/ioc.config';
+import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
+import LocalCatalog from '../../../src/lib/services/LocalCatalog';
+import fs = require('fs');
+import { fail } from 'assert';
 
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'eslintEngine');
+const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
+const CATALOG_FIXTURE_RULE_COUNT = 15;
+const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
+
+let ruleManager: RuleManager = null;
+
+class TestTypescriptEslintStrategy extends TypescriptEslintStrategy {
+	public async checkEngineOptionsForTsconfig(engineOptions: Map<string, string>): Promise<string> {
+		return super.checkEngineOptionsForTsconfig(engineOptions);
+	}
+
+	public async checkWorkingDirectoryForTsconfig(): Promise<string> {
+		return super.checkWorkingDirectoryForTsconfig();
+	}
+}
 
 describe('TypescriptEslint Strategy', () => {
-	describe('Test cases with #findTsConfig', () => {
-		const invalidPath = '/invalid/path';
-		const tsconfigFilePath = '/path/to/tsconfig.json';
-		const tsconfigDir = '/path/where/ts/config/lives';
-		const tsconfigFileInDir = `${tsconfigDir}/tsconfig.json`;
-		const tsconfigInCwd = path.resolve('', 'tsconfig.json');
+	afterEach(() => {
+		Sinon.restore();
+	});
 
-		describe('find tsconfig from Config.json', () => {
-			const target = '';
+	describe('Test cases with tsconfig.json', () => {
+		const cwdVal = 'another-dir/tsconfig.json';
+		const engineOptionsVal = 'some-dir/tsconfig.json';
+		describe('findTsconfig', () => {
+			it('use tsconfig from cwd', async () => {
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(cwdVal);
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(null);
 
-			afterEach(() => {
-				Sinon.restore();
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+
+				const fileFound =  await tsStrategy.findTsconfig(null);
+
+				expect(fileFound).equals(cwdVal);
 			});
 
-			it('should throw error if OverriddenConfigPath in Config.json contains an invalid path', async () => {
-				Sinon.stub(Config.prototype, "getOverriddenConfigPath").returns(invalidPath);
-				Sinon.stub(FileHandler.prototype, "exists").resolves(false);
+			it('use tsconfig from engineOptions', async () => {
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(null);
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(engineOptionsVal);
 
-				const tsStrategy = new TypescriptEslintStrategy();
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+
+				const fileFound =  await tsStrategy.findTsconfig(null);
+
+				expect(fileFound).equals(engineOptionsVal);
+			});
+
+			it('should throw an error if tsconfig is not in current working directory and not specified by engineOptions', async () => {
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(null);
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(null);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
 				await tsStrategy.init();
 
 				try {
-					await tsStrategy.findTsconfig(target);
-					fail("Invalid path in Config.json's OverriddenConfigPath should cause an error");
-				} catch (error) {
-					expect(error.message).equals(messages.getMessage('InvalidPath', [invalidPath]));
+					await tsStrategy.findTsconfig(null);
+					fail('findTsconfig should have thrown');
+				} catch(e) {
+					expect(e.message).to.contain(`Unable to find 'tsconfig.json' in current directory '${path.resolve()}'`)
 				}
-
 			});
 
-			it('should use tsconfig file from Config.json if OverriddenConfigPath is a valid file', async () => {
-				Sinon.stub(Config.prototype, "getOverriddenConfigPath").returns(tsconfigFilePath);
-				Sinon.stub(FileHandler.prototype, "exists").resolves(true);
-				Sinon.stub(FileHandler.prototype, 'isDir').resolves(false);
+			it('should throw an error if tsconfig is in working directory and is also specified as engineOption', async () => {
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkWorkingDirectoryForTsconfig').resolves(cwdVal);
+				Sinon.stub(TestTypescriptEslintStrategy.prototype, 'checkEngineOptionsForTsconfig').resolves(engineOptionsVal);
 
-				const tsStrategy = new TypescriptEslintStrategy();
+				const tsStrategy = new TestTypescriptEslintStrategy();
 				await tsStrategy.init();
-
-				const fileFound = await tsStrategy.findTsconfig(target);
-
-				expect(fileFound).equals(tsconfigFilePath);
+				try {
+					await tsStrategy.findTsconfig(null);
+					fail("findTsconfig should have thrown");
+				} catch(e) {
+					expect(e.message).to.contain(`'tsconfig.json' was found in current directory at location '${cwdVal}', '${engineOptionsVal}' was also specified by the --tsconfig flag.`);
+				}
 			});
-
-			it('should look for tsconfig file in directory given in Config.json if OverriddenConfigPath is a valid directory', async () => {
-				Sinon.stub(Config.prototype, 'getOverriddenConfigPath'). returns(tsconfigDir);
-				// exists() returns true for config path and tsconfig file inside
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'isDir').resolves(true);
-
-				const tsStrategy = new TypescriptEslintStrategy();
-				await tsStrategy.init();
-
-				const fileFound = await tsStrategy.findTsconfig(target);
-
-				expect(fileFound).equals(tsconfigFileInDir);
-			});
-
 		});
 
-		describe('find tsconfig from target or current working directory', () => {
-			const target = tsconfigDir;
-			afterEach(() => {
-				Sinon.restore();
-			});
+		describe('checkWorkingDirectoryForTsconfig', () => {
+			const tsconfigInCwd = path.resolve('', 'tsconfig.json');
 
-			it('should look for tsconfig in target directory if config has not been set', async () => {
-				Sinon.stub(Config.prototype, "getOverriddenConfigPath").returns('');
-				// exists() returns true for target path dir and tsconfig.json within it
+			it('finds tsconfig in current working directory', async () => {
 				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'isDir').resolves(true);
 
-				const tsStrategy = new TypescriptEslintStrategy();
+				const tsStrategy = new TestTypescriptEslintStrategy();
 				await tsStrategy.init();
 
-				const fileFound = await tsStrategy.findTsconfig(target);
-
-				expect(fileFound).equals(tsconfigFileInDir);
-
-			});
-
-			it('should look for tsconfig in current working directory if target is not a directory', async () => {
-				Sinon.stub(Config.prototype, "getOverriddenConfigPath").returns('');
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'isDir').resolves(false);
-
-				const tsStrategy = new TypescriptEslintStrategy();
-				await tsStrategy.init();
-
-				const fileFound = await tsStrategy.findTsconfig(target);
+				const fileFound = await tsStrategy.checkWorkingDirectoryForTsconfig();
 
 				expect(fileFound).equals(tsconfigInCwd);
 			});
 
-			// TODO: test cases that set exists to true/false depending on call order
+			it('does not find tsconfig in current working directory', async () => {
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+
+				const fileFound = await tsStrategy.checkWorkingDirectoryForTsconfig();
+
+				expect(fileFound).to.be.null;
+			});
+		});
+
+		describe('checkEngineOptionsForTsconfig', () => {
+			it('engineOption specifies a valid tsconfig.json', async () => {
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+
+				const engineOptions = new Map();
+				const engineOptionPath = path.join('test', 'existing-path', 'tsconfig.json');
+				engineOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, engineOptionPath);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+				const fileFound =  await tsStrategy.checkEngineOptionsForTsconfig(engineOptions);
+
+				expect(fileFound).equals(engineOptionPath);
+			});
+
+			it('engineOption does not specify tsconfig.json', async () => {
+				const engineOptions = new Map();
+				const engineOptionPath = path.join('test', 'existing-path', 'tsconfig.json');
+				engineOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, engineOptionPath);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+				const fileFound =  await tsStrategy.checkEngineOptionsForTsconfig(EMPTY_ENGINE_OPTIONS);
+
+				expect(fileFound).to.be.null;
+			});
+
+			it('should throw an error if tsconfig.json file specified engineOption does not exist', async () => {
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
+
+				const engineOptionPath = path.join('test', 'non-existent-path', 'tsconfig.json');
+				const engineOptions = new Map();
+				engineOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, engineOptionPath);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+				try {
+					await tsStrategy.checkEngineOptionsForTsconfig(engineOptions);
+					fail('findTsconfig should have thrown');
+				} catch(e) {
+					expect(e.message).to.contain(`Unable to find 'tsconfig.json' at location '${engineOptionPath}'`)
+				}
+			});
+
+			it('should throw an error if tsconfig engineOption is found, but is not a file named tsconfig.json', async () => {
+				const engineOptionPath = path.join('test', 'non-existent-path', 'tsconfig.foo');
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+
+				const engineOptions = new Map();
+				engineOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, engineOptionPath);
+
+				const tsStrategy = new TestTypescriptEslintStrategy();
+				await tsStrategy.init();
+				try {
+					await tsStrategy.checkEngineOptionsForTsconfig(engineOptions);
+					fail('findTsconfig should have thrown');
+				} catch(e) {
+					expect(e.message).to.contain(`File '${engineOptionPath}' specified by the --tsconfig flag must be named 'tsconfig.json'`)
+				}
+			});
+		});
+
+		describe('typescript file not in tsconfig.json causes error', () => {
+			before(async () => {
+				// Make sure all catalogs exist where they're supposed to.
+				if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
+					throw new Error('Fake catalog does not exist');
+				}
+
+				// Make sure all catalogs have the expected number of rules.
+				const catalogJson = JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
+				if (catalogJson.rules.length !== CATALOG_FIXTURE_RULE_COUNT) {
+					throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + CATALOG_FIXTURE_RULE_COUNT);
+				}
+
+				// Stub out the LocalCatalog's getCatalog method so it always returns the fake catalog, whose contents are known,
+				// and never overwrites the real catalog. (Or we could use the IOC container to do this without sinon.)
+				Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
+					return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
+				});
+
+				// Declare our rule manager.
+				ruleManager = await Controller.createRuleManager();
+
+				process.chdir(path.join('test', 'code-fixtures', 'projects'));
+			});
+			after(() => {
+				process.chdir("../../..");
+			});
+
+			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
+				const output = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+				expect(output).to.contain("test/code-fixtures/projects/invalid-ts/src/notSpecifiedInTsConfig.ts' does not reside in a location that is included by your tsconfig.json 'include' attribute.");
+				expect(output).to.not.contain('Parsing error: \\"parserOptions.project\\" has been set');
+			});
 		});
 	});
 });
