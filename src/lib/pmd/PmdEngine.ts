@@ -100,7 +100,7 @@ export class PmdEngine implements RuleEngine {
 		}
 	}
 
-	private xmlToRuleResults(pmdXml: string): RuleResult[] {
+	protected xmlToRuleResults(pmdXml: string): RuleResult[] {
 		// If the results were just an empty string, we can return it.
 		if (pmdXml === '') {
 			this.logger.trace('No PMD results to convert');
@@ -108,7 +108,15 @@ export class PmdEngine implements RuleEngine {
 		}
 
 		const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true});
-		return pmdJson.elements[0].elements.map(
+
+		// Only provide results for nodes that are files. Other nodes are filtered out and logged.
+		const fileNodes = pmdJson.elements[0].elements.filter(e => 'file' === e.name);
+		const otherNodes = pmdJson.elements[0].elements.filter(e => 'file' !== e.name);
+		for (const otherNode of otherNodes) {
+			this.logger.trace(`Skipping non-file node ${JSON.stringify(otherNode)}`);
+		}
+
+		return fileNodes.map(
 			(f): RuleResult => {
 				return {
 					engine: PmdEngine.NAME,
