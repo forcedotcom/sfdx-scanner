@@ -22,6 +22,7 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|ju
   -o, --outfile=outfile			Write output to a file
   -r, --ruleset=ruleset			One or more rulesets to run. Specify multiple values as a comma-separated list.
   -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
+  --tsconfig			tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
   --json				Format output as json
   --verbose				Emit additional command output to stdout
 ```
@@ -48,6 +49,12 @@ $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
 Windows example: 
 ```DOS
 > sfdx scanner:run --target ".\**\*.js,!.\**\IgnoreMe.js" ...
+```
+
+Specify tsconfig.json if the current working directory does not contain the ```tsconfig.json``` that corresponds to the TypeScript files being scanned. This example demonstrates scanning the project contained in ```/my-project``` if the current working directory is ```/my-home-directory```.
+```bash
+$ cd /my-home-directory
+$ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 ```
 
 ## Demo
