@@ -132,25 +132,40 @@ export class Config {
 		// If the config specifies property, use those.
 		if (ecc && ecc[propertyName] && typeChecker(ecc[propertyName], propertyName, engine)) {
 			this.logger.trace(`Retrieving ${propertyName} from engine ${engine}: ${ecc[propertyName]}`);
-			return ecc[propertyName];
 		} else {
-			// If the config doesn't specify the property, see if we have any default values.
-			const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name.toLowerCase() === engine.valueOf().toLowerCase());
-			// If we find default values, persist those to the config.
-			if (!ecc) {
-				ecc = defaultConfig;
-				this.logger.warn(`Persisting missing block for engine ${engine}`);
-				await this.writeConfig();
-			} else if (defaultConfig[propertyName]) {
-				ecc[propertyName] = defaultConfig[propertyName];
-				this.logger.warn(`Persisting default values ${ecc[propertyName]} for engine ${engine}`);
-				await this.writeConfig();
-			} else {
-				throw new Error(`Developer error: no default value set for ${propertyName} of ${engine} engine. Or invalid property call.`)
-			}
-			// Return whatever we came back with.
-			return ecc[propertyName];
+			// If the config doesn't specify the property, use the default value
+			this.logger.trace(`Looking for missing property ${propertyName} of ${engine} in defaults`);
+			ecc = await this.lookupAndUpdateToDefault(engine, ecc, propertyName);
 		}
+
+		return ecc[propertyName];
+	}
+
+	private async lookupAndUpdateToDefault(engine: ENGINE, ecc: EngineConfigContent, propertyName: string): Promise<EngineConfigContent> {
+		const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name.toLowerCase() === engine.valueOf().toLowerCase());
+
+		if (!ecc) { // if engine block doesn't exist, add a new one based on the default
+			ecc = defaultConfig;
+			this.addEngineToConfig(ecc);
+			this.logger.warn(`Persisting missing block for engine ${engine}`);
+		} else if (defaultConfig[propertyName]) { // engine block exists if we are here. Check if default has a value for property
+			ecc[propertyName] = defaultConfig[propertyName];
+			this.logger.warn(`Persisting default values ${ecc[propertyName]} for engine ${engine}`);
+		} else {
+			// if we are here, this is a developer problem
+			throw new Error(`Developer error: no default value set for ${propertyName} of ${engine} engine. Or invalid property call.`);
+		}
+
+		// update contents in Config file to latest configContent value
+		await this.writeConfig();
+		return ecc;
+	}
+
+	private addEngineToConfig(ecc: EngineConfigContent): void {
+		if (!this.configContent.engines) {
+			this.configContent.engines = [];
+		}
+		this.configContent.engines.push(ecc);
 	}
 
 	private getEngineConfig(name: ENGINE): EngineConfigContent {
@@ -197,7 +212,7 @@ export class Config {
 		this.configContent = JSON.parse(fileContent);
 
 		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
-		if (this.configContent['java-home']) {
+		if (!this.configContent['engines'] && this.configContent['javaHome']) {
 			// Prior version.  Migrate.
 			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
 		}
