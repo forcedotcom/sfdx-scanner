@@ -91,7 +91,21 @@ describe('Config.js tests', () => {
 			const targetPatterns = await config.getTargetPatterns(ENGINE.ESLINT);
 			const expectedTargetPatterns = DEFAULT_CONFIG.engines[1].targetPatterns;
 			expect(targetPatterns).deep.equals(expectedTargetPatterns);
-			expect(writeFileStub.calledWith(configFilePath, Sinon.match(expectedTargetPatterns)));
+			expect(writeFileStub.calledWith(configFilePath, Sinon.match(DEFAULT_CONFIG.engines[1].name)));
+		});
+
+		it("should be compatible with older version of Config.json", async () => {
+			const olderConfig = {"javaHome": "/my/test/java/home"};
+
+			Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
+
+			// initialization should automatically add default engines block of config
+			const config = await createConfig(olderConfig, false);
+
+			const actualTargetPatterns = await config.getTargetPatterns(ENGINE.PMD);
+			const expectedTargetPatterns = DEFAULT_CONFIG.engines[0].targetPatterns;
+			expect(actualTargetPatterns).deep.equals(expectedTargetPatterns);
+
 		});
 	});
 
