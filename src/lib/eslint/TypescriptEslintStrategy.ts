@@ -137,16 +137,13 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	 * Throw an error if a tsconfig.json file can't be found.
 	 */
 	async findTsconfig(engineOptions: Map<string, string>): Promise<string> {
-		let foundTsConfig = await this.checkEngineOptionsForTsconfig(engineOptions);
+		const foundTsConfig = (await this.checkEngineOptionsForTsconfig(engineOptions)) || (await this.checkWorkingDirectoryForTsconfig());
 
 		if (!foundTsConfig) {
-			foundTsConfig = await this.checkWorkingDirectoryForTsconfig();
-			if (!foundTsConfig) {
-				const cwd = path.resolve();
-				// Not specified in engineOptions and not found in the current directory
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfigFromCwd',
-					[TS_CONFIG, cwd, TS_CONFIG]);
-			}
+			const cwd = path.resolve();
+			// Not specified in engineOptions and not found in the current directory
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfigFromCwd',
+				[TS_CONFIG, cwd, TS_CONFIG]);
 		}
 
 		this.logger.trace(`Using ${TS_CONFIG} from ${foundTsConfig}`);
