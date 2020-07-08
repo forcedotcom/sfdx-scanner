@@ -9,6 +9,7 @@ import {OutputProcessor} from './OutputProcessor';
 import * as PmdLanguageManager from './PmdLanguageManager';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import path = require('path');
+import {uxEvents} from '../ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
@@ -97,9 +98,12 @@ export class PmdCatalogWrapper extends PmdSupport {
 	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const pathSetMap = new Map<string, Set<string>>();
 
-		const customPathEntries: Map<string, Set<string>> = await this.getCustomRulePathEntries();
+		const customRulePaths: Map<string, Set<string>> = await this.getCustomRulePathEntries();
+		const fileHandler = new FileHandler();
+
+
 		// Iterate through the custom paths.
-		customPathEntries.forEach(async (paths: Set<string>, langKey: string) => {
+		for (const [langKey, paths] of customRulePaths.entries()) {
 			// If the language by which these paths are mapped can be de-aliased into one of PMD's default-supported
 			// languages, we should use the name PMD recognizes. That way, if they have custom paths for 'ecmascript'
 			// and 'js', we'll turn both of those into 'javascript'.
@@ -112,11 +116,16 @@ export class PmdCatalogWrapper extends PmdSupport {
 			const pathSet = pathSetMap.get(lang) || new Set<string>();
 			if (paths) {
 				for (const value of paths.values()) {
-					pathSet.add(value);
+					if (await fileHandler.exists(value)) {
+						pathSet.add(value);
+					} else {
+						// The catalog file may have been deleted or moved. Show the user a warning.
+						uxEvents.emit('warning-always', messages.getMessage('warning.customRuleFileNotFound', [value, lang]));
+					}
 				}
 			}
 			pathSetMap.set(lang, pathSet);
-		});
+		}
 
 		// Now, we'll want to add the default PMD JARs for any activated languages.
 		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
