@@ -10,6 +10,10 @@ export type Rule = {
 	url?: string;
 }
 
+export type LooseObject = {
+	[key: string]: any
+}
+
 export type RuleGroup = {
 	engine: string;
 	name: string;

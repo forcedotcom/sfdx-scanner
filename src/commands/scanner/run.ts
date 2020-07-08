@@ -1,9 +1,11 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
+import {LooseObject} from '../../types';
 import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
+import {overrideDefaultEnv} from '../../lib/eslint/BaseEslintEngine';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import fs = require('fs');
 import untildify = require('untildify');
@@ -96,6 +98,14 @@ export default class Run extends ScannerCommand {
 		tsconfig: flags.string({
 			description: messages.getMessage('flags.tsconfigDescription'),
 			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		}),
+		// TODO: THIS FLAG WAS IMPLEMENTED FOR W-7791882, AND IT'S TERRIBLE. REPLACE IT DURING THE 3.0 RELEASE CYCLE.
+		env: flags.string({
+			description: messages.getMessage('flags.envDescription'),
+			longDescription: messages.getMessage('flags.envDescriptionLong'),
+			deprecated: {
+				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+			}
 		})
 	};
 
@@ -154,6 +164,17 @@ export default class Run extends ScannerCommand {
 			const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format;
 			if (derivedFormat !== chosenFormat) {
 				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format, derivedFormat]));
+			}
+		}
+
+		// TODO: THIS FIX FOR W-7791882 IS TERRIBLE. REPLACE IT DURING 3.0.
+		if (this.flags.env) {
+			// Try to parse the flag into a JSON.
+			try {
+				const overrideEnv: LooseObject = JSON.parse(this.flags.env);
+				overrideDefaultEnv(overrideEnv);
+			} catch (e) {
+				throw new SfdxError(messages.getMessage('output.invalidEnvJson'));
 			}
 		}
 	}

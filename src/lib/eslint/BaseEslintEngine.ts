@@ -1,9 +1,22 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
+import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
 import {CLIEngine} from 'eslint';
 import * as path from 'path';
+
+// TODO: We recognize that this fix for W-7791882, including DEFAULT_ENV_VARS and the overrideDefaultEnv() method, is GARBAGE.
+//       During the 3.0 release cycle, we must replace it a better handling of the eslintrc file in general.
+// These are the environment variables that we'll want enabled by default in our ESLint baseConfig.
+let DEFAULT_ENV_VARS: LooseObject = {
+	'es6': true,           // `Map` class and others
+	'node': true,          // `process` global var and others
+	'browser': true,       // `document` global var
+	'webextensions': true  // Chrome
+};
+export function overrideDefaultEnv(overrideEnv: LooseObject): void {
+	DEFAULT_ENV_VARS = {...DEFAULT_ENV_VARS, ...overrideEnv};
+}
 
 
 export interface EslintStrategy {
@@ -45,15 +58,13 @@ export class StaticDependencies {
 		// From https://eslint.org/docs/developer-guide/nodejs-api:
 		// options.baseConfig. Configuration object, extended by all configurations used with this instance.
 		// You can use this option to define the default settings that will be used if your configuration files don't configure it.
-		config["baseConfig"] = {
-			// Include the following environment variables in order to support the objects declared in the comment
-			"env": {
-				"es6": true, // Map
-				"node": true, // process
-				"browser": true, // document
-				"webextensions": true // chrome
-			}
-		};
+
+		// If they don't already have a baseConfig property on the options, we'll instantiate one.
+		config['baseConfig'] = config['baseConfig'] || {'env': {}};
+		// We'll need to potentially modify the provided config. We can merge two objects by using the spread syntax (...x),
+		// and by supplying our default value as the first parameter, we'll make it so any values already in the base config
+		// override default values with the same name.
+		config['baseConfig']['env'] = {...DEFAULT_ENV_VARS, ...config['baseConfig']['env']};
 		return new CLIEngine(config);
 	}
 
