@@ -9,7 +9,7 @@ module.exports = {
 		"invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
 		"xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
 		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",
-		"catalogFileNotFound": "Catalog file [%s] for language [%s] was not found.",
+		"customRuleFileNotFound": "Custom rule file path [%s] for language [%s] was not found.",
 },
 	"error": {
 		"internal": {

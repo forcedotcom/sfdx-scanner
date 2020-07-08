@@ -68,7 +68,7 @@ describe('PmdCatalogWrapper', () => {
 					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
 					// Spoof a CustomPathManager that claims that a custom JAR exists for plsql, using a weird alias for that language.
 					const customJars: Map<string, Set<string>> = new Map();
-					customJars.set(LANGUAGE.PLSQL, new Set([irrelevantPath]));
+					customJars.set('Pl/SqL', new Set([irrelevantPath]));
 					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 				});
@@ -104,7 +104,7 @@ describe('PmdCatalogWrapper', () => {
 					// Spoof a config that claims that only apex is the supported language
 					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
 					const customJars: Map<string, Set<string>> = new Map();
-					customJars.set(LANGUAGE.PLSQL, new Set([irrelevantPath]));
+					customJars.set('pl/sql', new Set([irrelevantPath]));
 					customJars.set(LANGUAGE.JAVA, new Set());
 					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
@@ -172,7 +172,7 @@ describe('PmdCatalogWrapper', () => {
 
 					// A warning should be displayed
 					Sinon.assert.calledOnce(uxSpy);
-					Sinon.assert.calledWith(uxSpy, 'warning-always', `Catalog file [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Custom rule file path [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
 				});
 			});
 		});

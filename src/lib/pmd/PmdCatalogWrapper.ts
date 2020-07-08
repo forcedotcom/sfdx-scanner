@@ -98,12 +98,12 @@ export class PmdCatalogWrapper extends PmdSupport {
 	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const pathSetMap = new Map<string, Set<string>>();
 
-		const customPathEntries: Map<string, Set<string>> = await this.getCustomRulePathEntries();
+		const customRulePaths: Map<string, Set<string>> = await this.getCustomRulePathEntries();
 		const fileHandler = new FileHandler();
 
 
 		// Iterate through the custom paths.
-		for (const [langKey, paths] of customPathEntries) {
+		for (const [langKey, paths] of customRulePaths.entries()) {
 			// If the language by which these paths are mapped can be de-aliased into one of PMD's default-supported
 			// languages, we should use the name PMD recognizes. That way, if they have custom paths for 'ecmascript'
 			// and 'js', we'll turn both of those into 'javascript'.
@@ -120,7 +120,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 						pathSet.add(value);
 					} else {
 						// The catalog file may have been deleted or moved. Show the user a warning.
-						uxEvents.emit('warning-always', messages.getMessage('warning.catalogFileNotFound', [value, lang]));
+						uxEvents.emit('warning-always', messages.getMessage('warning.customRuleFileNotFound', [value, lang]));
 					}
 				}
 			}
