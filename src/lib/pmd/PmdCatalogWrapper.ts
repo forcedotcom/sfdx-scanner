@@ -116,8 +116,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 			const pathSet = pathSetMap.get(lang) || new Set<string>();
 			if (paths) {
 				for (const value of paths.values()) {
-					const exists = (await fileHandler.exists(value));
-					if (exists) {
+					if (await fileHandler.exists(value)) {
 						pathSet.add(value);
 					} else {
 						// The catalog file may have been deleted or moved. Show the user a warning.
