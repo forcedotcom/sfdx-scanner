@@ -820,7 +820,7 @@ describe('scanner:run', function () {
 			expect(ctx.stdout).to.contains('No rule violations found.', 'Should be no violations found in the file.');
 		});
 
-		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS TERRIBLE, AND WE NEED TO CHANGE IT IN 3.0.
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
 		runTest
 			.stdout()
@@ -838,7 +838,7 @@ describe('scanner:run', function () {
 				expect(parsedCtx[0].violations.length).to.equal(8, 'Should be 8 violations');
 			});
 
-		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS TERRIBLE AND WE NEED TO REDO IT IN 3.0.
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
 		runTest
 			.stdout()
