@@ -22,7 +22,8 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|ju
   -o, --outfile=outfile			Write output to a file
   -r, --ruleset=ruleset			One or more rulesets to run. Specify multiple values as a comma-separated list.
   -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
-  --tsconfig			tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
+  --tsconfig				tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
+  --env 				JSON-formatted string that overrides ESLint's default environmental variables.
   --json				Format output as json
   --verbose				Emit additional command output to stdout
 ```
@@ -55,6 +56,10 @@ Specify tsconfig.json if the current working directory does not contain the ```t
 ```bash
 $ cd /my-home-directory
 $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
+```
+Use --env to override the default ESLint environment variables to add frameworks.
+```bash
+$ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 ```
 
 ## Demo
