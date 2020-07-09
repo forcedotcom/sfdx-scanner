@@ -10,6 +10,11 @@ export type Rule = {
 	url?: string;
 }
 
+export type LooseObject = {
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	[key: string]: any;
+}
+
 export type RuleGroup = {
 	engine: string;
 	name: string;

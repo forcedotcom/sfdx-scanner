@@ -819,5 +819,38 @@ describe('scanner:run', function () {
 			// There should be no violations.
 			expect(ctx.stdout).to.contains('No rule violations found.', 'Should be no violations found in the file.');
 		});
+
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
+		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
+		runTest
+			.stdout()
+			.stderr()
+			.command(['scanner:run',
+				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesJasmine.js'),
+				'--format', 'json'
+			])
+			.it('By default, frameworks such as Jasmine are not included in the baseConfig', ctx => {
+				// We expect there to be 8 errors about jasmine-related syntax being undefined.
+				// There's currently some weird issue with the test framework that causes this specific execution to act
+				// like the --verbose flag was supplied. So we'll just pull out a JSON by getting everything from the first
+				// instance of '[' to the last instance of ']', since the JSON takes the form of an array.
+				const parsedCtx = JSON.parse(ctx.stdout.slice(ctx.stdout.indexOf('['), ctx.stdout.lastIndexOf(']') + 1));
+				expect(parsedCtx[0].violations.length).to.equal(6, 'Should be 6 violations');
+			});
+
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
+		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
+		runTest
+			.stdout()
+			.stderr()
+
+			.command(['scanner:run',
+				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesJasmine.js'),
+				'--format', 'json',
+				'--env', '{"jasmine": true}'
+			])
+			.it('Providing jasmine in the --env override should resolve errors about that framework', ctx => {
+				expect(ctx.stdout).to.contain('No rule violations found.', 'Should be no violations found in the file.');
+			});
 	});
 });

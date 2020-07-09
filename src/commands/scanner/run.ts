@@ -1,6 +1,7 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
+import {LooseObject} from '../../types';
 import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from './scannerCommand';
@@ -96,6 +97,15 @@ export default class Run extends ScannerCommand {
 		tsconfig: flags.string({
 			description: messages.getMessage('flags.tsconfigDescription'),
 			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		}),
+		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
+		//   It should be replaced during the 3.0 release cycle.
+		env: flags.string({
+			description: messages.getMessage('flags.envDescription'),
+			longDescription: messages.getMessage('flags.envDescriptionLong'),
+			deprecated: {
+				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+			}
 		})
 	};
 
@@ -137,6 +147,17 @@ export default class Run extends ScannerCommand {
 		if (this.flags.tsconfig) {
 			const tsconfig = normalize(untildify(this.flags.tsconfig));
 			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
+		}
+
+		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
+		//  engine-specific flags. Replace it in 3.0.
+		if (this.flags.env) {
+			try {
+				const parsedEnv: LooseObject = JSON.parse(this.flags.env);
+				options.set('env', JSON.stringify(parsedEnv));
+			} catch (e) {
+				throw new SfdxError(messages.getMessage('output.invalidEnvJson'));
+			}
 		}
 		return options;
 	}
