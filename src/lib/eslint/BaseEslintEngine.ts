@@ -16,6 +16,9 @@ const DEFAULT_ENV_VARS: LooseObject = {
 	'webextensions': true  // Chrome
 };
 
+const ENV = 'env';
+const BASECONFIG = 'baseConfig';
+
 export interface EslintStrategy {
 
 	/** Initialize strategy */
@@ -204,13 +207,13 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				// options.baseConfig. Configuration object, extended by all configurations used with this instance.
 				// You can use this option to define the default settings that will be used if your configuration files don't configure it.
 				// If they don't already have a baseConfig property, we'll need to instantiate one.
-				config['baseConfig'] = config['baseConfig'] || {'env': {}};
+				config[BASECONFIG] = config[BASECONFIG] || {[ENV]: {}};
 				// We'll also need to potentially modify the provided config's environment variables. We can merge two objects
 				// by using the spread syntax (...x). Later parameters override earlier ones in a conflict, so we want
 				// the default values to be overridden by whatever was already in the env property, and we want the manual
 				// override to trump both of those things.
-				const envOverride = engineOptions.has('env') ? JSON.parse(engineOptions.get('env')) : {};
-				config['baseConfig']['env'] = {...DEFAULT_ENV_VARS, ...config['baseConfig']['env'], ...envOverride};
+				const envOverride = engineOptions.has(ENV) ? JSON.parse(engineOptions.get(ENV)) : {};
+				config[BASECONFIG][ENV] = {...DEFAULT_ENV_VARS, ...config[BASECONFIG][ENV], ...envOverride};
 				// ==== This is the end of the sup-optimal solution to W-7791882.
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);

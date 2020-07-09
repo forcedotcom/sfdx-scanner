@@ -53,5 +53,9 @@ module.exports = {
 	Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
 		E.g., sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 			Scans the project contained in '/my-project' if the current working directory is another directory.
+			
+	Use --env to override the default ESLint environment variables to add frameworks.
+		E.g., $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
+			Evaluates rules against somefile.js, including Jasmine in the environment variables.
 `
 };

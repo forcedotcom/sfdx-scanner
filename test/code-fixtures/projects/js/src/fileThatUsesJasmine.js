@@ -1,15 +1,14 @@
-describe('When in the course of human events', () => {
-	it('becomes necessary for one people to dissolve the political bands which have connected them with another...', () => {
-		const causesDeclared = true;
-		expect(causesDeclared).toBe(true, 'they should declare the causes which impel them to the separation.');
+describe('In the Age of Ancients, the world was unformed and shrouded by fog.', () => {
+	it('A land of grey crags, arch trees, and everlasting dragons.', () => {
+		expect(true).toBe(true, 'Then there was Fire, and with Fire came disparity');
 	});
 });
 
-describe('We hold these truths to be self evident', () => {
-	it('That all men are...endowed by their Creator with certain inalienable rights', () => {
-		const inalienableRights = ['marriage', 'freedom', 'food', 'life', 'water', 'liberty', 'pursuit of happiness'];
-		expect(inalienableRights).toContain('life');
-		expect(inalienableRights).toContain('liberty');
-		expect(inalienableRights).toContain('pursuit of happiness');
+describe('Heat and cold; life and death; and of course, light and dark', () => {
+	it('And from the dark they came, and found the Souls of Lords within the flame', () => {
+		const lordSouls = ['Gravelord Nito, First of the Dead', 'The Witch of Izalith and her Daughters of Chaos',
+			'Gwynn, Lord of Sunlight and his faithful knights', 'The Furtive Pygmy, so easily forgotten'
+		];
+		expect(lordSouls.length).toBe(4, 'And with the strength of lords, they challenged the dragons');
 	});
 });
