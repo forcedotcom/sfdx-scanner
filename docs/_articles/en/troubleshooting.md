@@ -80,5 +80,5 @@ Update your tsconfig's `include` attribute to include `<file_name>`
 The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
 
 ```bash
-$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --format csv --target "./**/*.ts"
+$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
 ```
