@@ -74,3 +74,11 @@ The annotated JSON below shows you what you should remove
 The ESLint engine requires that any typescript files that are scanned must be included by the tsconfig. [More Information](https://github.com/typescript-eslint/typescript-eslint/releases/tag/v2.0.0)
 
 Update your tsconfig's `include` attribute to include `<file_name>`
+
+### The `scanner:run` command results in the error `JavaScript heap out of memory`.
+
+The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
+
+```bash
+$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --format csv --target "./**/*.ts"
+```
