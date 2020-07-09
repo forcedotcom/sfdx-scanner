@@ -11,7 +11,8 @@ export type Rule = {
 }
 
 export type LooseObject = {
-	[key: string]: any
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	[key: string]: any;
 }
 
 export type RuleGroup = {
