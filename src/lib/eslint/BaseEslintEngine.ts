@@ -17,7 +17,7 @@ const DEFAULT_ENV_VARS: LooseObject = {
 	jasmine: true,			// `describe', 'expect', 'it' global vars
 	jest: true,				// 'jest' global var
 	jquery: true,			// '$' global var
-	mocha: true				// `describe', 'it' global var
+	mocha: true				// `describe' and 'it' global vars
 };
 
 const ENV = 'env';
