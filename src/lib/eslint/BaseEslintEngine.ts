@@ -10,10 +10,14 @@ import * as path from 'path';
 //       requires deleting DEFAULT_ENV_VARS, so be it.
 // These are the environment variables that we'll want enabled by default in our ESLint baseConfig.
 const DEFAULT_ENV_VARS: LooseObject = {
-	'es6': true,           // `Map` class and others
-	'node': true,          // `process` global var and others
-	'browser': true,       // `document` global var
-	'webextensions': true  // Chrome
+	es6: true, 				// `Map` class and others
+	node: true, 			// `process` global var and others
+	browser: true,			// `document` global var
+	webextensions: true,	// Chrome
+	jasmine: true,			// `describe', 'expect', 'it' global vars
+	jest: true,				// 'jest' global var
+	jquery: true,			// '$' global var
+	mocha: true				// `describe' and 'it' global vars
 };
 
 const ENV = 'env';
