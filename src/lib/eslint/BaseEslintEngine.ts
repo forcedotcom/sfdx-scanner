@@ -1,10 +1,27 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
+import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
 import {CLIEngine} from 'eslint';
 import * as path from 'path';
 
+// TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
+//       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
+//       requires deleting DEFAULT_ENV_VARS, so be it.
+// These are the environment variables that we'll want enabled by default in our ESLint baseConfig.
+const DEFAULT_ENV_VARS: LooseObject = {
+	es6: true, 				// `Map` class and others
+	node: true, 			// `process` global var and others
+	browser: true,			// `document` global var
+	webextensions: true,	// Chrome
+	jasmine: true,			// `describe', 'expect', 'it' global vars
+	jest: true,				// 'jest' global var
+	jquery: true,			// '$' global var
+	mocha: true				// `describe' and 'it' global vars
+};
+
+const ENV = 'env';
+const BASECONFIG = 'baseConfig';
 
 export interface EslintStrategy {
 
@@ -42,18 +59,6 @@ export interface EslintStrategy {
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	createCLIEngine(config: Record<string,any>): CLIEngine {
-		// From https://eslint.org/docs/developer-guide/nodejs-api:
-		// options.baseConfig. Configuration object, extended by all configurations used with this instance.
-		// You can use this option to define the default settings that will be used if your configuration files don't configure it.
-		config["baseConfig"] = {
-			// Include the following environment variables in order to support the objects declared in the comment
-			"env": {
-				"es6": true, // Map
-				"node": true, // process
-				"browser": true, // document
-				"webextensions": true // chrome
-			}
-		};
 		return new CLIEngine(config);
 	}
 
@@ -198,6 +203,22 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 				// get run-config for the engine and add to config
 				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
+
+				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
+				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
+				//       something better.
+				// From https://eslint.org/docs/developer-guide/nodejs-api:
+				// options.baseConfig. Configuration object, extended by all configurations used with this instance.
+				// You can use this option to define the default settings that will be used if your configuration files don't configure it.
+				// If they don't already have a baseConfig property, we'll need to instantiate one.
+				config[BASECONFIG] = config[BASECONFIG] || {[ENV]: {}};
+				// We'll also need to potentially modify the provided config's environment variables. We can merge two objects
+				// by using the spread syntax (...x). Later parameters override earlier ones in a conflict, so we want
+				// the default values to be overridden by whatever was already in the env property, and we want the manual
+				// override to trump both of those things.
+				const envOverride = engineOptions.has(ENV) ? JSON.parse(engineOptions.get(ENV)) : {};
+				config[BASECONFIG][ENV] = {...DEFAULT_ENV_VARS, ...config[BASECONFIG][ENV], ...envOverride};
+				// ==== This is the end of the sup-optimal solution to W-7791882.
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
 
