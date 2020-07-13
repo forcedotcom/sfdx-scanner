@@ -23,7 +23,8 @@ public class PmdCatalogRuleTest {
 
 	private static final String CATEGORY_NAME = "Best Practices";
 	private static final String CATEGORY_PATH = "/some/path";
-	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH);
+	private static final String CATEGORY_SOURCEJAR = "/path/to/sourcejar.jar";
+	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH, CATEGORY_SOURCEJAR);
 
 	@Test
 	public void testCatalogRuleJsonConversion() {
@@ -37,17 +38,17 @@ public class PmdCatalogRuleTest {
 
 
 		// Validate
-		assertEquals("Unexpected name on JSON", NAME, jsonObject.get(PmdCatalogRule.JSON_NAME));
+		assertEquals("Unexpected name on JSON", NAME, jsonObject.get(PmdCatalogJson.JSON_NAME));
 
-		assertEquals("Unexpected message", MESSAGE, jsonObject.get(PmdCatalogRule.JSON_MESSAGE));
+		assertEquals("Unexpected message", MESSAGE, jsonObject.get(PmdCatalogJson.JSON_MESSAGE));
 
 		final List<String> expectedLanguages = new ArrayList<>();
 		expectedLanguages.add(LANGUAGE);
-		assertEquals("Unexpected language", expectedLanguages, (List<String>) jsonObject.get(PmdCatalogRule.JSON_LANGUAGES));
+		assertEquals("Unexpected language", expectedLanguages, (List<String>) jsonObject.get(PmdCatalogJson.JSON_LANGUAGES));
 
 		final List<String> expectedCategoryNames = new ArrayList<>();
 		expectedCategoryNames.add(CATEGORY_NAME);
-		assertEquals("Unexpected categories", expectedCategoryNames, jsonObject.get(PmdCatalogRule.JSON_CATEGORIES));
+		assertEquals("Unexpected categories", expectedCategoryNames, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES));
 
 	}
 
@@ -65,7 +66,7 @@ public class PmdCatalogRuleTest {
 		final JSONObject jsonObject = catalogRule.toJson();
 
 		// Validate
-		assertEquals("Unexpected description", emptyDescription, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
+		assertEquals("Unexpected description", emptyDescription, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION));
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class PmdCatalogRuleTest {
 		final JSONObject jsonObject = catalogRule.toJson();
 
 		// Validate
-		assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogRule.JSON_DESCRIPTION));
+		assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION));
 	}
 
 	private Element getElementMock(int descriptionNlCount, String emptyDescription) {

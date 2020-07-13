@@ -1,0 +1,8 @@
+**/lwc/**/*.css
+**/lwc/**/*.html
+**/lwc/**/*.json
+**/lwc/**/*.svg
+**/lwc/**/*.xml
+.sfdx
+lib/**
+node_modules/**

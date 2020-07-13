@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"outDir": "./lib",
+		"rootDir": "./src",
+		"allowJs": false,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	},
+	"include": [
+		"./app/src/ts/src/**/*",
+		"./ts/src/**/*"
+	]
+}

@@ -1,0 +1,4 @@
+<aura:component >
+	try to run a script in the renderer via document.write
+    <ui:button label="press" press="{!c.myAction}"></ui:button>
+</aura:component>

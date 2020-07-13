@@ -22,7 +22,7 @@ class PmdRuleCataloger {
 	private Map<String, List<String>> rulePathEntries;
 
 	// Holds category and rulesets maps that provide files we need to scan for each language.
-	private LanguageXmlFileMapping languageXmlFileMapping = LanguageXmlFileMapping.getInstance();
+	private LanguageXmlFileMapping languageXmlFileMapping = new LanguageXmlFileMapping();
 
 	// These maps are going to help us store intermediate objects in an easy-to-reference way.
 	private Map<String, List<PmdCatalogRule>> rulesByLanguage = new HashMap<>();
@@ -95,8 +95,8 @@ class PmdRuleCataloger {
 		rulePathEntries.keySet().forEach(language -> {
 			List<String> filePaths = rulePathEntries.get(language);
 			filePaths.forEach(filePath -> {
-				List<String> xmlFiles = xmlFileFinder.findXmlFilesInPath(filePath);
-				languageXmlFileMapping.addPathsForLanguage(xmlFiles, language);
+				List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder.findXmlFilesInPath(filePath);
+				languageXmlFileMapping.addPathsForLanguage(xmlContainers, language);
 			});
 		});
 
@@ -115,7 +115,7 @@ class PmdRuleCataloger {
 
 		// STEP 2: Use the root element to derive a Category representation, and put it in the master list.
 		String categoryName = root.getAttribute("name");
-		PmdCatalogCategory category = new PmdCatalogCategory(categoryName, path);
+		PmdCatalogCategory category = new PmdCatalogCategory(categoryName, path, languageXmlFileMapping.getSourceJarForCategory(path));
 		this.masterCategoryList.add(category);
 
 		// STEP 3: Get the "rule"-type nodes and use them to create Rule representations, which we should map to the target
@@ -177,7 +177,7 @@ class PmdRuleCataloger {
 		}
 	}
 
-	private void writeJsonToFile(PmdCatalogJson json) {
+	void writeJsonToFile(PmdCatalogJson json) {
 		Path catDirPath = Paths.get(System.getProperty("user.home"), ".sfdx-scanner");
 		File catDir = catDirPath.toFile();
 		catDir.mkdir();
