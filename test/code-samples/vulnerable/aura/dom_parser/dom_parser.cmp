@@ -1,6 +1,0 @@
-<aura:component >
-    
-	DOM Parser component
-    <ui:button label="press to test svg" press="{!c.onPress}"></ui:button>
-    <div aura:id="attach"></div>
-</aura:component>

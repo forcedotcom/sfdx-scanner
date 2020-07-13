@@ -1,0 +1,33 @@
+<aura:component controller="SampleController">
+    
+    <aura:attribute name="saccounts" type="SimpleAccount[]"/>
+    <aura:attribute name="customobjects" type="testObj__c[]"/>
+    <aura:attribute name="accounts" type="Account[]"/>
+    
+    <p>This tests retrieving Apex Data wrapper classes as a list</p>
+    <p/>
+    <ui:button label="Get Simple Accounts (structure in Apex Class)" press="{!c.get_SimpleAccts}"/>
+    <aura:iteration var="obj" items="{!v.saccounts}">
+    	<p><a href="{!obj.Name}">{!'Name of ' + obj.Name}</a></p>
+        <p><a href="{!obj.Phone}">Phone of {!obj.Name}</a></p>
+    </aura:iteration>
+    
+    <p>This tests retrieving custom objects as a list</p>
+    <p/>
+    <ui:button label="Get custom objects" press="{!c.get_objs}"/>
+    <aura:iteration var="obj" items="{!v.customobjects}">
+    	<p><a href="{!obj.checkbox__c}">checkbox of {!obj.Name}</a></p>
+        <p><a href="{!obj.Name}">Name of {!obj.Name}</a></p>
+        <p><a href="{!obj.datetime__c}">datetime of {!obj.Name}</a></p>
+        <p><a href="{!obj.richtext__c}">richtext of {!obj.Name}</a></p>
+    </aura:iteration>
+    
+    <p>This tests retrieving accounts as a list</p>
+    <p/>
+    <ui:button label="Get accounts" press="{!c.get_accts}"/>
+    <aura:iteration var="obj" items="{!v.accounts}">
+    	<p><a href="{!obj.Name}">{!'Name of ' + obj.Name}</a></p>
+        <p><a href="{!obj.CreatedDate}">{!'Created date of ' + obj.Name}</a></p>
+    </aura:iteration>
+    
+</aura:component>

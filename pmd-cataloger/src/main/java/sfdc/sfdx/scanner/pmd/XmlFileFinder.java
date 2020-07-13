@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
@@ -34,39 +35,74 @@ public class XmlFileFinder {
 		}
 	}
 
+	/**
+	 * Represents a container for XML. This can either be a Jar file which may contain multiple XML files or an XML
+	 * file that contains itself.
+	 */
+	public static final class XmlContainer {
+		/**
+		 * This is the file path to either a Jar file or an XML file.
+		 */
+		public final String filePath;
+
+		/**
+		 * In the case of a Java Jar, this contains path to all XML files in that Jar. In the case of an XML file, this
+		 * contains a single value that is the same as {@link #filePath}. This allows the caller to treat them the same.
+		 */
+		public final List<String> containedFilePaths;
+
+		public XmlContainer(String filePath) {
+			this(filePath, Collections.singletonList(filePath));
+		}
+
+		public XmlContainer(String filePath, List<String> containedFilePaths) {
+			this.filePath = filePath;
+			this.containedFilePaths = containedFilePaths;
+		}
+	}
 
 	/***
 	 * Find XML in a given path
 	 * @param pathString - could be a directory with classes and/or jar files, or a single jar file
 	 * @return a list of XML files found
 	 */
-	public List<String> findXmlFilesInPath(String pathString) {
+	public List<XmlContainer> findXmlFilesInPath(String pathString) {
 
 		final List<String> xmlFiles = new ArrayList<>();
 		final List<String> jarFiles = new ArrayList<>();
 
 		final Path path = Paths.get(pathString);
 
+		List<XmlContainer> xmlContainers = new ArrayList<>(); 
+
 		// Make sure that the path exists to begin with
 		if (!Files.exists(path)) {
 			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
 		}
-
 
 		if (Files.isDirectory(path)) {
 			// Recursively walk through the directory and scout for XML/JAR files
 			xmlFiles.addAll(scoutForFiles(FileType.XML, path));
 			jarFiles.addAll(scoutForFiles(FileType.JAR, path));
 
-		} else if (Files.isRegularFile(path)
-			&& path.toString().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
-
-			jarFiles.add(path.toString());
+		} else if (Files.isRegularFile(path)) {
+			if (path.toString().endsWith(FileType.JAR.suffix)) { // Check if the path we have is a jar file
+				jarFiles.add(path.toString());
+			} else if (path.toString().endsWith(FileType.XML.suffix)) {
+				xmlFiles.add(path.toString());
+			}
 		}
 
-		jarFiles.forEach(jarPath -> xmlFiles.addAll(findXmlFilesInJar(jarPath)));
+		xmlFiles.forEach(x -> xmlContainers.add(new XmlContainer(x)));
 
-		return xmlFiles;
+		jarFiles.forEach(jarPath -> {
+			List<String> jarXmlFiles = findXmlFilesInJar(jarPath);
+			if (!jarXmlFiles.isEmpty()) {
+				xmlContainers.add(new XmlContainer(jarPath, jarXmlFiles));
+			}
+		});
+
+		return xmlContainers;
 	}
 
 	/**

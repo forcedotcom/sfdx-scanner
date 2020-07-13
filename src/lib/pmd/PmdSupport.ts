@@ -1,8 +1,9 @@
 import childProcess = require('child_process');
-import {ChildProcessWithoutNullStreams} from 'child_process';
-import {AsyncCreatable} from '@salesforce/kit';
-import {CustomRulePathManager, ENGINE} from '../CustomRulePathManager';
 import path = require('path');
+import {AsyncCreatable} from '@salesforce/kit';
+import {ChildProcessWithoutNullStreams} from 'child_process';
+import {Controller} from '../../ioc.config';
+import {PmdEngine} from './PmdEngine';
 
 export const PMD_VERSION = '6.22.0';
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
@@ -25,8 +26,8 @@ export abstract class PmdSupport extends AsyncCreatable {
 		const classpathEntries = [pmdLibs];
 
 		// Include custom rule paths into classpath
-		const rulePathEntries = await this.getRulePathEntries();
-		rulePathEntries.forEach((pathEntries) => {
+		const customPathEntries = await this.getCustomRulePathEntries();
+		customPathEntries.forEach((pathEntries) => {
 			classpathEntries.push(...pathEntries);
 		});
 
@@ -53,8 +54,8 @@ export abstract class PmdSupport extends AsyncCreatable {
 		});
 	}
 
-	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
-		const customRulePathManager = await CustomRulePathManager.create({});
-		return await customRulePathManager.getRulePathEntries(ENGINE.PMD);
+	protected async getCustomRulePathEntries(): Promise<Map<string, Set<string>>> {
+		const customRulePathManager = await Controller.createRulePathManager();
+		return await customRulePathManager.getRulePathEntries(PmdEngine.NAME);
 	}
 }

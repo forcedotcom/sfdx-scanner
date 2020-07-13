@@ -7,30 +7,27 @@ import org.json.simple.*;
 import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.EventKey;
 
+import static sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson.*;
+
 public class PmdCatalogRule {
 	public static final String ATTR_NAME = "name";
 	public static final String ATTR_MESSAGE = "message";
 	public static final String ATTR_DESCRIPTION = "description";
-	public static final String JSON_NAME = "name";
-	public static final String JSON_MESSAGE = "message";
-	public static final String JSON_DESCRIPTION = "description";
-	public static final String JSON_LANGUAGES = "languages";
-	public static final String JSON_CATEGORIES = "categories";
-	public static final String JSON_RULESETS = "rulesets";
 
-	private String name;
-	private String message;
-	private String description;
-	private String language;
+	private final String name;
+	private final String message;
+	private final String description;
+	private final String language;
+	private final String sourceJar;
 	/**
 	 * Seemingly all rules are defined in category XML files, so we can reasonably assume that each rule is a member of only
 	 * one category.
 	 */
-	private PmdCatalogCategory category;
+	private final PmdCatalogCategory category;
 	/**
 	 * Rules can be included in an arbitrary number of rulesets.
 	 */
-	private Set<PmdCatalogRuleset> rulesets = new HashSet<>();
+	private final Set<PmdCatalogRuleset> rulesets = new HashSet<>();
 
 
 	public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
@@ -39,6 +36,7 @@ public class PmdCatalogRule {
 		this.language = language;
 		this.category = category;
 		this.description = getDescription(element);
+		this.sourceJar = category.getSourceJar();
 	}
 
 	String getFullName() {
@@ -69,7 +67,7 @@ public class PmdCatalogRule {
 	private String getDescription(Element element) {
 		// The rule node should have at most one "description" node, so get that.
 		NodeList nl = element.getElementsByTagName(ATTR_DESCRIPTION);
-		String res = null;
+		String res;
 		switch (nl.getLength()) {
 			case 0:
 				// Technically there should always be a description node, but if there wasn't one, we'll just return an empty string.
@@ -94,9 +92,12 @@ public class PmdCatalogRule {
 	 */
 	JSONObject toJson() {
 		Map<String, Object> m = new HashMap<>();
+		m.put(JSON_ENGINE, PMD_ENGINE_NAME);
 		m.put(JSON_NAME, this.name);
 		m.put(JSON_MESSAGE, this.message);
 		m.put(JSON_DESCRIPTION, this.description);
+		m.put(JSON_SOURCEPACKAGE, this.sourceJar);
+		m.put(JSON_DEFAULTENABLED, true);
 
 		// We want 'languages' to be represented as an array even though PMD rules only run against one language, because
 		// this way it's easier to integrate with the language-agnostic framework that we ultimately want.

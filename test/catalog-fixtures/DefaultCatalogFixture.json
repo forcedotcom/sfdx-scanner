@@ -1,0 +1,337 @@
+{
+	"categories": [
+		{
+			"paths": [
+				"category/ecmascript/design.xml",
+				"category/apex/design.xml"
+			],
+			"name": "Design",
+			"engine": "pmd"
+		},
+		{
+			"paths": [
+				"category/ecmascript/bestpractices.xml",
+				"category/apex/bestpractices.xml"
+			],
+			"name": "Best Practices",
+			"engine": "pmd"
+		},
+		{
+			"paths": [
+				"category/ecmascript/errorprone.xml",
+				"category/apex/errorprone.xml"
+			],
+			"name": "Error Prone",
+			"engine": "pmd"
+		},
+		{
+			"name": "Best Practices",
+			"engine": "eslint",
+			"paths": [
+				"https://eslint.org/docs/rules/no-implicit-globals",
+				"https://eslint.org/docs/rules/no-implicit-coercion"
+			]
+		},
+		{
+			"name": "Possible Errors",
+			"engine": "eslint",
+			"paths": [
+				"https://eslint.org/docs/rules/no-inner-declarations"
+			]
+		},
+		{
+			"name": "Best Practices",
+			"engine": "eslint-typescript",
+			"paths": [
+				"https://eslint.org/docs/rules/no-implicit-globals",
+				"https://eslint.org/docs/rules/no-implicit-coercion"
+			]
+		},
+		{
+			"name": "Possible Errors",
+			"engine": "eslint-typescript",
+			"paths": [
+				"https://eslint.org/docs/rules/no-inner-declarations"
+			]
+		}
+	],
+	"rulesets": [
+		{
+			"paths": [
+				"rulesets/ecmascript/braces.xml",
+				"rulesets/apex/braces.xml"
+			],
+			"name": "Braces",
+			"engine": "pmd"
+		},
+		{
+			"paths": [
+				"rulesets/ecmascript/braces.xml",
+				"rulesets/apex/braces.xml"
+			],
+			"name": "Braces",
+			"engine": "pmd"
+		}
+	],
+	"rules": [
+		{
+			"engine": "eslint",
+			"sourcepackage": "eslint",
+			"name": "no-unreachable",
+			"description": "disallow unreachable code after `return`, `throw`, `continue`, and `break` statements",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"javascript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-unreachable"
+		},
+		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-unreachable",
+			"description": "disallow unreachable code after `return`, `throw`, `continue`, and `break` statements",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-unreachable"
+		},
+		{
+			"rulesets": [
+				"Default ruleset used by the CodeClimate Engine for Salesforce.com Apex",
+				"Complexity",
+				"quickstart"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-apex-6.22.0.jar",
+			"languages": [
+				"apex"
+			],
+			"name": "AvoidDeeplyNestedIfStmts",
+			"description": "\nAvoid creating deeply nested if-then statements since they are harder to read and error-prone to maintain.\n        ",
+			"categories": [
+				"Design"
+			],
+			"message": "Deeply nested if..then statements are hard to read",
+			"engine": "pmd"
+		},
+		{
+			"rulesets": [
+				"Default ruleset used by the CodeClimate Engine for Salesforce.com Apex",
+				"Complexity",
+				"quickstart"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-apex-6.22.0.jar",
+			"languages": [
+				"apex"
+			],
+			"name": "ExcessiveClassLength",
+			"description": "\nExcessive class file lengths are usually indications that the class may be burdened with excessive\nresponsibilities that could be provided by external classes or functions. In breaking these methods\napart the code becomes more managable and ripe for reuse.\n        ",
+			"categories": [
+				"Design"
+			],
+			"message": "Avoid really long classes.",
+			"engine": "pmd"
+		},
+		{
+			"rulesets": [
+				"Controversial Ecmascript"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-javascript-6.22.0.jar",
+			"languages": [
+				"javascript"
+			],
+			"name": "AvoidWithStatement",
+			"description": "Avoid using with - it's bad news",
+			"categories": [
+				"Best Practices"
+			],
+			"message": "Avoid using with - it's bad news",
+			"engine": "pmd"
+		},
+		{
+			"rulesets": [
+				"Basic Ecmascript"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-javascript-6.22.0.jar",
+			"languages": [
+				"javascript"
+			],
+			"name": "ConsistentReturn",
+			"description": "\nECMAScript does provide for return types on functions, and therefore there is no solid rule as to their usage.\nHowever, when a function does use returns they should all have a value, or all with no value.  Mixed return\nusage is likely a bug, or at best poor style.\n        ",
+			"categories": [
+				"Best Practices"
+			],
+			"message": "A function should not mix 'return' statements with and without a result.",
+			"engine": "pmd"
+		},
+		{
+			"engine": "eslint",
+			"sourcepackage": "eslint",
+			"name": "no-implicit-coercion",
+			"description": "disallow shorthand type conversions",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"javascript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-coercion"
+		},
+		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-implicit-coercion",
+			"description": "disallow shorthand type conversions",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-coercion"
+		},
+		{
+			"engine": "eslint",
+			"sourcepackage": "eslint",
+			"name": "no-implicit-globals",
+			"description": "disallow declarations in the global scope",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"javascript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-globals"
+		},
+		{
+			"engine": "eslint-typecsript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-implicit-globals",
+			"description": "disallow declarations in the global scope",
+			"categories": [
+				"Best Practices"
+			],
+			"rulesets": [
+				"Best Practices"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": false,
+			"url": "https://eslint.org/docs/rules/no-implicit-globals"
+		},
+		{
+			"engine": "eslint",
+			"sourcepackage": "eslint",
+			"name": "no-inner-declarations",
+			"description": "disallow variable or `function` declarations in nested blocks",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"javascript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-inner-declarations"
+		},
+		{
+			"engine": "eslint-typescript",
+			"sourcepackage": "eslint-typescript",
+			"name": "no-inner-declarations",
+			"description": "disallow variable or `function` declarations in nested blocks",
+			"categories": [
+				"Possible Errors"
+			],
+			"rulesets": [
+				"Possible Errors"
+			],
+			"languages": [
+				"typescript"
+			],
+			"defaultEnabled": true,
+			"url": "https://eslint.org/docs/rules/no-inner-declarations"
+		},
+		{
+			"rulesets": [
+				"Braces"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-javascript-6.22.0.jar",
+			"languages": [
+				"javascript"
+			],
+			"name": "ForLoopsMustUseBraces",
+			"description": "\nAvoid using 'for' statements without using curly braces.\n        ",
+			"categories": [
+				"Code Style"
+			],
+			"message": "Avoid using 'for' statements without curly braces",
+			"engine": "pmd"
+		},
+		{
+			"rulesets": [
+				"Braces"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-javascript-6.22.0.jar",
+			"languages": [
+				"javascript"
+			],
+			"name": "IfElseStmtsMustUseBraces",
+			"description": "\nAvoid using if..else statements without using curly braces.\n        ",
+			"categories": [
+				"Code Style"
+			],
+			"message": "Avoid using 'if...else' statements without curly braces",
+			"engine": "pmd"
+		},
+		{
+			"rulesets": [
+				"Braces"
+			],
+			"defaultEnabled": true,
+			"sourcepackage": "/Users/mhoefer/Code/swat/sfdx-scanner/dist/pmd/lib/pmd-javascript-6.22.0.jar",
+			"languages": [
+				"javascript"
+			],
+			"name": "IfStmtsMustUseBraces",
+			"description": "\nAvoid using if statements without using curly braces.\n        ",
+			"categories": [
+				"Code Style"
+			],
+			"message": "Avoid using if statements without curly braces",
+			"engine": "pmd"
+		}
+	]
+}
