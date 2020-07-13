@@ -104,7 +104,7 @@ jobs:
       - run:
           name: "Run rules"
           working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
 
       # Upload results
       - store_test_results:
