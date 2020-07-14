@@ -1,0 +1,26 @@
+<aura:component controller="NameController">
+    <aura:attribute name="Name" type="String" access="Private" default="nil"/>
+    <aura:attribute name="toUpdate" type="String" access="Private" default="nil"/>
+    <aura:attribute name="Id" type="String" access="Private" default="nil"/>
+    <hr></hr>
+    <ui:inputText label="enter name to search"
+                  class="slds-input"
+                  labelClass="slds-form-element__label"
+                  value="{!v.Name}"
+                  required="true"/> <!--sfdc:source7-->
+    <lightning:button label="press button to retreive Id" 
+                      onclick="{!c.getMyId}"/>
+    ID of Account:  <a href="{!'/'+ v.Id}">{!v.Id}</a><!--sfdc:sink9-->
+
+    <hr></hr>
+    <ui:inputText label="enter new name"
+                  class="slds-input"
+                  labelClass="slds-form-element__label"
+                  value="{!v.toUpdate}"
+                  required="true"/><!--sfdc:source8-->
+    newName: {!v.toUpdate} for Id: {!v.Id}
+    <lightning:button label="press button to set name" 
+                      onclick="{!c.setMyName}"/>
+    <hr></hr>  
+    
+</aura:component>

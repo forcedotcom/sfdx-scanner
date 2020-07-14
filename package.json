@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "2.0.0",
+	"version": "1.0.30",
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -10,20 +10,13 @@
 		"@oclif/errors": "^1",
 		"@salesforce/command": "^2.1.4",
 		"@salesforce/core": "^2.1.6",
-		"@typescript-eslint/eslint-plugin": "^2.21.0",
-		"@typescript-eslint/parser": "^2.21.0",
-		"eslint": "^6.8.0",
 		"find-java-home": "^1.1.0",
 		"globby": "^11.0.0",
 		"normalize-path": "^3.0.0",
-		"picomatch": "^2.2.2",
-		"reflect-metadata": "^0.1.13",
 		"ts-node": "^8",
 		"tslib": "^1",
-		"tsyringe": "^4.1.0",
 		"typescript": "^3.8.2",
 		"untildify": "^4.0.0",
-		"word-wrap": "^1.2.3",
 		"xml-js": "^1.6.11"
 	},
 	"devDependencies": {
@@ -32,18 +25,24 @@
 		"@oclif/plugin-help": "^2",
 		"@oclif/test": "^1",
 		"@salesforce/dev-config": "1.5.0",
-		"@salesforce/ts-sinon": "^1.1.2",
 		"@types/chai": "^4",
-		"@types/mocha": "^7.0.2",
-		"@types/node": "^13.11.1",
+		"@types/mocha": "^5",
+		"@types/node": "^13.1.8",
+		"@typescript-eslint/eslint-plugin": "^2.21.0",
+		"@typescript-eslint/parser": "^2.21.0",
 		"chai": "^4",
 		"eslint": "^6.8.0",
-		"mocha": "^7.2.0",
+		"eslint-config-standard": "^14.1.0",
+		"eslint-plugin-import": "^2.20.1",
+		"eslint-plugin-node": "^11.0.0",
+		"eslint-plugin-promise": "^4.2.1",
+		"eslint-plugin-standard": "^4.0.1",
+		"mocha": "^7.0.0",
 		"mocha-junit-reporter": "^1.23.3",
 		"nyc": "^15.0.0",
 		"sinon": "^9.0.0",
 		"tildify": "^2.0.0",
-		"ts-mockito": "^2.6.1"
+		"tslint": "^6.0.0"
 	},
 	"engines": {
 		"node": ">=8.0.0"
@@ -55,7 +54,7 @@
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json"
 	],
-	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
+	"homepage": "https://github.com/forcedotcom/sfdx-scanner",
 	"keywords": [
 		"sfdx-plugin"
 	],
@@ -65,10 +64,10 @@
 		"bin": "sfdx",
 		"topics": {
 			"scanner": {
-				"description": "scan code to detect code quality issues and security vulnerabilities",
+				"description": "Scan code to preemptively detect code quality issues and security vulnerabilities.",
 				"subtopics": {
 					"rule": {
-						"description": "view or add rules to scan code"
+						"description": "View/add rules that are used to scan code."
 					}
 				}
 			},

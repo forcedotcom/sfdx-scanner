@@ -1,27 +1,21 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.json.simple.*;
 
+@SuppressWarnings("unchecked")
 public class PmdCatalogJson {
-	public static final String PMD_ENGINE_NAME = "pmd";
-
-	public static final String JSON_ENGINE = "engine";
-	public static final String JSON_NAME = "name";
+	public static final String JSON_RULES = "rules";
 	public static final String JSON_CATEGORIES = "categories";
 	public static final String JSON_RULESETS = "rulesets";
-	public static final String JSON_PATHS = "paths";
-	public static final String JSON_RULES = "rules";
-	public static final String JSON_MESSAGE = "message";
-	public static final String JSON_DESCRIPTION = "description";
-	public static final String JSON_LANGUAGES = "languages";
-	public static final String JSON_SOURCEPACKAGE = "sourcepackage";
-	public static final String JSON_DEFAULTENABLED = "defaultEnabled";
 
-	private final List<PmdCatalogRule> rules;
-	private final List<PmdCatalogCategory> categories;
-	private final List<PmdCatalogRuleset> rulesets;
+	private List<PmdCatalogRule> rules;
+	private List<PmdCatalogCategory> categories;
+	private List<PmdCatalogRuleset> rulesets;
 
 	public PmdCatalogJson(List<PmdCatalogRule> rules, List<PmdCatalogCategory> categories, List<PmdCatalogRuleset> rulesets) {
 		this.rules = rules;
@@ -35,9 +29,9 @@ public class PmdCatalogJson {
 	public JSONObject constructJson() {
 		JSONObject result = new JSONObject();
 
-		result.put(JSON_RULES, constructRulesJson());
-		result.put(JSON_CATEGORIES, constructCategoriesJson());
-		result.put(JSON_RULESETS, constructRulesetsJson());
+		result.put(JSON_RULES, constructRulesList());
+		result.put(JSON_CATEGORIES, constructCategoriesMap());
+		result.put(JSON_RULESETS, constructRulesetsMap());
 
 		return result;
 	}
@@ -45,8 +39,8 @@ public class PmdCatalogJson {
 	/**
 	 * @return - A list of JSONs representing rules.
 	 */
-	private JSONArray constructRulesJson() {
-		JSONArray ruleJsons = new JSONArray();
+	private List<JSONObject> constructRulesList() {
+		List<JSONObject> ruleJsons = new ArrayList<>();
 		for (PmdCatalogRule rule : this.rules) {
 			ruleJsons.add(rule.toJson());
 		}
@@ -56,43 +50,36 @@ public class PmdCatalogJson {
 	/**
 	 * @return - A JSON mapping category names by matching paths.
 	 */
-	private JSONArray constructCategoriesJson() {
-		// Iterate over every category we've got, and combine all with the same name into a single entity
-		Map<String, JSONObject> categoryPathsByAlias = new HashMap<>();
+	private JSONObject constructCategoriesMap() {
+		// We're going to iterate over every category we've got, and combine all categories with the same name into a single
+		// entity in the catalog.
+		Map<String, List<String>> categoryPathsByAlias = new HashMap<>();
+
 		for (PmdCatalogCategory category : this.categories) {
-			addRulePath(categoryPathsByAlias, category.getName(), category.getPath());
+			String alias = category.getName();
+			List<String> matchingPaths = categoryPathsByAlias.containsKey(alias) ? categoryPathsByAlias.get(alias) : new ArrayList<>();
+			matchingPaths.add(category.getPath());
+			categoryPathsByAlias.put(alias, matchingPaths);
 		}
 
-		JSONArray json = new JSONArray();
-		json.addAll(categoryPathsByAlias.values());
-		return json;
+		return new JSONObject(categoryPathsByAlias);
 	}
 
 	/**
 	 * @return - A JSON mapping ruleset names to matching paths.
 	 */
-	private JSONArray constructRulesetsJson() {
-		// Iterate over every ruleset we've got, and combine all with the same name into a single entity
-		Map<String, JSONObject> rulesetPathsByAlias = new HashMap<>();
+	private JSONObject constructRulesetsMap() {
+		// We're going to iterate over every category we've got, and combine all categories with the same name into a single
+		// entity in the catalog.
+		Map<String, List<String>> rulesetPathsByAlias = new HashMap<>();
+
 		for (PmdCatalogRuleset ruleset : this.rulesets) {
-			addRulePath(rulesetPathsByAlias, ruleset.getName(), ruleset.getPath());
+			String alias = ruleset.getName();
+			List<String> matchingPaths = rulesetPathsByAlias.containsKey(alias) ? rulesetPathsByAlias.get(alias) : new ArrayList<>();
+			matchingPaths.add(ruleset.getPath());
+			rulesetPathsByAlias.put(alias, matchingPaths);
 		}
 
-		JSONArray json = new JSONArray();
-		json.addAll(rulesetPathsByAlias.values());
-		return json;
-	}
-
-	private void addRulePath(Map<String, JSONObject> pathsByAlias, String alias, String path) {
-		JSONObject obj = pathsByAlias.get(alias);
-		if (obj == null) {
-			obj = new JSONObject();
-			obj.put(JSON_ENGINE, PMD_ENGINE_NAME);
-			obj.put(JSON_NAME, alias);
-			obj.put(JSON_PATHS, new ArrayList<String>());
-			pathsByAlias.put(alias, obj);
-		}
-		ArrayList<String> paths = (ArrayList<String>) obj.get(JSON_PATHS);
-		paths.add(path);
+		return new JSONObject(rulesetPathsByAlias);
 	}
 }

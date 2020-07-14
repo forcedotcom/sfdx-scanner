@@ -1,5 +1,0 @@
-<aura:component >
-    <aura:attribute name="src" type="String" default="javascript:alert(document.cookie)"/>
-	Attribute test in CSP mode (LEX)
-    <iframe src="{!v.src}"></iframe>
-</aura:component>

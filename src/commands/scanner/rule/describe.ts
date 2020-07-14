@@ -1,7 +1,7 @@
 import {flags} from '@salesforce/command';
 import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../ioc.config';
+import {RuleManager} from '../../../lib/RuleManager';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../scannerCommand';
 
@@ -39,7 +39,7 @@ export default class Describe extends ScannerCommand {
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
-		const ruleManager = await Controller.createRuleManager();
+		const ruleManager = await RuleManager.create({});
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()

@@ -1,0 +1,109 @@
+<aura:component access="GLOBAL">
+    <aura:attribute name="href" type="String" default="null"/> <!--sfdc:source6-->
+    <aura:attribute name="frameSrc" type="String" default="null"/><!--sfdc:source7-->
+    <aura:attribute name="taint" access="private" type="String" default="null"/>
+	<aura:attribute name="taint2" access="private" type="String" default="null"/>
+    <aura:attribute name="taint3" access="Global" type="String" default="nill"/>
+    <aura:attribute name="evtMessage" access="private" type="String" default="none"/>
+    <aura:attribute name="evtHref" access="private" type="String" default="www.google.com"/>
+    
+    <aura:handler name="compEvent" event="c:compEvent"
+    action="{!c.handleEvent}"/>
+    <aura:handler name="appEvent" event="c:appEvent"
+    action="{!c.handleEvent}"/>
+    
+    current value of taint: {!v.taint}
+    
+    <div aura:id="target_div">target_div to which taint is attached</div>
+
+    <p>Component to test DOM XSS.</p>
+    <ul>
+        <hr></hr>
+        <li>
+            <lightning:button label="test assignment to location" onclick="{!c.testLocation}"/>
+        </li>
+        <hr></hr>
+    	<li>
+            <lightning:button label="href" onclick="{!c.testHref}"/>
+    		<a href="{!v.href}">click me to test href after pressing button</a> <!--sfdc:sink4-->
+        </li>
+        <hr></hr>
+        <li>
+            <lightning:button label="href" onclick="{!c.testHref}"/>
+            <a href="{!'/' + v.href}">click me to test sanitized href after pressing button</a>  <!--sfdc:sink5-->
+        </li>
+        <hr></hr>
+    	<li>
+            <lightning:button label="click to test iframe src" onclick="{!c.testFrameSrc}"/>
+    		<iframe src="{!v.frameSrc}">iframe</iframe> <!--sfdc:sink6-->
+        </li>
+        <hr></hr>
+        <li>
+            <lightning:button label="click to test sanitized iframe src" onclick="{!c.testFrameSrc}"/>
+    		<iframe src="{!'https:' + v.frameSrc}">iframe</iframe><!--sfdc:sink7-->
+        </li>
+        <hr></hr>        
+        <li>
+            <ui:inputText aura:id="AttributeTest" label="src of iframe to set"
+                        class="slds-input"
+                        labelClass="slds-form-element__label"
+                        value="{!v.taint}"
+                        required="true"/><!--sfdc:source12-->
+            <lightning:button label="click to set src attribute of dynamically created iframe" 
+                       onclick="{!c.testAttributeController}"/>
+        </li>
+        <hr></hr>
+        <li>
+            My test link is <a href="{!v.taint}">{!v.taint}</a><!--sfdc:sink11-->
+            <ui:inputText aura:id="AttributeTest" label="href to set"
+                        class="slds-input"
+                        labelClass="slds-form-element__label"
+                        value="{!v.taint}"
+                        required="true"/><!--sfdc:source13-->
+        </li>
+        <hr></hr>
+        <li>
+            My test link is <a href="{!v.taint2}">{!v.taint2}</a><!--sfdc:sink12-->
+            <ui:inputText aura:id="AttributeTest" label="href to set"
+                        class="slds-input"
+                        labelClass="slds-form-element__label"
+                        value="{!v.href}"
+                        required="true"/><!--sfdc:source14-->
+            <lightning:button label="click to update private taint attribute of href" 
+                       onclick="{!c.testAttr2AttrFlow}"/>
+        </li>
+        <hr></hr>
+		<li>
+            <ui:inputText aura:id="innerHTMLcontroller" label="InnerHTML value to set"
+                        class="slds-input"
+                        labelClass="slds-form-element__label"
+                        value="{!v.taint}"
+                        required="true"/><!--sfdc:source15-->
+            <lightning:button label="click to set innerHTML of target div" 
+                       onclick="{!c.testInnerHTMLController}"/>
+        </li>
+        <hr></hr>
+
+        <hr></hr>
+        <li>
+           <ui:inputText aura:id="set Child" label="set href of child"
+                        class="slds-input"
+                        labelClass="slds-form-element__label"
+                        value="{!v.taint3}"
+                        required="true"/><!--sfdc:source16-->
+            Nest child component set with {!v.taint3}: <c:ChildComponent href="{!v.taint3}"/>
+        </li>
+         <hr></hr>
+        <li>
+        Message from event: {!v.evtMessage}
+        <iframe src="{!v.evtHref}"/><!--sfdc:sink2-->
+        </li>
+         <hr></hr>
+        <li>
+            <hr></hr>
+            <c:ControllerDemo ></c:ControllerDemo>
+        	<hr></hr>
+        </li>
+	</ul>
+    
+</aura:component>

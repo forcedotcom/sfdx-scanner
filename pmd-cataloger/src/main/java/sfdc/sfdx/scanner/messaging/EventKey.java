@@ -2,7 +2,7 @@ package sfdc.sfdx.scanner.messaging;
 import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 
 public enum EventKey {
-	// MAKE SURE messageKey OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
+	// MAKE SURE messageKey OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.json'!
 	WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_XML_DROPPED("warning.xmlDropped", 1, MessageType.WARNING, MessageHandler.UX, true),
@@ -14,7 +14,6 @@ public enum EventKey {
 	ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH("error.internal.xmlMissingInClasspath", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
 	ERROR_EXTERNAL_JAR_NOT_READABLE("error.external.jarNotReadable", 1, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_DIR_NOT_READABLE("error.external.dirNotReadable", 1, MessageType.ERROR, MessageHandler.UX, false),
-	ERROR_EXTERNAL_DUPLICATE_XML_PATH("error.external.duplicateXmlPath", 3, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_MULTIPLE_RULE_DESC("error.external.multipleRuleDesc", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_RECURSION_LIMIT("error.external.recursionLimitReached", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_READABLE("error.external.xmlNotReadable", 2, MessageType.ERROR, MessageHandler.UX, false),

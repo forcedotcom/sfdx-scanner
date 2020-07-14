@@ -1,0 +1,20 @@
+<apex:page showHeader="true" sidebar="true">
+	<apex:composition template="Template1">
+
+		This is an included page
+		<apex:define name="insert1">
+			This part is called insert 1. Load this page with foo=&lt;img%20src=x%20onerror=alert(1)&gt;
+			<script>
+				var taint="{!JSENCODE($CurrentPage.parameters.foo)}"; //sfdc:source20
+				a_obj.a(taint); 
+			</script>
+		</apex:define>
+		<apex:define name="insert2">
+			This part is called insert 1. Load this page with bar=&lt;img%20src=x%20onerror=alert(2)&gt;
+			<script>
+				var taint="{!JSENCODE($CurrentPage.parameters.bar)}"; //sfdc:source21
+				a_func(taint); 
+			</script>
+		</apex:define>		
+	</apex:composition>
+</apex:page>

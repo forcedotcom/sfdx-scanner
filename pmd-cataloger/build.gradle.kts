@@ -40,9 +40,6 @@ dependencies {
   implementation("com.google.guava:guava:28.0-jre")
   testImplementation("org.mockito:mockito-core:1.+")
   testImplementation("junit", "junit", "4.12")
-  testImplementation("org.hamcrest:hamcrest:2.1")
-  // Used in unit tests
-  testImplementation(files("$buildDir/../../test/test-jars/apex/testjar-categories-and-rulesets-1.jar"))
 }
 
 configure<JavaPluginConvention> {
@@ -63,4 +60,3 @@ tasks.named("assemble") {
   dependsOn("installDist")
   dependsOn("installPmd")
 }
-

@@ -1,4 +1,4 @@
-import {RuleFilter} from '../RuleFilter';
+import {RuleFilter} from '../RuleManager';
 import {Rule} from '../../types';
 
 /**
@@ -13,7 +13,7 @@ export function stringifySet(stringSet: Set<string>): string {
  * Typically used to print Language-RulePath mapping
  * @param mapOfSet Map<string, Set<string>> to stringify
  */
-export function stringifyMapOfSets(mapOfSet: Map<string, Set<string>>): string {
+export function stringifyMapofSets(mapOfSet: Map<string, Set<string>>): string {
 	const returnArr = [];
 	mapOfSet.forEach((value, key) => {
 		returnArr.push(`{${key} => ${stringifySet(value)}}`);
@@ -28,7 +28,7 @@ export function stringifyMapOfSets(mapOfSet: Map<string, Set<string>>): string {
 export function stringifyMapOfMaps(mapOfMap: Map<string, Map<string, Set<string>>>): string {
 	const returnArr = [];
 	mapOfMap.forEach((value, key) => {
-		returnArr.push(`{${key} => ${stringifyMapOfSets(value)}}`);
+		returnArr.push(`{${key} => ${stringifyMapofSets(value)}}`);
 	});
 	return `${returnArr.join(',')}`;
 }
@@ -55,7 +55,7 @@ export function stringifyRuleFilters(filters: RuleFilter[]): string {
  * @param rule Rule to stringify
  */
 export function stringifyRule(rule: Rule): string {
-	return `Rule[name: ${rule.name}, description: ${rule.description}, categories: ${rule.categories.join(',')}, rulesets: ${rule.rulesets.join(',')}, languages: ${rule.languages.join(',')}, engine: ${rule.engine}, sourcepackage: ${rule.sourcepackage}]`;
+	return `Rule[name: ${rule.name}, description: ${rule.description}, categories: ${rule.categories.join(',')}, rulesets: ${rule.rulesets.join(',')}, languages: ${rule.languages.join(',')}]`;
 }
 
 /**

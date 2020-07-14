@@ -39,19 +39,19 @@ jobs:
       # UNIT TESTS
       - run:
           name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=./test-results/mocha/test-results.xml
           when: always
 
       - run:
           name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          command: yarn lint --format junit --output-file ./test-results/eslint/eslint.xml
           when: always
 
       - store_test_results:
-          path: test-results
+          path: ./test-results
 
       - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+          path: ./test-coverage
 
   unpackaged-sanity:
     executor:
@@ -64,20 +64,19 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
-      - run: md test-results
+      - run: md .\test-results
 
       - run:
           name: "List rules"
-          command: bin\run.cmd scanner:rule:list
+          command: .\bin\run.cmd scanner:rule:list
 
       - run:
           name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+          command: .\bin\run.cmd scanner:run --target test\code-samples\vulnerable --format junit --outfile .\test-results\vulnerable.xml
 
       # Upload results
       - store_test_results:
-          path: test-results
+          path: .\test-results
 
   packaged-sanity:
     executor:
@@ -103,29 +102,12 @@ jobs:
 
       - run:
           name: "Run rules"
-          working_directory: test\projects\app
-          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+          command: sfdx scanner:run --target .\test\code-samples\vulnerable\classes --format junit --outfile .\test-results\vulnerable.xml
 
       # Upload results
       - store_test_results:
-          path: test-results
+          path: .\test-results
 
-  auto-merge-release:
-    <<: *defaults
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - checkout
-      - run:
-          name: "Merge release"
-          command: |
-            git config user.email "isv.swat@salesforce.com"
-            git config user.name "$CIRCLE_USERNAME"
-            git checkout dev
-            git pull origin dev
-            git merge release --commit --no-edit -m "Automerge release to dev"
-            git push origin dev
   publish-latest:
     <<: *defaults
     steps:

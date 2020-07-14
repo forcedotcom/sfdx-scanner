@@ -1,27 +1,23 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
-import {Controller} from '../../../../src/ioc.config';
 import fs = require('fs');
 import path = require('path');
 import messages = require('../../../../messages/describe');
 
-const CATALOG_OVERRIDE = 'DescribeTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'DescribeTestCustomPaths.json';
+const CATALOG_OVERRIDE = 'DescribeTestPmdCatalog.json';
+const CUSTOM_PATH_OVERRIDE = 'DescribeTestCustomPaths.json';
 
 // Before our tests, delete any existing catalog and/or custom path associated with our override.
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
 	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
 }
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
+if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE))) {
+	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE));
 }
 
-let describeTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
+let describeTest = test.env({PMD_CATALOG_NAME: CATALOG_OVERRIDE, CUSTOM_PATH_FILE: CUSTOM_PATH_OVERRIDE});
 
 describe('scanner:rule:describe', () => {
-	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
-
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
@@ -80,19 +76,19 @@ describe('scanner:rule:describe', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.output.multipleMatchingRules
 				.replace('{0}', '2')
-				.replace('{1}', 'constructor-super');
+				.replace('{1}', 'WhileLoopsMustUseBraces');
 
 			describeTest
 				.stdout()
 				.stderr()
-				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])
+				.command(['scanner:rule:describe', '--rulename', 'WhileLoopsMustUseBraces'])
 				.it('Displayed output matches expectations', ctx => {
 					// First, verify that the warning was printed at the start like it should have been.
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should be formatted correctly');
 
 					// Next, verify that there are two rule descriptions that are distinctly identified.
-					const regex = /=== Rule #1\nname:\s+constructor-super(.*\n)*=== Rule #2\nname:\s+constructor-super/g;
-					expect(ctx.stdout).to.match(regex, 'Output should contain two rules named constructor-super');
+					const regex = /=== Rule #1\nname:\s+WhileLoopsMustUseBraces(.*\n)*=== Rule #2\nname:\s+WhileLoopsMustUseBraces/g;
+					expect(ctx.stdout).to.match(regex, 'Output should contain two rules named WhileLoopsMustUseBraces');
 				});
 
 			// TODO: THIS TEST IS FAILING BECAUSE THE WARNING FOR DEFINITELYFAKERULE IS BEING INCLUDED IN THE WARNINGS HERE.

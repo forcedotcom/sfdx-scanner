@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import sfdc.sfdx.scanner.messaging.EventKey;
 import sfdc.sfdx.scanner.messaging.SfdxScannerException;
@@ -18,7 +17,6 @@ import static org.mockito.Mockito.*;
 
 public class MainMessagesTest {
 
-	@Before
 	@After
 	public void clearMessages() {
 		SfdxMessager.getInstance().resetMessages();

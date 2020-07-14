@@ -1,12 +1,11 @@
 import {expect, test} from '@salesforce/command/lib/test';
-import {Controller} from '../../../../src/ioc.config';
 import {Rule} from '../../../../src/types';
 import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 
-const CATALOG_OVERRIDE = 'ListTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'ListTestCustomPaths.json';
+const CATALOG_OVERRIDE = 'ListTestPmdCatalog.json';
+const CUSTOM_PATH_OVERRIDE = 'ListTestCustomPaths.json';
 
 function getCatalogJson(): { rules: Rule[] } {
 	const catalogPath = path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE);
@@ -18,17 +17,14 @@ function getCatalogJson(): { rules: Rule[] } {
 if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
 	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
 }
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
+if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE))) {
+	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATH_OVERRIDE));
 }
 
-const listTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
+let listTest = test.env({PMD_CATALOG_NAME: CATALOG_OVERRIDE, CUSTOM_PATH_FILE: CUSTOM_PATH_OVERRIDE});
 
 
 describe('scanner:rule:list', () => {
-	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
-
 	describe('E2E', () => {
 		describe('Test Case: No filters applied', () => {
 			listTest
@@ -39,7 +35,7 @@ describe('scanner:rule:list', () => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
 					// compared to the number of rules in the catalog.
 					const catalog = getCatalogJson();
-					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled).length;
+					const totalRuleCount = catalog.rules.length;
 
 					// Split the output table by newline and throw out the first two rows, since they just contain header information. That
 					// should leave us with the actual data.
@@ -58,7 +54,7 @@ describe('scanner:rule:list', () => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
 					// compared to the number of rules in the catalog.
 					const catalog = getCatalogJson();
-					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled).length;
+					const totalRuleCount = catalog.rules.length;
 
 					// Parse the output back into a JSON, then make sure it has the same number of rules as the catalog did.
 					const outputJson = JSON.parse(ctx.stdout);

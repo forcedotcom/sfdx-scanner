@@ -1,13 +1,11 @@
 {
-	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
-	"compilerOptions": {
-		"outDir": "./lib",
-		"rootDir": "./src",
-		"allowJs": false,
-		"experimentalDecorators": true,
-		"emitDecoratorMetadata": true
-	},
-	"include": [
-		"./src/**/*"
-	]
+  "extends": "./node_modules/@salesforce/dev-config/tsconfig",
+  "compilerOptions": {
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "allowJs": false
+  },
+  "include": [
+    "./src/**/*"
+  ]
 }

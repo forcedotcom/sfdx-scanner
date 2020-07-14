@@ -9,20 +9,14 @@ public class PmdCatalogCategory {
 	 * The path to the definition file for this category.
 	 */
 	private String path;
-	/**
-	 * The JAR containing this category's definition file.
-	 */
-	private String sourceJar;
 
 	/**
 	 * @param name - The name for this category.
 	 * @param path - The path to the category's definition file.
-	 * @param sourceJar - The JAR containing the category's definition file.
 	 */
-	public PmdCatalogCategory(String name, String path, String sourceJar) {
+	public PmdCatalogCategory(String name, String path) {
 		this.name = name;
 		this.path = path;
-		this.sourceJar = sourceJar;
 	}
 
 	/**
@@ -41,13 +35,5 @@ public class PmdCatalogCategory {
 	 */
 	String getPath() {
 		return path;
-	}
-
-	/**
-	 * Getter for 'sourceJar' property.
-	 * @return - JAR containing definition file.
-	 */
-	String getSourceJar() {
-		return sourceJar;
 	}
 }

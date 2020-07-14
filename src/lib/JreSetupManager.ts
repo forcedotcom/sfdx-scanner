@@ -1,6 +1,5 @@
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
-import {Controller} from '../ioc.config';
 
 import process = require('process');
 import findJavaHome = require('find-java-home');
@@ -29,18 +28,11 @@ class JreSetupManager extends AsyncCreatable {
 	private logger!: Logger;
 	private config!: Config;
 	private dependencies: JreSetupManagerDependencies;
-	private initialized: boolean;
 
 	protected async init(): Promise<void> {
-		if (this.initialized) {
-			return;
-		}
 		this.logger = await Logger.child('verifyJRE');
-
-		this.config = await Controller.getConfig();
+		this.config = await Config.create({});
 		this.dependencies = new JreSetupManagerDependencies();
-
-		this.initialized = true;
 	}
 
 	async verifyJreSetup(): Promise<string> {

@@ -1,0 +1,8 @@
+<apex:page showHeader="true" sidebar="true" controller="testSELECT">
+	Embedding child component:
+	<script>
+	 var x = function(e,y){ e.innerHTML=y;} //sfdc:sink18
+	</script>
+	<c:child1 x="{!Name}"/>
+	<c:child1 x="{!BEGINS(Name, 'foo')}"/>
+</apex:page>

@@ -2,7 +2,6 @@ package sfdc.sfdx.scanner.pmd;
 
 import sfdc.sfdx.scanner.messaging.EventKey;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 
 import java.util.*;
 
@@ -13,24 +12,22 @@ public class LanguageXmlFileMapping {
 	private final static String CATEGORY = "category";
 	private final static String RULESETS = "rulesets";
 
+	private static LanguageXmlFileMapping INSTANCE = new LanguageXmlFileMapping();
+
 	private Map<String, Set<String>> categoryPathsByLanguage;
 	private Map<String, Set<String>> rulesetPathsByLanguage;
-	private Map<String, String> categoryToSourceJar;
-	private Map<String, String> rulesetToSourceJar;
 
-	public LanguageXmlFileMapping() {
+	private LanguageXmlFileMapping() {
 		categoryPathsByLanguage = new HashMap<>();
 		rulesetPathsByLanguage = new HashMap<>();
-		categoryToSourceJar = new HashMap<>();
-		rulesetToSourceJar = new HashMap<>();
 	}
 
-	public void addPathsForLanguage(List<XmlFileFinder.XmlContainer> xmlContainers, String language) {
-		xmlContainers.forEach(xmlContainer -> {
-			xmlContainer.containedFilePaths.forEach(containedFilePath -> {
-				addPathForLanguage(containedFilePath, language, xmlContainer.filePath);
-			});
-		});
+	public static LanguageXmlFileMapping getInstance() {
+		return INSTANCE;
+	}
+
+	public void addPathsForLanguage(List<String> paths, String language) {
+		paths.forEach(path -> addPathForLanguage(path, language));
 	}
 
 	public Map<String, Set<String>> getCategoryPaths() {
@@ -41,48 +38,31 @@ public class LanguageXmlFileMapping {
 		return this.rulesetPathsByLanguage;
 	}
 
-	public String getSourceJarForCategory(String catPath) {
-		return this.categoryToSourceJar.get(catPath);
-	}
-
 	// We want to distinguish XMLs as a Ruleset or a Category.
 	// If path looks like */rulesets/**/*.xml, we consider the XML a Ruleset
 	// If path looks like */category/**/*.xml, we consider the XML a Category
-	private void addPathForLanguage(String path, String language, String sourceJar) {
+	private void addPathForLanguage(String path, String language) {
 		if (!nullEmptyOrWhitespace(path)) {
 			if (path.contains(RULESETS)) {
-				addRulesetPathForLanguage(path, language, sourceJar);
-				rulesetToSourceJar.put(path, sourceJar);
+				addRulesetPathForLanguage(path, language);
 			} else if (path.contains(CATEGORY)) {
-				addCategoryPathForLanguage(path, language, sourceJar);
-				categoryToSourceJar.put(path, sourceJar);
+				addCategoryPathForLanguage(path, language);
 			} else {
 				SfdxMessager.getInstance().addMessage("Adding path " + path + " for language " + language, EventKey.WARNING_XML_DROPPED, path);
 			}
 		}
 	}
 
-	private void addRulesetPathForLanguage(String path, String language, String sourceJar) {
-		addPath(path, language, sourceJar, rulesetPathsByLanguage);
+	private void addRulesetPathForLanguage(String path, String language) {
+		addPath(path, language, rulesetPathsByLanguage);
 	}
 
-	private void addCategoryPathForLanguage(String path, String language, String sourceJar) {
-		addPath(path, language, sourceJar, categoryPathsByLanguage);
+	private void addCategoryPathForLanguage(String path, String language) {
+		addPath(path, language, categoryPathsByLanguage);
 	}
 
-	private void addPath(String path, String language, String sourceJar, Map<String, Set<String>> pathsByLanguage) {
+	private void addPath(String path, String language, Map<String, Set<String>> pathsByLanguage) {
 		language = language.toLowerCase();
-
-		String jarWithConflict = null;
-		if (rulesetToSourceJar.containsKey(path)) {
-			jarWithConflict = rulesetToSourceJar.get(path);
-		} else if (categoryToSourceJar.containsKey(path)) {
-			jarWithConflict = categoryToSourceJar.get(path);
-		}
-
-		if (jarWithConflict != null) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH, path, sourceJar, jarWithConflict);
-		}
 
 		if (pathsByLanguage.containsKey(language)) {
 			pathsByLanguage.get(language).add(path);

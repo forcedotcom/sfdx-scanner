@@ -1,0 +1,26 @@
+<apex:page showHeader="true" sidebar="true" standardController="testObj__c"><!--sfdc:source24-->
+	Load with id=a006A0000024Zrn to test
+
+	Page to test standard controller bindings
+	<p />
+	<apex:outputText value="{!testObj__c.Name}" escape="false"/> <!--sfdc:sink33-->
+	<p />
+	<apex:outputText value="{!testObj__c.CreatedDate}" escape="false"/>	<!--sfdc:sink34-->
+	<p />
+	<apex:outputText value="{!testObj__c.richtext__c}" escape="false"/>	<!--sfdc:sink35-->
+	<p />
+	<apex:outputText value="{!testObj__c.checkbox__c}" escape="false"/>	<!--sfdc:sink36-->
+	<p />
+	<apex:outputText value="{!testObj__c.datetime__c}" escape="false"/>	<!--sfdc:sink37-->
+
+	<script>
+	  console.log({!IF(testObj__c.Name=='1','2','3')}); //sfdc:sink38
+	  console.log({!ISBLANK(testObj__c.Name)}); //sfdc:sink39
+	  console.log({!BEGINS(testObj__c.Name, 'foo')}); //sfdc:sink40
+	  console.log({!IF(BEGINS(testObj__c.Name, 'foo'),testObj__c.text__c,testObj__c.checkbox__c)}); //sfdc:sink41
+	 </script>
+
+
+
+
+</apex:page>

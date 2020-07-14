@@ -19,10 +19,6 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Ignore jekyll cache and _site for doc
-docs/.jekyll-cache/
-docs/_site/
-
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -132,11 +128,3 @@ dist
 
 # Ignore Gradle build output directory
 build
-
-# Eclipse
-.classpath
-.project
-.settings
-
-pmd-cataloger/bin
-

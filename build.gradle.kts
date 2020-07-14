@@ -1,8 +1,7 @@
 plugins {
-	java
-	id("com.github.hierynomus.license") version "0.15.0"
+  java
 }
 
 subprojects {
-	version = "1.0"
+  version = "1.0"
 }

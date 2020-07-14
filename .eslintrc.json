@@ -11,5 +11,9 @@
 	},
 	"plugins": [
 		"@typescript-eslint"
+	],
+	"ignorePatterns": [
+		"lib/**",
+		"node_modules/**"
 	]
 }
