@@ -43,7 +43,7 @@ A: That depends on the engine in question.
 `~/.sfdx-scanner/Config.json`.
 <br/>
 If the language is not already supported, you must additionally follow the steps
-outlined in ["How do I add a new language to `sfdx-scanner`?"](/en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
+outlined in ["How do I add a new language to `sfdx-scanner`?"](./en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
 
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the `scanner:rule:add` command.
