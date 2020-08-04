@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../ioc.config';
 import {Rule} from '../../../types';
-import {ScannerCommand} from '../scannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);

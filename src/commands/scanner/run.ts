@@ -4,7 +4,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject} from '../../types';
 import {Controller} from '../../ioc.config';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
-import {ScannerCommand} from './scannerCommand';
+import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import fs = require('fs');
 import untildify = require('untildify');
