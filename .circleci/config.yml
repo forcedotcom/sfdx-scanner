@@ -53,6 +53,23 @@ jobs:
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
 
+  self-evaluation:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+    working_directory: C:\repo
+    steps:
+      - attach_workspace:
+          at: C:\repo
+
+      - run:
+          name: "list rules"
+          command: bin\run.cmd scanner:rule:list
+
+      - run:
+          name: "self-evaluate"
+          command: \bin\run.cmd scanner:run --target .\src
+
   unpackaged-sanity:
     executor:
       name: win/default # executor type
@@ -153,11 +170,14 @@ workflows:
       - unpackaged-sanity:
           requires:
             - build
+      - self-evaluation:
+          requires:
+            - build
       - publish-latest:
           # This job should only run after 'build' finishes successfully.
           requires:
             - build
-            - unpackaged-sanity
+            - self-evaluation
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
