@@ -103,7 +103,7 @@ export default class Remove extends ScannerCommand {
 	}
 
 	private validateFlags(): void {
-		if (this.flags.path != null && this.flags.path.includes('')) {
+		if (this.flags.path != null && this.flags.path.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.pathCannotBeEmpty', []);
 		}
 	}
