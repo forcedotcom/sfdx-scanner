@@ -1,0 +1,5 @@
+name: 'Verify PR Title'
+description: 'Verifies that a pull request contains a GUS work item'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
