@@ -68,7 +68,7 @@ jobs:
 
       - run:
           name: "self-evaluate"
-          command: bin\run.cmd scanner:run --target .\src
+          command: bin\run.cmd scanner:run --target .\src --format junit --outfile .\test-results\app.xml
       - store_test_results:
           path: test-results
 
