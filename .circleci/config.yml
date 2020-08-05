@@ -69,6 +69,8 @@ jobs:
       - run:
           name: "self-evaluate"
           command: bin\run.cmd scanner:run --target .\src
+      - store_test_results:
+          path: test-results
 
   unpackaged-sanity:
     executor:
