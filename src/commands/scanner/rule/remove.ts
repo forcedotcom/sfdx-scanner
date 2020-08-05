@@ -3,7 +3,7 @@ import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../ioc.config';
 import {FilterType, RuleFilter} from '../../../lib/RuleFilter';
-import {ScannerCommand} from '../scannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
@@ -103,7 +103,7 @@ export default class Remove extends ScannerCommand {
 	}
 
 	private validateFlags(): void {
-		if (this.flags.path != null && this.flags.path.includes('')) {
+		if (this.flags.path != null && this.flags.path.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.pathCannotBeEmpty', []);
 		}
 	}

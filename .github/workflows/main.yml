@@ -1,0 +1,15 @@
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+
+jobs:
+  verify_pr_title_job:
+    runs-on: ubuntu-latest
+    name: Verifies that a pull request contains a GUS work item
+    steps:
+    # Private actions must checkout the repo first
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Verify PR Title action step
+      uses: ./github-actions/verify-pr-title
+      id: verify_pr_title
