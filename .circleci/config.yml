@@ -62,6 +62,8 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
+      - run: md test-results
+
       - run:
           name: "list rules"
           command: bin\run.cmd scanner:rule:list
