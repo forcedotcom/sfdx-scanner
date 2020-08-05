@@ -71,6 +71,12 @@ jobs:
       - run:
           name: "self-evaluate"
           command: bin\run.cmd scanner:run --target .\src --format junit --outfile .\test-results\app.xml
+
+      - run:
+          name: "Fail if problems found"
+          command: |
+            test -f .\test-results\app.xml && exit 1
+            
       - store_test_results:
           path: test-results
 
