@@ -3,7 +3,7 @@ import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../ioc.config';
 import {FilterType, RuleFilter} from '../../../lib/RuleFilter';
-import {ScannerCommand} from '../scannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
