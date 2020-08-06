@@ -191,7 +191,7 @@ export class CustomRulePathManager implements RulePathManager {
 	private static convertJsonDataToMap(json): RulePathMap {
 		const map = new Map();
 		for (const key of Object.keys(json)) {
-			const engine = key as string;
+			const engine = key;
 			const val = json[key];
 			const innerMap = new Map();
 			for (const lang of Object.keys(val)) {
