@@ -45,7 +45,7 @@ export default class LocalCatalog implements RuleCatalog {
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
 	 */
-	public async getRuleGroupsMatchingFilters(filters: RuleFilter[]): Promise<RuleGroup[]> {
+	public getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
@@ -75,7 +75,7 @@ export default class LocalCatalog implements RuleCatalog {
 		return foundPaths;
 	}
 
-	async getRulesMatchingFilters(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {
 		this.logger.trace(`Fetching rules that match the criteria ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		try {

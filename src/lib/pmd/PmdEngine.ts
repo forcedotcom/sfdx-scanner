@@ -34,7 +34,7 @@ export class PmdEngine implements RuleEngine {
 		return PmdEngine.NAME;
 	}
 
-	/* eslint-disable @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
@@ -68,6 +68,7 @@ export class PmdEngine implements RuleEngine {
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
 	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
 	 */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		if (ruleGroups.length === 0) {
 			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);

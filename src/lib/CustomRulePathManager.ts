@@ -103,7 +103,7 @@ export class CustomRulePathManager implements RulePathManager {
 		return this.pathsByLanguageByEngine.get(name);
 	}
 
-	public async getAllPaths(): Promise<string[]> {
+	public getAllPaths(): string[] {
 		// We'll combine every entry set for every language in every engine into a single array. We don't care about
 		// uniqueness right now.
 		let rawResults = [];
@@ -166,7 +166,7 @@ export class CustomRulePathManager implements RulePathManager {
 		return deletedPaths;
 	}
 
-	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
+	public getRulePathEntries(engine: string): Map<string, Set<string>> {
 		if (!this.hasPathsForEngine(engine)) {
 			this.logger.trace(`CustomRulePath does not have entries for engine ${engine}`);
 			return new Map();
@@ -191,7 +191,7 @@ export class CustomRulePathManager implements RulePathManager {
 	private static convertJsonDataToMap(json): RulePathMap {
 		const map = new Map();
 		for (const key of Object.keys(json)) {
-			const engine = key as string;
+			const engine = key;
 			const val = json[key];
 			const innerMap = new Map();
 			for (const lang of Object.keys(val)) {
