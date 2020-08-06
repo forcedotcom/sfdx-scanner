@@ -75,7 +75,7 @@ jobs:
       - run:
           name: "Fail if problems found"
           command: |
-            if [ -f ./test-results/app.xml ]
+            if [ -f ./test-results/src.xml ]
             then
             exit 1
             fi
