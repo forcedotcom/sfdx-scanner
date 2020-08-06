@@ -54,7 +54,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ES_CONFIG;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
 	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
 		//TODO: find a way to override with eslintrc if Config asks for it
 		return ES_CONFIG;
