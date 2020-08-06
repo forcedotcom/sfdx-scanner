@@ -9,6 +9,6 @@ export interface RulePathManager {
 
 	removePaths(paths: string[]): Promise<string[]>;
 
-	getRulePathEntries(engine: string): Promise<Map<string, Set<string>>>;
+	getRulePathEntries(engine: string): Map<string, Set<string>>;
 }
 

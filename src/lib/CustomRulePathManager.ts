@@ -166,7 +166,7 @@ export class CustomRulePathManager implements RulePathManager {
 		return deletedPaths;
 	}
 
-	public async getRulePathEntries(engine: string): Promise<Map<string, Set<string>>> {
+	public getRulePathEntries(engine: string): Map<string, Set<string>> {
 		if (!this.hasPathsForEngine(engine)) {
 			this.logger.trace(`CustomRulePath does not have entries for engine ${engine}`);
 			return new Map();
