@@ -53,7 +53,7 @@ export class DefaultRuleManager implements RuleManager {
 		let results: RuleResult[] = [];
 
 		// Derives rules from our filters to feed the engines.
-		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters);
+		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = await this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
 		for (const e of this.engines) {

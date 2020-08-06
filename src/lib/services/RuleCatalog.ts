@@ -11,7 +11,7 @@ export interface RuleCatalog {
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
 	 */
-	getRuleGroupsMatchingFilters(filters: RuleFilter[]): Promise<RuleGroup[]>;
+	getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[];
 
 	getRulesMatchingFilters(filters: RuleFilter[]): Promise<Rule[]>;
 }
