@@ -34,7 +34,7 @@ export class PmdEngine implements RuleEngine {
 		return PmdEngine.NAME;
 	}
 
-	/* eslint-disable no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
