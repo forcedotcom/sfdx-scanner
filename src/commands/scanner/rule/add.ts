@@ -59,7 +59,7 @@ export default class Add extends SfdxCommand {
 		if (this.flags.language.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.languageCannotBeEmpty', []);
 		}
-		if (this.flags.path.includes('')) {
+		if (this.flags.path.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.pathCannotBeEmpty', []);
 		}
 	}

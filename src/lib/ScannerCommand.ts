@@ -1,6 +1,6 @@
 import {SfdxCommand} from '@salesforce/command';
-import {FilterType, RuleFilter} from '../../lib/RuleFilter';
-import {uxEvents} from '../../lib/ScannerEvents';
+import {FilterType, RuleFilter} from './RuleFilter';
+import {uxEvents} from './ScannerEvents';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
