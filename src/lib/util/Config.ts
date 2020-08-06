@@ -48,7 +48,7 @@ export const DEFAULT_CONFIG: ConfigContent = {
 class TypeChecker {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	stringArrayCheck(value: any, propertyName: string, engine: ENGINE): boolean {
+	stringArrayCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
 		if (Array.isArray(value) && value.length > 0) {
 			value.forEach((item) => {
 				if (typeof item != 'string') {
@@ -58,15 +58,15 @@ class TypeChecker {
 			return true;
 		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
-	}
+	};
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	booleanCheck(value: any, propertyName: string, engine: ENGINE): boolean {
+	booleanCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
 		if (value instanceof boolean) {
 			return true;
 		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidBooleanValue', [propertyName, engine.valueOf(), String(value)]);
-	}
+	};
 }
 
 export class Config {
