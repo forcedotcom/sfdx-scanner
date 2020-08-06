@@ -75,7 +75,7 @@ export default class LocalCatalog implements RuleCatalog {
 		return foundPaths;
 	}
 
-	async getRulesMatchingFilters(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {
 		this.logger.trace(`Fetching rules that match the criteria ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		try {

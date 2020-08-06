@@ -41,7 +41,7 @@ describe('RuleManager', () => {
 		describe('Test Case: No filters provided', () => {
 			it('When no filters are provided, all default-enabled rules are returned', async () => {
 				// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-				const allRules = await ruleManager.getRulesMatchingCriteria([]);
+				const allRules = ruleManager.getRulesMatchingCriteria([]);
 
 				// Expect all default-enabled rules to have been returned.
 				expect(allRules).to.have.lengthOf(CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
@@ -56,7 +56,7 @@ describe('RuleManager', () => {
 					new RuleFilter(FilterType.ENGINE, ['pmd'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'Exactly 2 pmd rules are categorized as "Best Practices".');
@@ -67,7 +67,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(8, 'Exactly 8 rules are categorized as "Best Practices" or "Design"');
@@ -80,7 +80,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.RULESET, ['Braces'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(3, 'Exactly 8 rules are in the "Braces" ruleset');
@@ -91,7 +91,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'Best Practices'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(7, 'Exactly 7 rules are in the "Braces" or "Best Practices" rulesets');
@@ -104,7 +104,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'There are 2 rules that target Apex');
@@ -115,7 +115,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex', 'javascript'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(11, 'There are 11 rules targeting either Apex or JS');
@@ -131,7 +131,7 @@ describe('RuleManager', () => {
 				];
 
 				// Pass the filter array into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(4, 'Exactly 4 rules target Apex and are categorized as "Best Practices".');
@@ -144,7 +144,7 @@ describe('RuleManager', () => {
 				const impossibleFilters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
 				// Pass our filters into the manager.
-				const matchingRules = await ruleManager.getRulesMatchingCriteria(impossibleFilters);
+				const matchingRules = ruleManager.getRulesMatchingCriteria(impossibleFilters);
 
 				// There shouldn't be anything in the array.
 				expect(matchingRules).to.have.lengthOf(0, 'Should be no matching rules');

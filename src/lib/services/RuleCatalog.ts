@@ -13,5 +13,5 @@ export interface RuleCatalog {
 	 */
 	getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[];
 
-	getRulesMatchingFilters(filters: RuleFilter[]): Promise<Rule[]>;
+	getRulesMatchingFilters(filters: RuleFilter[]): Rule[];
 }
