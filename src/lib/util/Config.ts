@@ -114,13 +114,11 @@ export class Config {
 	}
 
 	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
-		const value = await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
-		return value as Array<string>;
+		return await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
 	}
 
 	public async getTargetPatterns(engine: ENGINE): Promise<string[]> {
-		const value = await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
-		return value as Array<string>;
+		return await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
 	}
 
 	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<string[]> {
