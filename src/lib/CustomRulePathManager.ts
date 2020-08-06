@@ -103,7 +103,7 @@ export class CustomRulePathManager implements RulePathManager {
 		return this.pathsByLanguageByEngine.get(name);
 	}
 
-	public async getAllPaths(): Promise<string[]> {
+	public getAllPaths(): string[] {
 		// We'll combine every entry set for every language in every engine into a single array. We don't care about
 		// uniqueness right now.
 		let rawResults = [];

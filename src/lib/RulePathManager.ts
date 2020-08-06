@@ -3,7 +3,7 @@ export interface RulePathManager {
 
 	addPathsForLanguage(language: string, paths: string[]): Promise<string[]>;
 
-	getAllPaths(): Promise<string[]>;
+	getAllPaths(): string[];
 
 	getMatchingPaths(paths: string[]): Promise<string[]>;
 

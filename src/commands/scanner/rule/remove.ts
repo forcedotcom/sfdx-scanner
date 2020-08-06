@@ -52,7 +52,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 3: Get all rule entries matching the criteria they provided.
 		const crpm = await Controller.createRulePathManager();
-		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : await crpm.getAllPaths();
+		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : crpm.getAllPaths();
 
 		// Step 4: If there aren't any matching paths, we need to react appropriately.
 		if (!deletablePaths || deletablePaths.length === 0) {
