@@ -1,6 +1,6 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {RuleResult} from '../types';
+import {RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
 
@@ -68,40 +68,54 @@ ${v.message.trim()}
 	}
 
 	private static constructJunit(results: RuleResult[]): string {
-		let junitXml = ``;
-		// If the results were just an empty string, we can return it.
-		if (results.length === 0) {
-			return junitXml;
+		// If there are no results, we can just return an empty string.
+		if (!results || results.length === 0) {
+			return '';
 		}
-		let problemCount = 0;
 
+		// Otherwise, we'll need to start constructing our JUnit XML. To do that, we'll need a map from file names to
+		// lists of the <failure> tags generated from violations found in the corresponding file.
+		const violationsByFileName = new Map<string, string[]>();
+
+		// Iterate over all of the results, convert them to a <failure> tag, and map that tag by the file name.
 		for (const result of results) {
-			const fileName = result.fileName;
-			let failures = '';
-			for (const v of result.violations) {
-				problemCount++;
-				const msg = v.message.trim();
-				failures += `
-            <failure message="${fileName}: ${v.line} ${msg}" type="${v.severity}">
-${v.severity}: ${msg}
-Category: ${v.category} - ${v.ruleName}
-File: ${fileName}
-Line: ${v.line}
-Column: ${v.column}
-URL: ${v.url}
-            </failure>`;
+			const {fileName, violations} = result;
+			const mappedViolations: string[] = violationsByFileName.get(fileName) || [];
+			for (const violation of violations) {
+				mappedViolations.push(this.violationJsonToJUnitTag(fileName, violation));
 			}
-			junitXml += `
-      <testcase id="${fileName}" name="${fileName}">
-          ${failures}
-      </testcase>`;
+			violationsByFileName.set(fileName, mappedViolations);
 		}
 
-		return `<testsuites tests="${results.length}" failures="${problemCount}">
-    <testsuite tests="${results.length}" failures="${problemCount}">
-        ${junitXml}
-    </testsuite>
-</testsuites>`;
+		// Use each entry in the map to construct a <testsuite> tag.
+		const testsuiteTags = [];
+		for (const [fileName, failures] of violationsByFileName.entries()) {
+			testsuiteTags.push(`<testsuite name="${fileName}" tests="${failures.length}" errors="${failures.length}">\n${failures.join('\n')}\n</testsuite>`);
+		}
+
+		return `<testsuites>\n${testsuiteTags.join('\n')}\n</testsuites>`
+	}
+
+	private static violationJsonToJUnitTag(fileName: string, violation: RuleViolation): string {
+		const {
+			message,
+			line,
+			severity,
+			category,
+			ruleName,
+			column,
+			url
+		} = violation;
+		return `<testcase name="${fileName}">
+<failure message="${fileName}: ${line} ${message.trim()}" type="${severity}">
+${severity}: ${message.trim()}
+Category: ${category} - ${ruleName}
+File: ${fileName}
+Line: ${line}
+Column: ${column}
+URL: ${url}
+</failure>
+</testcase>`;
 	}
 
 	private static constructTable(results: RuleResult[]): { columns; rows } | string {
