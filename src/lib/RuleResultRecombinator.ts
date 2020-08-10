@@ -106,8 +106,10 @@ ${v.message.trim()}
 			column,
 			url
 		} = violation;
+		// The silliness of the triple backslashes in the .replace() calls is because we need to escape the backslash so
+		// it ends up in the output, AND the single/double quotes so the code compiles.
 		return `<testcase name="${fileName}">
-<failure message="${fileName}: ${line} ${message.trim().replace(/'/g, '\'').replace(/"/g, '\"')}" type="${severity}">
+<failure message="${fileName}: ${line} ${message.trim().replace(/'/g, '\\\'').replace(/"/g, '\\\"')}" type="${severity}">
 ${severity}: ${message.trim()}
 Category: ${category} - ${ruleName}
 File: ${fileName}
