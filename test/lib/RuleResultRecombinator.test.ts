@@ -100,8 +100,8 @@ describe('RuleResultRecombinator', () => {
 				let lineCounter = 1;
 				let idx = 0;
 				while (idx < fileNames.length) {
-					let fileName = fileNames[idx];
-					let expectedErrCt = violationCounts[idx];
+					const fileName = fileNames[idx];
+					const expectedErrCt = violationCounts[idx];
 					// Make sure the <testsuite> tag is well-formed.
 					expect(lines[lineCounter]).to.equal(`<testsuite name="${fileName}" tests="${expectedErrCt}" errors="${expectedErrCt}">`,
 						`Malformed testsuite opening tag @line ${lineCounter}`
@@ -139,42 +139,42 @@ describe('RuleResultRecombinator', () => {
 
 			it('Properly handles one file with one violation', () => {
 				// Create a subset of the fake results containing only one file and one violation.
-				let someFakeResults = [allFakeRuleResults[0]];
+				const someFakeResults = [allFakeRuleResults[0]];
 
 				// Create our reformatted results.
-				let results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
-					let resultLines = results.split('\n').map(x => x.trim());
+					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1], [1]);
 				}
 			});
 
 			it('Properly handles one file with multiple violations', () => {
 				// Create a subset of the fake results containing one file with multiple violations.
-				let someFakeResults = [allFakeRuleResults[1]];
+				const someFakeResults = [allFakeRuleResults[1]];
 
 				// Create our reformatted results.
-				let results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
-					let resultLines = results.split('\n').map(x => x.trim());
+					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile2], [2]);
 				}
 			});
 
 			it('Properly handles multiple files with multiple violations', () => {
 				// Create our reformatted results from the entire sample.
-				let results = RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
+				const results = RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
-					let resultLines = results.split('\n').map(x => x.trim());
+					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1, sampleFile2, sampleFile3], [1, 2, 3]);
 				}
 			});
