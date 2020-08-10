@@ -107,7 +107,7 @@ ${v.message.trim()}
 			url
 		} = violation;
 		return `<testcase name="${fileName}">
-<failure message="${fileName}: ${line} ${message.trim()}" type="${severity}">
+<failure message="${fileName}: ${line} ${message.trim().replace(/'/g, '\'').replace(/"/g, '\"')}" type="${severity}">
 ${severity}: ${message.trim()}
 Category: ${category} - ${ruleName}
 File: ${fileName}
