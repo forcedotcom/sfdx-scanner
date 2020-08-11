@@ -45,19 +45,20 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					// Expect there to be 6 parameters.
-					expect(params.length).to.equal(6, `Should have been 6 parameters: ${params}`);
-					// Expect the first two parameters to be the catalog and -cp flag.
-					expect(params[0]).to.equal('-DcatalogName=PmdCatalog.json', 'First parameter should be catalog override');
-					expect(params[1]).to.equal('-cp', 'Second parameter should be -cp flag');
+					// Expect there to be 7 parameters.
+					expect(params.length).to.equal(7, `Should have been 7 parameters: ${params}`);
+					// Expect the first three parameters to be the catalogHome, catalogName and -cp flag.
+					expect(params[0]).to.contain('-DcatalogHome=', 'First parameter should be catalog home path');
+					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'Second parameter should be catalog override');
+					expect(params[2]).to.equal('-cp', 'Second parameter should be -cp flag');
 					// The third parameter should be the classpath, and we want to make sure it contains our fake path.
-					expect(params[2]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
+					expect(params[3]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
 					// The fourth parameter should be the main class.
-					expect(params[3]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
+					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
 					// The fifth parameter is the Java JAR, and not the standard PMD JAR.
-					expect(params[4]).to.equal(`java=${irrelevantPath}`, 'Fifth parameter should be java-specific input, w/Custom Jar.');
+					expect(params[5]).to.equal(`java=${irrelevantPath}`, 'Fifth parameter should be java-specific input, w/Custom Jar.');
 					// The sixth parameter should be the default Apex JAR.
-					expect(params[5]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
+					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
 				});
 			});
 
@@ -83,18 +84,19 @@ describe('PmdCatalogWrapper', () => {
 					const params = (await target.buildCommandArray())[1];
 
 					// Expect there to be 6 parameters.
-					expect(params.length).to.equal(6, `Should have been 6 parameters: ${params}`);
-					// Expect the first two parameters to be the catalog and -cp flag.
-					expect(params[0]).to.equal('-DcatalogName=PmdCatalog.json', 'First parameter should be catalog override');
-					expect(params[1]).to.equal('-cp', 'Second parameter should be -cp flag');
-					// The third parameter should be the classpath, and we want to make sure it contains our fake path.
-					expect(params[2]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
-					// The fourth parameter should be the main class.
-					expect(params[3]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
-					// The fifth parameter is the PLSQL JAR, and not the standard PMD JAR.
-					expect(params[4]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific input, w/Custom Jar.');
-					// The sixth parameter should be the default Apex JAR.
-					expect(params[5]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
+					expect(params.length).to.equal(7, `Should have been 7 parameters: ${params}`);
+					// Expect the first three parameters to be the catalogHome, catalogName and -cp flag.
+					expect(params[0]).to.contain('-DcatalogHome=', 'First parameter should be catalog home path');
+					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'First parameter should be catalog override');
+					expect(params[2]).to.equal('-cp', 'Second parameter should be -cp flag');
+					// The next parameter should be the classpath, and we want to make sure it contains our fake path.
+					expect(params[3]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
+					// The next parameter should be the main class.
+					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
+					// The next parameter is the PLSQL JAR, and not the standard PMD JAR.
+					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific input, w/Custom Jar.');
+					// The next parameter should be the default Apex JAR.
+					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
 				});
 			});
 
@@ -119,17 +121,17 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					// verify that there's no seventh parameter for java since there's no associated path
-					expect(params.length).equals(6, `Expected exactly six parameters. Last parameter is ${params[params.length - 1]}`);
+					// verify that there's no eighth parameter for java since there's no associated path
+					expect(params.length).equals(7, `Expected exactly seven parameters. Last parameter is ${params[params.length - 1]}`);
 
 					// Confirm that the fourth parameter is the main class.
-					expect(params[3]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
+					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fifth parameter is the main class');
 
 					// verify that the fifth parameter is for plsql
-					expect(params[4]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific');
+					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Sixth parameter should be plsql-specific');
 
 					// verify that the sixth parameter is for plsql
-					expect(params[5]).to.match(/^apex=.*jar$/, 'Sixth parameter should be apex-specific');
+					expect(params[6]).to.match(/^apex=.*jar$/, 'Seventh parameter should be apex-specific');
 				});
 			});
 

@@ -1,31 +1,15 @@
 import {expect, test} from '@salesforce/command/lib/test';
-import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
 import {Controller} from '../../../../src/ioc.config';
-import fs = require('fs');
-import path = require('path');
 import messages = require('../../../../messages/describe');
-
-const CATALOG_OVERRIDE = 'DescribeTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'DescribeTestCustomPaths.json';
-
-// Before our tests, delete any existing catalog and/or custom path associated with our override.
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
-}
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
-}
-
-let describeTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
 
 describe('scanner:rule:describe', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
+	before(() => Controller.initializeTestSetup());
 
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
-			describeTest
+			test
 				.stdout() // Adds stdout to the test's context object.
 				.stderr() // Adds stderr to the test's context object.
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
@@ -33,7 +17,7 @@ describe('scanner:rule:describe', () => {
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
 				});
 
-			describeTest
+				test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
@@ -46,7 +30,7 @@ describe('scanner:rule:describe', () => {
 		});
 
 		describe('Test Case: One matching rule', () => {
-			describeTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields'])
@@ -59,7 +43,7 @@ describe('scanner:rule:describe', () => {
 					expect(ctx.stdout).to.match(/message:\s+Too many fields/, 'Message should match');
 				});
 
-			describeTest
+				test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields', '--json'])
@@ -82,7 +66,7 @@ describe('scanner:rule:describe', () => {
 				.replace('{0}', '2')
 				.replace('{1}', 'constructor-super');
 
-			describeTest
+				test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])
@@ -116,7 +100,7 @@ describe('scanner:rule:describe', () => {
 		});
 
 		describe('Error handling', () => {
-			describeTest
+			test
 				.stdout() // Adds stdout to the test's context object.
 				.stderr() // Adds stderr to the test's context object.
 				.command(['scanner:rule:describe'])

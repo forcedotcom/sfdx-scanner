@@ -1,17 +1,17 @@
 import path = require('path');
 import {Logger, SfdxError} from '@salesforce/core';
 import {injectable, injectAll} from 'tsyringe';
-import {CUSTOM_PATHS_FILE, SFDX_SCANNER_PATH} from '../Constants';
+import {CUSTOM_PATHS_FILE} from '../Constants';
 import {RulePathManager} from './RulePathManager';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import * as PrettyPrinter from './util/PrettyPrinter';
+import { Controller } from '../ioc.config';
 
 export type RulePathEntry = Map<string, Set<string>>;
 export type RulePathMap = Map<string, RulePathEntry>;
 
 const EMPTY_JSON_FILE = '{}';
-
 
 @injectable()
 export class CustomRulePathManager implements RulePathManager {
@@ -20,6 +20,7 @@ export class CustomRulePathManager implements RulePathManager {
 	private engines: RuleEngine[];
 	private pathsByLanguageByEngine: RulePathMap;
 	private fileHandler: FileHandler;
+	private sfdxScannerPath: string;
 
 	constructor(@injectAll("RuleEngine") engines?: RuleEngine[]) {
 		this.engines = engines;
@@ -37,6 +38,7 @@ export class CustomRulePathManager implements RulePathManager {
 
 		this.pathsByLanguageByEngine = new Map();
 		this.fileHandler = new FileHandler();
+		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 
 		this.logger.trace(`Initializing CustomRulePathManager.`);
 		// Read from the JSON and use it to populate the map.
@@ -129,11 +131,13 @@ export class CustomRulePathManager implements RulePathManager {
 		return expandedPaths.filter((p) => {
 			// Determine the engine associated with this path.
 			const engine = this.determineEngineForPath(p).getName();
+
 			// If there's anything mapped for that engine, check whether this path is mapped to any of the languages
 			// under that engine.
 			if (this.hasPathsForEngine(engine)) {
 				const pathsByLanguage = this.getPathsByEngine(engine);
-				return Array.from(pathsByLanguage.values()).some(pathSet => pathSet.has(p));
+				const matchedPath = Array.from(pathsByLanguage.values()).some(pathSet => pathSet.has(p));
+				return matchedPath;
 			}
 			return false;
 		});
@@ -179,7 +183,7 @@ export class CustomRulePathManager implements RulePathManager {
 		try {
 			const fileContent = JSON.stringify(this.convertMapToJson(), null, 4);
 			this.logger.trace(`Writing file content to CustomRulePath file [${this.getRulePathFile()}]: ${fileContent}`);
-			await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
+			await this.fileHandler.mkdirIfNotExists(this.sfdxScannerPath);
 			await this.fileHandler.writeFile(this.getRulePathFile(), fileContent);
 		} catch (e) {
 			// If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
@@ -225,7 +229,7 @@ export class CustomRulePathManager implements RulePathManager {
 	}
 
 	private getRulePathFile(): string {
-		return path.join(SFDX_SCANNER_PATH, this.getFileName());
+		return path.join(this.sfdxScannerPath, this.getFileName());
 	}
 
 	public async readRulePathFile(): Promise<string> {

@@ -8,6 +8,7 @@ import java.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.w3c.dom.*;
+import sfdc.sfdx.scanner.messaging.Message;
 import sfdc.sfdx.scanner.messaging.SfdxScannerException;
 import sfdc.sfdx.scanner.messaging.SfdxMessager;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
@@ -178,16 +179,19 @@ class PmdRuleCataloger {
 	}
 
 	void writeJsonToFile(PmdCatalogJson json) {
-		Path catDirPath = Paths.get(System.getProperty("user.home"), ".sfdx-scanner");
+		final String catalogHome = System.getProperty("catalogHome");
+		final String catalogName = System.getProperty("catalogName");
+		SfdxMessager.getInstance().addMessage(String.format("Received catalogHome as %s and catalogName as %s", catalogHome, catalogName), EventKey.INFO_GENERAL_INTERNAL_LOG, "PmdRuleCataloger.writeJsonToFile()");
+		Path catDirPath = Paths.get(catalogHome);
 		File catDir = catDirPath.toFile();
 		catDir.mkdir();
 		try (
-			FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), System.getProperty("catalogName")).toString());
+			FileWriter file = new FileWriter(Paths.get(catDirPath.toString(), catalogName).toString());
 		) {
 			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 			file.write(prettyGson.toJson(json.constructJson()));
 		} catch (IOException ioe) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, System.getProperty("catalogName"));
+			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, catalogName);
 		}
 	}
 }

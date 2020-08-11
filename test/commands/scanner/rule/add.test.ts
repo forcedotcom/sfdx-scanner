@@ -1,7 +1,6 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
 import * as os from 'os';
-import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
 import {Controller} from '../../../../src/ioc.config';
 import fs = require('fs');
 import path = require('path');
@@ -10,22 +9,9 @@ import path = require('path');
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
-const CATALOG_OVERRIDE = 'AddTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'AddTestCustomPaths.json';
-
-// Delete any existing JSONs associated with the tests so they run fresh each time.
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
-}
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
-}
-
-let addTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
-
 describe('scanner:rule:add', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
+	before(() => Controller.initializeTestSetup());
 
 	describe('E2E', () => {
 		const myLanguage = 'apex';
@@ -45,8 +31,8 @@ describe('scanner:rule:add', () => {
 			fs.writeFileSync(tmpJar4, 'Heat and cold, life and death, and of course, light and dark.');
 
 			// For the first test, we'll add two of the JARs with their absolute paths.
-			const absolutePaths = [tmpJar1, tmpJar2];
-			addTest
+			const absolutePaths = [tmpJar1];
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:add',
@@ -73,7 +59,7 @@ describe('scanner:rule:add', () => {
 
 			// For the second test, we'll add the other two JARs with relative paths.
 			const relativePaths = [path.relative('.', tmpJar3), path.relative('.', tmpJar4)];
-			addTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:add',
@@ -117,7 +103,7 @@ describe('scanner:rule:add', () => {
 			fs.writeFileSync(tmpJar6, 'With the strength of Lords, they challenged the Dragons.');
 
 			// For the first test, we'll add one of the folders by its absolute path.
-			addTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:add',
@@ -142,7 +128,7 @@ describe('scanner:rule:add', () => {
 				});
 
 			// For the second test, we'll add the other folder by its relative path.
-			addTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:add',

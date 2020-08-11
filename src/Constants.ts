@@ -1,10 +1,26 @@
 import os = require('os');
 import path = require('path');
 
-export const SFDX_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
+export interface EnvOverridable {
+	getSfdxScannerPath(): string;
+}
+
+export class ProdOverrides implements EnvOverridable {
+	public getSfdxScannerPath(): string {
+		return path.join(os.homedir(), '.sfdx-scanner');
+	}
+}
+
+export class TestOverrides implements EnvOverridable {
+	public getSfdxScannerPath(): string {
+		return path.join(os.homedir(), '.sfdx-scanner-test');
+	}
+}
+
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
+export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 export const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
