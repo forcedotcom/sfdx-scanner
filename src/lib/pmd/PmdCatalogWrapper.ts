@@ -155,7 +155,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 	 * @param res
 	 * @param rej
 	 */
-	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
+	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void {
 		let stdout = '';
 
 		// When data is passed back up to us, pop it onto the appropriate string.
@@ -168,7 +168,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 			this.outputProcessor.processOutput(stdout);
 			this.logger.trace(`monitorChildProcess has received exit code ${code}`);
 			if (code === 0) {
-				res([!!code, stdout]);
+				res(stdout);
 			} else {
 				rej(messages.getMessage('error.external.errorMessageAbove'));
 			}
