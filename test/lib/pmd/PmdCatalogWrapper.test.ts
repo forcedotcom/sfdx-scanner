@@ -87,16 +87,16 @@ describe('PmdCatalogWrapper', () => {
 					expect(params.length).to.equal(7, `Should have been 7 parameters: ${params}`);
 					// Expect the first three parameters to be the catalogHome, catalogName and -cp flag.
 					expect(params[0]).to.contain('-DcatalogHome=', 'First parameter should be catalog home path');
-					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'First parameter should be catalog override');
-					expect(params[2]).to.equal('-cp', 'Second parameter should be -cp flag');
+					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'Second parameter should be catalog override');
+					expect(params[2]).to.equal('-cp', 'Third parameter should be -cp flag');
 					// The next parameter should be the classpath, and we want to make sure it contains our fake path.
-					expect(params[3]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
+					expect(params[3]).to.contain(irrelevantPath, 'Fourth parameter should be classpath, including custom Java JAR');
 					// The next parameter should be the main class.
-					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
+					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fifth parameter is the main class');
 					// The next parameter is the PLSQL JAR, and not the standard PMD JAR.
-					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Fifth parameter should be plsql-specific input, w/Custom Jar.');
+					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Sixth parameter should be plsql-specific input, w/Custom Jar.');
 					// The next parameter should be the default Apex JAR.
-					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
+					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Seventh parameter is Apex-specific, with only standard JAR.');
 				});
 			});
 
