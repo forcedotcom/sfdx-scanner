@@ -79,7 +79,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
 			this.logger.trace(`Recombining results into requested format ${format}`);
-			return RuleResultRecombinator.recombineAndReformatResults(results, format);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, format);
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
