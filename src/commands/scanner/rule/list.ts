@@ -67,7 +67,7 @@ export default class List extends ScannerCommand {
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
-		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
+		const rules = ruleManager.getRulesMatchingCriteria(ruleFilters);
 		const formattedRules = this.formatRulesForDisplay(rules);
 		this.ux.table(formattedRules, columns);
 		// If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can

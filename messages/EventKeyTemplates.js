@@ -9,9 +9,11 @@ module.exports = {
 		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
 		"invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
 		"xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
-		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",
 		"customRuleFileNotFound": "Custom rule file path [%s] for language [%s] was not found.",
-},
+		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",
+		"pmdSuppressedViolation": "PMD suppressed violation against file '%s'. Message: %s. Suppression Type: %s. User Message: %s",
+		"pmdConfigError": "PMD failed to evaluate rule '%s'. Message: %s"
+	},
 	"error": {
 		"internal": {
 			"unexpectedError": "Unexpected error occurred while cataloging rules: %s",

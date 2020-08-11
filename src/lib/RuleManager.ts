@@ -2,17 +2,18 @@ import {Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
 
 export enum OUTPUT_FORMAT {
-	XML = 'xml',
+	CSV = 'csv',
+	HTML = 'html',
 	JSON = 'json',
 	JUNIT = 'junit',
-	CSV = 'csv',
-	TABLE = 'table'
+	TABLE = 'table',
+	XML = 'xml'
 }
 
 export interface RuleManager {
 	init(): Promise<void>;
 
-	getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]>;
+	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[];
 
 	/**
 	 * @param engineOptions - see RuleEngine#run

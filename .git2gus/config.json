@@ -1,5 +1,15 @@
 {
     "productTag": "a1aB0000000c7jnIAA",
     "defaultBuild": "scanner 2.0",
-    "hideWorkItemUrl": true
+    "hideWorkItemUrl": true,
+    "issueTypeLabels": {
+        "type:feature": "USER STORY",
+        "type:bug-p0": "BUG P0",
+        "type:bug-p1": "BUG P1",
+        "type:bug-p2": "BUG P2",
+        "type:bug-p3": "BUG P3",
+        "type:security": "BUG P0",
+        "type:feedback": "",
+        "type:duplicate": ""
+    }
 }

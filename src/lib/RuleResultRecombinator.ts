@@ -1,12 +1,15 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {RuleResult} from '../types';
+import {RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
+import {FileHandler} from './util/FileHandler';
+import * as Mustache from 'mustache';
+import htmlEscaper = require('html-escaper');
 
 export class RuleResultRecombinator {
 
-	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): string | { columns; rows } {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): Promise<string | { columns; rows }> {
 		// We need to change the results we were given into the desired final format.
 		switch (format) {
 			case OUTPUT_FORMAT.JSON:
@@ -19,6 +22,8 @@ export class RuleResultRecombinator {
 				return this.constructJunit(results);
 			case OUTPUT_FORMAT.TABLE:
 				return this.constructTable(results);
+			case OUTPUT_FORMAT.HTML:
+				return await this.constructHtml(results);
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
@@ -68,40 +73,54 @@ ${v.message.trim()}
 	}
 
 	private static constructJunit(results: RuleResult[]): string {
-		let junitXml = ``;
-		// If the results were just an empty string, we can return it.
-		if (results.length === 0) {
-			return junitXml;
+		// If there are no results, we can just return an empty string.
+		if (!results || results.length === 0) {
+			return '';
 		}
-		let problemCount = 0;
 
+		// Otherwise, we'll need to start constructing our JUnit XML. To do that, we'll need a map from file names to
+		// lists of the <failure> tags generated from violations found in the corresponding file.
+		const violationsByFileName = new Map<string, string[]>();
+
+		// Iterate over all of the results, convert them to a <failure> tag, and map that tag by the file name.
 		for (const result of results) {
-			const fileName = result.fileName;
-			let failures = '';
-			for (const v of result.violations) {
-				problemCount++;
-				const msg = v.message.trim();
-				failures += `
-            <failure message="${fileName}: ${v.line} ${msg}" type="${v.severity}">
-${v.severity}: ${msg}
-Category: ${v.category} - ${v.ruleName}
-File: ${fileName}
-Line: ${v.line}
-Column: ${v.column}
-URL: ${v.url}
-            </failure>`;
+			const {fileName, violations} = result;
+			const mappedViolations: string[] = violationsByFileName.get(fileName) || [];
+			for (const violation of violations) {
+				mappedViolations.push(this.violationJsonToJUnitTag(fileName, violation));
 			}
-			junitXml += `
-      <testcase id="${fileName}" name="${fileName}">
-          ${failures}
-      </testcase>`;
+			violationsByFileName.set(fileName, mappedViolations);
 		}
 
-		return `<testsuites tests="${results.length}" failures="${problemCount}">
-    <testsuite tests="${results.length}" failures="${problemCount}">
-        ${junitXml}
-    </testsuite>
-</testsuites>`;
+		// Use each entry in the map to construct a <testsuite> tag.
+		const testsuiteTags = [];
+		for (const [fileName, failures] of violationsByFileName.entries()) {
+			testsuiteTags.push(`<testsuite name="${fileName}" tests="${failures.length}" errors="${failures.length}">\n${failures.join('\n')}\n</testsuite>`);
+		}
+
+		return `<testsuites>\n${testsuiteTags.join('\n')}\n</testsuites>`
+	}
+
+	private static violationJsonToJUnitTag(fileName: string, violation: RuleViolation): string {
+		const {
+			message,
+			line,
+			severity,
+			category,
+			ruleName,
+			column,
+			url
+		} = violation;
+		return `<testcase name="${fileName}">
+<failure message="${fileName}: ${line} ${htmlEscaper.escape(message.trim())}" type="${severity}">
+${severity}: ${message.trim()}
+Category: ${category} - ${ruleName}
+File: ${fileName}
+Line: ${line}
+Column: ${column}
+URL: ${url}
+</failure>
+</testcase>`;
 	}
 
 	private static constructTable(results: RuleResult[]): { columns; rows } | string {
@@ -139,6 +158,37 @@ URL: ${v.url}
 			return '';
 		}
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
+	}
+
+	private static async constructHtml(results: RuleResult[]): Promise<string> {
+		// If the results were just an empty string, we can return it.
+		if (results.length === 0) {
+			return '';
+		}
+
+		const violations = [];
+		for (const result of results) {
+			for (const v of result.violations) {
+				violations.push({
+					engine: result.engine,
+					fileName: result.fileName,
+					line: v.line,
+					column: v.column,
+					endLine: v.endLine || null,
+					endColumn: v.endColumn || null,
+					severity: v.severity,
+					ruleName: v.ruleName,
+					category: v.category,
+					url: v.url,
+					message: v.message
+				});
+			}
+		}
+
+		// Populate the template with a JSON payload
+		const fileHandler = new FileHandler();
+		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', 'html-templates', 'simple.mustache'));
+		return Mustache.render(template, {violations: JSON.stringify(violations)});
 	}
 
 	private static constructCsv(results: RuleResult[]): string {

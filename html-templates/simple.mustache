@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowgroup/1.1.2/css/rowGroup.dataTables.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/rowgroup/1.1.2/css/rowGroup.bootstrap4.min.css">
+	<script type="text/javascript" language="javascript" src="https://code.jquery.com/jquery-3.5.1.js"></script>
+	<script type="text/javascript" language="javascript"
+		src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" language="javascript" src="https://cdn.datatables.net/rowgroup/1.1.2/js/dataTables.rowGroup.min.js"></script>
+	<script type="text/javascript" class="init">
+
+	// Placeholder JSON that will be filled in by the scanner
+	const violations = {{{violations}}};
+
+	// Create a table where the first column(fileName) is hidden but used for grouping.
+	// Initial sort by fileName, severity, lineNumber
+	// fileName is used in orderFixed to force all results to sort underneath the fileName grouping
+	$(document).ready(function () {
+		$('#violations').DataTable({
+				columnDefs: [
+					{ 'visible': false, 'targets': [0] }
+				],
+				rowGroup: {
+					dataSrc: ['fileName']
+				},
+				orderFixed: [[0, 'asc']],
+				order: [[5, 'asc'], [6, 'asc']],
+				data: violations,
+				paging: false,
+				columns: [
+					{ data: 'fileName' },
+					{ data: 'engine' },
+					{ data: 'category' },
+					{ data: 'ruleName',
+					    // Convert the ruleName to a hyperlink that displays the rule information
+						'render': function(data, type, row, meta){
+							if(type === 'display'){
+								data = '<a href="' + row.url + '" target="__blank">' + data + '</a>';
+							}
+							return data;
+						}
+					},
+					{ data: 'message' },
+					{ data: 'severity' },
+					{ data: 'line' },
+					{ data: 'column' },
+					{ data: 'endLine' },
+					{ data: 'endColumn' },
+				]
+			});
+		});
+	</script>
+</head>
+
+<body class="wide comments example">
+	<div class="fw-container">
+		<div class="fw-body">
+			<div class="content">
+				<table id="violations" class="table table-striped table-bordered" style="width:100%">
+					<thead>
+						<tr>
+							<th>File Name</th>
+							<th>Engine</th>
+							<th>Category</th>
+							<th>Rule Name</th>
+							<th>Message</th>
+							<th>Severity</th>
+							<th>Line</th>
+							<th>Column</th>
+							<th>End Line</th>
+							<th>End Column</th>
+						</tr>
+					</thead>
+					<tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

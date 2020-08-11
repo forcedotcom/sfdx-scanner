@@ -45,7 +45,7 @@ export class DefaultRuleManager implements RuleManager {
 		this.initialized = true;
 	}
 
-	async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[] {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
@@ -53,8 +53,8 @@ export class DefaultRuleManager implements RuleManager {
 		let results: RuleResult[] = [];
 
 		// Derives rules from our filters to feed the engines.
-		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters);
-		const rules: Rule[] = await this.catalog.getRulesMatchingFilters(filters);
+		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
+		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
 		for (const e of this.engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
@@ -79,7 +79,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
 			this.logger.trace(`Recombining results into requested format ${format}`);
-			return RuleResultRecombinator.recombineAndReformatResults(results, format);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, format);
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
