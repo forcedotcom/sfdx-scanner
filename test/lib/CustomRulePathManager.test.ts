@@ -21,7 +21,7 @@ describe('CustomRulePathManager tests', () => {
 	const populatedFile = '{"pmd": {"apex": ["/some/user/path/customRule.jar"],"java": ["/abc/def/ghi","/home/lib/jars"]}}';
 
 	// Most tests rely on the singletons being clean
-	beforeEach(() => Controller.reset());
+	beforeEach(() => Controller.initializeTestSetup());
 
 	describe('Rule path entries creation', () => {
 
