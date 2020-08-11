@@ -19,15 +19,15 @@ export const Services = {
 	RuleEngine: "RuleEngine",
 	RuleCatalog: "RuleCatalog",
 	RulePathManager: "RulePathManager",
-	FileConstants: "FileConstants"
+	EnvOverridable: "EnvOverridable"
 };
 
 function setupProd(): void {
-	container.register(Services.FileConstants, ProdOverrides);
+	container.register(Services.EnvOverridable, ProdOverrides);
 }
 
 function setupTestAlternatives(): void {
-	container.register(Services.FileConstants, TestOverrides);
+	container.register(Services.EnvOverridable, TestOverrides);
 }
 
 function registerAll(): void {
@@ -56,7 +56,7 @@ export const Controller = {
 	},
 
 	getSfdxScannerPath: (): string => {
-		const fileConstants = container.resolve<EnvOverridable>(Services.FileConstants);
+		const fileConstants = container.resolve<EnvOverridable>(Services.EnvOverridable);
 		return fileConstants.getSfdxScannerPath();
 	},
 
