@@ -3,6 +3,7 @@ import * as path from 'path';
 import {RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
+import htmlEscaper = require('html-escaper');
 
 export class RuleResultRecombinator {
 
@@ -107,7 +108,7 @@ ${v.message.trim()}
 			url
 		} = violation;
 		return `<testcase name="${fileName}">
-<failure message="${fileName}: ${line} ${message.trim()}" type="${severity}">
+<failure message="${fileName}: ${line} ${htmlEscaper.escape(message.trim())}" type="${severity}">
 ${severity}: ${message.trim()}
 Category: ${category} - ${ruleName}
 File: ${fileName}

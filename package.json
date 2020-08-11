@@ -15,6 +15,7 @@
 		"eslint": "^6.8.0",
 		"find-java-home": "^1.1.0",
 		"globby": "^11.0.0",
+		"html-escaper": "^3.0.0",
 		"normalize-path": "^3.0.0",
 		"picomatch": "^2.2.2",
 		"reflect-metadata": "^0.1.13",
