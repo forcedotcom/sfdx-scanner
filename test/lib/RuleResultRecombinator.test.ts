@@ -137,12 +137,12 @@ describe('RuleResultRecombinator', () => {
 				expect(lineCounter).to.equal(lines.length, `Reached unexpected end after ${lineCounter} lines instead of ${lines.length}`);
 			}
 
-			it('Properly handles one file with one violation', () => {
+			it('Properly handles one file with one violation', async () => {
 				// Create a subset of the fake results containing only one file and one violation.
 				const someFakeResults = [allFakeRuleResults[0]];
 
 				// Create our reformatted results.
-				const results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const results = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -152,12 +152,12 @@ describe('RuleResultRecombinator', () => {
 				}
 			});
 
-			it('Properly handles one file with multiple violations', () => {
+			it('Properly handles one file with multiple violations', async () => {
 				// Create a subset of the fake results containing one file with multiple violations.
 				const someFakeResults = [allFakeRuleResults[1]];
 
 				// Create our reformatted results.
-				const results = RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const results = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -167,9 +167,9 @@ describe('RuleResultRecombinator', () => {
 				}
 			});
 
-			it('Properly handles multiple files with multiple violations', () => {
+			it('Properly handles multiple files with multiple violations', async () => {
 				// Create our reformatted results from the entire sample.
-				const results = RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
+				const results = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');

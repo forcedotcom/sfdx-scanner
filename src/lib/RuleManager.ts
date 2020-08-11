@@ -2,11 +2,12 @@ import {Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
 
 export enum OUTPUT_FORMAT {
-	XML = 'xml',
+	CSV = 'csv',
+	HTML = 'html',
 	JSON = 'json',
 	JUNIT = 'junit',
-	CSV = 'csv',
-	TABLE = 'table'
+	TABLE = 'table',
+	XML = 'xml'
 }
 
 export interface RuleManager {

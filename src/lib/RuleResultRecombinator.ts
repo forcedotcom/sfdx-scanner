@@ -3,11 +3,13 @@ import * as path from 'path';
 import {RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
+import {FileHandler} from './util/FileHandler';
+import * as Mustache from 'mustache';
 import htmlEscaper = require('html-escaper');
 
 export class RuleResultRecombinator {
 
-	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): string | { columns; rows } {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): Promise<string | { columns; rows }> {
 		// We need to change the results we were given into the desired final format.
 		switch (format) {
 			case OUTPUT_FORMAT.JSON:
@@ -20,6 +22,8 @@ export class RuleResultRecombinator {
 				return this.constructJunit(results);
 			case OUTPUT_FORMAT.TABLE:
 				return this.constructTable(results);
+			case OUTPUT_FORMAT.HTML:
+				return await this.constructHtml(results);
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
@@ -154,6 +158,37 @@ URL: ${url}
 			return '';
 		}
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
+	}
+
+	private static async constructHtml(results: RuleResult[]): Promise<string> {
+		// If the results were just an empty string, we can return it.
+		if (results.length === 0) {
+			return '';
+		}
+
+		const violations = [];
+		for (const result of results) {
+			for (const v of result.violations) {
+				violations.push({
+					engine: result.engine,
+					fileName: result.fileName,
+					line: v.line,
+					column: v.column,
+					endLine: v.endLine || null,
+					endColumn: v.endColumn || null,
+					severity: v.severity,
+					ruleName: v.ruleName,
+					category: v.category,
+					url: v.url,
+					message: v.message
+				});
+			}
+		}
+
+		// Populate the template with a JSON payload
+		const fileHandler = new FileHandler();
+		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', 'html-templates', 'simple.mustache'));
+		return Mustache.render(template, {violations: JSON.stringify(violations)});
 	}
 
 	private static constructCsv(results: RuleResult[]): string {
