@@ -1,8 +1,9 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
-import {ENGINE, CONFIG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
+import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
+import { Controller } from '../../ioc.config';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -17,7 +18,6 @@ export type EngineConfigContent = {
 	supportedLanguages?: string[];
 }
 
-const CONFIG_FILE_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
 export const DEFAULT_CONFIG: ConfigContent = {
 	engines: [
 		{
@@ -74,6 +74,8 @@ export class Config {
 	configContent!: ConfigContent;
 	fileHandler!: FileHandler;
 	private typeChecker: TypeChecker;
+	private sfdxScannerPath: string;
+	private configFilePath: string;
 	private logger!: Logger;
 	private initialized: boolean;
 
@@ -85,6 +87,8 @@ export class Config {
 
 		this.typeChecker = new TypeChecker();
 		this.fileHandler = new FileHandler();
+		this.sfdxScannerPath = Controller.getSfdxScannerPath();
+		this.configFilePath = path.join(this.sfdxScannerPath, CONFIG_FILE);
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
 
@@ -169,15 +173,15 @@ export class Config {
 	private async writeConfig(): Promise<void> {
 		const jsonString = JSON.stringify(this.configContent, null, 4);
 		this.logger.trace(`Writing Config file with content: ${jsonString}`);
-		await this.fileHandler.writeFile(CONFIG_FILE_PATH, jsonString);
+		await this.fileHandler.writeFile(this.configFilePath, jsonString);
 	}
 
 	private async initializeConfig(): Promise<void> {
 		this.logger.trace(`Initializing Config`);
-		if (!await this.fileHandler.exists(CONFIG_FILE_PATH)) {
+		if (!await this.fileHandler.exists(this.configFilePath)) {
 			await this.createNewConfigFile(DEFAULT_CONFIG);
 		}
-		const fileContent = await this.fileHandler.readFile(CONFIG_FILE_PATH);
+		const fileContent = await this.fileHandler.readFile(this.configFilePath);
 		this.logger.trace(`Config content to be set as ${fileContent}`);
 		this.configContent = JSON.parse(fileContent);
 
@@ -190,8 +194,8 @@ export class Config {
 
 	private async createNewConfigFile(configContent: ConfigContent): Promise<void> {
 		this.logger.trace(`Creating a new Config file`);
-		await this.fileHandler.mkdirIfNotExists(SFDX_SCANNER_PATH);
-		await this.fileHandler.writeFile(CONFIG_FILE_PATH, JSON.stringify(configContent, null, 2));
+		await this.fileHandler.mkdirIfNotExists(this.sfdxScannerPath);
+		await this.fileHandler.writeFile(this.configFilePath, JSON.stringify(configContent, null, 2));
 		this.configContent = configContent;
 	}
 }

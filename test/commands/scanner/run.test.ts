@@ -1,33 +1,20 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import {SFDX_SCANNER_PATH} from '../../../src/Constants';
-import {Controller} from '../../../src/ioc.config';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
 import events = require('../../../messages/EventKeyTemplates');
 
-const CATALOG_OVERRIDE = 'RunTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'RunTestCustomPaths.json';
-
 Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
-// Before our tests, delete any existing catalog and/or custom path associated with our override.
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
-}
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
-}
-
-const runTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
 
 describe('scanner:run', function () {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
+	before(() => TestOverrides.initializeTestSetup());
 
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
@@ -49,7 +36,7 @@ describe('scanner:run', function () {
 			}
 
 			describe('Test Case: Running rules against a single file', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -61,7 +48,7 @@ describe('scanner:run', function () {
 						validateXmlOutput(ctx.stdout);
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -73,7 +60,7 @@ describe('scanner:run', function () {
 						validateXmlOutput(ctx.stdout);
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -87,7 +74,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running rules against multiple specified files', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -125,7 +112,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running rules against a folder', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -164,7 +151,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running multiple rulesets at once', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -196,7 +183,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Writing XML results to a file', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -240,7 +227,7 @@ describe('scanner:run', function () {
 				expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
 		}
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -253,7 +240,7 @@ describe('scanner:run', function () {
 					validateCsvOutput(ctx.stdout);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -278,7 +265,7 @@ describe('scanner:run', function () {
 					validateCsvOutput(fileContents);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -290,7 +277,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -333,7 +320,7 @@ describe('scanner:run', function () {
 				expect(rows[3]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #4 should be of the expected type');
 			}
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -346,7 +333,7 @@ describe('scanner:run', function () {
 					validateHtmlOutput(ctx.stdout);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -371,7 +358,7 @@ describe('scanner:run', function () {
 					validateHtmlOutput(fileContents);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -383,7 +370,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -418,7 +405,7 @@ describe('scanner:run', function () {
 				expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
 		}
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -430,7 +417,7 @@ describe('scanner:run', function () {
 					validateJsonOutput(ctx.stdout);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -455,7 +442,7 @@ describe('scanner:run', function () {
 					validateJsonOutput(fileContents);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -467,7 +454,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -491,7 +478,7 @@ describe('scanner:run', function () {
 
 		describe('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -511,7 +498,7 @@ describe('scanner:run', function () {
 					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -525,7 +512,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('--json flag', () => {
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -548,7 +535,7 @@ describe('scanner:run', function () {
 					expect(result[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -574,7 +561,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -612,7 +599,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -629,7 +616,7 @@ describe('scanner:run', function () {
 
 		describe('Dynamic Input', () => {
 			describe('Test Case: Running rules against a glob', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -670,7 +657,7 @@ describe('scanner:run', function () {
 
 			describe('Test Case: Using ~/ shorthand in target', () => {
 				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'));
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -697,7 +684,7 @@ describe('scanner:run', function () {
 
 		describe('Edge Cases', () => {
 			describe('Test case: No output specified', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -720,7 +707,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: No rules specified', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -737,7 +724,7 @@ describe('scanner:run', function () {
 						expect(violations.length).to.equal(84, 'Should be 84 violations detected in the file');
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -751,14 +738,14 @@ describe('scanner:run', function () {
 						// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 						const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 						const implicitMessages = violations[0].match(regex);
-						expect(implicitMessages || []).to.have.lengthOf(22, 'Should be 22 log entries for implicitly added categories from pmd and eslint');
+						expect(implicitMessages || []).to.have.lengthOf(25, 'Should be 25 log entries for implicitly added categories from pmd and eslint');
 					});
 			});
 
 			describe('Test Case: Evaluating rules against invalid code', () => {
 				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
 				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls');
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -774,7 +761,7 @@ describe('scanner:run', function () {
 						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -803,7 +790,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('Error handling', () => {
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
@@ -811,7 +798,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.mustTargetSomething')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
@@ -819,7 +806,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeValid')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
@@ -827,7 +814,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeSupportedType')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
@@ -845,7 +832,7 @@ describe('scanner:run', function () {
 			after(() => {
 				process.chdir("../../../..");
 			});
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
@@ -866,7 +853,7 @@ describe('scanner:run', function () {
 	});
 
 	describe('BaseConfig Environment Tests For Javascript', () => {
-		runTest
+		test
 		.stdout()
 		.stderr()
 		.command(['scanner:run',
@@ -880,7 +867,7 @@ describe('scanner:run', function () {
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		runTest
+		test
 			.stdout()
 			.stderr()
 			.command(['scanner:run',
@@ -899,7 +886,7 @@ describe('scanner:run', function () {
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		runTest
+		test
 			.stdout()
 			.stderr()
 

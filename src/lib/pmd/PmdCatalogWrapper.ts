@@ -1,6 +1,5 @@
 import {Logger, Messages} from '@salesforce/core';
 import {ChildProcessWithoutNullStreams} from "child_process";
-import {SFDX_SCANNER_PATH} from '../../Constants';
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
@@ -10,6 +9,8 @@ import * as PmdLanguageManager from './PmdLanguageManager';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import path = require('path');
 import {uxEvents} from '../ScannerEvents';
+import { Controller } from '../../ioc.config';
+import { PMD_CATALOG_FILE } from '../../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
@@ -17,13 +18,12 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemp
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
-const PMD_CATALOG_FILE = 'PmdCatalog.json';
-
 
 export class PmdCatalogWrapper extends PmdSupport {
 	private outputProcessor: OutputProcessor;
 	private logger: Logger; // TODO: add relevant trace logs
 	private initialized: boolean;
+	private sfdxScannerPath: string;
 
 	protected async init(): Promise<void> {
 		if (this.initialized) {
@@ -31,6 +31,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		}
 		this.logger = await Logger.child('PmdCatalogWrapper');
 		this.outputProcessor = await OutputProcessor.create({});
+		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 
 		this.initialized = true;
 	}
@@ -38,15 +39,15 @@ export class PmdCatalogWrapper extends PmdSupport {
 	public async getCatalog(): Promise<Catalog> {
 		this.logger.trace(`Populating PmdCatalog JSON.`);
 		await this.runCommand();
-		return PmdCatalogWrapper.readCatalogFromFile();
+		return this.readCatalogFromFile();
 	}
 
-	private static getCatalogPath(): string {
-		return path.join(SFDX_SCANNER_PATH, PMD_CATALOG_FILE);
+	private getCatalogPath(): string {
+		return path.join(this.sfdxScannerPath, PMD_CATALOG_FILE);
 	}
 
-	private static async readCatalogFromFile(): Promise<Catalog> {
-		const rawCatalog = await new FileHandler().readFile(PmdCatalogWrapper.getCatalogPath());
+	private async readCatalogFromFile(): Promise<Catalog> {
+		const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
 		return JSON.parse(rawCatalog);
 	}
 
@@ -57,7 +58,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
-		const args = [`-DcatalogName=${PMD_CATALOG_FILE}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
+		const args = [`-DcatalogHome=${this.sfdxScannerPath}`, `-DcatalogName=${PMD_CATALOG_FILE}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
 		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${args}"`);
 		return [command, args];
