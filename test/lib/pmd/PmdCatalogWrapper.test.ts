@@ -8,6 +8,7 @@ import path = require('path');
 import {ENGINE,LANGUAGE} from '../../../src/Constants';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {uxEvents} from '../../../src/lib/ScannerEvents';
+import { after } from 'mocha';
 
 // In order to get access to PmdCatalogWrapper's protected methods, we're going to extend it with a test class here.
 class TestablePmdCatalogWrapper extends PmdCatalogWrapper {
@@ -24,6 +25,33 @@ const irrelevantPath = path.join('this', 'path', 'does', 'not', 'actually', 'mat
 describe('PmdCatalogWrapper', () => {
 	describe('buildCommandArray()', () => {
 		describe('JAR parameters', () => {
+			describe('Common to all scenarios', () => {
+				before(() => {
+					Sinon.createSandbox();
+					// Spoof a config that claims that only Apex's default PMD JAR is enabled.
+					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
+				});
+
+				after(() => {
+					Sinon.restore();
+				});
+
+				it('uses the correct common parameter values', async () => {
+					const expectedParamList = [
+						`-DcatalogHome=`,
+						'-DcatalogName=PmdCatalog.json',
+						'-cp',
+						'dist/pmd-cataloger/lib',
+						'sfdc.sfdx.scanner.pmd.Main'];
+
+					const target = await TestablePmdCatalogWrapper.create({});
+					const params = (await target.buildCommandArray())[1];
+
+					expectedParamList.forEach((value: string, index: number, array: string[]) => {
+						expect(params[index]).contains(value, `Unexpected param value at position ${index}`);
+					});
+				});
+			});
 			describe('When Custom PMD JARs have been registered for a language whose default PMD rules are off...', () => {
 				before(() => {
 					Sinon.createSandbox();
@@ -45,20 +73,10 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					// Expect there to be 7 parameters.
-					expect(params.length).to.equal(7, `Should have been 7 parameters: ${params}`);
-					// Expect the first three parameters to be the catalogHome, catalogName and -cp flag.
-					expect(params[0]).to.contain('-DcatalogHome=', 'First parameter should be catalog home path');
-					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'Second parameter should be catalog override');
-					expect(params[2]).to.equal('-cp', 'Second parameter should be -cp flag');
-					// The third parameter should be the classpath, and we want to make sure it contains our fake path.
-					expect(params[3]).to.contain(irrelevantPath, 'Third parameter should be classpath, including custom Java JAR');
-					// The fourth parameter should be the main class.
-					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fourth parameter is the main class');
-					// The fifth parameter is the Java JAR, and not the standard PMD JAR.
-					expect(params[5]).to.equal(`java=${irrelevantPath}`, 'Fifth parameter should be java-specific input, w/Custom Jar.');
-					// The sixth parameter should be the default Apex JAR.
-					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Sixth parameter is Apex-specific, with only standard JAR.');
+					const customJarValue = `java=${irrelevantPath}`;
+					const defaultJarPattern = /^apex=.*pmd-apex-.*.jar$/;
+
+					validateCustomAndDefaultJarParams(params, customJarValue, defaultJarPattern);
 				});
 			});
 
@@ -83,20 +101,9 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					// Expect there to be 6 parameters.
-					expect(params.length).to.equal(7, `Should have been 7 parameters: ${params}`);
-					// Expect the first three parameters to be the catalogHome, catalogName and -cp flag.
-					expect(params[0]).to.contain('-DcatalogHome=', 'First parameter should be catalog home path');
-					expect(params[1]).to.equal('-DcatalogName=PmdCatalog.json', 'Second parameter should be catalog override');
-					expect(params[2]).to.equal('-cp', 'Third parameter should be -cp flag');
-					// The next parameter should be the classpath, and we want to make sure it contains our fake path.
-					expect(params[3]).to.contain(irrelevantPath, 'Fourth parameter should be classpath, including custom Java JAR');
-					// The next parameter should be the main class.
-					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fifth parameter is the main class');
-					// The next parameter is the PLSQL JAR, and not the standard PMD JAR.
-					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Sixth parameter should be plsql-specific input, w/Custom Jar.');
-					// The next parameter should be the default Apex JAR.
-					expect(params[6]).to.match(/^apex=.*pmd-apex-.*.jar$/, 'Seventh parameter is Apex-specific, with only standard JAR.');
+					const customJarValue = `plsql=${irrelevantPath}`;
+					const defaultJarPattern = /^apex=.*pmd-apex-.*.jar$/;
+					validateCustomAndDefaultJarParams(params, customJarValue, defaultJarPattern);
 				});
 			});
 
@@ -121,17 +128,10 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					// verify that there's no eighth parameter for java since there's no associated path
-					expect(params.length).equals(7, `Expected exactly seven parameters. Last parameter is ${params[params.length - 1]}`);
+					const customJarValue = `plsql=${irrelevantPath}`;
+					const defaultJarPattern = /^apex=.*jar$/;
 
-					// Confirm that the fourth parameter is the main class.
-					expect(params[4]).to.equal('sfdc.sfdx.scanner.pmd.Main', 'Fifth parameter is the main class');
-
-					// verify that the fifth parameter is for plsql
-					expect(params[5]).to.equal(`plsql=${irrelevantPath}`, 'Sixth parameter should be plsql-specific');
-
-					// verify that the sixth parameter is for plsql
-					expect(params[6]).to.match(/^apex=.*jar$/, 'Seventh parameter should be apex-specific');
+					validateCustomAndDefaultJarParams(params, customJarValue, defaultJarPattern);
 				});
 			});
 
@@ -180,3 +180,18 @@ describe('PmdCatalogWrapper', () => {
 		});
 	});
 });
+
+function validateCustomAndDefaultJarParams(params: string[], customJarValue: string, defaultJarPattern: RegExp) {
+	const expectedParamLength = 7;
+	expect(params.length).to.equal(expectedParamLength, `Should have been ${expectedParamLength} parameters: ${params}`);
+
+	const classpathIndex = expectedParamLength - 4;
+	expect(params[classpathIndex]).to.contain(irrelevantPath, `Parameter as position ${classpathIndex} should be classpath, including custom Java JAR`);
+
+	const customJarIndex = expectedParamLength - 2;
+	expect(params[customJarIndex]).to.equal(customJarValue, `Parameter as position ${customJarIndex} is incorrect`);
+
+	const defaultJarIndex = expectedParamLength - 1;
+	expect(params[defaultJarIndex]).to.match(defaultJarPattern, `Parameter as position ${defaultJarIndex} does not match pattern`);
+}
+

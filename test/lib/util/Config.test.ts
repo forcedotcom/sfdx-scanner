@@ -7,11 +7,12 @@ import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {Messages} from '@salesforce/core';
 import { fail } from 'assert';
 import { Controller } from '../../../src/ioc.config';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
-Controller.initializeTestSetup();
+TestOverrides.initializeTestSetup();
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
 

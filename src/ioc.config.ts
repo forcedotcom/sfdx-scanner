@@ -10,7 +10,7 @@ import {RuleManager} from './lib/RuleManager';
 import {RulePathManager} from './lib/RulePathManager';
 import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
-import {ProdOverrides, TestOverrides, EnvOverridable} from './Constants'
+import {ProdOverrides, EnvOverridable} from './Constants';
 
 
 export const Services = {
@@ -26,10 +26,6 @@ function setupProd(): void {
 	container.register(Services.EnvOverridable, ProdOverrides);
 }
 
-function setupTestAlternatives(): void {
-	container.register(Services.EnvOverridable, TestOverrides);
-}
-
 function registerAll(): void {
 	container.registerSingleton(Services.Config, Config);
 	container.registerSingleton(Services.RuleManager, DefaultRuleManager);
@@ -43,9 +39,7 @@ function registerAll(): void {
 export const Controller = {
 	container,
 
-	initializeTestSetup: (): void => {
-		container.reset();
-		setupTestAlternatives();
+	registerAll: (): void => {
 		registerAll();
 	},
 
@@ -56,8 +50,8 @@ export const Controller = {
 	},
 
 	getSfdxScannerPath: (): string => {
-		const fileConstants = container.resolve<EnvOverridable>(Services.EnvOverridable);
-		return fileConstants.getSfdxScannerPath();
+		const envOverrides = container.resolve<EnvOverridable>(Services.EnvOverridable);
+		return envOverrides.getSfdxScannerPath();
 	},
 
 	createRuleManager: async (): Promise<RuleManager> => {
