@@ -1,6 +1,6 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import {Controller} from '../../../src/ioc.config';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
@@ -14,7 +14,7 @@ const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKe
 
 describe('scanner:run', function () {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.initializeTestSetup());
+	before(() => TestOverrides.initializeTestSetup());
 
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 

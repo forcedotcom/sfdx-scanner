@@ -1,6 +1,7 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
 import {Controller} from '../../../../src/ioc.config';
+import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import { CUSTOM_PATHS_FILE } from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
@@ -8,7 +9,7 @@ import path = require('path');
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
 
-Controller.initializeTestSetup();
+TestOverrides.initializeTestSetup();
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 
 // NOTE: The relative paths are relative to the root of the project instead of to the location of this file,
@@ -33,7 +34,7 @@ const removeTest = test
 describe('scanner:rule:remove', () => {
 	// Reset our controller for each test because a) we are using file overrides and b) these tests muck with them.
 	beforeEach(() => {
-		Controller.initializeTestSetup();
+		TestOverrides.initializeTestSetup();
 	});
 
 	describe('E2E', () => {

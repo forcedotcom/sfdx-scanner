@@ -11,12 +11,6 @@ export class ProdOverrides implements EnvOverridable {
 	}
 }
 
-export class TestOverrides implements EnvOverridable {
-	public getSfdxScannerPath(): string {
-		return path.join(os.homedir(), '.sfdx-scanner-test');
-	}
-}
-
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';

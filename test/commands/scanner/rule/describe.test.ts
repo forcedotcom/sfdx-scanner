@@ -1,10 +1,10 @@
 import {expect, test} from '@salesforce/command/lib/test';
-import {Controller} from '../../../../src/ioc.config';
+import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import messages = require('../../../../messages/describe');
 
 describe('scanner:rule:describe', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.initializeTestSetup());
+	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {

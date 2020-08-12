@@ -1,7 +1,7 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
+import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import * as os from 'os';
-import {Controller} from '../../../../src/ioc.config';
 import fs = require('fs');
 import path = require('path');
 
@@ -11,7 +11,7 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 describe('scanner:rule:add', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.initializeTestSetup());
+	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
 		const myLanguage = 'apex';
@@ -31,7 +31,7 @@ describe('scanner:rule:add', () => {
 			fs.writeFileSync(tmpJar4, 'Heat and cold, life and death, and of course, light and dark.');
 
 			// For the first test, we'll add two of the JARs with their absolute paths.
-			const absolutePaths = [tmpJar1];
+			const absolutePaths = [tmpJar1, tmpJar2];
 			test
 				.stdout()
 				.stderr()

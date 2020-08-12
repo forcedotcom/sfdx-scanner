@@ -1,12 +1,13 @@
 import {expect, test} from '@salesforce/command/lib/test';
-import {Controller} from '../../../../src/ioc.config';
+import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import {Rule} from '../../../../src/types';
 import {CATALOG_FILE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
+import { Controller } from '../../../../src/ioc.config';
 
 
-Controller.initializeTestSetup();
+TestOverrides.initializeTestSetup();
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 
 function getCatalogJson(): { rules: Rule[] } {
@@ -17,7 +18,7 @@ function getCatalogJson(): { rules: Rule[] } {
 
 describe('scanner:rule:list', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.initializeTestSetup());
+	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
 		describe('Test Case: No filters applied', () => {
