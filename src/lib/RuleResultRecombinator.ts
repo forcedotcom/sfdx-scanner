@@ -91,10 +91,22 @@ ${v.message.trim()}
 		// Use each entry in the map to construct a <testsuite> tag.
 		const testsuiteTags = [];
 		for (const [fileName, failures] of violationsByFileName.entries()) {
-			testsuiteTags.push(`<testsuite name="${fileName}" tests="${failures.length}" errors="${failures.length}">\n${failures.join('\n')}\n</testsuite>`);
+			const escapedFileName = this.safeHtmlEscape(fileName);
+			testsuiteTags.push(`<testsuite name="${escapedFileName}" tests="${failures.length}" errors="${failures.length}">\n${failures.join('\n')}\n</testsuite>`);
 		}
 
 		return `<testsuites>\n${testsuiteTags.join('\n')}\n</testsuites>`
+	}
+
+	/**
+	 * Html escapes a string if it has a non-zero length
+	 */
+	private static safeHtmlEscape(str: string): string {
+		if (str && str.length > 0) {
+			return htmlEscaper.escape(str);
+		} else {
+			return str;
+		}
 	}
 
 	private static violationJsonToJUnitTag(fileName: string, violation: RuleViolation): string {
@@ -107,11 +119,15 @@ ${v.message.trim()}
 			column,
 			url
 		} = violation;
-		return `<testcase name="${fileName}">
-<failure message="${fileName}: ${line} ${htmlEscaper.escape(message.trim())}" type="${severity}">
-${severity}: ${message.trim()}
-Category: ${category} - ${ruleName}
-File: ${fileName}
+		const escapedFileName = this.safeHtmlEscape(fileName);
+		const escapedMessage = this.safeHtmlEscape(message.trim());
+		const escapedCategory = this.safeHtmlEscape(category);
+		const escapedRuleName = this.safeHtmlEscape(ruleName);
+		return `<testcase name="${escapedFileName}">
+<failure message="${escapedFileName}: ${line} ${escapedMessage}" type="${severity}">
+${severity}: ${escapedMessage}
+Category: ${escapedCategory} - ${escapedRuleName}}
+File: ${escapedFileName}
 Line: ${line}
 Column: ${column}
 URL: ${url}
