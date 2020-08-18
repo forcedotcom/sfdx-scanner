@@ -26,7 +26,7 @@ export const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
 			],
-			supportedLanguages: ['apex']
+			supportedLanguages: ['apex', 'vf']
 		},
 		{
 			name: ENGINE.ESLINT,
