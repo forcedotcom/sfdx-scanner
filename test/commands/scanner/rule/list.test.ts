@@ -5,7 +5,10 @@ import {CATALOG_FILE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 import { Controller } from '../../../../src/ioc.config';
+import { Messages } from '@salesforce/core';
 
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
 
 TestOverrides.initializeTestSetup();
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
@@ -105,6 +108,15 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by ruleset only', () => {
+			
+			test
+			.stdout()
+			.stderr()
+			.command(['scanner:rule:list', '--ruleset', 'Braces'])
+			.it('--ruleset option shows deprecation warning', ctx => {
+				expect(ctx.stderr).contains(messages.getMessage('rulesetDeprecation'));
+			});
+
 			test
 				.stdout()
 				.stderr()
