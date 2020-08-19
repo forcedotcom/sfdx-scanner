@@ -152,6 +152,16 @@ describe('scanner:run', function () {
 
 			describe('Test Case: Running multiple rulesets at once', () => {
 				test
+				.stdout()
+				.stderr()
+				.command(['scanner:run', '--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+				'--ruleset', 'ApexUnit',
+				'--format', 'xml'])
+				.it('--ruleset option shows deprecation warning', ctx => {
+					expect(ctx.stderr).contains(runMessages.getMessage('rulesetDeprecation'));
+				});
+
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',

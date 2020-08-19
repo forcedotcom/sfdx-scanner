@@ -4,6 +4,7 @@ import {Controller} from '../../../ioc.config';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 
+
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
@@ -34,6 +35,9 @@ export default class List extends ScannerCommand {
 		}),
 		ruleset: flags.array({
 			char: 'r',
+			deprecated: {
+				messageOverride: messages.getMessage('rulesetDeprecation')
+			},
 			description: messages.getMessage('flags.rulesetDescription'),
 			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
 		}),

@@ -8,8 +8,8 @@ module.exports = {
 		"rulenameDescription": "[description of 'rulename' parameter]",                   // TODO: Change this once the flag is implemented.
 		"categoryDescription": "categor(ies) of rules to run",
 		"categoryDescriptionLong": "One or more categories of rules to run. Multiple values can be specified as a comma-separated list.",
-		"rulesetDescription": "ruleset(s) of rules to run",
-		"rulesetDescriptionLong": "One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
+		"rulesetDescription": "[deprecated] ruleset(s) of rules to run",
+		"rulesetDescriptionLong": "[Deprecated] One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
 		"severityDescription": "[description of 'severity' parameter]",                   // TODO: Change this once the flag is implemented.
 		"excluderuleDescription": "[description of 'exclude-rule' parameter]",            // TODO: Change this once the flag is implemented.
 		"orgDescription": "[description of 'org' parameter]",                             // TODO: Change this once the flag is implemented.
@@ -37,6 +37,7 @@ module.exports = {
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
 		"writtenToOutFile": "Rule violations have been written to %s."
 	},
+	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"examples": `Invoking without specifying any rules causes all rules to be run.
 	E.g., $ sfdx scanner:run --format xml --target "somefile.js"
 		Evaluates all rules against somefile.js.

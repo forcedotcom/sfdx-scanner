@@ -17,12 +17,17 @@ $ sfdx scanner:rule:list [-c <array>] [-r <array>] [-l <array>] [--verbose] [--j
 ```bash
   -c, --category=category 	Select rules by category. Enter multiple values as a comma-separated list.
   -l, --language=language 	Select rules by language. Enter multiple values as a comma-separated list.
-  -r, --ruleset=ruleset 	Select rules by ruleset. Enter multiple values as a comma-separated list.
+  -r, --ruleset=ruleset 	[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.
   --json 			Format output as json
   --verbose 			Emit additional command output to stdout
 
 ```
   
+## Additional Notes
+
+--ruleset option is deprecated and will be removed soon. Please use --category instead.
+
+
 ## Example
 To see all rules, run the command without any filters. 
 ```bash
