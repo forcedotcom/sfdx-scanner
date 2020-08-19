@@ -40,7 +40,7 @@ export default class Run extends ScannerCommand {
 		ruleset: flags.array({
 			char: 'r',
 			deprecated: {
-				messageOverride: '"ruleset" option is deprecated. Please use "category" option instead'
+				messageOverride: messages.getMessage('rulesetDeprecation')
 			},
 			description: messages.getMessage('flags.rulesetDescription'),
 			longDescription: messages.getMessage('flags.rulesetDescriptionLong')

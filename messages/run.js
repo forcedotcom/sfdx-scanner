@@ -37,6 +37,7 @@ module.exports = {
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
 		"writtenToOutFile": "Rule violations have been written to %s."
 	},
+	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"examples": `Invoking without specifying any rules causes all rules to be run.
 	E.g., $ sfdx scanner:run --format xml --target "somefile.js"
 		Evaluates all rules against somefile.js.
