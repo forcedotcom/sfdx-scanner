@@ -15,6 +15,13 @@ module.exports = {
 		"customDescription": "[description of 'custom' parameter]"      // Change this when we implement the flag.
 	},
 	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
+	"columnNames": {
+		"name": "name", 
+		"languages": "languages",
+		"categories": "categories", 
+		"rulesets": "rulesets [dep]",
+		"engine": "engine"
+	},
 	"examples": `Invoking with no filter criteria returns all rules.
 	E.g., $ sfdx scanner:rule:list
 		Returns a table containing all rules.
