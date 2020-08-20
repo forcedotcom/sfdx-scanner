@@ -11,7 +11,11 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
-const columns = ['name', 'languages', 'categories', 'rulesets', 'engine'];
+const columns = [messages.getMessage('columnNames.name'), 
+				messages.getMessage('columnNames.languages'), 
+				messages.getMessage('columnNames.categories'), 
+				messages.getMessage('columnNames.rulesets'),
+				messages.getMessage('columnNames.engine')];
 
 export default class List extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
@@ -79,7 +83,31 @@ export default class List extends ScannerCommand {
 		return rules;
 	}
 
-	private formatRulesForDisplay(rules: Rule[]): Rule[] {
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	private formatRulesForDisplay(rules: Rule[]): Record<string, any>[] {
+		// Truncate ruleset values
+		const rulesetTruncatedRules = this.truncateRulesetValues(rules);
+
+		// Transform column names to match display
+		const transformedRules = [];
+		rulesetTruncatedRules.forEach(rule => transformedRules.push(this.transformKeysToMatchColumns(rule)));
+
+		return transformedRules;
+	}
+
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	private transformKeysToMatchColumns(rule: Rule): Record<string, any> {
+		// Map rule fields to the matching column
+		const transformedRule = {};
+		transformedRule[columns[0]] = rule.name;
+		transformedRule[columns[1]] = rule.languages;
+		transformedRule[columns[2]] = rule.categories;
+		transformedRule[columns[3]] = rule.rulesets;
+		transformedRule[columns[4]] = rule.engine;
+		return transformedRule;
+	}
+
+	private truncateRulesetValues(rules: Rule[]): Rule[] {
 		return rules.map(rule => {
 			const clonedRule = JSON.parse(JSON.stringify(rule));
 
