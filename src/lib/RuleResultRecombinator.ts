@@ -226,10 +226,26 @@ URL: ${url}
 			}
 		}
 
-		// Populate the template with a JSON payload
+		// Populate the template with a JSON payload of the violations
 		const fileHandler = new FileHandler();
 		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', 'html-templates', 'simple.mustache'));
-		return Mustache.render(template, {violations: JSON.stringify(violations)});
+		const args = ['sfdx'];
+		for (const arg of process.argv.slice(2)) {
+			if (arg.indexOf('-') == 0) {
+				// Pass flags as-is
+				args.push(arg);
+			} else {
+				// Wrag flag parameters in quotes
+				args.push(`"${arg}"`);
+			}
+		}
+		const templateData = {
+			violations: JSON.stringify(violations),
+			workingDirectory: process.cwd(),
+			commandLine: args.join(' ')
+		};
+
+		return Mustache.render(template, templateData);
 	}
 
 	private static constructCsv(results: RuleResult[]): string {
