@@ -231,7 +231,7 @@ URL: ${url}
 		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', 'html-templates', 'simple.mustache'));
 		const args = ['sfdx'];
 		for (const arg of process.argv.slice(2)) {
-			if (arg.indexOf('-') == 0) {
+			if (arg.startsWith('-')) {
 				// Pass flags as-is
 				args.push(arg);
 			} else {
