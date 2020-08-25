@@ -39,6 +39,9 @@ export default class Run extends ScannerCommand {
 		}),
 		ruleset: flags.array({
 			char: 'r',
+			deprecated: {
+				messageOverride: messages.getMessage('rulesetDeprecation')
+			},
 			description: messages.getMessage('flags.rulesetDescription'),
 			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
 		}),

@@ -8,11 +8,19 @@ module.exports = {
 		"languageDescriptionLong": "Filters the list based on the specified languages. Specify multiple languages as a comma-separated list. See the PMD CLI documentation for a list of supported languages.",
 		"categoryDescription": "categories to filter list by",
 		"categoryDescriptionLong": "Select rules by category. Enter multiple values as a comma-separated list. E.g., 'Best Practices',Performance ",
-		"rulesetDescription": "ruleset(s) to filter list by",
-		"rulesetDescriptionLong": "Select rules by ruleset. Enter multiple values as a comma-separated list.",
+		"rulesetDescription": "[deprecated] ruleset(s) to filter list by",
+		"rulesetDescriptionLong": "[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.",
 		"severityDescription": "[description of 'severity' parameter]", // Change this when we implement the flag.
 		"standardDescription": "[description of 'standard' parameter]", // Change this when we implement the flag.
 		"customDescription": "[description of 'custom' parameter]"      // Change this when we implement the flag.
+	},
+	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
+	"columnNames": {
+		"name": "name", 
+		"languages": "languages",
+		"categories": "categories", 
+		"rulesets": "rulesets [dep]",
+		"engine": "engine"
 	},
 	"examples": `Invoking with no filter criteria returns all rules.
 	E.g., $ sfdx scanner:rule:list
