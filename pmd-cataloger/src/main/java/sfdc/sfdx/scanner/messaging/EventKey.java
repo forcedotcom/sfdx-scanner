@@ -3,6 +3,7 @@ import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 
 public enum EventKey {
 	// MAKE SURE messageKey OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
+	INFO_GENERAL_INTERNAL_LOG("info.generalInternalLog", 1, MessageType.INFO, MessageHandler.INTERNAL, true),
 	WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_XML_DROPPED("warning.xmlDropped", 1, MessageType.WARNING, MessageHandler.UX, true),

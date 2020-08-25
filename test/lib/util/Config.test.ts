@@ -2,14 +2,18 @@ import {expect} from 'chai';
 import Sinon = require('sinon');
 import path = require('path');
 import {Config, DEFAULT_CONFIG} from '../../../src/lib/util/Config';
-import {CONFIG_FILE, SFDX_SCANNER_PATH, ENGINE} from '../../../src/Constants'
+import {CONFIG_FILE, ENGINE} from '../../../src/Constants'
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {Messages} from '@salesforce/core';
 import { fail } from 'assert';
+import { Controller } from '../../../src/ioc.config';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
+TestOverrides.initializeTestSetup();
+const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
 
 describe('Config.js tests', () => {

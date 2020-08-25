@@ -1,7 +1,7 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {injectable, injectAll} from 'tsyringe';
-import {CATALOG_FILE, SFDX_SCANNER_PATH} from '../../Constants';
+import {CATALOG_FILE} from '../../Constants';
 import {Catalog, Rule, RuleEvent, RuleGroup} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {FilterType, RuleFilter} from '../RuleFilter';
@@ -9,7 +9,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
 import {RuleCatalog} from './RuleCatalog';
 import {RuleEngine} from './RuleEngine';
-
+import { Controller } from '../../ioc.config';
 
 @injectable()
 export default class LocalCatalog implements RuleCatalog {
@@ -17,6 +17,7 @@ export default class LocalCatalog implements RuleCatalog {
 	private logger: Logger;
 	private outputProcessor: OutputProcessor;
 	private catalog: Catalog;
+	private sfdxScannerPath: string;
 
 	private readonly engines: RuleEngine[];
 	private initialized: boolean;
@@ -30,6 +31,7 @@ export default class LocalCatalog implements RuleCatalog {
 			return;
 		}
 		this.logger = await Logger.child("LocalCatalog");
+		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 
 		for (const engine of this.engines) {
 			await engine.init();
@@ -113,17 +115,17 @@ export default class LocalCatalog implements RuleCatalog {
 		return process.env.CATALOG_FILE || CATALOG_FILE;
 	}
 
-	private static getCatalogPath(): string {
-		return path.join(SFDX_SCANNER_PATH, LocalCatalog.getCatalogName());
+	private getCatalogPath(): string {
+		return path.join(this.sfdxScannerPath, LocalCatalog.getCatalogName());
 	}
 
-	private static async readCatalogJson(): Promise<Catalog> {
-		const rawCatalog = await new FileHandler().readFile(LocalCatalog.getCatalogPath());
+	private async readCatalogJson(): Promise<Catalog> {
+		const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
 		return JSON.parse(rawCatalog);
 	}
 
-	private static async writeCatalogJson(content: Catalog): Promise<void> {
-		return new FileHandler().writeFile(LocalCatalog.getCatalogPath(), JSON.stringify(content, null, 2));
+	private async writeCatalogJson(content: Catalog): Promise<void> {
+		return new FileHandler().writeFile(this.getCatalogPath(), JSON.stringify(content, null, 2));
 	}
 
 	public async getCatalog(): Promise<Catalog> {
@@ -131,7 +133,7 @@ export default class LocalCatalog implements RuleCatalog {
 		if (!this.catalog) {
 			this.logger.trace(`Populating Catalog JSON.`);
 			await this.rebuildCatalogIfNecessary();
-			this.catalog = await LocalCatalog.readCatalogJson();
+			this.catalog = await this.readCatalogJson();
 		}
 		return Promise.resolve(this.catalog);
 	}
@@ -156,7 +158,7 @@ export default class LocalCatalog implements RuleCatalog {
 			catalog.categories.push(...engineCatalog.categories);
 			catalog.rules.push(...engineCatalog.rules);
 		}
-		await LocalCatalog.writeCatalogJson(this.catalog);
+		await this.writeCatalogJson(this.catalog);
 		return Promise.resolve([true, 'rebuilt catalog']);
 	}
 
