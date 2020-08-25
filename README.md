@@ -16,7 +16,7 @@ All the official documentation on the Salesforce CLI Scanner plug-in is hosted o
 https://forcedotcom.github.io/sfdx-scanner/
 
 ### Contributing
-Instructions [here](CONTRIBUTING.MD).
+Instructions [here](CONTRIBUTING.md).
 
 =======
 
