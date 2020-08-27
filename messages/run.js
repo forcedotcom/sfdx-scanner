@@ -35,7 +35,9 @@ module.exports = {
 	"output": {
 		"noViolationsDetected": "No rule violations found.",
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
-		"writtenToOutFile": "Rule violations have been written to %s."
+		"writtenToOutFile": "Rule violations have been written to %s.",
+		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
+		"pleaseSeeAbove": "Please see the logs above."
 	},
 	"examples": `Invoking without specifying any rules causes all rules to be run.
 	E.g., $ sfdx scanner:run --format xml --target "somefile.js"

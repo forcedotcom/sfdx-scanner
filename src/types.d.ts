@@ -32,6 +32,11 @@ export type RuleResult = {
 	violations: RuleViolation[];
 };
 
+export type RecombinedRuleResults = {
+	minSev: number;
+	results: string | {columns; rows}
+};
+
 export type RuleViolation = {
 	line: number;
 	column: number;

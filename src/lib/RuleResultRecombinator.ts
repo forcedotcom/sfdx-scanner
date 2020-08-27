@@ -1,28 +1,52 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {RuleResult, RuleViolation} from '../types';
+import {RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
 import htmlEscaper = require('html-escaper');
 
 export class RuleResultRecombinator {
 
-	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): string | { columns; rows } {
+	public static recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): RecombinedRuleResults {
 		// We need to change the results we were given into the desired final format.
+		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
 			case OUTPUT_FORMAT.JSON:
-				return this.constructJson(results);
+				formattedResults = this.constructJson(results);
+				break;
 			case OUTPUT_FORMAT.CSV:
-				return this.constructCsv(results);
+				formattedResults = this.constructCsv(results);
+				break;
 			case OUTPUT_FORMAT.XML:
-				return this.constructXml(results);
+				formattedResults = this.constructXml(results);
+				break;
 			case OUTPUT_FORMAT.JUNIT:
-				return this.constructJunit(results);
+				formattedResults = this.constructJunit(results);
+				break;
 			case OUTPUT_FORMAT.TABLE:
-				return this.constructTable(results);
+				formattedResults = this.constructTable(results);
+				break;
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
+		return {minSev: this.findMinSev(results), results: formattedResults};
+	}
+
+	private static findMinSev(results: RuleResult[]): number {
+		// If there are no results, then there are no errors.
+		if (!results || results.length === 0) {
+			return 0;
+		}
+		let minSev = null;
+		for (let res of results) {
+			for (let violation of res.violations) {
+				if (!minSev || violation.severity < minSev) {
+					minSev = violation.severity;
+				}
+			}
+		}
+		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
+		return minSev || 0;
 	}
 
 	private static constructXml(results: RuleResult[]): string {

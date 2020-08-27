@@ -1,4 +1,4 @@
-import {Rule} from '../types';
+import {RecombinedRuleResults, Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
 
 export enum OUTPUT_FORMAT {
@@ -17,5 +17,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<string | { columns; rows }>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
 }

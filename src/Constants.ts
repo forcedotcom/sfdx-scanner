@@ -21,3 +21,5 @@ export enum LANGUAGE {
 	PLSQL = 'plsql',
 	TYPESCRIPT = 'typescript'
 }
+
+export const INTERNAL_ERROR_CODE = 500;
