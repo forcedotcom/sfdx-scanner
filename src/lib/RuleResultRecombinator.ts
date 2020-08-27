@@ -38,8 +38,8 @@ export class RuleResultRecombinator {
 			return 0;
 		}
 		let minSev = null;
-		for (let res of results) {
-			for (let violation of res.violations) {
+		for (const res of results) {
+			for (const violation of res.violations) {
 				if (!minSev || violation.severity < minSev) {
 					minSev = violation.severity;
 				}

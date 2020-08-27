@@ -34,7 +34,7 @@ export type RuleResult = {
 
 export type RecombinedRuleResults = {
 	minSev: number;
-	results: string | {columns; rows}
+	results: string | {columns; rows};
 };
 
 export type RuleViolation = {
