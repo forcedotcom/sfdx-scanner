@@ -260,17 +260,19 @@
 					{ data: 'ruleName',
 					    // Convert the ruleName to a hyperlink that displays the rule information
 						'render': function(data, type, row, meta){
-							if(type === 'display'){
+							if(data && type === 'display'){
 								data = '<a href="' + row.url + '" target="__blank">' + data + '</a>';
 							}
 							return data;
 						}
 					},
 					{ data: 'message' },
-					{ data: 'line', className: 'scannerLocation' },
-					{ data: 'column', className: 'scannerLocation' },
-					{ data: 'endLine', className: 'scannerLocation' },
-					{ data: 'endColumn', className: 'scannerLocation' },
+					// 'defaultContent' provides information to the Datatables code in cases where the row
+					// corresponds to something non file location specific. i.e. a tsconfig.json error
+					{ data: 'line', className: 'scannerLocation', defaultContent: ''},
+					{ data: 'column', className: 'scannerLocation', defaultContent: ''},
+					{ data: 'endLine', className: 'scannerLocation', defaultContent: ''},
+					{ data: 'endColumn', className: 'scannerLocation', defaultContent: ''}
 				],
 				'rowCallback': function(row, data, index) {
 					var severity = data['severity'];
