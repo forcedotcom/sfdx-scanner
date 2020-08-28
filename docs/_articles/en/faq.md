@@ -56,3 +56,8 @@ If the language is not already supported, follow the steps in "How do I add a ne
 A: You must:
 - Install the [Salesforce CLI](https://developer.salesforce.com/tools/sfdxcli) on your computer.
 - Use Java v1.8 or later.
+
+#### Q: How can I use `sfdx-scanner` in my CI/CD?
+A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD. You'll also probably want to do the following:
+- Use the `-o/--outfile` flag to write your results to a file, so you'll have an artifact of the results.
+- Use the `-v/--violations-cause-error` flag so violations cause a non-zero exit code, since many CI/CD frameworks care about such things.
