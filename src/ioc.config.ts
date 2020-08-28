@@ -10,14 +10,21 @@ import {RuleManager} from './lib/RuleManager';
 import {RulePathManager} from './lib/RulePathManager';
 import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
+import {ProdOverrides, EnvOverridable} from './Constants';
+
 
 export const Services = {
 	Config: "Config",
 	RuleManager: "RuleManager",
 	RuleEngine: "RuleEngine",
 	RuleCatalog: "RuleCatalog",
-	RulePathManager: "RulePathManager"
+	RulePathManager: "RulePathManager",
+	EnvOverridable: "EnvOverridable"
 };
+
+function setupProd(): void {
+	container.register(Services.EnvOverridable, ProdOverrides);
+}
 
 function registerAll(): void {
 	container.registerSingleton(Services.Config, Config);
@@ -31,8 +38,8 @@ function registerAll(): void {
 
 export const Controller = {
 	container,
-	reset: (): void => {
-		container.reset();
+
+	registerAll: (): void => {
 		registerAll();
 	},
 
@@ -40,6 +47,11 @@ export const Controller = {
 		const config = container.resolve<Config>(Services.Config);
 		await config.init();
 		return config;
+	},
+
+	getSfdxScannerPath: (): string => {
+		const envOverrides = container.resolve<EnvOverridable>(Services.EnvOverridable);
+		return envOverrides.getSfdxScannerPath();
 	},
 
 	createRuleManager: async (): Promise<RuleManager> => {
@@ -55,4 +67,5 @@ export const Controller = {
 	}
 };
 
+setupProd();
 registerAll();
