@@ -122,7 +122,7 @@ export default class Run extends ScannerCommand {
 
 		// We don't yet support running rules against an org, so we'll just throw an error for now.
 		if (this.flags.org) {
-			throw new SfdxError('Running rules against orgs is not yet supported');
+			throw new SfdxError('Running rules against orgs is not yet supported', null, null, this.getInternalErrorCode());
 		}
 
 		// Next, we need to build our input.
@@ -142,7 +142,13 @@ export default class Run extends ScannerCommand {
 		}
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
-		const output: RecombinedRuleResults = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format, engineOptions);
+		let output: RecombinedRuleResults = null;
+		try {
+			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format, engineOptions);
+		} catch (e) {
+			// Rethrow any errors as SFDX errors.
+			throw new SfdxError(e.message || e, null, null, this.getInternalErrorCode());
+		}
 		return this.processOutput(output);
 	}
 
@@ -163,7 +169,7 @@ export default class Run extends ScannerCommand {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env);
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfdxError(messages.getMessage('output.invalidEnvJson'));
+				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, this.getInternalErrorCode());
 			}
 		}
 		return options;
@@ -172,7 +178,7 @@ export default class Run extends ScannerCommand {
 	private validateFlags(): void {
 		// file, --target and --org are mutually exclusive, but they can't all be null.
 		if (!this.args.file && !this.flags.target && !this.flags.org) {
-			throw new SfdxError(messages.getMessage('validations.mustTargetSomething'));
+			throw new SfdxError(messages.getMessage('validations.mustTargetSomething'), null, null, this.getInternalErrorCode());
 		}
 
 		// Be liberal with the user, but do log an info message if they choose a file extension that does not match their format.
@@ -206,7 +212,7 @@ export default class Run extends ScannerCommand {
 		const outfile = this.flags.outfile;
 		const lastPeriod = outfile.lastIndexOf('.');
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'));
+			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, this.getInternalErrorCode());
 		} else {
 			const fileExtension = outfile.slice(lastPeriod + 1);
 			switch (fileExtension) {
@@ -217,7 +223,7 @@ export default class Run extends ScannerCommand {
 				case OUTPUT_FORMAT.XML:
 					return OUTPUT_FORMAT.XML;
 				default:
-					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'));
+					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, this.getInternalErrorCode());
 			}
 		}
 	}
