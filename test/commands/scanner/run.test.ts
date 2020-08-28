@@ -413,7 +413,7 @@ describe('scanner:run', function () {
 				expect(output[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
 				expect(output[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
 				expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
-		}
+			}
 
 			test
 				.stdout()
@@ -621,6 +621,45 @@ describe('scanner:run', function () {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
 					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+				});
+		});
+
+		describe('--violations-cause-error flag', () => {
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'xml',
+					'--violations-cause-error'
+				])
+				.it('When no violations are found, no error is thrown', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should not be present');
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'table',
+					'--violations-cause-error'
+				])
+				.it('When violations are found, an error is thrown', ctx => {
+					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+					// That will leave us with just the rows.
+					const rows = ctx.stdout.trim().split('\n');
+
+					// Assert rows have the right error on the right line.
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:68") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:72") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:76") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(ctx.stderr).to.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should be present');
 				});
 		});
 

@@ -163,49 +163,49 @@ describe('RuleManager', () => {
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['js'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
 					} else {
-						results = JSON.parse(output);
+						parsedRes = JSON.parse(results);
 					}
 
-					expect(results).to.be.an("array").that.has.length(1);
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+					expect(parsedRes).to.be.an("array").that.has.length(1);
+					for (const res of parsedRes) {
+						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 
 				it('TS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
 					} else {
-						results = JSON.parse(output);
+						parsedRes = JSON.parse(results);
 					}
 
-					expect(results).to.be.an("array").that.has.length(1);
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+					expect(parsedRes).to.be.an("array").that.has.length(1);
+					for (const res of parsedRes) {
+						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 
 				it('App project files', async () => {
 
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const output = await ruleManager.runRulesMatchingCriteria([], ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
 					} else {
-						results = JSON.parse(output);
+						parsedRes = JSON.parse(results);
 					}
-					expect(results).to.be.an("array").that.has.length(8);
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					expect(parsedRes).to.be.an("array").that.has.length(8);
+					for (const res of parsedRes) {
+						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 			});
@@ -216,17 +216,17 @@ describe('RuleManager', () => {
 					const filters = [
 						new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
 					} else {
-						results = JSON.parse(output);
+						parsedRes = JSON.parse(results);
 					}
 
-					expect(results, JSON.stringify(results)).to.be.an("array").that.has.length(3);
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(3);
+					for (const res of parsedRes) {
+						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 
@@ -234,17 +234,17 @@ describe('RuleManager', () => {
 					// Set up our filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Error Prone'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					let results = null;
-					if (typeof output !== "string") {
-						expect(false, `Invalid output: ${output}`);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
 					} else {
-						results = JSON.parse(output);
+						parsedRes = JSON.parse(results);
 					}
 
-					expect(results).to.be.an("array").that.has.length(6);
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+					expect(parsedRes).to.be.an("array").that.has.length(6);
+					for (const res of parsedRes) {
+						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 			});
@@ -254,9 +254,9 @@ describe('RuleManager', () => {
 					// Define our preposterous filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
-					const output = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-					expect(typeof output).to.equal('string', `Output ${output} should have been a string`);
-					expect(output).to.equal('', `Output ${output} should have been an empty string`);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
+					expect(results).to.equal('', `Output ${results} should have been an empty string`);
 				});
 			});
 		});

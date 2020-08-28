@@ -28,7 +28,7 @@ const allFakeRuleResults: RuleResult[] = [
 		violations: [{
 			"line": 4,
 			"column": 11,
-			"severity": 2,
+			"severity": 1,
 			"message": "'unusedParam' is defined but never used.",
 			"ruleName": "no-unused-vars",
 			"category": "Variables",
@@ -142,13 +142,14 @@ describe('RuleResultRecombinator', () => {
 				const someFakeResults = [allFakeRuleResults[0]];
 
 				// Create our reformatted results.
-				const results = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1], [1]);
+					expect(minSev).to.equal(2, 'Most severe problem should have been level 2');
 				}
 			});
 
@@ -157,25 +158,27 @@ describe('RuleResultRecombinator', () => {
 				const someFakeResults = [allFakeRuleResults[1]];
 
 				// Create our reformatted results.
-				const results = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile2], [2]);
+					expect(minSev).to.equal(1, 'Most severe problem should have been level 1');
 				}
 			});
 
 			it('Properly handles multiple files with multiple violations', async () => {
 				// Create our reformatted results from the entire sample.
-				const results = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
 				} else {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1, sampleFile2, sampleFile3], [1, 2, 3]);
+					expect(minSev).to.equal(1, 'Most severe problem should have been level 1');
 				}
 			});
 		});

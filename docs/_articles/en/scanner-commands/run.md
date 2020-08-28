@@ -22,6 +22,7 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|ju
   -o, --outfile=outfile			Write output to a file
   -r, --ruleset=ruleset			[Deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
   -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
+  -v, --violations-cause-error				When violations are detected, exit with code equal to the severity of the most severe violation.
   --tsconfig				tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
   --env 				JSON-formatted string that overrides ESLint's default environmental variables.
   --json				Format output as json
