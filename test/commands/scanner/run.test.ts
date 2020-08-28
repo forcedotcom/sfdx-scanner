@@ -569,7 +569,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('--throw-err-for-violations flag', () => {
+		describe('--violations-cause-error flag', () => {
 
 			runTest
 				.stdout()
@@ -578,7 +578,7 @@ describe('scanner:run', function () {
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'xml',
-					'--throw-err-for-violations'
+					'--violations-cause-error'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
@@ -592,7 +592,7 @@ describe('scanner:run', function () {
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
 					'--format', 'table',
-					'--throw-err-for-violations'
+					'--violations-cause-error'
 				])
 				.it('When violations are found, an error is thrown', ctx => {
 					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.

@@ -24,7 +24,9 @@ module.exports = {
 		"envDescriptionLong": "JSON-formatted string. Overrides ESLint's default environmental variables.",
 		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
 		"tsconfigDescription": "Location of tsconfig.json file",
-		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine."
+		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
+		"vceDescription": "Throws an error when violations are detected",
+		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation."
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
@@ -59,5 +61,9 @@ module.exports = {
 	Use --env to override the default ESLint environment variables to add frameworks.
 		E.g., $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 			Evaluates rules against somefile.js, including Jasmine in the environment variables.
+	
+	Use --violations-cause-error to throw exit with a non-zero code when violations are found.
+		E.g., $ sfdx scanner:run --target "somefile.js" --violations-cause-error
+			Evaluates rules against somefile.js. If any rules are violated, the exit code will be the severity of the most severe violation.
 `
 };

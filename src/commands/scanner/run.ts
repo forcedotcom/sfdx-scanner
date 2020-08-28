@@ -108,10 +108,10 @@ export default class Run extends ScannerCommand {
 				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
-		"throw-err-for-violations": flags.boolean({
-			char: 'e',
-			description: 'TODO: Populate this description',
-			longDescription: 'TODO: Populate this description too',
+		"violations-cause-error": flags.boolean({
+			char: 'v',
+			description: messages.getMessage('flags.vceDescription'),
+			longDescription: messages.getMessage('flags.vceDescriptionLong'),
 			exclusive: ['json']
 		})
 	};
@@ -238,7 +238,7 @@ export default class Run extends ScannerCommand {
 	}
 
 	private getInternalErrorCode(): number {
-		return this.flags['throw-err-for-violations'] ? INTERNAL_ERROR_CODE : 1;
+		return this.flags['violations-cause-error'] ? INTERNAL_ERROR_CODE : 1;
 	}
 
 	private writeToOutfile(minSev: number, results: string | {columns; rows}): AnyJson {
@@ -250,7 +250,7 @@ export default class Run extends ScannerCommand {
 		}
 		// Afterwards, we need to build a message saying that we wrote to the correct file.
 		const outfileMsg = messages.getMessage('output.writtenToOutFile', [this.flags.outfile]);
-		if (minSev > 0 && this.flags['throw-err-for-violations']) {
+		if (minSev > 0 && this.flags['violations-cause-error']) {
 			// If the user gave us the flag to throw errors when we find violations, we should prefix the message with
 			// one about the errors we found, and throw the whole thing as an exception.
 			const errMsg = messages.getMessage('output.sevDetectionSummary', [minSev]) + ' ' + outfileMsg;
@@ -292,7 +292,7 @@ export default class Run extends ScannerCommand {
 		// Now that we've displayed the results, we need to figure out what to return. If the flag for throwing an error
 		// in response to violations is present, we'll need to do that. Otherwise, we need to return some value to be used
 		// by the --json flag.
-		if (this.flags['throw-err-for-violations'] && minSev > 0) {
+		if (this.flags['violations-cause-error'] && minSev > 0) {
 			// When the error flag is active, we need to throw an error. So generate the message and throw it.
 			const errMsg = messages.getMessage('output.sevDetectionSummary', [minSev])
 				+ ' ' + messages.getMessage('output.pleaseSeeAbove');
