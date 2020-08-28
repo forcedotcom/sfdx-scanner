@@ -568,7 +568,7 @@ describe('scanner:run', function () {
 
 		describe('--violations-cause-error flag', () => {
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -579,10 +579,10 @@ describe('scanner:run', function () {
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
-					expect(ctx.stderr).to.equal('', 'Should be no errors');
+					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should not be present');
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
