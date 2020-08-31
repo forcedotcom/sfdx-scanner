@@ -6,7 +6,7 @@ import {RulePathManager} from './RulePathManager';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import * as PrettyPrinter from './util/PrettyPrinter';
-import { Controller } from '../ioc.config';
+import { Controller } from '../Controller';
 
 export type RulePathEntry = Map<string, Set<string>>;
 export type RulePathMap = Map<string, RulePathEntry>;

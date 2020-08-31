@@ -32,4 +32,13 @@ export enum LANGUAGE {
 	TYPESCRIPT = 'typescript'
 }
 
+export const Services = {
+	Config: "Config",
+	RuleManager: "RuleManager",
+	RuleEngine: "RuleEngine",
+	RuleCatalog: "RuleCatalog",
+	RulePathManager: "RulePathManager",
+	EnvOverridable: "EnvOverridable"
+};
+
 export const INTERNAL_ERROR_CODE = 500;

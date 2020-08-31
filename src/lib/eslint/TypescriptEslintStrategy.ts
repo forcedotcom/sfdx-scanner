@@ -3,7 +3,7 @@ import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {Config} from '../util/Config';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 

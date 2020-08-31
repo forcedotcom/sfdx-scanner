@@ -6,7 +6,7 @@ import {PmdEngine} from '../../src/lib/pmd/PmdEngine';
 import {FileHandler} from '../../src/lib/util/FileHandler';
 import path = require('path');
 import Sinon = require('sinon');
-import { Controller } from '../../src/ioc.config';
+import { Controller } from '../../src/Controller';
 
 /**
  * Unit tests to verify CustomRulePathManager

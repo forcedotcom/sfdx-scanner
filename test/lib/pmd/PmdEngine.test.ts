@@ -4,12 +4,11 @@ import {RuleResult} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
 import Sinon = require('sinon');
-import {container} from 'tsyringe'
-import {Services} from '../../../src/ioc.config';
-import {RuleEngine} from '../../../src/lib/services/RuleEngine'
 import {PmdEngine}  from '../../../src/lib/pmd/PmdEngine'
 import {uxEvents} from '../../../src/lib/ScannerEvents';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
+TestOverrides.initializeTestSetup();
 class TestPmdEngine extends PmdEngine {
 	public processStdOut(stdout: string): RuleResult[] {
 		return super.processStdOut(stdout);
@@ -21,9 +20,6 @@ describe('PmdEngine', () => {
 
 	before(async () => {
 		Sinon.createSandbox();
-		// Bootstrap the container.
-		// Avoids 'Cannot register a type name as a singleton without a 'to' token' exception
-		container.resolveAll<RuleEngine>(Services.RuleEngine);
 
 		await testPmdEngine.init();
 	});

@@ -1,5 +1,5 @@
 import {Config} from '../util/Config';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {LANGUAGE} from '../../Constants'
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';

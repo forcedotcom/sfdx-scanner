@@ -1,6 +1,10 @@
 import {SfdxCommand} from '@salesforce/command';
 import {FilterType, RuleFilter} from './RuleFilter';
 import {uxEvents} from './ScannerEvents';
+import {initContainer} from '../ioc.config';
+
+// Bootstrap the ioc container
+initContainer();
 
 export abstract class ScannerCommand extends SfdxCommand {
 

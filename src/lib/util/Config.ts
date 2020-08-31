@@ -3,7 +3,7 @@ import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
 
 export type ConfigContent = {
 	javaHome?: string;

@@ -1,6 +1,6 @@
 import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Controller} from '../../src/ioc.config';
+import {Controller} from '../../src/Controller';
 import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
 import LocalCatalog from '../../src/lib/services/LocalCatalog';

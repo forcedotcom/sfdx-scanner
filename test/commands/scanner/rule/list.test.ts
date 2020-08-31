@@ -4,7 +4,7 @@ import {Rule} from '../../../../src/types';
 import {CATALOG_FILE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
-import { Controller } from '../../../../src/ioc.config';
+import { Controller } from '../../../../src/Controller';
 import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectory(__dirname);
@@ -108,7 +108,7 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by ruleset only', () => {
-			
+
 			test
 			.stdout()
 			.stderr()

@@ -3,7 +3,7 @@ import Sinon = require('sinon');
 import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/lib/eslint/TypescriptEslintStrategy';
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import * as path from 'path';
-import {Controller} from '../../../src/ioc.config';
+import {Controller} from '../../../src/Controller';
 import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
 import fs = require('fs');

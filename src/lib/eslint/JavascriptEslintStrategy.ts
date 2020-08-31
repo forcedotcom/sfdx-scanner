@@ -1,7 +1,7 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {TYPESCRIPT_RULE_PREFIX, ENGINE, LANGUAGE} from '../../Constants';
 import {Config} from '../util/Config';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import { Logger } from '@salesforce/core';
 
 const ES_CONFIG = {

@@ -1,6 +1,6 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import {Controller} from '../../../../src/ioc.config';
+import {Controller} from '../../../../src/Controller';
 import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import { CUSTOM_PATHS_FILE } from '../../../../src/Constants';
 import fs = require('fs');

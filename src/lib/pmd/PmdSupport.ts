@@ -2,7 +2,7 @@ import childProcess = require('child_process');
 import path = require('path');
 import {AsyncCreatable} from '@salesforce/kit';
 import {ChildProcessWithoutNullStreams} from 'child_process';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
 
 export const PMD_VERSION = '6.22.0';

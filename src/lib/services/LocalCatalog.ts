@@ -9,7 +9,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
 import {RuleCatalog} from './RuleCatalog';
 import {RuleEngine} from './RuleEngine';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
 
 @injectable()
 export default class LocalCatalog implements RuleCatalog {
