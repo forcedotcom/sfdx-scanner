@@ -7,7 +7,7 @@ describe('scanner:rule:describe', () => {
 	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
-		describe('Test Case: No matching rules', () => {
+		it('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
 			test
 				.stdout() // Adds stdout to the test's context object.
@@ -29,7 +29,7 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		describe('Test Case: One matching rule', () => {
+		it('Test Case: One matching rule', () => {
 			test
 				.stdout()
 				.stderr()
@@ -60,7 +60,7 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		describe('Test Case: Multiple matching rules', () => {
+		it('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.output.multipleMatchingRules
 				.replace('{0}', '2')
@@ -99,7 +99,7 @@ describe('scanner:rule:describe', () => {
 			 */
 		});
 
-		describe('Error handling', () => {
+		it('Error handling', () => {
 			test
 				.stdout() // Adds stdout to the test's context object.
 				.stderr() // Adds stderr to the test's context object.

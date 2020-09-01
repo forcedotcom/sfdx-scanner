@@ -6,7 +6,7 @@ import {PmdEngine} from '../../src/lib/pmd/PmdEngine';
 import {FileHandler} from '../../src/lib/util/FileHandler';
 import path = require('path');
 import Sinon = require('sinon');
-import { Controller } from '../../src/ioc.config';
+import { Controller } from '../../src/Controller';
 
 /**
  * Unit tests to verify CustomRulePathManager
@@ -40,7 +40,7 @@ describe('CustomRulePathManager tests', () => {
 				const manager = await Controller.createRulePathManager();
 
 				// Execute test
-				const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+				const rulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 				// Validate run
 				expect(readStub.calledOnce).to.be.true;
@@ -63,9 +63,9 @@ describe('CustomRulePathManager tests', () => {
 				const manager = await Controller.createRulePathManager();
 
 				// Execute test
-				await manager.getRulePathEntries(PmdEngine.NAME);
+				await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 				// Rerun same end point again. This time, it shouldn't have read file
-				await manager.getRulePathEntries(PmdEngine.NAME);
+				await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 				// Validate
 				expect(readStub.calledOnce).to.be.true;
@@ -77,7 +77,7 @@ describe('CustomRulePathManager tests', () => {
 			const readStub = Sinon.stub(CustomRulePathManager.prototype, 'readRulePathFile').resolves(emptyFile);
 			try {
 				const manager = await Controller.createRulePathManager();
-				const rulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+				const rulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 				expect(readStub.calledOnce).to.be.true;
 				expect(rulePathMap).is.not.null;
@@ -123,9 +123,9 @@ describe('CustomRulePathManager tests', () => {
 					const paths = ['/absolute/path/to/SomeJar.jar', '/another/absolute/path/to/AnotherJar.jar'];
 
 					// Execute test - fetch original state of Map, add entries, check state of updated Map
-					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 					await manager.addPathsForLanguage(language, paths);
-					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 					// Validate
 					expect(originalRulePathMap).to.be.empty;
@@ -150,7 +150,7 @@ describe('CustomRulePathManager tests', () => {
 					const newPaths = ['/absolute/path/to/SomeJar.jar', '/different/absolute/path/to/OtherJar.jar'];
 
 					// Execute test
-					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 					// Pre-validate to make sure test setup is alright, before proceeding
 					expect(originalRulePathMap).has.keys([language]);
 					const originalPathEntries = originalRulePathMap.get(language);
@@ -158,7 +158,7 @@ describe('CustomRulePathManager tests', () => {
 					// Now add more entries to same language
 					await manager.addPathsForLanguage(language, newPaths);
 					// Fetch updated Map to validate
-					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 					// Validate
 					const updatedPathEntries = updatedRulePathMap.get(language);
@@ -198,9 +198,9 @@ describe('CustomRulePathManager tests', () => {
 					const paths = ['path1', 'path2'];
 
 					// Execute test - fetch original state of Map, add entries, check state of updated Map
-					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 					await manager.addPathsForLanguage(language, paths);
-					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 					// Validate
 					expect(originalRulePathMap).to.be.empty;
@@ -227,7 +227,7 @@ describe('CustomRulePathManager tests', () => {
 					const newPath = '/my/new/path';
 
 					// Execute test
-					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 					// Pre-validate to make sure test setup is alright, before proceeding
 					expect(originalRulePathMap).has.keys([language]);
 					const originalPathEntries = originalRulePathMap.get(language);
@@ -235,7 +235,7 @@ describe('CustomRulePathManager tests', () => {
 					// Now add more entries to same language
 					await manager.addPathsForLanguage(language, [newPath]);
 					// Fetch updated Map to validate
-					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);
+					const updatedRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 
 					// Validate
 					const updatedPathEntries = updatedRulePathMap.get(language);

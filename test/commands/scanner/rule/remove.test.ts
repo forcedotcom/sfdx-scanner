@@ -1,6 +1,6 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import {Controller} from '../../../../src/ioc.config';
+import {Controller} from '../../../../src/Controller';
 import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import { CUSTOM_PATHS_FILE } from '../../../../src/Constants';
 import fs = require('fs');
@@ -38,7 +38,7 @@ describe('scanner:rule:remove', () => {
 	});
 
 	describe('E2E', () => {
-		describe('Dry-Run (omitting --path parameter)', () => {
+		it('Dry-Run (omitting --path parameter)', () => {
 			removeTest
 				.stdout()
 				.stderr()
@@ -52,7 +52,7 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('Rule Removal', () => {
-			describe('Test Case: Removing a single PMD JAR', () => {
+			it('Test Case: Removing a single PMD JAR', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -76,7 +76,7 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			describe('Test Case: Removing multiple PMD JARs', () => {
+			it('Test Case: Removing multiple PMD JARs', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -100,7 +100,7 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			describe('Test Case: Removing an entire folder of PMD JARs', () => {
+			it('Test Case: Removing an entire folder of PMD JARs', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -124,7 +124,7 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			describe('Edge Case: Provided path is not registered as a custom rule', () => {
+			it('Edge Case: Provided path is not registered as a custom rule', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -141,7 +141,7 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('User prompt', () => {
-			describe('Test Case: User chooses to abort transaction instead of confirming', () => {
+			it('Test Case: User chooses to abort transaction instead of confirming', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -158,7 +158,7 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			describe('Test Case: User uses --force flag to skip confirmation prompt', () => {
+			it('Test Case: User uses --force flag to skip confirmation prompt', () => {
 				removeTest
 					.stdout()
 					.stderr()
@@ -182,7 +182,7 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('Validations', () => {
-			describe('Path validations', () => {
+			it('Path validations', () => {
 				// Test for failure scenario doesn't need to do any special setup or cleanup.
 				removeTest
 					.stdout()

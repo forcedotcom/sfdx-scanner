@@ -1,7 +1,7 @@
 import {flags, SfdxCommand} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import path = require('path');
 import untildify = require('untildify');
 

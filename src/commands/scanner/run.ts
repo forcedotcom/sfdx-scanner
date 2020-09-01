@@ -3,7 +3,7 @@ import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
 import {INTERNAL_ERROR_CODE} from '../../Constants';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';

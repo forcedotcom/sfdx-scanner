@@ -4,7 +4,7 @@ import {Rule} from '../../../../src/types';
 import {CATALOG_FILE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
-import { Controller } from '../../../../src/ioc.config';
+import { Controller } from '../../../../src/Controller';
 import { Messages } from '@salesforce/core';
 
 Messages.importMessagesDirectory(__dirname);
@@ -24,7 +24,7 @@ describe('scanner:rule:list', () => {
 	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
-		describe('Test Case: No filters applied', () => {
+		it('Test Case: No filters applied', () => {
 			test
 				.stdout()
 				.stderr()
@@ -61,7 +61,7 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		describe('Test Case: Filtering by category only', () => {
+		it('Test Case: Filtering by category only', () => {
 			test
 				.stdout()
 				.stderr()
@@ -107,8 +107,8 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		describe('Test Case: Filtering by ruleset only', () => {
-			
+		it('Test Case: Filtering by ruleset only', () => {
+
 			test
 			.stdout()
 			.stderr()
@@ -157,7 +157,7 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		describe('Test Case: Filtering by language only', () => {
+		it('Test Case: Filtering by language only', () => {
 			test
 				.stdout()
 				.stderr()
@@ -197,7 +197,7 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		describe('Test Case: Applying multiple filter types', () => {
+		it('Test Case: Applying multiple filter types', () => {
 			test
 				.stdout()
 				.stderr()
@@ -218,7 +218,7 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		describe('Edge Case: No rules match criteria', () => {
+		it('Edge Case: No rules match criteria', () => {
 			test
 				.stdout()
 				.stderr()

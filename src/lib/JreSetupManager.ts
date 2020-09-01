@@ -1,6 +1,6 @@
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
-import {Controller} from '../ioc.config';
+import {Controller} from '../Controller';
 
 import process = require('process');
 import findJavaHome = require('find-java-home');

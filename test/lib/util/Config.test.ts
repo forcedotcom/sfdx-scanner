@@ -6,7 +6,7 @@ import {CONFIG_FILE, ENGINE} from '../../../src/Constants'
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {Messages} from '@salesforce/core';
 import { fail } from 'assert';
-import { Controller } from '../../../src/ioc.config';
+import { Controller } from '../../../src/Controller';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 // Initialize Messages with the current plugin directory
@@ -37,7 +37,7 @@ describe('Config.js tests', () => {
 		afterEach(() => {
 			Sinon.restore();
 		});
-	
+
 		it('should create new file if Config.json does not exist', async () => {
 			const existsStub = Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
 			const makeDirStub = Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves();
@@ -45,12 +45,12 @@ describe('Config.js tests', () => {
 
 			const config = new Config();
 			await config.init();
-			
+
 			expect(existsStub.calledWith(configFilePath)).is.true;
 			expect(makeDirStub.calledWith(SFDX_SCANNER_PATH)).is.true;
 			expect(writeFileStub.calledWith(configFilePath)).is.true;
 		});
-	
+
 		it('should initialize with existing config file if available', async () => {
 			Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 			Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(testConfig));
@@ -61,7 +61,7 @@ describe('Config.js tests', () => {
 			const javaHome = config.getJavaHome();
 			expect(javaHome).equals(testConfig.javaHome);
 		});
-	
+
 		it('should fetch config value if available', async () => {
 			const config = await createConfig(testConfig);
 
@@ -69,7 +69,7 @@ describe('Config.js tests', () => {
 			const targetPatterns = await config.getTargetPatterns(ENGINE.PMD);
 			expect(targetPatterns).deep.equals(testConfig.engines[0].targetPatterns);
 		});
-	
+
 		it('should get default value if config value is empty', async () => {
 			const config = await createConfig(testConfig);
 
@@ -111,6 +111,16 @@ describe('Config.js tests', () => {
 			expect(actualTargetPatterns).deep.equals(expectedTargetPatterns);
 
 		});
+
+		it ('Test default enabled engines', async() => {
+			const config = new Config();
+			await config.init();
+
+			expect(config.isEngineEnabled(ENGINE.PMD)).to.be.true;
+			expect(config.isEngineEnabled(ENGINE.ESLINT)).to.be.true;
+			expect(config.isEngineEnabled(ENGINE.ESLINT_LWC)).to.be.false;
+			expect(config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT)).to.be.true;
+		});
 	});
 
 	describe('Verifying typeCheckers', () => {
@@ -137,7 +147,7 @@ describe('Config.js tests', () => {
 				} catch (error) {
 					expect(error.message).equals(configMessages.getMessage('InvalidStringArrayValue', ['targetPatterns', 'pmd', invalidUserConfig.engines[0].targetPatterns]));
 				}
-				
+
 			});
 
 			it('should fail for a value that is an array but not an array of string', async () => {
@@ -158,7 +168,7 @@ describe('Config.js tests', () => {
 				} catch (error) {
 					expect(error.message).equals(configMessages.getMessage('OnlyStringAllowedInStringArray', ['targetPatterns', 'pmd', String(invalidUserConfig.engines[0].targetPatterns)]));
 				}
-				
+
 			});
 
 		});
@@ -169,7 +179,7 @@ describe('Config.js tests', () => {
 async function createConfig(testConfig: Object, stubWrite: boolean = true) {
 	Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 	Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(testConfig));
-	
+
 	if (stubWrite) {
 		Sinon.stub(FileHandler.prototype, 'writeFile').resolves();
 	}

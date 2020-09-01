@@ -1,7 +1,7 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
-import {inject, injectable, injectAll} from 'tsyringe';
+import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
@@ -9,6 +9,7 @@ import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
+import {Controller} from '../Controller';
 import globby = require('globby');
 import picomatch = require('picomatch');
 import path = require('path');
@@ -18,16 +19,14 @@ export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
 
 	// noinspection JSMismatchedCollectionQueryUpdate
-	private readonly engines: RuleEngine[];
+	private engines: RuleEngine[];
 	private readonly catalog: RuleCatalog;
 	private fileHandler: FileHandler;
 	private initialized: boolean;
 
 	constructor(
-		@injectAll("RuleEngine") engines?: RuleEngine[],
 		@inject("RuleCatalog") catalog?: RuleCatalog
 	) {
-		this.engines = engines;
 		this.catalog = catalog;
 	}
 
@@ -37,9 +36,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 		this.logger = await Logger.child('DefaultManager');
 		this.fileHandler = new FileHandler();
-		for (const engine of this.engines) {
-			await engine.init();
-		}
+		this.engines = await Controller.getEnabledEngines();
 		await this.catalog.init();
 
 		this.initialized = true;

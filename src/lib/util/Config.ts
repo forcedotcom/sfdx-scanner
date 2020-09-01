@@ -3,7 +3,7 @@ import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -34,6 +34,14 @@ export const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.js",
 				"!**/node_modules/**",
 			]
+		},
+		{
+			name: ENGINE.ESLINT_LWC,
+			targetPatterns: [
+					"**/*.js",
+					"!**/node_modules/**",
+			],
+			disabled: true
 		},
 		{
             name: ENGINE.ESLINT_TYPESCRIPT,
@@ -106,15 +114,15 @@ export class Config {
 
 	// FIXME: Not supported yet - the logic is not hooked up to the actual call
 	// Leaving this as-is instead of moving to getConfigValue() style
-	public isEngineEnabled(name: string): boolean {
+	public isEngineEnabled(engine: ENGINE): boolean {
 		if (!this.configContent.engines) {
 			// Fast exit.  No definitions means all enabled.
 			return true;
 		}
 
-		const e = this.configContent.engines.find(e => e.name === name);
+		const e = this.getEngineConfig(engine);
 		// No definition means enabled by default.  Must explicitly disable.
-		return !e || e.disabled;
+		return !e || !e.disabled;
 	}
 
 	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
