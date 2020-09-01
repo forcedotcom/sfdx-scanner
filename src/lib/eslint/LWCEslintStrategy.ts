@@ -64,7 +64,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 		const url: string = ruleViolation.url || '';
 		const repoName = 'eslint-plugin-lwc';
 
-		if (url.indexOf(repoName) !== -1) {
+		if (url.includes(repoName)) {
 			// The meta.docs.url parameter for eslint-lwc is incorrect. It contains '.git' in the command line and is missing the 'v' for version
 			// https://github.com/salesforce/eslint-plugin-lwc.git/blob/0.10.0/docs/rules/no-unknown-wire-adapters.md to
 			// https://github.com/salesforce/eslint-plugin-lwc/blob/v0.10.0/docs/rules/no-unknown-wire-adapters.md

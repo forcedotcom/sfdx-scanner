@@ -57,6 +57,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return paths;
 	}
 
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
 		// Intentionally left blank
 	}
