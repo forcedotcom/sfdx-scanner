@@ -1,6 +1,6 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {injectable, injectAll} from 'tsyringe';
+import {injectable} from 'tsyringe';
 import {CATALOG_FILE} from '../../Constants';
 import {Catalog, Rule, RuleEvent, RuleGroup} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
@@ -19,12 +19,8 @@ export default class LocalCatalog implements RuleCatalog {
 	private catalog: Catalog;
 	private sfdxScannerPath: string;
 
-	private readonly engines: RuleEngine[];
+	private engines: RuleEngine[];
 	private initialized: boolean;
-
-	constructor(@injectAll("RuleEngine") engines?: RuleEngine[]) {
-		this.engines = engines;
-	}
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -32,10 +28,7 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 		this.logger = await Logger.child("LocalCatalog");
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
-
-		for (const engine of this.engines) {
-			await engine.init();
-		}
+		this.engines = await Controller.getEnabledEngines();
 
 		this.outputProcessor = await OutputProcessor.create({}); // TODO should be an injected service
 		this.catalog = await this.getCatalog();

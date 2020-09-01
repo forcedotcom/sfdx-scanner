@@ -17,7 +17,8 @@ const ES_CONFIG = {
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
-	private static ENGINE_NAME = ENGINE.ESLINT.valueOf();
+	private static THIS_ENGINE = ENGINE.ESLINT;
+	private static ENGINE_NAME = JavascriptEslintStrategy.THIS_ENGINE.valueOf();
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
@@ -34,7 +35,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
+		return this.config.isEngineEnabled(JavascriptEslintStrategy.THIS_ENGINE);
 	}
 
 	getLanguages(): string[] {

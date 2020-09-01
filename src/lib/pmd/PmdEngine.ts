@@ -26,7 +26,8 @@ interface PmdViolation extends Element {
 }
 
 export class PmdEngine implements RuleEngine {
-	public static NAME: string = ENGINE.PMD.valueOf();
+	private static THIS_ENGINE = ENGINE.PMD;
+	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
 
 	private logger: Logger;
 	private config: Config;
@@ -35,7 +36,7 @@ export class PmdEngine implements RuleEngine {
 	private initialized: boolean;
 
 	public getName(): string {
-		return PmdEngine.NAME;
+		return PmdEngine.ENGINE_NAME;
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
@@ -60,7 +61,7 @@ export class PmdEngine implements RuleEngine {
 	}
 
 	public isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
+		return this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
 	}
 
 	getCatalog(): Promise<Catalog> {
@@ -134,7 +135,7 @@ export class PmdEngine implements RuleEngine {
 		return files.map(
 			(f): RuleResult => {
 				return {
-					engine: PmdEngine.NAME,
+					engine: PmdEngine.ENGINE_NAME,
 					fileName: f.attributes['name'],
 					violations: f.elements.map(
 						(v: PmdViolation) => {

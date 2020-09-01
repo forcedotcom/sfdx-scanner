@@ -106,15 +106,15 @@ export class Config {
 
 	// FIXME: Not supported yet - the logic is not hooked up to the actual call
 	// Leaving this as-is instead of moving to getConfigValue() style
-	public isEngineEnabled(name: string): boolean {
+	public isEngineEnabled(engine: ENGINE): boolean {
 		if (!this.configContent.engines) {
 			// Fast exit.  No definitions means all enabled.
 			return true;
 		}
 
-		const e = this.configContent.engines.find(e => e.name === name);
+		const e = this.getEngineConfig(engine);
 		// No definition means enabled by default.  Must explicitly disable.
-		return !e || e.disabled;
+		return !e || !e.disabled;
 	}
 
 	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {

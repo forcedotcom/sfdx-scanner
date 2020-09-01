@@ -41,7 +41,8 @@ const ES_PLUS_TS_CONFIG = {
 const TS_CONFIG = 'tsconfig.json';
 
 export class TypescriptEslintStrategy implements EslintStrategy {
-	private static ENGINE_NAME = ENGINE.ESLINT_TYPESCRIPT.valueOf();
+	private static THIS_ENGINE = ENGINE.ESLINT_TYPESCRIPT;
+	private static ENGINE_NAME = TypescriptEslintStrategy.THIS_ENGINE.valueOf();
 	private static LANGUAGES = [LANGUAGE.TYPESCRIPT];
 
 	private initialized: boolean;
@@ -62,7 +63,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
+		return this.config.isEngineEnabled(TypescriptEslintStrategy.THIS_ENGINE);
 	}
 
 	getName(): string {

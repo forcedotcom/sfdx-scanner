@@ -111,6 +111,15 @@ describe('Config.js tests', () => {
 			expect(actualTargetPatterns).deep.equals(expectedTargetPatterns);
 
 		});
+
+		it ('Test default enabled engines', async() => {
+			const config = new Config();
+			await config.init();
+
+			expect(config.isEngineEnabled(ENGINE.PMD)).to.be.true;
+			expect(config.isEngineEnabled(ENGINE.ESLINT)).to.be.true;
+			expect(config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT)).to.be.true;
+		});
 	});
 
 	describe('Verifying typeCheckers', () => {

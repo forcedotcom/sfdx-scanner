@@ -15,7 +15,7 @@ describe('scanner:rule:add', () => {
 
 	describe('E2E', () => {
 		const myLanguage = 'apex';
-		describe('Test Case: Adding individual JARs', () => {
+		it('Test Case: Adding individual JARs', () => {
 			// Create four temporary directories, each having a single JAR.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -85,7 +85,7 @@ describe('scanner:rule:add', () => {
 		});
 
 
-		describe('Test Case: Adding all JARs in a folder', () => {
+		it('Test Case: Adding all JARs in a folder', () => {
 			// Create two temporary directories, each containing three JARs.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -155,7 +155,7 @@ describe('scanner:rule:add', () => {
 	});
 
 	describe('Validations', () => {
-		describe('Language validations', () => {
+		it('Language validations', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			test
 				.stdout()
@@ -175,7 +175,7 @@ describe('scanner:rule:add', () => {
 				});
 		});
 
-		describe('Path validations', () => {
+		it('Path validations', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			test
 				.stdout()
