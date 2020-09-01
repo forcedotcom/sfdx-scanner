@@ -1,7 +1,6 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {TYPESCRIPT_RULE_PREFIX, ENGINE, LANGUAGE} from '../../Constants';
-import {Config} from '../util/Config';
-import {Controller} from '../../Controller';
+import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 
 const ES_CONFIG = {
@@ -17,33 +16,25 @@ const ES_CONFIG = {
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
-	private static THIS_ENGINE = ENGINE.ESLINT;
-	private static ENGINE_NAME = JavascriptEslintStrategy.THIS_ENGINE.valueOf();
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
 	protected logger: Logger;
-	private config: Config;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
-		this.logger = await Logger.child(this.getName());
-		this.config = await Controller.getConfig();
+		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.initialized = true;
-	}
-
-	isEnabled(): boolean {
-		return this.config.isEngineEnabled(JavascriptEslintStrategy.THIS_ENGINE);
 	}
 
 	getLanguages(): string[] {
 		return JavascriptEslintStrategy.LANGUAGES;
 	}
 
-	getName(): string {
-		return JavascriptEslintStrategy.ENGINE_NAME;
+	getEngine(): ENGINE {
+		return ENGINE.ESLINT;
 	}
 
 	isRuleKeySupported(key: string): boolean {
@@ -66,13 +57,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return paths;
 	}
 
-	async getTargetPatterns(): Promise<string[]> {
-
-		// TODO: extract target patterns from overridden config, if available
-		return this.config.getTargetPatterns(ENGINE.ESLINT);
-	}
-
-	convertLintMessage(fileName: string, message: string): string {
-		return message;
+	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
+		// Intentionally left blank
 	}
 }

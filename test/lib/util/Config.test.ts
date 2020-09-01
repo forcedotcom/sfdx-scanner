@@ -118,6 +118,7 @@ describe('Config.js tests', () => {
 
 			expect(config.isEngineEnabled(ENGINE.PMD)).to.be.true;
 			expect(config.isEngineEnabled(ENGINE.ESLINT)).to.be.true;
+			expect(config.isEngineEnabled(ENGINE.ESLINT_LWC)).to.be.false;
 			expect(config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT)).to.be.true;
 		});
 	});

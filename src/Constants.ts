@@ -16,11 +16,13 @@ export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
 export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
+export const LWC_RULE_PREFIX = '@lwc';
 export const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
 export enum ENGINE {
 	PMD = 'pmd',
 	ESLINT = 'eslint',
+	ESLINT_LWC = 'eslint-lwc',
 	ESLINT_TYPESCRIPT = 'eslint-typescript'
 }
 

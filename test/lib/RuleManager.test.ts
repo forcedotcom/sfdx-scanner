@@ -6,6 +6,9 @@ import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
+import * as TestOverrides from '../test-related-lib/TestOverrides';
+
+TestOverrides.initializeTestSetup();
 
 const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
 const CATALOG_FIXTURE_RULE_COUNT = 15;
@@ -171,7 +174,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes).to.be.an("array").that.has.length(1);
+					expect(parsedRes, '' + results).to.be.an("array").that.has.length(1);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}

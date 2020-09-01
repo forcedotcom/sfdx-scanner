@@ -36,6 +36,14 @@ export const DEFAULT_CONFIG: ConfigContent = {
 			]
 		},
 		{
+			name: ENGINE.ESLINT_LWC,
+			targetPatterns: [
+					"**/*.js",
+					"!**/node_modules/**",
+			],
+			disabled: true
+		},
+		{
             name: ENGINE.ESLINT_TYPESCRIPT,
             targetPatterns: [
                 "**/*.ts",
