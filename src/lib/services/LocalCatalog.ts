@@ -28,7 +28,9 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 		this.logger = await Logger.child("LocalCatalog");
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
-		this.engines = await Controller.getEnabledEngines();
+		// The catalog consists of all engines, even those that may be disabled.
+		// This is currently necessary because the user can specify a disabled engine, revisit when we don't overwrite the catalog on each run.
+		this.engines = await Controller.getAllEngines();
 
 		this.outputProcessor = await OutputProcessor.create({}); // TODO should be an injected service
 		this.catalog = await this.getCatalog();

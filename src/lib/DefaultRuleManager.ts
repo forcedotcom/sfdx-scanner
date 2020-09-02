@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
-import {RuleFilter} from './RuleFilter';
+import {FilterType, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
@@ -19,7 +19,6 @@ export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
 
 	// noinspection JSMismatchedCollectionQueryUpdate
-	private engines: RuleEngine[];
 	private readonly catalog: RuleCatalog;
 	private fileHandler: FileHandler;
 	private initialized: boolean;
@@ -36,7 +35,6 @@ export class DefaultRuleManager implements RuleManager {
 		}
 		this.logger = await Logger.child('DefaultManager');
 		this.fileHandler = new FileHandler();
-		this.engines = await Controller.getEnabledEngines();
 		await this.catalog.init();
 
 		this.initialized = true;
@@ -53,7 +51,15 @@ export class DefaultRuleManager implements RuleManager {
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		for (const e of this.engines) {
+		let filteredNames = null;
+		for (const filter of filters) {
+			if (filter.filterType === FilterType.ENGINE) {
+				filteredNames = filter.filterValues;
+				break;
+			}
+		}
+		const engines: RuleEngine[] = await (filteredNames ? Controller.getFilteredEngines(filteredNames) : Controller.getEnabledEngines());
+		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
