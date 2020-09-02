@@ -9,7 +9,7 @@ import * as PmdLanguageManager from './PmdLanguageManager';
 import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
 import path = require('path');
 import {uxEvents} from '../ScannerEvents';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
 import { PMD_CATALOG_FILE } from '../../Constants';
 
 Messages.importMessagesDirectory(__dirname);

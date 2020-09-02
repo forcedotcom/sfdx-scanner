@@ -1,12 +1,12 @@
 import path = require('path');
 import {Logger, SfdxError} from '@salesforce/core';
-import {injectable, injectAll} from 'tsyringe';
+import {injectable} from 'tsyringe';
 import {CUSTOM_PATHS_FILE} from '../Constants';
 import {RulePathManager} from './RulePathManager';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import * as PrettyPrinter from './util/PrettyPrinter';
-import { Controller } from '../ioc.config';
+import { Controller } from '../Controller';
 
 export type RulePathEntry = Map<string, Set<string>>;
 export type RulePathMap = Map<string, RulePathEntry>;
@@ -22,19 +22,13 @@ export class CustomRulePathManager implements RulePathManager {
 	private fileHandler: FileHandler;
 	private sfdxScannerPath: string;
 
-	constructor(@injectAll("RuleEngine") engines?: RuleEngine[]) {
-		this.engines = engines;
-	}
-
 	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
 		this.logger = await Logger.child('CustomRulePathManager');
 
-		for (const engine of this.engines) {
-			await engine.init();
-		}
+		this.engines = await Controller.getEnabledEngines();
 
 		this.pathsByLanguageByEngine = new Map();
 		this.fileHandler = new FileHandler();

@@ -1,7 +1,7 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import {FilterType, RuleFilter} from '../../../lib/RuleFilter';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';

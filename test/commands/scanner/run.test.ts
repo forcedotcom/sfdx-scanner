@@ -35,7 +35,7 @@ describe('scanner:run', function () {
 				expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 			}
 
-			describe('Test Case: Running rules against a single file', () => {
+			it('Test Case: Running rules against a single file', () => {
 				test
 					.stdout()
 					.stderr()
@@ -73,7 +73,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Running rules against multiple specified files', () => {
+			it('Test Case: Running rules against multiple specified files', () => {
 				test
 					.stdout()
 					.stderr()
@@ -111,7 +111,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Running rules against a folder', () => {
+			it('Test Case: Running rules against a folder', () => {
 				test
 					.stdout()
 					.stderr()
@@ -150,7 +150,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Running multiple rulesets at once', () => {
+			it('Test Case: Running multiple rulesets at once', () => {
 				test
 				.stdout()
 				.stderr()
@@ -192,7 +192,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Writing XML results to a file', () => {
+			it('Test Case: Writing XML results to a file', () => {
 				test
 					.stdout()
 					.stderr()
@@ -216,7 +216,7 @@ describe('scanner:run', function () {
 			});
 		});
 
-		describe('Output Type: CSV', () => {
+		it('Output Type: CSV', () => {
 			function validateCsvOutput(csv: string): void {
 				const rows = csv.trim().split('\n');
 				rows.shift();
@@ -308,7 +308,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('Output Type: HTML', () => {
+		it('Output Type: HTML', () => {
 			const outputFile = 'testout.html';
 			function validateHtmlOutput(html: string): void {
 				const result = html.match(/const violations = (\[.*);/);
@@ -401,7 +401,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('Output Type: JSON', () => {
+		it('Output Type: JSON', () => {
 			function validateJsonOutput(json: string): void {
 				const output = JSON.parse(json);
 				// Only PMD rules should have run.
@@ -486,7 +486,7 @@ describe('scanner:run', function () {
 
 		});
 
-		describe('Output Type: Table', () => {
+		it('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
 			test
 				.stdout()
@@ -521,7 +521,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('--json flag', () => {
+		it('--json flag', () => {
 			test
 				.stdout()
 				.stderr()
@@ -624,7 +624,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('--violations-cause-error flag', () => {
+		it('--violations-cause-error flag', () => {
 
 			test
 				.stdout()
@@ -664,7 +664,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('Dynamic Input', () => {
-			describe('Test Case: Running rules against a glob', () => {
+			it('Test Case: Running rules against a glob', () => {
 				test
 					.stdout()
 					.stderr()
@@ -704,7 +704,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Using ~/ shorthand in target', () => {
+			it('Test Case: Using ~/ shorthand in target', () => {
 				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'));
 				test
 					.stdout()
@@ -732,7 +732,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('Edge Cases', () => {
-			describe('Test case: No output specified', () => {
+			it('Test case: No output specified', () => {
 				test
 					.stdout()
 					.stderr()
@@ -755,7 +755,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: No rules specified', () => {
+			it('Test Case: No rules specified', () => {
 				test
 					.stdout()
 					.stderr()
@@ -791,7 +791,7 @@ describe('scanner:run', function () {
 					});
 			});
 
-			describe('Test Case: Evaluating rules against invalid code', () => {
+			it('Test Case: Evaluating rules against invalid code', () => {
 				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
 				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls');
 				test
@@ -838,7 +838,7 @@ describe('scanner:run', function () {
 			});
 		});
 
-		describe('Error handling', () => {
+		it('Error handling', () => {
 			test
 				.stdout()
 				.stderr()
@@ -874,7 +874,7 @@ describe('scanner:run', function () {
 	});
 
 	describe('MultiEngine', () => {
-		describe('Project: JS', () => {
+		it('Project: JS', () => {
 			before(() => {
 				process.chdir(path.join('test', 'code-fixtures', 'projects', 'app'))
 			});
@@ -901,7 +901,7 @@ describe('scanner:run', function () {
 		});
 	});
 
-	describe('BaseConfig Environment Tests For Javascript', () => {
+	it('BaseConfig Environment Tests For Javascript', () => {
 		test
 		.stdout()
 		.stderr()

@@ -1,6 +1,6 @@
 import {flags} from '@salesforce/command';
 import {Messages} from '@salesforce/core';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 
@@ -12,9 +12,9 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
-const columns = [messages.getMessage('columnNames.name'), 
-				messages.getMessage('columnNames.languages'), 
-				messages.getMessage('columnNames.categories'), 
+const columns = [messages.getMessage('columnNames.name'),
+				messages.getMessage('columnNames.languages'),
+				messages.getMessage('columnNames.categories'),
 				messages.getMessage('columnNames.rulesets'),
 				messages.getMessage('columnNames.engine')];
 
