@@ -1,6 +1,5 @@
 import "reflect-metadata";
 
-import {Logger} from '@salesforce/core';
 import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
 import {EnvOverridable, Services} from './Constants';
@@ -35,18 +34,30 @@ export const Controller = {
 		return manager;
 	},
 
-	getEnabledEngines: async (): Promise<RuleEngine[]> => {
+	getAllEngines: async (): Promise<RuleEngine[]> => {
 		const engines: RuleEngine[] = [];
-		const logger: Logger = await Logger.child('Controller');
-
 		for (const engine of container.resolveAll<RuleEngine>(Services.RuleEngine)) {
 			await engine.init();
-			if (engine.isEnabled()) {
-				engines.push(engine);
-			} else {
-				logger.trace(`Engine '${engine.getName()}' is disabled}`);
-			}
+			engines.push(engine);
 		}
+
+		if (engines.length == 0) {
+			throw new Error('No engines found');
+		}
+		return engines;
+	},
+
+	getFilteredEngines: async (filteredNames: string[]): Promise<RuleEngine[]> => {
+		const engines: RuleEngine[] = (await Controller.getAllEngines()).filter(e => filteredNames.includes(e.getName()));
+
+		if (engines.length == 0) {
+			throw new Error('No engines found');
+		}
+		return engines;
+	},
+
+	getEnabledEngines: async (): Promise<RuleEngine[]> => {
+		const engines: RuleEngine[] = (await Controller.getAllEngines()).filter(e => e.isEnabled());
 
 		if (engines.length == 0) {
 			throw new Error('No engines found');

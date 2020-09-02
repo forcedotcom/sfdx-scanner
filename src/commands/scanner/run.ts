@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {INTERNAL_ERROR_CODE} from '../../Constants';
+import {ENGINE, INTERNAL_ERROR_CODE} from '../../Constants';
 import {Controller} from '../../Controller';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from '../../lib/ScannerCommand';
@@ -116,6 +116,12 @@ export default class Run extends ScannerCommand {
 			description: messages.getMessage('flags.vceDescription'),
 			longDescription: messages.getMessage('flags.vceDescriptionLong'),
 			exclusive: ['json']
+		}),
+		engine:  flags.array({
+			char: 'e',
+			description: messages.getMessage('flags.engineDescription'),
+			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
 		})
 	};
 

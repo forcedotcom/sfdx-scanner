@@ -31,6 +31,11 @@ export abstract class ScannerCommand extends SfdxCommand {
 			filters.push(new RuleFilter(FilterType.RULENAME, [this.flags.rulename]));
 		}
 
+		// TODO: This isn't idiomatic. https://github.com/rwaldron/idiomatic.js
+		if ((this.flags.engine || []).length > 0) {
+			filters.push(new RuleFilter(FilterType.ENGINE, this.flags.engine));
+		}
+
 		return filters;
 	}
 

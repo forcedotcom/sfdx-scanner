@@ -663,6 +663,32 @@ describe('scanner:run', function () {
 				});
 		});
 
+		describe('--engine flag', () => {
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'lwc'),
+					'--format', 'csv',
+					'--engine', 'eslint-lwc'
+				])
+				.it('LWC Engine Successfully parses LWC code', ctx => {
+					expect(ctx.stdout).to.contain('No rule violations found.');
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'invalid-lwc'),
+					'--format', 'csv',
+					'--engine', 'eslint-lwc'
+				])
+				.it('LWC Engine detects LWC errors', ctx => {
+					expect(ctx.stdout).to.contain('Invalid public property initialization for "foo"');
+				});
+		});
+
 		describe('Dynamic Input', () => {
 			it('Test Case: Running rules against a glob', () => {
 				test
