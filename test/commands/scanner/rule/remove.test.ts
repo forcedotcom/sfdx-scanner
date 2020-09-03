@@ -1,7 +1,7 @@
-import {expect, test} from '@salesforce/command/lib/test';
+import {expect} from '@salesforce/command/lib/test';
+import {setupCommandTest} from '../../../TestUtils';
 import {Messages} from '@salesforce/core';
 import {Controller} from '../../../../src/Controller';
-import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import { CUSTOM_PATHS_FILE } from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
@@ -9,8 +9,9 @@ import path = require('path');
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
 
-TestOverrides.initializeTestSetup();
-const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
+function getSfdxScannerPath(): string {
+	return Controller.getSfdxScannerPath();
+}
 
 // NOTE: The relative paths are relative to the root of the project instead of to the location of this file,
 // because the root is the working directory during test evaluation.
@@ -26,22 +27,15 @@ const customPathDescriptor = {
 	}
 };
 
-const removeTest = test
+const removeTest = setupCommandTest
 	.do(() => {
 		writeNewCustomPathFile();
 	});
 
 describe('scanner:rule:remove', () => {
-	// Reset our controller for each test because a) we are using file overrides and b) these tests muck with them.
-	beforeEach(() => {
-		TestOverrides.initializeTestSetup();
-	});
-
 	describe('E2E', () => {
-		it('Dry-Run (omitting --path parameter)', () => {
+		describe('Dry-Run (omitting --path parameter)', () => {
 			removeTest
-				.stdout()
-				.stderr()
 				.command(['scanner:rule:remove'])
 				.it('When custom rules are registered, all paths are returned', ctx => {
 					const expectedRuleSummary = [pathToApexJar1, pathToApexJar2, pathToApexJar3]
@@ -52,10 +46,8 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('Rule Removal', () => {
-			it('Test Case: Removing a single PMD JAR', () => {
+			describe('Test Case: Removing a single PMD JAR', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
 					.stdin('y\n', 3000)
 					.timeout(10000)
@@ -76,10 +68,8 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			it('Test Case: Removing multiple PMD JARs', () => {
+			describe('Test Case: Removing multiple PMD JARs', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
 					.stdin('y\n', 3000)
 					.timeout(10000)
@@ -100,10 +90,8 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			it('Test Case: Removing an entire folder of PMD JARs', () => {
+			describe('Test Case: Removing an entire folder of PMD JARs', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
 					.stdin('y\n', 3000)
 					.timeout(10000)
@@ -124,10 +112,8 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			it('Edge Case: Provided path is not registered as a custom rule', () => {
+			describe('Edge Case: Provided path is not registered as a custom rule', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
 					.stdin('y\n', 3000)
 					.timeout(10000)
@@ -141,10 +127,8 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('User prompt', () => {
-			it('Test Case: User chooses to abort transaction instead of confirming', () => {
+			describe('Test Case: User chooses to abort transaction instead of confirming', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					// We'll wait three seconds and then send in a 'n', to simulate the user aborting the request.
 					.stdin('n\n', 3000)
 					.timeout(10000)
@@ -158,10 +142,8 @@ describe('scanner:rule:remove', () => {
 					});
 			});
 
-			it('Test Case: User uses --force flag to skip confirmation prompt', () => {
+			describe('Test Case: User uses --force flag to skip confirmation prompt', () => {
 				removeTest
-					.stdout()
-					.stderr()
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar1,
 						'--force'
@@ -182,11 +164,9 @@ describe('scanner:rule:remove', () => {
 		});
 
 		describe('Validations', () => {
-			it('Path validations', () => {
+			describe('Path validations', () => {
 				// Test for failure scenario doesn't need to do any special setup or cleanup.
 				removeTest
-					.stdout()
-					.stderr()
 					.command(['scanner:rule:remove', '--path', ''])
 					.it('should complain about empty path', ctx => {
 						expect(ctx.stderr).contains(messages.getMessage('validations.pathCannotBeEmpty'));
@@ -197,10 +177,10 @@ describe('scanner:rule:remove', () => {
 });
 
 function writeNewCustomPathFile() {
-	fs.writeFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_FILE), JSON.stringify(customPathDescriptor));
+	fs.writeFileSync(path.join(getSfdxScannerPath(), CUSTOM_PATHS_FILE), JSON.stringify(customPathDescriptor));
 }
 
 function getCustomPathFileContent(): string {
-	return JSON.parse(fs.readFileSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_FILE)).toString());
+	return JSON.parse(fs.readFileSync(path.join(getSfdxScannerPath(), CUSTOM_PATHS_FILE)).toString());
 }
 

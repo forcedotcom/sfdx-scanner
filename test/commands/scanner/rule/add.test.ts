@@ -1,6 +1,6 @@
-import {expect, test} from '@salesforce/command/lib/test';
+import {expect} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import * as TestOverrides from '../../../test-related-lib/TestOverrides';
+import {setupCommandTest} from '../../../TestUtils';
 import * as os from 'os';
 import fs = require('fs');
 import path = require('path');
@@ -10,12 +10,9 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 describe('scanner:rule:add', () => {
-	// Reset our controller since we are using alternate file locations
-	before(() => TestOverrides.initializeTestSetup());
-
 	describe('E2E', () => {
 		const myLanguage = 'apex';
-		it('Test Case: Adding individual JARs', () => {
+		describe('Test Case: Adding individual JARs', () => {
 			// Create four temporary directories, each having a single JAR.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -32,9 +29,7 @@ describe('scanner:rule:add', () => {
 
 			// For the first test, we'll add two of the JARs with their absolute paths.
 			const absolutePaths = [tmpJar1, tmpJar2];
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add',
 					'--language', myLanguage,
 					'--path', absolutePaths.join(','),
@@ -59,9 +54,7 @@ describe('scanner:rule:add', () => {
 
 			// For the second test, we'll add the other two JARs with relative paths.
 			const relativePaths = [path.relative('.', tmpJar3), path.relative('.', tmpJar4)];
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add',
 					'--language', myLanguage,
 					'--path', relativePaths.join(','),
@@ -85,7 +78,7 @@ describe('scanner:rule:add', () => {
 		});
 
 
-		it('Test Case: Adding all JARs in a folder', () => {
+		describe('Test Case: Adding all JARs in a folder', () => {
 			// Create two temporary directories, each containing three JARs.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -103,9 +96,7 @@ describe('scanner:rule:add', () => {
 			fs.writeFileSync(tmpJar6, 'With the strength of Lords, they challenged the Dragons.');
 
 			// For the first test, we'll add one of the folders by its absolute path.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add',
 					'--language', myLanguage,
 					'--path', tmpDir1,
@@ -128,9 +119,7 @@ describe('scanner:rule:add', () => {
 				});
 
 			// For the second test, we'll add the other folder by its relative path.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add',
 					'--language', myLanguage,
 					'--path', path.relative('.', tmpDir2),
@@ -155,40 +144,32 @@ describe('scanner:rule:add', () => {
 	});
 
 	describe('Validations', () => {
-		it('Language validations', () => {
+		describe('Language validations', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add', '--path', '/some/local/path'])
 				.it('should complain about missing --language flag', ctx => {
 					expect(ctx.stderr).contains(messages.getMessage('flags.languageDescription'));
 				});
 
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add', '--language', '', '--path', '/some/local/path'])
 				.it('should complain about empty language entry', ctx => {
 					expect(ctx.stderr).contains(messages.getMessage('validations.languageCannotBeEmpty'));
 				});
 		});
 
-		it('Path validations', () => {
+		describe('Path validations', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add', '--language', 'apex'])
 				.it('should complain about missing --path flag', ctx => {
 					expect(ctx.stderr).contains('Missing required flag:\n -p, --path PATH');
 				});
 
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:add', '--language', 'apex', '--path', ''])
 				.it('should complain about empty path', ctx => {
 					expect(ctx.stderr).contains(messages.getMessage('validations.pathCannotBeEmpty'));

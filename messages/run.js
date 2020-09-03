@@ -28,7 +28,7 @@ module.exports = {
 		"vceDescription": "Throws an error when violations are detected",
 		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
 		'engineDescription': "engine(s) to run",
-		'engineDescriptionLong': "One or more engines of run. Multiple values can be specified as a comma-separated list.",
+		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list."
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.

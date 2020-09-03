@@ -12,21 +12,29 @@ import {Config} from './lib/util/Config';
 import {ProdOverrides, Services} from './Constants';
 
 function setupProd(): void {
-	container.register(Services.EnvOverridable, ProdOverrides);
+	// This method may be called more than once in unit test scenarios where
+	// the test sets up the ioc container and the oclif testing framework is used.
+	// The first caller wins. In production this will be called once.
+	if (!container.isRegistered(Services.EnvOverridable)) {
+		container.register(Services.EnvOverridable, ProdOverrides);
+	}
 }
 
 /**
  * Initialize the ioc container with singletons common to test and prod
  */
 export function registerAll(): void {
-	container.registerSingleton(Services.Config, Config);
-	container.registerSingleton(Services.RuleManager, DefaultRuleManager);
-	container.registerSingleton(Services.RuleEngine, PmdEngine);
-	container.registerSingleton(Services.RuleEngine, JavascriptEslintEngine);
-	container.registerSingleton(Services.RuleEngine, LWCEslintEngine);
-	container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
-	container.registerSingleton(Services.RuleCatalog, LocalCatalog);
-	container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
+	// See #setupProd comment above
+	if (!container.isRegistered(Services.Config)) {
+		container.registerSingleton(Services.Config, Config);
+		container.registerSingleton(Services.RuleManager, DefaultRuleManager);
+		container.registerSingleton(Services.RuleEngine, PmdEngine);
+		container.registerSingleton(Services.RuleEngine, JavascriptEslintEngine);
+		container.registerSingleton(Services.RuleEngine, LWCEslintEngine);
+		container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
+		container.registerSingleton(Services.RuleCatalog, LocalCatalog);
+		container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
+	}
 }
 
 /**
