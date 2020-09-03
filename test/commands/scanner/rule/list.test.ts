@@ -1,7 +1,7 @@
-import {expect, test} from '@salesforce/command/lib/test';
-import * as TestOverrides from '../../../test-related-lib/TestOverrides';
+import {expect} from '@salesforce/command/lib/test';
+import {setupCommandTest} from '../../../TestUtils';
 import {Rule} from '../../../../src/types';
-import {CATALOG_FILE} from '../../../../src/Constants';
+import {CATALOG_FILE, ENGINE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 import { Controller } from '../../../../src/Controller';
@@ -10,24 +10,18 @@ import { Messages } from '@salesforce/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
 
-TestOverrides.initializeTestSetup();
-const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
-
 function getCatalogJson(): { rules: Rule[] } {
-	const catalogPath = path.join(SFDX_SCANNER_PATH, CATALOG_FILE);
-	expect(fs.existsSync(catalogPath)).to.equal(true, 'Catalog file should exist');
+	const sfdxScannerPath = Controller.getSfdxScannerPath();
+	const catalogPath = path.join(sfdxScannerPath, CATALOG_FILE);
+	expect(fs.existsSync(catalogPath), catalogPath).to.equal(true, 'Catalog file should exist');
 	return JSON.parse(fs.readFileSync(catalogPath).toString());
 }
 
 describe('scanner:rule:list', () => {
-	// Reset our controller since we are using alternate file locations
-	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
-		it('Test Case: No filters applied', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Test Case: No filters applied', () => {
+			setupCommandTest
 				.command(['scanner:rule:list'])
 				.it('All rules are returned', ctx => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
@@ -40,13 +34,10 @@ describe('scanner:rule:list', () => {
 					const rows = ctx.stdout.trim().split('\n');
 					rows.shift();
 					rows.shift();
-
-					expect(rows).to.have.lengthOf(totalRuleCount, 'All rules should have been returned');
+					expect(rows, rows + '').to.have.lengthOf(totalRuleCount, 'All rules should have been returned');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--json'])
 				.it('--json flag yields expected JSON', ctx => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
@@ -61,10 +52,8 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		it('Test Case: Filtering by category only', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Test Case: Filtering by category only', () => {
+			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Best Practices', '--json'])
 				.it('Filtering by one category returns only the rules in that category', ctx => {
 					// Rather than painstakingly checking everything about all the rules, we'll just make sure that the number of rules
@@ -84,9 +73,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Best Practices,Design', '--json'])
 				.it('Filtering by multiple categories returns any rule in either category', ctx => {
 					// Count how many rules in the catalog fit the criteria.
@@ -107,19 +94,15 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		it('Test Case: Filtering by ruleset only', () => {
+		describe('Test Case: Filtering by ruleset only', () => {
 
-			test
-			.stdout()
-			.stderr()
-			.command(['scanner:rule:list', '--ruleset', 'Braces'])
-			.it('--ruleset option shows deprecation warning', ctx => {
-				expect(ctx.stderr).contains(messages.getMessage('rulesetDeprecation'));
-			});
+			setupCommandTest
+				.command(['scanner:rule:list', '--ruleset', 'Braces'])
+				.it('--ruleset option shows deprecation warning', ctx => {
+					expect(ctx.stderr).contains(messages.getMessage('rulesetDeprecation'));
+				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--ruleset', 'Braces', '--json'])
 				.it('Filtering by a single ruleset returns only the rules in that ruleset', ctx => {
 					// Count how many rules in the catalog fit the criteria.
@@ -135,9 +118,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--ruleset', 'ApexUnit,Braces', '--json'])
 				.it('Filtering by multiple rulesets returns any rule in either ruleset', ctx => {
 					// Count how many rules in the catalog fit the criteria.
@@ -157,10 +138,8 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		it('Test Case: Filtering by language only', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Test Case: Filtering by language only', () => {
+			setupCommandTest
 				.command(['scanner:rule:list', '--language', 'apex', '--json'])
 				.it('Filtering by a single language returns only rules applied to that language', ctx => {
 					// Count how many rules in the catalog fit the criteria.
@@ -175,9 +154,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--language', 'apex,javascript', '--json'])
 				.it('Filtering by multiple languages returns any rule for either language', ctx => {
 					// Count how many rules in the catalog fit the criteria.
@@ -197,10 +174,60 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		it('Test Case: Applying multiple filter types', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Test Case: Filtering by engine only', () => {
+			setupCommandTest
+				.command(['scanner:rule:list', '--engine', ENGINE.PMD, '--json'])
+				.it('Filtering by a single engine returns only rules applied to that engine', ctx => {
+					// Count how many rules in the catalog fit the criteria.
+					const targetRuleCount = getCatalogJson().rules.filter(rule => rule.engine.includes(ENGINE.PMD)).length;
+
+					// Parse the output back into a JSON and make sure it has the right number of rules.
+					const outputJson = JSON.parse(ctx.stdout);
+					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules of the desired engine should be returned');
+					// Make sure that only the right rules were returned.
+					outputJson.result.forEach((rule) => {
+						expect(rule.engine).to.equal(ENGINE.PMD, `Rule ${rule.name} was included despite targeting the wrong engine`)
+					});
+				});
+
+			setupCommandTest
+				.command(['scanner:rule:list', '--engine', ENGINE.ESLINT_LWC, '--json'])
+				.it('Filtering by a disabled engine returns rules', ctx => {
+					// Count how many rules in the catalog fit the criteria.
+					const targetRuleCount = getCatalogJson().rules.filter(rule => rule.engine.includes(ENGINE.ESLINT_LWC)).length;
+
+					// Parse the output back into a JSON and make sure it has the right number of rules.
+					const outputJson = JSON.parse(ctx.stdout);
+					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules of the desired engine should be returned');
+					// Make sure that only the right rules were returned.
+					outputJson.result.forEach((rule) => {
+						expect(rule.engine).to.equal(ENGINE.ESLINT_LWC, `Rule ${rule.name} was included despite targeting the wrong engine`)
+					});
+				});
+
+			const engines: string[] = [ENGINE.PMD, ENGINE.ESLINT_LWC];
+			setupCommandTest
+				.command(['scanner:rule:list', '--engine', engines.join(','), '--json'])
+				.it('Filtering by multiple engines returns any rule for either engine', ctx => {
+					// Count how many rules in the catalog fit the criteria.
+					const targetRuleCount = getCatalogJson().rules.filter(rule => (engines.indexOf(rule.engine) >= 0)).length;
+
+					// Parse the output back into a JSON and make sure it has the right number of rules.
+					const outputJson = JSON.parse(ctx.stdout);
+					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules of the desired engines should be returned');
+					// Make sure that only the right rules were returned.
+					outputJson.result.forEach((rule: Rule) => {
+						expect(rule).to.satisfy((rule) => {
+								return (engines.indexOf(rule.engine) >= 0)
+							},
+							`Rule ${rule.name} was included despite targeting neither desired engine`
+						);
+					});
+				});
+		});
+
+		describe('Test Case: Applying multiple filter types', () => {
+			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Best Practices', '--language', 'apex', '--json'])
 				.it('Filtering on multiple columns only returns rows that satisfy BOTH filters', ctx => {
 					// Count how many rules in the catalog fit all criteria.
@@ -218,10 +245,8 @@ describe('scanner:rule:list', () => {
 				});
 		});
 
-		it('Edge Case: No rules match criteria', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Edge Case: No rules match criteria', () => {
+			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Beebleborp'])
 				.it('Without --json flag, an empty table is printed', ctx => {
 					// Split the result by newline, and make sure there are two rows.
@@ -229,9 +254,7 @@ describe('scanner:rule:list', () => {
 					expect(rows).to.have.lengthOf(2, 'Only the header rows should have been printed');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Beebleborp', '--json'])
 				.it('With the --json flag, the results are empty', ctx => {
 					// Parse the results back into a JSON and make sure it has an empty list.

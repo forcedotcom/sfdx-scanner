@@ -1,6 +1,6 @@
-import {expect, test} from '@salesforce/command/lib/test';
+import {expect} from '@salesforce/command/lib/test';
+import {setupCommandTest} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
-import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
@@ -11,11 +11,7 @@ Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
-
 describe('scanner:run', function () {
-	// Reset our controller since we are using alternate file locations
-	before(() => TestOverrides.initializeTestSetup());
-
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('E2E', () => {
@@ -26,7 +22,7 @@ describe('scanner:run', function () {
 				// The first list item is going to be the header, so we need to pull that off.
 				violations.shift();
 				// There should be four violations.
-				expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+				expect(violations.length).to.equal(4, `Should be four violations detected in the file:\n ${xml}`);
 				// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 				// expected order.
 				expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
@@ -35,10 +31,8 @@ describe('scanner:run', function () {
 				expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 			}
 
-			it('Test Case: Running rules against a single file', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: Running rules against a single file', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit',
@@ -48,9 +42,7 @@ describe('scanner:run', function () {
 						validateXmlOutput(ctx.stdout);
 					});
 
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('.', 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit',
@@ -60,9 +52,7 @@ describe('scanner:run', function () {
 						validateXmlOutput(ctx.stdout);
 					});
 
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--ruleset', 'ApexUnit',
@@ -73,10 +63,8 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: Running rules against multiple specified files', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: Running rules against multiple specified files', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls') + ',' + path.join('test', 'code-fixtures', 'apex', 'InstallProcessorTests.cls'),
 						'--ruleset', 'ApexUnit',
@@ -111,10 +99,8 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: Running rules against a folder', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: Running rules against a folder', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex'),
 						'--ruleset', 'ApexUnit',
@@ -150,20 +136,16 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: Running multiple rulesets at once', () => {
-				test
-				.stdout()
-				.stderr()
-				.command(['scanner:run', '--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
-				'--ruleset', 'ApexUnit',
-				'--format', 'xml'])
-				.it('--ruleset option shows deprecation warning', ctx => {
-					expect(ctx.stderr).contains(runMessages.getMessage('rulesetDeprecation'));
-				});
+			describe('Test Case: Running multiple rulesets at once', () => {
+				setupCommandTest
+					.command(['scanner:run', '--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+						'--ruleset', 'ApexUnit',
+						'--format', 'xml'])
+					.it('--ruleset option shows deprecation warning', ctx => {
+						expect(ctx.stderr).contains(runMessages.getMessage('rulesetDeprecation'));
+					});
 
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit,Style',
@@ -192,10 +174,8 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: Writing XML results to a file', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: Writing XML results to a file', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit',
@@ -216,7 +196,7 @@ describe('scanner:run', function () {
 			});
 		});
 
-		it('Output Type: CSV', () => {
+		describe('Output Type: CSV', () => {
 			function validateCsvOutput(csv: string): void {
 				const rows = csv.trim().split('\n');
 				rows.shift();
@@ -235,11 +215,9 @@ describe('scanner:run', function () {
 				expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
 				expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
 				expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
-		}
+			}
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -250,9 +228,7 @@ describe('scanner:run', function () {
 					validateCsvOutput(ctx.stdout);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -275,9 +251,7 @@ describe('scanner:run', function () {
 					validateCsvOutput(fileContents);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -287,9 +261,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -308,7 +280,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		it('Output Type: HTML', () => {
+		describe('Output Type: HTML', () => {
 			const outputFile = 'testout.html';
 			function validateHtmlOutput(html: string): void {
 				const result = html.match(/const violations = (\[.*);/);
@@ -330,9 +302,7 @@ describe('scanner:run', function () {
 				expect(rows[3]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #4 should be of the expected type');
 			}
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -343,9 +313,7 @@ describe('scanner:run', function () {
 					validateHtmlOutput(ctx.stdout);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -368,9 +336,7 @@ describe('scanner:run', function () {
 					validateHtmlOutput(fileContents);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -380,9 +346,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -401,7 +365,7 @@ describe('scanner:run', function () {
 				});
 		});
 
-		it('Output Type: JSON', () => {
+		describe('Output Type: JSON', () => {
 			function validateJsonOutput(json: string): void {
 				const output = JSON.parse(json);
 				// Only PMD rules should have run.
@@ -415,9 +379,7 @@ describe('scanner:run', function () {
 				expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
 			}
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -427,9 +389,7 @@ describe('scanner:run', function () {
 					validateJsonOutput(ctx.stdout);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -452,9 +412,7 @@ describe('scanner:run', function () {
 					validateJsonOutput(fileContents);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -464,9 +422,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -486,11 +442,9 @@ describe('scanner:run', function () {
 
 		});
 
-		it('Output Type: Table', () => {
+		describe('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -508,9 +462,7 @@ describe('scanner:run', function () {
 					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -521,10 +473,8 @@ describe('scanner:run', function () {
 				});
 		});
 
-		it('--json flag', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('--json flag', () => {
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -545,9 +495,7 @@ describe('scanner:run', function () {
 					expect(result[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -571,9 +519,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -609,9 +555,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -624,11 +568,9 @@ describe('scanner:run', function () {
 				});
 		});
 
-		it('--violations-cause-error flag', () => {
+		describe('--violations-cause-error flag', () => {
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -640,9 +582,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should not be present');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 					'--ruleset', 'ApexUnit',
@@ -664,9 +604,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('--engine flag', () => {
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'lwc'),
 					'--format', 'csv',
@@ -676,9 +614,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain('No rule violations found.');
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'invalid-lwc'),
 					'--format', 'csv',
@@ -690,10 +626,8 @@ describe('scanner:run', function () {
 		});
 
 		describe('Dynamic Input', () => {
-			it('Test Case: Running rules against a glob', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: Running rules against a glob', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES. But the tests sidestep that, somehow.
 						'--target', 'test/code-fixtures/apex/*Tests.cls',
@@ -730,11 +664,9 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: Using ~/ shorthand in target', () => {
+			describe('Test Case: Using ~/ shorthand in target', () => {
 				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'));
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', pathWithTilde,
 						'--ruleset', 'ApexUnit',
@@ -758,10 +690,8 @@ describe('scanner:run', function () {
 		});
 
 		describe('Edge Cases', () => {
-			it('Test case: No output specified', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test case: No output specified', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
 						'--ruleset', 'ApexUnit'
@@ -781,10 +711,8 @@ describe('scanner:run', function () {
 					});
 			});
 
-			it('Test Case: No rules specified', () => {
-				test
-					.stdout()
-					.stderr()
+			describe('Test Case: No rules specified', () => {
+				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
 						'--format', 'xml'
@@ -798,31 +726,12 @@ describe('scanner:run', function () {
 						// make sure there's the right number of them.
 						expect(violations.length).to.equal(84, 'Should be 84 violations detected in the file');
 					});
-
-				test
-					.stdout()
-					.stderr()
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
-						'--format', 'xml',
-						'--verbose'
-					])
-					.it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
-						const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
-						const implicitMessages = violations[0].match(regex);
-						expect(implicitMessages || []).to.have.lengthOf(25, 'Should be 25 log entries for implicitly added categories from pmd and eslint');
-					});
 			});
 
-			it('Test Case: Evaluating rules against invalid code', () => {
+			describe('Test Case: Evaluating rules against invalid code', () => {
 				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
 				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls');
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--ruleset', 'ApexUnit',
 						'--target', pathToBadSyntax,
@@ -836,9 +745,7 @@ describe('scanner:run', function () {
 						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
 					});
 
-				test
-					.stdout()
-					.stderr()
+				setupCommandTest
 					.command(['scanner:run',
 						'--ruleset', 'ApexUnit',
 						'--target', `${pathToBadSyntax},${pathToGoodSyntax}`,
@@ -864,34 +771,26 @@ describe('scanner:run', function () {
 			});
 		});
 
-		it('Error handling', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Error handling', () => {
+			setupCommandTest
 				.command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
 				.it('Error thrown when no target is specified', ctx => {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.mustTargetSomething')}`);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
 				.it('Error thrown when output file is malformed', ctx => {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeValid')}`);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
 				.it('Error thrown when output file is unsupported type', ctx => {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeSupportedType')}`);
 				});
 
-			test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
 				.it('Warning logged when output file format does not match format', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
@@ -900,19 +799,13 @@ describe('scanner:run', function () {
 	});
 
 	describe('MultiEngine', () => {
-		it('Project: JS', () => {
-			before(() => {
-				process.chdir(path.join('test', 'code-fixtures', 'projects', 'app'))
-			});
-			after(() => {
-				process.chdir("../../../..");
-			});
-			test
-				.stdout()
-				.stderr()
+		describe('Project: JS', () => {
+			setupCommandTest
+				.do(() => process.chdir(path.join('test', 'code-fixtures', 'projects', 'app')))
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
+				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
-					expect(ctx.stderr).to.be.empty;
+					expect(ctx.stderr, ctx.stdout).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{")));
 					// Look through all of the results and gather a set of unique engines
 					const uniqueEngines = new Set(results.map(r => { return r.engine }));
@@ -921,50 +814,40 @@ describe('scanner:run', function () {
 					expect(uniqueEngines).to.contain("pmd");
 					// Validate that all of the results have an expected property
 					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
+						expect(result.violations[0], `Message is ${result.violations[0].message}\n ${ctx.stdout}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
 		});
 	});
 
-	it('BaseConfig Environment Tests For Javascript', () => {
-		test
-		.stdout()
-		.stderr()
-		.command(['scanner:run',
-			'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js'),
-			'--format', 'csv'
-		])
-		.it('The baseConfig enables the usage of default Javascript Types', ctx => {
-			// There should be no violations.
-			expect(ctx.stdout).to.contains('No rule violations found.', 'Should be no violations found in the file.');
-		});
+	describe('BaseConfig Environment Tests For Javascript', () => {
+		setupCommandTest
+			.command(['scanner:run',
+				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js'),
+				'--format', 'csv'
+			])
+			.it('The baseConfig enables the usage of default Javascript Types', ctx => {
+				// There should be no violations.
+				expect(ctx.stdout).to.contains('No rule violations found.', 'Should be no violations found in the file.');
+			});
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		test
-			.stdout()
-			.stderr()
+		setupCommandTest
 			.command(['scanner:run',
 				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js'),
 				'--format', 'json'
 			])
 			.it('By default, frameworks such as QUnit are not included in the baseConfig', ctx => {
 				// We expect there to be 2 errors about qunit-related syntax being undefined.
-				// There's currently some weird issue with the test framework that causes this specific execution to act
-				// like the --verbose flag was supplied. So we'll just pull out a JSON by getting everything from the first
-				// instance of '[' to the last instance of ']', since the JSON takes the form of an array.
-				const parsedCtx = JSON.parse(ctx.stdout.slice(ctx.stdout.indexOf('['), ctx.stdout.lastIndexOf(']') + 1));
+				const parsedCtx = JSON.parse(ctx.stdout);
 				expect(parsedCtx[0].violations.length).to.equal(2, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
 				expect(parsedCtx[0].violations[0].message).to.contain("'QUnit' is not defined.");
 			});
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		test
-			.stdout()
-			.stderr()
-
+		setupCommandTest
 			.command(['scanner:run',
 				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js'),
 				'--format', 'json',
@@ -972,6 +855,25 @@ describe('scanner:run', function () {
 			])
 			.it('Providing qunit in the --env override should resolve errors about that framework', ctx => {
 				expect(ctx.stdout).to.contain('No rule violations found.', 'Should be no violations found in the file.');
+			});
+	});
+
+	// Any commands that specify the --verbose cause subsequent commands to execute as if --verbose was specified.
+	// Put all --verbose commands at the end of this file.
+	describe('Verbose tests must come last. Verbose does not reset', () => {
+		setupCommandTest
+			.command(['scanner:run',
+				'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+				'--format', 'xml',
+				'--verbose'
+			])
+			.it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
+				// We'll split the output by the <violation> tag, so we can get individual violations.
+				const violations = ctx.stdout.split('<violation');
+				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
+				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
+				const implicitMessages = violations[0].match(regex);
+				expect(implicitMessages || []).to.have.lengthOf(26, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 			});
 	});
 });

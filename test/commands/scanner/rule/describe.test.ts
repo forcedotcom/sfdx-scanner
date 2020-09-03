@@ -1,25 +1,18 @@
-import {expect, test} from '@salesforce/command/lib/test';
-import * as TestOverrides from '../../../test-related-lib/TestOverrides';
+import {expect} from '@salesforce/command/lib/test';
+import {setupCommandTest} from '../../../TestUtils';
 import messages = require('../../../../messages/describe');
 
 describe('scanner:rule:describe', () => {
-	// Reset our controller since we are using alternate file locations
-	before(() => TestOverrides.initializeTestSetup());
-
 	describe('E2E', () => {
-		it('Test Case: No matching rules', () => {
+		describe('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
-			test
-				.stdout() // Adds stdout to the test's context object.
-				.stderr() // Adds stderr to the test's context object.
+			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
 				.it('Correct warning is displayed', ctx => {
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
 				});
 
-				test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
 				.it('--json flag yields correct results', ctx => {
 					const ctxJson = JSON.parse(ctx.stdout);
@@ -29,10 +22,8 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		it('Test Case: One matching rule', () => {
-			test
-				.stdout()
-				.stderr()
+		describe('Test Case: One matching rule', () => {
+			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields'])
 				.it('Displayed output matches expectations', ctx => {
 					// Rather than compare every attribute, we'll just compare a few so we can be reasonably confident we got the right
@@ -43,9 +34,7 @@ describe('scanner:rule:describe', () => {
 					expect(ctx.stdout).to.match(/message:\s+Too many fields/, 'Message should match');
 				});
 
-				test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields', '--json'])
 				.it('--json flag yields correct results', ctx => {
 					const resultList = JSON.parse(ctx.stdout).result;
@@ -60,15 +49,13 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		it('Test Case: Multiple matching rules', () => {
+		describe('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.output.multipleMatchingRules
 				.replace('{0}', '2')
 				.replace('{1}', 'constructor-super');
 
-				test
-				.stdout()
-				.stderr()
+			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])
 				.it('Displayed output matches expectations', ctx => {
 					// First, verify that the warning was printed at the start like it should have been.
@@ -99,10 +86,8 @@ describe('scanner:rule:describe', () => {
 			 */
 		});
 
-		it('Error handling', () => {
-			test
-				.stdout() // Adds stdout to the test's context object.
-				.stderr() // Adds stderr to the test's context object.
+		describe('Error handling', () => {
+			setupCommandTest
 				.command(['scanner:rule:describe'])
 				.it('Must input a rule name', ctx => {
 					expect(ctx.stderr).to.contain('ERROR running scanner:rule:describe:  Missing required flag:\n -n, --rulename RULENAME');

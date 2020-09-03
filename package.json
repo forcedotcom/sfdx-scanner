@@ -84,7 +84,10 @@
 		},
 		"devPlugins": [
 			"@oclif/plugin-help"
-		]
+		],
+		"hooks": {
+			"init": "./src/lib/hooks/init"
+		}
 	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {

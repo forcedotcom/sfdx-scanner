@@ -12,13 +12,15 @@ module.exports = {
 		"rulesetDescriptionLong": "[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.",
 		"severityDescription": "[description of 'severity' parameter]", // Change this when we implement the flag.
 		"standardDescription": "[description of 'standard' parameter]", // Change this when we implement the flag.
-		"customDescription": "[description of 'custom' parameter]"      // Change this when we implement the flag.
+		"customDescription": "[description of 'custom' parameter]",      // Change this when we implement the flag.
+		'engineDescription': "engine(s) to filter list by",
+		'engineDescriptionLong': "Filters the list based on the specified engines. Specify multiple engines as a comma-separated list."
 	},
 	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"columnNames": {
-		"name": "name", 
+		"name": "name",
 		"languages": "languages",
-		"categories": "categories", 
+		"categories": "categories",
 		"rulesets": "rulesets [dep]",
 		"engine": "engine"
 	},
