@@ -7,17 +7,17 @@ export abstract class ScannerCommand extends SfdxCommand {
 	protected buildRuleFilters(): RuleFilter[] {
 		const filters: RuleFilter[] = [];
 		// Create a filter for any provided categories.
-		if ((this.flags.category || []).length > 0) {
+		if (this.flags.category && this.flags.category.length) {
 			filters.push(new RuleFilter(FilterType.CATEGORY, this.flags.category));
 		}
 
 		// Create a filter for any provided rulesets.
-		if ((this.flags.ruleset || []).length > 0) {
+		if (this.flags.ruleset && this.flags.ruleset.length) {
 			filters.push(new RuleFilter(FilterType.RULESET, this.flags.ruleset));
 		}
 
 		// Create a filter for any provided languages.
-		if ((this.flags.language || []).length > 0) {
+		if (this.flags.language && this.flags.language.length) {
 			filters.push(new RuleFilter(FilterType.LANGUAGE, this.flags.language));
 		}
 
@@ -27,8 +27,8 @@ export abstract class ScannerCommand extends SfdxCommand {
 			filters.push(new RuleFilter(FilterType.RULENAME, [this.flags.rulename]));
 		}
 
-		// TODO: This isn't idiomatic. https://github.com/rwaldron/idiomatic.js
-		if ((this.flags.engine || []).length > 0) {
+		// Create a filter for any provided engines.
+		if (this.flags.engine && this.flags.engine.length) {
 			filters.push(new RuleFilter(FilterType.ENGINE, this.flags.engine));
 		}
 

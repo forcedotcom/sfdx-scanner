@@ -1,8 +1,12 @@
+import "reflect-metadata";
+import {container} from "tsyringe";
 import {Controller} from '../../src/Controller';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 import * as TestOverrides from '../test-related-lib/TestOverrides';
+import {ENGINE, Services} from '../../src/Constants';
 import {expect}  from 'chai';
-import {ENGINE} from '../../src/Constants';
+import {fail} from 'assert';
+import {instance, mock, when} from 'ts-mockito';
 
 describe('Controller.ts tests', () => {
 	beforeEach(() => {
@@ -38,5 +42,33 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_LWC);
 		expect(names).to.contain(ENGINE.PMD);
+	});
+
+	it('getEnabledEngines throws exception when no engines are found', async() => {
+		// Create a single mocked engine that is disabled
+		const mockedRuleEngine: RuleEngine = mock<RuleEngine>();
+		when(mockedRuleEngine.getName).thenReturn(() => 'fake-engine');
+		when(mockedRuleEngine.isEnabled).thenReturn(() => false);
+		const ruleEngine: RuleEngine = instance(mockedRuleEngine);
+
+		// Remove everything else from the container and register the mock engine
+		container.reset();
+		container.registerInstance(Services.RuleEngine, ruleEngine);
+
+		try {
+			await Controller.getEnabledEngines();
+			fail('getEnabledEngines should have thrown');
+		} catch (e) {
+			expect(e.message).to.equal('No engines are currently enabled. Currently disabled engines: fake-engine');
+		}
+	});
+
+	it('getFilteredEngines throws exception when no engines are found', async() => {
+		try {
+			await Controller.getFilteredEngines(['invalid-engine']);
+			fail('getFilteredEngines should have thrown');
+		} catch (e) {
+			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: eslint, eslint-lwc, eslint-typescript, pmd`);
+		}
 	});
 });
