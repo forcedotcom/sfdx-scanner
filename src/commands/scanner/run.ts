@@ -32,6 +32,7 @@ export default class Run extends ScannerCommand {
 	// This defines the flags accepted by this command.
 	protected static flagsConfig = {
 		verbose: flags.builtin(),
+		// BEGIN: Flags consumed by ScannerCommand#buildRuleFilters
 		// These flags are how you choose which rules you're running.
 		category: flags.array({
 			char: 'c',
@@ -54,6 +55,13 @@ export default class Run extends ScannerCommand {
 			exclusive: ['category', 'ruleset', 'severity', 'exclude-rule'],
 			hidden: true
 		}),
+		engine: flags.array({
+			char: 'e',
+			description: messages.getMessage('flags.engineDescription'),
+			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
+		}),
+		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// TODO: After implementing this flag, unhide it.
 		severity: flags.string({
 			char: 's',
@@ -116,12 +124,6 @@ export default class Run extends ScannerCommand {
 			description: messages.getMessage('flags.vceDescription'),
 			longDescription: messages.getMessage('flags.vceDescriptionLong'),
 			exclusive: ['json']
-		}),
-		engine:  flags.array({
-			char: 'e',
-			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
 		})
 	};
 

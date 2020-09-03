@@ -33,6 +33,8 @@ export default class List extends ScannerCommand {
 	// is what's printed when the -h/--help flag is supplied.
 	protected static flagsConfig = {
 		verbose: flags.builtin(),
+		// BEGIN: Flags consumed by ScannerCommand#buildRuleFilters
+		// These flags are how you choose which rules are listed.
 		category: flags.array({
 			char: 'c',
 			description: messages.getMessage('flags.categoryDescription'),
@@ -51,6 +53,13 @@ export default class List extends ScannerCommand {
 			description: messages.getMessage('flags.languageDescription'),
 			longDescription: messages.getMessage('flags.languageDescriptionLong')
 		}),
+		engine: flags.array({
+			char: 'e',
+			description: messages.getMessage('flags.engineDescription'),
+			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
+		}),
+		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// TODO: After implementing this flag, unhide it.
 		severity: flags.string({
 			char: 's',
@@ -68,12 +77,6 @@ export default class List extends ScannerCommand {
 			description: messages.getMessage('flags.customDescription'),
 			exclusive: ['standard'],
 			hidden: true
-		}),
-		engine:  flags.array({
-			char: 'e',
-			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
 		})
 	};
 
