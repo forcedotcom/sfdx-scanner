@@ -174,7 +174,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes, '' + results).to.be.an("array").that.has.length(1);
+					expect(parsedRes, '' + results).to.be.an("array").that.has.length(2);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -206,7 +206,7 @@ describe('RuleManager', () => {
 					} else {
 						parsedRes = JSON.parse(results);
 					}
-					expect(parsedRes).to.be.an("array").that.has.length(8);
+					expect(parsedRes).to.be.an("array").that.has.length(17);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -227,7 +227,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(3);
+					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(13);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -245,7 +245,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes).to.be.an("array").that.has.length(6);
+					expect(parsedRes).to.be.an("array").that.has.length(16);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}

@@ -4,6 +4,7 @@ import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
 import { Controller } from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -196,7 +197,7 @@ export class Config {
 		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
 		if (!this.configContent['engines'] && this.configContent['javaHome']) {
 			// Prior version.  Migrate.
-			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
+			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, deepCopy(DEFAULT_CONFIG)) );
 		}
 	}
 

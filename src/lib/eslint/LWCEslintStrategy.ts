@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {ENGINE, LANGUAGE, LWC_RULE_PREFIX} from '../../Constants';
+import {ENGINE, LANGUAGE} from '../../Constants';
 import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 
@@ -7,7 +7,10 @@ const ES_CONFIG = {
 	"parser": "babel-eslint",
 	"plugins": ["@lwc/eslint-plugin-lwc"],
 	"baseConfig": {
-		"extends": ["@salesforce/eslint-config-lwc/base"]
+		"extends": [
+			"eslint:recommended",
+			"@salesforce/eslint-config-lwc/base"
+		]
 	},
 	"ignorePatterns": [
 		"node_modules/!**"
@@ -39,8 +42,8 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_LWC;
 	}
 
-	isRuleKeySupported(key: string): boolean {
-		return key.startsWith(LWC_RULE_PREFIX);
+	isRuleKeySupported(): boolean {
+		return true;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

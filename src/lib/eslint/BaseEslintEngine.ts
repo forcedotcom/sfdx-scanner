@@ -7,6 +7,7 @@ import {CLIEngine} from 'eslint';
 import * as path from 'path';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -206,7 +207,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
+				Object.assign(config, deepCopy(await this.strategy.getRunConfig(engineOptions)));
 
 				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
 				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
