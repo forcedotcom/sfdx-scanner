@@ -91,7 +91,7 @@ export default class Run extends ScannerCommand {
 			char: 'f',
 			description: messages.getMessage('flags.formatDescription'),
 			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.XML, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.TABLE]
+			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
 		}),
 		outfile: flags.string({
 			char: 'o',
@@ -219,12 +219,11 @@ export default class Run extends ScannerCommand {
 		} else {
 			const fileExtension = outfile.slice(lastPeriod + 1);
 			switch (fileExtension) {
-				case OUTPUT_FORMAT.JSON:
-					return OUTPUT_FORMAT.JSON;
 				case OUTPUT_FORMAT.CSV:
-					return OUTPUT_FORMAT.CSV;
+				case OUTPUT_FORMAT.HTML:
+				case OUTPUT_FORMAT.JSON:
 				case OUTPUT_FORMAT.XML:
-					return OUTPUT_FORMAT.XML;
+					return fileExtension;
 				default:
 					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, this.getInternalErrorCode());
 			}
@@ -277,6 +276,7 @@ export default class Run extends ScannerCommand {
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
+			case OUTPUT_FORMAT.HTML:
 			case OUTPUT_FORMAT.JSON:
 			case OUTPUT_FORMAT.CSV:
 			case OUTPUT_FORMAT.XML:
