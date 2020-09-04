@@ -23,9 +23,9 @@ module.exports = {
 		"envDescription": "JSON-formatted string, overrides ESLint's default environment variables",
 		"envDescriptionLong": "JSON-formatted string. Overrides ESLint's default environmental variables.",
 		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
-		"tsconfigDescription": "Location of tsconfig.json file",
+		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
-		"vceDescription": "Throws an error when violations are detected",
+		"vceDescription": "throws an error when violations are detected",
 		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
 		'engineDescription': "engine(s) to run",
 		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list."
