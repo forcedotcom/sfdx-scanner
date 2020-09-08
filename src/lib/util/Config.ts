@@ -33,13 +33,15 @@ export const DEFAULT_CONFIG: ConfigContent = {
 			targetPatterns: [
 				"**/*.js",
 				"!**/node_modules/**",
+				"!**/bower_components/**"
 			]
 		},
 		{
             name: ENGINE.ESLINT_TYPESCRIPT,
             targetPatterns: [
                 "**/*.ts",
-                "!**/node_modules/**"
+                "!**/node_modules/**",
+				"!**/bower_components/**"
 			]
         }
 	]

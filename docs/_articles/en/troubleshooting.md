@@ -82,3 +82,14 @@ The scanner's node process runs with a default limit of 2GB of memory. This limi
 ```bash
 $ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
 ```
+
+### The `scanner:run` command fails with the error `Unable to find 'tsconfig.json' in current directory X`, even though I'm not scanning any TypeScript files.
+
+The most likely cause is that you're scanning TypeScript files without realizing it.
+
+If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
+being ignored by the scanner, since dependent modules may have TypeScript files that you don't know about.
+
+Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
+used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
+property, and add `!**/bower_components/**` to exclude Bower dependencies.
