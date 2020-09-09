@@ -59,7 +59,8 @@
 		"/lib",
 		"/messages",
 		"/npm-shrinkwrap.json",
-		"/oclif.manifest.json"
+		"/oclif.manifest.json",
+		"/html-templates"
 	],
 	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
 	"keywords": [
