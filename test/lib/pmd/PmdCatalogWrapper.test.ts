@@ -37,11 +37,12 @@ describe('PmdCatalogWrapper', () => {
 				});
 
 				it('uses the correct common parameter values', async () => {
+					const thePath = path.join('dist', 'pmd-cataloger', 'lib');
 					const expectedParamList = [
 						`-DcatalogHome=`,
 						'-DcatalogName=PmdCatalog.json',
 						'-cp',
-						'dist/pmd-cataloger/lib',
+						thePath,
 						'sfdc.sfdx.scanner.pmd.Main'];
 
 					const target = await TestablePmdCatalogWrapper.create({});
