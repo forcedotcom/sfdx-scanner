@@ -76,8 +76,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -113,8 +113,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -641,8 +641,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
