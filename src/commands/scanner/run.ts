@@ -284,7 +284,6 @@ export default class Run extends ScannerCommand {
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
-			case OUTPUT_FORMAT.HTML:
 			case OUTPUT_FORMAT.JSON:
 			case OUTPUT_FORMAT.CSV:
 			case OUTPUT_FORMAT.XML:
