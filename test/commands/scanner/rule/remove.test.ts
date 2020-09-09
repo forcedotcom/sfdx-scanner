@@ -15,11 +15,11 @@ function getSfdxScannerPath(): string {
 
 // NOTE: The relative paths are relative to the root of the project instead of to the location of this file,
 // because the root is the working directory during test evaluation.
-const parentFolderForJars = path.resolve('./test/test-jars/apex');
-const pathToApexJar1 = path.resolve('./test/test-jars/apex/testjar1.jar');
-const pathToApexJar2 = path.resolve('./test/test-jars/apex/testjar2.jar');
-const pathToApexJar3 = path.resolve('./test/test-jars/apex/testjar3.jar');
-const pathToApexJar4 = path.resolve('./test/test-jars/apex/testjar4.jar');
+const parentFolderForJars = path.resolve('test', 'test-jars', 'apex');
+const pathToApexJar1 = path.resolve('test', 'test-jars', 'apex', 'testjar1.jar');
+const pathToApexJar2 = path.resolve('test', 'test-jars', 'apex', 'testjar2.jar');
+const pathToApexJar3 = path.resolve('test', 'test-jars', 'apex', 'testjar3.jar');
+const pathToApexJar4 = path.resolve('test', 'test-jars', 'apex', 'testjar4.jar');
 // For our tests, we'll include three Apex JARs.
 const customPathDescriptor = {
 	'pmd': {
