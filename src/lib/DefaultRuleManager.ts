@@ -98,8 +98,15 @@ export class DefaultRuleManager implements RuleManager {
 			// Ask engines for their desired target patterns.
 			const targetPatterns: string[] = await engine.getTargetPatterns(target);
 			assert(targetPatterns);
-			const isInclusiveMatch = picomatch(targetPatterns.filter(p => !p.startsWith("!")));
-			const isExclusiveMatch = picomatch(targetPatterns.filter(p => p.startsWith("!")));
+			// Picomatch OR's together the patterns you provide it, which means we need to be careful about how we construct
+			// our matchers.
+			// Inclusion patterns denote files we want to include, and we want all files that match even a single pattern,
+			// so we can just create a single matcher for all inclusion patterns.
+			const inclusionMatcher = picomatch(targetPatterns.filter(p => !p.startsWith("!")));
+			// Exclusion patterns denote files we want to exclude, and we want all files that match every single pattern,
+			// i.e., doesn't match the inversion of any patterns. So we invert each exclusion pattern and combine them
+			// into a single matcher whose value we'll negate when we need it.
+			const exclusionMatcher = picomatch(targetPatterns.filter(p => p.startsWith("!")).map(p => p.slice(1)));
 
 			const fileExists = await this.fileHandler.exists(target);
 			if (globby.hasMagic(target)) {
@@ -111,7 +118,7 @@ export class DefaultRuleManager implements RuleManager {
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				const ruleTarget = {
 					target,
-					paths: absoluteMatchingTargets.filter(t => isInclusiveMatch(t) && isExclusiveMatch(t))
+					paths: absoluteMatchingTargets.filter(t => inclusionMatcher(t) && !exclusionMatcher(t))
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
@@ -138,7 +145,7 @@ export class DefaultRuleManager implements RuleManager {
 						// The target is a simple file.  Validate it against the engine's own patterns.  First test
 						// any inclusive patterns, then with any exclusive patterns.
 						const absolutePath = path.resolve(target);
-						if (isInclusiveMatch(absolutePath) && isExclusiveMatch(absolutePath)) {
+						if (inclusionMatcher(absolutePath) && !exclusionMatcher(absolutePath)) {
 							ruleTargets.push({target, paths: [absolutePath]});
 						}
 					}
