@@ -93,3 +93,10 @@ being ignored by the scanner, since dependent modules may have TypeScript files 
 Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
 used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
 property, and add `!**/bower_components/**` to exclude Bower dependencies.
+
+### The `scanner:run` command throws a ParseException when executing against my Visualforce files as target.
+
+Please check if the affected Visualforce pages/components render correctly.
+
+If it does, check if it has an HTML tag that has an attribute with a dot? PMD has an [open issue](https://github.com/pmd/pmd/issues/2765) and we are working with them to fix it.
+If this is a new issue, please let us know.
