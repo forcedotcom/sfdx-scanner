@@ -64,12 +64,6 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_TYPESCRIPT;
 	}
 
-	isRuleKeySupported(): boolean {
-		// Javascript rules written for only eslint work for typescript as well,
-		// though they require the parser information that is specific to typescript.
-		return true;
-	}
-
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string, any> {
 		return ES_PLUS_TS_CONFIG;

@@ -42,10 +42,6 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_LWC;
 	}
 
-	isRuleKeySupported(): boolean {
-		return true;
-	}
-
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string,any> {
 		return ES_CONFIG;

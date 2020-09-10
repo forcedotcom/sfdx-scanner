@@ -45,9 +45,6 @@ export interface EslintStrategy {
 	/** Get languages supported by engine */
 	getLanguages(): string[];
 
-	/** Find if a rule name is supported by the engine based on its rule key */
-	isRuleKeySupported(key: string): boolean;
-
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
 
@@ -125,10 +122,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		allRules.forEach((esRule: ESRule, key: string) => {
 			const docs = esRule.meta.docs;
 
-			if (!this.strategy.isRuleKeySupported(key)) {
-				return;
-			}
-
 			const rule = this.processRule(key, docs);
 			if (rule) {
 				// Add only rules supported by the engine implementation
@@ -150,25 +143,19 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private processRule(key: string, docs: any): Rule {
-
-		if (this.strategy.isRuleKeySupported(key)) {
-
-			// Massage eslint rule into Catalog rule format
-			const rule = {
-				engine: this.getName(),
-				sourcepackage: this.getName(),
-				name: key,
-				description: docs.description,
-				categories: [docs.category],
-				rulesets: [docs.category],
-				languages: [...this.strategy.getLanguages()],
-				defaultEnabled: docs.recommended,
-				url: docs.url
-			};
-			return rule;
-		}
-
-		return null;
+		// Massage eslint rule into Catalog rule format
+		const rule = {
+			engine: this.getName(),
+			sourcepackage: this.getName(),
+			name: key,
+			description: docs.description,
+			categories: [docs.category],
+			rulesets: [docs.category],
+			languages: [...this.strategy.getLanguages()],
+			defaultEnabled: docs.recommended,
+			url: docs.url
+		};
+		return rule;
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
@@ -248,9 +235,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		let ruleCount = 0;
 
 		for (const rule of rules) {
-			if (!this.strategy.isRuleKeySupported(rule.name)) {
-				continue;
-			}
 			// Find if a rule is relevant
 			if (rule.engine === this.getName()) {
 				// Select rules by setting them to "error" level in eslint config

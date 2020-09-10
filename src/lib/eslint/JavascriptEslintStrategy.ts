@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {TYPESCRIPT_RULE_PREFIX, ENGINE, LANGUAGE} from '../../Constants';
+import {ENGINE, LANGUAGE} from '../../Constants';
 import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 
@@ -37,10 +37,6 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 
 	getEngine(): ENGINE {
 		return ENGINE.ESLINT;
-	}
-
-	isRuleKeySupported(key: string): boolean {
-		return !key.startsWith(TYPESCRIPT_RULE_PREFIX);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
