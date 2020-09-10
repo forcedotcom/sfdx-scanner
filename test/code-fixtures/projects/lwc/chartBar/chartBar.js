@@ -1,9 +1,13 @@
-import { LightningElement, api } from 'lwc';
+import {LightningElement, api} from "lwc";
 
 export default class ChartBar extends LightningElement {
+
     @api percentage;
 
-    get style() {
+    get style () {
+
         return `width: ${this.percentage}%`;
+
     }
+
 }

@@ -617,11 +617,19 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'invalid-lwc'),
-					'--format', 'csv',
+					'--format', 'json',
 					'--engine', 'eslint-lwc'
 				])
 				.it('LWC Engine detects LWC errors', ctx => {
-					expect(ctx.stdout).to.contain('Invalid public property initialization for "foo"');
+					const results = JSON.parse(ctx.stdout);
+					expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
+						.to.be.an('Array').that.has.length(1);
+					const messages = results[0].violations.map(v => v.message);
+					const expectedMessages = ['Invalid public property initialization for "foo". Boolean public properties should not be initialized to "true", consider initializing the property to "false".',
+						`'Foo' is defined but never used.`];
+					for (const expectedMessage of expectedMessages) {
+						expect(messages).to.contain(expectedMessage);
+					}
 				});
 		});
 
@@ -873,7 +881,7 @@ describe('scanner:run', function () {
 				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 				const implicitMessages = violations[0].match(regex);
-				expect(implicitMessages || []).to.have.lengthOf(26, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				expect(implicitMessages || []).to.have.lengthOf(33, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 			});
 	});
 });

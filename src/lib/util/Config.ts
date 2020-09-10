@@ -4,6 +4,7 @@ import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
 import { Controller } from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -33,6 +34,7 @@ export const DEFAULT_CONFIG: ConfigContent = {
 			targetPatterns: [
 				"**/*.js",
 				"!**/node_modules/**",
+				"!**/bower_components/**"
 			]
 		},
 		{
@@ -47,7 +49,8 @@ export const DEFAULT_CONFIG: ConfigContent = {
             name: ENGINE.ESLINT_TYPESCRIPT,
             targetPatterns: [
                 "**/*.ts",
-                "!**/node_modules/**"
+                "!**/node_modules/**",
+				"!**/bower_components/**"
 			]
         }
 	]
@@ -196,7 +199,7 @@ export class Config {
 		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
 		if (!this.configContent['engines'] && this.configContent['javaHome']) {
 			// Prior version.  Migrate.
-			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
+			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, deepCopy(DEFAULT_CONFIG)) );
 		}
 	}
 

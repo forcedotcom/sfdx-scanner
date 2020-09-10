@@ -5,6 +5,7 @@ import {ENGINE, LANGUAGE} from '../../Constants';
 import {RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
+import {deepCopy} from '../../lib/util/Utils';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -16,11 +17,13 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
-	"extends": [
-		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:@typescript-eslint/eslint-recommended"
-	],
+	"baseConfig": {
+		"extends": [
+			"eslint:recommended",
+			"plugin:@typescript-eslint/recommended",
+			"plugin:@typescript-eslint/eslint-recommended"
+		]
+	},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -61,12 +64,6 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_TYPESCRIPT;
 	}
 
-	isRuleKeySupported(): boolean {
-		// Javascript rules written for only eslint work for typescript as well,
-		// though they require the parser information that is specific to typescript.
-		return true;
-	}
-
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	getCatalogConfig(): Record<string, any> {
 		return ES_PLUS_TS_CONFIG;
@@ -91,7 +88,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 		const config = {};
 
-		Object.assign(config, ES_PLUS_TS_CONFIG);
+		Object.assign(config, deepCopy(ES_PLUS_TS_CONFIG));
 
 		// Enable typescript by registering its project config file
 		config["parserOptions"].project = tsconfigPath;
