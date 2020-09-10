@@ -5,13 +5,16 @@
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
+		"@lwc/eslint-plugin-lwc": "^0.10.0",
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
 		"@oclif/errors": "^1",
-		"@salesforce/command": "^2.1.4",
+		"@salesforce/command": "^3",
 		"@salesforce/core": "^2.1.6",
+		"@salesforce/eslint-config-lwc": "^0.7.0",
 		"@typescript-eslint/eslint-plugin": "^2.21.0",
 		"@typescript-eslint/parser": "^2.21.0",
+		"babel-eslint": "^10.1.0",
 		"eslint": "^6.8.0",
 		"find-java-home": "^1.1.0",
 		"globby": "^11.0.0",
@@ -21,7 +24,7 @@
 		"picomatch": "^2.2.2",
 		"reflect-metadata": "^0.1.13",
 		"ts-node": "^8",
-		"tslib": "^1",
+		"tslib": "^2",
 		"tsyringe": "^4.1.0",
 		"typescript": "^3.8.2",
 		"untildify": "^4.0.0",
@@ -31,9 +34,9 @@
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
 		"@oclif/dev-cli": "^1",
-		"@oclif/plugin-help": "^2",
+		"@oclif/plugin-help": "^3",
 		"@oclif/test": "^1",
-		"@salesforce/dev-config": "1.5.0",
+		"@salesforce/dev-config": "^1.5.0",
 		"@salesforce/ts-sinon": "^1.1.2",
 		"@types/chai": "^4",
 		"@types/mocha": "^7.0.2",
@@ -41,8 +44,8 @@
 		"@types/node": "^13.11.1",
 		"chai": "^4",
 		"eslint": "^6.8.0",
-		"mocha": "^7.2.0",
-		"mocha-junit-reporter": "^1.23.3",
+		"mocha": "^8.1.1",
+		"mocha-junit-reporter": "^2.0.0",
 		"nyc": "^15.0.0",
 		"sinon": "^9.0.0",
 		"tildify": "^2.0.0",
@@ -81,7 +84,10 @@
 		},
 		"devPlugins": [
 			"@oclif/plugin-help"
-		]
+		],
+		"hooks": {
+			"init": "./src/lib/hooks/init"
+		}
 	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {

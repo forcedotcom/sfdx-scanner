@@ -1,12 +1,16 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {ENGINE} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
+import {uxEvents} from "../ScannerEvents";
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
 
 interface PmdViolation extends Element {
 	attributes: {
@@ -22,7 +26,8 @@ interface PmdViolation extends Element {
 }
 
 export class PmdEngine implements RuleEngine {
-	public static NAME: string = ENGINE.PMD.valueOf();
+	private static THIS_ENGINE = ENGINE.PMD;
+	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
 
 	private logger: Logger;
 	private config: Config;
@@ -31,10 +36,10 @@ export class PmdEngine implements RuleEngine {
 	private initialized: boolean;
 
 	public getName(): string {
-		return PmdEngine.NAME;
+		return PmdEngine.ENGINE_NAME;
 	}
 
-	/* eslint-disable @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	getTargetPatterns(path?: string): Promise<string[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
@@ -56,7 +61,7 @@ export class PmdEngine implements RuleEngine {
 	}
 
 	public isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
+		return this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
 	}
 
 	getCatalog(): Promise<Catalog> {
@@ -68,6 +73,7 @@ export class PmdEngine implements RuleEngine {
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
 	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
 	 */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		if (ruleGroups.length === 0) {
 			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
@@ -83,43 +89,53 @@ export class PmdEngine implements RuleEngine {
 				return [];
 			}
 			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, rule groups: ${ruleGroups.length}`);
-			const [violationsFound, stdout] = await PmdWrapper.execute(targetPaths.join(','), ruleGroups.map(np => np.paths).join(','));
-			if (violationsFound) {
-				this.logger.trace('Found rule violations.');
-
-				// Violations are in an XML document somewhere in stdout, which we'll need to find and process.
-				const xmlStart = stdout.indexOf('<?xml');
-				const xmlEnd = stdout.lastIndexOf('</pmd>') + 6;
-				return this.xmlToRuleResults(stdout.slice(xmlStart, xmlEnd));
-			} else {
-				return [];
-			}
+			const stdout = await PmdWrapper.execute(targetPaths.join(','), ruleGroups.map(np => np.paths).join(','));
+			return this.processStdOut(stdout);
 		} catch (e) {
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(e.message || e);
 		}
 	}
 
-	protected xmlToRuleResults(pmdXml: string): RuleResult[] {
-		// If the results were just an empty string, we can return it.
-		if (pmdXml === '') {
-			this.logger.trace('No PMD results to convert');
-			return [];
+	/**
+	 * stdout returned from PMD contains an XML payload that may be surrounded by other text.
+	 * 'file' nodes from the XML are returned as rows of output to the user. 'configerror', 'error',
+	 * and 'suppressedviolation' nodes are emitted as warnings from the CLI.
+	 */
+	protected processStdOut(stdout: string): RuleResult[] {
+		let violations: RuleResult[] = [];
+
+		// Try to find the xml payload. It begins with '<?xml' and ends with '</pmd>'
+		const pmdEnd = '</pmd>';
+		const xmlStart = stdout.indexOf('<?xml');
+		const xmlEnd = stdout.lastIndexOf(pmdEnd);
+		if (xmlStart != -1 && xmlEnd != -1) {
+			const pmdXml = stdout.slice(xmlStart, xmlEnd + pmdEnd.length);
+			const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true});
+
+			const elements =  pmdJson.elements[0].elements;
+			if (elements) {
+				this.emitErrorsAndWarnings(elements);
+				violations = this.xmlToRuleResults(elements);
+			}
 		}
 
-		const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true});
-
-		// Only provide results for nodes that are files. Other nodes are filtered out and logged.
-		const fileNodes = pmdJson.elements[0].elements.filter(e => 'file' === e.name);
-		const otherNodes = pmdJson.elements[0].elements.filter(e => 'file' !== e.name);
-		for (const otherNode of otherNodes) {
-			this.logger.trace(`Skipping non-file node ${JSON.stringify(otherNode)}`);
+		if (violations.length > 0) {
+			this.logger.trace('Found rule violations.');
 		}
 
-		return fileNodes.map(
+		return violations;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	protected xmlToRuleResults(elements: any): RuleResult[] {
+		// Provide results for nodes that are files.
+		const files = elements.filter(e => 'file' === e.name);
+
+		return files.map(
 			(f): RuleResult => {
 				return {
-					engine: PmdEngine.NAME,
+					engine: PmdEngine.ENGINE_NAME,
 					fileName: f.attributes['name'],
 					violations: f.elements.map(
 						(v: PmdViolation) => {
@@ -139,6 +155,60 @@ export class PmdEngine implements RuleEngine {
 				};
 			}
 		);
+	}
+
+	/**
+	 * The PMD report contains a mix of violations and other issues. This method converts
+	 * these other issues intoto ux events.
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private emitErrorsAndWarnings(elements: any): void {
+		// Provide results for nodes that aren't files.
+		const nodes = elements.filter(e => 'file' !== e.name);
+
+		// See https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/report_2_0_0.xsd
+		// for node schema
+		for (const node of nodes) {
+			const attributes = node.attributes;
+			switch (node.name) {
+				case "error":
+					uxEvents.emit(
+						"warning-always",
+						messages.getMessage("warning.pmdSkippedFile", [
+							attributes.filename,
+							attributes.msg
+						])
+					);
+					break;
+
+				case "suppressedviolation":
+					uxEvents.emit(
+						"warning-always",
+						messages.getMessage("warning.pmdSuppressedViolation", [
+							attributes.filename,
+							attributes.msg,
+							attributes.suppressiontype,
+							attributes.usermsg
+						])
+					);
+					break;
+
+				case "configerror":
+					uxEvents.emit(
+						"warning-always",
+						messages.getMessage("warning.pmdConfigError", [
+							attributes.rule,
+							attributes.msg
+						])
+					);
+					break;
+
+				default:
+					this.logger.warn(
+						`Unknown non-file node ${JSON.stringify(node)}`
+					);
+			}
+		}
 	}
 
 	private toText(v: PmdViolation): string {

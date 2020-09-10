@@ -1,7 +1,7 @@
 import {flags, SfdxCommand} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import path = require('path');
 import untildify = require('untildify');
 
@@ -59,7 +59,7 @@ export default class Add extends SfdxCommand {
 		if (this.flags.language.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.languageCannotBeEmpty', []);
 		}
-		if (this.flags.path.includes('')) {
+		if (this.flags.path.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.pathCannotBeEmpty', []);
 		}
 	}

@@ -3,7 +3,9 @@ import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage, ESReport } fr
 import { expect } from 'chai';
 import { CLIEngine } from 'eslint';
 import Mockito = require('ts-mockito');
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
+TestOverrides.initializeTestSetup();
 
 const engineName = 'TestHarnessEngine';
 class TestHarnessEngine extends BaseEslintEngine {
@@ -13,6 +15,10 @@ class TestHarnessEngine extends BaseEslintEngine {
 
 	public async initializeContents(strategy: EslintStrategy, baseDependencies: StaticDependencies) {
 		await super.initializeContents(strategy, baseDependencies);
+	}
+
+	public getName(): string {
+		return engineName;
 	}
 }
 
@@ -30,7 +36,6 @@ describe('Tests for BaseEslintEngine', () => {
 			it('should not execute when target is empty', async () => {
 
 				//instantiate abstract engine
-				Mockito.when(MockStrategy.getName()).thenReturn(engineName);
 				const mockStrategy = Mockito.instance(MockStrategy);
 				const engine = await createDummyEngine(mockStrategy);
 
@@ -78,7 +83,6 @@ describe('Tests for BaseEslintEngine', () => {
 
 			it('should not execute when rules are empty', async () => {
 				// instantiate abstract engine
-				Mockito.when(MockStrategy.getName()).thenReturn(engineName);
 				const mockStrategy = Mockito.instance(MockStrategy);
 				const engine = await createDummyEngine(mockStrategy);
 
@@ -96,7 +100,6 @@ describe('Tests for BaseEslintEngine', () => {
 				const differentEngine = 'differentEngineName';
 				const irrelevantRule = getDummyRule(differentEngine);
 
-				Mockito.when(MockStrategy.getName()).thenReturn(engineName);
 				const mockStrategy = Mockito.instance(MockStrategy);
 				const engine = await createDummyEngine(mockStrategy);
 
@@ -131,8 +134,6 @@ describe('Tests for BaseEslintEngine', () => {
 					const cliEngineMock = getDummyCliEngine(esRuleMap, esReport);
 					const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
 					const engine = await createAbstractEngine(target, StaticDependenciesMock);
-
-					Mockito.when(MockStrategy.convertLintMessage("filePath", message)).thenReturn(message);
 
 					const results = await engine.run(
 						[getDummyRuleGroup()],
@@ -238,9 +239,7 @@ function mockStaticDependencies(target: RuleTarget, cliEngineMock: any) {
 }
 
 async function createAbstractEngine(target: RuleTarget, StaticDependenciesMock: StaticDependencies) {
-	Mockito.when(MockStrategy.getName()).thenReturn(engineName);
 	Mockito.when(MockStrategy.filterUnsupportedPaths(target.paths)).thenReturn(target.paths);
-	Mockito.when(MockStrategy.isRuleKeySupported(Mockito.anyString())).thenReturn(true);
 	Mockito.when(MockStrategy.getLanguages()).thenReturn(['language']);
 
 	const engine = await createDummyEngine(Mockito.instance(MockStrategy), Mockito.instance(StaticDependenciesMock));

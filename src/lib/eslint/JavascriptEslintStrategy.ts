@@ -1,11 +1,12 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {TYPESCRIPT_RULE_PREFIX, ENGINE, LANGUAGE} from '../../Constants';
-import {Config} from '../util/Config';
-import {Controller} from '../../ioc.config';
+import {ENGINE, LANGUAGE} from '../../Constants';
+import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 
 const ES_CONFIG = {
-	"extends": ["eslint:recommended"],
+	"baseConfig": {
+		"extends": ["eslint:recommended"]
+	},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -17,36 +18,25 @@ const ES_CONFIG = {
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
-	private static ENGINE_NAME = ENGINE.ESLINT.valueOf();
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
 	protected logger: Logger;
-	private config: Config;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
-		this.logger = await Logger.child(this.getName());
-		this.config = await Controller.getConfig();
+		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.initialized = true;
-	}
-
-	isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.getName());
 	}
 
 	getLanguages(): string[] {
 		return JavascriptEslintStrategy.LANGUAGES;
 	}
 
-	getName(): string {
-		return JavascriptEslintStrategy.ENGINE_NAME;
-	}
-
-	isRuleKeySupported(key: string): boolean {
-		return !key.startsWith(TYPESCRIPT_RULE_PREFIX);
+	getEngine(): ENGINE {
+		return ENGINE.ESLINT;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -54,7 +44,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ES_CONFIG;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
 	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
 		//TODO: find a way to override with eslintrc if Config asks for it
 		return ES_CONFIG;
@@ -65,13 +55,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return paths;
 	}
 
-	async getTargetPatterns(): Promise<string[]> {
-
-		// TODO: extract target patterns from overridden config, if available
-		return this.config.getTargetPatterns(ENGINE.ESLINT);
-	}
-
-	convertLintMessage(fileName: string, message: string): string {
-		return message;
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
+		// Intentionally left blank
 	}
 }

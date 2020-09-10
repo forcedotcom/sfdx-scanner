@@ -1,6 +1,6 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {injectable, injectAll} from 'tsyringe';
+import {injectable} from 'tsyringe';
 import {CATALOG_FILE} from '../../Constants';
 import {Catalog, Rule, RuleEvent, RuleGroup} from '../../types';
 import {OutputProcessor} from '../pmd/OutputProcessor';
@@ -9,7 +9,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
 import {RuleCatalog} from './RuleCatalog';
 import {RuleEngine} from './RuleEngine';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
 
 @injectable()
 export default class LocalCatalog implements RuleCatalog {
@@ -19,12 +19,8 @@ export default class LocalCatalog implements RuleCatalog {
 	private catalog: Catalog;
 	private sfdxScannerPath: string;
 
-	private readonly engines: RuleEngine[];
+	private engines: RuleEngine[];
 	private initialized: boolean;
-
-	constructor(@injectAll("RuleEngine") engines?: RuleEngine[]) {
-		this.engines = engines;
-	}
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -32,10 +28,9 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 		this.logger = await Logger.child("LocalCatalog");
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
-
-		for (const engine of this.engines) {
-			await engine.init();
-		}
+		// The catalog consists of all engines, even those that may be disabled.
+		// This is currently necessary because the user can specify a disabled engine, revisit when we don't overwrite the catalog on each run.
+		this.engines = await Controller.getAllEngines();
 
 		this.outputProcessor = await OutputProcessor.create({}); // TODO should be an injected service
 		this.catalog = await this.getCatalog();
@@ -47,7 +42,7 @@ export default class LocalCatalog implements RuleCatalog {
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
 	 */
-	public async getRuleGroupsMatchingFilters(filters: RuleFilter[]): Promise<RuleGroup[]> {
+	public getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
@@ -77,7 +72,7 @@ export default class LocalCatalog implements RuleCatalog {
 		return foundPaths;
 	}
 
-	async getRulesMatchingFilters(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {
 		this.logger.trace(`Fetching rules that match the criteria ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		try {

@@ -1,14 +1,15 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
-import {inject, injectable, injectAll} from 'tsyringe';
+import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
-import {RuleFilter} from './RuleFilter';
+import {FilterType, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
+import {Controller} from '../Controller';
 import globby = require('globby');
 import picomatch = require('picomatch');
 import path = require('path');
@@ -18,16 +19,13 @@ export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
 
 	// noinspection JSMismatchedCollectionQueryUpdate
-	private readonly engines: RuleEngine[];
 	private readonly catalog: RuleCatalog;
 	private fileHandler: FileHandler;
 	private initialized: boolean;
 
 	constructor(
-		@injectAll("RuleEngine") engines?: RuleEngine[],
 		@inject("RuleCatalog") catalog?: RuleCatalog
 	) {
-		this.engines = engines;
 		this.catalog = catalog;
 	}
 
@@ -37,15 +35,12 @@ export class DefaultRuleManager implements RuleManager {
 		}
 		this.logger = await Logger.child('DefaultManager');
 		this.fileHandler = new FileHandler();
-		for (const engine of this.engines) {
-			await engine.init();
-		}
 		await this.catalog.init();
 
 		this.initialized = true;
 	}
 
-	async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[] {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
@@ -53,10 +48,18 @@ export class DefaultRuleManager implements RuleManager {
 		let results: RuleResult[] = [];
 
 		// Derives rules from our filters to feed the engines.
-		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters);
-		const rules: Rule[] = await this.catalog.getRulesMatchingFilters(filters);
+		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
+		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		for (const e of this.engines) {
+		let filteredNames = null;
+		for (const filter of filters) {
+			if (filter.filterType === FilterType.ENGINE) {
+				filteredNames = filter.filterValues;
+				break;
+			}
+		}
+		const engines: RuleEngine[] = await (filteredNames ? Controller.getFilteredEngines(filteredNames) : Controller.getEnabledEngines());
+		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());

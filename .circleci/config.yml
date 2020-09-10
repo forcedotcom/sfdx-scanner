@@ -53,6 +53,31 @@ jobs:
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
 
+  self-evaluation:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      - run: mkdir test-results
+
+      - run:
+          name: "list rules"
+          command: bin/run scanner:rule:list
+
+      - run:
+          name: "self-evaluate"
+          command: |
+            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
+          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
+          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
+            
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
+
   unpackaged-sanity:
     executor:
       name: win/default # executor type
@@ -153,11 +178,14 @@ workflows:
       - unpackaged-sanity:
           requires:
             - build
+      - self-evaluation:
+          requires:
+            - build
       - publish-latest:
           # This job should only run after 'build' finishes successfully.
           requires:
             - build
-            - unpackaged-sanity
+            - self-evaluation
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
