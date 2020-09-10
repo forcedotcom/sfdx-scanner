@@ -8,6 +8,7 @@ import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import { fail } from 'assert';
+import {RuleResult, RuleViolation} from '../../../src/types';
 
 const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
 const CATALOG_FIXTURE_RULE_COUNT = 15;
@@ -202,9 +203,18 @@ describe('TypescriptEslint Strategy', () => {
 			});
 
 			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
-				const output = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
-				expect(output).to.contain("test/code-fixtures/projects/invalid-ts/src/notSpecifiedInTsConfig.ts' does not reside in a location that is included by your tsconfig.json 'include' attribute.");
-				expect(output).to.not.contain('Parsing error: \\"parserOptions.project\\" has been set');
+				const {results} = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+				// Parse the json in order to make the string match easier.
+				// There should be a single violation with a single message
+				const ruleResults: RuleResult[] = JSON.parse(results.toString());
+				expect(ruleResults).to.have.lengthOf(1);
+				const ruleResult: RuleResult = ruleResults[0];
+				expect(ruleResult.violations).to.have.lengthOf(1);
+				const violation: RuleViolation = ruleResult.violations[0];
+				const message = violation.message;
+				const thePath = path.join('test', 'code-fixtures', 'projects', 'invalid-ts', 'src', 'notSpecifiedInTsConfig.ts');
+				expect(message).to.contain(`${thePath}' does not reside in a location that is included by your tsconfig.json 'include' attribute.`);
+				expect(message).to.not.contain('Parsing error: \\"parserOptions.project\\" has been set');
 			});
 		});
 	});

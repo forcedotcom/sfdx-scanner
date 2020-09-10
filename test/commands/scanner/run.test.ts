@@ -1,40 +1,42 @@
 import {expect, test} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-import {SFDX_SCANNER_PATH} from '../../../src/Constants';
-import {Controller} from '../../../src/ioc.config';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
 import events = require('../../../messages/EventKeyTemplates');
 
-const CATALOG_OVERRIDE = 'RunTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'RunTestCustomPaths.json';
-
 Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
-// Before our tests, delete any existing catalog and/or custom path associated with our override.
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
-}
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
-}
-
-const runTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
 
 describe('scanner:run', function () {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
+	before(() => TestOverrides.initializeTestSetup());
 
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('E2E', () => {
 		describe('Output Type: XML', () => {
+			function validateXmlOutput(xml: string): void {
+				// We'll split the output by the <violation> tag, so we can get individual violations.
+				const violations = xml.split('<violation');
+				// The first list item is going to be the header, so we need to pull that off.
+				violations.shift();
+				// There should be four violations.
+				expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
+				// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+				// expected order.
+				expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+			}
+
 			describe('Test Case: Running rules against a single file', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -43,21 +45,10 @@ describe('scanner:run', function () {
 						'--format', 'xml'
 					])
 					.it('When the file contains violations, they are logged out as an XML', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						// There should be four violations.
-						expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						validateXmlOutput(ctx.stdout);
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -66,21 +57,10 @@ describe('scanner:run', function () {
 						'--format', 'xml'
 					])
 					.it('Target path may be relative or absolute', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						// There should be four violations.
-						expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						validateXmlOutput(ctx.stdout);
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -94,7 +74,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running rules against multiple specified files', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -108,8 +88,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -132,7 +112,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running rules against a folder', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -147,8 +127,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -171,7 +151,17 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Running multiple rulesets at once', () => {
-				runTest
+				test
+				.stdout()
+				.stderr()
+				.command(['scanner:run', '--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+				'--ruleset', 'ApexUnit',
+				'--format', 'xml'])
+				.it('--ruleset option shows deprecation warning', ctx => {
+					expect(ctx.stderr).contains(runMessages.getMessage('rulesetDeprecation'));
+				});
+
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -203,7 +193,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: Writing XML results to a file', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -221,24 +211,33 @@ describe('scanner:run', function () {
 						// Verify that the file we wanted was actually created.
 						expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
 						const fileContents = fs.readFileSync('testout.xml').toString();
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = fileContents.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						// There should be four violations.
-						expect(violations.length).to.equal(4, 'Should be four violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						validateXmlOutput(fileContents);
 					});
 			});
 		});
 
 		describe('Output Type: CSV', () => {
-			runTest
+			function validateCsvOutput(csv: string): void {
+				const rows = csv.trim().split('\n');
+				rows.shift();
+
+				// There should be four rows.
+				expect(rows.length).to.equal(4, 'Should be four violations detected');
+
+				// Split each row by commas, so we'll have each cell.
+				const data = rows.map(val => val.split(','));
+				// Verify that each row looks approximately right.
+				expect(data[0][3]).to.equal('"68"', 'Violation #1 should occur on the expected line');
+				expect(data[1][3]).to.equal('"72"', 'Violation #2 should occur on the expected line');
+				expect(data[2][3]).to.equal('"76"', 'Violation #3 should occur on the expected line');
+				expect(data[3][3]).to.equal('"80"', 'Violation #4 should occur on the expected line');
+				expect(data[0][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
+				expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
+				expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
+				expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
+		}
+
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -248,26 +247,10 @@ describe('scanner:run', function () {
 				])
 				.it('Properly writes CSV to console', ctx => {
 					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					const rows = ctx.stdout.trim().split('\n');
-					rows.shift();
-
-					// There should be four rows.
-					expect(rows.length).to.equal(4, 'Should be four violations detected');
-
-					// Split each row by commas, so we'll have each cell.
-					const data = rows.map(val => val.split(','));
-					// Verify that each row looks approximately right.
-					expect(data[0][3]).to.equal('"68"', 'Violation #1 should occur on the expected line');
-					expect(data[1][3]).to.equal('"72"', 'Violation #2 should occur on the expected line');
-					expect(data[2][3]).to.equal('"76"', 'Violation #3 should occur on the expected line');
-					expect(data[3][3]).to.equal('"80"', 'Violation #4 should occur on the expected line');
-					expect(data[0][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
-					expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
-					expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
-					expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
+					validateCsvOutput(ctx.stdout);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -289,27 +272,10 @@ describe('scanner:run', function () {
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
 					const fileContents = fs.readFileSync('testout.csv').toString();
-					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					const rows = fileContents.trim().split('\n');
-					rows.shift();
-
-					// There should be four rows.
-					expect(rows.length).to.equal(4, 'Should be four violations detected');
-
-					// Split each row by commas, so we'll have each cell.
-					const data = rows.map(val => val.split(','));
-					// Verify that each row looks approximately right.
-					expect(data[0][3]).to.equal('"68"', 'Violation #1 should occur on the expected line');
-					expect(data[1][3]).to.equal('"72"', 'Violation #2 should occur on the expected line');
-					expect(data[2][3]).to.equal('"76"', 'Violation #3 should occur on the expected line');
-					expect(data[3][3]).to.equal('"80"', 'Violation #4 should occur on the expected line');
-					expect(data[0][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #1 should be of the expected type');
-					expect(data[1][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #2 should be of the expected type');
-					expect(data[2][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #3 should be of the expected type');
-					expect(data[3][5]).to.equal('"ApexUnitTestClassShouldHaveAsserts"', 'Violation #4 should be of the expected type');
+					validateCsvOutput(fileContents);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -321,7 +287,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -342,8 +308,114 @@ describe('scanner:run', function () {
 				});
 		});
 
+		describe('Output Type: HTML', () => {
+			const outputFile = 'testout.html';
+			function validateHtmlOutput(html: string): void {
+				const result = html.match(/const violations = (\[.*);/);
+				expect(result, html).to.be.not.null;
+				expect(result[1]).to.be.not.null;
+				const rows = JSON.parse(result[1]);
+
+				// There should be four rows.
+				expect(rows.length).to.equal(4);
+
+				// Verify that each row looks approximately right.
+				expect(rows[0]['line']).to.equal('68', 'Violation #1 should occur on the expected line');
+				expect(rows[1]['line']).to.equal('72', 'Violation #2 should occur on the expected line');
+				expect(rows[2]['line']).to.equal('76', 'Violation #3 should occur on the expected line');
+				expect(rows[3]['line']).to.equal('80', 'Violation #4 should occur on the expected line');
+				expect(rows[0]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #1 should be of the expected type');
+				expect(rows[1]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #2 should be of the expected type');
+				expect(rows[2]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #3 should be of the expected type');
+				expect(rows[3]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #4 should be of the expected type');
+			}
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'html'
+				])
+				.it('Properly writes HTML to console', ctx => {
+					// Parse out the JSON results
+					validateHtmlOutput(ctx.stdout);
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--outfile', outputFile
+				])
+				.finally(ctx => {
+					// Regardless of what happens in the test itself, we need to delete the file we created.
+					if (fs.existsSync(outputFile)) {
+						fs.unlinkSync(outputFile);
+					}
+				})
+				.it('Properly writes HTML to file', ctx => {
+					// Verify that the correct message is displayed to user
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
+					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+
+					// Verify that the file we wanted was actually created.
+					expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
+					const fileContents = fs.readFileSync(outputFile).toString();
+					validateHtmlOutput(fileContents);
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'html'
+				])
+				.it('When no violations are detected, a message is logged to the console', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--outfile', outputFile
+				])
+				.finally(ctx => {
+					// Regardless of what happens in the test itself, we need to delete the file we created.
+					if (fs.existsSync(outputFile)) {
+						fs.unlinkSync(outputFile);
+					}
+				})
+				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
+					expect(fs.existsSync(outputFile)).to.be.false;
+				});
+		});
+
 		describe('Output Type: JSON', () => {
-			runTest
+			function validateJsonOutput(json: string): void {
+				const output = JSON.parse(json);
+				// Only PMD rules should have run.
+				expect(output.length).to.equal(1, 'Should only be violations from one engine');
+				expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
+
+				expect(output[0].violations.length).to.equal(4, 'Should be 4 violations');
+				expect(output[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
+				expect(output[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
+				expect(output[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
+				expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+			}
+
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -352,19 +424,10 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('Properly writes JSON to console', ctx => {
-					const output = JSON.parse(ctx.stdout);
-					// Only PMD rules should have run.
-					expect(output.length).to.equal(1, 'Should only be violations from one engine');
-					expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
-
-					expect(output[0].violations.length).to.equal(4, 'Should be 4 violations');
-					expect(output[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
-					expect(output[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
-					expect(output[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
-					expect(output[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+					validateJsonOutput(ctx.stdout);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -385,19 +448,11 @@ describe('scanner:run', function () {
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.json')).to.equal(true, 'The command should have created the expected output file');
-					const fileContents = JSON.parse(fs.readFileSync('testout.json').toString());
-					// Only PMD rules should have run.
-					expect(fileContents.length).to.equal(1, 'Should only be violations from one engine');
-					expect(fileContents[0].engine).to.equal('pmd', 'Engine should be PMD');
-
-					expect(fileContents[0].violations.length).to.equal(4, 'Should be 4 violations');
-					expect(fileContents[0].violations[0].line).to.equal('68', 'Violation #1 should occur on the expected line');
-					expect(fileContents[0].violations[1].line).to.equal('72', 'Violation #2 should occur on the expected line');
-					expect(fileContents[0].violations[2].line).to.equal('76', 'Violation #3 should occur on the expected line');
-					expect(fileContents[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
+					const fileContents = fs.readFileSync('testout.json').toString();
+					validateJsonOutput(fileContents);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -409,7 +464,7 @@ describe('scanner:run', function () {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -433,7 +488,7 @@ describe('scanner:run', function () {
 
 		describe('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -453,7 +508,7 @@ describe('scanner:run', function () {
 					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -467,7 +522,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('--json flag', () => {
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -490,7 +545,7 @@ describe('scanner:run', function () {
 					expect(result[0].violations[3].line).to.equal('80', 'Violation #4 should occur on the expected line');
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -516,7 +571,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -554,7 +609,7 @@ describe('scanner:run', function () {
 					expect(violations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run',
@@ -569,9 +624,48 @@ describe('scanner:run', function () {
 				});
 		});
 
+		describe('--violations-cause-error flag', () => {
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AbstractPriceRuleEvaluatorTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'xml',
+					'--violations-cause-error'
+				])
+				.it('When no violations are found, no error is thrown', ctx => {
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should not be present');
+				});
+
+			test
+				.stdout()
+				.stderr()
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'),
+					'--ruleset', 'ApexUnit',
+					'--format', 'table',
+					'--violations-cause-error'
+				])
+				.it('When violations are found, an error is thrown', ctx => {
+					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+					// That will leave us with just the rows.
+					const rows = ctx.stdout.trim().split('\n');
+
+					// Assert rows have the right error on the right line.
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:68") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:72") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:76") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("AccountServiceTests.cls:80") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(ctx.stderr).to.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should be present');
+				});
+		});
+
 		describe('Dynamic Input', () => {
 			describe('Test Case: Running rules against a glob', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -587,8 +681,8 @@ describe('scanner:run', function () {
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
 						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test\/code-fixtures\/apex\/AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test\/code-fixtures\/apex\/InstallProcessorTests.cls"/);
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -612,7 +706,7 @@ describe('scanner:run', function () {
 
 			describe('Test Case: Using ~/ shorthand in target', () => {
 				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'AccountServiceTests.cls'));
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -639,7 +733,7 @@ describe('scanner:run', function () {
 
 		describe('Edge Cases', () => {
 			describe('Test case: No output specified', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -662,7 +756,7 @@ describe('scanner:run', function () {
 			});
 
 			describe('Test Case: No rules specified', () => {
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -679,7 +773,7 @@ describe('scanner:run', function () {
 						expect(violations.length).to.equal(84, 'Should be 84 violations detected in the file');
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -693,14 +787,14 @@ describe('scanner:run', function () {
 						// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 						const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 						const implicitMessages = violations[0].match(regex);
-						expect(implicitMessages || []).to.have.lengthOf(22, 'Should be 22 log entries for implicitly added categories from pmd and eslint');
+						expect(implicitMessages || []).to.have.lengthOf(25, 'Should be 25 log entries for implicitly added categories from pmd and eslint');
 					});
 			});
 
 			describe('Test Case: Evaluating rules against invalid code', () => {
 				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
 				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'AccountServiceTests.cls');
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -716,7 +810,7 @@ describe('scanner:run', function () {
 						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
 					});
 
-				runTest
+				test
 					.stdout()
 					.stderr()
 					.command(['scanner:run',
@@ -745,7 +839,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('Error handling', () => {
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--ruleset', 'ApexUnit', '--format', 'xml'])
@@ -753,7 +847,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.mustTargetSomething')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
@@ -761,7 +855,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeValid')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
@@ -769,7 +863,7 @@ describe('scanner:run', function () {
 					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeSupportedType')}`);
 				});
 
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
@@ -787,7 +881,7 @@ describe('scanner:run', function () {
 			after(() => {
 				process.chdir("../../../..");
 			});
-			runTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
@@ -808,7 +902,7 @@ describe('scanner:run', function () {
 	});
 
 	describe('BaseConfig Environment Tests For Javascript', () => {
-		runTest
+		test
 		.stdout()
 		.stderr()
 		.command(['scanner:run',
@@ -822,7 +916,7 @@ describe('scanner:run', function () {
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		runTest
+		test
 			.stdout()
 			.stderr()
 			.command(['scanner:run',
@@ -841,7 +935,7 @@ describe('scanner:run', function () {
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		runTest
+		test
 			.stdout()
 			.stderr()
 

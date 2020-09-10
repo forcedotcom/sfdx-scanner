@@ -1,10 +1,20 @@
 import os = require('os');
 import path = require('path');
 
-export const SFDX_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
+export interface EnvOverridable {
+	getSfdxScannerPath(): string;
+}
+
+export class ProdOverrides implements EnvOverridable {
+	public getSfdxScannerPath(): string {
+		return path.join(os.homedir(), '.sfdx-scanner');
+	}
+}
+
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
+export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 export const TYPESCRIPT_RULE_PREFIX = '@typescript';
 
@@ -21,3 +31,5 @@ export enum LANGUAGE {
 	PLSQL = 'plsql',
 	TYPESCRIPT = 'typescript'
 }
+
+export const INTERNAL_ERROR_CODE = 500;

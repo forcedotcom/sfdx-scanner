@@ -1,11 +1,12 @@
 import {expect} from 'chai';
 import {Stats} from 'fs';
-import {Controller} from '../../src/ioc.config';
+import * as TestOverrides from '../test-related-lib/TestOverrides';
 import {CustomRulePathManager} from '../../src/lib/CustomRulePathManager';
 import {PmdEngine} from '../../src/lib/pmd/PmdEngine';
 import {FileHandler} from '../../src/lib/util/FileHandler';
 import path = require('path');
 import Sinon = require('sinon');
+import { Controller } from '../../src/ioc.config';
 
 /**
  * Unit tests to verify CustomRulePathManager
@@ -21,7 +22,7 @@ describe('CustomRulePathManager tests', () => {
 	const populatedFile = '{"pmd": {"apex": ["/some/user/path/customRule.jar"],"java": ["/abc/def/ghi","/home/lib/jars"]}}';
 
 	// Most tests rely on the singletons being clean
-	beforeEach(() => Controller.reset());
+	beforeEach(() => TestOverrides.initializeTestSetup());
 
 	describe('Rule path entries creation', () => {
 
@@ -223,7 +224,7 @@ describe('CustomRulePathManager tests', () => {
 				try {
 					const manager = await Controller.createRulePathManager();
 					const language = 'apex';
-					const newPath = '/my/new/path';
+					const newPath = path.resolve('my', 'new', 'path');
 
 					// Execute test
 					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.NAME);

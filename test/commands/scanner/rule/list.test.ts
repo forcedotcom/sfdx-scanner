@@ -1,37 +1,31 @@
 import {expect, test} from '@salesforce/command/lib/test';
-import {Controller} from '../../../../src/ioc.config';
+import * as TestOverrides from '../../../test-related-lib/TestOverrides';
 import {Rule} from '../../../../src/types';
-import {SFDX_SCANNER_PATH} from '../../../../src/Constants';
+import {CATALOG_FILE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
+import { Controller } from '../../../../src/ioc.config';
+import { Messages } from '@salesforce/core';
 
-const CATALOG_OVERRIDE = 'ListTestCatalog.json';
-const CUSTOM_PATHS_OVERRIDE = 'ListTestCustomPaths.json';
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
+
+TestOverrides.initializeTestSetup();
+const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 
 function getCatalogJson(): { rules: Rule[] } {
-	const catalogPath = path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE);
+	const catalogPath = path.join(SFDX_SCANNER_PATH, CATALOG_FILE);
 	expect(fs.existsSync(catalogPath)).to.equal(true, 'Catalog file should exist');
 	return JSON.parse(fs.readFileSync(catalogPath).toString());
 }
 
-// Before our tests, delete any existing catalog and/or custom path associated with our override.
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CATALOG_OVERRIDE));
-}
-if (fs.existsSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE))) {
-	fs.unlinkSync(path.join(SFDX_SCANNER_PATH, CUSTOM_PATHS_OVERRIDE));
-}
-
-const listTest = test.env({CATALOG_FILE: CATALOG_OVERRIDE, CUSTOM_PATHS_FILE: CUSTOM_PATHS_OVERRIDE});
-
-
 describe('scanner:rule:list', () => {
 	// Reset our controller since we are using alternate file locations
-	before(() => Controller.reset());
+	before(() => TestOverrides.initializeTestSetup());
 
 	describe('E2E', () => {
 		describe('Test Case: No filters applied', () => {
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list'])
@@ -50,7 +44,7 @@ describe('scanner:rule:list', () => {
 					expect(rows).to.have.lengthOf(totalRuleCount, 'All rules should have been returned');
 				});
 
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--json'])
@@ -68,7 +62,7 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by category only', () => {
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--category', 'Best Practices', '--json'])
@@ -90,7 +84,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--category', 'Best Practices,Design', '--json'])
@@ -114,7 +108,16 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by ruleset only', () => {
-			listTest
+			
+			test
+			.stdout()
+			.stderr()
+			.command(['scanner:rule:list', '--ruleset', 'Braces'])
+			.it('--ruleset option shows deprecation warning', ctx => {
+				expect(ctx.stderr).contains(messages.getMessage('rulesetDeprecation'));
+			});
+
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--ruleset', 'Braces', '--json'])
@@ -132,7 +135,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--ruleset', 'ApexUnit,Braces', '--json'])
@@ -155,7 +158,7 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by language only', () => {
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--language', 'apex', '--json'])
@@ -172,7 +175,7 @@ describe('scanner:rule:list', () => {
 					});
 				});
 
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--language', 'apex,javascript', '--json'])
@@ -195,7 +198,7 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Applying multiple filter types', () => {
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--category', 'Best Practices', '--language', 'apex', '--json'])
@@ -216,7 +219,7 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Edge Case: No rules match criteria', () => {
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--category', 'Beebleborp'])
@@ -226,7 +229,7 @@ describe('scanner:rule:list', () => {
 					expect(rows).to.have.lengthOf(2, 'Only the header rows should have been printed');
 				});
 
-			listTest
+			test
 				.stdout()
 				.stderr()
 				.command(['scanner:rule:list', '--category', 'Beebleborp', '--json'])
