@@ -224,7 +224,7 @@ describe('CustomRulePathManager tests', () => {
 				try {
 					const manager = await Controller.createRulePathManager();
 					const language = 'apex';
-					const newPath = '/my/new/path';
+					const newPath = path.resolve('my', 'new', 'path');
 
 					// Execute test
 					const originalRulePathMap = await manager.getRulePathEntries(PmdEngine.ENGINE_NAME);

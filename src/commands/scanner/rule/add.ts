@@ -59,7 +59,8 @@ export default class Add extends SfdxCommand {
 		if (this.flags.language.length === 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.languageCannotBeEmpty', []);
 		}
-		if (this.flags.path.length === 0) {
+		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
+		if (this.flags.path && (!this.flags.path.length || this.flags.path.includes(''))) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.pathCannotBeEmpty', []);
 		}
 	}
