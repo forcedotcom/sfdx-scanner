@@ -52,7 +52,7 @@ describe('scanner:rule:describe', () => {
 		describe('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.output.multipleMatchingRules
-				.replace('{0}', '2')
+				.replace('{0}', '3')
 				.replace('{1}', 'constructor-super');
 
 			setupCommandTest
@@ -61,9 +61,9 @@ describe('scanner:rule:describe', () => {
 					// First, verify that the warning was printed at the start like it should have been.
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should be formatted correctly');
 
-					// Next, verify that there are two rule descriptions that are distinctly identified.
-					const regex = /=== Rule #1\nname:\s+constructor-super(.*\n)*=== Rule #2\nname:\s+constructor-super/g;
-					expect(ctx.stdout).to.match(regex, 'Output should contain two rules named constructor-super');
+					// Next, verify that there are rule descriptions that are distinctly identified.
+					const regex = /=== Rule #1\nname:\s+constructor-super(.*\n)*=== Rule #2\nname:\s+constructor-super(.*\n)*=== Rule #3\nname:\s+constructor-super/g;
+					expect(ctx.stdout).to.match(regex, 'Output should contain three rules named constructor-super for each eslint based engine');
 				});
 
 			// TODO: THIS TEST IS FAILING BECAUSE THE WARNING FOR DEFINITELYFAKERULE IS BEING INCLUDED IN THE WARNINGS HERE.
