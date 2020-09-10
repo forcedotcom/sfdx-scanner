@@ -7,6 +7,7 @@ import {CLIEngine} from 'eslint';
 import * as path from 'path';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -43,9 +44,6 @@ export interface EslintStrategy {
 
 	/** Get languages supported by engine */
 	getLanguages(): string[];
-
-	/** Find if a rule name is supported by the engine based on its rule key */
-	isRuleKeySupported(key: string): boolean;
 
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
@@ -124,10 +122,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		allRules.forEach((esRule: ESRule, key: string) => {
 			const docs = esRule.meta.docs;
 
-			if (!this.strategy.isRuleKeySupported(key)) {
-				return;
-			}
-
 			const rule = this.processRule(key, docs);
 			if (rule) {
 				// Add only rules supported by the engine implementation
@@ -149,25 +143,19 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private processRule(key: string, docs: any): Rule {
-
-		if (this.strategy.isRuleKeySupported(key)) {
-
-			// Massage eslint rule into Catalog rule format
-			const rule = {
-				engine: this.getName(),
-				sourcepackage: this.getName(),
-				name: key,
-				description: docs.description,
-				categories: [docs.category],
-				rulesets: [docs.category],
-				languages: [...this.strategy.getLanguages()],
-				defaultEnabled: docs.recommended,
-				url: docs.url
-			};
-			return rule;
-		}
-
-		return null;
+		// Massage eslint rule into Catalog rule format
+		const rule = {
+			engine: this.getName(),
+			sourcepackage: this.getName(),
+			name: key,
+			description: docs.description,
+			categories: [docs.category],
+			rulesets: [docs.category],
+			languages: [...this.strategy.getLanguages()],
+			defaultEnabled: docs.recommended,
+			url: docs.url
+		};
+		return rule;
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
@@ -206,7 +194,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
+				Object.assign(config, deepCopy(await this.strategy.getRunConfig(engineOptions)));
 
 				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
 				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
@@ -247,9 +235,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		let ruleCount = 0;
 
 		for (const rule of rules) {
-			if (!this.strategy.isRuleKeySupported(rule.name)) {
-				continue;
-			}
 			// Find if a rule is relevant
 			if (rule.engine === this.getName()) {
 				// Select rules by setting them to "error" level in eslint config

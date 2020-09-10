@@ -240,7 +240,6 @@ function mockStaticDependencies(target: RuleTarget, cliEngineMock: any) {
 
 async function createAbstractEngine(target: RuleTarget, StaticDependenciesMock: StaticDependencies) {
 	Mockito.when(MockStrategy.filterUnsupportedPaths(target.paths)).thenReturn(target.paths);
-	Mockito.when(MockStrategy.isRuleKeySupported(Mockito.anyString())).thenReturn(true);
 	Mockito.when(MockStrategy.getLanguages()).thenReturn(['language']);
 
 	const engine = await createDummyEngine(Mockito.instance(MockStrategy), Mockito.instance(StaticDependenciesMock));
