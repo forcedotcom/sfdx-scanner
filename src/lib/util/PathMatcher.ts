@@ -25,8 +25,8 @@ export class PathMatcher {
 		const exclusionPatterns = [];
 		patterns.forEach(p => p.startsWith('!') ? exclusionPatterns.push(p.slice(1)) : inclusionPatterns.push(p));
 
-		const inclusionMatcher = inclusionPatterns && inclusionPatterns.length ? picomatch(inclusionPatterns) : () => true;
-		const exclusionMatcher = exclusionPatterns && exclusionPatterns.length ? picomatch(exclusionPatterns) : () => false;
+		const inclusionMatcher = inclusionPatterns && inclusionPatterns.length ? picomatch(inclusionPatterns) : (): boolean => true;
+		const exclusionMatcher = exclusionPatterns && exclusionPatterns.length ? picomatch(exclusionPatterns) : (): boolean => false;
 
 		return (t: string): boolean => {return inclusionMatcher(t) && !exclusionMatcher(t)};
 	}
