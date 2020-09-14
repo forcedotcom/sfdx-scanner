@@ -9,9 +9,9 @@ import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
+import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
 import globby = require('globby');
-import picomatch = require('picomatch');
 import path = require('path');
 
 @injectable()
@@ -97,31 +97,23 @@ export class DefaultRuleManager implements RuleManager {
 	 */
 	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
+		// Ask engines for their desired target patterns.
+		const targetPatterns: string[] = await engine.getTargetPatterns();
+		assert(targetPatterns);
+		const pm = new PathMatcher(targetPatterns);
 		for (const target of targets) {
-			// Ask engines for their desired target patterns.
-			const targetPatterns: string[] = await engine.getTargetPatterns(target);
-			assert(targetPatterns);
-			// Picomatch OR's together the patterns you provide it, which means we need to be careful about how we construct
-			// our matchers.
-			// Inclusion patterns denote files we want to include, and we want all files that match even a single pattern,
-			// so we can just create a single matcher for all inclusion patterns.
-			const inclusionMatcher = picomatch(targetPatterns.filter(p => !p.startsWith("!")));
-			// Exclusion patterns denote files we want to exclude, and we want all files that match every single pattern,
-			// i.e., doesn't match the inversion of any patterns. So we invert each exclusion pattern and combine them
-			// into a single matcher whose value we'll negate when we need it.
-			const exclusionMatcher = picomatch(targetPatterns.filter(p => p.startsWith("!")).map(p => p.slice(1)));
-
 			const fileExists = await this.fileHandler.exists(target);
 			if (globby.hasMagic(target)) {
 				// The target is a magic globby glob.  Retrieve paths in the working dir that match it, and then
-				// filter each with the engine's own patterns.  First test any inclusive patterns, then AND them with
-				// any exclusive patterns.
+				// filter each with the engine's own patterns.
 				const matchingTargets = await globby(target);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
+				// Filter the targets based on our target patterns.
+				const filteredTargets = pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
 					target,
-					paths: absoluteMatchingTargets.filter(t => inclusionMatcher(t) && !exclusionMatcher(t))
+					paths: filteredTargets
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
@@ -148,7 +140,7 @@ export class DefaultRuleManager implements RuleManager {
 						// The target is a simple file.  Validate it against the engine's own patterns.  First test
 						// any inclusive patterns, then with any exclusive patterns.
 						const absolutePath = path.resolve(target);
-						if (inclusionMatcher(absolutePath) && !exclusionMatcher(absolutePath)) {
+						if (pm.pathMatchesPatterns(absolutePath)) {
 							ruleTargets.push({target, paths: [absolutePath]});
 						}
 					}
