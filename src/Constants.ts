@@ -24,6 +24,10 @@ export enum ENGINE {
 	ESLINT_TYPESCRIPT = 'eslint-typescript'
 }
 
+export enum DEPCHECK {
+	RETIRE_JS = 'retire-js'
+}
+
 export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',

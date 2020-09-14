@@ -5,6 +5,7 @@ import {CustomRulePathManager} from './lib/CustomRulePathManager';
 import {DefaultRuleManager} from './lib/DefaultRuleManager';
 import {JavascriptEslintEngine} from './lib/eslint/EslintEngine';
 import {TypescriptEslintEngine} from './lib/eslint/EslintEngine';
+import {RetireJsDepChecker} from './lib/retirejs/RetireJsDepChecker';
 import {PmdEngine} from './lib/pmd/PmdEngine';
 import {RuleManager} from './lib/RuleManager';
 import {RulePathManager} from './lib/RulePathManager';
@@ -17,6 +18,7 @@ export const Services = {
 	Config: "Config",
 	RuleManager: "RuleManager",
 	RuleEngine: "RuleEngine",
+	DependencyChecker: "DependencyChecker",
 	RuleCatalog: "RuleCatalog",
 	RulePathManager: "RulePathManager",
 	EnvOverridable: "EnvOverridable"
@@ -32,6 +34,7 @@ function registerAll(): void {
 	container.registerSingleton(Services.RuleEngine, PmdEngine);
 	container.registerSingleton(Services.RuleEngine, JavascriptEslintEngine);
 	container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
+	container.registerSingleton(Services.DependencyChecker, RetireJsDepChecker);
 	container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 	container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
 }
