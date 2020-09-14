@@ -3,7 +3,7 @@
 export interface DependencyChecker {
 	getName(): string;
 
-	run(): Promise<any>;
+	run(target?: string): Promise<[boolean, string, string]>;
 
 	isEnabled(): boolean;
 
