@@ -97,11 +97,11 @@ export class DefaultRuleManager implements RuleManager {
 	 */
 	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
+		// Ask engines for their desired target patterns.
+		const targetPatterns: string[] = await engine.getTargetPatterns();
+		assert(targetPatterns);
+		const pm = new PathMatcher(targetPatterns);
 		for (const target of targets) {
-			// Ask engines for their desired target patterns.
-			const targetPatterns: string[] = await engine.getTargetPatterns(target);
-			assert(targetPatterns);
-
 			const fileExists = await this.fileHandler.exists(target);
 			if (globby.hasMagic(target)) {
 				// The target is a magic globby glob.  Retrieve paths in the working dir that match it, and then
@@ -110,7 +110,7 @@ export class DefaultRuleManager implements RuleManager {
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				// Filter the targets based on our target patterns.
-				const filteredTargets = PathMatcher.filterPathsByPatterns(absoluteMatchingTargets, targetPatterns);
+				const filteredTargets = pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
 					target,
 					paths: filteredTargets
@@ -140,7 +140,7 @@ export class DefaultRuleManager implements RuleManager {
 						// The target is a simple file.  Validate it against the engine's own patterns.  First test
 						// any inclusive patterns, then with any exclusive patterns.
 						const absolutePath = path.resolve(target);
-						if (PathMatcher.pathMatchesPatterns(absolutePath, targetPatterns)) {
+						if (pm.pathMatchesPatterns(absolutePath)) {
 							ruleTargets.push({target, paths: [absolutePath]});
 						}
 					}

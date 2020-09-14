@@ -3,7 +3,7 @@ import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 export interface RuleEngine {
 	getName(): string;
 
-	getTargetPatterns(path?: string): Promise<string[]>;
+	getTargetPatterns(): Promise<string[]>;
 
 	getCatalog(): Promise<Catalog>;
 

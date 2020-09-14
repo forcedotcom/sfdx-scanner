@@ -4,13 +4,24 @@ type MatchingFunction = (string) => boolean;
 
 
 export class PathMatcher {
+	private readonly matcher: MatchingFunction;
+
+	/**
+	 *
+	 * @param {string[]} patterns - An array of strings that are either positive patterns (don't start with `!`), or
+	 *                              negative patterns (do start with `!`).
+	 */
+	constructor(patterns: string[]) {
+		this.matcher = this.generateMatchingFunction(patterns);
+	}
+
 	/**
 	 * Creates a MatchingFunction for the provided patterns.
 	 * @param {string[]} patterns - An array of strings that are either positive patterns (don't start with `!`), or
 	 *                              negative patterns (do start with `!`).
 	 * @returns {MatchingFunction} A function that will match the provided patterns.
 	 */
-	private static generateMatchingFunction(patterns: string[]): MatchingFunction {
+	private generateMatchingFunction(patterns: string[]): MatchingFunction {
 		// Picomatch matches patterns using a logical OR (i.e. it returns true if the target matches ANY provided pattern).
 		//
 		// Inclusion patterns (e.g., '**/*.js') indicate what a path is allowed to look like. We want files that match ANY
@@ -32,25 +43,20 @@ export class PathMatcher {
 	}
 
 	/**
-	 * Returns the subset of the provided paths match ANY of the provided positive patterns AND ALL provided negative patterns.
+	 * Returns the subset of the provided paths matching ANY of this matcher's positive patterns AND ALL of its negative patterns.
 	 * @param {string[]} targets - An array of paths
-	 * @param {string[]} patterns - An array of strings that are either positive patterns (don't start with `!`), or
-	 *                              negative patterns (do start with `!`).
 	 * @returns {string[]} - The subset of the target strings that match the provided patterns.
 	 */
-	public static filterPathsByPatterns(targets: string[], patterns: string[]): string[] {
-		const matcher: MatchingFunction = this.generateMatchingFunction(patterns);
-		return targets.filter(t => matcher(t));
+	public filterPathsByPatterns(targets: string[]): string[] {
+		return targets.filter(this.matcher);
 	}
 
 	/**
-	 * Returns true if the provided target string matches ANY of the provided positive patterns AND ALL provided negative patterns.
+	 * Returns true if the provided target string matches ANY of this matcher's positive patterns AND ALL of its negative patterns.
 	 * @param {string} target - A path.
-	 * @param {string[]} patterns - An array of strings that are either positive patterns (don't start with `!`), or
-	 *                              negative patterns (do start with `!`).
 	 * @returns {boolean}
 	 */
-	public static pathMatchesPatterns(target: string, patterns: string[]): boolean {
-		return this.generateMatchingFunction(patterns)(target);
+	public pathMatchesPatterns(target: string): boolean {
+		return this.matcher(target);
 	}
 }

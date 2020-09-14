@@ -10,8 +10,8 @@ describe('PathMatcher', () => {
 				'path/to/some/javafile.java'
 			];
 			const patterns = ['**/*.js', '**/*.ts', '/Users/jfeingold/code/CPQ/**/*.cls'];
-
-			const results = PathMatcher.filterPathsByPatterns(targets, patterns);
+			const pm = new PathMatcher(patterns);
+			const results = pm.filterPathsByPatterns(targets);
 
 			it('INCLUDES paths matching ANY positive pattern', () => {
 				expect(results).to.include(targets[0], 'Paths that match a single positive pattern should be included');
@@ -31,8 +31,8 @@ describe('PathMatcher', () => {
 				'~/code/CPQ/pkg/main/default/components/SomeComp.component-meta.xml'
 			];
 			const patterns = ['!**/node_modules/**', '!**/*.component-meta.xml'];
-
-			const results = PathMatcher.filterPathsByPatterns(targets, patterns);
+			const pm = new PathMatcher(patterns);
+			const results = pm.filterPathsByPatterns(targets);
 
 			it('INCLUDES paths matching EVERY negative pattern', () => {
 				expect(results).to.include(targets[0], 'Paths that match all negative patterns should be included');
@@ -57,8 +57,8 @@ describe('PathMatcher', () => {
 				'**/*.js', '!**/node_modules/**',
 				'**/*.cls', '!/Users/jfeingold/code/CPQ/pkg/**'
 			];
-
-			const results = PathMatcher.filterPathsByPatterns(targets, patterns);
+			const pm = new PathMatcher(patterns);
+			const results = pm.filterPathsByPatterns(targets);
 
 			it('INCLUDES paths matching ANY positive AND ALL negative patterns', () => {
 				expect(results).to.include(targets[0], 'Path wrongly excluded.');
@@ -84,13 +84,15 @@ describe('PathMatcher', () => {
 				'path/to/some/javafile.java'
 			];
 			const patterns = ['**/*.js', '**/*.ts', '/Users/jfeingold/code/CPQ/**/*.cls'];
+			const pm = new PathMatcher(patterns);
+
 			it('MATCHES paths matching ANY positive pattern', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[0], patterns)).to.equal(true, 'Paths matching a single positive pattern should return true.');
-				expect(PathMatcher.pathMatchesPatterns(targets[1], patterns)).to.equal(true, 'Paths matching a single positive pattern should return true.');
+				expect(pm.pathMatchesPatterns(targets[0])).to.equal(true, 'Paths matching a single positive pattern should return true.');
+				expect(pm.pathMatchesPatterns(targets[1])).to.equal(true, 'Paths matching a single positive pattern should return true.');
 			});
 
 			it('DOES NOT MATCH paths matching NO positive patterns', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[2], patterns)).to.equal(false, 'Paths not matching any positive pattern should return false.');
+				expect(pm.pathMatchesPatterns(targets[2])).to.equal(false, 'Paths not matching any positive pattern should return false.');
 			});
 		});
 
@@ -102,15 +104,16 @@ describe('PathMatcher', () => {
 				'~/code/CPQ/pkg/main/default/components/SomeComp.component-meta.xml'
 			];
 			const patterns = ['!**/node_modules/**', '!**/*.component-meta.xml'];
+			const pm = new PathMatcher(patterns);
 
 			it('MATCHES paths matching EVERY negative pattern', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[0], patterns)).to.equal(true, 'Paths that match all negative patterns should return true.');
-				expect(PathMatcher.pathMatchesPatterns(targets[1], patterns)).to.equal(true, 'Paths that match all negative patterns should return true.');
+				expect(pm.pathMatchesPatterns(targets[0])).to.equal(true, 'Paths that match all negative patterns should return true.');
+				expect(pm.pathMatchesPatterns(targets[1])).to.equal(true, 'Paths that match all negative patterns should return true.');
 			});
 
 			it('DOES NOT MATCH paths matching NOT EVERY negative pattern', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[2], patterns)).to.equal(false, 'Paths that match not all negative patterns should return false.');
-				expect(PathMatcher.pathMatchesPatterns(targets[3], patterns)).to.equal(false, 'Paths that match not all negative patterns should return false.');
+				expect(pm.pathMatchesPatterns(targets[2])).to.equal(false, 'Paths that match not all negative patterns should return false.');
+				expect(pm.pathMatchesPatterns(targets[3])).to.equal(false, 'Paths that match not all negative patterns should return false.');
 			});
 		});
 
@@ -126,19 +129,20 @@ describe('PathMatcher', () => {
 				'**/*.js', '!**/node_modules/**',
 				'**/*.cls', '!/Users/jfeingold/code/CPQ/pkg/**'
 			];
+			const pm = new PathMatcher(patterns);
 
 			it('MATCHES paths matching positive and negative patterns', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[0], patterns)).to.equal(true, 'Path wrongly matched.');
-				expect(PathMatcher.pathMatchesPatterns(targets[2], patterns)).to.equal(true, 'Path wrongly matched.');
+				expect(pm.pathMatchesPatterns(targets[0])).to.equal(true, 'Path wrongly matched.');
+				expect(pm.pathMatchesPatterns(targets[2])).to.equal(true, 'Path wrongly matched.');
 			});
 
 			it('DOES NOT MATCH paths matching positive patterns but not negative patterns', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[1], patterns)).to.equal(false, 'Path wrongly not matched.');
-				expect(PathMatcher.pathMatchesPatterns(targets[3], patterns)).to.equal(false, 'Path wrongly not matched.');
+				expect(pm.pathMatchesPatterns(targets[1])).to.equal(false, 'Path wrongly not matched.');
+				expect(pm.pathMatchesPatterns(targets[3])).to.equal(false, 'Path wrongly not matched.');
 			});
 
 			it('DOES NOT MATCH paths matching negative patterns but not positive patterns', () => {
-				expect(PathMatcher.pathMatchesPatterns(targets[4], patterns)).to.equal(false, 'Path wrongly not matched.');
+				expect(pm.pathMatchesPatterns(targets[4])).to.equal(false, 'Path wrongly not matched.');
 			});
 		});
 	})
