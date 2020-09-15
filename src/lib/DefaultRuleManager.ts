@@ -2,9 +2,10 @@ import {Logger, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable, injectAll} from 'tsyringe';
+import {OUTPUT_FORMAT} from '../Constants';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {RuleFilter} from './RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
+import {RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -35,7 +36,7 @@ export class DefaultRuleManager implements RuleManager {
 		if (this.initialized) {
 			return;
 		}
-		this.logger = await Logger.child('DefaultManager');
+		this.logger = await Logger.child('DefaultRuleManager');
 		this.fileHandler = new FileHandler();
 		for (const engine of this.engines) {
 			await engine.init();

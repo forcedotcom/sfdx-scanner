@@ -4,7 +4,8 @@ import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import * as path from 'path';
 import {Controller} from '../../../src/ioc.config';
-import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
+import {OUTPUT_FORMAT} from '../../../src/Constants';
+import {RuleManager} from '../../../src/lib/RuleManager';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import { fail } from 'assert';

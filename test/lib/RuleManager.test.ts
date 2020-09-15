@@ -1,7 +1,8 @@
 import {expect} from 'chai';
 import {Controller} from '../../src/ioc.config';
 import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
+import {OUTPUT_FORMAT} from '../../src/Constants';
+import {RuleManager} from '../../src/lib/RuleManager';
 import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import path = require('path');

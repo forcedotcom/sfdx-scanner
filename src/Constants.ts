@@ -36,4 +36,13 @@ export enum LANGUAGE {
 	TYPESCRIPT = 'typescript'
 }
 
+export enum OUTPUT_FORMAT {
+	CSV = 'csv',
+	HTML = 'html',
+	JSON = 'json',
+	JUNIT = 'junit',
+	TABLE = 'table',
+	XML = 'xml'
+}
+
 export const INTERNAL_ERROR_CODE = 500;

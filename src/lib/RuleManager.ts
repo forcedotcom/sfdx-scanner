@@ -1,14 +1,6 @@
 import {RecombinedRuleResults, Rule} from '../types';
+import {OUTPUT_FORMAT} from '../Constants';
 import {RuleFilter} from './RuleFilter';
-
-export enum OUTPUT_FORMAT {
-	CSV = 'csv',
-	HTML = 'html',
-	JSON = 'json',
-	JUNIT = 'junit',
-	TABLE = 'table',
-	XML = 'xml'
-}
 
 export interface RuleManager {
 	init(): Promise<void>;
