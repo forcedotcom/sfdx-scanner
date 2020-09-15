@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
-import {OUTPUT_FORMAT} from './RuleManager';
+import {OUTPUT_FORMAT} from '../Constants';
 import * as wrap from 'word-wrap';
 import {FileHandler} from './util/FileHandler';
 import * as Mustache from 'mustache';

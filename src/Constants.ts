@@ -23,6 +23,10 @@ export enum ENGINE {
 	ESLINT_TYPESCRIPT = 'eslint-typescript'
 }
 
+export enum DEPCHECK {
+	RETIRE_JS = 'retire-js'
+}
+
 export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',
@@ -31,10 +35,20 @@ export enum LANGUAGE {
 	TYPESCRIPT = 'typescript'
 }
 
+export enum OUTPUT_FORMAT {
+	CSV = 'csv',
+	HTML = 'html',
+	JSON = 'json',
+	JUNIT = 'junit',
+	TABLE = 'table',
+	XML = 'xml'
+}
+
 export const Services = {
 	Config: "Config",
 	RuleManager: "RuleManager",
 	RuleEngine: "RuleEngine",
+	DependencyChecker: "DependencyChecker",
 	RuleCatalog: "RuleCatalog",
 	RulePathManager: "RulePathManager",
 	EnvOverridable: "EnvOverridable"

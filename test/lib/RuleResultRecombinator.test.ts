@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {RuleResult} from '../../src/types';
 import {RuleResultRecombinator} from '../../src/lib/RuleResultRecombinator';
-import {OUTPUT_FORMAT} from '../../src/lib/RuleManager';
+import {OUTPUT_FORMAT} from '../../src/Constants';
 import path = require('path');
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');

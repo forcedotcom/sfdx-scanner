@@ -1,8 +1,9 @@
 import {expect} from 'chai';
 import {Controller} from '../../src/Controller';
 import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
+import {RuleManager} from '../../src/lib/RuleManager';
 import LocalCatalog from '../../src/lib/services/LocalCatalog';
+import {OUTPUT_FORMAT} from '../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');

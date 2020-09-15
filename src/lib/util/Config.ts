@@ -1,6 +1,6 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
-import {ENGINE, CONFIG_FILE} from '../../Constants';
+import {DEPCHECK, ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { boolean } from '@oclif/command/lib/flags';
 import { Controller } from '../../Controller';
@@ -9,6 +9,7 @@ import {deepCopy} from '../../lib/util/Utils';
 export type ConfigContent = {
 	javaHome?: string;
 	engines?: EngineConfigContent[];
+	depCheckers?: DepCheckConfigContent[];
 	targetPatterns?: string[];
 }
 
@@ -17,6 +18,11 @@ export type EngineConfigContent = {
 	disabled?: boolean;
 	targetPatterns: string[];
 	supportedLanguages?: string[];
+}
+
+export type DepCheckConfigContent = {
+	name: string;
+	disabled?: boolean;
 }
 
 export const DEFAULT_CONFIG: ConfigContent = {
@@ -53,6 +59,11 @@ export const DEFAULT_CONFIG: ConfigContent = {
 				"!**/bower_components/**"
 			]
         }
+	],
+	depCheckers: [
+		{
+			name: DEPCHECK.RETIRE_JS
+		}
 	]
 };
 
@@ -128,6 +139,16 @@ export class Config {
 		return !e || !e.disabled;
 	}
 
+	public isDepCheckerEnabled(depcheck: DEPCHECK): boolean {
+		if (!this.configContent.depCheckers) {
+			// Fast exit.  No definitions means all enabled.
+			return true;
+		}
+		const d = this.getDepCheckerConfig(depcheck);
+		// No definition means enabled by default. Must explicitly disable.
+		return !d || !d.disabled;
+	}
+
 	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
 		return await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
 	}
@@ -179,6 +200,10 @@ export class Config {
 
 	private getEngineConfig(name: ENGINE): EngineConfigContent {
 		return this.configContent.engines.find(e => e.name === name);
+	}
+
+	private getDepCheckerConfig(name: DEPCHECK): DepCheckConfigContent {
+		return this.configContent.depCheckers.find(d => d.name === name);
 	}
 
 	private async writeConfig(): Promise<void> {

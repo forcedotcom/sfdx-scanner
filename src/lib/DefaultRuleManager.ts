@@ -4,7 +4,8 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {FilterType, RuleFilter} from './RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
+import {RuleManager} from './RuleManager';
+import {OUTPUT_FORMAT} from '../Constants';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -33,7 +34,7 @@ export class DefaultRuleManager implements RuleManager {
 		if (this.initialized) {
 			return;
 		}
-		this.logger = await Logger.child('DefaultManager');
+		this.logger = await Logger.child('DefaultRuleManager');
 		this.fileHandler = new FileHandler();
 		await this.catalog.init();
 
