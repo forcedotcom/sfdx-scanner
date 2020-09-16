@@ -6,14 +6,15 @@ import {Config} from './lib/util/Config';
 import {EnvOverridable, Services} from './Constants';
 import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine'
+import {DependencyChecker} from './lib/services/DependencyChecker';
 import {RulePathManager} from './lib/RulePathManager';
 
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
  */
-function enginesToString(engines: RuleEngine[]): string {
-	return engines.map(e => e.getName()).sort().join(', ');
+function servicesToString(services: (RuleEngine|DependencyChecker)[]): string {
+	return services.map(s => s.getName()).sort().join(', ');
 }
 
 // TODO: This is probably more appropriately called a Factory
@@ -58,7 +59,7 @@ export const Controller = {
 		const engines = allEngines.filter(e => filteredNames.includes(e.getName()));
 
 		if (engines.length == 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), enginesToString(allEngines)]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), servicesToString(allEngines)]);
 		}
 
 		return engines;
@@ -69,9 +70,29 @@ export const Controller = {
 		const engines: RuleEngine[] = allEngines.filter(e => e.isEnabled());
 
 		if (engines.length == 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoEnabledEnginesFound', [servicesToString(allEngines)]);
 		}
 
 		return engines;
+	},
+
+	getAllDepCheckers: async(): Promise<DependencyChecker[]> => {
+		const depCheckers: DependencyChecker[] = [];
+		for (const depcheck of container.resolveAll<DependencyChecker>(Services.DependencyChecker)) {
+			await depcheck.init();
+			depCheckers.push(depcheck);
+		}
+		return depCheckers;
+	},
+
+	getEnabledDepCheckers: async (): Promise<DependencyChecker[]> => {
+		const allDepCheckers: DependencyChecker[] = await Controller.getAllDepCheckers();
+		const enabledCheckers: DependencyChecker[] = allDepCheckers.filter(d => d.isEnabled());
+
+		if (enabledCheckers.length === 0) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoEnabledDepCheckersFound', [servicesToString(allDepCheckers)]);
+		}
+
+		return enabledCheckers;
 	}
 };

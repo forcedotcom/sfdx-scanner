@@ -32,6 +32,10 @@ export type RuleResult = {
 	violations: RuleViolation[];
 };
 
+// TODO: As we develop a better idea of what results we want from RetireJS and other dependency checkers, this should be
+//  flesh out.
+export type DependencyResult = LooseObject;
+
 export type RecombinedRuleResults = {
 	minSev: number;
 	results: string | {columns; rows};

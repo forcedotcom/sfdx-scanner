@@ -2,11 +2,12 @@
  * An interface for Dependency Checker engines.
  * @author Josh Feingold
  */
+import {DependencyResult} from '../../types';
 
 export interface DependencyChecker {
 	getName(): string;
 
-	run(target?: string): Promise<[boolean, string, string]>;
+	run(target?: string): Promise<DependencyResult[]>;
 
 	isEnabled(): boolean;
 
