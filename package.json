@@ -31,6 +31,9 @@
 		"word-wrap": "^1.2.3",
 		"xml-js": "^1.6.11"
 	},
+	"resolutions": {
+		"bl": "^4.0.3"
+	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
 		"@oclif/dev-cli": "^1",
