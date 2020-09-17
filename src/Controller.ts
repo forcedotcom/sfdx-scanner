@@ -5,6 +5,7 @@ import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
 import {EnvOverridable, Services} from './Constants';
 import {RuleManager} from './lib/RuleManager';
+import {Service} from './lib/services/Service';
 import {RuleEngine} from './lib/services/RuleEngine'
 import {DependencyChecker} from './lib/services/DependencyChecker';
 import {RulePathManager} from './lib/RulePathManager';
@@ -13,7 +14,7 @@ import {RulePathManager} from './lib/RulePathManager';
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
  */
-function servicesToString(services: (RuleEngine|DependencyChecker)[]): string {
+function servicesToString(services: Service[]): string {
 	return services.map(s => s.getName()).sort().join(', ');
 }
 

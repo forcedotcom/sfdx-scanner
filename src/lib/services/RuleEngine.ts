@@ -1,8 +1,7 @@
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
+import {Service} from './Service';
 
-export interface RuleEngine {
-	getName(): string;
-
+export interface RuleEngine extends Service {
 	getTargetPatterns(): Promise<string[]>;
 
 	getCatalog(): Promise<Catalog>;
@@ -15,6 +14,4 @@ export interface RuleEngine {
 	init(): Promise<void>;
 
 	matchPath(path: string): boolean;
-
-	isEnabled(): boolean;
 }

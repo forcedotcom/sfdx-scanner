@@ -46,12 +46,12 @@ export enum OUTPUT_FORMAT {
 
 export const Services = {
 	Config: "Config",
-	RuleManager: "RuleManager",
-	RuleEngine: "RuleEngine",
 	DependencyChecker: "DependencyChecker",
+	EnvOverridable: "EnvOverridable",
 	RuleCatalog: "RuleCatalog",
-	RulePathManager: "RulePathManager",
-	EnvOverridable: "EnvOverridable"
+	RuleEngine: "RuleEngine",
+	RuleManager: "RuleManager",
+	RulePathManager: "RulePathManager"
 };
 
 export const INTERNAL_ERROR_CODE = 500;

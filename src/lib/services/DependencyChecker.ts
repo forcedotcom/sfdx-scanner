@@ -3,13 +3,10 @@
  * @author Josh Feingold
  */
 import {DependencyResult} from '../../types';
+import {Service} from './Service';
 
-export interface DependencyChecker {
-	getName(): string;
-
+export interface DependencyChecker extends Service {
 	run(target?: string): Promise<DependencyResult[]>;
-
-	isEnabled(): boolean;
 
 	init(): Promise<void>;
 }
