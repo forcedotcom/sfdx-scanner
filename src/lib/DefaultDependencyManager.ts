@@ -31,7 +31,8 @@ export class DefaultDependencyManager implements DependencyManager {
 
 		try {
 			// TODO: As we add more functionality and flesh out our design, there will definitely need to be changes here.
-			const results = (await Promise.all(resultPromises)).reduce((acc, v) => [...acc, ...v], []);
+			// We can combine the arrays into a single array using .reduce() instead of the more verbose for-loop.
+			const results = (await Promise.all(resultPromises)).reduce((acc, rp) => [...acc, ...rp], []);
 			this.logger.trace(`Received vulnerabilities ${results}`);
 			return results;
 		} catch (e) {
