@@ -46,8 +46,6 @@ export class DefaultRuleManager implements RuleManager {
 	}
 
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
-		let results: RuleResult[] = [];
-
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
@@ -79,8 +77,8 @@ export class DefaultRuleManager implements RuleManager {
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
 		// all of the results together from all engines into one report.
 		try {
-			const psResults: RuleResult[][] = await Promise.all(ps);
-			psResults.forEach(r => results = results.concat(r));
+			// We can combine the arrays into a single array using .reduce() instead of the more verbose for-loop.
+			const results: RuleResult[] = (await Promise.all(ps)).reduce((acc, rp) => [...acc, ...rp], []);
 			this.logger.trace(`Received rule violations: ${results}`);
 			this.logger.trace(`Recombining results into requested format ${format}`);
 			return await RuleResultRecombinator.recombineAndReformatResults(results, format);
