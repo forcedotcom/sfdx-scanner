@@ -112,9 +112,10 @@ describe('scanner:run', function () {
 						// The first list item is going to be the header, so we need to pull that off.
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
-						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
+						expect(results.length).to.equal(3, 'Only three files should have violated the rules');
 						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
 						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
+						expect(results[2]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)TwinFieldMapperTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -133,6 +134,14 @@ describe('scanner:run', function () {
 						// There should be one violation.
 						expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
 						expect(installProcessorViolations[0]).to.match(/line="994".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+
+						const fieldMapperViolations = results[2].split('<violation');
+						fieldMapperViolations.shift();
+						// There should be three violations.
+						expect(fieldMapperViolations.length).to.equal(3, 'Should be three violations detected in TwinFieldMapperTests.cls');
+						expect(fieldMapperViolations[0]).to.match(/line="9".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(fieldMapperViolations[1]).to.match(/line="13".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(fieldMapperViolations[2]).to.match(/line="17".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 					});
 			});
 
@@ -634,23 +643,110 @@ describe('scanner:run', function () {
 		});
 
 		describe('Dynamic Input', () => {
-			describe('Test Case: Running rules against a glob', () => {
+			describe('Positive Globs', () => {
+				describe('Test Case: Running rules against one positive glob', () => {
+					setupCommandTest
+						.command(['scanner:run',
+							// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES. But the tests sidestep that, somehow.
+							'--target', 'test/code-fixtures/apex/*Tests.cls',
+							'--ruleset', 'ApexUnit',
+							'--format', 'xml'
+						])
+						.it('Glob is resolved to files, and those files are evaluated', ctx => {
+							// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+							const results = ctx.stdout.split('<result ');
+							// The first list item is going to be the header, so we need to pull that off.
+							results.shift();
+							// Verify that each set of violations corresponds to the expected file.
+							expect(results.length).to.equal(3, 'Only three files should have violated the rules');
+							expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+							expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
+							expect(results[2]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)TwinFieldMapperTests.cls"/);
+
+							// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+							const acctServiceViolations = results[0].split('<violation');
+							acctServiceViolations.shift();
+							// There should be four violations.
+							expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
+							// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+							// expected order.
+							expect(acctServiceViolations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+
+							const installProcessorViolations = results[1].split('<violation');
+							installProcessorViolations.shift();
+							// There should be one violation.
+							expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
+							expect(installProcessorViolations[0]).to.match(/line="994".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+
+							const fieldMapperViolations = results[2].split('<violation');
+							fieldMapperViolations.shift();
+							// There should be three violations.
+							expect(fieldMapperViolations.length).to.equal(3, 'Should be three violations detected in TwinFieldMapperTests.cls');
+							expect(fieldMapperViolations[0]).to.match(/line="9".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(fieldMapperViolations[1]).to.match(/line="13".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(fieldMapperViolations[2]).to.match(/line="17".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						});
+				});
+
+				describe('Test Case: Running rules against multiple positive globs', () => {
+					setupCommandTest
+						.command(['scanner:run',
+							// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES. But the tests sidestep that, somehow.
+							'--target', 'test/code-fixtures/apex/A*.cls,test/code-fixtures/apex/I*.cls',
+							'--ruleset', 'ApexUnit',
+							'--format', 'xml'
+						])
+						.it('Files matching even a single positive glob are evaluated', ctx => {
+							// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+							const results = ctx.stdout.split('<result ');
+							// The first list item is going to be the header, so we need to pull that off.
+							results.shift();
+							// Verify that each set of violations corresponds to the expected file.
+							expect(results.length).to.equal(2, 'Only two files should have violated the rules');
+							expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+							expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
+
+							// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+							const acctServiceViolations = results[0].split('<violation');
+							acctServiceViolations.shift();
+							// There should be four violations.
+							expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
+							// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+							// expected order.
+							expect(acctServiceViolations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+							expect(acctServiceViolations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+
+							const installProcessorViolations = results[1].split('<violation');
+							installProcessorViolations.shift();
+							// There should be one violation.
+							expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
+							expect(installProcessorViolations[0]).to.match(/line="994".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						});
+				});
+			});
+
+			describe('Negative Globs', () => {
 				setupCommandTest
 					.command(['scanner:run',
-						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES. But the tests sidestep that, somehow.
-						'--target', 'test/code-fixtures/apex/*Tests.cls',
+						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES.
+						// But the tests sidestep that somehow.
+						'--target', 'test/code-fixtures/apex/*Tests.cls,!**/I*,!**/T*',
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
-					.it('Glob is resolved to files, and those files are evaluated', ctx => {
+					.it('When mixing negative and positive globs, files must match ALL negative globs to be evaluated', ctx => {
 						// We'll split the output by the <file> tag first, so we can get each file that violated rules.
 						const results = ctx.stdout.split('<result ');
 						// The first list item is going to be the header, so we need to pull that off.
 						results.shift();
 						// Verify that each set of violations corresponds to the expected file.
-						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
+						expect(results.length).to.equal(1, 'Only one file should have violated the rules');
 						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
-						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)InstallProcessorTests.cls"/);
 
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const acctServiceViolations = results[0].split('<violation');
@@ -663,12 +759,66 @@ describe('scanner:run', function () {
 						expect(acctServiceViolations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 						expect(acctServiceViolations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 						expect(acctServiceViolations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					});
 
-						const installProcessorViolations = results[1].split('<violation');
-						installProcessorViolations.shift();
-						// There should be one violation.
-						expect(installProcessorViolations.length).to.equal(1, 'Should be one violation detected in InstallProcessorTests.cls');
-						expect(installProcessorViolations[0]).to.match(/line="994".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				setupCommandTest
+					.command(['scanner:run',
+						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES.
+						// But the tests sidestep that somehow.
+						'--target', 'test/code-fixtures/apex/*Tests.cls,!test/code-fixtures/apex/I*,!./test/code-fixtures/apex/T*',
+						'--ruleset', 'ApexUnit',
+						'--format', 'xml'
+					])
+					.it('Relative negative globs are properly processed', ctx => {
+						// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+						const results = ctx.stdout.split('<result ');
+						// The first list item is going to be the header, so we need to pull that off.
+						results.shift();
+						// Verify that each set of violations corresponds to the expected file.
+						expect(results.length).to.equal(1, 'Only one file should have violated the rules');
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+
+						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+						const acctServiceViolations = results[0].split('<violation');
+						acctServiceViolations.shift();
+						// There should be four violations.
+						expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
+						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+						// expected order.
+						expect(acctServiceViolations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					});
+
+				setupCommandTest
+					.command(['scanner:run',
+						// NOTE: When running the command for real, a glob would have to be wrapped in SINGLE-QUOTES.
+						// But the tests sidestep that somehow.
+						'--target', 'test/code-fixtures/apex,!**/I*,!**/T*',
+						'--ruleset', 'ApexUnit',
+						'--format', 'xml'
+					])
+					.it('When mixing negative globs and directories, files must match ALL negative globs to be evaluated', ctx => {
+						// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+						const results = ctx.stdout.split('<result ');
+						// The first list item is going to be the header, so we need to pull that off.
+						results.shift();
+						// Verify that each set of violations corresponds to the expected file.
+						expect(results.length).to.equal(1, 'Only one file should have violated the rules');
+						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AccountServiceTests.cls"/);
+
+						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+						const acctServiceViolations = results[0].split('<violation');
+						acctServiceViolations.shift();
+						// There should be four violations.
+						expect(acctServiceViolations.length).to.equal(4, 'Should be four violations detected in AccountServiceTests.cls');
+						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+						// expected order.
+						expect(acctServiceViolations[0]).to.match(/line="68".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[1]).to.match(/line="72".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[2]).to.match(/line="76".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+						expect(acctServiceViolations[3]).to.match(/line="80".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 					});
 			});
 

@@ -98,14 +98,36 @@ export class DefaultRuleManager implements RuleManager {
 	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
-		const targetPatterns: string[] = await engine.getTargetPatterns();
-		assert(targetPatterns);
-		const pm = new PathMatcher(targetPatterns);
-		for (const target of targets) {
-			const fileExists = await this.fileHandler.exists(target);
+		const engineTargets = await engine.getTargetPatterns();
+		assert(engineTargets);
+		// We also need to do a bit of processing on the patterns we were given.
+		const positivePatterns = [];
+		const negativePatterns = [];
+		targets.forEach((t) => {
+			if (t.startsWith('!**') || t.startsWith('!/')) {
+				// If a negative glob starts with a ** or /, it's an absolute path and we can just add it to our array.
+				negativePatterns.push(t);
+			} else if (t.startsWith('!')) {
+				// If relative negative paths start with dots (e.g., ./ or ../../), we should use those to resolve to an
+				// absolute path. Otherwise, we should just use the current directory to resolve to an absolute path.
+				const regexResult = /(\.{1,2}\/)+/.exec(t);
+				const pathPrefix = regexResult ? regexResult[0] : '.';
+				const resolvedPrefix = path.resolve(pathPrefix);
+				const globStartPoint = (regexResult ? pathPrefix.length : 0) + 1;
+				negativePatterns.push(`!${resolvedPrefix}/${t.slice(globStartPoint)}`);
+			} else {
+				// Everything else is a positive pattern.
+				positivePatterns.push(t);
+			}
+		});
+
+		// We want to use a path matcher that can filter based on the engine's target patterns and any negative globs
+		// provided to us.
+		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
+		for (const target of positivePatterns) {
 			if (globby.hasMagic(target)) {
-				// The target is a magic globby glob.  Retrieve paths in the working dir that match it, and then
-				// filter each with the engine's own patterns.
+				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
+				// our pattern matcher.
 				const matchingTargets = await globby(target);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
@@ -118,31 +140,18 @@ export class DefaultRuleManager implements RuleManager {
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
 				}
-			} else {
-				if (fileExists) {
-					const stats: Stats = await this.fileHandler.stats(target);
-					if (stats.isDirectory()) {
-						// The target is a directory.  If the engine has target patterns, which is always should,
-						// call globby with the directory as the working dir, and use the patterns to match its contents.
-						if (targetPatterns) {
-							// If dir, use globby { cwd: process.cwd() } option
-							const relativePaths = await globby(targetPatterns, {cwd: target});
-							// Join the relative path to the files that were found
-							const joinedPaths = relativePaths.map(t => path.join(target, t));
-							// Resolve the relative paths to their absolute paths
-							const absolutePaths = joinedPaths.map(t => path.resolve(t));
-							ruleTargets.push({target, isDirectory: true, paths: absolutePaths});
-						} else {
-							// Without target patterns for the engine, just add the dir itself and hope for the best.
-							ruleTargets.push({target, isDirectory: true, paths: ["."]});
-						}
-					} else {
-						// The target is a simple file.  Validate it against the engine's own patterns.  First test
-						// any inclusive patterns, then with any exclusive patterns.
-						const absolutePath = path.resolve(target);
-						if (pm.pathMatchesPatterns(absolutePath)) {
-							ruleTargets.push({target, paths: [absolutePath]});
-						}
+			} else if (await this.fileHandler.exists(target)) {
+				const stats: Stats = await this.fileHandler.stats(target);
+				if (stats.isDirectory()) {
+					// If the target is a directory, we should get everything in it, convert relative paths to absolute
+					// paths, and then filter based our matcher.
+					const relativePaths = await globby(target);
+					ruleTargets.push({target, isDirectory: true, paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))});
+				} else {
+					// The target is just a file. Validate it against our matcher, and add it if eligible.
+					const absolutePath = path.resolve(target);
+					if (pm.pathMatchesPatterns(absolutePath)) {
+						ruleTargets.push({target, paths: [absolutePath]});
 					}
 				}
 			}
