@@ -59,8 +59,8 @@ export class PmdEngine implements RuleEngine {
 		this.initialized = true;
 	}
 
-	public isEnabled(): boolean {
-		return this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
+	public async isEnabled(): Promise<boolean> {
+		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
 	}
 
 	getCatalog(): Promise<Catalog> {
