@@ -123,7 +123,7 @@ export class DefaultRuleManager implements RuleManager {
 				// Construct a new glob using an exclamation point, our resolved dot-prefix, and the glob portion of the
 				// original.
 				negativePatterns.push(`!${resolvedRelativePath}/${t.slice(globStartPoint)}`);
- 			} else {
+			} else {
 				// Everything else is a positive pattern.
 				positivePatterns.push(t);
 			}
