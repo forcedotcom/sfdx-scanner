@@ -37,7 +37,7 @@ This is working as designed. Some rules are default-enabled by eslint while some
 
 ### Commands display `Javascript is not currently supported by the PMD engine`.
 
-Version 6.22.0 of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
+Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
 
 Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
 
