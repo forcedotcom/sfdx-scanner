@@ -103,19 +103,27 @@ export class DefaultRuleManager implements RuleManager {
 		// We also need to do a bit of processing on the patterns we were given.
 		const positivePatterns = [];
 		const negativePatterns = [];
+		// This regex will help us identify and resolve relative paths.
+		const dotNotationRegex = /(\.{1,2}\/)+/;
 		targets.forEach((t) => {
 			if (t.startsWith('!**') || t.startsWith('!/')) {
 				// If a negative glob starts with a ** or /, it's an absolute path and we can just add it to our array.
 				negativePatterns.push(t);
 			} else if (t.startsWith('!')) {
-				// If relative negative paths start with dots (e.g., ./ or ../../), we should use those to resolve to an
-				// absolute path. Otherwise, we should just use the current directory to resolve to an absolute path.
-				const regexResult = /(\.{1,2}\/)+/.exec(t);
-				const pathPrefix = regexResult ? regexResult[0] : '.';
-				const resolvedPrefix = path.resolve(pathPrefix);
-				const globStartPoint = (regexResult ? pathPrefix.length : 0) + 1;
-				negativePatterns.push(`!${resolvedPrefix}/${t.slice(globStartPoint)}`);
-			} else {
+				// We should turn relative negative globs into absolute globs.
+				// First, identify whether this glob contains any dot-notation (e.g., ./ or ../../).
+				const dotNotationDescriptor = dotNotationRegex.exec(t);
+				// If the regex found anything, that's our dot notation prefix. Otherwise, there's an implicit prefix of '.'.
+				const dotNotationPrefix = dotNotationDescriptor ? dotNotationDescriptor[0] :  '.';
+				// The actual glob-portion of the target starts at the end of the dot notation stuff (or just immediately
+				// after the exclamation point if no dot notation was used).
+				const globStartPoint = (dotNotationDescriptor ? dotNotationPrefix.length : 0) + 1;
+				// Resolve the dot notation prefix into an actual path.
+				const resolvedRelativePath = path.resolve(dotNotationPrefix);
+				// Construct a new glob using an exclamation point, our resolved dot-prefix, and the glob portion of the
+				// original.
+				negativePatterns.push(`!${resolvedRelativePath}/${t.slice(globStartPoint)}`);
+ 			} else {
 				// Everything else is a positive pattern.
 				positivePatterns.push(t);
 			}
