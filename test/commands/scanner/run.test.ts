@@ -80,13 +80,11 @@ describe('scanner:run', function () {
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const firstFileViolations = results[0].split('<violation');
 						firstFileViolations.shift();
-						// There should be one violation.
 						expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
 						expect(firstFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 						const secondFileViolations = results[1].split('<violation');
 						secondFileViolations.shift();
-						// There should be two violations.
 						expect(secondFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -116,19 +114,16 @@ describe('scanner:run', function () {
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const firstFileViolations = results[0].split('<violation');
 						firstFileViolations.shift();
-						// There should be one violations.
 						expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in AnotherTestClass.cls');
 						expect(firstFileViolations[0]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 						const secondFileViolations = results[1].split('<violation');
 						secondFileViolations.shift();
-						// There should be one violation.
 						expect(secondFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
 						expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 						const thirdFileViolations = results[2].split('<violation');
 						thirdFileViolations.shift();
-						// There should be two violations.
 						expect(thirdFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -157,7 +152,6 @@ describe('scanner:run', function () {
 						const violations = ctx.stdout.split('<violation');
 						// The first list item is going to be the header, so we need to pull that off.
 						violations.shift();
-						// There should be two violations.
 						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -276,7 +270,6 @@ describe('scanner:run', function () {
 				expect(result[1]).to.be.not.null;
 				const rows = JSON.parse(result[1]);
 
-				// There should be two rows.
 				expect(rows.length).to.equal(2);
 
 				// Verify that each row looks approximately right.
@@ -521,7 +514,6 @@ describe('scanner:run', function () {
 					const violations = fileContents.split('<violation');
 					// The first list item is going to be the header, so we need to pull that off.
 					violations.shift();
-					// There should be two violations.
 					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
 					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 					// expected order.
@@ -628,13 +620,11 @@ describe('scanner:run', function () {
 							// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 							const firstFileViolations = results[0].split('<violation');
 							firstFileViolations.shift();
-							// There should be one violation.
 							expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
 							expect(firstFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 							const secondFileViolations = results[1].split('<violation');
 							secondFileViolations.shift();
-							// There should be two violations.
 							expect(secondFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 							// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 							// expected order.
@@ -665,19 +655,16 @@ describe('scanner:run', function () {
 							// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 							const firstFileViolations = results[0].split('<violation');
 							firstFileViolations.shift();
-							// There should be one violation.
 							expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in AnotherTestClass.cls');
 							expect(firstFileViolations[0]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 							const secondFileViolations = results[1].split('<violation');
 							secondFileViolations.shift();
-							// There should be one violation.
 							expect(secondFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
 							expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
 							const thirdFileViolations = results[2].split('<violation');
 							thirdFileViolations.shift();
-							// There should be two violations.
 							expect(thirdFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 							// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 							// expected order.
@@ -708,7 +695,6 @@ describe('scanner:run', function () {
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const fileViolations = results[0].split('<violation');
 						fileViolations.shift();
-						// There should be two violations.
 						expect(fileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -736,7 +722,6 @@ describe('scanner:run', function () {
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const fileViolations = results[0].split('<violation');
 						fileViolations.shift();
-						// There should be two violations.
 						expect(fileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -764,7 +749,6 @@ describe('scanner:run', function () {
 						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
 						const fileViolations = results[0].split('<violation');
 						fileViolations.shift();
-						// There should be two violations.
 						expect(fileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -786,7 +770,6 @@ describe('scanner:run', function () {
 						const violations = ctx.stdout.split('<violation');
 						// The first list item is going to be the header, so we need to pull that off.
 						violations.shift();
-						// There should be two violations.
 						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
@@ -861,7 +844,6 @@ describe('scanner:run', function () {
 						const violations = ctx.stdout.split('<violation');
 						// The first list item is going to be the header, so we need to pull that off.
 						violations.shift();
-						// There should be two violations.
 						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
 						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
 						// expected order.
