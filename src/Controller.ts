@@ -66,8 +66,13 @@ export const Controller = {
 
 	getEnabledEngines: async (): Promise<RuleEngine[]> => {
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
-		const engines: RuleEngine[] = allEngines.filter(e => e.isEnabled());
+		const engines: RuleEngine[] = [];
 
+		for (const engine of allEngines) {
+			if (await engine.isEnabled()) {
+				engines.push(engine);
+			}
+		}
 		if (engines.length == 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
 		}

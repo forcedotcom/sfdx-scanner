@@ -16,5 +16,5 @@ export interface RuleEngine {
 
 	matchPath(path: string): boolean;
 
-	isEnabled(): boolean;
+	isEnabled(): Promise<boolean>;
 }

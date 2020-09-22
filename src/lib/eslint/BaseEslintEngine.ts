@@ -101,8 +101,8 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return this.strategy.getEngine().valueOf();
 	}
 
-	isEnabled(): boolean {
-		return this.config.isEngineEnabled(this.strategy.getEngine());
+	async isEnabled(): Promise<boolean> {
+		return await this.config.isEngineEnabled(this.strategy.getEngine());
 	}
 
 	async getTargetPatterns(): Promise<string[]> {

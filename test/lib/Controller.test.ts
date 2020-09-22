@@ -48,7 +48,7 @@ describe('Controller.ts tests', () => {
 		// Create a single mocked engine that is disabled
 		const mockedRuleEngine: RuleEngine = mock<RuleEngine>();
 		when(mockedRuleEngine.getName).thenReturn(() => 'fake-engine');
-		when(mockedRuleEngine.isEnabled).thenReturn(() => false);
+		when(mockedRuleEngine.isEnabled).thenReturn(() => Promise.resolve(false));
 		const ruleEngine: RuleEngine = instance(mockedRuleEngine);
 
 		// Remove everything else from the container and register the mock engine
