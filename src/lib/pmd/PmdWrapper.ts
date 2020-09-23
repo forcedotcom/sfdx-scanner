@@ -1,13 +1,9 @@
 import {ChildProcessWithoutNullStreams} from 'child_process';
-import {Logger, Messages} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
-import {uxEvents} from '../ScannerEvents';
 import path = require('path');
 import {FileHandler} from '../util/FileHandler';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -39,7 +35,7 @@ export default class PmdWrapper extends PmdSupport {
 		this.initialized = true;
 	}
 
-	public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<[boolean, string]> {
+	public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<string> {
 		const myPmd = await PmdWrapper.create({
 			path: path,
 			rules: rules,
@@ -49,7 +45,7 @@ export default class PmdWrapper extends PmdSupport {
 		return myPmd.execute();
 	}
 
-	private async execute(): Promise<[boolean, string]> {
+	private async execute(): Promise<string> {
 		return super.runCommand();
 	}
 
@@ -97,7 +93,7 @@ export default class PmdWrapper extends PmdSupport {
 	 * @param res
 	 * @param rej
 	 */
-	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void {
+	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void {
 		let stdout = '';
 		let stderr = '';
 
@@ -112,67 +108,14 @@ export default class PmdWrapper extends PmdSupport {
 		cp.on('exit', code => {
 			this.logger.trace(`monitorChildProcess has received exit code ${code}`);
 			if (code === 0 || code === 4) {
-				const processedStdout = this.turnErrorsIntoWarnings(stdout);
 				// If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
-				// one violation was found. In either case, PMD ran successfully, so we'll resolve the Promise. We use a tuple
-				// containing a boolean that will be true if there were any violations, and stdut.
-				// That way, we have a simple indicator of whether there were violations, and a log that we can sweep to know
-				// what those violations were.
-				res([!!code, processedStdout]);
+				// one violation was found. In either case, PMD ran successfully, so we'll resolve the Promise.
+				res(stdout);
 			} else {
 				// If we got any other error, it means something actually went wrong. We'll just reject with stderr for the ease
 				// of upstream error handling.
 				rej(stderr);
 			}
 		});
-	}
-
-	/**
-	 * Sweeps the output from PMD, converting any errors thrown while inspecting files into warnings that can be surfaced
-	 * to the user. Said errors are also removed from the output so the remainder can be properly parsed downstream.
-	 * @param stdout - The stdout from a successful run of of PMD. Reminder that a successful run is one that exited with
-	 *                 status code of 0 or 4.
-	 * @return - The input string, but with any errors removed.
-	 */
-	protected turnErrorsIntoWarnings(stdout: string): string {
-		// This method is currently only capable of dealing with XML output. That's fine currently, because we've pretty much
-		// hardcoded PMD to output XMLs. But if that changes, then this method will need to be updated too.
-		if (this.reportFormat !== Format.XML) {
-			return stdout;
-		}
-
-		// Any thrown errors should be in an <error> tag. So we'll split the output, using the following regex. It will catch
-		// the opening '<error' or the closing '</error>', and pull off any whitespace at the end. That way, we'll instantly
-		// be able to tell what we're looking at when we examine each piece.
-		const splitStdout = stdout.split(/<error\s*|<\/error>\s*/g);
-		if (splitStdout.length === 1) {
-			// If there's only one entry, then it means there weren't any errors, so we can just return the string.
-			return stdout;
-		} else {
-			// If there's more than one entry, then we've got some errors we need to process. We'll gradually build up our processed
-			// string.
-			const outputArray = [];
-			splitStdout.forEach(piece => {
-				if (piece === '') {
-					// If the piece is an empty string, that means there were two separators next to each other. Skip it.
-					return;
-				} else if (piece.startsWith('<')) {
-					// If the piece starts with a bracket, it means that this is NOT the contents of an error tag. So just trim the
-					// whitespace since we'll add our own at the end, and push it onto our array.
-					outputArray.push(piece.trim());
-				} else if (piece.startsWith('filename')) {
-					// If the piece starts with 'filename', then it's the contents of an error tag. We know that because filename is
-					// the first argument provided to the tag.
-					// We'll use the contents of the tag to construct a warning that will be surfaced to the user.
-					// We'll need the filename and the failure message. They'll be between the first and second '"', and between the
-					// third and fourth '"' respectively.
-					const filename = piece.split('"')[1];
-					const msg = piece.split('"')[3];
-					uxEvents.emit('warning-always', messages.getMessage('warning.pmdSkippedFile', [filename, msg]));
-				}
-			});
-			// Once we've processed all the pieces, we can join what we've got and return it.
-			return outputArray.join('\n');
-		}
 	}
 }

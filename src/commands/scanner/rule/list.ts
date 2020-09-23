@@ -1,8 +1,9 @@
 import {flags} from '@salesforce/command';
 import {Messages} from '@salesforce/core';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
-import {ScannerCommand} from '../scannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
+import {ENGINE} from '../../../Constants';
 
 
 // Initialize Messages with the current plugin directory
@@ -11,9 +12,9 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
-const columns = [messages.getMessage('columnNames.name'), 
-				messages.getMessage('columnNames.languages'), 
-				messages.getMessage('columnNames.categories'), 
+const columns = [messages.getMessage('columnNames.name'),
+				messages.getMessage('columnNames.languages'),
+				messages.getMessage('columnNames.categories'),
 				messages.getMessage('columnNames.rulesets'),
 				messages.getMessage('columnNames.engine')];
 
@@ -32,6 +33,8 @@ export default class List extends ScannerCommand {
 	// is what's printed when the -h/--help flag is supplied.
 	protected static flagsConfig = {
 		verbose: flags.builtin(),
+		// BEGIN: Flags consumed by ScannerCommand#buildRuleFilters
+		// These flags are how you choose which rules are listed.
 		category: flags.array({
 			char: 'c',
 			description: messages.getMessage('flags.categoryDescription'),
@@ -50,6 +53,13 @@ export default class List extends ScannerCommand {
 			description: messages.getMessage('flags.languageDescription'),
 			longDescription: messages.getMessage('flags.languageDescriptionLong')
 		}),
+		engine: flags.array({
+			char: 'e',
+			description: messages.getMessage('flags.engineDescription'),
+			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
+		}),
+		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// TODO: After implementing this flag, unhide it.
 		severity: flags.string({
 			char: 's',
@@ -75,7 +85,7 @@ export default class List extends ScannerCommand {
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
-		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
+		const rules = ruleManager.getRulesMatchingCriteria(ruleFilters);
 		const formattedRules = this.formatRulesForDisplay(rules);
 		this.ux.table(formattedRules, columns);
 		// If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can

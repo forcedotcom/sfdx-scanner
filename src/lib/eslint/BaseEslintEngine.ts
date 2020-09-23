@@ -1,9 +1,13 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
+import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
 import {CLIEngine} from 'eslint';
 import * as path from 'path';
+import {Config} from '../util/Config';
+import {Controller} from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -28,14 +32,8 @@ export interface EslintStrategy {
 	/** Initialize strategy */
 	init(): Promise<void>;
 
-	/** Get name of the engine that strategy supports */
-	getName(): string;
-
-	/** Find if engine is enabled */
-	isEnabled(): boolean;
-
-	/** Get all the target patterns that the engine supports */
-	getTargetPatterns(target?: string): Promise<string[]>;
+	/** Get engine that strategy supports */
+	getEngine(): ENGINE;
 
 	/** Get eslint config that can be used to get catalog */
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -47,15 +45,13 @@ export interface EslintStrategy {
 	/** Get languages supported by engine */
 	getLanguages(): string[];
 
-	/** Find if a rule name is supported by the engine based on its rule key */
-	isRuleKeySupported(key: string): boolean;
-
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
 
-	/** Allow the strategy to convert messages to more user friendly versions */
-	convertLintMessage(fileName: string, message: string): string;
+	/** Allow the strategy to convert the RuleViolation */
+	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void;
 }
+
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	createCLIEngine(config: Record<string,any>): CLIEngine {
@@ -78,6 +74,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	private initializedBase: boolean;
 	protected outputProcessor: OutputProcessor;
 	private baseDependencies: StaticDependencies;
+	private config: Config;
 
 	// We'll leave init abstract to allow implementations to initialize
 	async abstract init(): Promise<void>;
@@ -86,8 +83,9 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		if (this.initializedBase) {
 			return;
 		}
+		this.config = await Controller.getConfig();
 		this.strategy = strategy;
-		this.logger = await Logger.child(strategy.getName());
+		this.logger = await Logger.child(this.getName());
 		this.baseDependencies = baseDependencies;
 
 		this.initializedBase = true;
@@ -100,15 +98,15 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	}
 
 	getName(): string {
-		return this.strategy.getName();
+		return this.strategy.getEngine().valueOf();
 	}
 
-	isEnabled(): boolean {
-		return this.strategy.isEnabled();
+	async isEnabled(): Promise<boolean> {
+		return await this.config.isEngineEnabled(this.strategy.getEngine());
 	}
 
-	async getTargetPatterns(target?: string): Promise<string[]> {
-		return await this.strategy.getTargetPatterns(target);
+	async getTargetPatterns(): Promise<string[]> {
+		return await this.config.getTargetPatterns(this.strategy.getEngine());
 	}
 
 	async getCatalog(): Promise<Catalog> {
@@ -145,25 +143,19 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private processRule(key: string, docs: any): Rule {
-
-		if (this.strategy.isRuleKeySupported(key)) {
-
-			// Massage eslint rule into Catalog rule format
-			const rule = {
-				engine: this.getName(),
-				sourcepackage: this.getName(),
-				name: key,
-				description: docs.description,
-				categories: [docs.category],
-				rulesets: [docs.category],
-				languages: [...this.strategy.getLanguages()],
-				defaultEnabled: docs.recommended,
-				url: docs.url
-			};
-			return rule;
-		}
-
-		return null;
+		// Massage eslint rule into Catalog rule format
+		const rule = {
+			engine: this.getName(),
+			sourcepackage: this.getName(),
+			name: key,
+			description: docs.description,
+			categories: [docs.category],
+			rulesets: [docs.category],
+			languages: [...this.strategy.getLanguages()],
+			defaultEnabled: docs.recommended,
+			url: docs.url
+		};
+		return rule;
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
@@ -202,7 +194,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, await this.strategy.getRunConfig(engineOptions));
+				Object.assign(config, deepCopy(await this.strategy.getRunConfig(engineOptions)));
 
 				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
 				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
@@ -244,7 +236,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 		for (const rule of rules) {
 			// Find if a rule is relevant
-			if (rule.engine === this.strategy.getName()) {
+			if (rule.engine === this.getName()) {
 				// Select rules by setting them to "error" level in eslint config
 				filteredRules[rule.name] = "error";
 				ruleCount++;
@@ -272,15 +264,19 @@ export abstract class BaseEslintEngine implements RuleEngine {
 					const rule = ruleMap.get(v.ruleId);
 					const category = rule ? rule.meta.docs.category : "";
 					const url = rule ? rule.meta.docs.url : "";
-					return {
+					const violation: RuleViolation = {
 						line: v.line,
 						column: v.column,
 						severity: v.severity,
-						message: this.strategy.convertLintMessage(fileName, v.message),
+						message: v.message,
 						ruleName: v.ruleId,
 						category,
 						url
 					};
+
+					this.strategy.processRuleViolation(fileName, violation);
+
+					return violation;
 				}
 			)
 		};

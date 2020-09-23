@@ -1,16 +1,17 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
-import {inject, injectable, injectAll} from 'tsyringe';
+import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
-import {RuleFilter} from './RuleFilter';
+import {FilterType, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
+import {PathMatcher} from './util/PathMatcher';
+import {Controller} from '../Controller';
 import globby = require('globby');
-import picomatch = require('picomatch');
 import path = require('path');
 
 @injectable()
@@ -18,16 +19,13 @@ export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
 
 	// noinspection JSMismatchedCollectionQueryUpdate
-	private readonly engines: RuleEngine[];
 	private readonly catalog: RuleCatalog;
 	private fileHandler: FileHandler;
 	private initialized: boolean;
 
 	constructor(
-		@injectAll("RuleEngine") engines?: RuleEngine[],
 		@inject("RuleCatalog") catalog?: RuleCatalog
 	) {
-		this.engines = engines;
 		this.catalog = catalog;
 	}
 
@@ -37,15 +35,12 @@ export class DefaultRuleManager implements RuleManager {
 		}
 		this.logger = await Logger.child('DefaultManager');
 		this.fileHandler = new FileHandler();
-		for (const engine of this.engines) {
-			await engine.init();
-		}
 		await this.catalog.init();
 
 		this.initialized = true;
 	}
 
-	async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[] {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
@@ -53,10 +48,18 @@ export class DefaultRuleManager implements RuleManager {
 		let results: RuleResult[] = [];
 
 		// Derives rules from our filters to feed the engines.
-		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters);
-		const rules: Rule[] = await this.catalog.getRulesMatchingFilters(filters);
+		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
+		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		for (const e of this.engines) {
+		let filteredNames = null;
+		for (const filter of filters) {
+			if (filter.filterType === FilterType.ENGINE) {
+				filteredNames = filter.filterValues;
+				break;
+			}
+		}
+		const engines: RuleEngine[] = await (filteredNames ? Controller.getFilteredEngines(filteredNames) : Controller.getEnabledEngines());
+		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
@@ -94,60 +97,69 @@ export class DefaultRuleManager implements RuleManager {
 	 */
 	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
-		for (const target of targets) {
-			// Ask engines for their desired target patterns.
-			const targetPatterns: string[] = await engine.getTargetPatterns(target);
-			assert(targetPatterns);
-			// Picomatch OR's together the patterns you provide it, which means we need to be careful about how we construct
-			// our matchers.
-			// Inclusion patterns denote files we want to include, and we want all files that match even a single pattern,
-			// so we can just create a single matcher for all inclusion patterns.
-			const inclusionMatcher = picomatch(targetPatterns.filter(p => !p.startsWith("!")));
-			// Exclusion patterns denote files we want to exclude, and we want all files that match every single pattern,
-			// i.e., doesn't match the inversion of any patterns. So we invert each exclusion pattern and combine them
-			// into a single matcher whose value we'll negate when we need it.
-			const exclusionMatcher = picomatch(targetPatterns.filter(p => p.startsWith("!")).map(p => p.slice(1)));
+		// Ask engines for their desired target patterns.
+		const engineTargets = await engine.getTargetPatterns();
+		assert(engineTargets);
+		// We also need to do a bit of processing on the patterns we were given.
+		const positivePatterns = [];
+		const negativePatterns = [];
+		// This regex will help us identify and resolve relative paths.
+		const dotNotationRegex = /(\.{1,2}\/)+/;
+		targets.forEach((t) => {
+			if (t.startsWith('!**') || t.startsWith('!/')) {
+				// If a negative glob starts with a ** or /, it's an absolute path and we can just add it to our array.
+				negativePatterns.push(t);
+			} else if (t.startsWith('!')) {
+				// We should turn relative negative globs into absolute globs.
+				// First, identify whether this glob contains any dot-notation (e.g., ./ or ../../).
+				const dotNotationDescriptor = dotNotationRegex.exec(t);
+				// If the regex found anything, that's our dot notation prefix. Otherwise, there's an implicit prefix of '.'.
+				const dotNotationPrefix = dotNotationDescriptor ? dotNotationDescriptor[0] :  '.';
+				// The actual glob-portion of the target starts at the end of the dot notation stuff (or just immediately
+				// after the exclamation point if no dot notation was used).
+				const globStartPoint = (dotNotationDescriptor ? dotNotationPrefix.length : 0) + 1;
+				// Resolve the dot notation prefix into an actual path.
+				const resolvedRelativePath = path.resolve(dotNotationPrefix);
+				// Construct a new glob using an exclamation point, our resolved dot-prefix, and the glob portion of the
+				// original.
+				negativePatterns.push(`!${resolvedRelativePath}/${t.slice(globStartPoint)}`);
+			} else {
+				// Everything else is a positive pattern.
+				positivePatterns.push(t);
+			}
+		});
 
-			const fileExists = await this.fileHandler.exists(target);
+		// We want to use a path matcher that can filter based on the engine's target patterns and any negative globs
+		// provided to us.
+		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
+		for (const target of positivePatterns) {
 			if (globby.hasMagic(target)) {
-				// The target is a magic globby glob.  Retrieve paths in the working dir that match it, and then
-				// filter each with the engine's own patterns.  First test any inclusive patterns, then AND them with
-				// any exclusive patterns.
+				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
+				// our pattern matcher.
 				const matchingTargets = await globby(target);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
+				// Filter the targets based on our target patterns.
+				const filteredTargets = pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
 					target,
-					paths: absoluteMatchingTargets.filter(t => inclusionMatcher(t) && !exclusionMatcher(t))
+					paths: filteredTargets
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
 				}
-			} else {
-				if (fileExists) {
-					const stats: Stats = await this.fileHandler.stats(target);
-					if (stats.isDirectory()) {
-						// The target is a directory.  If the engine has target patterns, which is always should,
-						// call globby with the directory as the working dir, and use the patterns to match its contents.
-						if (targetPatterns) {
-							// If dir, use globby { cwd: process.cwd() } option
-							const relativePaths = await globby(targetPatterns, {cwd: target});
-							// Join the relative path to the files that were found
-							const joinedPaths = relativePaths.map(t => path.join(target, t));
-							// Resolve the relative paths to their absolute paths
-							const absolutePaths = joinedPaths.map(t => path.resolve(t));
-							ruleTargets.push({target, isDirectory: true, paths: absolutePaths});
-						} else {
-							// Without target patterns for the engine, just add the dir itself and hope for the best.
-							ruleTargets.push({target, isDirectory: true, paths: ["."]});
-						}
-					} else {
-						// The target is a simple file.  Validate it against the engine's own patterns.  First test
-						// any inclusive patterns, then with any exclusive patterns.
-						const absolutePath = path.resolve(target);
-						if (inclusionMatcher(absolutePath) && !exclusionMatcher(absolutePath)) {
-							ruleTargets.push({target, paths: [absolutePath]});
-						}
+			} else if (await this.fileHandler.exists(target)) {
+				const stats: Stats = await this.fileHandler.stats(target);
+				if (stats.isDirectory()) {
+					// If the target is a directory, we should get everything in it, convert relative paths to absolute
+					// paths, and then filter based our matcher.
+					const relativePaths = await globby(target);
+					ruleTargets.push({target, isDirectory: true, paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))});
+				} else {
+					// The target is just a file. Validate it against our matcher, and add it if eligible.
+					const absolutePath = path.resolve(target);
+					if (pm.pathMatchesPatterns(absolutePath)) {
+						ruleTargets.push({target, paths: [absolutePath]});
 					}
 				}
 			}

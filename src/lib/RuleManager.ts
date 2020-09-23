@@ -13,7 +13,7 @@ export enum OUTPUT_FORMAT {
 export interface RuleManager {
 	init(): Promise<void>;
 
-	getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]>;
+	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[];
 
 	/**
 	 * @param engineOptions - see RuleEngine#run

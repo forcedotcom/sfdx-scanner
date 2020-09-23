@@ -61,7 +61,7 @@ describe('PmdCatalogWrapper', () => {
 					// Spoof a CustomPathManager that claims that a custom JAR exists for Java.
 					const customJars: Map<string, Set<string>> = new Map();
 					customJars.set(LANGUAGE.JAVA, new Set([irrelevantPath]));
-					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
+					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 				});
 
@@ -89,7 +89,7 @@ describe('PmdCatalogWrapper', () => {
 					// Spoof a CustomPathManager that claims that a custom JAR exists for plsql, using a weird alias for that language.
 					const customJars: Map<string, Set<string>> = new Map();
 					customJars.set('Pl/SqL', new Set([irrelevantPath]));
-					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
+					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 				});
 
@@ -116,7 +116,7 @@ describe('PmdCatalogWrapper', () => {
 					const customJars: Map<string, Set<string>> = new Map();
 					customJars.set('pl/sql', new Set([irrelevantPath]));
 					customJars.set(LANGUAGE.JAVA, new Set());
-					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
+					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 				});
 
@@ -149,7 +149,7 @@ describe('PmdCatalogWrapper', () => {
 					const customJars: Map<string, Set<string>> = new Map();
 					// Simulate CustomPaths.json contains a jar that has been deleted or moved
 					customJars.set(LANGUAGE.JAVA, new Set([validJar, missingJar]));
-					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.NAME).resolves(customJars);
+					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					const stub = Sinon.stub(FileHandler.prototype, 'exists');
 					stub.withArgs(validJar).resolves(true);
 					stub.withArgs(missingJar).resolves(false);

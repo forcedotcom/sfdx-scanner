@@ -7,7 +7,7 @@ Here are some troubleshooting tips to fix common issues when you use the Salesfo
 
 
 ### My custom rule Java file doesn’t compile.
-* Make sure that you reference only PMD features and classes that are available in version 6.22.0.
+* Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
 * Check that you're using correct syntax. 
 * Check that the compilation CLASSPATH contains the correct version of the PMD binary.
 
@@ -27,7 +27,7 @@ One possible reason is that the Java version you used to build your code is diff
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
 
-One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version 6.22.0. Make sure that you reference only PMD features and classes that are available in version 6.22.0.
+One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version {{ site.data.versions.pmd }}. Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
 
 
 ### I sometimes see more rules violations when I specify the categories with `scanner:run` command than when I execute it for the same target without filters. What is this inconsistency?
@@ -37,7 +37,7 @@ This is working as designed. Some rules are default-enabled by eslint while some
 
 ### Commands display `Javascript is not currently supported by the PMD engine`.
 
-Version 6.22.0 of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
+Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
 
 Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
 

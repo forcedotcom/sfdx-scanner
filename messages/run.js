@@ -23,10 +23,12 @@ module.exports = {
 		"envDescription": "JSON-formatted string, overrides ESLint's default environment variables",
 		"envDescriptionLong": "JSON-formatted string. Overrides ESLint's default environmental variables.",
 		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
-		"tsconfigDescription": "Location of tsconfig.json file",
+		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
-		"vceDescription": "Throws an error when violations are detected",
-		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation."
+		"vceDescription": "throws an error when violations are detected",
+		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
+		'engineDescription': "engine(s) to run",
+		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list."
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
@@ -58,13 +60,17 @@ module.exports = {
 	Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
 		E.g., sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 			Scans the project contained in '/my-project' if the current working directory is another directory.
-			
+
 	Use --env to override the default ESLint environment variables to add frameworks.
 		E.g., $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 			Evaluates rules against somefile.js, including Jasmine in the environment variables.
-	
+
 	Use --violations-cause-error to throw exit with a non-zero code when violations are found.
 		E.g., $ sfdx scanner:run --target "somefile.js" --violations-cause-error
 			Evaluates rules against somefile.js. If any rules are violated, the exit code will be the severity of the most severe violation.
-`
+
+	Use --engines to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
+		E.g., $ sfdx scanner:run --target "somefile.js" --engines "eslint-lwc,pmd"
+			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
+	`
 };

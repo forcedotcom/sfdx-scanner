@@ -1,6 +1,6 @@
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
-import {Controller} from '../ioc.config';
+import {Controller} from '../Controller';
 
 import process = require('process');
 import findJavaHome = require('find-java-home');
@@ -116,8 +116,8 @@ class JreSetupManager extends AsyncCreatable {
 		// Win10: "openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n"
 		// We want to get the "11.0" or "14" part
 		// The version number could be of the format 11.0 or 1.8 or 14
-		const regex = '(\\d+)(\\.(\\d+))?';
-		const matchedParts = versionOut.match(regex);
+		const regex = /(\d+)(\.(\d+))?/;
+		const matchedParts = regex.exec(versionOut);
 		this.logger.trace(`Version output match for pattern ${regex} is ${matchedParts}`);
 
 		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined

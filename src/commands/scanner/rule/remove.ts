@@ -1,9 +1,9 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../ioc.config';
+import {Controller} from '../../../Controller';
 import {FilterType, RuleFilter} from '../../../lib/RuleFilter';
-import {ScannerCommand} from '../scannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
@@ -52,7 +52,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 3: Get all rule entries matching the criteria they provided.
 		const crpm = await Controller.createRulePathManager();
-		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : await crpm.getAllPaths();
+		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : crpm.getAllPaths();
 
 		// Step 4: If there aren't any matching paths, we need to react appropriately.
 		if (!deletablePaths || deletablePaths.length === 0) {
@@ -84,7 +84,7 @@ export default class Remove extends ScannerCommand {
 
 			// Step 6b: We'll want to retrieve the matching rules.
 			const rm = await Controller.createRuleManager();
-			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
+			const matchingRules: Rule[] = rm.getRulesMatchingCriteria(filters);
 
 			// Step 6c: If any rules are found, ask the user to confirm that they actually want to delete them.
 			if (matchingRules.length > 0 && await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {

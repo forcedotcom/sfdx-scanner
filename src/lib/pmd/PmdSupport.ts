@@ -2,7 +2,7 @@ import childProcess = require('child_process');
 import path = require('path');
 import {AsyncCreatable} from '@salesforce/kit';
 import {ChildProcessWithoutNullStreams} from 'child_process';
-import {Controller} from '../../ioc.config';
+import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
 
 export const PMD_VERSION = '6.22.0';
@@ -41,14 +41,14 @@ export abstract class PmdSupport extends AsyncCreatable {
 	 * @param res
 	 * @param rej
 	 */
-	protected abstract monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: ([boolean, string]) => void, rej: (string) => void): void;
+	protected abstract monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void;
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
 
-	protected async runCommand(): Promise<[boolean, string]> {
+	protected async runCommand(): Promise<string> {
 		const [command, args] = await this.buildCommandArray();
 
-		return new Promise<[boolean, string]>((res, rej) => {
+		return new Promise<string>((res, rej) => {
 			const cp = childProcess.spawn(command, args);
 			this.monitorChildProcess(cp, res, rej);
 		});
@@ -56,6 +56,6 @@ export abstract class PmdSupport extends AsyncCreatable {
 
 	protected async getCustomRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const customRulePathManager = await Controller.createRulePathManager();
-		return await customRulePathManager.getRulePathEntries(PmdEngine.NAME);
+		return customRulePathManager.getRulePathEntries(PmdEngine.ENGINE_NAME);
 	}
 }
