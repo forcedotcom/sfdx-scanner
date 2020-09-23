@@ -2,8 +2,8 @@ import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
-import { boolean } from '@oclif/command/lib/flags';
-import { Controller } from '../../ioc.config';
+import { Controller } from '../../Controller';
+import {deepCopy} from '../../lib/util/Utils';
 
 export type ConfigContent = {
 	javaHome?: string;
@@ -18,7 +18,7 @@ export type EngineConfigContent = {
 	supportedLanguages?: string[];
 }
 
-export const DEFAULT_CONFIG: ConfigContent = {
+const DEFAULT_CONFIG: ConfigContent = {
 	engines: [
 		{
 			name: ENGINE.PMD,
@@ -26,7 +26,8 @@ export const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
 				"!**/node_modules/**","!**/*-meta.xml"
 			],
-			supportedLanguages: ['apex', 'vf']
+			supportedLanguages: ['apex', 'vf'],
+			disabled: false
 		},
 		{
 			name: ENGINE.ESLINT,
@@ -34,7 +35,16 @@ export const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.js",
 				"!**/node_modules/**",
 				"!**/bower_components/**"
-			]
+			],
+			disabled: false
+		},
+		{
+			name: ENGINE.ESLINT_LWC,
+			targetPatterns: [
+					"**/*.js",
+					"!**/node_modules/**",
+			],
+			disabled: true
 		},
 		{
             name: ENGINE.ESLINT_TYPESCRIPT,
@@ -42,7 +52,8 @@ export const DEFAULT_CONFIG: ConfigContent = {
                 "**/*.ts",
                 "!**/node_modules/**",
 				"!**/bower_components/**"
-			]
+			],
+			disabled: false
         }
 	]
 };
@@ -50,7 +61,7 @@ export const DEFAULT_CONFIG: ConfigContent = {
 class TypeChecker {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	stringArrayCheck(value: any, propertyName: string, engine: ENGINE): boolean {
+	stringArrayCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
 		if (Array.isArray(value) && value.length > 0) {
 			value.forEach((item) => {
 				if (typeof item != 'string') {
@@ -60,15 +71,15 @@ class TypeChecker {
 			return true;
 		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
-	}
+	};
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	booleanCheck(value: any, propertyName: string, engine: ENGINE): boolean {
-		if (value instanceof boolean) {
+	booleanCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
+		if (typeof value === 'boolean') {
 			return true;
 		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidBooleanValue', [propertyName, engine.valueOf(), String(value)]);
-	}
+	};
 }
 
 export class Config {
@@ -106,27 +117,21 @@ export class Config {
 		return this.configContent.javaHome;
 	}
 
-	// FIXME: Not supported yet - the logic is not hooked up to the actual call
-	// Leaving this as-is instead of moving to getConfigValue() style
-	public isEngineEnabled(name: string): boolean {
+	public async isEngineEnabled(engine: ENGINE): Promise<boolean> {
 		if (!this.configContent.engines) {
 			// Fast exit.  No definitions means all enabled.
 			return true;
 		}
 
-		const e = this.configContent.engines.find(e => e.name === name);
-		// No definition means enabled by default.  Must explicitly disable.
-		return !e || e.disabled;
+		return !(await this.getConfigValue('disabled', engine, this.typeChecker.booleanCheck));
 	}
 
 	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
-		const value = await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
-		return value as Array<string>;
+		return await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
 	}
 
 	public async getTargetPatterns(engine: ENGINE): Promise<string[]> {
-		const value = await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
-		return value as Array<string>;
+		return await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
 	}
 
 	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<string[]> {
@@ -143,14 +148,23 @@ export class Config {
 		return ecc[propertyName];
 	}
 
-	private async lookupAndUpdateToDefault(engine: ENGINE, ecc: EngineConfigContent, propertyName: string): Promise<EngineConfigContent> {
-		const defaultConfig = DEFAULT_CONFIG.engines.find(e => e.name.toLowerCase() === engine.valueOf().toLowerCase());
+	/**
+	 * Get the default ConfigContent. This value will be used as-is when a Config.json file doesn't exist, or
+	 * its contents will be merged with an existing Config.json file in cases where new values are added after the
+	 * Config.json file has been written.
+	 */
+	protected getDefaultConfig(): ConfigContent {
+		return DEFAULT_CONFIG;
+	}
+
+	protected async lookupAndUpdateToDefault(engine: ENGINE, ecc: EngineConfigContent, propertyName: string): Promise<EngineConfigContent> {
+		const defaultConfig = this.getDefaultConfig().engines.find(e => e.name.toLowerCase() === engine.valueOf().toLowerCase());
 
 		if (!ecc) { // if engine block doesn't exist, add a new one based on the default
 			ecc = defaultConfig;
 			this.addEngineToConfig(ecc);
 			this.logger.warn(`Persisting missing block for engine ${engine}`);
-		} else if (defaultConfig[propertyName]) { // engine block exists if we are here. Check if default has a value for property
+		} else if (defaultConfig[propertyName] !== undefined) { // engine block exists if we are here. Check if default has a value for property
 			ecc[propertyName] = defaultConfig[propertyName];
 			this.logger.warn(`Persisting default values ${ecc[propertyName]} for engine ${engine}`);
 		} else {
@@ -192,7 +206,7 @@ export class Config {
 		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
 		if (!this.configContent['engines'] && this.configContent['javaHome']) {
 			// Prior version.  Migrate.
-			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, DEFAULT_CONFIG) );
+			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, deepCopy(DEFAULT_CONFIG)) );
 		}
 	}
 

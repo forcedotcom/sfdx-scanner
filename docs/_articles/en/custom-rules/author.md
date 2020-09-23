@@ -20,7 +20,7 @@ If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To comp
 
 ```$ javac -cp ".:$PMD_BIN_HOME/lib/*" /path/to/your/Rule.java```
 
-Use only [version 6.22.0](https://github.com/pmd/pmd/releases/download/pmd_releases%2F6.22.0/pmd-bin-6.22.0.zip) of PMD for writing the custom rules. 
+Use only [version {{ site.data.versions.pmd }}](https://github.com/pmd/pmd/releases/download/pmd_releases%2F{{ site.data.versions.pmd }}/pmd-bin-{{ site.data.versions.pmd }}.zip) of PMD for writing the custom rules. 
 
 ## Bundling PMD Custom Rules
 If you haven't already, create the XML rule [definition file](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) for your new rule(s). Add them to a directory structure like this: 

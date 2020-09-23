@@ -3,9 +3,9 @@ import * as path from 'path';
 import {RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
-import htmlEscaper = require('html-escaper');
 import {FileHandler} from './util/FileHandler';
 import * as Mustache from 'mustache';
+import htmlEscaper = require('html-escaper');
 
 export class RuleResultRecombinator {
 

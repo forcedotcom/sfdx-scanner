@@ -13,6 +13,6 @@ export class RuleFilter {
 
     constructor(filterType: FilterType, filterValues: string[]) {
         this.filterType = filterType;
-        this.filterValues = filterValues;
+        this.filterValues = filterValues.map(v => v.trim());
     }
 }

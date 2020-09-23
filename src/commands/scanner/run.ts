@@ -2,10 +2,10 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {INTERNAL_ERROR_CODE} from '../../Constants';
-import {Controller} from '../../ioc.config';
+import {ENGINE, INTERNAL_ERROR_CODE} from '../../Constants';
+import {Controller} from '../../Controller';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
-import {ScannerCommand} from './scannerCommand';
+import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import fs = require('fs');
 import untildify = require('untildify');
@@ -32,6 +32,7 @@ export default class Run extends ScannerCommand {
 	// This defines the flags accepted by this command.
 	protected static flagsConfig = {
 		verbose: flags.builtin(),
+		// BEGIN: Flags consumed by ScannerCommand#buildRuleFilters
 		// These flags are how you choose which rules you're running.
 		category: flags.array({
 			char: 'c',
@@ -54,6 +55,13 @@ export default class Run extends ScannerCommand {
 			exclusive: ['category', 'ruleset', 'severity', 'exclude-rule'],
 			hidden: true
 		}),
+		engine: flags.array({
+			char: 'e',
+			description: messages.getMessage('flags.engineDescription'),
+			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD]
+		}),
+		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// TODO: After implementing this flag, unhide it.
 		severity: flags.string({
 			char: 's',
@@ -276,11 +284,11 @@ export default class Run extends ScannerCommand {
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
-			case OUTPUT_FORMAT.HTML:
 			case OUTPUT_FORMAT.JSON:
 			case OUTPUT_FORMAT.CSV:
 			case OUTPUT_FORMAT.XML:
 			case OUTPUT_FORMAT.JUNIT:
+			case OUTPUT_FORMAT.HTML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
 					throw new SfdxError(msg, null, null, this.getInternalErrorCode());

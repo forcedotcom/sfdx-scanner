@@ -3,12 +3,12 @@ export interface RulePathManager {
 
 	addPathsForLanguage(language: string, paths: string[]): Promise<string[]>;
 
-	getAllPaths(): Promise<string[]>;
+	getAllPaths(): string[];
 
 	getMatchingPaths(paths: string[]): Promise<string[]>;
 
 	removePaths(paths: string[]): Promise<string[]>;
 
-	getRulePathEntries(engine: string): Promise<Map<string, Set<string>>>;
+	getRulePathEntries(engine: string): Map<string, Set<string>>;
 }
 

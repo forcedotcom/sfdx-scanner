@@ -1,3 +1,4 @@
+STDOUT HEADER THAT SHOULD BE FILTERED OUT
 <?xml version="1.0" encoding="UTF-8"?>
 <pmd xmlns="http://pmd.sourceforge.net/report/2.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -44,5 +45,8 @@ Parameter 'messageType' is not assigned and could be declared final
 Parameter 'verbose' is not assigned and could be declared final
 </violation>
 </file>
+<error filename="Foo.java" msg="Issue with Foo"/>
 <configerror rule="LoosePackageCoupling" msg="No packages or classes specified"/>
+<suppressedviolation filename="Bar.java" msg="Rule suppressed message" suppressiontype="Warning" usermsg="Rule user message" />
 </pmd>
+STDOUT FOOTER THAT SHOULD BE FILTERED OUT
