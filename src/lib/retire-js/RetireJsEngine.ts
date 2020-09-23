@@ -10,8 +10,21 @@ import path = require('path');
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior.
 const retireJsCatalog: Catalog = {
-	rules: [],
-	categories: [],
+	rules: [{
+		engine: ENGINE.RETIRE_JS.valueOf(),
+		sourcepackage: ENGINE.RETIRE_JS.valueOf(),
+		name: 'retirejs-rule',
+		description: 'Dummy description of the rule',
+		categories: ['Insecure Dependencies'],
+		rulesets: [],
+		languages: ['javascript'],
+		defaultEnabled: true
+	}],
+	categories: [{
+		engine: ENGINE.RETIRE_JS.valueOf(),
+		name: 'Insecure Dependencies',
+		paths: []
+	}],
 	rulesets: []
 };
 
