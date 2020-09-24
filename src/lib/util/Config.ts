@@ -123,21 +123,29 @@ export class Config {
 			return true;
 		}
 
-		return !(await this.getConfigValue('disabled', engine, this.typeChecker.booleanCheck));
+		return !(await this.getBooleanConfigValue('disabled', engine));
 	}
 
-	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
-		return await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
+	public getSupportedLanguages(engine: ENGINE): Promise<any> {
+		return this.getStringArrayConfigValue('supportedLanguages', engine);
 	}
 
-	public async getTargetPatterns(engine: ENGINE): Promise<string[]> {
-		return await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
+	public getTargetPatterns(engine: ENGINE): Promise<any> {
+		return this.getStringArrayConfigValue('targetPatterns', engine);
 	}
 
-	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<string[]> {
+	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
+		return this.getConfigValue(propertyName, engine, this.typeChecker.booleanCheck);
+	}
+
+	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {
+		return this.getConfigValue(propertyName, engine, this.typeChecker.stringArrayCheck);
+	}
+
+	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<any> {
 		let ecc = this.getEngineConfig(engine);
 		// If the config specifies property, use those.
-		if (ecc && ecc[propertyName] && typeChecker(ecc[propertyName], propertyName, engine)) {
+		if (ecc && (ecc[propertyName] !== undefined) && typeChecker(ecc[propertyName], propertyName, engine)) {
 			this.logger.trace(`Retrieving ${propertyName} from engine ${engine}: ${ecc[propertyName]}`);
 		} else {
 			// If the config doesn't specify the property, use the default value
