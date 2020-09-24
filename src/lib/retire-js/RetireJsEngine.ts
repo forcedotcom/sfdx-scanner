@@ -54,7 +54,7 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 	// TODO: We need to actually implement this method.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		return [];
 	}
