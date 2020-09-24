@@ -1,4 +1,5 @@
 import {PmdCatalogWrapper} from '../../../src/lib/pmd/PmdCatalogWrapper';
+import {PMD_VERSION} from '../../../src/lib/pmd/PmdSupport';
 import {PmdEngine} from '../../../src/lib/pmd/PmdEngine';
 import {CustomRulePathManager} from '../../../src/lib/CustomRulePathManager';
 import {Config} from '../../../src/lib/util/Config';
@@ -140,7 +141,7 @@ describe('PmdCatalogWrapper', () => {
 				const validJar = 'jar-that-exists.jar';
 				const missingJar = 'jar-that-is-missing.jar';
 				// This jar is automatically included by the PmdCatalogWrapper
-				const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', 'pmd-java-6.22.0.jar'));
+				const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', `pmd-java-${PMD_VERSION}.jar`));
 				let uxSpy = null;
 
 				before(() => {
