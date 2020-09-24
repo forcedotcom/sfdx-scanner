@@ -13,8 +13,9 @@ const retireJsCatalog: Catalog = {
 	rules: [{
 		engine: ENGINE.RETIRE_JS.valueOf(),
 		sourcepackage: ENGINE.RETIRE_JS.valueOf(),
-		name: 'retirejs-rule',
-		description: 'Dummy description of the rule',
+		// Give this rule an informative name, specific enough that we're able to supplement it with other rules later.
+		name: ' insecure-bundled-dependencies',
+		description: 'Identify bundled libraries/modules with known vulnerabilities.',
 		categories: ['Insecure Dependencies'],
 		rulesets: [],
 		languages: ['javascript'],
@@ -52,6 +53,8 @@ export class RetireJsEngine implements RuleEngine {
 		return retireJsCatalog;
 	}
 
+	// TODO: We need to actually implement this method.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		return [];
 	}
@@ -66,7 +69,8 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 	public matchPath(path: string): boolean {
-		return null;
+		this.logger.trace(`Engine RetireJS does not support custom rules: ${path}`);
+		return false;
 	}
 
 	public async isEnabled(): Promise<boolean> {
