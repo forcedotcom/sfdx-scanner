@@ -49,12 +49,12 @@ export class RetireJsEngine implements RuleEngine {
 		return this.config.getTargetPatterns(ENGINE.RETIRE_JS);
 	}
 
-	public async getCatalog(): Promise<Catalog> {
-		return retireJsCatalog;
+	public getCatalog(): Promise<Catalog> {
+		return Promise.resolve(retireJsCatalog);
 	}
 
 	// TODO: We need to actually implement this method.
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		return [];
 	}
