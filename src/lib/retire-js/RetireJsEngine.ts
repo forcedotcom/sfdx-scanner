@@ -35,7 +35,7 @@ export class RetireJsEngine implements RuleEngine {
 	// RetireJS isn't really built to be invoked programmatically, so we'll need to invoke it as a CLI command. However, we
 	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
-	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
+	//private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 
 	private logger: Logger;
 	private config: Config;
