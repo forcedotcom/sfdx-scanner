@@ -54,8 +54,9 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by category only', () => {
 			it('Filtering by one category returns only rules in that category', async () => {
 				// Set up our filter array.
+				const category = 'Best Practices';
 				const filters = [
-					new RuleFilter(FilterType.CATEGORY, ['Best Practices']),
+					new RuleFilter(FilterType.CATEGORY, [category]),
 					new RuleFilter(FilterType.ENGINE, ['pmd'])];
 
 				// Pass the filter array into the manager.
@@ -63,17 +64,26 @@ describe('RuleManager', () => {
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'Exactly 2 pmd rules are categorized as "Best Practices".');
-			});
+				for (const rule of matchingRules) {
+					expect(rule.categories).to.contain(category);
+				}
+		});
 
 			it('Filtering by multiple categories returns any rule in either category', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Design'])];
+				const categories = ['Best Practices', 'Design'];
+				const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
 
 				// Pass the filter array into the manager.
 				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(8, 'Exactly 8 rules are categorized as "Best Practices" or "Design"');
+				for (const rule of matchingRules) {
+					for (const category of rule.categories) {
+						expect(categories, JSON.stringify(matchingRules)).to.contain(category);
+					}
+				}
 			});
 		});
 
@@ -128,9 +138,10 @@ describe('RuleManager', () => {
 		describe('Test Case: Mixing filter types', () => {
 			it('Filtering on multiple columns at once returns only rules that satisfy ALL filters', async () => {
 				// Set up our filter array.
+				const category = 'Best Practices';
 				const filters = [
 					new RuleFilter(FilterType.LANGUAGE, ['javascript']),
-					new RuleFilter(FilterType.CATEGORY, ['Best Practices'])
+					new RuleFilter(FilterType.CATEGORY, [category])
 				];
 
 				// Pass the filter array into the manager.
@@ -138,6 +149,9 @@ describe('RuleManager', () => {
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(4, 'Exactly 4 rules target Apex and are categorized as "Best Practices".');
+				for (const rule of matchingRules) {
+					expect(rule.categories).to.contain(category);
+				}
 			});
 		});
 
@@ -174,7 +188,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes, '' + results).to.be.an("array").that.has.length(2);
+					expect(parsedRes, '' + results).to.be.an("array").that.has.length(1);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -206,7 +220,7 @@ describe('RuleManager', () => {
 					} else {
 						parsedRes = JSON.parse(results);
 					}
-					expect(parsedRes).to.be.an("array").that.has.length(17);
+					expect(parsedRes).to.be.an("array").that.has.length(8);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
@@ -216,8 +230,9 @@ describe('RuleManager', () => {
 			describe('Test Case: Run by category', () => {
 				it('Filtering by one category runs only rules in that category', async () => {
 					// Set up our filter array.
+					const category = 'Best Practices';
 					const filters = [
-						new RuleFilter(FilterType.CATEGORY, ['Best Practices'])];
+						new RuleFilter(FilterType.CATEGORY, [category])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -227,15 +242,19 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(13);
+					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(3);
 					for (const res of parsedRes) {
-						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+						for (const violation of res.violations) {
+							expect(violation, `Message is ${violation['message']}`).to.have.property("ruleName").that.is.not.null;
+							expect(violation.category).to.equal(category);
+						}
 					}
 				});
 
 				it('Filtering by multiple categories runs any rule in either category', async () => {
 					// Set up our filter array.
-					const filters = [new RuleFilter(FilterType.CATEGORY, ['Best Practices', 'Error Prone'])];
+					const categories = ['Best Practices', 'Error Prone'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -245,9 +264,10 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 
-					expect(parsedRes).to.be.an("array").that.has.length(16);
+					expect(parsedRes).to.be.an("array").that.has.length(6);
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
+						expect(res.violations[0].category).to.be.oneOf(categories);
 					}
 				});
 			});

@@ -1,5 +1,6 @@
 const ONE = 1;
 const THREE = 3;
+const UNUSED = 4;
 
 function boofTime(): number {
 	return new Date().getTime() % THREE;

@@ -17,13 +17,11 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
-	"baseConfig": {
-		"extends": [
-			"eslint:recommended",
-			"plugin:@typescript-eslint/recommended",
-			"plugin:@typescript-eslint/eslint-recommended"
-		]
-	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/eslint-recommended"
+	],
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
