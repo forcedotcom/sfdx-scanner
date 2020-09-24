@@ -5,7 +5,7 @@ import {RuleEngine} from '../services/RuleEngine';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {ENGINE} from '../../Constants';
 //import childProcess = require('child_process');
-import path = require('path');
+//import path = require('path');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior.
