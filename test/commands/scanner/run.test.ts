@@ -810,8 +810,9 @@ describe('scanner:run', function () {
 						const violations = ctx.stdout.split('<violation');
 						// The first list item is going to be the header, so we need to pull that off.
 						violations.shift();
-						// There should be three violations. We'll just make sure that we have the right number of them.
-						expect(violations.length).to.equal(3, 'Should be 3 violations detected in the file');
+						// ApexUnitTestClassShouldHaveAsserts, FieldNamingConventions, UnusedLocalVariable, and VariableNamingConventions
+						// We'll just make sure that we have the right number of them.
+						expect(violations.length).to.equal(4, 'Violations detected in the file');
 					});
 			});
 
