@@ -46,3 +46,6 @@
 - title:
     en: Troubleshooting
   url: /troubleshooting
+- title:
+    en: Release Information
+  url: /changelog/

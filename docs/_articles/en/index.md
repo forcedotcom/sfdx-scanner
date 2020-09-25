@@ -4,6 +4,12 @@ permalink: /
 lang: en
 ---
 
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_warning" role="alert">
+  <span class="slds-assistive-text">warning</span>
+  	A new version (v{{ site.data.versions.scanner }}) of the Scanner Plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/changelog/">Release Information</a>
+</div>
+<br>
+
 ## Salesforce CLI Scanner Plug-in
 
 The Salesforce CLI Scanner plug-in is a unified tool for static analysis of source code, in multiple languages (including Apex), with a consistent command-line interface and report output. We currently support the [PMD rule engine](https://pmd.github.io/) and [ESLint](https://eslint.org/). We may add support for more rule engines in the future.
