@@ -4,9 +4,7 @@ import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 
 const ES_CONFIG = {
-	"baseConfig": {
-		"extends": ["eslint:recommended"]
-	},
+	"extends": ["eslint:recommended"],
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
