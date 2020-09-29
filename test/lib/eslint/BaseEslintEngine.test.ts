@@ -83,7 +83,6 @@ describe('Tests for BaseEslintEngine', () => {
 
 			it('should not execute when rules are empty', async () => {
 				// instantiate abstract engine
-				Mockito.when(MockStrategy.getLanguages()).thenReturn(['language']);
 				const mockStrategy = Mockito.instance(MockStrategy);
 				const engine = await createDummyEngine(mockStrategy);
 
