@@ -7,17 +7,25 @@ lang: en
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.2.0...v2.2.1)
 
+### Release Summary
+* Bug fix for a regression
+
 **Merged pull requests:**
 
 - @W-8129868@ Increment version in the docs [\#228](https://github.com/forcedotcom/sfdx-scanner/pull/228)
-- @W-8129868@ Merge dev to release [\#227](https://github.com/forcedotcom/sfdx-scanner/pull/227)
 - @W-8129868@ Preparing for 2.2.1 release [\#226](https://github.com/forcedotcom/sfdx-scanner/pull/226)
 - @W-8118474@ Fix filter by Category regression [\#223](https://github.com/forcedotcom/sfdx-scanner/pull/223)
-- @W-8112504@ Merging release back to dev [\#219](https://github.com/forcedotcom/sfdx-scanner/pull/219)
 
 ## [v2.2.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.2.0) (09-23-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.1.1...v2.2.0)
+
+### Release Summary
+* New feature to scan Lightning Web Components using ESlint
+* HTML report enhancements 
+* Bug fixes
+
+
 
 **Closed issues:**
 
@@ -25,7 +33,6 @@ lang: en
 
 **Merged pull requests:**
 
-- @W-8112504@ Merging dev to release before 2.2 [\#217](https://github.com/forcedotcom/sfdx-scanner/pull/217)
 - @W-8111353@ Switch path of init hook [\#216](https://github.com/forcedotcom/sfdx-scanner/pull/216)
 - @W-8105926@ Config\#isEngineEnabled should use \#getConfigValue [\#215](https://github.com/forcedotcom/sfdx-scanner/pull/215)
 - @W-8105674@ Move engine version info to a single yml file [\#214](https://github.com/forcedotcom/sfdx-scanner/pull/214)
@@ -33,15 +40,11 @@ lang: en
 - @W-8095993@ Increment transitive bl dependency version [\#211](https://github.com/forcedotcom/sfdx-scanner/pull/211)
 - @W-8089974@ Trim category filters [\#208](https://github.com/forcedotcom/sfdx-scanner/pull/208)
 - @W-8062540@: Refactored code into PathMatcher class and added unit te… [\#206](https://github.com/forcedotcom/sfdx-scanner/pull/206)
-- @W-8056964@ Merging release to dev. [\#205](https://github.com/forcedotcom/sfdx-scanner/pull/205)
-- @W-8066439@ merge release changes [\#200](https://github.com/forcedotcom/sfdx-scanner/pull/200)
-- @W-8056964@ port from release to dev [\#196](https://github.com/forcedotcom/sfdx-scanner/pull/196)
 - @W-7921470@ Change eslint-lwc engine to use eslint rules [\#192](https://github.com/forcedotcom/sfdx-scanner/pull/192)
 - @W-8046080@ Adding Code of conduct and Security md files [\#190](https://github.com/forcedotcom/sfdx-scanner/pull/190)
 - @W-7972245@ Change sfdx-scanner to Salesforce CLI Scanner [\#187](https://github.com/forcedotcom/sfdx-scanner/pull/187)
 - @W-8035436@ Added --engine flag [\#185](https://github.com/forcedotcom/sfdx-scanner/pull/185)
 - @W-7921470@ Add LWC Engine [\#184](https://github.com/forcedotcom/sfdx-scanner/pull/184)
-- @W-8002539@: Allow flag for exiting with non-zero code. Merging from release to dev. [\#183](https://github.com/forcedotcom/sfdx-scanner/pull/183)
 - @W-7957489@ Fix some corner cases for the HTML report [\#181](https://github.com/forcedotcom/sfdx-scanner/pull/181)
 - @W-7992570@ Minor doc changes to include build information [\#178](https://github.com/forcedotcom/sfdx-scanner/pull/178)
 - @W-7957489@ HTML report enhancements [\#173](https://github.com/forcedotcom/sfdx-scanner/pull/173)
@@ -67,6 +70,9 @@ lang: en
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.1.0...v2.1.1)
 
+### Release Summary
+* Bug fix for a regression
+
 **Merged pull requests:**
 
 - @W-8063136@: Incrementing version from 2.1.0 to 2.1.1 [\#201](https://github.com/forcedotcom/sfdx-scanner/pull/201)
@@ -75,6 +81,11 @@ lang: en
 ## [v2.1.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.1.0) (09-09-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.0.0...v2.1.0)
+
+### Release Summary
+* Adding visualforce to default languages supported by PMD
+* A non-zero exit code for CI/CD
+* Bug fixes
 
 **Closed issues:**
 
@@ -89,13 +100,9 @@ lang: en
 - @W-8058863@ @W-8058863@ Fix for unit tests failing on windows [\#195](https://github.com/forcedotcom/sfdx-scanner/pull/195)
 - @W-8058687@ Adding troubleshoot section for VF parse error [\#194](https://github.com/forcedotcom/sfdx-scanner/pull/194)
 - @W-8056964@: Bower components now excluded by default. Troubleshootin… [\#193](https://github.com/forcedotcom/sfdx-scanner/pull/193)
-- @W-7972245@ "Salesforce CLI Scanner" in our docs \(merge to release\) [\#191](https://github.com/forcedotcom/sfdx-scanner/pull/191)
-- @W-8043716@ Merge HTML report from dev to release [\#189](https://github.com/forcedotcom/sfdx-scanner/pull/189)
 - @W-8002539@: Allowing violations to cause non-zero exit code for CI/CD purposes. [\#182](https://github.com/forcedotcom/sfdx-scanner/pull/182)
-- @W-7972415@ Mark ruleset parameter as deprecated - merge from dev to release branch [\#179](https://github.com/forcedotcom/sfdx-scanner/pull/179)
-- @W-7905086@ Inversion of control to use an alternative directory for testing - merging from dev to release [\#175](https://github.com/forcedotcom/sfdx-scanner/pull/175)
+[\#175](https://github.com/forcedotcom/sfdx-scanner/pull/175)
 - @W-7971516@ Adding visualforce to default languages supported by PMD [\#174](https://github.com/forcedotcom/sfdx-scanner/pull/174)
-- @W-7927194@ backport to Release [\#172](https://github.com/forcedotcom/sfdx-scanner/pull/172)
 - updating the baseURL for docs [\#148](https://github.com/forcedotcom/sfdx-scanner/pull/148)
 - Revert "Adding sfdx-scanner to the baseUrl" [\#144](https://github.com/forcedotcom/sfdx-scanner/pull/144)
 - Adding sfdx-scanner to the baseUrl [\#141](https://github.com/forcedotcom/sfdx-scanner/pull/141)
@@ -105,6 +112,11 @@ lang: en
 ## [v2.0.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.0.0) (07-13-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v1.0.30...v2.0.0)
+
+### Release Summary
+* Eslint Engine support to scan Javascript and Typescript
+* Developer documentation
+* Bug fixes
 
 **Closed issues:**
 
