@@ -1,4 +1,4 @@
 scanner: '2.2.1'
 releasedon: '09-28-2020'
-pmd: '6.22.0'
+pmd: '6.28.0'
 eslint: '6.8.0'
