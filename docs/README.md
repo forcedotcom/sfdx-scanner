@@ -60,10 +60,11 @@ Instructions: https://github.com/github-changelog-generator/github-changelog-gen
 ```bash
 export CHANGELOG_GITHUB_TOKEN="<<Github Token>>"
 github_changelog_generator -u forcedotcom -p sfdx-scanner -f %m-%d-%Y --no-unreleased --no-author --exclude-tags-regex "tag-test*" --no-verbose --since-tag vX.Y.Z
+
 ```
 
 ### Note:
-Remember to remove the X on the header of the CHANGELOG.md that is generated
+Copy the information for the release you are making to the top of the release-information.md
 
 ## Localization (NOT Supported Yet, Ignore this section)
 
