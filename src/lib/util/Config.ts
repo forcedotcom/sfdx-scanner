@@ -145,6 +145,8 @@ export class Config {
 	private async getConfigValue<T>(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<T> {
 		let ecc = this.getEngineConfig(engine);
 		// If the config specifies property, use those.
+		// Intentionally distinguishing null from undefined in case we want to allow nullable config values in the future.
+		// TODO: Look into possibly using typeguards, see discussion here https://github.com/forcedotcom/sfdx-scanner/pull/222/files#r497080143
 		if (ecc && (ecc[propertyName] !== undefined) && typeChecker(ecc[propertyName], propertyName, engine)) {
 			this.logger.trace(`Retrieving ${propertyName} from engine ${engine}: ${ecc[propertyName]}`);
 		} else {
