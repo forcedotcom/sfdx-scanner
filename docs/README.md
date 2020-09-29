@@ -59,11 +59,7 @@ Instructions: https://github.com/github-changelog-generator/github-changelog-gen
 
 ```bash
 export CHANGELOG_GITHUB_TOKEN="<<Github Token>>"
-github_changelog_generator -u forcedotcom -p sfdx-scanner -f %m-%d-%Y  --header-label 'X---
-title: Release Information
-lang: en
----
-' --no-unreleased --no-author --exclude-tags-regex "tag-test*" --no-verbose
+github_changelog_generator -u forcedotcom -p sfdx-scanner -f %m-%d-%Y --no-unreleased --no-author --exclude-tags-regex "tag-test*" --no-verbose --since-tag vX.Y.Z
 ```
 
 ### Note:

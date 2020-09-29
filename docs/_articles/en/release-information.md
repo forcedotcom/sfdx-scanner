@@ -3,6 +3,18 @@ title: Release Information
 lang: en
 ---
 
+## [v2.2.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.2.1) (09-28-2020)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.2.0...v2.2.1)
+
+**Merged pull requests:**
+
+- @W-8129868@ Increment version in the docs [\#228](https://github.com/forcedotcom/sfdx-scanner/pull/228)
+- @W-8129868@ Merge dev to release [\#227](https://github.com/forcedotcom/sfdx-scanner/pull/227)
+- @W-8129868@ Preparing for 2.2.1 release [\#226](https://github.com/forcedotcom/sfdx-scanner/pull/226)
+- @W-8118474@ Fix filter by Category regression [\#223](https://github.com/forcedotcom/sfdx-scanner/pull/223)
+- @W-8112504@ Merging release back to dev [\#219](https://github.com/forcedotcom/sfdx-scanner/pull/219)
+
 ## [v2.2.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.2.0) (09-23-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.1.1...v2.2.0)
@@ -74,7 +86,7 @@ lang: en
 
 - @W-8063136@: Incrementing version to 2.1 for new release. [\#198](https://github.com/forcedotcom/sfdx-scanner/pull/198)
 - @W-8056964@: Fixed issue with negated patterns not being properly com… [\#197](https://github.com/forcedotcom/sfdx-scanner/pull/197)
-- @W-8058863@ R/jbartolotta/w 8058863 [\#195](https://github.com/forcedotcom/sfdx-scanner/pull/195)
+- @W-8058863@ @W-8058863@ Fix for unit tests failing on windows [\#195](https://github.com/forcedotcom/sfdx-scanner/pull/195)
 - @W-8058687@ Adding troubleshoot section for VF parse error [\#194](https://github.com/forcedotcom/sfdx-scanner/pull/194)
 - @W-8056964@: Bower components now excluded by default. Troubleshootin… [\#193](https://github.com/forcedotcom/sfdx-scanner/pull/193)
 - @W-7972245@ "Salesforce CLI Scanner" in our docs \(merge to release\) [\#191](https://github.com/forcedotcom/sfdx-scanner/pull/191)
@@ -107,7 +119,7 @@ lang: en
 - Update to add Google Tag Manager for analytics [\#136](https://github.com/forcedotcom/sfdx-scanner/pull/136)
 - @W-7805991@ Add more defaults to DEFAULT\_ENV\_VARS [\#135](https://github.com/forcedotcom/sfdx-scanner/pull/135)
 - @W-7802169@ Add eslint out of memory troubleshooter [\#134](https://github.com/forcedotcom/sfdx-scanner/pull/134)
-- D/w 7791882 b [\#133](https://github.com/forcedotcom/sfdx-scanner/pull/133)
+- @w-7791882@ -TypeScript scanner throws "X is undefined" errors for elements of mocha/jasmine/chai etc. [\#133](https://github.com/forcedotcom/sfdx-scanner/pull/133)
 - @W-7792085@ Filter out invalid catalog files [\#132](https://github.com/forcedotcom/sfdx-scanner/pull/132)
 - @W-776022@ Give precedence to --tsconfig flag over cwd [\#131](https://github.com/forcedotcom/sfdx-scanner/pull/131)
 - @W-7742718@ Filter PMD results before processing violations [\#130](https://github.com/forcedotcom/sfdx-scanner/pull/130)
@@ -115,12 +127,12 @@ lang: en
 - @W-7760223@ Updated documentation for --tsconfig flag [\#128](https://github.com/forcedotcom/sfdx-scanner/pull/128)
 - @W-7785414@ Catalog language fix [\#127](https://github.com/forcedotcom/sfdx-scanner/pull/127)
 - @W-7786899@Update Readme.md with changes to the order & also a link to the git page [\#126](https://github.com/forcedotcom/sfdx-scanner/pull/126)
-- D/jbartolotta/w 7760223 [\#125](https://github.com/forcedotcom/sfdx-scanner/pull/125)
+- @w-7760223@-Introduce --tsconfig to the run command \(possibly List command\) [\#125](https://github.com/forcedotcom/sfdx-scanner/pull/125)
 - @W-7740890@ Adding documentation about category inconsistency [\#124](https://github.com/forcedotcom/sfdx-scanner/pull/124)
-- @W-7740537@ D/jbartolotta/w 7740537 [\#122](https://github.com/forcedotcom/sfdx-scanner/pull/122)
+- @W-7740537@-Disable PMD for JS by default and throw a warning if the user changes this [\#122](https://github.com/forcedotcom/sfdx-scanner/pull/122)
 - @W-7740484@ Fixing targetPatterns Config lookup and default values [\#121](https://github.com/forcedotcom/sfdx-scanner/pull/121)
 - @W-7661074@ ESLint changes [\#120](https://github.com/forcedotcom/sfdx-scanner/pull/120)
-- WowD/w 7740890 [\#119](https://github.com/forcedotcom/sfdx-scanner/pull/119)
+- @w-7740890@-Custom PMD JARs/XMLs cannot be added for a language if the default PMD rules are not enabled for that language. [\#119](https://github.com/forcedotcom/sfdx-scanner/pull/119)
 - @W-7661091@ More unit tests for BaseEslintEngine [\#118](https://github.com/forcedotcom/sfdx-scanner/pull/118)
 - @W-7748199@ Strip comments from tsconfig.json before parsing [\#117](https://github.com/forcedotcom/sfdx-scanner/pull/117)
 - @W-7736937@ Add Triggers to PMD glob list [\#116](https://github.com/forcedotcom/sfdx-scanner/pull/116)
@@ -128,28 +140,28 @@ lang: en
 - @W-7396965@ Minor doc changes [\#114](https://github.com/forcedotcom/sfdx-scanner/pull/114)
 - @W-7736591@ Use a temporary file to pass files to PMD [\#112](https://github.com/forcedotcom/sfdx-scanner/pull/112)
 - @W-7732253@ Taking out the link for one of the questions [\#111](https://github.com/forcedotcom/sfdx-scanner/pull/111)
-- D/w 7716156 b [\#110](https://github.com/forcedotcom/sfdx-scanner/pull/110)
+- @W-7716156@-Allow user to enable PMD's default rules for languages of their choice. [\#110](https://github.com/forcedotcom/sfdx-scanner/pull/110)
 - @W-7732253@  Edit all \*.md files in the \_articles/en directory [\#109](https://github.com/forcedotcom/sfdx-scanner/pull/109)
 - @W-7661051@ @W-7673639@ @W-7661091@ Eslint changes [\#108](https://github.com/forcedotcom/sfdx-scanner/pull/108)
-- D/jbartolotta/w 7452168 show error [\#107](https://github.com/forcedotcom/sfdx-scanner/pull/107)
+- @W-7452168@-When two PMD rule JARs have files with the same relative paths, the rules defined in one are omitted from the cataloger [\#107](https://github.com/forcedotcom/sfdx-scanner/pull/107)
 - Small formatting changes for FAQs [\#105](https://github.com/forcedotcom/sfdx-scanner/pull/105)
 - Added helpful FAQ. [\#104](https://github.com/forcedotcom/sfdx-scanner/pull/104)
-- D/w 7660937 [\#103](https://github.com/forcedotcom/sfdx-scanner/pull/103)
+- @W-7660937@ --json option for Run command should hold usable data [\#103](https://github.com/forcedotcom/sfdx-scanner/pull/103)
 - @W-7687751@: ESLint results are only reported if they are actually me… [\#102](https://github.com/forcedotcom/sfdx-scanner/pull/102)
-- D/ranekere/docupdates [\#101](https://github.com/forcedotcom/sfdx-scanner/pull/101)
+- @@W-7396965@ Adding a logo and some small formatting of the header [\#101](https://github.com/forcedotcom/sfdx-scanner/pull/101)
 - Fixing some grammer and also adding a line for PMD version during com… [\#100](https://github.com/forcedotcom/sfdx-scanner/pull/100)
 - @W-7660921@: Switched to absolute paths and added tests. [\#99](https://github.com/forcedotcom/sfdx-scanner/pull/99)
-- D/ranekere/docupdates [\#98](https://github.com/forcedotcom/sfdx-scanner/pull/98)
+- @@W-7396965@ - Demo gif and Doc updates [\#98](https://github.com/forcedotcom/sfdx-scanner/pull/98)
 - Bump websocket-extensions from 0.1.3 to 0.1.4 [\#96](https://github.com/forcedotcom/sfdx-scanner/pull/96)
 - Doc site updates with install and command references + update CLI plu… [\#95](https://github.com/forcedotcom/sfdx-scanner/pull/95)
-- D/ranekere/docs [\#94](https://github.com/forcedotcom/sfdx-scanner/pull/94)
+- @W-75854542@ - Basic Structure for Sfdx Scanner Doc site [\#94](https://github.com/forcedotcom/sfdx-scanner/pull/94)
 - @W-7559673@ Git2Gus config changes on dev branch [\#91](https://github.com/forcedotcom/sfdx-scanner/pull/91)
-- d/rename [\#88](https://github.com/forcedotcom/sfdx-scanner/pull/88)
+- Renamed code-samples to code-fixtures [\#88](https://github.com/forcedotcom/sfdx-scanner/pull/88)
 - W-7443194: Phase 2 of multi-engine story.  Collection of fixes and better support for tsconfig. [\#87](https://github.com/forcedotcom/sfdx-scanner/pull/87)
-- d/eslint [\#85](https://github.com/forcedotcom/sfdx-scanner/pull/85)
+- Eslint Engine support [\#85](https://github.com/forcedotcom/sfdx-scanner/pull/85)
 - IOC part 2 [\#84](https://github.com/forcedotcom/sfdx-scanner/pull/84)
 - IOC to abstract rule engines from rule manager code [\#83](https://github.com/forcedotcom/sfdx-scanner/pull/83)
-- D/w 7434792 b [\#82](https://github.com/forcedotcom/sfdx-scanner/pull/82)
+- @W-7434792@ Delete a custom rule library I previously added [\#82](https://github.com/forcedotcom/sfdx-scanner/pull/82)
 - Changed all spaces to tabs. [\#81](https://github.com/forcedotcom/sfdx-scanner/pull/81)
 - Adding long descriptions to commands and flags - draft messages that'l… [\#80](https://github.com/forcedotcom/sfdx-scanner/pull/80)
 - Missing log lines, additions to PrettyPrinter [\#79](https://github.com/forcedotcom/sfdx-scanner/pull/79)
@@ -175,18 +187,14 @@ lang: en
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v1.0.27...v1.0.28)
 
-**Merged pull requests:**
-
-- Wrapped JreSetupManager in a postinstall-only class to hopefully prop… [\#73](https://github.com/forcedotcom/sfdx-scanner/pull/73)
-
 ## [v1.0.27](https://github.com/forcedotcom/sfdx-scanner/tree/v1.0.27) (04-02-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v1.0.26...v1.0.27)
 
 **Merged pull requests:**
 
+- Wrapped JreSetupManager in a postinstall-only class to hopefully prop… [\#73](https://github.com/forcedotcom/sfdx-scanner/pull/73)
 - Decouple format from outfile [\#72](https://github.com/forcedotcom/sfdx-scanner/pull/72)
-- W-7398711: Fixing run command on-success behavior [\#70](https://github.com/forcedotcom/sfdx-scanner/pull/70)
 
 ## [v1.0.26](https://github.com/forcedotcom/sfdx-scanner/tree/v1.0.26) (04-02-2020)
 
@@ -214,9 +222,10 @@ lang: en
 
 **Merged pull requests:**
 
+- W-7398711: Fixing run command on-success behavior [\#70](https://github.com/forcedotcom/sfdx-scanner/pull/70)
 - Windows CI [\#69](https://github.com/forcedotcom/sfdx-scanner/pull/69)
 - Fixing Java version check to ignore minor version if needed and not a… [\#68](https://github.com/forcedotcom/sfdx-scanner/pull/68)
-- D/w 7388308 [\#67](https://github.com/forcedotcom/sfdx-scanner/pull/67)
+- @W-7388308@ scanner:rule:add incorrectly handles relative paths. [\#67](https://github.com/forcedotcom/sfdx-scanner/pull/67)
 - New PrettyPrinter module +  Adding trace logs for CustomRulePathManager, PmdWrapper, PmdCatalogWrapper [\#66](https://github.com/forcedotcom/sfdx-scanner/pull/66)
 - Jf add help [\#65](https://github.com/forcedotcom/sfdx-scanner/pull/65)
 - Jf help text [\#64](https://github.com/forcedotcom/sfdx-scanner/pull/64)
@@ -270,7 +279,7 @@ lang: en
 **Merged pull requests:**
 
 - Incremented to v1.0.16. [\#55](https://github.com/forcedotcom/sfdx-scanner/pull/55)
-- D/w 7309176 [\#54](https://github.com/forcedotcom/sfdx-scanner/pull/54)
+- @W-7309176@ Support globs in file pattern arguments [\#54](https://github.com/forcedotcom/sfdx-scanner/pull/54)
 - Java changes to replace exit code with messages + some unit tests [\#53](https://github.com/forcedotcom/sfdx-scanner/pull/53)
 
 ## [v1.0.15](https://github.com/forcedotcom/sfdx-scanner/tree/v1.0.15) (03-23-2020)
@@ -345,7 +354,7 @@ lang: en
 - Renamed package to @salesforce/sfdx-scanner, and incremented version … [\#38](https://github.com/forcedotcom/sfdx-scanner/pull/38)
 - Adding junit tests for Json creation [\#36](https://github.com/forcedotcom/sfdx-scanner/pull/36)
 - Refactor to honor classpath rules [\#35](https://github.com/forcedotcom/sfdx-scanner/pull/35)
-- D/w 7307977 b [\#34](https://github.com/forcedotcom/sfdx-scanner/pull/34)
+- @W-7307977@ Ignore XML files that are not category/ruleset format [\#34](https://github.com/forcedotcom/sfdx-scanner/pull/34)
 - Pretty print catalog.json [\#32](https://github.com/forcedotcom/sfdx-scanner/pull/32)
 - Jf env vars [\#31](https://github.com/forcedotcom/sfdx-scanner/pull/31)
 - Jf catalog relocation [\#30](https://github.com/forcedotcom/sfdx-scanner/pull/30)
@@ -361,19 +370,19 @@ lang: en
 - @W-7256572@: Implemented the scanner:rule:list tests. [\#19](https://github.com/forcedotcom/sfdx-scanner/pull/19)
 - Add unit tests [\#18](https://github.com/forcedotcom/sfdx-scanner/pull/18)
 - @W-7246358@: Refactored PmdSupport and subclasses to use child\_proces… [\#17](https://github.com/forcedotcom/sfdx-scanner/pull/17)
-- D/w 7159179 [\#15](https://github.com/forcedotcom/sfdx-scanner/pull/15)
-- D/w 7159188 b [\#13](https://github.com/forcedotcom/sfdx-scanner/pull/13)
+- @W-7159179@ Implement scanner plugin's 'describe' command. [\#15](https://github.com/forcedotcom/sfdx-scanner/pull/15)
+- @W-7159188@ Implement scanner plugin's 'run' command. [\#13](https://github.com/forcedotcom/sfdx-scanner/pull/13)
 - Refactoring pmd support [\#12](https://github.com/forcedotcom/sfdx-scanner/pull/12)
 - PMD support: Moved java code under submodule, added gradle build, fixed tsc errors [\#11](https://github.com/forcedotcom/sfdx-scanner/pull/11)
 - @W-7159171@: Reorganized packages once again, rebuilt JAR, changed pa… [\#10](https://github.com/forcedotcom/sfdx-scanner/pull/10)
-- D/w 7159171 b [\#9](https://github.com/forcedotcom/sfdx-scanner/pull/9)
+- @W-7159171@ Implement scanner plugin's 'list' command. [\#9](https://github.com/forcedotcom/sfdx-scanner/pull/9)
 - Fixing PMD download [\#8](https://github.com/forcedotcom/sfdx-scanner/pull/8)
 - @W-7109964@: Relocating list and describe commands as per feedback fr… [\#7](https://github.com/forcedotcom/sfdx-scanner/pull/7)
-- D/w 7109964 e [\#6](https://github.com/forcedotcom/sfdx-scanner/pull/6)
+- @W-7109964@ Static Analyzer CLI plugin [\#6](https://github.com/forcedotcom/sfdx-scanner/pull/6)
 - @W-7109964@: Fixed one bit of documentation. [\#5](https://github.com/forcedotcom/sfdx-scanner/pull/5)
 - @W-7109964@: Changed some stuff to fix type errors and runtime errors. [\#4](https://github.com/forcedotcom/sfdx-scanner/pull/4)
-- D/w 7109964 c [\#3](https://github.com/forcedotcom/sfdx-scanner/pull/3)
-- D/w 7109964 b [\#2](https://github.com/forcedotcom/sfdx-scanner/pull/2)
+- @W-7109964@ Static Analyzer CLI plugin [\#3](https://github.com/forcedotcom/sfdx-scanner/pull/3)
+- @W-7109964@ Static Analyzer CLI plugin [\#2](https://github.com/forcedotcom/sfdx-scanner/pull/2)
 - Auto-generated SFDC CLI Plugin + PMD integration draft [\#1](https://github.com/forcedotcom/sfdx-scanner/pull/1)
 
 
