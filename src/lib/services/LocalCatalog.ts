@@ -130,7 +130,7 @@ export default class LocalCatalog implements RuleCatalog {
 			await this.rebuildCatalogIfNecessary();
 			this.catalog = await this.readCatalogJson();
 		}
-		return Promise.resolve(this.catalog);
+		return this.catalog;
 	}
 
 	private async rebuildCatalogIfNecessary(): Promise<[boolean, string]> {
