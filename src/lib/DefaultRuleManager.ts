@@ -65,17 +65,6 @@ export class DefaultRuleManager implements RuleManager {
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		/*
-		let filteredNames = null;
-		for (const filter of filters) {
-			if (filter.filterType === FilterType.ENGINE) {
-				filteredNames = filter.filterValues;
-				break;
-			}
-		}
-		const engines: RuleEngine[] = await (filteredNames ? Controller.getFilteredEngines(filteredNames) : Controller.getEnabledEngines());
-
-		 */
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters);
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
