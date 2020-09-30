@@ -75,6 +75,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	protected outputProcessor: OutputProcessor;
 	private baseDependencies: StaticDependencies;
 	private config: Config;
+	private catalog: Catalog;
 
 	// We'll leave init abstract to allow implementations to initialize
 	async abstract init(): Promise<void>;
@@ -109,36 +110,41 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return await this.config.getTargetPatterns(this.strategy.getEngine());
 	}
 
-	async getCatalog(): Promise<Catalog> {
-		const categoryMap: Map<string, RuleGroup> = new Map();
-		const catalog: Catalog = {rulesets: [], categories: [], rules: []};
-		const rules: Rule[] = [];
+	getCatalog(): Promise<Catalog> {
+		if (!this.catalog) {
+			const categoryMap: Map<string, RuleGroup> = new Map();
+			const rules: Rule[] = [];
 
-		// Get all rules supported by eslint
-		const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
-		const allRules = cli.getRules();
+			// Get all rules supported by eslint
+			const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
+			const allRules = cli.getRules();
 
-		// Add eslint rules to catalog
-		allRules.forEach((esRule: ESRule, key: string) => {
-			const docs = esRule.meta.docs;
+			// Add eslint rules to catalog
+			allRules.forEach((esRule: ESRule, key: string) => {
+				const docs = esRule.meta.docs;
 
-			const rule = this.processRule(key, docs);
-			if (rule) {
-				// Add only rules supported by the engine implementation
-				rules.push(rule);
-				const categoryName = docs.category;
-				let category = categoryMap.get(categoryName);
-				if (!category) {
-					category = { name: categoryName, engine: this.getName(), paths: [] };
-					categoryMap.set(categoryName, category);
+				const rule = this.processRule(key, docs);
+				if (rule) {
+					// Add only rules supported by the engine implementation
+					rules.push(rule);
+					const categoryName = docs.category;
+					let category = categoryMap.get(categoryName);
+					if (!category) {
+						category = { name: categoryName, engine: this.getName(), paths: [] };
+						categoryMap.set(categoryName, category);
+					}
+					category.paths.push(docs.url);
 				}
-				category.paths.push(docs.url);
-			}
-		});
+			});
 
-		catalog.categories = Array.from(categoryMap.values());
-		catalog.rules = rules;
-		return Promise.resolve(catalog);
+			this.catalog = {
+				categories: Array.from(categoryMap.values()),
+				rules: rules,
+				rulesets: []
+			};
+		}
+
+		return Promise.resolve(this.catalog);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -166,7 +172,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		}
 
 		// Get sublist of rules supported by the engine
-		const filteredRules = this.selectRelevantRules(rules);
+		const filteredRules = await this.selectRelevantRules(rules);
 		if (Object.keys(filteredRules).length === 0) {
 			// No rules to run
 			this.logger.trace('No matching rules to run. Nothing to execute.');
@@ -230,19 +236,21 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private selectRelevantRules(rules: Rule[]): Record<string,any> {
+	private async selectRelevantRules(rules: Rule[]): Promise<Record<string,any>> {
 		const filteredRules = {};
-		let ruleCount = 0;
 
-		for (const rule of rules) {
-			// Find if a rule is relevant
-			if (rule.engine === this.getName()) {
-				// Select rules by setting them to "error" level in eslint config
-				filteredRules[rule.name] = "error";
-				ruleCount++;
+		// the eslint engines will run all rules explicitly enabled and all 'recommended' rules
+		// that are inherited from the 'extends' configuration attribute. Disable all rules that
+		// the engine would run by default. The requested rules will be  enabled below.
+		if (rules.length > 0) {
+			for (const rule of (await this.getCatalog()).rules.filter(r => r.defaultEnabled)) {
+				filteredRules[rule.name] = 'off';
 			}
 		}
-		this.logger.trace(`Count of rules selected for ${this.getName()}: ${ruleCount}`);
+
+		rules.forEach(rule => filteredRules[rule.name] = 'error');
+
+		this.logger.trace(`Count of rules selected for ${this.getName()}: ${rules.length}`);
 		return filteredRules;
 	}
 
