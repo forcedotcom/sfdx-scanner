@@ -15,7 +15,7 @@ export interface RuleManager {
 
 	getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]>;
 
-	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]>
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]>;
 
 	/**
 	 * @param engineOptions - see RuleEngine#run
