@@ -19,7 +19,6 @@ const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
 	"baseConfig": {
 		"extends": [
-			"eslint:recommended",
 			"plugin:@typescript-eslint/recommended",
 			"plugin:@typescript-eslint/eslint-recommended"
 		]

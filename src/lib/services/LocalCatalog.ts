@@ -136,7 +136,7 @@ export default class LocalCatalog implements RuleCatalog {
 	private async rebuildCatalogIfNecessary(): Promise<[boolean, string]> {
 		// First, check whether the catalog is stale. If it's not, we don't even need to do anything.
 		if (!LocalCatalog.catalogIsStale()) {
-			return new Promise<[boolean, string]>(() => [false, 'no action taken']);
+			return [false, 'no action taken'];
 		}
 
 		return this.rebuildCatalog();
@@ -154,7 +154,7 @@ export default class LocalCatalog implements RuleCatalog {
 			catalog.rules.push(...engineCatalog.rules);
 		}
 		await this.writeCatalogJson(this.catalog);
-		return Promise.resolve([true, 'rebuilt catalog']);
+		return [true, 'rebuilt catalog'];
 	}
 
 	private static catalogIsStale(): boolean {
