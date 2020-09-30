@@ -40,8 +40,22 @@ export class DefaultRuleManager implements RuleManager {
 		this.initialized = true;
 	}
 
-	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[] {
-		return this.catalog.getRulesMatchingFilters(filters);
+	/**
+	 * Returns rules matching the filter criteria provided, and any non-conflicting implicit filters.
+	 * @param {RuleFilter[]} filters - A collection of filters.
+	 */
+	async getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+		const engineNames: string[] = (await this.resolveEngineFilters(filters)).map(e => e.getName());
+		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
+		return rules.filter(r => engineNames.includes(r.engine));
+	}
+
+	/**
+	 * Returns rules that match only the provided filters, completely ignoring any implicit filtering.
+	 * @param filters
+	 */
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]> {
+		return Promise.resolve(this.catalog.getRulesMatchingFilters(filters));
 	}
 
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
@@ -51,6 +65,7 @@ export class DefaultRuleManager implements RuleManager {
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
+		/*
 		let filteredNames = null;
 		for (const filter of filters) {
 			if (filter.filterType === FilterType.ENGINE) {
@@ -59,6 +74,9 @@ export class DefaultRuleManager implements RuleManager {
 			}
 		}
 		const engines: RuleEngine[] = await (filteredNames ? Controller.getFilteredEngines(filteredNames) : Controller.getEnabledEngines());
+
+		 */
+		const engines: RuleEngine[] = await this.resolveEngineFilters(filters);
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
@@ -86,6 +104,21 @@ export class DefaultRuleManager implements RuleManager {
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
+	}
+
+	private async resolveEngineFilters(filters: RuleFilter[]): Promise<RuleEngine[]> {
+		let filteredEngineNames: readonly string[] = null;
+		for (const filter of filters) {
+			if (filter.filterType === FilterType.ENGINE) {
+				filteredEngineNames = filter.filterValues;
+				break;
+			}
+		}
+		// If there are any engine-specific filter criteria, return those engines whether they're enabled or not. Otherwise,
+		// just return any enabled engines.
+		// This lets us quietly introduce new engines by making them disabled by default but still available if explicitly
+		// specified.
+		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[]) : Controller.getEnabledEngines();
 	}
 
 	/**
