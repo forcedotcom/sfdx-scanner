@@ -123,21 +123,31 @@ export class Config {
 			return true;
 		}
 
-		return !(await this.getConfigValue('disabled', engine, this.typeChecker.booleanCheck));
+		return !(await this.getBooleanConfigValue('disabled', engine));
 	}
 
-	public async getSupportedLanguages(engine: ENGINE): Promise<string[]> {
-		return await this.getConfigValue('supportedLanguages', engine, this.typeChecker.stringArrayCheck);
+	public getSupportedLanguages(engine: ENGINE): Promise<string[]> {
+		return this.getStringArrayConfigValue('supportedLanguages', engine);
 	}
 
-	public async getTargetPatterns(engine: ENGINE): Promise<string[]> {
-		return await this.getConfigValue('targetPatterns', engine, this.typeChecker.stringArrayCheck);
+	public getTargetPatterns(engine: ENGINE): Promise<string[]> {
+		return this.getStringArrayConfigValue('targetPatterns', engine);
 	}
 
-	private async getConfigValue(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<string[]> {
+	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
+		return this.getConfigValue<boolean>(propertyName, engine, this.typeChecker.booleanCheck);
+	}
+
+	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {
+		return this.getConfigValue<string[]>(propertyName, engine, this.typeChecker.stringArrayCheck);
+	}
+
+	private async getConfigValue<T>(propertyName: string, engine: ENGINE, typeChecker: (any, string, ENGINE) => boolean): Promise<T> {
 		let ecc = this.getEngineConfig(engine);
 		// If the config specifies property, use those.
-		if (ecc && ecc[propertyName] && typeChecker(ecc[propertyName], propertyName, engine)) {
+		// Intentionally distinguishing null from undefined in case we want to allow nullable config values in the future.
+		// TODO: Look into possibly using typeguards, see discussion here https://github.com/forcedotcom/sfdx-scanner/pull/222/files#r497080143
+		if (ecc && (ecc[propertyName] !== undefined) && typeChecker(ecc[propertyName], propertyName, engine)) {
 			this.logger.trace(`Retrieving ${propertyName} from engine ${engine}: ${ecc[propertyName]}`);
 		} else {
 			// If the config doesn't specify the property, use the default value
