@@ -53,6 +53,9 @@ jobs:
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
 
+      - store_artifacts: # upload test results as artifact.
+          path: test-results
+
   self-evaluation:
     <<: *defaults
     steps:
