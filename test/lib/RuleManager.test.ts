@@ -175,7 +175,7 @@ describe('RuleManager', () => {
 				process.chdir(path.join('test', 'code-fixtures', 'projects'));
 			});
 			after(() => {
-				process.chdir("../..");
+				process.chdir("../../..");
 			});
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
