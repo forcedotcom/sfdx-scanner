@@ -6,6 +6,7 @@ import * as wrap from 'word-wrap';
 import {FileHandler} from './util/FileHandler';
 import * as Mustache from 'mustache';
 import htmlEscaper = require('html-escaper');
+import * as csvStringify from 'csv-stringify';
 
 export class RuleResultRecombinator {
 
@@ -17,7 +18,7 @@ export class RuleResultRecombinator {
 				formattedResults = this.constructJson(results);
 				break;
 			case OUTPUT_FORMAT.CSV:
-				formattedResults = this.constructCsv(results);
+				formattedResults = await this.constructCsv(results);
 				break;
 			case OUTPUT_FORMAT.XML:
 				formattedResults = this.constructXml(results);
@@ -78,16 +79,19 @@ export class RuleResultRecombinator {
 		for (const result of results) {
 			const from = process.cwd();
 			const fileName = path.relative(from, result.fileName);
+			const escapedFileName = this.safeHtmlEscape(fileName);
 			let violations = '';
 			for (const v of result.violations) {
+				const escapedMessage = this.safeHtmlEscape(v.message.trim());
+				const escapedCategory = this.safeHtmlEscape(v.category);
+				const escapedRuleName = this.safeHtmlEscape(v.ruleName);
+				const escapedUrl = this.safeHtmlEscape(v.url);
+
 				problemCount++;
-				violations += `
-            <violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${v.ruleName}" category="${v.category}" url="${v.url}">
-${v.message.trim()}
-            </violation>`;
+				violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
 			}
 			resultXml += `
-      <result file="${fileName}">
+      <result file="${escapedFileName}" engine="${result.engine}">
           ${violations}
       </result>`;
 		}
@@ -248,27 +252,38 @@ URL: ${url}
 		return Mustache.render(template, templateData);
 	}
 
-	private static constructCsv(results: RuleResult[]): string {
+	private static async constructCsv(results: RuleResult[]): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
 
+		const csvRows = [];
 		// Gradually build our CSV, starting with these columns.
-		let csvString = '"Problem","File","Severity","Line","Column","Rule","Description","URL","Category","Engine"\n';
+		csvRows.push(['Problem', 'File', 'Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
 		let problemCount = 0;
 
 		for (const result of results) {
 			const fileName = result.fileName;
 			for (const v of result.violations) {
-				// Since we are creating CSVs, make sure we escape any commas in our violation messages.
-				// Just replace with semi-colon.
-				const msg = v.message.trim().replace(",", ";");
-				const row = [++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine];
-				csvString += '"' + row.join('","') + '"\n';
+				const msg = v.message.trim();
+				csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
 			}
 		}
-		return csvString;
+
+		// Force all cells to have quotes
+		const csvOptions = {
+			quoted: true,
+			// eslint-disable-next-line @typescript-eslint/camelcase
+			quoted_empty: true
+		};
+		return new Promise((resolve, reject) => {
+			csvStringify(csvRows, csvOptions,  (err, output) => {
+				if (err) {
+					reject(err);
+				}
+				resolve(output);
+			});
+		});
 	}
 }
-

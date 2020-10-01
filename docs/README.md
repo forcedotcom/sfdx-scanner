@@ -49,6 +49,23 @@ For links the path is relative to the base path (i.e. `/tools/vscode/`). The url
 [My Link](./en/getting-started/orgbrowser)
 ```
 
+## How to generate Change Log
+
+### Install github-changelog-generator
+
+Instructions: https://github.com/github-changelog-generator/github-changelog-generator/blob/master/README.md
+
+### Commands
+
+```bash
+export CHANGELOG_GITHUB_TOKEN="<<Github Token>>"
+github_changelog_generator -u forcedotcom -p sfdx-scanner -f %m-%d-%Y --no-unreleased --no-author --exclude-tags-regex "tag-test*" --no-verbose --since-tag vX.Y.Z
+
+```
+
+### Note:
+Copy the information for the release you are making to the top of the release-information.md
+
 ## Localization (NOT Supported Yet, Ignore this section)
 
 The site is localized in english and japanese. All articles must specify their language (`en` or `ja`) in the front matter:

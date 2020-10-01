@@ -68,7 +68,7 @@ describe('Tests for BaseEslintEngine', () => {
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
 
 				// verify config
-				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).first();
+				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).second();
 				expect(capturedConfig[0]).instanceOf(Object);
 				const config = <Object>capturedConfig[0];
 				expect(config['cwd']).equals(target.target);
@@ -95,24 +95,6 @@ describe('Tests for BaseEslintEngine', () => {
 
 				expect(results).to.be.empty;
 			});
-
-			it('should not execute when no rules are relevant', async () => {
-				const differentEngine = 'differentEngineName';
-				const irrelevantRule = getDummyRule(differentEngine);
-
-				const mockStrategy = Mockito.instance(MockStrategy);
-				const engine = await createDummyEngine(mockStrategy);
-
-				const results = await engine.run(
-					[getDummyRuleGroup()],
-					[irrelevantRule],
-					[getDummyTarget(true)],
-					EMPTY_ENGINE_OPTIONS
-				);
-
-				expect(results).to.be.empty;
-			});
-
 		});
 
 		describe('Rule mapping', () => {

@@ -590,6 +590,29 @@ describe('scanner:run', function () {
 
 		});
 
+		describe('Eslint Javascript Engine --category flag', () => {
+			const category = 'Best Practices';
+			setupCommandTest
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'dom_parser', 'dom_parserController.js'),
+					'--format', 'json',
+					'--engine', 'eslint-lwc',
+					'--category', category
+				])
+				.it('Only correct categories are returned', ctx => {
+					const output = JSON.parse(ctx.stdout);
+					expect(output.length).to.equal(1, 'Should only be violations from one engine');
+					expect(output[0].engine).to.equal('eslint-lwc');
+					expect(output[0].violations, JSON.stringify(output[0].violations)).to.be.lengthOf(13);
+
+					// Make sure only violations are returned for the requested category
+					for (const v of output[0].violations) {
+						expect(v.category, JSON.stringify(v)).to.equal(category);
+					}
+				});
+
+		});
+
 		describe('Eslint Typescript Engine --category flag', () => {
 			const category = 'Possible Errors';
 			setupCommandTest
@@ -637,7 +660,6 @@ describe('scanner:run', function () {
 
 		});
 
-		// TODO: eslint-lwc --category. This has a known issue
 		// TODO: this test has become more of an integration test, than just testing the run command. break it up to make it more manageable, maybe based on engine or flags.
 
 		describe('--engine flag', () => {

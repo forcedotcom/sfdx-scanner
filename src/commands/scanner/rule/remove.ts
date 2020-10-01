@@ -84,7 +84,7 @@ export default class Remove extends ScannerCommand {
 
 			// Step 6b: We'll want to retrieve the matching rules.
 			const rm = await Controller.createRuleManager();
-			const matchingRules: Rule[] = rm.getRulesMatchingCriteria(filters);
+			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 
 			// Step 6c: If any rules are found, ask the user to confirm that they actually want to delete them.
 			if (matchingRules.length > 0 && await this.ux.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
