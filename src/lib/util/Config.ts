@@ -62,7 +62,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 				'!**/node_modules/**',
 				'!**/bower_components/**'
 			],
-			disabled: false
+			disabled: true
 		}
 	]
 };
