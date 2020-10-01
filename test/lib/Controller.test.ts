@@ -29,11 +29,10 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(4);
+		expect(engines.length).to.equal(3);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getFilteredEngines filters and includes disabled', async() => {
