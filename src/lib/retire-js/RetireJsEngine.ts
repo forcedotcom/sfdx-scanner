@@ -38,8 +38,10 @@ export class RetireJsEngine implements RuleEngine {
 	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
+	// We'll be generating aliases for directories, and we want a way to make sure their names are all unique.
+	private static NEXT_ALIAS_IDX: number = 0;
 
-	private pathAliasMap: Map<string, string> = new Map();
+	private dirAliasMap: Map<string, string> = new Map();
 
 	private logger: Logger;
 	private config: Config;
@@ -88,40 +90,45 @@ export class RetireJsEngine implements RuleEngine {
 		return await this.config.isEngineEnabled(RetireJsEngine.ENGINE_ENUM);
 	}
 
-	private async createIntermediateDir(dir): Promise<void> {
-		return new Promise((res, rej) => {
-			fs.mkdir(dir, (err) => {
-				if (err) {
-					rej(err);
-				} else {
-					res();
-				}
+	private async createPathAlias(tmpParent: string, basePath: string): Promise<string> {
+		// We want to make sure each duplicate file's path is unique, to avoid collisions. If we haven't already created
+		// a unique alias for this path's directory, we need to do that now.
+		const baseDir = path.dirname(basePath);
+		if (!this.dirAliasMap.has(baseDir)) {
+			const aliasDir = `TMP_${RetireJsEngine.NEXT_ALIAS_IDX++}`;
+			this.dirAliasMap.set(baseDir, aliasDir);
+			const absoluteAlias = path.join(tmpParent, aliasDir);
+			return new Promise((res, rej) => {
+				// Create a directory beneath the temporary parent directory with the name of the alias.
+				fs.mkdir(absoluteAlias, (err) => {
+					if (err) {
+						rej(err);
+					} else {
+						res(absoluteAlias);
+					}
+				});
 			});
-		});
+		}
+		return path.join(tmpParent, this.dirAliasMap.get(baseDir));
 	}
 
-	private async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<any> {
+
+	private async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await new FileHandler().tmpDirWithCleanup();
 		const fileCopyPromises: Promise<void>[] = [];
 
 		// We want to duplicate all of the targeted files into our temporary directory.
-		let targetCount = 0;
 		for (const target of targets) {
 			for (const p of target.paths) {
-				// We want to make sure that every duplicate file has a unique path to avoid collision. The target paths
-				// are all absolute paths, and you can't just slam absolute paths together. So we need to get creative.
-				// We'll associate the directory portion of each path with a unique alias...
-				const dirPrefix = path.dirname(p);
-				// ...Then use the alias to create a directory below the temporary parent, unless we've already done so.
-				if (!this.pathAliasMap.has(dirPrefix)) {
-					const dirAlias = `TMP_${targetCount++}`;
-					this.pathAliasMap.set(dirPrefix, dirAlias);
-					await this.createIntermediateDir(path.join(tmpParent, dirAlias));
-				}
-				// Then we'll copy the original target file to the child directory, thereby preserving path uniqueness.
+				// Create a unique alias directory into which we should duplicate all of these files.
+				// We'll use an `await` for this line because this operation needs to be atomic.
+				const pathAlias: string = await this.createPathAlias(tmpParent, p);
+
+				// Once we've got a path, ew can copy the original target file to the child directory, thereby preserving
+				// path uniqueness. No race condition exists, so no need for an `await`.
 				fileCopyPromises.push(new Promise((res, rej) => {
-					fs.copyFile(p, path.join(tmpParent, this.pathAliasMap.get(dirPrefix), path.basename(p)), (err) => {
+					fs.copyFile(p, path.join(pathAlias, path.basename(p)), (err) => {
 						if (err) {
 							rej(err);
 						} else {
@@ -132,8 +139,11 @@ export class RetireJsEngine implements RuleEngine {
 			}
 		}
 
+		// Wait for all of the files to be copied.
 		await Promise.all(fileCopyPromises);
 		// If we successfully created all of the duplicate files, then we can return the temporary parent directory.
 		return tmpParent;
 	}
+
+
 }
