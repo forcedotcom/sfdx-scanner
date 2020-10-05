@@ -1057,3 +1057,4 @@ describe('scanner:run', function () {
 			});
 	});
 });
+
