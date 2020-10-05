@@ -1,11 +1,11 @@
-import {Logger} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
 import {RuleEngine} from '../services/RuleEngine';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {ENGINE} from '../../Constants';
 import {FileHandler} from '../util/FileHandler';
-//import childProcess = require('child_process');
+import childProcess = require('child_process');
 import path = require('path');
 import fs = require('fs');
 
@@ -16,7 +16,7 @@ const retireJsCatalog: Catalog = {
 		engine: ENGINE.RETIRE_JS.valueOf(),
 		sourcepackage: ENGINE.RETIRE_JS.valueOf(),
 		// Give this rule an informative name, specific enough that we're able to supplement it with other rules later.
-		name: ' insecure-bundled-dependencies',
+		name: 'insecure-bundled-dependencies',
 		description: 'Identify bundled libraries/modules with known vulnerabilities.',
 		categories: ['Insecure Dependencies'],
 		rulesets: [],
@@ -69,7 +69,69 @@ export class RetireJsEngine implements RuleEngine {
 		// we were given into a directory that we can pass into RetireJS.
 		const tmpDir = await this.createTmpDirWithDuplicatedTargets(target);
 		console.log(`Created parent directory ${tmpDir}`);
+		const argArrays: string[][] = this.buildCliCommands(rules, tmpDir);
+
+		const retireJsPromises: Promise<any>[] = [];
+		for (const argArray of argArrays) {
+			retireJsPromises.push(this.executeRetireJs(argArray));
+		}
+		const res: RuleResult[] = await Promise.all(retireJsPromises);
+		console.log('results: ' + JSON.stringify(res));
 		return [];
+	}
+
+	private buildCliCommands(rules: Rule[], target: string): string[][] {
+		const argsArrays: string[][] = [];
+		for (const rule of rules) {
+			switch (rule.name) {
+				case 'insecure-bundled-dependencies':
+					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
+					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
+					argsArrays.push(['--js', '--jspath', target, '--outputformat', 'json']);
+					break;
+				default:
+					throw new SfdxError(`Unexpected retire-js rule: ${rule.name}`);
+			}
+		}
+		return argsArrays;
+	}
+
+	private async executeRetireJs(args: string[]): Promise<RuleResult[]> {
+		return new Promise<any>((res, rej) => {
+			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, args);
+			
+			let stdout = '';
+			let stderr = '';
+
+			// When data is passed back up to us, pop it onto the appropriate string.
+			cp.stdout.on('data', data => {
+				stdout += data;
+			});
+			cp.stderr.on('data', data => {
+				stderr += data;
+			});
+
+			cp.on('exit', code => {
+				this.logger.trace(`monitorChildProcess has received exit code ${code}`);
+				if (code === 0) {
+					// If RetireJS exits with code 0, then it ran successfully and found no vulnerabilities. We can resolve
+					// to an empty array.
+					console.log('no insecurities');
+					res([]);
+				} else if (code === 13) {
+					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
+					// Convert the output into RuleResult objects and resolve to that.
+					console.log('yes insecurities');
+					// TODO: Process the output.
+					res([]);
+				} else {
+					// If RetireJS exits with any other code, then it means something went wrong. We'll reject with stderr
+					// for the ease of upstream error handling.
+					console.log('some weird errors');
+					rej(stderr);
+				}
+			});
+		});
 	}
 
 	public async init(): Promise<void> {
