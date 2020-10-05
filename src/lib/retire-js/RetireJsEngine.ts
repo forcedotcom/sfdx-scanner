@@ -39,7 +39,7 @@ export class RetireJsEngine implements RuleEngine {
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 	// We'll be generating aliases for directories, and we want a way to make sure their names are all unique.
-	private static NEXT_ALIAS_IDX: number = 0;
+	private static NEXT_ALIAS_IDX = 0;
 
 	private dirAliasMap: Map<string, string> = new Map();
 
