@@ -1,4 +1,4 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
@@ -13,6 +13,10 @@ import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
+import {uxEvents} from './ScannerEvents';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
 
 @injectable()
 export class DefaultRuleManager implements RuleManager {
@@ -66,12 +70,13 @@ export class DefaultRuleManager implements RuleManager {
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters);
+		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
 			const engineGroups = ruleGroups.filter(g => g.engine === e.getName());
 			const engineRules = rules.filter(r => r.engine === e.getName());
-			const engineTargets = await this.unpackTargets(e, targets);
+			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 			if (engineRules.length > 0 && engineTargets.length > 0) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
@@ -80,6 +85,14 @@ export class DefaultRuleManager implements RuleManager {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
 			}
 
+		}
+
+		// Warn the user if any positive targets were skipped
+		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
+
+		if (unmatchedTargets.length > 0) {
+			const warningKey = unmatchedTargets.length === 1 ? 'warning.targetSkipped' : 'warning.targetsSkipped';
+			uxEvents.emit('warning-always', messages.getMessage(warningKey, [`${unmatchedTargets.join(', ')}`]));
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
@@ -116,8 +129,10 @@ export class DefaultRuleManager implements RuleManager {
 	 * 1. If a target has a pattern (i.e. hasMagic) resolve it using globby.
 	 * 2. If a target is a directory, get its contents using the target patterns specified for the engine.
 	 * 3. If the target is a file, make sure it matches the engine's target patterns.
+	 *
+	 * Any items from the 'targets' array that result in a match are added to the 'matchedTargets' Set.
 	 */
-	private async unpackTargets(engine: RuleEngine, targets: string[]): Promise<RuleTarget[]> {
+	private async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
 		const engineTargets = await engine.getTargetPatterns();
@@ -155,6 +170,8 @@ export class DefaultRuleManager implements RuleManager {
 		// provided to us.
 		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
 		for (const target of positivePatterns) {
+			// Used to detect if the target resulted in a match
+			const startLength: number = ruleTargets.length;
 			if (globby.hasMagic(target)) {
 				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
 				// our pattern matcher.
@@ -184,6 +201,10 @@ export class DefaultRuleManager implements RuleManager {
 						ruleTargets.push({target, paths: [absolutePath]});
 					}
 				}
+			}
+
+			if (startLength !== ruleTargets.length) {
+				matchedTargets.add(target);
 			}
 		}
 		return ruleTargets;
