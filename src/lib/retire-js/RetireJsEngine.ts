@@ -10,7 +10,7 @@ import path = require('path');
 import fs = require('fs');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
-// "catalog" out of RetireJS's normal behavior.
+// "catalog" out of RetireJS's normal behavior and its permutations.
 const retireJsCatalog: Catalog = {
 	rules: [{
 		engine: ENGINE.RETIRE_JS.valueOf(),
@@ -31,22 +31,34 @@ const retireJsCatalog: Catalog = {
 	rulesets: []
 };
 
+/**
+ * The various permutations of RetireJS are each handled with separate rules, so we'll use this structure to associate
+ * a particular invocation of RetireJS with a particular rule.
+ */
+type RetireJsInvocation = {
+	args: string[];
+	rule: string;
+};
+
+/**
+ * This is the format of the JSON output by RetireJS.
+ */
 type RetireJsResult = {
-	version: string,
+	version: string;
 	data: {
-		file: string,
+		file: string;
 		results: {
-			version: string,
-			component: string,
-			detection: string,
+			version: string;
+			component: string;
+			detection: string;
 			vulnerabilities: {
-				info: string[],
-				below?: string,
-				atOrAbove?: string,
-				severity: string
-			}[]
-		}[]
-	}[]
+				info: string[];
+				below?: string;
+				atOrAbove?: string;
+				severity: string;
+			}[];
+		}[];
+	}[];
 };
 
 export class RetireJsEngine implements RuleEngine {
@@ -83,43 +95,48 @@ export class RetireJsEngine implements RuleEngine {
 	// TODO: We need to actually implement this method.
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		console.log(`Identified RetireJS exe path as ${RetireJsEngine.RETIRE_JS_PATH}`);
-		console.log(`Targets are: ${JSON.stringify(target)}`);
+		//console.log(`Identified RetireJS exe path as ${RetireJsEngine.RETIRE_JS_PATH}`);
+		//console.log(`Targets are: ${JSON.stringify(target)}`);
 
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
 		// we were given into a directory that we can pass into RetireJS.
 		const tmpDir = await this.createTmpDirWithDuplicatedTargets(target);
-		console.log(`Created parent directory ${tmpDir}`);
-		const argArrays: string[][] = this.buildCliCommands(rules, tmpDir);
+		//console.log(`Created parent directory ${tmpDir}`);
+		const invocationArray: RetireJsInvocation[] = this.buildCliInvocations(rules, tmpDir);
 
-		const retireJsPromises: Promise<any>[] = [];
-		for (const argArray of argArrays) {
-			retireJsPromises.push(this.executeRetireJs(argArray));
+		const retireJsPromises: Promise<RuleResult[]>[] = [];
+		for (const invocation of invocationArray) {
+			retireJsPromises.push(this.executeRetireJs(invocation));
 		}
-		const res: RuleResult[] = await Promise.all(retireJsPromises);
-		console.log('results: ' + JSON.stringify(res));
-		return [];
+
+		// We can combine the results into a single array using .reduce() instead of the more verbose for-loop.
+		const res: RuleResult[] = (await Promise.all(retireJsPromises)).reduce((acc, r) => [...acc, ...r], []);
+		//console.log('results: ' + JSON.stringify(res));
+		return res;
 	}
 
-	private buildCliCommands(rules: Rule[], target: string): string[][] {
-		const argsArrays: string[][] = [];
+	private buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
+		const invocationArray: RetireJsInvocation[] = [];
 		for (const rule of rules) {
 			switch (rule.name) {
 				case 'insecure-bundled-dependencies':
 					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
 					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
-					argsArrays.push(['--js', '--jspath', target, '--outputformat', 'json']);
+					invocationArray.push({
+						args: ['--js', '--jspath', target, '--outputformat', 'json'],
+						rule: rule.name
+					});
 					break;
 				default:
 					throw new SfdxError(`Unexpected retire-js rule: ${rule.name}`);
 			}
 		}
-		return argsArrays;
+		return invocationArray;
 	}
 
-	private async executeRetireJs(args: string[]): Promise<RuleResult[]> {
-		return new Promise<any>((res, rej) => {
-			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, args);
+	private async executeRetireJs(invocation: RetireJsInvocation): Promise<RuleResult[]> {
+		return new Promise<RuleResult[]>((res, rej) => {
+			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
 
 			let stdout = '';
 			let stderr = '';
@@ -133,7 +150,7 @@ export class RetireJsEngine implements RuleEngine {
 			});
 
 			cp.on('exit', code => {
-				this.logger.trace(`monitorChildProcess has received exit code ${code}`);
+				this.logger.trace(`executeRetireJs has received exit code ${code}`);
 				if (code === 0) {
 					// If RetireJS exits with code 0, then it ran successfully and found no vulnerabilities. We can resolve
 					// to an empty array.
@@ -144,7 +161,7 @@ export class RetireJsEngine implements RuleEngine {
 					// Convert the output into RuleResult objects and resolve to that.
 					console.log('yes insecurities');
 					console.log('out lens? ' + stdout.length + ', ' + stderr.length);
-					res(this.processOutput(stderr));
+					res(this.processOutput(stderr, invocation.rule));
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. We'll reject with stderr
 					// for the ease of upstream error handling.
@@ -155,17 +172,40 @@ export class RetireJsEngine implements RuleEngine {
 		});
 	}
 
-	private processOutput(cmdOutput: string): RuleResult[] {
+	private processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		// The output from the CLI should be a valid JSON.
 		const outputJson = JSON.parse(cmdOutput);
 		if (RetireJsEngine.validatePotentialResult(outputJson)) {
+			const ruleResults: RuleResult[] = [];
 			for (const data of outputJson.data) {
 				// First, we need to de-alias the file.
 				const aliasDir = path.dirname(data.file);
 				const originalPath = path.join(this.originalPathsByAlias.get(aliasDir), path.basename(data.file));
 
-				console.log(`Followed alias back to file ${originalPath}`);
+//				console.log(`Followed alias back to file ${originalPath}`);
+				// Each `data` entry yields a single RuleResult.
+				const ruleResult: RuleResult = {
+					engine: ENGINE.RETIRE_JS.valueOf(),
+					fileName: originalPath,
+					violations: []
+				};
+				// Each `result` entry uses its own `vulnerabilities` array to generate one or more RuleViolations for
+				// the parent RuleResult.
+				for (const result of data.results) {
+					for (const vuln of result.vulnerabilities) {
+						ruleResult.violations.push({
+							line: 1,
+							column: 1,
+							ruleName: ruleName,
+							severity: this.retireSevToScannerSev(vuln.severity),
+							message: 'dummy message',
+							category: 'Insecure Dependencies'
+						});
+					}
+				}
+				ruleResults.push(ruleResult);
 			}
+			return ruleResults;
 		} else {
 			// TODO: Throw some kind of error here.
 		}
@@ -173,6 +213,20 @@ export class RetireJsEngine implements RuleEngine {
 
 	}
 
+	private retireSevToScannerSev(sev: string): number {
+		switch (sev.toLowerCase()) {
+			case 'low':
+				return 3;
+			case 'medium':
+				return 2;
+			case 'high':
+				return 1;
+			default:
+				// TODO: Throw an error of some kind.
+		}
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private static validatePotentialResult(parsedOutput: any): parsedOutput is RetireJsResult {
 		return (parsedOutput as RetireJsResult).version != undefined;
 	}
