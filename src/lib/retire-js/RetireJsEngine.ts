@@ -31,6 +31,24 @@ const retireJsCatalog: Catalog = {
 	rulesets: []
 };
 
+type RetireJsResult = {
+	version: string,
+	data: {
+		file: string,
+		results: {
+			version: string,
+			component: string,
+			detection: string,
+			vulnerabilities: {
+				info: string[],
+				below?: string,
+				atOrAbove?: string,
+				severity: string
+			}[]
+		}[]
+	}[]
+};
+
 export class RetireJsEngine implements RuleEngine {
 	public static ENGINE_ENUM: ENGINE = ENGINE.RETIRE_JS;
 	public static ENGINE_NAME: string = ENGINE.RETIRE_JS.valueOf();
@@ -38,10 +56,13 @@ export class RetireJsEngine implements RuleEngine {
 	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
-	// We'll be generating aliases for directories, and we want a way to make sure their names are all unique.
-	private static NEXT_ALIAS_IDX = 0;
 
-	private dirAliasMap: Map<string, string> = new Map();
+	// When we're duplicating files, we want to make sure that each duplicate file's path is unique. We'll do that by
+	// generating aliases associated with the directory portion of each original file's path. We need an incrementing
+	// index to generate unique aliases, and we need maps from both the aliases to the original and vice versa.
+	private static NEXT_ALIAS_IDX = 0;
+	private aliasesByOriginalPath: Map<string, string> = new Map();
+	private originalPathsByAlias: Map<string, string> = new Map();
 
 	private logger: Logger;
 	private config: Config;
@@ -99,7 +120,7 @@ export class RetireJsEngine implements RuleEngine {
 	private async executeRetireJs(args: string[]): Promise<RuleResult[]> {
 		return new Promise<any>((res, rej) => {
 			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, args);
-			
+
 			let stdout = '';
 			let stderr = '';
 
@@ -122,8 +143,8 @@ export class RetireJsEngine implements RuleEngine {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
 					console.log('yes insecurities');
-					// TODO: Process the output.
-					res([]);
+					console.log('out lens? ' + stdout.length + ', ' + stderr.length);
+					res(this.processOutput(stderr));
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. We'll reject with stderr
 					// for the ease of upstream error handling.
@@ -132,6 +153,28 @@ export class RetireJsEngine implements RuleEngine {
 				}
 			});
 		});
+	}
+
+	private processOutput(cmdOutput: string): RuleResult[] {
+		// The output from the CLI should be a valid JSON.
+		const outputJson = JSON.parse(cmdOutput);
+		if (RetireJsEngine.validatePotentialResult(outputJson)) {
+			for (const data of outputJson.data) {
+				// First, we need to de-alias the file.
+				const aliasDir = path.dirname(data.file);
+				const originalPath = path.join(this.originalPathsByAlias.get(aliasDir), path.basename(data.file));
+
+				console.log(`Followed alias back to file ${originalPath}`);
+			}
+		} else {
+			// TODO: Throw some kind of error here.
+		}
+		return [];
+
+	}
+
+	private static validatePotentialResult(parsedOutput: any): parsedOutput is RetireJsResult {
+		return (parsedOutput as RetireJsResult).version != undefined;
 	}
 
 	public async init(): Promise<void> {
@@ -156,22 +199,22 @@ export class RetireJsEngine implements RuleEngine {
 		// We want to make sure each duplicate file's path is unique, to avoid collisions. If we haven't already created
 		// a unique alias for this path's directory, we need to do that now.
 		const baseDir = path.dirname(basePath);
-		if (!this.dirAliasMap.has(baseDir)) {
-			const aliasDir = `TMP_${RetireJsEngine.NEXT_ALIAS_IDX++}`;
-			this.dirAliasMap.set(baseDir, aliasDir);
-			const absoluteAlias = path.join(tmpParent, aliasDir);
+		if (!this.aliasesByOriginalPath.has(baseDir)) {
+			const aliasDir = path.join(tmpParent, `TMP_${RetireJsEngine.NEXT_ALIAS_IDX++}`);
+			this.aliasesByOriginalPath.set(baseDir, aliasDir);
+			this.originalPathsByAlias.set(aliasDir, baseDir);
 			return new Promise((res, rej) => {
 				// Create a directory beneath the temporary parent directory with the name of the alias.
-				fs.mkdir(absoluteAlias, (err) => {
+				fs.mkdir(aliasDir, (err) => {
 					if (err) {
 						rej(err);
 					} else {
-						res(absoluteAlias);
+						res(aliasDir);
 					}
 				});
 			});
 		}
-		return path.join(tmpParent, this.dirAliasMap.get(baseDir));
+		return this.aliasesByOriginalPath.get(baseDir);
 	}
 
 
