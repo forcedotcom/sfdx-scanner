@@ -239,7 +239,7 @@ describe('RuleManager', () => {
 				});
 
 				it('All targets match', async () => {
-					const validTargets = ['js/**/*.js', '!**/negative-filter-does-not-exist/**'];
+					const validTargets = ['js/**/*.js', 'app/force-app/main/default/classes', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
 					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
@@ -311,7 +311,7 @@ describe('RuleManager', () => {
 					expect(results).to.equal('', `Output ${results} should have been an empty string`);
 				});
 
-				it('Single target does not match', async () => {
+				it('Single target file does not match', async () => {
 					const invalidTarget = ['does-not-exist.js'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
@@ -324,8 +324,22 @@ describe('RuleManager', () => {
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
 				});
 
+
+				it('Single target directory does not match', async () => {
+					const invalidTarget = ['app/force-app/main/default/no-such-directory'];
+					// Set up our filter array.
+					const categories = ['Best Practices', 'Error Prone'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+				});
+
 				it('Multiple targets do not match', async () => {
-					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js'];
+					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', 'app/force-app/main/default/no-such-directory'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
@@ -338,7 +352,7 @@ describe('RuleManager', () => {
 				});
 
 				it('Some targets do not match', async () => {
-					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', '**/non-existent/**/*.js'];
+					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', '**/non-existent/**/*.js', 'app/force-app/main/default/no-such-directory'];
 					const validTargets = ['js/**/*.js', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
