@@ -41,24 +41,33 @@ type RetireJsInvocation = {
 };
 
 /**
- * This is the format of the JSON output by RetireJS.
+ * These next few classes define the format of the JSON output by RetireJS.
  */
+type RetireJsVulnerability = {
+	info: string[];
+	below?: string;
+	atOrAbove?: string;
+	severity: string;
+	identifiers: {
+		summary: string;
+	};
+};
+
 type RetireJsResult = {
 	version: string;
-	data: {
-		file: string;
-		results: {
-			version: string;
-			component: string;
-			detection: string;
-			vulnerabilities: {
-				info: string[];
-				below?: string;
-				atOrAbove?: string;
-				severity: string;
-			}[];
-		}[];
-	}[];
+	component: string;
+	detection?: string;
+	vulnerabilities: RetireJsVulnerability[];
+};
+
+type RetireJsData = {
+	file: string;
+	results: RetireJsResult[];
+};
+
+type RetireJsOutput = {
+	version: string;
+	data: RetireJsData[];
 };
 
 export class RetireJsEngine implements RuleEngine {
@@ -175,7 +184,7 @@ export class RetireJsEngine implements RuleEngine {
 	private processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		// The output from the CLI should be a valid JSON.
 		const outputJson = JSON.parse(cmdOutput);
-		if (RetireJsEngine.validatePotentialResult(outputJson)) {
+		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
 			const ruleResults: RuleResult[] = [];
 			for (const data of outputJson.data) {
 				// First, we need to de-alias the file.
@@ -193,12 +202,13 @@ export class RetireJsEngine implements RuleEngine {
 				// the parent RuleResult.
 				for (const result of data.results) {
 					for (const vuln of result.vulnerabilities) {
+						const msg = this.generateViolationMessage(vuln);
 						ruleResult.violations.push({
 							line: 1,
 							column: 1,
 							ruleName: ruleName,
 							severity: this.retireSevToScannerSev(vuln.severity),
-							message: 'dummy message',
+							message: msg,
 							category: 'Insecure Dependencies'
 						});
 					}
@@ -210,7 +220,24 @@ export class RetireJsEngine implements RuleEngine {
 			// TODO: Throw some kind of error here.
 		}
 		return [];
+	}
 
+	/**
+	 * Generates a violation message of the format "[Impacted versions]: [Summary of issue]".
+	 * @param vuln
+	 */
+	private generateViolationMessage(vuln: RetireJsVulnerability): string {
+		// The first part of the message indicates the vulnerable versions. We'll generate each portion of that header
+		// separately, and concatenate an array together.
+		const versionArray: string[] = [];
+		if (vuln.atOrAbove) {
+			versionArray.push(`>= ${vuln.atOrAbove}`);
+		}
+		if (vuln.below) {
+			versionArray.push(`< ${vuln.below}`);
+		}
+
+		return `${versionArray.join(' && ')}: ${vuln.identifiers.summary}`;
 	}
 
 	private retireSevToScannerSev(sev: string): number {
@@ -227,8 +254,8 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private static validatePotentialResult(parsedOutput: any): parsedOutput is RetireJsResult {
-		return (parsedOutput as RetireJsResult).version != undefined;
+	private static validateRetireJsOutput(parsedOutput: any): parsedOutput is RetireJsOutput {
+		return (parsedOutput as RetireJsOutput).version != undefined;
 	}
 
 	public async init(): Promise<void> {
