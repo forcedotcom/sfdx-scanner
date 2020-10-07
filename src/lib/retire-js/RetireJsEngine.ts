@@ -101,7 +101,6 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.resolve(retireJsCatalog);
 	}
 
-	// TODO: We need to actually implement this method.
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
@@ -115,8 +114,7 @@ export class RetireJsEngine implements RuleEngine {
 		}
 
 		// We can combine the results into a single array using .reduce() instead of the more verbose for-loop.
-		const res: RuleResult[] = (await Promise.all(retireJsPromises)).reduce((acc, r) => [...acc, ...r], []);
-		return res;
+		return (await Promise.all(retireJsPromises)).reduce((acc, r) => [...acc, ...r], []);
 	}
 
 	private buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
@@ -204,7 +202,9 @@ export class RetireJsEngine implements RuleEngine {
 			}
 			return ruleResults;
 		} else {
-			// TODO: Throw some kind of error here.
+			// It's theoretically impossible to reach this point, because it means that RetireJS finished successfully
+			// but returned something we don't recognize.
+			throw new SfdxError(`retire-js output did not match expected structure`);
 		}
 		return [];
 	}
@@ -214,17 +214,24 @@ export class RetireJsEngine implements RuleEngine {
 	 * @param vuln
 	 */
 	private generateViolationMessage(vuln: RetireJsVulnerability, currentVersion: string): string {
-		// The first part of the message indicates the vulnerable versions. We'll generate each portion of that header
-		// separately, and concatenate an array together.
-		const versionArray: string[] = [];
-		if (vuln.atOrAbove) {
-			versionArray.push(`>=v${vuln.atOrAbove}`);
-		}
+		// Our message needs to include information about which versions are free of the specific vulnerability.
+		let secureVersion = null;
 		if (vuln.below) {
-			versionArray.push(`<v${vuln.below}`);
+			// The `below` property is the version in which the described vulnerability was PATCHED. Users can upgrade to
+			// that version to resolve the vulnerability. We want to encourage upgrading, so we'll use the `below` property
+			// if we can.
+			secureVersion = `>=v${vuln.below}`;
+		} else if (vuln.atOrAbove) {
+			// The `atOrAbove` property is the version in which the described vulnerability was INTRODUCED. Users can
+			// downgrade to a version below that version to resolve the vulnerability. We want to discourage downgrading,
+			// so we'll only provide this information if we couldn't provide a `below` property.
+			secureVersion = `<v${vuln.atOrAbove}`;
+		} else {
+			// If there's neither an `atOrAbove` or `below` property, then the vulnerability is inescapable. Womp womp.
+			secureVersion = 'None';
 		}
-		return `Affects v${currentVersion} (${versionArray.join(' && ')}); Summary: ${vuln.identifiers.summary}`;
-		//return `${versionArray.join(' && ')}: ${vuln.identifiers.summary}`;
+
+		return `Found: v${currentVersion}. Fixed in: ${secureVersion}. Summary: ${vuln.identifiers.summary}`;
 	}
 
 	private retireSevToScannerSev(sev: string): number {
@@ -236,7 +243,7 @@ export class RetireJsEngine implements RuleEngine {
 			case 'high':
 				return 1;
 			default:
-				// TODO: Throw an error of some kind.
+				throw new SfdxError(`retire-js encountered unexpected severity value of ${sev}.`);
 		}
 	}
 
