@@ -104,13 +104,9 @@ export class RetireJsEngine implements RuleEngine {
 	// TODO: We need to actually implement this method.
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		//console.log(`Identified RetireJS exe path as ${RetireJsEngine.RETIRE_JS_PATH}`);
-		//console.log(`Targets are: ${JSON.stringify(target)}`);
-
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
 		// we were given into a directory that we can pass into RetireJS.
 		const tmpDir = await this.createTmpDirWithDuplicatedTargets(target);
-		//console.log(`Created parent directory ${tmpDir}`);
 		const invocationArray: RetireJsInvocation[] = this.buildCliInvocations(rules, tmpDir);
 
 		const retireJsPromises: Promise<RuleResult[]>[] = [];
@@ -120,7 +116,6 @@ export class RetireJsEngine implements RuleEngine {
 
 		// We can combine the results into a single array using .reduce() instead of the more verbose for-loop.
 		const res: RuleResult[] = (await Promise.all(retireJsPromises)).reduce((acc, r) => [...acc, ...r], []);
-		//console.log('results: ' + JSON.stringify(res));
 		return res;
 	}
 
@@ -147,13 +142,10 @@ export class RetireJsEngine implements RuleEngine {
 		return new Promise<RuleResult[]>((res, rej) => {
 			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
 
-			let stdout = '';
+			// We only care about StdErr, since that's where the vulnerability entries will be logged to.
 			let stderr = '';
 
 			// When data is passed back up to us, pop it onto the appropriate string.
-			cp.stdout.on('data', data => {
-				stdout += data;
-			});
 			cp.stderr.on('data', data => {
 				stderr += data;
 			});
@@ -163,18 +155,14 @@ export class RetireJsEngine implements RuleEngine {
 				if (code === 0) {
 					// If RetireJS exits with code 0, then it ran successfully and found no vulnerabilities. We can resolve
 					// to an empty array.
-					console.log('no insecurities');
 					res([]);
 				} else if (code === 13) {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
-					console.log('yes insecurities');
-					console.log('out lens? ' + stdout.length + ', ' + stderr.length);
 					res(this.processOutput(stderr, invocation.rule));
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. We'll reject with stderr
 					// for the ease of upstream error handling.
-					console.log('some weird errors');
 					rej(stderr);
 				}
 			});
@@ -191,7 +179,6 @@ export class RetireJsEngine implements RuleEngine {
 				const aliasDir = path.dirname(data.file);
 				const originalPath = path.join(this.originalPathsByAlias.get(aliasDir), path.basename(data.file));
 
-//				console.log(`Followed alias back to file ${originalPath}`);
 				// Each `data` entry yields a single RuleResult.
 				const ruleResult: RuleResult = {
 					engine: ENGINE.RETIRE_JS.valueOf(),
@@ -202,7 +189,7 @@ export class RetireJsEngine implements RuleEngine {
 				// the parent RuleResult.
 				for (const result of data.results) {
 					for (const vuln of result.vulnerabilities) {
-						const msg = this.generateViolationMessage(vuln);
+						const msg = this.generateViolationMessage(vuln, result.version);
 						ruleResult.violations.push({
 							line: 1,
 							column: 1,
@@ -226,18 +213,18 @@ export class RetireJsEngine implements RuleEngine {
 	 * Generates a violation message of the format "[Impacted versions]: [Summary of issue]".
 	 * @param vuln
 	 */
-	private generateViolationMessage(vuln: RetireJsVulnerability): string {
+	private generateViolationMessage(vuln: RetireJsVulnerability, currentVersion: string): string {
 		// The first part of the message indicates the vulnerable versions. We'll generate each portion of that header
 		// separately, and concatenate an array together.
 		const versionArray: string[] = [];
 		if (vuln.atOrAbove) {
-			versionArray.push(`>= ${vuln.atOrAbove}`);
+			versionArray.push(`>=v${vuln.atOrAbove}`);
 		}
 		if (vuln.below) {
-			versionArray.push(`< ${vuln.below}`);
+			versionArray.push(`<v${vuln.below}`);
 		}
-
-		return `${versionArray.join(' && ')}: ${vuln.identifiers.summary}`;
+		return `Affects v${currentVersion} (${versionArray.join(' && ')}); Summary: ${vuln.identifiers.summary}`;
+		//return `${versionArray.join(' && ')}: ${vuln.identifiers.summary}`;
 	}
 
 	private retireSevToScannerSev(sev: string): number {
