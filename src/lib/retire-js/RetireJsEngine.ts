@@ -206,7 +206,6 @@ export class RetireJsEngine implements RuleEngine {
 			// but returned something we don't recognize.
 			throw new SfdxError(`retire-js output did not match expected structure`);
 		}
-		return [];
 	}
 
 	/**
