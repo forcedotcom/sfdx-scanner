@@ -32,6 +32,13 @@ class TestConfig extends Config {
 		return super.lookupAndUpdateToDefault(engine, ecc, propertyName);
 	}
 
+	/**
+	 * Overridden to make public
+	 */
+	public getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
+		return super.getBooleanConfigValue(propertyName, engine);
+	}
+
 	public getDefaultConfig(): ConfigContent {
 		return this.defaultConfig || super.getDefaultConfig();
 	}
@@ -166,6 +173,108 @@ describe('Config.js tests', () => {
 			const config = await createConfig(userConfig, true, defaultConfig);
 			const updatedConfig = await config.lookupAndUpdateToDefault(ENGINE.PMD, userConfig.engines[0], 'supportedLanguages');
 			expect(updatedConfig.supportedLanguages).to.have.members(["go", "kotlin"]);
+		});
+
+		it ('Test getConfigValue for default true value overriden to false', async() => {
+			const defaultConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": true
+					}
+				]
+			}
+
+			const userConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": false
+					}
+				]
+			};
+
+			const config = await createConfig(userConfig, true, defaultConfig);
+			const value = await config.getBooleanConfigValue('disabled', ENGINE.PMD);
+			expect(value).to.be.false;
+		});
+
+		it ('Test getConfigValue for default true value not defined', async() => {
+			const defaultConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": true
+					}
+				]
+			}
+
+			const userConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": []
+					}
+				]
+			};
+
+			const config = await createConfig(userConfig, true, defaultConfig);
+			const value = await config.getBooleanConfigValue('disabled', ENGINE.PMD);
+			expect(value).to.be.true;
+		});
+
+		it ('Test getConfigValue for default false value overridden to true', async() => {
+			const defaultConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": false
+					}
+				]
+			}
+
+			const userConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": true
+					}
+				]
+			};
+
+			const config = await createConfig(userConfig, true, defaultConfig);
+			const value = await config.getBooleanConfigValue('disabled', ENGINE.PMD);
+			expect(value).to.be.true;
+		});
+
+		it ('Test getConfigValue for default false value not defined', async() => {
+			const defaultConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": [],
+						"disabled": false
+					}
+				]
+			}
+
+			const userConfig = {
+				"engines": [
+					{
+						"name": "pmd",
+						"targetPatterns": []
+					}
+				]
+			};
+
+			const config = await createConfig(userConfig, true, defaultConfig);
+			const value = await config.getBooleanConfigValue('disabled', ENGINE.PMD);
+			expect(value).to.be.false;
 		});
 
 		it ('Test lookupAndUpdateToDefault for default false value', async() => {

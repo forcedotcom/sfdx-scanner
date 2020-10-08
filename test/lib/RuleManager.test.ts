@@ -7,6 +7,7 @@ import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 import * as TestOverrides from '../test-related-lib/TestOverrides';
+import {uxEvents} from '../../src/lib/ScannerEvents';
 
 TestOverrides.initializeTestSetup();
 
@@ -18,6 +19,17 @@ let ruleManager: RuleManager = null;
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 describe('RuleManager', () => {
+	let uxSpy;
+
+	beforeEach(() => {
+		Sinon.createSandbox();
+		uxSpy = Sinon.spy(uxEvents, 'emit');
+	});
+
+	afterEach(() => {
+		Sinon.restore();
+	});
+
 	before(async () => {
 		// Make sure all catalogs exist where they're supposed to.
 		if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
@@ -44,7 +56,7 @@ describe('RuleManager', () => {
 		describe('Test Case: No filters provided', () => {
 			it('When no filters are provided, all default-enabled rules are returned', async () => {
 				// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-				const allRules = ruleManager.getRulesMatchingCriteria([]);
+				const allRules = await ruleManager.getRulesMatchingCriteria([]);
 
 				// Expect all default-enabled rules to have been returned.
 				expect(allRules).to.have.lengthOf(CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
@@ -60,7 +72,7 @@ describe('RuleManager', () => {
 					new RuleFilter(FilterType.ENGINE, ['pmd'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'Exactly 2 pmd rules are categorized as "Best Practices".');
@@ -75,10 +87,10 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(8, 'Exactly 8 rules are categorized as "Best Practices" or "Design"');
+				expect(matchingRules).to.have.lengthOf(7, 'Exactly 7 rules in enabled engines are categorized as "Best Practices" or "Design"');
 				for (const rule of matchingRules) {
 					for (const category of rule.categories) {
 						expect(categories, JSON.stringify(matchingRules)).to.contain(category);
@@ -93,7 +105,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.RULESET, ['Braces'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(3, 'Exactly 8 rules are in the "Braces" ruleset');
@@ -104,10 +116,10 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'Best Practices'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(7, 'Exactly 7 rules are in the "Braces" or "Best Practices" rulesets');
+				expect(matchingRules).to.have.lengthOf(6, 'Exactly 6 rules in enabled engines are in the "Braces" or "Best Practices" rulesets');
 			});
 		});
 
@@ -117,7 +129,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'There are 2 rules that target Apex');
@@ -128,7 +140,7 @@ describe('RuleManager', () => {
 				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex', 'javascript'])];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(11, 'There are 11 rules targeting either Apex or JS');
@@ -145,7 +157,7 @@ describe('RuleManager', () => {
 				];
 
 				// Pass the filter array into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(filters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(4, 'Exactly 4 rules target Apex and are categorized as "Best Practices".');
@@ -161,7 +173,7 @@ describe('RuleManager', () => {
 				const impossibleFilters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
 
 				// Pass our filters into the manager.
-				const matchingRules = ruleManager.getRulesMatchingCriteria(impossibleFilters);
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(impossibleFilters);
 
 				// There shouldn't be anything in the array.
 				expect(matchingRules).to.have.lengthOf(0, 'Should be no matching rules');
@@ -175,7 +187,7 @@ describe('RuleManager', () => {
 				process.chdir(path.join('test', 'code-fixtures', 'projects'));
 			});
 			after(() => {
-				process.chdir("../..");
+				process.chdir("../../..");
 			});
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
@@ -225,6 +237,23 @@ describe('RuleManager', () => {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
 				});
+
+				it('All targets match', async () => {
+					const validTargets = ['js/**/*.js', 'app/force-app/main/default/classes', '!**/negative-filter-does-not-exist/**'];
+					// Set up our filter array.
+					const categories = ['Possible Errors'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
+					} else {
+						parsedRes = JSON.parse(results);
+					}
+					expect(parsedRes).to.be.an("array").that.has.length(1);
+					Sinon.assert.callCount(uxSpy, 0);
+				});
 			});
 
 			describe('Test Case: Run by category', () => {
@@ -272,7 +301,7 @@ describe('RuleManager', () => {
 				});
 			});
 
-			describe('Edge Case: No rules match criteria', () => {
+			describe('Edge Cases', () => {
 				it('When no rules match the given criteria, an empty string is returned', async () => {
 					// Define our preposterous filter array.
 					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
@@ -280,6 +309,65 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
 					expect(results).to.equal('', `Output ${results} should have been an empty string`);
+				});
+
+				it('Single target file does not match', async () => {
+					const invalidTarget = ['does-not-exist.js'];
+					// Set up our filter array.
+					const categories = ['Best Practices', 'Error Prone'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+				});
+
+
+				it('Single target directory does not match', async () => {
+					const invalidTarget = ['app/force-app/main/default/no-such-directory'];
+					// Set up our filter array.
+					const categories = ['Best Practices', 'Error Prone'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+				});
+
+				it('Multiple targets do not match', async () => {
+					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', 'app/force-app/main/default/no-such-directory'];
+					// Set up our filter array.
+					const categories = ['Best Practices', 'Error Prone'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+				});
+
+				it('Some targets do not match', async () => {
+					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', '**/non-existent/**/*.js', 'app/force-app/main/default/no-such-directory'];
+					const validTargets = ['js/**/*.js', '!**/negative-filter-does-not-exist/**'];
+					// Set up our filter array.
+					const categories = ['Possible Errors'];
+					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== "string") {
+						expect(false, `Invalid output: ${results}`);
+					} else {
+						parsedRes = JSON.parse(results);
+					}
+					expect(parsedRes).to.be.an("array").that.has.length(1);
+					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
 				});
 			});
 		});

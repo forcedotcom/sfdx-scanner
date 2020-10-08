@@ -17,17 +17,22 @@ function getCatalogJson(): { rules: Rule[] } {
 	return JSON.parse(fs.readFileSync(catalogPath).toString());
 }
 
+function listContentsOverlap<T>(list1: T[], list2: T[]): boolean {
+	return list1.some(x => list2.includes(x));
+}
+
 describe('scanner:rule:list', () => {
 
 	describe('E2E', () => {
 		describe('Test Case: No filters applied', () => {
 			setupCommandTest
 				.command(['scanner:rule:list'])
-				.it('All rules are returned', ctx => {
+				.it('All rules for enabled engines are returned', async ctx => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
 					// compared to the number of rules in the catalog.
 					const catalog = getCatalogJson();
-					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled).length;
+					const enabledEngines = (await Controller.getEnabledEngines()).map(e => e.getName());
+					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled && enabledEngines.includes(r.engine)).length;
 
 					// Split the output table by newline and throw out the first two rows, since they just contain header information. That
 					// should leave us with the actual data.
@@ -39,11 +44,12 @@ describe('scanner:rule:list', () => {
 
 			setupCommandTest
 				.command(['scanner:rule:list', '--json'])
-				.it('--json flag yields expected JSON', ctx => {
+				.it('--json flag yields expected JSON', async ctx => {
 					// Rather than painstakingly check all of the rules, we'll just make sure that we got the right number of rules,
 					// compared to the number of rules in the catalog.
 					const catalog = getCatalogJson();
-					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled).length;
+					const enabledEngines = (await Controller.getEnabledEngines()).map(e => e.getName());
+					const totalRuleCount = catalog.rules.filter(r => r.defaultEnabled && enabledEngines.includes(r.engine)).length;
 
 					// Parse the output back into a JSON, then make sure it has the same number of rules as the catalog did.
 					const outputJson = JSON.parse(ctx.stdout);
@@ -53,15 +59,20 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by category only', () => {
+			const filteredCategories = ['Best Practices', 'Design'];
 			setupCommandTest
-				.command(['scanner:rule:list', '--category', 'Best Practices', '--json'])
-				.it('Filtering by one category returns only the rules in that category', ctx => {
+				.command(['scanner:rule:list', '--category', filteredCategories[0], '--json'])
+				.it('Filtering by one category returns only the rules in that category for enabled engines', async ctx => {
 					// Rather than painstakingly checking everything about all the rules, we'll just make sure that the number of rules
 					// returned is the same as the number of rules in the target category, and that every rule returned is actually
 					// a member of that category.
 					// The first step is to identify how many satisfactory rules are in the catalog.
 					const catalog = getCatalogJson();
-					const targetRuleCount = catalog.rules.filter(rule => rule.categories.includes('Best Practices')).length;
+					const enabledEngines = (await Controller.getEnabledEngines()).map(e => e.getName());
+					const filterFunction: (Rule) => boolean = (r: Rule) => r.categories.includes(filteredCategories[0]) && enabledEngines.includes(r.engine);
+					const targetRuleCount = catalog.rules.filter(filterFunction).length;
+					expect(targetRuleCount).to.be.above(0, 'Expected rule count cannot be zero. Test invalid');
+
 
 					// Then, we parse the output back into a JSON, make sure it has the right number of rules, and make sure that each
 					// rule is the right type.
@@ -69,16 +80,20 @@ describe('scanner:rule:list', () => {
 
 					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules in the specified category should have been returned');
 					outputJson.result.forEach((rule: Rule) => {
-						expect(rule.categories).to.contain('Best Practices', `Rule ${rule.name} was included despite being in the wrong category`);
+						expect(rule.categories).to.contain(filteredCategories[0], `Rule ${rule.name} was included despite being in the wrong category`);
 					});
 				});
 
 			setupCommandTest
-				.command(['scanner:rule:list', '--category', 'Best Practices,Design', '--json'])
-				.it('Filtering by multiple categories returns any rule in either category', ctx => {
+				.command(['scanner:rule:list', '--category', filteredCategories.join(','), '--json'])
+				.it('Filtering by multiple categories returns any rule in either category', async ctx => {
 					// Count how many rules in the catalog fit the criteria.
 					const catalog = getCatalogJson();
-					const targetRuleCount = catalog.rules.filter(rule => rule.categories.includes('Best Practices') || rule.categories.includes('Design')).length;
+					const enabledEngines = (await Controller.getEnabledEngines()).map(e => e.getName());
+					const filterFunction: (Rule) => boolean =
+						(r: Rule) => listContentsOverlap(r.categories, filteredCategories) && enabledEngines.includes(r.engine);
+					const targetRuleCount = catalog.rules.filter(filterFunction).length;
+					expect(targetRuleCount).to.be.above(0, 'Expected rule count cannot be zero. Test invalid');
 
 					// Parse the output back into a JSON, and make sure it has the right number of rules.
 					const outputJson = JSON.parse(ctx.stdout);
@@ -86,7 +101,7 @@ describe('scanner:rule:list', () => {
 					// Make sure that only rules in the right categories were returned.
 					outputJson.result.forEach((rule: Rule) => {
 						expect(rule).to.satisfy((rule) => {
-								return rule.categories.includes('Best Practices') || rule.categories.includes('Design')
+								return listContentsOverlap(rule.categories, filteredCategories)
 							},
 							`Rule ${rule.name} was included despite being in the wrong category`
 						);
@@ -139,26 +154,32 @@ describe('scanner:rule:list', () => {
 		});
 
 		describe('Test Case: Filtering by language only', () => {
+			const filteredLanguages = ['apex', 'javascript'];
 			setupCommandTest
-				.command(['scanner:rule:list', '--language', 'apex', '--json'])
+				.command(['scanner:rule:list', '--language', filteredLanguages[0], '--json'])
 				.it('Filtering by a single language returns only rules applied to that language', ctx => {
 					// Count how many rules in the catalog fit the criteria.
-					const targetRuleCount = getCatalogJson().rules.filter(rule => rule.languages.includes('apex')).length;
+					const targetRuleCount = getCatalogJson().rules.filter(rule => rule.languages.includes(filteredLanguages[0])).length;
+					expect(targetRuleCount).to.be.above(0, 'Expected rule count cannot be zero. Test invalid');
 
 					// Parse the output back into a JSON and make sure it has the right number of rules.
 					const outputJson = JSON.parse(ctx.stdout);
 					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules of the desired language should be returned');
 					// Make sure that only the right rules were returned.
 					outputJson.result.forEach((rule) => {
-						expect(rule.languages).to.contain('apex', `Rule ${rule.name} was included despite targeting the wrong language`)
+						expect(rule.languages).to.contain(filteredLanguages[0], `Rule ${rule.name} was included despite targeting the wrong language`)
 					});
 				});
 
 			setupCommandTest
-				.command(['scanner:rule:list', '--language', 'apex,javascript', '--json'])
-				.it('Filtering by multiple languages returns any rule for either language', ctx => {
+				.command(['scanner:rule:list', '--language', filteredLanguages.join(','), '--json'])
+				.it('Filtering by multiple languages returns any rule for either language', async ctx => {
 					// Count how many rules in the catalog fit the criteria.
-					const targetRuleCount = getCatalogJson().rules.filter(rule => rule.languages.includes('apex') || rule.languages.includes('javascript')).length;
+					const enabledEngines = (await Controller.getEnabledEngines()).map(e => e.getName());
+					const filterFunction: (Rule) => boolean =
+						(r: Rule) => listContentsOverlap(r.languages, filteredLanguages) && enabledEngines.includes(r.engine);
+					const targetRuleCount = getCatalogJson().rules.filter(filterFunction).length;
+					expect(targetRuleCount).to.be.above(0, 'Expected rule count cannot be zero. Test invalid');
 
 					// Parse the output back into a JSON and make sure it has the right number of rules.
 					const outputJson = JSON.parse(ctx.stdout);
@@ -166,7 +187,7 @@ describe('scanner:rule:list', () => {
 					// Make sure that only the right rules were returned.
 					outputJson.result.forEach((rule: Rule) => {
 						expect(rule).to.satisfy((rule) => {
-								return rule.languages.includes('apex') || rule.languages.includes('javascript')
+								return listContentsOverlap(rule.languages, filteredLanguages)
 							},
 							`Rule ${rule.name} was included despite targeting neither desired language`
 						);
