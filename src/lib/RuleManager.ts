@@ -13,7 +13,17 @@ export enum OUTPUT_FORMAT {
 export interface RuleManager {
 	init(): Promise<void>;
 
-	getRulesMatchingCriteria(filters: RuleFilter[]): Rule[];
+	/**
+	 * Returns rules matching the filter criteria provided, and any non-conflicting implicit filters.
+	 * @param {RuleFilter[]} filters - A collection of filters.
+	 */
+	getRulesMatchingCriteria(filters: RuleFilter[]): Promise<Rule[]>;
+
+	/**
+	 * Returns rules that match only the provided filters, completely ignoring any implicit filtering.
+	 * @param filters
+	 */
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]>;
 
 	/**
 	 * @param engineOptions - see RuleEngine#run
