@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
-import {RuleTarget} from '../../../src/types';
+import {RuleResult, RuleTarget} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
-import {RetireJsEngine}  from '../../../src/lib/retire-js/RetireJsEngine'
+import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import globby = require('globby');
 
@@ -11,8 +11,17 @@ import globby = require('globby');
 TestOverrides.initializeTestSetup();
 
 class TestableRetireJsEngine extends RetireJsEngine {
+	public processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
+		return super.processOutput(cmdOutput, ruleName);
+	}
+
 	public createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		return super.createTmpDirWithDuplicatedTargets(targets);
+	}
+
+	public addFakeAliasData(original: string, alias: string): void {
+		this.originalPathsByAlias.set(alias, original);
+		this.aliasesByOriginalPath.set(original, alias);
 	}
 }
 
@@ -73,5 +82,68 @@ describe('RetireJsEngine', () => {
 				expect(dupedFileBaseNames).to.include(e, 'Expected duplicate file missing from array');
 			}
 		});
+	});
+
+	describe('processOutput()', () => {
+		it('Properly dealiases and processes results from non-zipped file', async () => {
+			// First, we need to seed the test engine with some fake aliases.
+			testEngine.addFakeAliasData(path.join('first', 'unimportant', 'path'), path.join('first', 'unimportant', 'alias'));
+			testEngine.addFakeAliasData(path.join('second', 'unimportant', 'path'), path.join('second', 'unimportant', 'alias'));
+
+			// Next, we want to spoof some output that looks like it came from RetireJS.
+			const fakeRetireOutput = {
+				"data": [{
+					"file": path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js'),
+					"results": [{
+						"version": "3.1.0",
+						"component": "jquery",
+						"vulnerabilities": [{
+							"severity": "low"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}]
+					}]
+				}, {
+					"file": path.join('second', 'unimportant', 'alias', 'angular-scenario.js'),
+					"results": [{
+						"version": "1.10.2",
+						"component": "jquery",
+						"vulnerabilities": [{
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}]
+					}, {
+						"version": "1.2.13",
+						"component": "angularjs",
+						"vulnerabilities": [{
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "low"
+						}]
+					}]
+				}]
+			};
+
+			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
+			const results: RuleResult[] = testEngine.procesOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+		});
+
 	});
 });

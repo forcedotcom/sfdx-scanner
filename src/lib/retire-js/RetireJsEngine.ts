@@ -44,17 +44,10 @@ type RetireJsInvocation = {
  * These next few classes define the format of the JSON output by RetireJS.
  */
 type RetireJsVulnerability = {
-	info: string[];
-	below?: string;
-	atOrAbove?: string;
 	severity: string;
-	identifiers: {
-		summary: string;
-	};
 };
 
 type RetireJsResult = {
-	version: string;
 	component: string;
 	detection?: string;
 	vulnerabilities: RetireJsVulnerability[];
@@ -82,8 +75,8 @@ export class RetireJsEngine implements RuleEngine {
 	// generating aliases associated with the directory portion of each original file's path. We need an incrementing
 	// index to generate unique aliases, and we need maps from both the aliases to the original and vice versa.
 	private static NEXT_ALIAS_IDX = 0;
-	private aliasesByOriginalPath: Map<string, string> = new Map();
-	private originalPathsByAlias: Map<string, string> = new Map();
+	protected aliasesByOriginalPath: Map<string, string> = new Map();
+	protected originalPathsByAlias: Map<string, string> = new Map();
 
 	private logger: Logger;
 	private config: Config;
@@ -167,7 +160,7 @@ export class RetireJsEngine implements RuleEngine {
 		});
 	}
 
-	private processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
+	protected processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		// The output from the CLI should be a valid JSON.
 		const outputJson = JSON.parse(cmdOutput);
 		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
@@ -177,26 +170,26 @@ export class RetireJsEngine implements RuleEngine {
 				const aliasDir = path.dirname(data.file);
 				const originalPath = path.join(this.originalPathsByAlias.get(aliasDir), path.basename(data.file));
 
-				// Each `data` entry yields a single RuleResult.
+				// Each entry in the `data` array yields a single RuleResult.
 				const ruleResult: RuleResult = {
 					engine: ENGINE.RETIRE_JS.valueOf(),
 					fileName: originalPath,
 					violations: []
 				};
-				// Each `result` entry uses its own `vulnerabilities` array to generate one or more RuleViolations for
-				// the parent RuleResult.
+
+				// Each `result` entry generates one RuleViolation.
 				for (const result of data.results) {
-					for (const vuln of result.vulnerabilities) {
-						const msg = this.generateViolationMessage(vuln, result.version);
-						ruleResult.violations.push({
-							line: 1,
-							column: 1,
-							ruleName: ruleName,
-							severity: this.retireSevToScannerSev(vuln.severity),
-							message: msg,
-							category: 'Insecure Dependencies'
-						});
-					}
+					ruleResult.violations.push({
+						line: 1,
+						column: 1,
+						ruleName: ruleName,
+						// Sweep the vulnerabilities to find the most severe one.
+						severity: result.vulnerabilities
+							.map(vuln => this.retireSevToScannerSev(vuln.severity))
+							.reduce((min, sev) => min > sev ? sev: min, 9000),
+						message: `${result.component} v${result.version} is insecure. Please upgrade to latest version.`,
+						category: 'Insecure Dependencies'
+					});
 				}
 				ruleResults.push(ruleResult);
 			}
@@ -206,31 +199,6 @@ export class RetireJsEngine implements RuleEngine {
 			// but returned something we don't recognize.
 			throw new SfdxError(`retire-js output did not match expected structure`);
 		}
-	}
-
-	/**
-	 * Generates a violation message of the format "[Impacted versions]: [Summary of issue]".
-	 * @param vuln
-	 */
-	private generateViolationMessage(vuln: RetireJsVulnerability, currentVersion: string): string {
-		// Our message needs to include information about which versions are free of the specific vulnerability.
-		let secureVersion = null;
-		if (vuln.below) {
-			// The `below` property is the version in which the described vulnerability was PATCHED. Users can upgrade to
-			// that version to resolve the vulnerability. We want to encourage upgrading, so we'll use the `below` property
-			// if we can.
-			secureVersion = `>=v${vuln.below}`;
-		} else if (vuln.atOrAbove) {
-			// The `atOrAbove` property is the version in which the described vulnerability was INTRODUCED. Users can
-			// downgrade to a version below that version to resolve the vulnerability. We want to discourage downgrading,
-			// so we'll only provide this information if we couldn't provide a `below` property.
-			secureVersion = `<v${vuln.atOrAbove}`;
-		} else {
-			// If there's neither an `atOrAbove` or `below` property, then the vulnerability is inescapable. Womp womp.
-			secureVersion = 'None';
-		}
-
-		return `Found: v${currentVersion}. Fixed in: ${secureVersion}. Summary: ${vuln.identifiers.summary}`;
 	}
 
 	private retireSevToScannerSev(sev: string): number {
