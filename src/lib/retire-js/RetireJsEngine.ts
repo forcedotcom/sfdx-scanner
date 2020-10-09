@@ -292,7 +292,7 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 
-	private async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
+	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await new FileHandler().tmpDirWithCleanup();
 		const fileCopyPromises: Promise<void>[] = [];
