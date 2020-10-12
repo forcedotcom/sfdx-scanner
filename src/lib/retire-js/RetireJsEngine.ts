@@ -48,6 +48,7 @@ type RetireJsVulnerability = {
 };
 
 type RetireJsResult = {
+	version: string;
 	component: string;
 	detection?: string;
 	vulnerabilities: RetireJsVulnerability[];

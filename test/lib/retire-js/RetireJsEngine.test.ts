@@ -87,13 +87,19 @@ describe('RetireJsEngine', () => {
 	describe('processOutput()', () => {
 		it('Properly dealiases and processes results from non-zipped file', async () => {
 			// First, we need to seed the test engine with some fake aliases.
-			testEngine.addFakeAliasData(path.join('first', 'unimportant', 'path'), path.join('first', 'unimportant', 'alias'));
-			testEngine.addFakeAliasData(path.join('second', 'unimportant', 'path'), path.join('second', 'unimportant', 'alias'));
+			const firstPath = path.join('first', 'unimportant', 'path');
+			const firstAlias = path.join('first', 'unimportant', 'alias');
+			const secondPath = path.join('second', 'unimportant', 'path');
+			const secondAlias = path.join('second', 'unimportant', 'alias');
+
+			testEngine.addFakeAliasData(firstPath, firstAlias);
+			testEngine.addFakeAliasData(secondPath, secondAlias);
 
 			// Next, we want to spoof some output that looks like it came from RetireJS.
 			const fakeRetireOutput = {
+				"version": "2.2.2",
 				"data": [{
-					"file": path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js'),
+					"file": path.join(firstAlias, 'jquery-3.1.0.js'),
 					"results": [{
 						"version": "3.1.0",
 						"component": "jquery",
@@ -106,12 +112,12 @@ describe('RetireJsEngine', () => {
 						}]
 					}]
 				}, {
-					"file": path.join('second', 'unimportant', 'alias', 'angular-scenario.js'),
+					"file": path.join(secondAlias, 'angular-scenario.js'),
 					"results": [{
 						"version": "1.10.2",
 						"component": "jquery",
 						"vulnerabilities": [{
-							"severity": "medium"
+							"severity": "high"
 						}, {
 							"severity": "medium"
 						}, {
@@ -125,15 +131,15 @@ describe('RetireJsEngine', () => {
 						"version": "1.2.13",
 						"component": "angularjs",
 						"vulnerabilities": [{
-							"severity": "medium"
+							"severity": "low"
 						}, {
-							"severity": "medium"
+							"severity": "low"
 						}, {
-							"severity": "medium"
+							"severity": "low"
 						}, {
-							"severity": "medium"
+							"severity": "low"
 						}, {
-							"severity": "medium"
+							"severity": "low"
 						}, {
 							"severity": "low"
 						}]
@@ -142,7 +148,17 @@ describe('RetireJsEngine', () => {
 			};
 
 			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
-			const results: RuleResult[] = testEngine.procesOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+			const results: RuleResult[] = testEngine.processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+
+			// Now we run our assertions.
+			expect(results.length).to.equal(2, 'Should be two result objects because of the two spoofed files.');
+			expect(results[0].fileName).to.equal(path.join(firstPath, 'jquery-3.1.0.js'), 'First path should have been de-aliased properly');
+			expect(results[0].violations.length).to.equal(1, 'Should be a single violation in the first result');
+			expect(results[0].violations[0].severity).to.equal(2, 'Severity should be translated to 2');
+			expect(results[1].fileName).to.equal(path.join(secondPath, 'angular-scenario.js'), 'Second path should have been de-aliased properly');
+			expect(results[1].violations.length).to.equal(2, 'Should be two violations in the second file');
+			expect(results[1].violations[0].severity).to.equal(1, 'Sev should be translated to 1');
+			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
 		});
 
 	});
