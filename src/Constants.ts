@@ -20,7 +20,8 @@ export enum ENGINE {
 	PMD = 'pmd',
 	ESLINT = 'eslint',
 	ESLINT_LWC = 'eslint-lwc',
-	ESLINT_TYPESCRIPT = 'eslint-typescript'
+	ESLINT_TYPESCRIPT = 'eslint-typescript',
+	RETIRE_JS = 'retire-js'
 }
 
 export enum LANGUAGE {
