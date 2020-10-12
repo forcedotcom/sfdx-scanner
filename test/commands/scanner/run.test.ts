@@ -1034,7 +1034,7 @@ describe('scanner:run', function () {
 				'--env', '{"qunit": true}'
 			])
 			.it('Providing qunit in the --env override should resolve errors about that framework', ctx => {
-				expect(ctx.stdout).to.contain('No rule violations found.', 'Should be no violations found in the file.');
+				expect(ctx.stdout).to.not.contain('No rule violations found.', 'Should be no violations found in the file.');
 			});
 	});
 
