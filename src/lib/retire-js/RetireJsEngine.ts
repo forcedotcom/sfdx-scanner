@@ -11,12 +11,13 @@ import fs = require('fs');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
+const INSECURE_BUNDLED_DEPS = 'insecure-bundled-dependencies';
 const retireJsCatalog: Catalog = {
 	rules: [{
 		engine: ENGINE.RETIRE_JS.valueOf(),
 		sourcepackage: ENGINE.RETIRE_JS.valueOf(),
 		// Give this rule an informative name, specific enough that we're able to supplement it with other rules later.
-		name: 'insecure-bundled-dependencies',
+		name: INSECURE_BUNDLED_DEPS,
 		description: 'Identify bundled libraries/modules with known vulnerabilities.',
 		categories: ['Insecure Dependencies'],
 		rulesets: [],
@@ -108,14 +109,14 @@ export class RetireJsEngine implements RuleEngine {
 		}
 
 		// We can combine the results into a single array using .reduce() instead of the more verbose for-loop.
-		return (await Promise.all(retireJsPromises)).reduce((acc, r) => [...acc, ...r], []);
+		return (await Promise.all(retireJsPromises)).reduce((all, next) => [...all, ...next], []);
 	}
 
 	private buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
 		const invocationArray: RetireJsInvocation[] = [];
 		for (const rule of rules) {
 			switch (rule.name) {
-				case 'insecure-bundled-dependencies':
+				case INSECURE_BUNDLED_DEPS:
 					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
 					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
 					invocationArray.push({
@@ -163,7 +164,12 @@ export class RetireJsEngine implements RuleEngine {
 
 	protected processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		// The output from the CLI should be a valid JSON.
-		const outputJson = JSON.parse(cmdOutput);
+		let outputJson = null;
+		try {
+			outputJson = JSON.parse(cmdOutput);
+		} catch (e) {
+			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
+		}
 		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
 			const ruleResults: RuleResult[] = [];
 			for (const data of outputJson.data) {

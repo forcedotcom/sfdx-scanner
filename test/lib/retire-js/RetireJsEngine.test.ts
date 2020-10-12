@@ -161,5 +161,33 @@ describe('RetireJsEngine', () => {
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
 		});
 
+		describe('Error handling', () => {
+			it('Throws user-friendly error for un-parsable JSON', async () => {
+				const invalidJson = '{"beep": [';
+
+				try {
+					// eslint-disable-next-line no-unused-vars @typescript-eslint/no-unused-vars
+					const results: RuleResult[] = testEngine.processOutput(invalidJson, 'insecure-bundled-dependencies');
+					expect(true).to.be(false, 'Exception should be thrown');
+				} catch (e) {
+					expect(e.message.toLowerCase()).to.include('could not parse retirejs output', 'Error message should be user-friendly');
+				}
+			});
+
+			it('Throws user-friendly error for improperly formed JSON', async () => {
+				const malformedJson = {
+					// The top-level will not have the `data` property.
+					"version": "2.2.2"
+				};
+
+				try {
+					// eslint-disable-next-line no-unused-vars @typescript-eslint/no-unused-vars
+					const results: RuleResult[] = testEngine.processOutput(JSON.stringify(malformedJson), 'insecure-bundled-dependencies');
+					expect(true).to.be(false, 'Exception should be thrown');
+				} catch (e) {
+					expect(e.message.toLowerCase()).to.include('retire-js output did not match expected structure');
+				}
+			});
+		});
 	});
 });
