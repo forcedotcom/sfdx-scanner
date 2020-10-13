@@ -282,6 +282,9 @@ export class RetireJsEngine implements RuleEngine {
 				// Once we've got a path, ew can copy the original target file to the child directory, thereby preserving
 				// path uniqueness. No race condition exists, so no need for an `await`.
 				fileCopyPromises.push(new Promise((res, rej) => {
+					// NOTE: We recognize that there are potential performance concerns for copying a possibly-large number
+					// of possibly large files. If those issues become a problem, we should consider alternatives such as
+					// symlink() (if RetireJS supports it) or even a different implementation.
 					fs.copyFile(p, path.join(pathAlias, path.basename(p)), (err) => {
 						if (err) {
 							rej(err);
