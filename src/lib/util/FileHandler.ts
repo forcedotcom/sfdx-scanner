@@ -94,4 +94,18 @@ export class FileHandler {
 			});
 		});
 	}
+
+	tmpDirWithCleanup(): Promise<string> {
+		return new Promise<string>((res, rej) => {
+			// Ask tmp to gracefully clean up everything on process exit.
+			tmp.setGracefulCleanup();
+			return tmp.dir({unsafeCleanup: true}, (err, name) => {
+				if (!err) {
+					res(name);
+				} else {
+					rej(err);
+				}
+			});
+		});
+	}
 }

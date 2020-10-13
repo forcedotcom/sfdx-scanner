@@ -17,11 +17,12 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getAllEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length, names + '').to.equal(4);
+		expect(engines.length, names + '').to.equal(5);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_LWC);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD);
+		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getEnabledEngines returns only enabled engines', async() => {
@@ -68,7 +69,7 @@ describe('Controller.ts tests', () => {
 			await Controller.getFilteredEngines(['invalid-engine']);
 			fail('getFilteredEngines should have thrown');
 		} catch (e) {
-			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: eslint, eslint-lwc, eslint-typescript, pmd`);
+			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: eslint, eslint-lwc, eslint-typescript, pmd, retire-js`);
 		}
 	});
 });

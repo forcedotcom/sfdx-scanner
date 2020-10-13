@@ -54,7 +54,16 @@ const DEFAULT_CONFIG: ConfigContent = {
 				"!**/bower_components/**"
 			],
 			disabled: false
-        }
+        },
+		{
+			name: ENGINE.RETIRE_JS,
+			targetPatterns: [
+				'**/*.js',
+				'!**/node_modules/**',
+				'!**/bower_components/**'
+			],
+			disabled: true
+		}
 	]
 };
 
