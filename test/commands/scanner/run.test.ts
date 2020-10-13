@@ -1021,7 +1021,7 @@ describe('scanner:run', function () {
 			.it('By default, frameworks such as QUnit are not included in the baseConfig', ctx => {
 				// We expect there to be 2 errors about qunit-related syntax being undefined.
 				const parsedCtx = JSON.parse(ctx.stdout);
-				expect(parsedCtx[0].violations.length).to.equal(5, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
+				expect(parsedCtx[0].violations.length).to.equal(6, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
 				expect(parsedCtx[0].violations[0].message).to.contain("'QUnit' is not defined.");
 			});
 
