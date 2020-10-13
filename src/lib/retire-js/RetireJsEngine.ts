@@ -223,7 +223,8 @@ export class RetireJsEngine implements RuleEngine {
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private static validateRetireJsOutput(parsedOutput: any): parsedOutput is RetireJsOutput {
-		return (parsedOutput as RetireJsOutput).version != undefined;
+		const castParsedOutput = parsedOutput as RetireJsOutput;
+		return castParsedOutput.version != undefined && castParsedOutput.data != undefined;
 	}
 
 	public async init(): Promise<void> {

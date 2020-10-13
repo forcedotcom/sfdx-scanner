@@ -166,9 +166,9 @@ describe('RetireJsEngine', () => {
 				const invalidJson = '{"beep": [';
 
 				try {
-					// eslint-disable-next-line no-unused-vars @typescript-eslint/no-unused-vars
 					const results: RuleResult[] = testEngine.processOutput(invalidJson, 'insecure-bundled-dependencies');
-					expect(true).to.be(false, 'Exception should be thrown');
+					expect(true).to.equal(false, 'Exception should be thrown');
+					expect(results).to.equal(null, 'This assertion should never fire. It is needed to make the TS compiler stop complaining');
 				} catch (e) {
 					expect(e.message.toLowerCase()).to.include('could not parse retirejs output', 'Error message should be user-friendly');
 				}
@@ -181,9 +181,9 @@ describe('RetireJsEngine', () => {
 				};
 
 				try {
-					// eslint-disable-next-line no-unused-vars @typescript-eslint/no-unused-vars
 					const results: RuleResult[] = testEngine.processOutput(JSON.stringify(malformedJson), 'insecure-bundled-dependencies');
-					expect(true).to.be(false, 'Exception should be thrown');
+					expect(true).to.equal(false, 'Exception should be thrown');
+					expect(results).to.equal(null, 'This assertion should never fire. It is needed to make the TS compiler stop complaining');
 				} catch (e) {
 					expect(e.message.toLowerCase()).to.include('retire-js output did not match expected structure');
 				}
