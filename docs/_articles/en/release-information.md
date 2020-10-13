@@ -3,6 +3,28 @@ title: Release Information
 lang: en
 ---
 
+## [v2.3.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.3.0) (10-08-2020)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.2.1...v2.3.0)
+
+### Release Summary
+* Underlying PMD Engine is upgraded to 6.28.0 (from 6.22.0)
+* Release Information and release summary in our Documentation
+* Bug fixes 
+
+**Merged pull requests:**
+
+- @W-8178014@ Remove old and redundant usage information from README.md [\#242](https://github.com/forcedotcom/sfdx-scanner/pull/242)
+- @W-8101850@ Display a warning when targets don't match [\#237](https://github.com/forcedotcom/sfdx-scanner/pull/237)
+- @W-8081789@ scanner:rule:list now omits rules for disabled engines u… [\#236](https://github.com/forcedotcom/sfdx-scanner/pull/236)
+- @W-8141814@ Git action changes to validate PRs that start with d/ or r/ [\#235](https://github.com/forcedotcom/sfdx-scanner/pull/235)
+- @W-8122073@ Fix csv output escaping issue [\#234](https://github.com/forcedotcom/sfdx-scanner/pull/234)
+- @W-8121424@ Fix filter by category for extended configs [\#233](https://github.com/forcedotcom/sfdx-scanner/pull/233)
+- @W-8117040@ Release Information in our developer docs [\#232](https://github.com/forcedotcom/sfdx-scanner/pull/232)
+- @W-8019507@ Upgrade PMD to 6.28.0 [\#230](https://github.com/forcedotcom/sfdx-scanner/pull/230)
+- @W-8117190@ Fix issue with default false values [\#222](https://github.com/forcedotcom/sfdx-scanner/pull/222)
+
+
 ## [v2.2.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.2.1) (09-28-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.2.0...v2.2.1)
@@ -121,7 +143,6 @@ lang: en
 **Closed issues:**
 
 - --target to become more like --path [\#123](https://github.com/forcedotcom/sfdx-scanner/issues/123)
-- \[Dummy - please ignore\] Testing Git2Gus setup [\#93](https://github.com/forcedotcom/sfdx-scanner/issues/93)
 - Question: Will scanner provide the same results as Checkmarx/Partner Security Portal [\#92](https://github.com/forcedotcom/sfdx-scanner/issues/92)
 - Scanner does not show up in sfdx commands after installation [\#89](https://github.com/forcedotcom/sfdx-scanner/issues/89)
 
@@ -184,7 +205,7 @@ lang: en
 
 **Merged pull requests:**
 
-- Rm/missing doc [\#76](https://github.com/forcedotcom/sfdx-scanner/pull/76)
+- Fix some missing doc [\#76](https://github.com/forcedotcom/sfdx-scanner/pull/76)
 
 ## [v1.0.29](https://github.com/forcedotcom/sfdx-scanner/tree/v1.0.29) (04-03-2020)
 
