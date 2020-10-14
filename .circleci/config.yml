@@ -10,6 +10,7 @@ defaults: &defaults
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
+  codecov: codecov/codecov@1.0.2 # The CodeCov orb gives us everything we need to easily integrate CodeCov metrics.
 
 jobs:
   build:
@@ -52,6 +53,9 @@ jobs:
 
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
+
+      - codecov/upload:
+          file: test-coverage/coverage-final.json
 
   self-evaluation:
     <<: *defaults
