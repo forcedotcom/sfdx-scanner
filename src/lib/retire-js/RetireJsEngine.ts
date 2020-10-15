@@ -270,7 +270,8 @@ export class RetireJsEngine implements RuleEngine {
 
 	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
-		const tmpParent: string = await new FileHandler().tmpDirWithCleanup();
+		const fh = new FileHandler();
+		const tmpParent: string = await fh.tmpDirWithCleanup();
 		const fileCopyPromises: Promise<void>[] = [];
 
 		// We want to duplicate all of the targeted files into our temporary directory.
@@ -282,16 +283,7 @@ export class RetireJsEngine implements RuleEngine {
 
 				// Once we've got a path, ew can copy the original target file to the child directory, thereby preserving
 				// path uniqueness. No race condition exists, so no need for an `await`.
-				fileCopyPromises.push(new Promise((res, rej) => {
-					// Use symlink() instead of copyFile() for performance reasons.
-					fs.symlink(p, path.join(pathAlias, path.basename(p)), (err) => {
-						if (err) {
-							rej(err);
-						} else {
-							res();
-						}
-					});
-				}));
+				fileCopyPromises.push(fh.symlinkFile(p, path.join(pathAlias, path.basename(p))));
 			}
 		}
 
