@@ -286,7 +286,7 @@ export class RetireJsEngine implements RuleEngine {
 					// NOTE: We recognize that there are potential performance concerns for copying a possibly-large number
 					// of possibly large files. If those issues become a problem, we should consider alternatives such as
 					// symlink() (if RetireJS supports it) or even a different implementation.
-					fs.copyFile(p, path.join(pathAlias, path.basename(p)), (err) => {
+					fs.symlink(p, path.join(pathAlias, path.basename(p)), (err) => {
 						if (err) {
 							rej(err);
 						} else {
