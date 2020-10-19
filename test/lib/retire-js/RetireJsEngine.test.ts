@@ -20,8 +20,8 @@ class TestableRetireJsEngine extends RetireJsEngine {
 	}
 
 	public addFakeAliasData(original: string, alias: string): void {
-		this.originalPathsByAlias.set(alias, original);
-		this.aliasesByOriginalPath.set(original, alias);
+		this.aliasDirsByOriginalDir.set(path.dirname(original), path.dirname(alias));
+		this.originalFilesByAlias.set(alias, original);
 	}
 }
 
@@ -82,24 +82,57 @@ describe('RetireJsEngine', () => {
 				expect(dupedFileBaseNames).to.include(e, 'Expected duplicate file missing from array');
 			}
 		});
+
+		it('Targeted JS-type static resources are duplicated and renamed', async () => {
+			// We'll want some paths that simulate matching an entire directory. Importantly, the resources are a mixture
+			// of JS and non-JS.
+			const resourcePaths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource1.resource'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource2.resource'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'HtmlStaticResource1.resource'),
+			];
+
+			const targets: RuleTarget[] = [{
+				target: path.dirname(resourcePaths[0]),
+				isDirectory: true,
+				paths: resourcePaths
+			}];
+
+			// THIS IS THE ACTUAL METHOD BEING TESTED: Construct our temporary directory.
+			const tmpDir: string = await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+			// We expect the directory to still exist, since the process hasn't actually exited yet.
+			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
+			// We expect various files to exist somewhere in the temp directory.
+			const dupedFiles: string[] = await globby(path.join(tmpDir, '**', '*'));
+			expect(dupedFiles.length).to.equal(2, 'Wrong number of files copied');
+			// Expect each of the copied files to have a `.js` extension.
+			for (const d of dupedFiles) {
+				expect(path.extname(d)).to.equal('.js', 'Copied static resource should have .js file extension');
+			}
+		});
+
+		it('ZIPs and ZIP-type static resources are unpacked', async () => {
+
+		});
 	});
 
 	describe('processOutput()', () => {
 		it('Properly dealiases and processes results from non-zipped file', async () => {
 			// First, we need to seed the test engine with some fake aliases.
-			const firstPath = path.join('first', 'unimportant', 'path');
-			const firstAlias = path.join('first', 'unimportant', 'alias');
-			const secondPath = path.join('second', 'unimportant', 'path');
-			const secondAlias = path.join('second', 'unimportant', 'alias');
+			const firstOriginal = path.join('first', 'unimportant', 'path', 'jquery-3.1.0.js');
+			const firstAlias = path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js');
+			const secondOriginal = path.join('first', 'unimportant', 'path', 'angular-scenario.js');
+			const secondAlias = path.join('first', 'unimportant', 'alias', 'angular-scenario.js');
 
-			testEngine.addFakeAliasData(firstPath, firstAlias);
-			testEngine.addFakeAliasData(secondPath, secondAlias);
+			testEngine.addFakeAliasData(firstOriginal, firstAlias);
+			testEngine.addFakeAliasData(secondOriginal, secondAlias);
 
 			// Next, we want to spoof some output that looks like it came from RetireJS.
 			const fakeRetireOutput = {
 				"version": "2.2.2",
 				"data": [{
-					"file": path.join(firstAlias, 'jquery-3.1.0.js'),
+					"file": firstAlias,
 					"results": [{
 						"version": "3.1.0",
 						"component": "jquery",
@@ -112,7 +145,7 @@ describe('RetireJsEngine', () => {
 						}]
 					}]
 				}, {
-					"file": path.join(secondAlias, 'angular-scenario.js'),
+					"file": secondAlias,
 					"results": [{
 						"version": "1.10.2",
 						"component": "jquery",
@@ -152,10 +185,10 @@ describe('RetireJsEngine', () => {
 
 			// Now we run our assertions.
 			expect(results.length).to.equal(2, 'Should be two result objects because of the two spoofed files.');
-			expect(results[0].fileName).to.equal(path.join(firstPath, 'jquery-3.1.0.js'), 'First path should have been de-aliased properly');
+			expect(results[0].fileName).to.equal(firstOriginal, 'First path should have been de-aliased properly');
 			expect(results[0].violations.length).to.equal(1, 'Should be a single violation in the first result');
 			expect(results[0].violations[0].severity).to.equal(2, 'Severity should be translated to 2');
-			expect(results[1].fileName).to.equal(path.join(secondPath, 'angular-scenario.js'), 'Second path should have been de-aliased properly');
+			expect(results[1].fileName).to.equal(secondOriginal, 'Second path should have been de-aliased properly');
 			expect(results[1].violations.length).to.equal(2, 'Should be two violations in the second file');
 			expect(results[1].violations[0].severity).to.equal(1, 'Sev should be translated to 1');
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
