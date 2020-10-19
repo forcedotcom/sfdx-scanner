@@ -328,7 +328,7 @@ export class RetireJsEngine implements RuleEngine {
 		return this.fh.mkdirIfNotExists(aliasDir)
 			.then(() => {
 				// We'll use this callback to handle the files contained in the ZIP.
-				const onEntryCallback = (entry) => {
+				const onEntryCallback = (entry): void => {
 					// JS-type files should be mapped by their full alias.
 					if (path.extname(entry.fileName) === '.js') {
 						this.originalFilesByAlias.set(path.join(aliasDir, entry.fileName), zipFileName);
