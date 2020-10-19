@@ -12,9 +12,9 @@ export enum StaticResourceType {
 interface StaticResourceJson extends ElementCompact  {
 	StaticResource: {
 		contentType: {
-			_text: string
-		}
-	}
+			_text: string;
+		};
+	};
 }
 
 export class StaticResourceHandler {

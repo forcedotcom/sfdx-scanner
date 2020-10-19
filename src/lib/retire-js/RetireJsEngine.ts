@@ -8,6 +8,7 @@ import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceH
 import {FileHandler} from '../util/FileHandler';
 import childProcess = require('child_process');
 import path = require('path');
+import extract = require('extract-zip');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -81,7 +82,7 @@ export class RetireJsEngine implements RuleEngine {
 
 	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
 	protected originalFilesByAlias: Map<string, string> = new Map();
-	
+
 	private logger: Logger;
 	private fh: FileHandler;
 	private srh: StaticResourceHandler;
@@ -175,17 +176,21 @@ export class RetireJsEngine implements RuleEngine {
 			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
 		}
 		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
-			const ruleResults: RuleResult[] = [];
+			const ruleResultsByFile: Map<string, RuleResult> = new Map();
 			for (const data of outputJson.data) {
 				// First, we need to de-alias the file using the descriptor.
 				const originalFile = this.originalFilesByAlias.get(data.file);
 
-				// Each entry in the `data` array yields a single RuleResult.
-				const ruleResult: RuleResult = {
-					engine: ENGINE.RETIRE_JS.valueOf(),
-					fileName: originalFile,
-					violations: []
-				};
+				// Each entry in the `data` array yields a single RuleResult. If we already have a RuleResult associated
+				// with this original file (happens when a ZIP contains multiple insecure files), we'll keep using that.
+				// Otherwise, we need to build a new one.
+				const ruleResult: RuleResult = ruleResultsByFile.has(originalFile)
+					? ruleResultsByFile.get(originalFile)
+					: {
+						engine: ENGINE.RETIRE_JS.valueOf(),
+						fileName: originalFile,
+						violations: []
+					};
 
 				// Each `result` entry generates one RuleViolation.
 				for (const result of data.results) {
@@ -201,9 +206,12 @@ export class RetireJsEngine implements RuleEngine {
 						category: 'Insecure Dependencies'
 					});
 				}
-				ruleResults.push(ruleResult);
+
+				// Map the result object so we can continue using it if need be.
+				ruleResultsByFile.set(originalFile, ruleResult);
 			}
-			return ruleResults;
+			// Once we exit the loop, we can return all of the results in our Map.
+			return Array.from(ruleResultsByFile.values());
 		} else {
 			// It's theoretically impossible to reach this point, because it means that RetireJS finished successfully
 			// but returned something we don't recognize.
@@ -279,8 +287,13 @@ export class RetireJsEngine implements RuleEngine {
 			case StaticResourceType.JS:
 				return this.duplicateJsFile(tmpParent, fileName);
 			case StaticResourceType.ZIP:
+				return this.duplicateZipFile(tmpParent, fileName);
 			case StaticResourceType.OTHER:
+				this.logger.trace(`Static Resource ${fileName} is neither JS nor ZIP. It is being skipped.`);
+				return;
 			case null:
+				this.logger.trace(`File ${fileName} is not actually a Static Resource. It is being skipped.`);
+				return;
 		}
 	}
 
@@ -302,8 +315,28 @@ export class RetireJsEngine implements RuleEngine {
 		return this.fh.symlinkFile(fileName, fullAlias);
 	}
 
-	private async duplicateZipFile(): Promise<void> {
+	private async duplicateZipFile(tmpParent: string, zipFileName: string): Promise<void> {
+		// We'll need to derive an aliased subdirectory to unpack this ZIP into, so we can prevent name collision.
+		// We'll use an `await` for this line becaus it's important for this operation to be atomic.
+		let aliasDir: string = await this.createAliasDirectory(tmpParent, zipFileName);
+		// It's possible for two ZIPs in the same directory to contain a file with the same name. To prevent name collision
+		// in this case, we'll turn the name of the zip itself into one additional level of directory aliasing.
+		const zipLayer = `${path.basename(zipFileName, path.extname(zipFileName))}-extracted`;
+		aliasDir = path.join(aliasDir, zipLayer);
+		// This operation doesn't need to be blocking, so we'll use a Promise chain instead of `await`. Slightly messier,
+		// but should keep our performance decent.
+		return this.fh.mkdirIfNotExists(aliasDir)
+			.then(() => {
+				// We'll use this callback to handle the files contained in the ZIP.
+				const onEntryCallback = (entry) => {
+					// JS-type files should be mapped by their full alias.
+					if (path.extname(entry.fileName) === '.js') {
+						this.originalFilesByAlias.set(path.join(aliasDir, entry.fileName), zipFileName);
+					}
+				};
 
+				return extract(zipFileName, {dir: aliasDir, onEntry: onEntryCallback});
+			});
 	}
 
 
@@ -319,7 +352,7 @@ export class RetireJsEngine implements RuleEngine {
 				if (ext === '.resource') {
 					fileCopyPromises.push(this.duplicateStaticResource(tmpParent, p));
 				} else if (ext === '.zip') {
-					fileCopyPromises.push(this.duplicateZipFile());
+					fileCopyPromises.push(this.duplicateZipFile(tmpParent, p));
 				} else if (ext === '.js') {
 					fileCopyPromises.push(this.duplicateJsFile(tmpParent, p));
 				}
