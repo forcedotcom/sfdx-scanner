@@ -20,7 +20,7 @@ class TestableRetireJsEngine extends RetireJsEngine {
 	}
 
 	public addFakeAliasData(original: string, alias: string): void {
-		this.aliasDirsByOriginalDir.set(path.dirname(original), path.dirname(alias));
+		//this.aliasDirsByOriginalDir.set(path.dirname(original), path.dirname(alias));
 		this.originalFilesByAlias.set(alias, original);
 	}
 }
@@ -113,7 +113,27 @@ describe('RetireJsEngine', () => {
 		});
 
 		it('ZIPs and ZIP-type static resources are unpacked', async () => {
+			const zipPaths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'AngularJS.zip'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'leaflet.resource')
+			];
 
+			const targets: RuleTarget[] = [{
+				target: path.dirname(zipPaths[0]),
+				isDirectory: true,
+				paths: zipPaths
+			}];
+
+			// THIS IS THE ACTUAL METHOD BEING TESTED: Construct our temporary directory.
+			const tmpDir: string = await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+			// We expect the temp directory to still exist, since the process hasn't actually exited yet.
+			const fh = new FileHandler();
+			expect(await fh.exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
+			const extractedAngular = await globby(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*'));
+			const extractedLeaflet = await globby(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*'));
+			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
+			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
 		});
 	});
 
@@ -192,6 +212,78 @@ describe('RetireJsEngine', () => {
 			expect(results[1].violations.length).to.equal(2, 'Should be two violations in the second file');
 			expect(results[1].violations[0].severity).to.equal(1, 'Sev should be translated to 1');
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
+		});
+
+		it('Results from ZIP contents are properly consolidated', async () => {
+			// First, we need to seed the engine with some fake data.
+			const originalZip = path.join('unimportant', 'path', 'to', 'SomeBundle.zip');
+			const firstAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-a', 'jquery-3.1.0.js');
+			const secondAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-b', 'angular-scenario.js');
+			testEngine.addFakeAliasData(originalZip, firstAlias);
+			testEngine.addFakeAliasData(originalZip, secondAlias);
+
+			// Next, we want to spoof some output that looks like it came from RetireJS.
+			const fakeRetireOutput = {
+				"version": "2.2.2",
+				"data": [{
+					"file": firstAlias,
+					"results": [{
+						"version": "3.1.0",
+						"component": "jquery",
+						"vulnerabilities": [{
+							"severity": "low"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}]
+					}]
+				}, {
+					"file": secondAlias,
+					"results": [{
+						"version": "1.10.2",
+						"component": "jquery",
+						"vulnerabilities": [{
+							"severity": "high"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "medium"
+						}, {
+							"severity": "medium"
+						}]
+					}, {
+						"version": "1.2.13",
+						"component": "angularjs",
+						"vulnerabilities": [{
+							"severity": "low"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "low"
+						}, {
+							"severity": "low"
+						}]
+					}]
+				}]
+			};
+
+			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
+			const results: RuleResult[] = testEngine.processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+
+			// Now we run our assertions.
+			expect(results.length).to.equal(1, 'Should be one result object, since both "files" are in the same "zip".');
+			expect(results[0].fileName).to.equal(originalZip, 'Path should properly de-alias back to the ZIP');
+			expect(results[0].violations.length).to.equal(3, 'All violations should be consolidated properly');
+			expect(results[0].violations[0].severity).to.equal(2, 'Severity should be translated to 2');
+			expect(results[0].violations[1].severity).to.equal(1, 'Sev should be translated to 1');
+			expect(results[0].violations[2].severity).to.equal(3, 'Sev should be translated to 3');
 		});
 
 		describe('Error handling', () => {
