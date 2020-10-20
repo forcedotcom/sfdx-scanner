@@ -294,6 +294,8 @@ export class RetireJsEngine implements RuleEngine {
 			case null:
 				this.logger.trace(`File ${fileName} is not actually a Static Resource. It is being skipped.`);
 				return;
+			default:
+				throw new SfdxError('Should be impossible to reach');
 		}
 	}
 
@@ -317,7 +319,7 @@ export class RetireJsEngine implements RuleEngine {
 
 	private async duplicateZipFile(tmpParent: string, zipFileName: string): Promise<void> {
 		// We'll need to derive an aliased subdirectory to unpack this ZIP into, so we can prevent name collision.
-		// We'll use an `await` for this line becaus it's important for this operation to be atomic.
+		// We'll use an `await` for this line because it's important for this operation to be atomic.
 		let aliasDir: string = await this.createAliasDirectory(tmpParent, zipFileName);
 		// It's possible for two ZIPs in the same directory to contain a file with the same name. To prevent name collision
 		// in this case, we'll turn the name of the zip itself into one additional level of directory aliasing.
@@ -338,7 +340,7 @@ export class RetireJsEngine implements RuleEngine {
 					zip.on('ready', () => {
 						// Before we do the extraction, we want to map the contained JS-type files by their full alias.
 						for (const {name} of Object.values(zip.entries())) {
-							if (path.extname(name) === '.js') {
+							if (path.extname(name).toLowerCase() === '.js') {
 								this.originalFilesByAlias.set(path.join(aliasDir, name), zipFileName);
 							}
 						}
@@ -364,7 +366,7 @@ export class RetireJsEngine implements RuleEngine {
 		// We want to duplicate all of the targeted files into our temporary directory.
 		for (const target of targets) {
 			for (const p of target.paths) {
-				const ext: string = path.extname(p);
+				const ext: string = path.extname(p).toLowerCase();
 				if (ext === '.resource') {
 					fileCopyPromises.push(this.duplicateStaticResource(tmpParent, p));
 				} else if (ext === '.zip') {
