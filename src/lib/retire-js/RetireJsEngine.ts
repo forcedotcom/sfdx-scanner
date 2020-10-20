@@ -8,7 +8,7 @@ import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceH
 import {FileHandler} from '../util/FileHandler';
 import childProcess = require('child_process');
 import path = require('path');
-import extract = require('extract-zip');
+import StreamZip = require('node-stream-zip');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -325,18 +325,34 @@ export class RetireJsEngine implements RuleEngine {
 		aliasDir = path.join(aliasDir, zipLayer);
 		// This operation doesn't need to be blocking, so we'll use a Promise chain instead of `await`. Slightly messier,
 		// but should keep our performance decent.
-		return this.fh.mkdirIfNotExists(aliasDir)
-			.then(() => {
-				// We'll use this callback to handle the files contained in the ZIP.
-				const onEntryCallback = (entry): void => {
-					// JS-type files should be mapped by their full alias.
-					if (path.extname(entry.fileName) === '.js') {
-						this.originalFilesByAlias.set(path.join(aliasDir, entry.fileName), zipFileName);
-					}
-				};
+		return new Promise((res, rej) => {
+			this.fh.mkdirIfNotExists(aliasDir)
+				.then(() => {
+					const zip = new StreamZip({
+						file: zipFileName,
+						storeEntries: true
+					});
 
-				return extract(zipFileName, {dir: aliasDir, onEntry: onEntryCallback});
-			});
+					zip.on('error', rej);
+
+					zip.on('ready', () => {
+						// Before we do the extraction, we want to map the contained JS-type files by their full alias.
+						for (const {name} of Object.values(zip.entries())) {
+							if (path.extname(name) === '.js') {
+								this.originalFilesByAlias.set(path.join(aliasDir, name), zipFileName);
+							}
+						}
+						// The null first parameter causes us to extract the entire ZIP.
+						zip.extract(null, aliasDir, (err) => {
+							if (err) {
+								rej(err);
+							} else {
+								res();
+							}
+						});
+					});
+				});
+		});
 	}
 
 
