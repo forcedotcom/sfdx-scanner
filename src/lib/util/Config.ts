@@ -59,6 +59,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 			name: ENGINE.RETIRE_JS,
 			targetPatterns: [
 				'**/*.js',
+				'**/*.resource',
 				'!**/node_modules/**',
 				'!**/bower_components/**'
 			],

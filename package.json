@@ -20,6 +20,7 @@
 		"globby": "^11.0.0",
 		"html-escaper": "^3.0.0",
 		"mustache": "^4.0.1",
+		"node-stream-zip": "^1.11.3",
 		"normalize-path": "^3.0.0",
 		"picomatch": "^2.2.2",
 		"reflect-metadata": "^0.1.13",

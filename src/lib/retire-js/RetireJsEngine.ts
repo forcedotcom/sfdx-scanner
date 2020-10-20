@@ -4,10 +4,11 @@ import {Config} from '../util/Config';
 import {RuleEngine} from '../services/RuleEngine';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {ENGINE} from '../../Constants';
+import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
 import childProcess = require('child_process');
 import path = require('path');
-import fs = require('fs');
+import StreamZip = require('node-stream-zip');
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -74,13 +75,17 @@ export class RetireJsEngine implements RuleEngine {
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 
 	// When we're duplicating files, we want to make sure that each duplicate file's path is unique. We'll do that by
-	// generating aliases associated with the directory portion of each original file's path. We need an incrementing
-	// index to generate unique aliases, and we need maps from both the aliases to the original and vice versa.
-	private static NEXT_ALIAS_IDX = 0;
-	protected aliasesByOriginalPath: Map<string, string> = new Map();
-	protected originalPathsByAlias: Map<string, string> = new Map();
+	// generating aliases associated with portions of the original path. We need incrementing indexes to generate unique
+	// aliases, and we need maps to track relationships between aliases and originals.
+	private static NEXT_TMPDIR_IDX = 0;
+	private static NEXT_TMPFILE_IDX = 0;
+
+	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
+	protected originalFilesByAlias: Map<string, string> = new Map();
 
 	private logger: Logger;
+	private fh: FileHandler;
+	private srh: StaticResourceHandler;
 	private config: Config;
 	private initialized: boolean;
 
@@ -171,18 +176,21 @@ export class RetireJsEngine implements RuleEngine {
 			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
 		}
 		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
-			const ruleResults: RuleResult[] = [];
+			const ruleResultsByFile: Map<string, RuleResult> = new Map();
 			for (const data of outputJson.data) {
-				// First, we need to de-alias the file.
-				const aliasDir = path.dirname(data.file);
-				const originalPath = path.join(this.originalPathsByAlias.get(aliasDir), path.basename(data.file));
+				// First, we need to de-alias the file using the descriptor.
+				const originalFile = this.originalFilesByAlias.get(data.file);
 
-				// Each entry in the `data` array yields a single RuleResult.
-				const ruleResult: RuleResult = {
-					engine: ENGINE.RETIRE_JS.valueOf(),
-					fileName: originalPath,
-					violations: []
-				};
+				// Each entry in the `data` array yields a single RuleResult. If we already have a RuleResult associated
+				// with this original file (happens when a ZIP contains multiple insecure files), we'll keep using that.
+				// Otherwise, we need to build a new one.
+				const ruleResult: RuleResult = ruleResultsByFile.has(originalFile)
+					? ruleResultsByFile.get(originalFile)
+					: {
+						engine: ENGINE.RETIRE_JS.valueOf(),
+						fileName: originalFile,
+						violations: []
+					};
 
 				// Each `result` entry generates one RuleViolation.
 				for (const result of data.results) {
@@ -198,9 +206,12 @@ export class RetireJsEngine implements RuleEngine {
 						category: 'Insecure Dependencies'
 					});
 				}
-				ruleResults.push(ruleResult);
+
+				// Map the result object so we can continue using it if need be.
+				ruleResultsByFile.set(originalFile, ruleResult);
 			}
-			return ruleResults;
+			// Once we exit the loop, we can return all of the results in our Map.
+			return Array.from(ruleResultsByFile.values());
 		} else {
 			// It's theoretically impossible to reach this point, because it means that RetireJS finished successfully
 			// but returned something we don't recognize.
@@ -232,6 +243,8 @@ export class RetireJsEngine implements RuleEngine {
 			return;
 		}
 		this.logger = await Logger.child(this.getName());
+		this.fh = new FileHandler();
+		this.srh = new StaticResourceHandler();
 		this.config = await Controller.getConfig();
 		this.initialized = true;
 	}
@@ -245,45 +258,122 @@ export class RetireJsEngine implements RuleEngine {
 		return await this.config.isEngineEnabled(RetireJsEngine.ENGINE_ENUM);
 	}
 
-	private async createPathAlias(tmpParent: string, basePath: string): Promise<string> {
-		// We want to make sure each duplicate file's path is unique, to avoid collisions. If we haven't already created
-		// a unique alias for this path's directory, we need to do that now.
-		const baseDir = path.dirname(basePath);
-		if (!this.aliasesByOriginalPath.has(baseDir)) {
-			const aliasDir = path.join(tmpParent, `TMP_${RetireJsEngine.NEXT_ALIAS_IDX++}`);
-			this.aliasesByOriginalPath.set(baseDir, aliasDir);
-			this.originalPathsByAlias.set(aliasDir, baseDir);
-			return new Promise((res, rej) => {
-				// Create a directory beneath the temporary parent directory with the name of the alias.
-				fs.mkdir(aliasDir, (err) => {
-					if (err) {
-						rej(err);
-					} else {
-						res(aliasDir);
-					}
-				});
-			});
+	private getNextDirAlias(): string {
+		return `TMPDIR_${RetireJsEngine.NEXT_TMPDIR_IDX++}`;
+	}
+
+	private getNextFileAlias(): string {
+		return `TMPFILE_${RetireJsEngine.NEXT_TMPFILE_IDX++}.js`;
+	}
+
+	private async createAliasDirectory(tmpParent: string, originalPath: string): Promise<string> {
+		// By converting the directory portion of each path into a unique alias, we can make sure that the alias paths
+		// remain unique (and thereby avoid name collision) without renaming the files themselves.
+		const originalDir = path.dirname(originalPath);
+		if (!this.aliasDirsByOriginalDir.has(originalDir)) {
+			const aliasDir = path.join(tmpParent, this.getNextDirAlias());
+			this.aliasDirsByOriginalDir.set(originalDir, aliasDir);
+			await this.fh.mkdirIfNotExists(aliasDir);
 		}
-		return this.aliasesByOriginalPath.get(baseDir);
+		return this.aliasDirsByOriginalDir.get(originalDir);
+	}
+
+
+
+	private async duplicateStaticResource(tmpParent: string, fileName: string): Promise<void> {
+		const resourceType: StaticResourceType = await this.srh.identifyStaticResourceType(fileName);
+
+		switch (resourceType) {
+			case StaticResourceType.JS:
+				return this.duplicateJsFile(tmpParent, fileName);
+			case StaticResourceType.ZIP:
+				return this.duplicateZipFile(tmpParent, fileName);
+			case StaticResourceType.OTHER:
+				this.logger.trace(`Static Resource ${fileName} is neither JS nor ZIP. It is being skipped.`);
+				return;
+			case null:
+				this.logger.trace(`File ${fileName} is not actually a Static Resource. It is being skipped.`);
+				return;
+			default:
+				throw new SfdxError('Should be impossible to reach');
+		}
+	}
+
+	private async duplicateJsFile(tmpParent: string, fileName: string): Promise<void> {
+		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
+		// We'll use an `await` for this line because it's important for this operation to be atomic.
+		const aliasDir: string = await this.createAliasDirectory(tmpParent, fileName);
+
+		// Static Resource files need to be changed to `.js` files so RetireJS can see them. We'll also give them aliases
+		// to make sure that they can't conflict with `.js` files in the same directory.
+		const aliasFile: string = path.extname(fileName) === '.resource' ? this.getNextFileAlias() : path.basename(fileName);
+
+		const fullAlias = path.join(aliasDir, aliasFile);
+
+		// Map the original file by the alias we're using, so we can look back to it later.
+		this.originalFilesByAlias.set(fullAlias, fileName);
+
+		// Now we can duplicate the file. No race condition exists, so no need for an `await`.
+		return this.fh.symlinkFile(fileName, fullAlias);
+	}
+
+	private async duplicateZipFile(tmpParent: string, zipFileName: string): Promise<void> {
+		// We'll need to derive an aliased subdirectory to unpack this ZIP into, so we can prevent name collision.
+		// We'll use an `await` for this line because it's important for this operation to be atomic.
+		let aliasDir: string = await this.createAliasDirectory(tmpParent, zipFileName);
+		// It's possible for two ZIPs in the same directory to contain a file with the same name. To prevent name collision
+		// in this case, we'll turn the name of the zip itself into one additional level of directory aliasing.
+		const zipLayer = `${path.basename(zipFileName, path.extname(zipFileName))}-extracted`;
+		aliasDir = path.join(aliasDir, zipLayer);
+		// This operation doesn't need to be blocking, so we'll use a Promise chain instead of `await`. Slightly messier,
+		// but should keep our performance decent.
+		return new Promise((res, rej) => {
+			this.fh.mkdirIfNotExists(aliasDir)
+				.then(() => {
+					const zip = new StreamZip({
+						file: zipFileName,
+						storeEntries: true
+					});
+
+					zip.on('error', rej);
+
+					zip.on('ready', () => {
+						// Before we do the extraction, we want to map the contained JS-type files by their full alias.
+						for (const {name} of Object.values(zip.entries())) {
+							if (path.extname(name).toLowerCase() === '.js') {
+								this.originalFilesByAlias.set(path.join(aliasDir, name), zipFileName);
+							}
+						}
+						// The null first parameter causes us to extract the entire ZIP.
+						zip.extract(null, aliasDir, (err) => {
+							if (err) {
+								rej(err);
+							} else {
+								res();
+							}
+						});
+					});
+				});
+		});
 	}
 
 
 	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
-		const fh = new FileHandler();
-		const tmpParent: string = await fh.tmpDirWithCleanup();
+		const tmpParent: string = await this.fh.tmpDirWithCleanup();
 		const fileCopyPromises: Promise<void>[] = [];
 
 		// We want to duplicate all of the targeted files into our temporary directory.
 		for (const target of targets) {
 			for (const p of target.paths) {
-				// Create a unique alias directory into which we should duplicate all of these files.
-				// We'll use an `await` for this line because this operation needs to be atomic.
-				const pathAlias: string = await this.createPathAlias(tmpParent, p);
-
-				// Once we've got a path, ew can copy the original target file to the child directory, thereby preserving
-				// path uniqueness. No race condition exists, so no need for an `await`.
-				fileCopyPromises.push(fh.symlinkFile(p, path.join(pathAlias, path.basename(p))));
+				const ext: string = path.extname(p).toLowerCase();
+				if (ext === '.resource') {
+					fileCopyPromises.push(this.duplicateStaticResource(tmpParent, p));
+				} else if (ext === '.zip') {
+					fileCopyPromises.push(this.duplicateZipFile(tmpParent, p));
+				} else if (ext === '.js') {
+					fileCopyPromises.push(this.duplicateJsFile(tmpParent, p));
+				}
 			}
 		}
 
