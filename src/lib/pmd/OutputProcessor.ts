@@ -57,12 +57,9 @@ export class OutputProcessor extends AsyncCreatable {
 		// Iterate over all of the events and throw them as appropriate.
 		outEvents.forEach((event) => {
 			this.logEvent(event);
-			if (event.handler === 'UX') {
+			if (event.handler === 'UX' || (event.handler === 'INTERNAL' && event.type === 'ERROR')) {
 				const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
 				this.emitUxEvent(eventType, event.messageKey, event.args);
-			} else if (event.handler === 'INTERNAL' && event.type === 'ERROR') {
-				this.logger.trace(`Logging error ${event.messageKey} and sending generic error message`);
-				this.emitUxEvent(`error-always`, genericMessageKey, []);
 			}
 		});
 	}
@@ -70,7 +67,16 @@ export class OutputProcessor extends AsyncCreatable {
 
 	private emitUxEvent(eventType: string, messageKey: string, args: string[]): void {
 		this.logger.trace(`Sending new event of type ${eventType} and message ${messageKey}`);
-		uxEvents.emit(eventType, messages.getMessage(messageKey, args));
+		let constructedMessage: string = null;
+		try {
+			// Do this in a try-block so we can fail safely.
+			constructedMessage = messages.getMessage(messageKey, args);
+		} catch (e) {
+			// If we were somehow unable to generate a message, fall back on the generic one, since we know that's valid.
+			this.logger.trace(`Could not generate message for event key ${messageKey}. Defaulting to generic error message.`);
+			constructedMessage = messages.getMessage(genericMessageKey, []);
+		}
+		uxEvents.emit(eventType, constructedMessage);
 	}
 
 	private getEventsFromString(str: string): RuleEvent[] {
