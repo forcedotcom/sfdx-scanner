@@ -10,6 +10,7 @@ defaults: &defaults
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
+  release-management: salesforce/npm-release-management@3
 
 jobs:
   build:
@@ -158,12 +159,13 @@ jobs:
           at: ~/repo
 
       - run:
-          name: Authenticate with npm registry
-          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" >> ~/repo/.npmrc
-
-      - run:
-          name: Publish a public package with the tag "latest"
-          command: npm publish --public --tag latest
+          command: npm prepack
+      - release-management/sign
+      - release-management/publish:
+          access: public
+          tag: latest
+          use_tarfile: true
+      - release-management/create-github-release
 
 workflows:
   version: 2.1
