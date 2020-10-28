@@ -273,7 +273,6 @@ export class RetireJsEngine implements RuleEngine {
 
 		// Iterate through all of our targets to generate alias information. Importantly, we will NOT be actually creating
 		// any new directories or files at this point.
-		const t1 = Date.now();
 		for (const target of targets) {
 			for (const originalPath of target.paths) {
 				// At this point, we can't alias all types of files to the same extent. So we'll use different submethods
@@ -299,7 +298,6 @@ export class RetireJsEngine implements RuleEngine {
 
 		// Everything has been duplicated, extracted, or whatever else we were supposed to do to it. We're done. Return
 		// the parent directory that holds it all.
-		console.log(`Copy time = ${Date.now() - t1} ms`);
 		return tmpParent;
 	}
 
