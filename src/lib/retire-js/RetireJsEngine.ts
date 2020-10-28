@@ -82,6 +82,7 @@ export class RetireJsEngine implements RuleEngine {
 
 	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
 	protected originalFilesByAlias: Map<string, string> = new Map();
+	protected zipDstByZipSrc: Map<string, string> = new Map();
 
 	private logger: Logger;
 	private fh: FileHandler;
@@ -266,122 +267,128 @@ export class RetireJsEngine implements RuleEngine {
 		return `TMPFILE_${RetireJsEngine.NEXT_TMPFILE_IDX++}.js`;
 	}
 
-	private async createAliasDirectory(tmpParent: string, originalPath: string): Promise<string> {
-		// By converting the directory portion of each path into a unique alias, we can make sure that the alias paths
-		// remain unique (and thereby avoid name collision) without renaming the files themselves.
-		const originalDir = path.dirname(originalPath);
-		if (!this.aliasDirsByOriginalDir.has(originalDir)) {
-			const aliasDir = path.join(tmpParent, this.getNextDirAlias());
-			this.aliasDirsByOriginalDir.set(originalDir, aliasDir);
-			await this.fh.mkdirIfNotExists(aliasDir);
-		}
-		return this.aliasDirsByOriginalDir.get(originalDir);
-	}
-
-
-
-	private async duplicateStaticResource(tmpParent: string, fileName: string): Promise<void> {
-		const resourceType: StaticResourceType = await this.srh.identifyStaticResourceType(fileName);
-
-		switch (resourceType) {
-			case StaticResourceType.JS:
-				return this.duplicateJsFile(tmpParent, fileName);
-			case StaticResourceType.ZIP:
-				return this.duplicateZipFile(tmpParent, fileName);
-			case StaticResourceType.OTHER:
-				this.logger.trace(`Static Resource ${fileName} is neither JS nor ZIP. It is being skipped.`);
-				return;
-			case null:
-				this.logger.trace(`File ${fileName} is not actually a Static Resource. It is being skipped.`);
-				return;
-			default:
-				throw new SfdxError('Should be impossible to reach');
-		}
-	}
-
-	private async duplicateJsFile(tmpParent: string, fileName: string): Promise<void> {
-		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
-		// We'll use an `await` for this line because it's important for this operation to be atomic.
-		const aliasDir: string = await this.createAliasDirectory(tmpParent, fileName);
-
-		// Static Resource files need to be changed to `.js` files so RetireJS can see them. We'll also give them aliases
-		// to make sure that they can't conflict with `.js` files in the same directory.
-		const aliasFile: string = path.extname(fileName) === '.resource' ? this.getNextFileAlias() : path.basename(fileName);
-
-		const fullAlias = path.join(aliasDir, aliasFile);
-
-		// Map the original file by the alias we're using, so we can look back to it later.
-		this.originalFilesByAlias.set(fullAlias, fileName);
-
-		// Now we can duplicate the file. No race condition exists, so no need for an `await`.
-		return this.fh.symlinkFile(fileName, fullAlias);
-	}
-
-	private async duplicateZipFile(tmpParent: string, zipFileName: string): Promise<void> {
-		// We'll need to derive an aliased subdirectory to unpack this ZIP into, so we can prevent name collision.
-		// We'll use an `await` for this line because it's important for this operation to be atomic.
-		let aliasDir: string = await this.createAliasDirectory(tmpParent, zipFileName);
-		// It's possible for two ZIPs in the same directory to contain a file with the same name. To prevent name collision
-		// in this case, we'll turn the name of the zip itself into one additional level of directory aliasing.
-		const zipLayer = `${path.basename(zipFileName, path.extname(zipFileName))}-extracted`;
-		aliasDir = path.join(aliasDir, zipLayer);
-		// This operation doesn't need to be blocking, so we'll use a Promise chain instead of `await`. Slightly messier,
-		// but should keep our performance decent.
-		return new Promise((res, rej) => {
-			this.fh.mkdirIfNotExists(aliasDir)
-				.then(() => {
-					const zip = new StreamZip({
-						file: zipFileName,
-						storeEntries: true
-					});
-
-					zip.on('error', rej);
-
-					zip.on('ready', () => {
-						// Before we do the extraction, we want to map the contained JS-type files by their full alias.
-						for (const {name} of Object.values(zip.entries())) {
-							if (path.extname(name).toLowerCase() === '.js') {
-								this.originalFilesByAlias.set(path.join(aliasDir, name), zipFileName);
-							}
-						}
-						// The null first parameter causes us to extract the entire ZIP.
-						zip.extract(null, aliasDir, (err) => {
-							if (err) {
-								rej(err);
-							} else {
-								res();
-							}
-						});
-					});
-				});
-		});
-	}
-
-
 	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await this.fh.tmpDirWithCleanup();
-		const fileCopyPromises: Promise<void>[] = [];
 
-		// We want to duplicate all of the targeted files into our temporary directory.
+		// Iterate through all of our targets to generate alias information. Importantly, we will NOT be actually creating
+		// any new directories or files at this point.
 		for (const target of targets) {
-			for (const p of target.paths) {
-				const ext: string = path.extname(p).toLowerCase();
-				if (ext === '.resource') {
-					fileCopyPromises.push(this.duplicateStaticResource(tmpParent, p));
-				} else if (ext === '.zip') {
-					fileCopyPromises.push(this.duplicateZipFile(tmpParent, p));
-				} else if (ext === '.js') {
-					fileCopyPromises.push(this.duplicateJsFile(tmpParent, p));
+			for (const originalPath of target.paths) {
+				// At this point, we can't alias all types of files to the same extent. So we'll use different submethods
+				// to handle them.
+				const ext: string = path.extname(originalPath.toLowerCase());
+				const srType = ext === '.resource' ? await this.srh.identifyStaticResourceType(originalPath) : null;
+				if (ext === '.js' || srType === StaticResourceType.JS) {
+					this.aliasJsFile(tmpParent, originalPath);
+				} else if (ext === '.zip' || srType === StaticResourceType.ZIP) {
+					this.aliasZipFile(tmpParent, originalPath);
 				}
 			}
 		}
 
-		// Wait for all of the files to be copied.
-		await Promise.all(fileCopyPromises);
-		// If we successfully created all of the duplicate files, then we can return the temporary parent directory.
+		// Now that we've generated aliases, we should create the directories first.
+		await this.createAliasDirectories();
+
+		// Once we've created all of the alias directories, we can symlink all of the JS files with no fear of race conditions.
+		await this.symlinkJsFiles();
+
+		// Finally, we can handle all of the ZIP files.
+		await this.extractZips();
+
+		// Everything has been duplicated, extracted, or whatever else we were supposed to do to it. We're done. Return
+		// the parent directory that holds it all.
 		return tmpParent;
 	}
 
+	protected aliasJsFile(tmpParent: string, originalPath: string): void {
+		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
+		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
+		// Static Resource files need to be changed to `.js` files so RetireJS can see them. We'll also give them aliases
+		// to make sure that they can't conflict with `.js` files in the same directory.
+		const aliasFile: string = path.extname(originalPath) === '.resource' ? this.getNextFileAlias() : path.basename(originalPath);
+
+		const fullAlias = path.join(aliasDir, aliasFile);
+
+		// Map the original file by the alias we're using, so we can look back to it later.
+		this.originalFilesByAlias.set(fullAlias, originalPath);
+	}
+
+	protected aliasZipFile(tmpParent: string, originalPath: string): void {
+		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
+		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
+
+		// ZIPs require an additional layer of aliasing, since two ZIPs in the same directory could have similar contents.
+		// We'll derive this layer of aliasing based on the name of the ZIP.
+		const zipLayer = `${path.basename(originalPath, path.extname(originalPath))}-extracted`;
+		this.zipDstByZipSrc.set(originalPath, path.join(aliasDir, zipLayer));
+	}
+
+	protected deriveDirectoryAlias(tmpParent: string, originalPath: string): string {
+		// By converting the directory portion of each path into a unique alias, we can make sure that the alias paths
+		// remain unique, and thereby avoid name collision.
+		const originalDir = path.dirname(originalPath);
+		if (!this.aliasDirsByOriginalDir.has(originalDir)) {
+			this.aliasDirsByOriginalDir.set(originalDir, path.join(tmpParent, this.getNextDirAlias()));
+		}
+		return this.aliasDirsByOriginalDir.get(originalDir);
+	}
+
+	protected async createAliasDirectories(): Promise<void[]> {
+		const dirCreationPromises: Promise<void>[] = [];
+		for (const aliasDir of this.aliasDirsByOriginalDir.values()) {
+			dirCreationPromises.push(this.fh.mkdirIfNotExists(aliasDir));
+		}
+		await Promise.all(dirCreationPromises);
+
+		// ZIP extraction folders should be created only after all of the base alias directories have been created.
+		const zipDestPromises: Promise<void>[] = [];
+		for (const zipDst of this.zipDstByZipSrc.values()) {
+			zipDestPromises.push(this.fh.mkdirIfNotExists(zipDst));
+		}
+		return Promise.all(zipDestPromises);
+	}
+
+	protected async symlinkJsFiles(): Promise<void[]> {
+		const symlinkPromises: Promise<void>[] = [];
+		for (const [alias, original] of this.originalFilesByAlias.entries()) {
+			symlinkPromises.push(this.fh.symlinkFile(original, alias));
+		}
+		return Promise.all(symlinkPromises);
+	}
+
+	protected async extractZips(): Promise<void[]> {
+		const zipExtractionPromises: Promise<void>[] = [];
+		for (const [zipSrc, zipDst] of this.zipDstByZipSrc.entries()) {
+			zipExtractionPromises.push(new Promise((res, rej) => {
+				const zip = new StreamZip({
+					file: zipSrc,
+					storeEntries: true
+				});
+
+				zip.on('error', rej);
+
+				zip.on('ready', () => {
+					// Before we do the extraction, we want to map the aliased JS files within the ZIP back to the ZIP itself,
+					// since the ZIP is the real original file.
+					for (const {name} of Object.values(zip.entries())) {
+						if (path.extname(name).toLowerCase() === '.js') {
+							this.originalFilesByAlias.set(path.join(zipDst, name), zipSrc);
+						}
+					}
+					// Passing null as the first parameter to this method causes it to extract the entire ZIP.
+					zip.extract(null, zipDst, (err) => {
+						if (err) {
+							rej(err);
+						} else {
+							res();
+						}
+					});
+				});
+			}));
+		}
+
+		return Promise.all(zipExtractionPromises);
+	}
 }

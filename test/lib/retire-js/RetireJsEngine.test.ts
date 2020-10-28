@@ -20,7 +20,6 @@ class TestableRetireJsEngine extends RetireJsEngine {
 	}
 
 	public addFakeAliasData(original: string, alias: string): void {
-		//this.aliasDirsByOriginalDir.set(path.dirname(original), path.dirname(alias));
 		this.originalFilesByAlias.set(alias, original);
 	}
 }
@@ -28,7 +27,7 @@ class TestableRetireJsEngine extends RetireJsEngine {
 describe('RetireJsEngine', () => {
 	let testEngine;
 
-	before(async () => {
+	beforeEach(async () => {
 		testEngine = new TestableRetireJsEngine();
 
 		await testEngine.init();
