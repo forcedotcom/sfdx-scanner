@@ -109,9 +109,9 @@ export class FileHandler {
 		});
 	}
 
-	symlinkFile(src: string, target: string): Promise<void> {
+	linkFile(src: string, target: string): Promise<void> {
 		return new Promise<void>((res, rej) => {
-			fs.symlink(src, target, (err) => {
+			fs.link(src, target, (err) => {
 				if (err) {
 					rej(err);
 				} else {
