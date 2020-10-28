@@ -73,7 +73,7 @@ describe('RetireJsEngine', () => {
 			// We expect the directory to still exist, since the process hasn't actually exited yet.
 			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
 			// We expect the various files to exist somewhere in the temp directory.
-			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*'));
+			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*')));
 			expect(dupedFiles.length).to.equal(5, 'Wrong number of files copied.');
 			// Make sure the files themselves have the names we expect.
 			const dupedFileBaseNames = dupedFiles.map(f => path.basename(f));
