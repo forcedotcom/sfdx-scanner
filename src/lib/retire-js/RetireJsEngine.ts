@@ -6,7 +6,7 @@ import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {ENGINE} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
-import childProcess = require('child_process');
+import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
 
@@ -139,7 +139,7 @@ export class RetireJsEngine implements RuleEngine {
 
 	private async executeRetireJs(invocation: RetireJsInvocation): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
-			const cp = childProcess.spawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
+			const cp = cspawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
 
 			// We only care about StdErr, since that's where the vulnerability entries will be logged to.
 			let stderr = '';
@@ -291,7 +291,7 @@ export class RetireJsEngine implements RuleEngine {
 		await this.createAliasDirectories();
 
 		// Once we've created all of the alias directories, we can symlink all of the JS files with no fear of race conditions.
-		await this.symlinkJsFiles();
+		await this.linkJsFiles();
 
 		// Finally, we can handle all of the ZIP files.
 		await this.extractZips();
@@ -350,12 +350,12 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(zipDestPromises);
 	}
 
-	protected async symlinkJsFiles(): Promise<void[]> {
-		const symlinkPromises: Promise<void>[] = [];
+	protected async linkJsFiles(): Promise<void[]> {
+		const linkPromises: Promise<void>[] = [];
 		for (const [alias, original] of this.originalFilesByAlias.entries()) {
-			symlinkPromises.push(this.fh.symlinkFile(original, alias));
+			linkPromises.push(this.fh.linkFile(original, alias));
 		}
-		return Promise.all(symlinkPromises);
+		return Promise.all(linkPromises);
 	}
 
 	protected async extractZips(): Promise<void[]> {
