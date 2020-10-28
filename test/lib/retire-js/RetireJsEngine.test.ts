@@ -6,6 +6,7 @@ import {expect} from 'chai';
 import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import globby = require('globby');
+import normalize = require('normalize-path');
 
 
 TestOverrides.initializeTestSetup();
@@ -72,7 +73,7 @@ describe('RetireJsEngine', () => {
 			// We expect the directory to still exist, since the process hasn't actually exited yet.
 			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
 			// We expect the various files to exist somewhere in the temp directory.
-			const dupedFiles: string[] = await globby(path.join(tmpDir, '**', '*'));
+			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*'));
 			expect(dupedFiles.length).to.equal(5, 'Wrong number of files copied.');
 			// Make sure the files themselves have the names we expect.
 			const dupedFileBaseNames = dupedFiles.map(f => path.basename(f));
@@ -103,7 +104,7 @@ describe('RetireJsEngine', () => {
 			// We expect the directory to still exist, since the process hasn't actually exited yet.
 			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
 			// We expect various files to exist somewhere in the temp directory.
-			const dupedFiles: string[] = await globby(path.join(tmpDir, '**', '*'));
+			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*')));
 			expect(dupedFiles.length).to.equal(2, 'Wrong number of files copied');
 			// Expect each of the copied files to have a `.js` extension.
 			for (const d of dupedFiles) {
@@ -129,8 +130,8 @@ describe('RetireJsEngine', () => {
 			// We expect the temp directory to still exist, since the process hasn't actually exited yet.
 			const fh = new FileHandler();
 			expect(await fh.exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
-			const extractedAngular = await globby(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*'));
-			const extractedLeaflet = await globby(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*'));
+			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
+			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
 			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
 			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
 		});
