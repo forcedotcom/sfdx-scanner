@@ -19,6 +19,12 @@ interface StaticResourceJson extends ElementCompact  {
 
 export class StaticResourceHandler {
 
+	private resultCache: Map<string, StaticResourceType>;
+
+	constructor() {
+		this.resultCache = new Map();
+	}
+
 	private isStaticResourceJson(fileContents: ElementCompact): fileContents is StaticResourceJson {
 		return !!(fileContents.StaticResource
 			&& fileContents.StaticResource.contentType
@@ -27,6 +33,11 @@ export class StaticResourceHandler {
 	}
 
 	public async identifyStaticResourceType(filename: string): Promise<StaticResourceType> {
+		// If we've already cached a value for this file, we can return early.
+		if (this.resultCache.has(filename)) {
+			return this.resultCache.get(filename);
+		}
+		// Otherwise, we need to do some work.
 		const fh = new FileHandler();
 		const metafileName = filename + '-meta.xml';
 
@@ -34,6 +45,7 @@ export class StaticResourceHandler {
 		// Rather than throwing an error, we'll just return null. That way, upstream callers can decide whether to throw
 		// an error.
 		if (!await fh.exists(metafileName)) {
+			this.resultCache.set(filename, null);
 			return null;
 		}
 		// If there's a `-meta.xml` file, we should read it and parse it into a JSON.
@@ -59,12 +71,15 @@ export class StaticResourceHandler {
 		// use the MIME type to determine what type of static resource we're looking at.
 		switch (metaJson.StaticResource.contentType._text) {
 			case 'application/zip':
-				return StaticResourceType.ZIP;
+				this.resultCache.set(filename, StaticResourceType.ZIP);
+				break;
 			case 'application/javascript':
 			case 'text/javascript':
-				return StaticResourceType.JS;
+				this.resultCache.set(filename, StaticResourceType.JS);
+				break;
 			default:
-				return StaticResourceType.OTHER;
+				this.resultCache.set(filename, StaticResourceType.OTHER);
 		}
+		return this.resultCache.get(filename);
 	}
 }
