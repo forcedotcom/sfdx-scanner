@@ -123,7 +123,7 @@ export class FileHandler {
 		return new Promise<void>((res, rej) => {
 			const dfIterator: IterableIterator<DuplicationFn> = dupFns.values();
 
-			function iterativelyAttemptDuplication() {
+			function iterativelyAttemptDuplication(): void {
 				const {value, done} = dfIterator.next();
 				if (done) {
 					// If `done` is true, it means we're out of duplication functions to try. We'll need to combine the
