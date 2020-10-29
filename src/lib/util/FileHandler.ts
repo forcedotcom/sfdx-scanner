@@ -118,7 +118,7 @@ export class FileHandler {
 		// an optimal one, and prepared to address it if there's somehow a problem.
 		// These are the file duplication functions available to us, in order of preference.
 		const dupFns: DuplicationFn[] = [fs.symlink, fs.link, fs.copyFile];
-		const errs: Error[] = [];
+		const errMsgs: string[] = [];
 
 		return new Promise<void>((res, rej) => {
 			const dfIterator: IterableIterator<DuplicationFn> = dupFns.values();
@@ -127,18 +127,14 @@ export class FileHandler {
 				const {value, done} = dfIterator.next();
 				if (done) {
 					// If `done` is true, it means we're out of duplication functions to try. We'll need to combine the
-					// error messages we got in order to make something informative and helpful.
-					const errMsgs: string[] = [];
-					for (let i = 0; i < errs.length; i++) {
-						errMsgs.push(`${dupFns[i].name}: ${errs[i].message || errs[i]}`);
-					}
+					// error messages we've built up in order to make something informative and helpful.
 					rej(`All attempts to duplicate file ${src} failed.\n${errMsgs.join('\n')}`);
 				} else {
 					// If `done` is false, then we have another duplication function we can try.
 					value(src, target, (err) => {
 						// Handle errors by adding them to the array and making a recursive call to try again.
 						if (err) {
-							errs.push(err);
+							errMsgs.push(`${value.name}: ${err.message || err}`);
 							iterativelyAttemptDuplication();
 						} else {
 							// If there was no error, then the duplication succeeded, and we're in the clear.
