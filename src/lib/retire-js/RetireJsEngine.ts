@@ -291,8 +291,12 @@ export class RetireJsEngine implements RuleEngine {
 		await this.createAliasDirectories();
 
 		// Once we've created all of the alias directories, we can symlink all of the JS files with no fear of race conditions.
-		await this.linkJsFiles();
-
+		try {
+			await this.duplicateJsFiles();
+		} catch (e) {
+			// Catch any error and give it a slightly more informative header.
+			throw new SfdxError(`RetireJS: ${e.message || e}`);
+		}
 		// Finally, we can handle all of the ZIP files.
 		await this.extractZips();
 
@@ -350,12 +354,12 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(zipDestPromises);
 	}
 
-	protected async linkJsFiles(): Promise<void[]> {
-		const linkPromises: Promise<void>[] = [];
+	protected async duplicateJsFiles(): Promise<void[]> {
+		const dupPromises: Promise<void>[] = [];
 		for (const [alias, original] of this.originalFilesByAlias.entries()) {
-			linkPromises.push(this.fh.linkFile(original, alias));
+			dupPromises.push(this.fh.duplicateFile(original, alias));
 		}
-		return Promise.all(linkPromises);
+		return Promise.all(dupPromises);
 	}
 
 	protected async extractZips(): Promise<void[]> {

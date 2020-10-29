@@ -2,6 +2,8 @@ import fs = require('fs');
 import {Stats} from 'fs';
 import tmp = require('tmp');
 
+type DuplicationFn = (src: string, target: string, callback: (err: Error) => void) => void;
+
 /**
  * Handles all File and IO operations.
  * Mock this class to override file change behavior from unit tests.
@@ -109,15 +111,45 @@ export class FileHandler {
 		});
 	}
 
-	linkFile(src: string, target: string): Promise<void> {
+	duplicateFile(src: string, target: string): Promise<void> {
+		// NOTE: This method is likely to be called many times concurrently, and it's probably possible to optimize it a
+		// bit so we don't try duplication methods we know will fail. However, that introduces risk that we'd rather avoid
+		// at the moment. So we'll go with this semi-naive implementation, aware that it performs SLIGHTLY worse than
+		// an optimal one, and prepared to address it if there's somehow a problem.
+		// These are the file duplication functions available to us, in order of preference.
+		const dupFns: DuplicationFn[] = [fs.symlink, fs.link, fs.copyFile];
+		const errs: Error[] = [];
+
 		return new Promise<void>((res, rej) => {
-			fs.link(src, target, (err) => {
-				if (err) {
-					rej(err);
+			const dfIterator: IterableIterator<DuplicationFn> = dupFns.values();
+
+			function iterativelyAttemptDuplication() {
+				const {value, done} = dfIterator.next();
+				if (done) {
+					// If `done` is true, it means we're out of duplication functions to try. We'll need to combine the
+					// error messages we got in order to make something informative and helpful.
+					const errMsgs: string[] = [];
+					for (let i = 0; i < errs.length; i++) {
+						errMsgs.push(`${dupFns[i].name}: ${errs[i].message || errs[i]}`);
+					}
+					rej(`All attempts to duplicate file ${src} failed.\n${errMsgs.join('\n')}`);
 				} else {
-					res();
+					// If `done` is false, then we have another duplication function we can try.
+					value(src, target, (err) => {
+						// Handle errors by adding them to the array and making a recursive call to try again.
+						if (err) {
+							errs.push(err);
+							iterativelyAttemptDuplication();
+						} else {
+							// If there was no error, then the duplication succeeded, and we're in the clear.
+							res();
+						}
+					});
 				}
-			});
+			}
+
+			// Start our recursion.
+			iterativelyAttemptDuplication();
 		});
 	}
 }
