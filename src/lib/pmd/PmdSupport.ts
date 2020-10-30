@@ -5,7 +5,7 @@ import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
 
-export const PMD_VERSION = '6.28.0';
+export const PMD_VERSION = '6.29.0';
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 export const PMD_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd', 'lib');
 
