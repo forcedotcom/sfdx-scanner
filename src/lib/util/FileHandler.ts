@@ -123,7 +123,10 @@ export class FileHandler {
 		return new Promise<void>((res, rej) => {
 			const dfIterator: IterableIterator<DuplicationFn> = dupFns.values();
 
-			function iterativelyAttemptDuplication(): void {
+			// This function uses the iterator defined above to get the next potential duplication method, then applies it.
+			// If there's an error, it will store the error message and then call itself recursively to continue iterating
+			// through the list until no options remain, at which point it will throw an error.
+			function attemptDuplication(): void {
 				const {value, done} = dfIterator.next();
 				if (done) {
 					// If `done` is true, it means we're out of duplication functions to try. We'll need to combine the
@@ -133,9 +136,12 @@ export class FileHandler {
 					// If `done` is false, then we have another duplication function we can try.
 					value(src, target, (err) => {
 						// Handle errors by adding them to the array and making a recursive call to try again.
+						// NOTE: If you're changing this method, it's CRUCIAL that you guarantee the recursive call
+						// happens AFTER the current duplication attempt fails. Otherwise, different copy methods will run
+						// simultaneously leading to disastrous outcomes. BE CAREFUL!
 						if (err) {
 							errMsgs.push(`${value.name}: ${err.message || err}`);
-							iterativelyAttemptDuplication();
+							attemptDuplication();
 						} else {
 							// If there was no error, then the duplication succeeded, and we're in the clear.
 							res();
@@ -145,7 +151,7 @@ export class FileHandler {
 			}
 
 			// Start our recursion.
-			iterativelyAttemptDuplication();
+			attemptDuplication();
 		});
 	}
 }
