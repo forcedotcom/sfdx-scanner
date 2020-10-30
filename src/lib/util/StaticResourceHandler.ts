@@ -71,10 +71,12 @@ export class StaticResourceHandler {
 		// use the MIME type to determine what type of static resource we're looking at.
 		switch (metaJson.StaticResource.contentType._text) {
 			case 'application/zip':
+			case 'application/x-zip-compressed':
 				this.resultCache.set(filename, StaticResourceType.ZIP);
 				break;
 			case 'application/javascript':
 			case 'text/javascript':
+			case 'application/x-javascript':
 				this.resultCache.set(filename, StaticResourceType.JS);
 				break;
 			default:
