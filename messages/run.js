@@ -69,8 +69,8 @@ module.exports = {
 		E.g., $ sfdx scanner:run --target "somefile.js" --violations-cause-error
 			Evaluates rules against somefile.js. If any rules are violated, the exit code will be the severity of the most severe violation.
 
-	Use --engines to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
-		E.g., $ sfdx scanner:run --target "somefile.js" --engines "eslint-lwc,pmd"
+	Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
+		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
 	`
 };
