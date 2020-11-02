@@ -15,7 +15,6 @@ lang: en
 
 **Closed issues:**
 
-- Missing meta mime types detections [\#270](https://github.com/forcedotcom/sfdx-scanner/issues/270)
 - @W-8118474@ specifying --category flag in scanner:run command has no effect for JavaScript and TypeScript files [\#224](https://github.com/forcedotcom/sfdx-scanner/issues/224)
 - @W-8117190@ engines.eslint-lwc.disabled value in Config.json gets overwritten in Windows and Linux [\#220](https://github.com/forcedotcom/sfdx-scanner/issues/220)
 
