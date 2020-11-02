@@ -3,6 +3,38 @@ title: Release Information
 lang: en
 ---
 
+## [v2.4.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.4.0) (11-04-2020)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.3.0...v2.4.0)
+
+### Release Summary
+
+* RetireJS - Supports a new engine to detect vulnerable Javascript Library in the project
+* Underlying PMD Engine is upgraded to 6.29.0 (from 6.28.0)
+* Bug fixes 
+
+**Closed issues:**
+
+- Missing meta mime types detections [\#270](https://github.com/forcedotcom/sfdx-scanner/issues/270)
+- @W-8118474@ specifying --category flag in scanner:run command has no effect for JavaScript and TypeScript files [\#224](https://github.com/forcedotcom/sfdx-scanner/issues/224)
+- @W-8117190@ engines.eslint-lwc.disabled value in Config.json gets overwritten in Windows and Linux [\#220](https://github.com/forcedotcom/sfdx-scanner/issues/220)
+
+**Merged pull requests:**
+
+- @W-8277866@ Upgrade PMD 6.28.0 to 6.29.0 [\#273](https://github.com/forcedotcom/sfdx-scanner/pull/273)
+- @W-8294938@: Added missing MIME types to StaticResourceHandler. [\#272](https://github.com/forcedotcom/sfdx-scanner/pull/272)
+- @W-8273114@: Supplemental pull request to resolve issues across platforms, most notably Linux. [\#269](https://github.com/forcedotcom/sfdx-scanner/pull/269)
+- @W-8273114@: Fixed errors that were preventing use of RetireJS on Windows. [\#268](https://github.com/forcedotcom/sfdx-scanner/pull/268)
+- @W-8272961@: Fixed potential race conditions in the RetireJS file sym… [\#267](https://github.com/forcedotcom/sfdx-scanner/pull/267)
+- chore\(build\): setup plugin signing @W-8046146@ [\#266](https://github.com/forcedotcom/sfdx-scanner/pull/266)
+- @W-8246167@: Rewrote a few error messages and changed how we choose t… [\#263](https://github.com/forcedotcom/sfdx-scanner/pull/263)
+- @W-7983263@: Implemented .zip and .resource support for RetireJsEngine. [\#259](https://github.com/forcedotcom/sfdx-scanner/pull/259)
+- @W-8221285@: Upgraded RetireJS to v2.2.3 and switched the relevant us… [\#256](https://github.com/forcedotcom/sfdx-scanner/pull/256)
+- @W-7978510@ and @W-7983101@: Implementation of RetireJS for scanner:run command. [\#255](https://github.com/forcedotcom/sfdx-scanner/pull/255)
+- @W-7978510@ and @W-7983101@: Integration of RetireJS into sfdx-scanner. [\#254](https://github.com/forcedotcom/sfdx-scanner/pull/254)
+- @W-7983101@: Implementation of `run` command for RetireJS. [\#249](https://github.com/forcedotcom/sfdx-scanner/pull/249)
+- @W-7978510@: Initial partial implementation of RetireJS engine. Implementation of scanner:run command still lacking. [\#231](https://github.com/forcedotcom/sfdx-scanner/pull/231)
+
 ## [v2.3.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.3.0) (10-08-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.2.1...v2.3.0)
