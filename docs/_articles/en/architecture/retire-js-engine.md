@@ -3,9 +3,9 @@ title: 'RetireJS'
 lang: en
 ---
 ## What is RetireJS?
-[RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project's third-party dependencies and
-identifies those that have known security vulnerabilities. It has a lively and responsive community, and its database
-of vulnerable libraries is updated frequently.
+[RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project's third-party JavaScript
+dependencies and identifies those that have known security vulnerabilities. It has a lively and responsive community,
+and its database of vulnerable libraries is updated frequently.
 
 ## How does Salesforce CLI Scanner use RetireJS?
 Salesforce CLI Scanner uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.
