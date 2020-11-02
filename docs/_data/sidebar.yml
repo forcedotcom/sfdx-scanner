@@ -45,12 +45,6 @@
         en: Design
       url: /architecture/architecture
     - title:
-        en: PMD
-      url: /architecture/pmd-engine
-    - title:
-        en: ESLint
-      url: /architecture/eslint-engine
-    - title:
         en: RetireJS
       url: /architecture/retire-js-engine
 - title:
