@@ -11,13 +11,14 @@ You can specify the format of the output as XML, Junit, CSV or table. You can pr
 ## Usage
 
 ```bash
-$ sfdx scanner:run [-c <array>] [-r <array>] [-t <array> | undefined] [-f xml|junit|csv|table] [-o <string>] [--verbose] [--json]
+$ sfdx scanner:run [-c <array>] [-r <array>] [-e <array>] [-t <array> | undefined] [-f xml|junit|csv|table] [-o <string>] [--verbose] [--json]
 ```
   
 ## Options
 
 ```bash
   -c, --category=category		One or more categories of rules to run. Specify multiple values as a comma-separated list.
+  -e, --engine=engine 			One or more engines to run. Multiple values can be specified as a comma-separated list.
   -f, --format=(xml|junit|csv|table) 	Specifies output format with results written directly to the console.
   -o, --outfile=outfile			Write output to a file
   -r, --ruleset=ruleset			[Deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
@@ -65,6 +66,18 @@ $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconf
 Use --env to override the default ESLint environment variables to add frameworks.
 ```bash
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
+```
+
+Use --violations-cause-error to throw a non-zero exit code when rule violations are found.
+In this example, if any rules are violated, the exit code will be equal to the severity of the most severe violation.
+```bash
+$ sfdx scanner:run --target "somefile.js" --violations-cause-error
+```
+
+Use --engine to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
+In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
+```bash
+$ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
 ```
 
 ## Demo
