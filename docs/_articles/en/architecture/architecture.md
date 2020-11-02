@@ -11,7 +11,7 @@ Salesforce CLI Scanner is an open-source [Salesforce CLI plugin](https://develop
 
 The Salesforce CLI Scanner plug-in is powered by multiple static analyzers, also known as rule engines. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. The Salesforce CLI Scanner plug-in unifies these rules engines as a single static analyzer and provides a common user experience to benefit from the different specialties.
 
-Version {{ site.data.versions.scanner }} of the Salesforce CLI Scanner plug-in uses PMD v{{ site.data.versions.pmd }} and ESlint v{{ site.data.versions.eslint }}.
+Version {{ site.data.versions.scanner }} of the Salesforce CLI Scanner plug-in uses PMD v{{ site.data.versions.pmd }}, ESlint v{{ site.data.versions.eslint }}, and RetireJS v{{ site.data.versions.retirejs }}.
 
 -------
 
