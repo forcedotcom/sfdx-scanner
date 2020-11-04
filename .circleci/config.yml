@@ -72,7 +72,7 @@ jobs:
             bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
           # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
           # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
-            
+
       - store_test_results:
           path: test-results
 
@@ -159,7 +159,7 @@ jobs:
           at: ~/repo
 
       - run:
-          command: npm prepack
+          command: npm run prepack
       - release-management/sign
       - release-management/publish:
           access: public
