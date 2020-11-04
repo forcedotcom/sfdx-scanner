@@ -6,6 +6,7 @@ import {DefaultRuleManager} from './lib/DefaultRuleManager';
 import {JavascriptEslintEngine} from './lib/eslint/EslintEngine';
 import {LWCEslintEngine} from './lib/eslint/EslintEngine';
 import {TypescriptEslintEngine} from './lib/eslint/EslintEngine';
+import {RetireJsEngine} from './lib/retire-js/RetireJsEngine';
 import {PmdEngine} from './lib/pmd/PmdEngine';
 import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
@@ -32,6 +33,7 @@ export function registerAll(): void {
 		container.registerSingleton(Services.RuleEngine, JavascriptEslintEngine);
 		container.registerSingleton(Services.RuleEngine, LWCEslintEngine);
 		container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
+		container.registerSingleton(Services.RuleEngine, RetireJsEngine);
 		container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 		container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
 	}

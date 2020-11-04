@@ -16,15 +16,15 @@ module.exports = {
 	},
 	"error": {
 		"internal": {
-			"unexpectedError": "Unexpected error occurred while cataloging rules: %s",
-			"mainInvalidArgument": "Invalid arguments passed to Main. Details: %s",
-			"jsonWriteFailed": "Failed to write JSON to file: %s",
-			"classpathDoesNotExist": "Path does not exist: %s",
-			"xmlMissingInClasspath": "XML resource [%s] found in jar, but not in Classpath"
+			"unexpectedError": "INTERNAL ERROR: Unexpected error occurred while cataloging rules: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
+			"mainInvalidArgument": "INTERNAL ERROR: Invalid arguments passed to Main. Details: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
+			"jsonWriteFailed": "INTERNAL ERROR: Failed to write JSON to file: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
+			"classpathDoesNotExist": "INTERNAL ERROR: Path does not exist: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
+			"xmlMissingInClasspath": "INTERNAL ERROR: XML resource [%s] found in jar, but not in Classpath. Please log an issue with us at github.com/forcedotcom/sfdx-scanner."
 		},
 		"external": {
 			"errorMessageAbove": "Please see error details displayed above.",
-			"genericErrorMessage": "ERROR: An internal error occurred. [TODO: Information on how to contact us and what details to provide]",
+			"genericErrorMessage": "ERROR: An unexpected error occurred. Please log an issue on github.com/forcedotcom/sfdx-scanner.",
 			"jarNotReadable": "ERROR: Unable to read resource JAR: %s",
 			"dirNotReadable": "ERROR: Unable to walk directory: %s",
 			"multipleRuleDesc": "ERROR: PMD Rule [%s] has %s 'description' elements. Please reduce this number to 1.",
