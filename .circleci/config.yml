@@ -50,7 +50,7 @@ jobs:
           when: always
 
       - codecov/upload:
-          file: test-coveragee/coverage-final.json
+          file: test-coverage/coverage-final.json
 
       - store_test_results:
           path: test-results
