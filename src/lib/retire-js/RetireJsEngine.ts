@@ -169,7 +169,6 @@ export class RetireJsEngine implements RuleEngine {
 					// If RetireJS exits with any other code, then it means something went wrong. The error could be
 					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
 					// reject the string we receive after prefixing it with an informative header.
-					this.logger.trace(`RetireJS failed with exit code ${code}`);
 					rej(`RetireJS: ${this.processFailure(stdout, stderr)}`);
 				}
 			});
@@ -177,7 +176,7 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 	protected processFailure(stdout: string, stderr: string): string {
-		this.logger.trace(`Processing RetireJS failure. stdout: ${stdout}\nstderr: ${stderr}`);
+		this.logger.warn(`Processing RetireJS failure. stdout: ${stdout}\nstderr: ${stderr}`);
 		// Either stdout or stderr could contain the error information, depending on what the error was. We'll try the
 		// same tactics on each one, and hopefully we'll find what we're looking for.
 		for (const o of [stdout, stderr]) {
@@ -186,17 +185,17 @@ export class RetireJsEngine implements RuleEngine {
 				const outputJson: RetireJsOutput = RetireJsEngine.convertStringToResultObj(o);
 				if (outputJson.errors && outputJson.errors.length > 0) {
 					// If there are any errors contained within, we should return the first one.
-					this.logger.trace(`Found a valid error JSON, reporting error ${outputJson.errors[0]}`);
+					this.logger.warn(`Found a valid error JSON, reporting error ${outputJson.errors[0]}`);
 					return outputJson.errors[0];
 				}
 			} catch (e) {
 				// We can swallow errors here, since they just mean this output isn't actually a JSON.
-				this.logger.trace(`Failed to convert output into object: ${e.message || e}`);
+				this.logger.warn(`Failed to convert output into object: ${e.message || e}`);
 			}
 		}
 		// If we're outside of the loop, then neither stdout nor stderr were a JSON. So we should just return stderr
 		// as a string for the ease of upstream error handling.
-		this.logger.trace(`Neither stdout nor stderr contained a valid output object. Returning raw stderr string.`);
+		this.logger.warn(`Neither stdout nor stderr contained a valid output object. Returning raw stderr string.`);
 		return stderr;
 	}
 
