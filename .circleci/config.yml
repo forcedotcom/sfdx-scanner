@@ -10,7 +10,8 @@ defaults: &defaults
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
-  release-management: salesforce/npm-release-management@3
+  release-management: salesforce/npm-release-management@3.5.1
+  codecov: codecov/codecov@1.1.1
 
 jobs:
   build:
@@ -47,6 +48,9 @@ jobs:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
+
+      - codecov/upload:
+          file: test-coverage/coverage-final.json
 
       - store_test_results:
           path: test-results
@@ -160,6 +164,9 @@ jobs:
 
       - run:
           command: npm run prepack
+      # Update the path so that node modules installed by the release-management orb are found
+      # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
+      - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
       - release-management/sign
       - release-management/publish:
           access: public
