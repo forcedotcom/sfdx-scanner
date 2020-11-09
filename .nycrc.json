@@ -2,6 +2,6 @@
   "extends": "@istanbuljs/nyc-config-typescript",
   "all": true,
   "reportDir": "./test-coverage",
-  "reporter": ["lcov"],
+  "reporter": ["lcov", "json"],
   "exclude": "github-actions"
 }
