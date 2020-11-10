@@ -77,6 +77,7 @@ export class StaticResourceHandler {
 			case 'application/javascript':
 			case 'application/x-javascript':
 			case 'text/javascript':
+			case 'application/x-javascript':
 				this.resultCache.set(filename, StaticResourceType.JS);
 				break;
 			default:

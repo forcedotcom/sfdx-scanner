@@ -39,7 +39,14 @@
       url: /custom-rules/manage
 - title:
     en: Architecture
-  url: /architecture
+  baseUrl: /architecture/
+  children:
+    - title:
+        en: Design
+      url: /architecture/architecture
+    - title:
+        en: RetireJS
+      url: /architecture/retire-js-engine
 - title:
     en: FAQ
   url: /faq
