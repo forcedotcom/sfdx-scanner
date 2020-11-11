@@ -1,5 +1,5 @@
 ---
-title: 'PMD'
+title: 'ESLint'
 lang: en
 ---
 ## What is ESLint?
