@@ -4,6 +4,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
 import {ENGINE, INTERNAL_ERROR_CODE} from '../../Constants';
 import {Controller} from '../../Controller';
+import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
@@ -47,14 +48,6 @@ export default class Run extends ScannerCommand {
 			description: messages.getMessage('flags.rulesetDescription'),
 			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
 		}),
-		// TODO: After implementing this flag, unhide it.
-		rulename: flags.string({
-			char: 'n',
-			description: messages.getMessage('flags.rulenameDescription'),
-			// If you're specifying by name, it doesn't make sense to let you specify by any other means.
-			exclusive: ['category', 'ruleset', 'severity', 'exclude-rule'],
-			hidden: true
-		}),
 		engine: flags.array({
 			char: 'e',
 			description: messages.getMessage('flags.engineDescription'),
@@ -62,17 +55,6 @@ export default class Run extends ScannerCommand {
 			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD, ENGINE.RETIRE_JS]
 		}),
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
-		// TODO: After implementing this flag, unhide it.
-		severity: flags.string({
-			char: 's',
-			description: messages.getMessage('flags.severityDescription'),
-			hidden: true
-		}),
-		// TODO: After implementing this flag, unhide it.
-		'exclude-rule': flags.array({
-			description: messages.getMessage('flags.excluderuleDescription'),
-			hidden: true
-		}),
 		// These flags are how you choose which files you're targeting.
 		target: flags.array({
 			char: 't',
@@ -81,20 +63,7 @@ export default class Run extends ScannerCommand {
 			// If you're specifying local files, it doesn't make much sense to let you specify anything else.
 			exclusive: ['org']
 		}),
-		// TODO: After implementing this flag, unhide it.
-		org: flags.string({
-			char: 'a',
-			description: messages.getMessage('flags.orgDescription'),
-			// If you're specifying an org, it doesn't make sense to let you specify anything else.
-			exclusive: ['target'],
-			hidden: true
-		}),
 		// These flags modify how the process runs, rather than what it consumes.
-		// TODO: After implementing this flag, unhide it.
-		'suppress-warnings': flags.boolean({
-			description: messages.getMessage('flags.suppresswarningsDescription'),
-			hidden: true
-		}),
 		format: flags.enum({
 			char: 'f',
 			description: messages.getMessage('flags.formatDescription'),
@@ -109,6 +78,14 @@ export default class Run extends ScannerCommand {
 		tsconfig: flags.string({
 			description: messages.getMessage('flags.tsconfigDescription'),
 			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		}),
+		eslintconfig: flags.string({
+			description: messages.getMessage('flags.eslintConfig'),
+			longDescription: messages.getMessage('flags.eslintConfigLong')
+		}),
+		pmdconfig: flags.string({
+			description: messages.getMessage('flags.pmdConfig'),
+			longDescription: messages.getMessage('flags.pmdConfigLong')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
@@ -182,6 +159,18 @@ export default class Run extends ScannerCommand {
 			} catch (e) {
 				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, this.getInternalErrorCode());
 			}
+		}
+
+		// Capturing eslintconfig value, if provided
+		if (this.flags.eslintconfig) {
+			const eslintConfig = normalize(untildify(this.flags.eslintconfig));
+			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
+		}
+
+		// Capturing eslintconfig value, if provided
+		if (this.flags.pmdconfig) {
+			const pmdConfig = normalize(untildify(this.flags.pmdconfig));
+			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
 		return options;
 	}

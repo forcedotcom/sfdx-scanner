@@ -4,10 +4,11 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
+import { FileHandler } from '../util/FileHandler';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -74,10 +75,38 @@ export class PmdEngine implements RuleEngine {
 	 */
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		if (ruleGroups.length === 0) {
+
+		let selectedRules: string;
+
+		// If custom config has been passed, use the custom config 
+		if (engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
+			this.logger.info(`Custom config found for PMD. Ignoring rule filters.`);
+			selectedRules = await this.getCustomConfig(engineOptions);
+
+		} else if (ruleGroups.length === 0) {
 			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
 			return [];
+
+		} else {
+			this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
+			selectedRules = ruleGroups.map(np => np.paths).join(',');
 		}
+
+		return await this.runInternal(selectedRules, targets);
+	}
+
+	private async getCustomConfig(engineOptions: Map<string, string>) {
+
+		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
+		const fileHandler = new FileHandler();
+		if (!(await fileHandler.exists(configFile))) {
+			throw new SfdxError(`PMD config file does not exist: ${configFile}`);
+		}
+
+		return configFile;
+	}
+
+	private async runInternal(selectedRules: string, targets: RuleTarget[]): Promise<RuleResult[]> {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
@@ -87,14 +116,19 @@ export class PmdEngine implements RuleEngine {
 				this.logger.trace('No matching pmd target files found. Nothing to execute.');
 				return [];
 			}
-			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, rule groups: ${ruleGroups.length}`);
-			const stdout = await PmdWrapper.execute(targetPaths.join(','), ruleGroups.map(np => np.paths).join(','));
-			return this.processStdOut(stdout);
+			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
+			
+			const selectedTargets = targetPaths.join(',');
+			const stdout = await PmdWrapper.execute(selectedTargets, selectedRules);
+			const results = this.processStdOut(stdout);
+			this.logger.trace(`Found ${results.length} for PMD`);
+			return results;
 		} catch (e) {
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(e.message || e);
 		}
 	}
+
 
 	/**
 	 * stdout returned from PMD contains an XML payload that may be surrounded by other text.
@@ -103,6 +137,8 @@ export class PmdEngine implements RuleEngine {
 	 */
 	protected processStdOut(stdout: string): RuleResult[] {
 		let violations: RuleResult[] = [];
+
+		this.logger.trace(`Output received from PMD: ${stdout}`);
 
 		// Try to find the xml payload. It begins with '<?xml' and ends with '</pmd>'
 		const pmdEnd = '</pmd>';

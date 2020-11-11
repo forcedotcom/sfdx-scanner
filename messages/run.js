@@ -5,15 +5,10 @@ module.exports = {
 	You can choose the format of output and decide between printing the results directly
 	or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
-		"rulenameDescription": "[description of 'rulename' parameter]",                   // TODO: Change this once the flag is implemented.
 		"categoryDescription": "categor(ies) of rules to run",
 		"categoryDescriptionLong": "One or more categories of rules to run. Multiple values can be specified as a comma-separated list.",
 		"rulesetDescription": "[deprecated] ruleset(s) of rules to run",
 		"rulesetDescriptionLong": "[Deprecated] One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
-		"severityDescription": "[description of 'severity' parameter]",                   // TODO: Change this once the flag is implemented.
-		"excluderuleDescription": "[description of 'exclude-rule' parameter]",            // TODO: Change this once the flag is implemented.
-		"orgDescription": "[description of 'org' parameter]",                             // TODO: Change this once the flag is implemented.
-		"suppresswarningsDescription": "[description of 'suppress-warnings' parameter]",  // TODO: Change this once the flag is implemented.
 		"targetDescription": "location of source code",
 		"targetDescriptionLong": "Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list",
 		"formatDescription": "format of results",
@@ -28,7 +23,11 @@ module.exports = {
 		"vceDescription": "throws an error when violations are detected",
 		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
 		'engineDescription': "engine(s) to run",
-		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list."
+		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list.",
+		'eslintConfig': 'location of eslintrc config to customize eslint engine',
+		'eslintConfigLong': 'Location of eslintrc to customize eslint engine',
+		'pmdConfig': 'location of PMD rule reference XML file to customize rule selection',
+		'pmdConfigLong': 'Location of PMD rule reference XML file to customize rule selection'
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.

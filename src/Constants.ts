@@ -21,6 +21,7 @@ export enum ENGINE {
 	ESLINT = 'eslint',
 	ESLINT_LWC = 'eslint-lwc',
 	ESLINT_TYPESCRIPT = 'eslint-typescript',
+	ESLINT_CUSTOM = 'eslint-custom',
 	RETIRE_JS = 'retire-js'
 }
 
@@ -42,3 +43,8 @@ export const Services = {
 };
 
 export const INTERNAL_ERROR_CODE = 500;
+
+export enum CUSTOM_CONFIG {
+	EslintConfig = "EslintConfig",
+	PmdConfig = "PmdConfig"
+}

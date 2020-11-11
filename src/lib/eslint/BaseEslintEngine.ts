@@ -1,13 +1,12 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
+import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
-import {CLIEngine} from 'eslint';
-import * as path from 'path';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
+import {StaticDependencies, EslintProcessHelper} from './EslintProcessHelper';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -52,21 +51,6 @@ export interface EslintStrategy {
 	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void;
 }
 
-export class StaticDependencies {
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	createCLIEngine(config: Record<string,any>): CLIEngine {
-		return new CLIEngine(config);
-	}
-
-	resolveTargetPath(target: string): string {
-		return path.resolve(target);
-	}
-
-	getCurrentWorkingDirectory(): string {
-		return process.cwd();
-	}
-}
-
 export abstract class BaseEslintEngine implements RuleEngine {
 
 	private strategy: EslintStrategy;
@@ -74,6 +58,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	private initializedBase: boolean;
 	protected outputProcessor: OutputProcessor;
 	private baseDependencies: StaticDependencies;
+	private helper: EslintProcessHelper;
 	private config: Config;
 	private catalog: Catalog;
 
@@ -88,6 +73,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		this.strategy = strategy;
 		this.logger = await Logger.child(this.getName());
 		this.baseDependencies = baseDependencies;
+		this.helper = new EslintProcessHelper();
 
 		this.initializedBase = true;
 	}
@@ -165,6 +151,12 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
+		// If this was for a Custom run, don't go any further
+		if (this.helper.isCustomRun(engineOptions)) {
+			this.logger.trace('Custom eslint run. No action needed.');
+			return [];
+		}
+
 		// If we didn't find any paths, we're done.
 		if (!targets || targets.length === 0) {
 			this.logger.trace('No matching target files found. Nothing to execute.');
@@ -226,7 +218,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				this.logger.trace(`Finished running ${this.getName()}`);
 
 				// Map results to supported format
-				this.addRuleResultsFromReport(results, report, cli.getRules());
+				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, report, cli.getRules(), this.strategy.processRuleViolation);
 			}
 
 			return results;
@@ -254,39 +246,4 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return filteredRules;
 	}
 
-	private addRuleResultsFromReport(results: RuleResult[], report: ESReport, ruleMap: Map<string, ESRule>): void {
-		for (const r of report.results) {
-			// Only add report entries that have actual violations to report.
-			if (r.messages && r.messages.length > 0) {
-				results.push(this.toRuleResult(r.filePath, r.messages, ruleMap));
-			}
-		}
-	}
-
-	private toRuleResult(fileName: string, messages: ESMessage[], ruleMap: Map<string, ESRule>): RuleResult {
-		return {
-			engine: this.getName(),
-			fileName,
-			violations: messages.map(
-				(v): RuleViolation => {
-					const rule = ruleMap.get(v.ruleId);
-					const category = rule ? rule.meta.docs.category : "";
-					const url = rule ? rule.meta.docs.url : "";
-					const violation: RuleViolation = {
-						line: v.line,
-						column: v.column,
-						severity: v.severity,
-						message: v.message,
-						ruleName: v.ruleId,
-						category,
-						url
-					};
-
-					this.strategy.processRuleViolation(fileName, violation);
-
-					return violation;
-				}
-			)
-		};
-	}
 }
