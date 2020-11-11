@@ -47,6 +47,12 @@
     - title:
         en: RetireJS
       url: /architecture/retire-js-engine
+    - title:
+        en: PMD
+      url: /architecture/pmd-engine
+    - title:
+        en: ESLint
+      url: /architecture/eslint-engine
 - title:
     en: FAQ
   url: /faq
