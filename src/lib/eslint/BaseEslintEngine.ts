@@ -96,6 +96,10 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return await this.config.getTargetPatterns(this.strategy.getEngine());
 	}
 
+	isCustomConfigBased(): boolean {
+		return false;
+	}
+
 	getCatalog(): Promise<Catalog> {
 		if (!this.catalog) {
 			const categoryMap: Map<string, RuleGroup> = new Map();

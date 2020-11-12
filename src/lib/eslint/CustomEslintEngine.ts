@@ -12,11 +12,15 @@ export class CustomEslintEngine implements RuleEngine {
 	protected logger: Logger;
 
 	getEngine(): ENGINE {
-		return ENGINE.ESLINT_TYPESCRIPT;
+		return ENGINE.ESLINT_CUSTOM;
 	}
 
 	getName(): string {
 		return this.getEngine().valueOf();
+	}
+
+	isCustomConfigBased(): boolean {
+		return true;
 	}
 
 	async init(): Promise<void> {
@@ -26,7 +30,7 @@ export class CustomEslintEngine implements RuleEngine {
 	}
 
 	async getTargetPatterns(): Promise<string[]> {
-		return ["**"]; // TODO: crude code. revisit
+		return ["**/*.js"]; // TODO: We need a different way to set target pattern. Somehow eslintrc's ignore pattern doesn't work as expected
 	}
 
 	getCatalog(): Promise<Catalog> {
@@ -74,7 +78,8 @@ export class CustomEslintEngine implements RuleEngine {
 	}
 
 	
-	private async extractConfig(configFile: string) {
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	private async extractConfig(configFile: string): Promise<Record<string, any>> {
 		
 		const fileHandler = new FileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
@@ -86,19 +91,30 @@ export class CustomEslintEngine implements RuleEngine {
 		const configContent = await fileHandler.readFile(configFile);
 
 		// TODO: skim out comments in the file
-		const config = JSON.parse(configContent);
+		let config;
+
+		try {
+			config = JSON.parse(configContent);
+		} catch (error) {
+			throw new SfdxError(`Invalid config file ${configFile} - Could not read JSON: ${error || error.message}`);
+		}
+		
 		return config;
 	}
 
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
-		// do nothing for now - TODO: revisit
+		// do nothing - revisit when we have situations that need processing
 	}
 
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	matchPath(path: string): boolean {
 		throw new Error('matchPath() - Method not implemented.');
 	}
+
 	async isEnabled(): Promise<boolean> {
-		return true; // TODO: Is this applicable?
+		// Hardcoding custom engines to be always enabled and not have a control point
+		return Promise.resolve(true);
 	}
 
 }

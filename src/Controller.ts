@@ -53,12 +53,25 @@ export const Controller = {
 		return engines;
 	},
 
-	getFilteredEngines: async (filteredNames: string[]): Promise<RuleEngine[]> => {
+	getUserFacingEngines: async (): Promise<RuleEngine[]> => {
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
-		const engines = allEngines.filter(e => filteredNames.includes(e.getName()));
+		const engines: RuleEngine[] = [];
+
+		for (const engine of allEngines) {
+			if (!engine.isCustomConfigBased()) {
+				engines.push(engine);
+			}
+		}
+
+		return engines;
+	},
+
+	getFilteredEngines: async (filteredNames: string[]): Promise<RuleEngine[]> => {
+		const userFacingEngines: RuleEngine[] = await Controller.getUserFacingEngines();
+		const engines = userFacingEngines.filter(e => filteredNames.includes(e.getName()));
 
 		if (engines.length == 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), enginesToString(allEngines)]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), enginesToString(userFacingEngines)]);
 		}
 
 		return engines;

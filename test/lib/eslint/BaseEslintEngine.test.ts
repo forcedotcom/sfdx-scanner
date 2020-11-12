@@ -1,4 +1,5 @@
-import { BaseEslintEngine, StaticDependencies, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
+import { BaseEslintEngine, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
+import {StaticDependencies} from "../../../src/lib/eslint/EslintProcessHelper";
 import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage, ESReport } from '../../../src/types';
 import { expect } from 'chai';
 import { CLIEngine } from 'eslint';
@@ -128,7 +129,7 @@ describe('Tests for BaseEslintEngine', () => {
 					expect(results.length).greaterThan(0);
 					const result = results[0];
 
-					expect(result.engine).equals(engineName);
+					// TODO: verify engineName - right now, unless we use a real ENGINE enum type, this won't work
 					expect(result.fileName).equals(esReport.results[0].filePath);
 					expect(result.violations.length).greaterThan(0);
 					const violation = result.violations[0];

@@ -18,6 +18,7 @@ export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 export enum ENGINE {
 	PMD = 'pmd',
+	PMD_CUSTOM = 'pmd-custom',
 	ESLINT = 'eslint',
 	ESLINT_LWC = 'eslint-lwc',
 	ESLINT_TYPESCRIPT = 'eslint-typescript',

@@ -26,19 +26,13 @@ interface PmdViolation extends Element {
 	};
 }
 
-export class PmdEngine implements RuleEngine {
-	private static THIS_ENGINE = ENGINE.PMD;
-	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
+abstract class BasePmdEngine implements RuleEngine {
 
-	private logger: Logger;
-	private config: Config;
+	protected logger: Logger;
+	protected config: Config;
 
-	private pmdCatalogWrapper: PmdCatalogWrapper;
+	protected pmdCatalogWrapper: PmdCatalogWrapper;
 	private initialized: boolean;
-
-	public getName(): string {
-		return PmdEngine.ENGINE_NAME;
-	}
 
 	getTargetPatterns(): Promise<string[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
@@ -48,6 +42,16 @@ export class PmdEngine implements RuleEngine {
 		// TODO implement this for realz
 		return path != null;
 	}
+
+	public abstract getName(): string;
+
+	public abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+	
+	public abstract isEnabled(): Promise<boolean>;
+
+	public abstract isCustomConfigBased(): boolean;
+
+	public abstract getCatalog(): Promise<Catalog>;
 
 	public async init(): Promise<void> {
 		if (this.initialized) {
@@ -60,53 +64,7 @@ export class PmdEngine implements RuleEngine {
 		this.initialized = true;
 	}
 
-	public async isEnabled(): Promise<boolean> {
-		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
-	}
-
-	getCatalog(): Promise<Catalog> {
-		return this.pmdCatalogWrapper.getCatalog();
-	}
-
-	/**
-	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
-	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
-	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
-	 */
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-
-		let selectedRules: string;
-
-		// If custom config has been passed, use the custom config 
-		if (engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
-			this.logger.info(`Custom config found for PMD. Ignoring rule filters.`);
-			selectedRules = await this.getCustomConfig(engineOptions);
-
-		} else if (ruleGroups.length === 0) {
-			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
-			return [];
-
-		} else {
-			this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
-			selectedRules = ruleGroups.map(np => np.paths).join(',');
-		}
-
-		return await this.runInternal(selectedRules, targets);
-	}
-
-	private async getCustomConfig(engineOptions: Map<string, string>) {
-
-		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
-		const fileHandler = new FileHandler();
-		if (!(await fileHandler.exists(configFile))) {
-			throw new SfdxError(`PMD config file does not exist: ${configFile}`);
-		}
-
-		return configFile;
-	}
-
-	private async runInternal(selectedRules: string, targets: RuleTarget[]): Promise<RuleResult[]> {
+	protected async runInternal(selectedRules: string, targets: RuleTarget[]): Promise<RuleResult[]> {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
@@ -170,7 +128,7 @@ export class PmdEngine implements RuleEngine {
 		return files.map(
 			(f): RuleResult => {
 				return {
-					engine: PmdEngine.ENGINE_NAME,
+					engine: this.getName(),
 					fileName: f.attributes['name'],
 					violations: f.elements.map(
 						(v: PmdViolation) => {
@@ -253,4 +211,107 @@ export class PmdEngine implements RuleEngine {
 
 		return v.elements.map(e => e.text).join("\n");
 	}
+}
+
+export class PmdEngine extends BasePmdEngine {
+	private static THIS_ENGINE = ENGINE.PMD;
+	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
+
+	getName(): string {
+		return PmdEngine.ENGINE_NAME;
+	}
+
+	isCustomConfigBased(): boolean {
+		return false;
+	}
+
+	getCatalog(): Promise<Catalog> {
+		return this.pmdCatalogWrapper.getCatalog();
+	}
+
+	/**
+	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
+	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
+	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
+	 */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	public async run(
+		ruleGroups: RuleGroup[], 
+		rules: Rule[], 
+		targets: RuleTarget[], 
+		engineOptions: Map<string, string>): Promise<RuleResult[]> {
+
+		// If custom config has been passed, no action needed here
+		if (engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
+			this.logger.info(`Custom config found for PMD. No action needed.`);
+			return [];
+		} 
+		
+		if (ruleGroups.length === 0) {
+			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
+			return [];
+		} 
+
+		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
+
+		const selectedRules = ruleGroups.map(np => np.paths).join(',');
+		return await this.runInternal(selectedRules, targets);
+	}
+
+	public async isEnabled(): Promise<boolean> {
+		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
+	}
+}
+
+export class CustomPmdEngine extends BasePmdEngine {
+	private static THIS_ENGINE = ENGINE.PMD_CUSTOM;
+
+	getName(): string {
+		return CustomPmdEngine.THIS_ENGINE.valueOf();
+	}
+
+	isEnabled(): Promise<boolean> {
+		return Promise.resolve(true); // TODO: revisit
+	}
+
+	isCustomConfigBased(): boolean {
+		return true;
+	}
+
+	getCatalog(): Promise<Catalog> {
+		// TODO: revisit this when adding customization to List
+		const catalog = {
+			rules: [],
+			categories: [],
+			rulesets: []
+		};
+		return Promise.resolve(catalog);
+	}
+
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	public async run(
+		ruleGroups: RuleGroup[], 
+		rules: Rule[], 
+		targets: RuleTarget[], 
+		engineOptions: Map<string, string>): Promise<RuleResult[]> {
+		// If custom config has been passed, use the custom config 
+		if (!engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
+			this.logger.info(`No custom config found. No action needed.`);
+			return [];	
+		} 
+
+		const selectedRules = await this.getCustomConfig(engineOptions);
+		return await this.runInternal(selectedRules, targets);
+	}
+
+	private async getCustomConfig(engineOptions: Map<string, string>): Promise<string> {
+		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
+		const fileHandler = new FileHandler();
+		if (!(await fileHandler.exists(configFile))) {
+			throw new SfdxError(`PMD config file does not exist: ${configFile}`);
+		}
+
+		return configFile;
+	}
+
 }

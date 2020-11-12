@@ -102,6 +102,10 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.resolve(retireJsCatalog);
 	}
 
+	isCustomConfigBased(): boolean {
+		return false;
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
