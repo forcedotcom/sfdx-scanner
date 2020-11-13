@@ -163,6 +163,25 @@ jobs:
           at: ~/repo
 
       - run:
+          name: Verify branch of origin
+          command: |
+            if [ -z "$CIRCLE_TAG" ]
+            then
+               # If we're not actually working from a tag, then just exit. We only want to deploy tags.
+               exit 1
+            fi
+            # For these two exports, the git command is logging out every local and remote branch that contains the tag.
+            # That gets piped into a grep command so we can look for specific branches in the results.
+            export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG|grep release)
+            export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG|grep master)
+            # Our typical flow is feature branch -> dev -> release -> master. We want to publish tags based on release.
+            # So we'll abort if the tag isn't present in release, or if it's present in master.
+            if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
+            then
+               exit 1
+            fi
+
+      - run:
           command: npm run prepack
       # Update the path so that node modules installed by the release-management orb are found
       # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
