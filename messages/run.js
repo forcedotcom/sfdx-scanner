@@ -24,23 +24,25 @@ module.exports = {
 		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
 		'engineDescription': "engine(s) to run",
 		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list.",
-		'eslintConfig': 'location of eslintrc config to customize eslint engine',
-		'eslintConfigLong': 'Location of eslintrc to customize eslint engine',
-		'pmdConfig': 'location of PMD rule reference XML file to customize rule selection',
-		'pmdConfigLong': 'Location of PMD rule reference XML file to customize rule selection'
+		'eslintConfigDescription': 'location of eslintrc config to customize eslint engine',
+		'eslintConfigDescriptionLong': 'Location of eslintrc to customize eslint engine',
+		'pmdConfigDescription': 'location of PMD rule reference XML file to customize rule selection',
+		'pmdConfigDescriptionLong': 'Location of PMD rule reference XML file to customize rule selection'
 	},
 	"validations": {
 		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
-		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv."
+		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv.",
+		"tsConfigEslintConfigExclusive": "Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {
 		"noViolationsDetected": "No rule violations found.",
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
 		"writtenToOutFile": "Rule violations have been written to %s.",
 		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
-		"pleaseSeeAbove": "Please see the logs above."
+		"pleaseSeeAbove": "Please see the logs above.",
+		"filtersIgnoredCustom": "Rule filters will be ignored for custom config runs. Please modify your config file to reflect the filtering you need."
 	},
 	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"examples": `Invoking without specifying any rules causes all rules to be run.

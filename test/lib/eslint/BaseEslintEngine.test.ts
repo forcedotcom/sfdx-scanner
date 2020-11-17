@@ -1,10 +1,12 @@
 import { BaseEslintEngine, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
 import {StaticDependencies} from "../../../src/lib/eslint/EslintProcessHelper";
-import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage, ESReport } from '../../../src/types';
+import { RuleTarget, ESRule, ESReport } from '../../../src/types';
 import { expect } from 'chai';
 import { CLIEngine } from 'eslint';
+import {CUSTOM_CONFIG} from '../../../src/Constants';
 import Mockito = require('ts-mockito');
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import * as DataGenerator from './EslintTestDataGenerator';
 
 TestOverrides.initializeTestSetup();
 
@@ -27,6 +29,76 @@ const MockStrategy: EslintStrategy = Mockito.mock<EslintStrategy>();
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 describe('Tests for BaseEslintEngine', () => {
+	describe('Tests for shouldEngineRun()', () => {
+		afterEach(() => {
+			Mockito.reset(MockStrategy);
+		});
+
+		it('should decide to not run when target is empty', async () => {
+			//instantiate abstract engine
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[DataGenerator.getDummyRule()],
+				[], // no target
+				EMPTY_ENGINE_OPTIONS
+			);
+
+			expect(shouldEngineRun).to.be.false;
+		});
+
+		it('should decide to not run when rules are empty', async () => {
+			//instantiate abstract engine
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[], //no rules
+				[DataGenerator.getDummyTarget()],
+				EMPTY_ENGINE_OPTIONS
+			);
+
+			expect(shouldEngineRun).to.be.false;
+		});
+
+		it('should decide to not run when EngineOptions has eslint custom config', async () => {
+			//instantiate abstract engine
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const engineOptions = new Map<string, string>();
+			engineOptions.set(CUSTOM_CONFIG.EslintConfig, '/some/dummy/path');
+
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[DataGenerator.getDummyRule()],
+				[DataGenerator.getDummyTarget()],
+				engineOptions
+			);
+
+			expect(shouldEngineRun).to.be.false;
+		});
+
+		it('should decide to run when target, rules and options look right', async () => {
+			//instantiate abstract engine
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[DataGenerator.getDummyRule()],
+				[DataGenerator.getDummyTarget()],
+				EMPTY_ENGINE_OPTIONS
+			);
+
+			expect(shouldEngineRun).to.be.true;
+		});
+
+	});
+
 	describe('Tests for run()', () => {
 		describe('Related to target input', () => {
 
@@ -34,25 +106,9 @@ describe('Tests for BaseEslintEngine', () => {
 				Mockito.reset(MockStrategy);
 			});
 
-			it('should not execute when target is empty', async () => {
-
-				//instantiate abstract engine
-				const mockStrategy = Mockito.instance(MockStrategy);
-				const engine = await createDummyEngine(mockStrategy);
-
-				const results = await engine.run(
-					[getDummyRuleGroup()],
-					[getDummyRule()],
-					[], // no target
-					EMPTY_ENGINE_OPTIONS
-				);
-
-				expect(results).to.be.empty;
-			});
-
 			it('should use target as current working directory if target is a directory', async () => {
 				const isDir = true;
-				const target = getDummyTarget(isDir);
+				const target = DataGenerator.getDummyTarget(isDir);
 
 				const StaticDependenciesMock = mockStaticDependencies(target, getDummyCliEngine());
 
@@ -60,8 +116,8 @@ describe('Tests for BaseEslintEngine', () => {
 				const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
 				await engine.run(
-					[getDummyRuleGroup()],
-					[getDummyRule()],
+					[DataGenerator.getDummyRuleGroup()],
+					[DataGenerator.getDummyRule()],
 					[target],
 					EMPTY_ENGINE_OPTIONS
 				);
@@ -88,9 +144,9 @@ describe('Tests for BaseEslintEngine', () => {
 				const engine = await createDummyEngine(mockStrategy);
 
 				const results = await engine.run(
-					[getDummyRuleGroup()],
+					[DataGenerator.getDummyRuleGroup()],
 					[], // no rules
-					[getDummyTarget(true)],
+					[DataGenerator.getDummyTarget(true)],
 					EMPTY_ENGINE_OPTIONS
 				);
 
@@ -105,22 +161,22 @@ describe('Tests for BaseEslintEngine', () => {
 				});
 
 				it('should map Eslint-rule to sfdx scanner rule structure', async () => {
-					const target = getDummyTarget();
+					const target = DataGenerator.getDummyTarget();
 
 					const ruleId = 'ruleId';
 					const category = 'myCategory';
 					const description = 'rule description';
 					const message = 'this is a message';
-					const esRuleMap = getDummyEsRuleMap(ruleId, category, description);
-					const esReport = getDummyEsReport([getDummyEsResult([getDummyEsMessage(ruleId, message)])]);
+					const esRuleMap = DataGenerator.getDummyEsRuleMap(ruleId, category, description);
+					const esReport = DataGenerator.getDummyEsReport([DataGenerator.getDummyEsResult([DataGenerator.getDummyEsMessage(ruleId, message)])]);
 
 					const cliEngineMock = getDummyCliEngine(esRuleMap, esReport);
 					const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
 					const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
 					const results = await engine.run(
-						[getDummyRuleGroup()],
-						[getDummyRule()],
+						[DataGenerator.getDummyRuleGroup()],
+						[DataGenerator.getDummyRule()],
 						[target],
 						EMPTY_ENGINE_OPTIONS
 					);
@@ -150,13 +206,13 @@ describe('Tests for BaseEslintEngine', () => {
 			});
 
 			it('should map ESRules to Catalog', async () => {
-				const target = getDummyTarget();
+				const target = DataGenerator.getDummyTarget();
 
 				const ruleId = 'ruleId';
 				const category = 'myCategory';
 				const description = 'some lengthy description';
 
-				const esRuleMap = getDummyEsRuleMap(ruleId, category, description);
+				const esRuleMap = DataGenerator.getDummyEsRuleMap(ruleId, category, description);
 				const cliEngineMock = getDummyCliEngine(esRuleMap);
 				const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
 				const engine = await createAbstractEngine(target, StaticDependenciesMock);
@@ -177,18 +233,18 @@ describe('Tests for BaseEslintEngine', () => {
 			});
 
 			it('should add rule to an existing category if applicable', async () => {
-				const target = getDummyTarget();
+				const target = DataGenerator.getDummyTarget();
 				const category = 'myCategory';
 				const esRuleMap = new Map<string, ESRule>();
 
 				const ruleId1 = 'ruleId1';
 				const description1 = 'some lengthy description';
-				const esRule1 = getDummyEsRule(category, description1);
+				const esRule1 = DataGenerator.getDummyEsRule(category, description1);
 				esRuleMap.set(ruleId1, esRule1);
 
 				const ruleId2 = 'ruleId2';
 				const description2 = 'some lengthy description';
-				const esRule2 = getDummyEsRule(category, description2);
+				const esRule2 = DataGenerator.getDummyEsRule(category, description2);
 				esRuleMap.set(ruleId2, esRule2);
 
 				const cliEngineMock = getDummyCliEngine(esRuleMap);
@@ -235,8 +291,8 @@ async function createDummyEngine(strategy: EslintStrategy, baseDependencies = ne
 	return engine;
 }
 
-function getDummyCliEngine(esRuleMap: Map<string, ESRule> = getDummyEsRuleMap(), esReport: ESReport = getDummyEsReport()): CLIEngine {
-	const CLIEngineMock: CLIEngine = Mockito.mock(CLIEngine);
+function getDummyCliEngine(esRuleMap: Map<string, ESRule> = DataGenerator.getDummyEsRuleMap(), esReport: ESReport = DataGenerator.getDummyEsReport()): typeof CLIEngine {
+	const CLIEngineMock: typeof CLIEngine = Mockito.mock(CLIEngine);
 
 	Mockito.when(CLIEngineMock.getRules()).thenReturn(esRuleMap);
 	Mockito.when(CLIEngineMock.executeOnFiles(Mockito.anything())).thenReturn(esReport);
@@ -244,83 +300,3 @@ function getDummyCliEngine(esRuleMap: Map<string, ESRule> = getDummyEsRuleMap(),
 	return Mockito.instance(CLIEngineMock);
 }
 
-function getDummyRuleGroup(): RuleGroup {
-	return { engine: engineName, name: "Group name", paths: ['/some/random/path'] };
-}
-
-function getDummyRule(myEngineName = engineName): Rule {
-	return {
-		engine: myEngineName,
-		name: "MyTestRule",
-		description: "my test rule",
-		categories: ["some category"],
-		languages: ["language"],
-		sourcepackage: "MySourcePackage",
-		rulesets: [],
-		defaultEnabled: true
-	}
-}
-
-function getDummyTarget(isDir: boolean = true): RuleTarget {
-	return {
-		target: "/some/target",
-		isDirectory: isDir,
-		paths: ['/some/target/path1', '/some/target/path2']
-	}
-}
-
-function getDummyEsRuleMap(ruleId: string = 'ruleId', category: string = 'myCategory', description: string = 'my description'): Map<string, ESRule> {
-	const map = new Map<string, ESRule>();
-	map.set(ruleId, getDummyEsRule(category, description));
-	return map;
-}
-
-function getDummyEsRule(category: string = 'myCategory', description: string = 'my description'): ESRule {
-	return {
-		meta: {
-			docs: {
-				description: description,
-				category: category,
-				recommended: true,
-				url: 'someURL'
-			},
-			schema: [{
-				element: 'value'
-			}]
-		},
-		create: () => { }
-	}
-}
-
-function getDummyEsReport(results: ESResult[] = [getDummyEsResult()]): ESReport {
-	return {
-		results: results,
-		errorCount: 0,
-		warningCount: 0,
-		fixableErrorCount: 0,
-		fixableWarningCount: 0,
-		usedDeprecatedRules: []
-	}
-}
-
-function getDummyEsResult(messages: ESMessage[] = [getDummyEsMessage()]): ESResult {
-	return {
-		filePath: "filePath",
-		messages: messages
-	};
-}
-
-function getDummyEsMessage(ruleId: string = 'rule', message: string = 'message'): ESMessage {
-	return {
-		fatal: true,
-		ruleId: ruleId,
-		severity: 2,
-		line: 35,
-		column: 7,
-		message: message,
-		fix: {
-			range: [23, 78],
-			text: "some fix string"
-		}
-	}
-}

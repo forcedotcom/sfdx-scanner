@@ -1038,6 +1038,30 @@ describe('scanner:run', function () {
 			});
 	});
 
+	describe('Validation on custom config flags', () => {
+		setupCommandTest
+			.command(['scanner:run',
+				'--target', '/some/path',
+				'--tsconfig', '/some/path/tsconfig.json',
+				'--eslintconfig', '/some/path/.eslintrc.json'
+			])
+			.it('Handle --tsconfig and --eslintconfig as mutially exclusive flags and throw an informative error message', ctx => {
+				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.tsConfigEslintConfigExclusive'));
+			});
+
+		setupCommandTest
+			.command(['scanner:run',
+				'--target', '/some/path',
+				'--pmdconfig', '/some/path/ruleref.xml',
+				'--category', 'Security'
+			])
+			.it('Display informative message when rule filters are provided along with custom config - pmdconfig', ctx => {
+				expect(ctx.stdout).to.contain(runMessages.getMessage('output.filtersIgnoredCustom'));
+			});
+
+
+	});
+
 	// Any commands that specify the --verbose cause subsequent commands to execute as if --verbose was specified.
 	// Put all --verbose commands at the end of this file.
 	describe('Verbose tests must come last. Verbose does not reset', () => {

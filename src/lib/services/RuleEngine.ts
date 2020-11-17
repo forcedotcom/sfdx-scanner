@@ -7,6 +7,8 @@ export interface RuleEngine {
 
 	getCatalog(): Promise<Catalog>;
 
+	shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
+
 	/**
 	 * @param engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */

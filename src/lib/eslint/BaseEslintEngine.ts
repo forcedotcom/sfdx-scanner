@@ -154,18 +154,18 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return rule;
 	}
 
-	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		// If this was for a Custom run, don't go any further
-		if (this.helper.isCustomRun(engineOptions)) {
-			this.logger.trace('Custom eslint run. No action needed.');
-			return [];
-		}
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
 
-		// If we didn't find any paths, we're done.
-		if (!targets || targets.length === 0) {
-			this.logger.trace('No matching target files found. Nothing to execute.');
-			return [];
-		}
+		return !this.helper.isCustomRun(engineOptions)
+			&& (target && target.length > 0)
+			&& rules.length > 0;
+	}
+
+	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		// Get sublist of rules supported by the engine
 		const filteredRules = await this.selectRelevantRules(rules);

@@ -79,9 +79,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 			
-			// Not checking for selected rule count anymore since 
-			// Custom config engines do not have an upfront selection
-			if (engineTargets.length > 0) {
+			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {

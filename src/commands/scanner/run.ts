@@ -80,12 +80,12 @@ export default class Run extends ScannerCommand {
 			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
 		}),
 		eslintconfig: flags.string({
-			description: messages.getMessage('flags.eslintConfig'),
-			longDescription: messages.getMessage('flags.eslintConfigLong')
+			description: messages.getMessage('flags.eslintConfigDescription'),
+			longDescription: messages.getMessage('flags.eslintConfigDescriptionLong')
 		}),
 		pmdconfig: flags.string({
-			description: messages.getMessage('flags.pmdConfig'),
-			longDescription: messages.getMessage('flags.pmdConfigLong')
+			description: messages.getMessage('flags.pmdConfigDescription'),
+			longDescription: messages.getMessage('flags.pmdConfigDescriptionLong')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
@@ -179,6 +179,14 @@ export default class Run extends ScannerCommand {
 		// file, --target and --org are mutually exclusive, but they can't all be null.
 		if (!this.args.file && !this.flags.target && !this.flags.org) {
 			throw new SfdxError(messages.getMessage('validations.mustTargetSomething'), null, null, this.getInternalErrorCode());
+		}
+
+		if (this.flags.tsconfig && this.flags.eslintconfig) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
+		}
+
+		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
+			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
 
 		// Be liberal with the user, but do log an info message if they choose a file extension that does not match their format.

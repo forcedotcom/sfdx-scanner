@@ -2,6 +2,7 @@ import { CLIEngine } from 'eslint';
 import * as path from 'path';
 import { CUSTOM_CONFIG } from '../../Constants';
 import { RuleResult, RuleViolation, ESMessage, ESRule, ESReport } from '../../types';
+import { FileHandler } from '../util/FileHandler';
 
 
 export class StaticDependencies {
@@ -17,6 +18,10 @@ export class StaticDependencies {
 	getCurrentWorkingDirectory(): string {
 		return process.cwd();
 	}
+
+	getFileHandler(): FileHandler {
+		return new FileHandler();
+	}
 }
 
 export class EslintProcessHelper {
@@ -31,7 +36,7 @@ export class EslintProcessHelper {
 		report: ESReport, 
 		ruleMap: Map<string, ESRule>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): void {
-		for (const r of report.results) {
+			for (const r of report.results) {
 			// Only add report entries that have actual violations to report.
 			if (r.messages && r.messages.length > 0) {
 				results.push(this.toRuleResult(engineName, r.filePath, r.messages, ruleMap, processRuleViolation));

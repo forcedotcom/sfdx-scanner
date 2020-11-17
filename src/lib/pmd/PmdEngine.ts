@@ -9,6 +9,7 @@ import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
 import { FileHandler } from '../util/FileHandler';
+import { EventCreator } from '../util/EventCreator';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -32,6 +33,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	protected config: Config;
 
 	protected pmdCatalogWrapper: PmdCatalogWrapper;
+	protected eventCreator: EventCreator;
 	private initialized: boolean;
 
 	getTargetPatterns(): Promise<string[]> {
@@ -44,6 +46,8 @@ abstract class BasePmdEngine implements RuleEngine {
 	}
 
 	public abstract getName(): string;
+
+	public abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
 
 	public abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
 	
@@ -61,6 +65,7 @@ abstract class BasePmdEngine implements RuleEngine {
 
 		this.config = await Controller.getConfig();
 		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
+		this.eventCreator = await EventCreator.create({});
 		this.initialized = true;
 	}
 
@@ -229,6 +234,16 @@ export class PmdEngine extends BasePmdEngine {
 		return this.pmdCatalogWrapper.getCatalog();
 	}
 
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+			return !isCustomConfig(engineOptions)
+				&& (ruleGroups.length > 0 || rules.length > 0);
+				//TODO: targetPaths count should be ideally included here
+		}
+
 	/**
 	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
@@ -240,17 +255,6 @@ export class PmdEngine extends BasePmdEngine {
 		rules: Rule[], 
 		targets: RuleTarget[], 
 		engineOptions: Map<string, string>): Promise<RuleResult[]> {
-
-		// If custom config has been passed, no action needed here
-		if (engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
-			this.logger.info(`Custom config found for PMD. No action needed.`);
-			return [];
-		} 
-		
-		if (ruleGroups.length === 0) {
-			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
-			return [];
-		} 
 
 		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
 
@@ -288,19 +292,31 @@ export class CustomPmdEngine extends BasePmdEngine {
 		return Promise.resolve(catalog);
 	}
 
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+			return isCustomConfig(engineOptions);;
+				//TODO: targetPaths count should be ideally included here
+		}
+
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(
 		ruleGroups: RuleGroup[], 
 		rules: Rule[], 
 		targets: RuleTarget[], 
 		engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		// If custom config has been passed, use the custom config 
-		if (!engineOptions.has(CUSTOM_CONFIG.PmdConfig)) {
-			this.logger.info(`No custom config found. No action needed.`);
-			return [];	
-		} 
 
 		const selectedRules = await this.getCustomConfig(engineOptions);
+
+		// Let users know that they are on their own
+		this.eventCreator.createUxInfoAlwaysMessage('info.customPmdHeadsUp', [selectedRules]);
+
+		if (ruleGroups.length > 0) {
+			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
+		}
+
 		return await this.runInternal(selectedRules, targets);
 	}
 
@@ -315,3 +331,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 	}
 
 }
+function isCustomConfig(engineOptions: Map<string, string>) {
+	return engineOptions.has(CUSTOM_CONFIG.PmdConfig);
+}
+
