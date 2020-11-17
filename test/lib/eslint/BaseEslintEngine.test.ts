@@ -263,6 +263,71 @@ describe('Tests for BaseEslintEngine', () => {
 			});
 		});
 	});
+
+	describe('Tests for shouldEngineRun()', () => {
+		const configFilePath = '/some/file/path/config.json';
+		const engineOptionsWithEslintCustom = new Map<string, string>([
+			[CUSTOM_CONFIG.EslintConfig, configFilePath]
+		]);
+		const emptyEngineOptions = new Map<string, string>();
+
+		it ('should decide to run if custom config, rules and target are correct', async () => {
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldRunEngine = engine.shouldEngineRun(
+				[],
+				[DataGenerator.getDummyRule()],
+				[DataGenerator.getDummyTarget()],
+				emptyEngineOptions
+			);
+
+			expect(shouldRunEngine).to.be.true;
+		});
+
+
+		it ('should decide to not run if using custom config', async () => {
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldRunEngine = engine.shouldEngineRun(
+				[],
+				[DataGenerator.getDummyRule()],
+				[DataGenerator.getDummyTarget()],
+				engineOptionsWithEslintCustom
+			);
+
+			expect(shouldRunEngine).to.be.false;
+		});
+
+		it('should decide to not run if target paths is empty', async () => {
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldRunEngine = engine.shouldEngineRun(
+				[],
+				[DataGenerator.getDummyRule()],
+				[],
+				emptyEngineOptions
+			);
+
+			expect(shouldRunEngine).to.be.false;
+		});
+
+		it('should decide to not run if no rules are chosen', async () => {
+			const mockStrategy = Mockito.instance(MockStrategy);
+			const engine = await createDummyEngine(mockStrategy);
+
+			const shouldRunEngine = engine.shouldEngineRun(
+				[],
+				[],
+				[DataGenerator.getDummyTarget()],
+				emptyEngineOptions
+			);
+
+			expect(shouldRunEngine).to.be.false;
+		});
+	});
 });
 
 

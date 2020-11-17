@@ -218,6 +218,10 @@ abstract class BasePmdEngine implements RuleEngine {
 	}
 }
 
+function isCustomConfig(engineOptions: Map<string, string>): boolean {
+	return engineOptions.has(CUSTOM_CONFIG.PmdConfig);
+}
+
 export class PmdEngine extends BasePmdEngine {
 	private static THIS_ENGINE = ENGINE.PMD;
 	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
@@ -250,11 +254,7 @@ export class PmdEngine extends BasePmdEngine {
 	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
 	 */
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-	public async run(
-		ruleGroups: RuleGroup[], 
-		rules: Rule[], 
-		targets: RuleTarget[], 
-		engineOptions: Map<string, string>): Promise<RuleResult[]> {
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
 
@@ -297,7 +297,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		rules: Rule[],
 		target: RuleTarget[],
 		engineOptions: Map<string, string>): boolean {
-			return isCustomConfig(engineOptions);;
+			return isCustomConfig(engineOptions);
 				//TODO: targetPaths count should be ideally included here
 		}
 
@@ -331,7 +331,5 @@ export class CustomPmdEngine extends BasePmdEngine {
 	}
 
 }
-function isCustomConfig(engineOptions: Map<string, string>) {
-	return engineOptions.has(CUSTOM_CONFIG.PmdConfig);
-}
+
 

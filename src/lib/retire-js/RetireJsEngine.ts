@@ -106,6 +106,7 @@ export class RetireJsEngine implements RuleEngine {
 		return false;
 	}
 
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean {
 		// If the engine was not filtered out, no reason to not run it
 		return true;

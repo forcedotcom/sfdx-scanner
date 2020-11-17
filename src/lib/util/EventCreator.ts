@@ -15,7 +15,7 @@ export class EventCreator extends AsyncCreatable {
 		this.initialized = true;
 	}
 
-	public createUxInfoAlwaysMessage(eventTemplateKey: string, args: string[]) {
+	public createUxInfoAlwaysMessage(eventTemplateKey: string, args: string[]): void {
 		const event = {
 			messageKey: eventTemplateKey, 
 			args: args, 
