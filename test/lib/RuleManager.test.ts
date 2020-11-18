@@ -1,13 +1,23 @@
 import {expect} from 'chai';
-import {Controller} from '../../src/Controller';
-import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
-import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
-import * as TestOverrides from '../test-related-lib/TestOverrides';
+
+import {Controller} from '../../src/Controller';
+import {Rule, RuleGroup, RuleTarget} from '../../src/types';
+
+import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
+import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
+import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
 import {uxEvents} from '../../src/lib/ScannerEvents';
+
+import LocalCatalog from '../../src/lib/services/LocalCatalog';
+import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
+import {RuleEngine} from '../../src/lib/services/RuleEngine';
+
+import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
+
+import * as TestOverrides from '../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
 
@@ -369,6 +379,201 @@ describe('RuleManager', () => {
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
 				});
+			});
+		});
+	});
+
+	describe('unpackTargets()', () => {
+		// We want to create a subclass of DefaultRuleManager that exposes the protected method `unpackTargets()`.
+		// In order to do that, we'll also need a very basic implementation of RuleCatalog to give to the constructor.
+		// That way, we can sidestep any need to mess with the controller or IoC.
+		class DummyCatalog implements RuleCatalog {
+			getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
+				return [];
+			}
+
+			getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {
+				return [];
+			}
+
+			init(): Promise<void> {
+				return;
+			}
+
+		}
+		class UnpackTargetsDRM extends DefaultRuleManager {
+			constructor() {
+				super(new DummyCatalog());
+			}
+
+			public async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
+				return super.unpackTargets(engine, targets, matchedTargets);
+			}
+		}
+
+		describe('Positive matching', () => {
+			it('File-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/folder-a/SomeGenericFile.js', // This file is real and should be included.
+					'test/code-fixtures/projects/dep-test-app/folder-e/JsStaticResource1.resource', // This file is also real and should be included.
+					'test/code-fixtures/apex/SomeTestClass.cls', // This file is real, but should be excluded since it's Apex.
+					'test/beep/boop/not/real.js' // This file isn't real, and shouldn't be included.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong file matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[1], 'Wrong file matched');
+				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Directory-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/folder-a', // This directory is real and contains JS files, so it should be included.
+					'test/code-fixtures/apex', // This directory is real, but contains only Apex, so should be excluded.
+					'test/beep/boop/not/real' // This directory doesn't exist at all, and should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong directory matched');
+				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+
+			it('Positive glob-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/**/*Generic*.js', // This glob matches some JS files, and should be included.
+					'test/code-fixtures/apex/**/*.cls', // This glob only matches Apex files, so it should be excluded.
+					'test/code-fixtures/beep/boop/**/*' // This glob won't match anything at all, so it should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong glob matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+		});
+
+		describe('Negative matching', () => {
+			it('Negative globs properly interact with file targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/folder-b/**/*', // This is our negative glob.
+					'test/code-fixtures/projects/dep-test-app/folder-a/SomeGenericFile.js', // This file is real and should be included.
+					'test/code-fixtures/projects/dep-test-app/folder-b/AnotherGenericFile.js' // This file is real, but matches the negative glob and should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[1], 'Wrong file matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Negative globs properly interact with directory targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/*Static*', // Negative Glob #1
+					'!**/*3.5.1.js', // Negative Glob #2
+					'test/code-fixtures/projects/dep-test-app/folder-a', // This real directory should be included since no files match negative globs.
+					'test/code-fixtures/projects/dep-test-app/folder-b', // This real directory should be included since only some files match negative globs.
+					'test/code-fixtures/projects/dep-test-app/folder-e' // This real directory should be excluded since all files match negative globs.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[2], 'Wrong directory matched');
+				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[3], 'Wrong directory matched');
+				expect(results[1].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Negative globs properly interact with positive glob targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/*-3.5.1.js', // Negative Glob #1
+					'!**/folder-e/**', // Negative Glob #2
+					'test/code-fixtures/projects/dep-test-app/**/*Generic*.js', // This glob should be included since none of its files are excluded by negative globs.
+					'test/code-fixtures/projects/dep-test-app/**/jquery*.js', // This glob should be included since only some of its files are excluded by negative globs.
+					'test/code-fixtures/projects/dep-test-app/**/*Static*' // This glob should be excluded since all of its files are excluded by negative globs.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[2], 'Wrong glob matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[3], 'Wrong glob matched');
+				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 		});
 	});
