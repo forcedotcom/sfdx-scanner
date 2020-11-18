@@ -4,10 +4,12 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineBase} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
+import { FileHandler } from '../util/FileHandler';
+import { EventCreator } from '../util/EventCreator';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -25,19 +27,14 @@ interface PmdViolation extends Element {
 	};
 }
 
-export class PmdEngine implements RuleEngine {
-	private static THIS_ENGINE = ENGINE.PMD;
-	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
+abstract class BasePmdEngine implements RuleEngine {
 
-	private logger: Logger;
-	private config: Config;
+	protected logger: Logger;
+	protected config: Config;
 
-	private pmdCatalogWrapper: PmdCatalogWrapper;
+	protected pmdCatalogWrapper: PmdCatalogWrapper;
+	protected eventCreator: EventCreator;
 	private initialized: boolean;
-
-	public getName(): string {
-		return PmdEngine.ENGINE_NAME;
-	}
 
 	getTargetPatterns(): Promise<string[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
@@ -48,6 +45,18 @@ export class PmdEngine implements RuleEngine {
 		return path != null;
 	}
 
+	public abstract getName(): string;
+
+	public abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
+
+	public abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+	
+	public abstract isEnabled(): Promise<boolean>;
+
+	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+
+	public abstract getCatalog(): Promise<Catalog>;
+
 	public async init(): Promise<void> {
 		if (this.initialized) {
 			return;
@@ -56,28 +65,11 @@ export class PmdEngine implements RuleEngine {
 
 		this.config = await Controller.getConfig();
 		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
+		this.eventCreator = await EventCreator.create({});
 		this.initialized = true;
 	}
 
-	public async isEnabled(): Promise<boolean> {
-		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
-	}
-
-	getCatalog(): Promise<Catalog> {
-		return this.pmdCatalogWrapper.getCatalog();
-	}
-
-	/**
-	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
-	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
-	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
-	 */
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		if (ruleGroups.length === 0) {
-			this.logger.trace(`No rule groups given.  PMD requires at least one. Skipping.`);
-			return [];
-		}
+	protected async runInternal(selectedRules: string, targets: RuleTarget[]): Promise<RuleResult[]> {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
@@ -87,14 +79,19 @@ export class PmdEngine implements RuleEngine {
 				this.logger.trace('No matching pmd target files found. Nothing to execute.');
 				return [];
 			}
-			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, rule groups: ${ruleGroups.length}`);
-			const stdout = await PmdWrapper.execute(targetPaths.join(','), ruleGroups.map(np => np.paths).join(','));
-			return this.processStdOut(stdout);
+			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
+			
+			const selectedTargets = targetPaths.join(',');
+			const stdout = await PmdWrapper.execute(selectedTargets, selectedRules);
+			const results = this.processStdOut(stdout);
+			this.logger.trace(`Found ${results.length} for PMD`);
+			return results;
 		} catch (e) {
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(e.message || e);
 		}
 	}
+
 
 	/**
 	 * stdout returned from PMD contains an XML payload that may be surrounded by other text.
@@ -103,6 +100,8 @@ export class PmdEngine implements RuleEngine {
 	 */
 	protected processStdOut(stdout: string): RuleResult[] {
 		let violations: RuleResult[] = [];
+
+		this.logger.trace(`Output received from PMD: ${stdout}`);
 
 		// Try to find the xml payload. It begins with '<?xml' and ends with '</pmd>'
 		const pmdEnd = '</pmd>';
@@ -134,7 +133,7 @@ export class PmdEngine implements RuleEngine {
 		return files.map(
 			(f): RuleResult => {
 				return {
-					engine: PmdEngine.ENGINE_NAME,
+					engine: this.getName(),
 					fileName: f.attributes['name'],
 					violations: f.elements.map(
 						(v: PmdViolation) => {
@@ -218,3 +217,127 @@ export class PmdEngine implements RuleEngine {
 		return v.elements.map(e => e.text).join("\n");
 	}
 }
+
+function isCustomConfig(engineOptions: Map<string, string>): boolean {
+	return engineOptions.has(CUSTOM_CONFIG.PmdConfig);
+}
+
+export class PmdEngine extends BasePmdEngine {
+	private static THIS_ENGINE = ENGINE.PMD;
+	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
+
+	getName(): string {
+		return PmdEngine.ENGINE_NAME;
+	}
+
+	getCatalog(): Promise<Catalog> {
+		return this.pmdCatalogWrapper.getCatalog();
+	}
+
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+		return !isCustomConfig(engineOptions)
+			&& (ruleGroups.length > 0); // TODO: there's a bug in DefaultRuleManager that's populating Rules instead of RuleGroups when --engine filter is used
+		//TODO: targetPaths count should be ideally included here
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return !isCustomConfig(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value === this.getName();
+		});
+	}
+
+	/**
+	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
+	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
+	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
+	 */
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
+
+		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
+
+		const selectedRules = ruleGroups.map(np => np.paths).join(',');
+		return await this.runInternal(selectedRules, targets);
+	}
+
+	public async isEnabled(): Promise<boolean> {
+		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
+	}
+}
+
+export class CustomPmdEngine extends BasePmdEngine {
+	private static THIS_ENGINE = ENGINE.PMD_CUSTOM;
+
+	getName(): string {
+		return CustomPmdEngine.THIS_ENGINE.valueOf();
+	}
+
+	isEnabled(): Promise<boolean> {
+		return Promise.resolve(true); // Custom config will always be enabled
+	}
+
+	getCatalog(): Promise<Catalog> {
+		// TODO: revisit this when adding customization to List
+		const catalog = {
+			rules: [],
+			categories: [],
+			rulesets: []
+		};
+		return Promise.resolve(catalog);
+	}
+
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+		return isCustomConfig(engineOptions);
+		//TODO: targetPaths count should be ideally included here
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return isCustomConfig(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value.startsWith(EngineBase.PMD);
+		});
+	}
+
+	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	public async run(
+		ruleGroups: RuleGroup[], 
+		rules: Rule[], 
+		targets: RuleTarget[], 
+		engineOptions: Map<string, string>): Promise<RuleResult[]> {
+
+		const selectedRules = await this.getCustomConfig(engineOptions);
+
+		// Let users know that they are on their own
+		this.eventCreator.createUxInfoAlwaysMessage('info.customPmdHeadsUp', [selectedRules]);
+
+		if (ruleGroups.length > 0) {
+			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
+		}
+
+		return await this.runInternal(selectedRules, targets);
+	}
+
+	private async getCustomConfig(engineOptions: Map<string, string>): Promise<string> {
+		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
+		const fileHandler = new FileHandler();
+		if (!(await fileHandler.exists(configFile))) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdEngine', 'ConfigNotFound', [configFile]);
+		}
+
+		return configFile;
+	}
+
+}
+
+

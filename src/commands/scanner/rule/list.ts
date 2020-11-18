@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
-import {ENGINE} from '../../../Constants';
+import {AllowedEngineFilters} from '../../../Constants';
 
 
 // Initialize Messages with the current plugin directory
@@ -57,7 +57,7 @@ export default class List extends ScannerCommand {
 			char: 'e',
 			description: messages.getMessage('flags.engineDescription'),
 			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD, ENGINE.RETIRE_JS]
+			options: [...AllowedEngineFilters]
 		}),
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// TODO: After implementing this flag, unhide it.
