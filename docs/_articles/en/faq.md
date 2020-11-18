@@ -8,7 +8,7 @@ lang: en
 A: `Salesforce CLI Scanner` is a [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_plugins.meta/sfdx_cli_plugins/cli_plugins_architecture.htm) plug-in that helps developers write better and more
 secure code.
 
-The plug-in uses multiple code analysis engines, including PMD and ESLint, to inspect your code. It identifies potential problems, from inconsistent naming to security vulnerabilities, and conveys these problems with easy-to-understand results.
+The plug-in uses multiple code analysis engines, including PMD, ESLint, and RetireJS to inspect your code. It identifies potential problems, from inconsistent naming to security vulnerabilities, and conveys these problems with easy-to-understand results.
 You can run the scanner on-command in the CLI, or integrate it into your CI/CD framework so you can run it against every code change.
 
 #### Q: Is `Salesforce CLI Scanner` part of the App Exchange security review process?
@@ -42,11 +42,11 @@ A: That depends on the engine in question.
 - __PMD__: Add the language's name to the PMD's `supportedLanguages` array in
 `~/.sfdx-scanner/Config.json`.
 <br/>
-If the language is not already supported, you must additionally follow the steps
-outlined in ["How do I add a new language to `Salesforce CLI Scanner`?"](./en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
+If the language is not already supported, you must additionally follow the steps outlined above in
+["How do I add a new language to `Salesforce CLI Scanner`?"](./en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
 
 #### Q: How do I add new rules for Language X?
-A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the `scanner:rule:add` command.
+A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the [`scanner:rule:add`](./en/scanner-commands/add/#example) command.
 
 If the language is not already supported, follow the steps in "How do I add a new language to `Salesforce CLI Scanner`?"
 

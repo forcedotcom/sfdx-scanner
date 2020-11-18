@@ -64,6 +64,7 @@ type RetireJsData = {
 type RetireJsOutput = {
 	version: string;
 	data: RetireJsData[];
+	errors?: string[];
 };
 
 export class RetireJsEngine implements RuleEngine {
@@ -155,10 +156,15 @@ export class RetireJsEngine implements RuleEngine {
 		return new Promise<RuleResult[]>((res, rej) => {
 			const cp = cspawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
 
-			// We only care about StdErr, since that's where the vulnerability entries will be logged to.
+			// Initialize both stdout and stderr as empty strings to which we can append data as we receive it.
+			let stdout = '';
 			let stderr = '';
 
 			// When data is passed back up to us, pop it onto the appropriate string.
+			cp.stdout.on('data', data => {
+				stdout += data;
+			});
+
 			cp.stderr.on('data', data => {
 				stderr += data;
 			});
@@ -174,23 +180,43 @@ export class RetireJsEngine implements RuleEngine {
 					// Convert the output into RuleResult objects and resolve to that.
 					res(this.processOutput(stderr, invocation.rule));
 				} else {
-					// If RetireJS exits with any other code, then it means something went wrong. We'll reject with stderr
-					// for the ease of upstream error handling.
-					rej(stderr);
+					// If RetireJS exits with any other code, then it means something went wrong. The error could be
+					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
+					// reject the string we receive after prefixing it with an informative header.
+					rej(`RetireJS: ${this.processFailure(stdout, stderr)}`);
 				}
 			});
 		});
 	}
 
-	protected processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
-		// The output from the CLI should be a valid JSON.
-		let outputJson = null;
-		try {
-			outputJson = JSON.parse(cmdOutput);
-		} catch (e) {
-			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
+	protected processFailure(stdout: string, stderr: string): string {
+		this.logger.warn(`Processing RetireJS failure. stdout: ${stdout}\nstderr: ${stderr}`);
+		// Either stdout or stderr could contain the error information, depending on what the error was. We'll try the
+		// same tactics on each one, and hopefully we'll find what we're looking for.
+		for (const o of [stdout, stderr]) {
+			try {
+				// It's possible that we're looking at a valid output JSON whose `errors` property contains the errors we want.
+				const outputJson: RetireJsOutput = RetireJsEngine.convertStringToResultObj(o);
+				if (outputJson.errors && outputJson.errors.length > 0) {
+					// If there are any errors contained within, we should return the first one.
+					this.logger.warn(`Found a valid error JSON, reporting error ${outputJson.errors[0]}`);
+					return outputJson.errors[0];
+				}
+			} catch (e) {
+				// We can swallow errors here, since they just mean this output isn't actually a JSON.
+				this.logger.warn(`Failed to convert output into object: ${e.message || e}`);
+			}
 		}
-		if (RetireJsEngine.validateRetireJsOutput(outputJson)) {
+		// If we're outside of the loop, then neither stdout nor stderr were a JSON. So we should just return stderr
+		// as a string for the ease of upstream error handling.
+		this.logger.warn(`Neither stdout nor stderr contained a valid output object. Returning raw stderr string.`);
+		return stderr;
+	}
+
+	protected processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
+		// The output should be a valid result JSON.
+		try {
+			const outputJson: RetireJsOutput = RetireJsEngine.convertStringToResultObj(cmdOutput);
 			const ruleResultsByFile: Map<string, RuleResult> = new Map();
 			for (const data of outputJson.data) {
 				// First, we need to de-alias the file using the descriptor.
@@ -227,10 +253,9 @@ export class RetireJsEngine implements RuleEngine {
 			}
 			// Once we exit the loop, we can return all of the results in our Map.
 			return Array.from(ruleResultsByFile.values());
-		} else {
-			// It's theoretically impossible to reach this point, because it means that RetireJS finished successfully
-			// but returned something we don't recognize.
-			throw new SfdxError(`retire-js output did not match expected structure`);
+		} catch (e) {
+			// Rethrow any errors as Sfdx errors.
+			throw new SfdxError(e.message || e);
 		}
 	}
 
@@ -244,6 +269,22 @@ export class RetireJsEngine implements RuleEngine {
 				return 1;
 			default:
 				throw new SfdxError(`retire-js encountered unexpected severity value of ${sev}.`);
+		}
+	}
+
+	private static convertStringToResultObj(output: string): RetireJsOutput {
+		// Theoretically, the output is at least a valid JSON.
+		let outputJson = null;
+		try {
+			outputJson = JSON.parse(output);
+		} catch (e) {
+			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
+		}
+		// If we were able to parse the object, we should then verify that it's actually a RetireJsOutput instance.
+		if (this.validateRetireJsOutput(outputJson)) {
+			return outputJson;
+		} else {
+			throw new SfdxError(`retire-js output did not match expected structure`);
 		}
 	}
 
