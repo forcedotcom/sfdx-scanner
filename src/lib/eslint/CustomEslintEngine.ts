@@ -38,7 +38,7 @@ export class CustomEslintEngine implements RuleEngine {
 	}
 
 	async getTargetPatterns(): Promise<string[]> {
-		return Promise.resolve(["**/*.js"]); // TODO: We need a different way to set target pattern. Somehow eslintrc's ignore pattern doesn't work as expected
+		return Promise.resolve(["**"]); // TODO: We need a different way to set target pattern. Somehow eslintrc's ignore pattern doesn't work as expected
 	}
 
 	getCatalog(): Promise<Catalog> {

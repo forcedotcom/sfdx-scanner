@@ -26,11 +26,18 @@ export enum ENGINE {
 	RETIRE_JS = 'retire-js'
 }
 
+/**
+ * Main engine types that have more than one variation
+ */
 export const EngineFlavor = {
 	PMD: 'pmd',
 	ESLINT: 'eslint'
 }
 
+/**
+ * These are the filter values that Users can filter by when using
+ * --engine flag
+ */
 export const AllowedEngineFilters = [ 
 	ENGINE.ESLINT, 
 	ENGINE.ESLINT_LWC, 

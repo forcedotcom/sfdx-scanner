@@ -16,7 +16,7 @@ const ES_CONFIG = {
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
-	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"useEslintrc": false, // will not use an external confi
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
@@ -50,7 +50,6 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
 	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
-		//TODO: find a way to override with eslintrc if Config asks for it
 		return ES_CONFIG;
 	}
 

@@ -316,6 +316,12 @@ describe('RetireJsEngine', () => {
 			});
 		});
 
+		describe('Tests for shouldEngineRun()', () => {
+			it('should always return true if the engine was not filtered out', () => {
+				expect(testEngine.shouldEngineRun([],[],[],new Map<string,string>())).to.be.true;
+			});
+		});
+
 		describe('Tests for isEngineRequested()', () => {
 			const emptyEngineOptions = new Map<string, string>();
 

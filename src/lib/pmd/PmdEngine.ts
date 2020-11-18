@@ -279,7 +279,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 	}
 
 	isEnabled(): Promise<boolean> {
-		return Promise.resolve(true); // TODO: revisit
+		return Promise.resolve(true); // Custom config will always be enabled
 	}
 
 	getCatalog(): Promise<Catalog> {
