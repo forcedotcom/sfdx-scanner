@@ -35,7 +35,7 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false, // will not use external config
+	"useEslintrc": false, // Will not use external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };

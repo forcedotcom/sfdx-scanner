@@ -16,7 +16,7 @@ const ES_CONFIG = {
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
-	"useEslintrc": false, // will not use an external confi
+	"useEslintrc": false, // Will not use an external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };

@@ -15,7 +15,7 @@ const ES_CONFIG = {
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
-	"useEslintrc": false // will not use an external config
+	"useEslintrc": false // Will not use an external config
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
