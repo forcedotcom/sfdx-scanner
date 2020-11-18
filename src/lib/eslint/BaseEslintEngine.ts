@@ -1,12 +1,12 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule} from '../../types';
+import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
-import {StaticDependencies, EslintProcessHelper} from './EslintProcessHelper';
+import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -48,7 +48,7 @@ export interface EslintStrategy {
 	filterUnsupportedPaths(paths: string[]): string[];
 
 	/** Allow the strategy to convert the RuleViolation */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void;
+	processRuleViolation(): ProcessRuleViolationType;
 }
 
 export abstract class BaseEslintEngine implements RuleEngine {
@@ -94,10 +94,6 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	async getTargetPatterns(): Promise<string[]> {
 		return await this.config.getTargetPatterns(this.strategy.getEngine());
-	}
-
-	isCustomConfigBased(): boolean {
-		return false;
 	}
 
 	getCatalog(): Promise<Catalog> {
@@ -165,6 +161,14 @@ export abstract class BaseEslintEngine implements RuleEngine {
 			&& rules.length > 0;
 	}
 
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return !this.helper.isCustomRun(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value === this.getName();
+		});
+	}
+
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		// Get sublist of rules supported by the engine
@@ -222,7 +226,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				this.logger.trace(`Finished running ${this.getName()}`);
 
 				// Map results to supported format
-				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, report, cli.getRules(), this.strategy.processRuleViolation);
+				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, report, cli.getRules(), this.strategy.processRuleViolation());
 			}
 
 			return results;

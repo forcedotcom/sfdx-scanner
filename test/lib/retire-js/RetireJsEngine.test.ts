@@ -7,6 +7,7 @@ import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import globby = require('globby');
 import normalize = require('normalize-path');
+import { CUSTOM_CONFIG } from '../../../src/Constants';
 
 
 TestOverrides.initializeTestSetup();
@@ -313,6 +314,51 @@ describe('RetireJsEngine', () => {
 					expect(e.message.toLowerCase()).to.include('retire-js output did not match expected structure');
 				}
 			});
+		});
+
+		describe('Tests for isEngineRequested()', () => {
+			const emptyEngineOptions = new Map<string, string>();
+
+			const configFilePath = '/some/file/path/config.json';
+			const engineOptionsWithEslintCustom = new Map<string, string>([
+				[CUSTOM_CONFIG.EslintConfig, configFilePath]
+			]);
+			const engineOptionsWithPmdCustom = new Map<string, string>([
+				[CUSTOM_CONFIG.PmdConfig, configFilePath]
+			]);
+			
+			it('should return true if filter contains "retire-js" if engineOptions is empty', () => {
+				const filterValues = ['retire-js', 'pmd'];
+
+				const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
+
+				expect(isEngineRequested).to.be.true;
+			});
+
+			it('should return true if filter contains "retire-js" if engineOptions contains eslint config', () => {
+				const filterValues = ['retire-js', 'pmd'];
+
+				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithEslintCustom);
+
+				expect(isEngineRequested).to.be.true;
+			});
+
+			it('should return true if filter contains "retire-js" if engineOptions contains pmd config', () => {
+				const filterValues = ['retire-js', 'pmd'];
+
+				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithPmdCustom);
+
+				expect(isEngineRequested).to.be.true;
+			});
+
+			it('should return false if filter does not contain "retire-js" irrespective of engineOptions', () => {
+				const filterValues = ['eslint-lwc', 'pmd'];
+
+				const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
+
+				expect(isEngineRequested).to.be.false;
+			});
+
 		});
 	});
 });

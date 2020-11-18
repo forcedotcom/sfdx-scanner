@@ -26,6 +26,20 @@ export enum ENGINE {
 	RETIRE_JS = 'retire-js'
 }
 
+export const EngineFlavor = {
+	PMD: 'pmd',
+	ESLINT: 'eslint'
+}
+
+export const AllowedEngineFilters = [ 
+	ENGINE.ESLINT, 
+	ENGINE.ESLINT_LWC, 
+	ENGINE.ESLINT_TYPESCRIPT, 
+	ENGINE.PMD,
+	ENGINE.RETIRE_JS
+]
+
+
 export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',

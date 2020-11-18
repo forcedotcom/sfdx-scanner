@@ -1,6 +1,6 @@
 import { BaseEslintEngine, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
-import {StaticDependencies} from "../../../src/lib/eslint/EslintProcessHelper";
-import { RuleTarget, ESRule, ESReport } from '../../../src/types';
+import {StaticDependencies} from "../../../src/lib/eslint/EslintCommons";
+import { RuleTarget, ESRule, ESReport, RuleViolation } from '../../../src/types';
 import { expect } from 'chai';
 import { CLIEngine } from 'eslint';
 import {CUSTOM_CONFIG} from '../../../src/Constants';
@@ -26,7 +26,15 @@ class TestHarnessEngine extends BaseEslintEngine {
 }
 
 const MockStrategy: EslintStrategy = Mockito.mock<EslintStrategy>();
-const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
+const emptyEngineOptions = new Map<string, string>();
+
+const configFilePath = '/some/file/path/config.json';
+const engineOptionsWithEslintCustom = new Map<string, string>([
+	[CUSTOM_CONFIG.EslintConfig, configFilePath]
+]);
+const engineOptionsWithPmdCustom = new Map<string, string>([
+	[CUSTOM_CONFIG.PmdConfig, configFilePath]
+]);
 
 describe('Tests for BaseEslintEngine', () => {
 	describe('Tests for shouldEngineRun()', () => {
@@ -43,7 +51,7 @@ describe('Tests for BaseEslintEngine', () => {
 				[DataGenerator.getDummyRuleGroup()],
 				[DataGenerator.getDummyRule()],
 				[], // no target
-				EMPTY_ENGINE_OPTIONS
+				emptyEngineOptions
 			);
 
 			expect(shouldEngineRun).to.be.false;
@@ -58,7 +66,7 @@ describe('Tests for BaseEslintEngine', () => {
 				[DataGenerator.getDummyRuleGroup()],
 				[], //no rules
 				[DataGenerator.getDummyTarget()],
-				EMPTY_ENGINE_OPTIONS
+				emptyEngineOptions
 			);
 
 			expect(shouldEngineRun).to.be.false;
@@ -91,7 +99,7 @@ describe('Tests for BaseEslintEngine', () => {
 				[DataGenerator.getDummyRuleGroup()],
 				[DataGenerator.getDummyRule()],
 				[DataGenerator.getDummyTarget()],
-				EMPTY_ENGINE_OPTIONS
+				emptyEngineOptions
 			);
 
 			expect(shouldEngineRun).to.be.true;
@@ -119,7 +127,7 @@ describe('Tests for BaseEslintEngine', () => {
 					[DataGenerator.getDummyRuleGroup()],
 					[DataGenerator.getDummyRule()],
 					[target],
-					EMPTY_ENGINE_OPTIONS
+					emptyEngineOptions
 				);
 
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
@@ -147,7 +155,7 @@ describe('Tests for BaseEslintEngine', () => {
 					[DataGenerator.getDummyRuleGroup()],
 					[], // no rules
 					[DataGenerator.getDummyTarget(true)],
-					EMPTY_ENGINE_OPTIONS
+					emptyEngineOptions
 				);
 
 				expect(results).to.be.empty;
@@ -178,7 +186,7 @@ describe('Tests for BaseEslintEngine', () => {
 						[DataGenerator.getDummyRuleGroup()],
 						[DataGenerator.getDummyRule()],
 						[target],
-						EMPTY_ENGINE_OPTIONS
+						emptyEngineOptions
 					);
 
 					// verify results structure and content
@@ -265,15 +273,16 @@ describe('Tests for BaseEslintEngine', () => {
 	});
 
 	describe('Tests for shouldEngineRun()', () => {
-		const configFilePath = '/some/file/path/config.json';
-		const engineOptionsWithEslintCustom = new Map<string, string>([
-			[CUSTOM_CONFIG.EslintConfig, configFilePath]
-		]);
-		const emptyEngineOptions = new Map<string, string>();
 
-		it ('should decide to run if custom config, rules and target are correct', async () => {
-			const mockStrategy = Mockito.instance(MockStrategy);
-			const engine = await createDummyEngine(mockStrategy);
+		const mockStrategy = Mockito.instance(MockStrategy);
+		let engine;
+
+		before(async () => {
+			engine = await createDummyEngine(mockStrategy);
+		});
+		
+
+		it ('should decide to run if custom config, rules and target are correct', () => {
 
 			const shouldRunEngine = engine.shouldEngineRun(
 				[],
@@ -286,9 +295,7 @@ describe('Tests for BaseEslintEngine', () => {
 		});
 
 
-		it ('should decide to not run if using custom config', async () => {
-			const mockStrategy = Mockito.instance(MockStrategy);
-			const engine = await createDummyEngine(mockStrategy);
+		it ('should decide to not run if using custom config', () => {
 
 			const shouldRunEngine = engine.shouldEngineRun(
 				[],
@@ -300,9 +307,7 @@ describe('Tests for BaseEslintEngine', () => {
 			expect(shouldRunEngine).to.be.false;
 		});
 
-		it('should decide to not run if target paths is empty', async () => {
-			const mockStrategy = Mockito.instance(MockStrategy);
-			const engine = await createDummyEngine(mockStrategy);
+		it('should decide to not run if target paths is empty', () => {
 
 			const shouldRunEngine = engine.shouldEngineRun(
 				[],
@@ -314,9 +319,7 @@ describe('Tests for BaseEslintEngine', () => {
 			expect(shouldRunEngine).to.be.false;
 		});
 
-		it('should decide to not run if no rules are chosen', async () => {
-			const mockStrategy = Mockito.instance(MockStrategy);
-			const engine = await createDummyEngine(mockStrategy);
+		it('should decide to not run if no rules are chosen', () => {
 
 			const shouldRunEngine = engine.shouldEngineRun(
 				[],
@@ -326,6 +329,67 @@ describe('Tests for BaseEslintEngine', () => {
 			);
 
 			expect(shouldRunEngine).to.be.false;
+		});
+
+		it ('should decide to run if using custom config contains PMD but not Eslint', () => {
+
+			const shouldRunEngine = engine.shouldEngineRun(
+				[],
+				[DataGenerator.getDummyRule()],
+				[DataGenerator.getDummyTarget()],
+				engineOptionsWithPmdCustom
+			);
+
+			expect(shouldRunEngine).to.be.true;
+		});
+	});
+
+	describe('Tests for isEngineRequested()', () => {
+		const mockStrategy = Mockito.instance(MockStrategy);
+		let engine;
+
+		before(async () => {
+			engine = await createDummyEngine(mockStrategy);
+		});
+
+		it('should return true when custom config is not present and filter contains engine name', () => {
+			const filteredNames = ['pmd', engine.getName(), 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.true;
+		});
+
+		it('should return false when custom config is present even if filter contains engine name', () => {
+			const filteredNames = ['pmd', engine.getName(), 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.false;	
+		});
+
+		it('should return false when custom config is not present but filter does not contain engine name', () => {
+			const filteredNames = ['pmd', 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;	
+		});
+
+		it('should return false when custom config is not present and filter starts with "eslint"', () => {
+			const filteredNames = ['pmd', 'retire-js', 'eslint-custom'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;	
+		});
+
+		it('should return true when only PMD custom config is present and filter contains engine name', () => {
+			const filteredNames = ['pmd', engine.getName(), 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithPmdCustom);
+
+			expect(isEngineRequested).to.be.true;
 		});
 	});
 });
@@ -345,6 +409,9 @@ function mockStaticDependencies(target: RuleTarget, cliEngineMock: any) {
 async function createAbstractEngine(target: RuleTarget, StaticDependenciesMock: StaticDependencies) {
 	Mockito.when(MockStrategy.filterUnsupportedPaths(target.paths)).thenReturn(target.paths);
 	Mockito.when(MockStrategy.getLanguages()).thenReturn(['language']);
+	Mockito.when(MockStrategy.processRuleViolation()).thenReturn((filename: string, ruleViolation: RuleViolation)=> {
+		//do nothing
+	});
 
 	const engine = await createDummyEngine(Mockito.instance(MockStrategy), Mockito.instance(StaticDependenciesMock));
 	return engine;

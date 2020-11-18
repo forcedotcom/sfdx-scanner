@@ -3,7 +3,7 @@ import {container} from "tsyringe";
 import {Controller} from '../../src/Controller';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 import * as TestOverrides from '../test-related-lib/TestOverrides';
-import {ENGINE, Services} from '../../src/Constants';
+import {CUSTOM_CONFIG, ENGINE, Services} from '../../src/Constants';
 import {expect}  from 'chai';
 import {fail} from 'assert';
 import {instance, mock, when} from 'ts-mockito';
@@ -39,18 +39,6 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 	});
 
-	it('getUserFacingEngines excludes custom engines', async() => {
-		const engines: RuleEngine[] = await Controller.getUserFacingEngines();
-		const names: string[] = engines.map(e => e.getName());
-
-		expect(engines.length).to.equal(5);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.ESLINT_LWC);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-	});
-
 	it('getFilteredEngines filters and includes disabled', async() => {
 		const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.PMD]);
 		const names: string[] = engines.map(e => e.getName());
@@ -59,6 +47,17 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_LWC);
 		expect(names).to.contain(ENGINE.PMD);
+	});
+
+	it('getFilteredEngines uses custom config information to choose the correct instance', async() => {
+		const engineOptionsWithPmdCustom = new Map<string, string>([
+			[CUSTOM_CONFIG.PmdConfig, '/some/path/to/config']
+		]);		
+		const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.PMD], engineOptionsWithPmdCustom);
+		const names: string[] = engines.map(e => e.getName());
+
+		expect(engines.length).to.equal(1);
+		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 	});
 
 	it('getEnabledEngines throws exception when no engines are found', async() => {

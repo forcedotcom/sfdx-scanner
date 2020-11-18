@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineFlavor} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
@@ -53,7 +53,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	
 	public abstract isEnabled(): Promise<boolean>;
 
-	public abstract isCustomConfigBased(): boolean;
+	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
 	public abstract getCatalog(): Promise<Catalog>;
 
@@ -230,10 +230,6 @@ export class PmdEngine extends BasePmdEngine {
 		return PmdEngine.ENGINE_NAME;
 	}
 
-	isCustomConfigBased(): boolean {
-		return false;
-	}
-
 	getCatalog(): Promise<Catalog> {
 		return this.pmdCatalogWrapper.getCatalog();
 	}
@@ -243,10 +239,18 @@ export class PmdEngine extends BasePmdEngine {
 		rules: Rule[],
 		target: RuleTarget[],
 		engineOptions: Map<string, string>): boolean {
-			return !isCustomConfig(engineOptions)
-				&& (ruleGroups.length > 0 || rules.length > 0);
-				//TODO: targetPaths count should be ideally included here
-		}
+		return !isCustomConfig(engineOptions)
+			&& (ruleGroups.length > 0); // TODO: there's a bug in DefaultRuleManager that's populating Rules instead of RuleGroups when --engine filter is used
+		//TODO: targetPaths count should be ideally included here
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return !isCustomConfig(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value === this.getName();
+		});
+	}
 
 	/**
 	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
@@ -278,10 +282,6 @@ export class CustomPmdEngine extends BasePmdEngine {
 		return Promise.resolve(true); // TODO: revisit
 	}
 
-	isCustomConfigBased(): boolean {
-		return true;
-	}
-
 	getCatalog(): Promise<Catalog> {
 		// TODO: revisit this when adding customization to List
 		const catalog = {
@@ -297,9 +297,17 @@ export class CustomPmdEngine extends BasePmdEngine {
 		rules: Rule[],
 		target: RuleTarget[],
 		engineOptions: Map<string, string>): boolean {
-			return isCustomConfig(engineOptions);
-				//TODO: targetPaths count should be ideally included here
-		}
+		return isCustomConfig(engineOptions);
+		//TODO: targetPaths count should be ideally included here
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return isCustomConfig(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value.startsWith(EngineFlavor.PMD);
+		});
+	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(
@@ -324,7 +332,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
 		const fileHandler = new FileHandler();
 		if (!(await fileHandler.exists(configFile))) {
-			throw new SfdxError(`PMD config file does not exist: ${configFile}`);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdEngine', 'ConfigNotFound', [configFile]);
 		}
 
 		return configFile;

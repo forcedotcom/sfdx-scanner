@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {ENGINE, INTERNAL_ERROR_CODE} from '../../Constants';
+import {AllowedEngineFilters, INTERNAL_ERROR_CODE} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
@@ -52,7 +52,7 @@ export default class Run extends ScannerCommand {
 			char: 'e',
 			description: messages.getMessage('flags.engineDescription'),
 			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.ESLINT_TYPESCRIPT, ENGINE.PMD, ENGINE.RETIRE_JS]
+			options: [...AllowedEngineFilters]
 		}),
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// These flags are how you choose which files you're targeting.
@@ -167,7 +167,7 @@ export default class Run extends ScannerCommand {
 			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
 		}
 
-		// Capturing eslintconfig value, if provided
+		// Capturing pmdconfig value, if provided
 		if (this.flags.pmdconfig) {
 			const pmdConfig = normalize(untildify(this.flags.pmdconfig));
 			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);

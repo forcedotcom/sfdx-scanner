@@ -20,5 +20,5 @@ export interface RuleEngine {
 
 	isEnabled(): Promise<boolean>;
 
-	isCustomConfigBased(): boolean;
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 }

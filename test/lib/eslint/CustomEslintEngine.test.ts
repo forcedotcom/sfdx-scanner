@@ -4,7 +4,7 @@ import * as DataGenerator from './EslintTestDataGenerator';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import Mockito = require('ts-mockito');
 import { FileHandler } from '../../../src/lib/util/FileHandler';
-import { StaticDependencies } from '../../../src/lib/eslint/EslintProcessHelper';
+import { StaticDependencies } from '../../../src/lib/eslint/EslintCommons';
 import { Messages } from '@salesforce/core';
 import { CLIEngine } from 'eslint';
 import { ESReport, ESRule } from '../../../src/types';
@@ -19,14 +19,21 @@ describe("Tests for CustomEslintEngine", () => {
 	const engineOptionsWithEslintCustom = new Map<string, string>([
 		[CUSTOM_CONFIG.EslintConfig, configFilePath]
 	]);
+	const engineOptionsWithPmdCustom = new Map<string, string>([
+		[CUSTOM_CONFIG.PmdConfig, configFilePath]
+	]);
 
 	const emptyEngineOptions = new Map<string, string>();
 
 	describe("Testing shouldEngineRun()", () => {
 
-		it("should decide to run if EngineOptions has custom config for eslint and target is not empty", async () => {
-			const customEslintEngine = new CustomEslintEngine();
+		const customEslintEngine = new CustomEslintEngine();
+
+		before(async () => {
 			await customEslintEngine.init();
+		});
+
+		it("should decide to run if EngineOptions has custom config for eslint and target is not empty", async () => {
 
 			const shouldEngineRun = customEslintEngine.shouldEngineRun(
 				[],
@@ -38,8 +45,6 @@ describe("Tests for CustomEslintEngine", () => {
 		});
 
 		it("should decide to not run if EngineOptions is empty", async () => {
-			const customEslintEngine = new CustomEslintEngine();
-			await customEslintEngine.init();
 
 			const shouldEngineRun = customEslintEngine.shouldEngineRun(
 				[],
@@ -51,8 +56,6 @@ describe("Tests for CustomEslintEngine", () => {
 		});
 
 		it("should decide to not run if target is empty", async () => {
-			const customEslintEngine = new CustomEslintEngine();
-			await customEslintEngine.init();
 
 			const shouldEngineRun = customEslintEngine.shouldEngineRun(
 				[],
@@ -62,6 +65,56 @@ describe("Tests for CustomEslintEngine", () => {
 
 			expect(shouldEngineRun).to.be.false;
 		});
+	});
+
+	describe('Testing isEngineRequested()', () => {
+		const engine = new CustomEslintEngine();
+
+		before(async () => {
+			await engine.init();
+		});
+
+		it('should return true when custom config is present and filter contains "eslint"', () => {
+			const filteredValues = ['pmd','eslint'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.true;
+		});
+
+		it('should return true when custom config is present and filter starts with "eslint"', () => {
+			const filteredValues = ['eslint-lwc'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.true;
+		});
+
+		it('should return false when custom config is not present even if filter contains "eslint"', () => {
+			const filteredValues = ['pmd','eslint', 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return false when custom config is present but filter does not contain "eslint"', () => {
+			const filteredValues = ['pmd','retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return false when only pmd custom config is present even if filter contains "eslint"', () => {
+			const filteredValues = ['pmd','eslint'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, engineOptionsWithPmdCustom);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+
 	});
 
 	describe('Testing getCatalog()', () => {

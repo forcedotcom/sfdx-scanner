@@ -1,13 +1,14 @@
 import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport } from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
-import {CUSTOM_CONFIG, ENGINE} from '../../Constants';
-import {EslintProcessHelper, StaticDependencies} from './EslintProcessHelper';
+import {CUSTOM_CONFIG, ENGINE, EngineFlavor} from '../../Constants';
+import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import { EventCreator } from '../util/EventCreator';
 
 
 
 export class CustomEslintEngine implements RuleEngine {
+
 	private dependencies: StaticDependencies;
 	private helper: EslintProcessHelper;
 	private eventCreator: EventCreator;
@@ -21,8 +22,12 @@ export class CustomEslintEngine implements RuleEngine {
 		return this.getEngine().valueOf();
 	}
 
-	isCustomConfigBased(): boolean {
-		return true;
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return this.helper.isCustomRun(engineOptions)
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		&& filterValues.some((value, index, array) => {
+			return value.startsWith(EngineFlavor.ESLINT);
+		});
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {
@@ -77,7 +82,7 @@ export class CustomEslintEngine implements RuleEngine {
 			const report: ESReport = cli.executeOnFiles(target.paths);
 
 			// Map results to supported format
-			this.helper.addRuleResultsFromReport(this.getName(), results, report, cli.getRules(), this.processRuleViolation);
+			this.helper.addRuleResultsFromReport(this.getName(), results, report, cli.getRules(), this.processRuleViolation());
 		}
 		
 		return results;
@@ -107,9 +112,11 @@ export class CustomEslintEngine implements RuleEngine {
 		return config;
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
-		// do nothing - revisit when we have situations that need processing
+	processRuleViolation(): ProcessRuleViolationType {
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		return (fileName: string, ruleViolation: RuleViolation): void => {
+			// do nothing - revisit when we have situations that need processing
+		}
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

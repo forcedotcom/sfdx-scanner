@@ -3,7 +3,7 @@ import "reflect-metadata";
 import {SfdxError} from '@salesforce/core';
 import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
-import {EnvOverridable, Services} from './Constants';
+import {EnvOverridable, Services, AllowedEngineFilters} from './Constants';
 import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine'
 import {RulePathManager} from './lib/RulePathManager';
@@ -53,25 +53,12 @@ export const Controller = {
 		return engines;
 	},
 
-	getUserFacingEngines: async (): Promise<RuleEngine[]> => {
+	getFilteredEngines: async (filteredNames: string[], engineOptions: Map<string, string> = new Map()): Promise<RuleEngine[]> => {
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
-		const engines: RuleEngine[] = [];
-
-		for (const engine of allEngines) {
-			if (!engine.isCustomConfigBased()) {
-				engines.push(engine);
-			}
-		}
-
-		return engines;
-	},
-
-	getFilteredEngines: async (filteredNames: string[]): Promise<RuleEngine[]> => {
-		const userFacingEngines: RuleEngine[] = await Controller.getUserFacingEngines();
-		const engines = userFacingEngines.filter(e => filteredNames.includes(e.getName()));
+		const engines = allEngines.filter(e => e.isEngineRequested(filteredNames, engineOptions));
 
 		if (engines.length == 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), enginesToString(userFacingEngines)]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Controller', 'NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
 		}
 
 		return engines;

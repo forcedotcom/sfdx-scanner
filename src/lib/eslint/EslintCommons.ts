@@ -4,6 +4,10 @@ import { CUSTOM_CONFIG } from '../../Constants';
 import { RuleResult, RuleViolation, ESMessage, ESRule, ESReport } from '../../types';
 import { FileHandler } from '../util/FileHandler';
 
+// Defining a function signature that will be returned by EslintStrategy.processRuleViolation()
+// This provides a safe way to pass around the callback function
+export interface ProcessRuleViolationType { (fileName: string, ruleViolation: RuleViolation): void}
+
 
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -25,7 +29,7 @@ export class StaticDependencies {
 }
 
 export class EslintProcessHelper {
-	// TODO: move to common code
+
 	isCustomRun(engineOptions: Map<string, string>): boolean {
 		return engineOptions.has(CUSTOM_CONFIG.EslintConfig);
 	}
@@ -68,8 +72,6 @@ export class EslintProcessHelper {
 						url
 					};
 
-					// TODO: when moving to a common logic, find a way to handle this missing step
-					// this.strategy.processRuleViolation(fileName, violation);
 					processRuleViolation(fileName, violation);
 
 					return violation;

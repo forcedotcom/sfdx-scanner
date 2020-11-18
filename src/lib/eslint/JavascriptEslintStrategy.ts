@@ -2,6 +2,7 @@ import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
 import {RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
+import { ProcessRuleViolationType } from './EslintCommons';
 
 const ES_CONFIG = {
 	"baseConfig": {
@@ -55,8 +56,10 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return paths;
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
-		// Intentionally left blank
+	processRuleViolation(): ProcessRuleViolationType {
+		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		return (fileName: string, ruleViolation: RuleViolation): void => {
+			// Intentionally left blank
+		}
 	}
 }
