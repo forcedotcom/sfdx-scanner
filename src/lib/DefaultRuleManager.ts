@@ -132,7 +132,7 @@ export class DefaultRuleManager implements RuleManager {
 	 *
 	 * Any items from the 'targets' array that result in a match are added to the 'matchedTargets' Set.
 	 */
-	private async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
+	protected async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
 		const engineTargets = await engine.getTargetPatterns();
@@ -193,7 +193,14 @@ export class DefaultRuleManager implements RuleManager {
 					// If the target is a directory, we should get everything in it, convert relative paths to absolute
 					// paths, and then filter based our matcher.
 					const relativePaths = await globby(target);
-					ruleTargets.push({target, isDirectory: true, paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))});
+					const ruleTarget = {
+						target,
+						isDirectory: true,
+						paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
+					};
+					if (ruleTarget.paths.length > 0) {
+						ruleTargets.push(ruleTarget);
+					}
 				} else {
 					// The target is just a file. Validate it against our matcher, and add it if eligible.
 					const absolutePath = path.resolve(target);
