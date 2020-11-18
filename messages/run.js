@@ -34,7 +34,7 @@ module.exports = {
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
 		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv.",
-		"tsConfigEslintConfigExclusive": "Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
+		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {
 		"noViolationsDetected": "No rule violations found.",
@@ -42,7 +42,7 @@ module.exports = {
 		"writtenToOutFile": "Rule violations have been written to %s.",
 		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
 		"pleaseSeeAbove": "Please see the logs above.",
-		"filtersIgnoredCustom": "Rule filters will be ignored for custom config runs. Please modify your config file to reflect the filtering you need."
+		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
 	},
 	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"examples": `Invoking without specifying any rules causes all rules to be run.

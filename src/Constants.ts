@@ -29,7 +29,7 @@ export enum ENGINE {
 /**
  * Main engine types that have more than one variation
  */
-export const EngineFlavor = {
+export const EngineBase = {
 	PMD: 'pmd',
 	ESLINT: 'eslint'
 }

@@ -333,7 +333,7 @@ describe('RetireJsEngine', () => {
 				[CUSTOM_CONFIG.PmdConfig, configFilePath]
 			]);
 			
-			it('should return true if filter contains "retire-js" if engineOptions is empty', () => {
+			it('should return true if filter contains "retire-js" and engineOptions map is empty', () => {
 				const filterValues = ['retire-js', 'pmd'];
 
 				const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
@@ -341,7 +341,7 @@ describe('RetireJsEngine', () => {
 				expect(isEngineRequested).to.be.true;
 			});
 
-			it('should return true if filter contains "retire-js" if engineOptions contains eslint config', () => {
+			it('should return true if filter contains "retire-js" and engineOptions map contains eslint config', () => {
 				const filterValues = ['retire-js', 'pmd'];
 
 				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithEslintCustom);
@@ -349,7 +349,7 @@ describe('RetireJsEngine', () => {
 				expect(isEngineRequested).to.be.true;
 			});
 
-			it('should return true if filter contains "retire-js" if engineOptions contains pmd config', () => {
+			it('should return true if filter contains "retire-js" and engineOptions map contains pmd config', () => {
 				const filterValues = ['retire-js', 'pmd'];
 
 				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithPmdCustom);

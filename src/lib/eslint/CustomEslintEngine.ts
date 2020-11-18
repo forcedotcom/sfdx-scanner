@@ -1,6 +1,6 @@
 import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport } from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
-import {CUSTOM_CONFIG, ENGINE, EngineFlavor} from '../../Constants';
+import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import { EventCreator } from '../util/EventCreator';
@@ -26,7 +26,7 @@ export class CustomEslintEngine implements RuleEngine {
 		return this.helper.isCustomRun(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 		&& filterValues.some((value, index, array) => {
-			return value.startsWith(EngineFlavor.ESLINT);
+			return value.startsWith(EngineBase.ESLINT);
 		});
 	}
 

@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG, EngineFlavor} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineBase} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
@@ -305,7 +305,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		return isCustomConfig(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 		&& filterValues.some((value, index, array) => {
-			return value.startsWith(EngineFlavor.PMD);
+			return value.startsWith(EngineBase.PMD);
 		});
 	}
 
