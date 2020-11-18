@@ -74,6 +74,37 @@ describe('PathMatcher', () => {
 				expect(results).to.not.include(targets[4], 'Path wrongly included');
 			});
 		});
+
+		describe('De-normalized paths', () => {
+			const targets = [
+				'path\\to\\a/JSScript.js',
+				'path/to\\node_modules/lib\\JSScript.js',
+				'path/to/QuoteTrigger.cls',
+				'C:\\Users\\jfeingold/code/CPQ/pkg/main/default/classes/QuoteTrigger.cls',
+				'path/to/SomeClass.java'
+			];
+			const patterns = [
+				'**\\*.js', '!**/node_modules/**',
+				'**/*.cls', '!C:/Users\\jfeingold/code/CPQ/pkg/**'
+			];
+
+			const pm = new PathMatcher(patterns);
+			const results = pm.filterPathsByPatterns(targets);
+
+			it('INCLUDES paths matching ANY positive AND ALL negative patterns', () => {
+				expect(results).to.include(targets[0], 'Path wrongly excluded.');
+				expect(results).to.include(targets[2], 'Path wrongly excluded.')
+			});
+
+			it('EXCLUDES paths matching ANY positive patterns but NOT ALL negative patterns', () => {
+				expect(results).to.not.include(targets[1], 'Path wrongly included');
+				expect(results).to.not.include(targets[3], 'Path wrongly included');
+			});
+
+			it('EXCLUDES paths matching ALL negative patterns but NO positive patterns', () => {
+				expect(results).to.not.include(targets[4], 'Path wrongly included');
+			});
+		});
 	});
 
 	describe('#pathMatchesPatterns()', () => {
@@ -145,5 +176,34 @@ describe('PathMatcher', () => {
 				expect(pm.pathMatchesPatterns(targets[4])).to.equal(false, 'Path wrongly not matched.');
 			});
 		});
+
+		describe('De-normalized paths', () => {
+			const targets = [
+				'path\\to\\a/JSScript.js',
+				'path/to\\node_modules/lib\\JSScript.js',
+				'path/to/QuoteTrigger.cls',
+				'C:\\Users\\jfeingold/code/CPQ/pkg/main/default/classes/QuoteTrigger.cls',
+				'path/to/SomeClass.java'
+			];
+			const patterns = [
+				'**\\*.js', '!**/node_modules/**',
+				'**/*.cls', '!C:/Users\\jfeingold/code/CPQ/pkg/**'
+			];
+			const pm = new PathMatcher(patterns);
+
+			it('MATCHES paths matching positive and negative patterns', () => {
+				expect(pm.pathMatchesPatterns(targets[0])).to.equal(true, 'Path wrongly matched.');
+				expect(pm.pathMatchesPatterns(targets[2])).to.equal(true, 'Path wrongly matched.');
+			});
+
+			it('DOES NOT MATCH paths matching positive patterns but not negative patterns', () => {
+				expect(pm.pathMatchesPatterns(targets[1])).to.equal(false, 'Path wrongly not matched.');
+				expect(pm.pathMatchesPatterns(targets[3])).to.equal(false, 'Path wrongly not matched.');
+			});
+
+			it('DOES NOT MATCH paths matching negative patterns but not positive patterns', () => {
+				expect(pm.pathMatchesPatterns(targets[4])).to.equal(false, 'Path wrongly not matched.');
+			});
+		})
 	})
 });
