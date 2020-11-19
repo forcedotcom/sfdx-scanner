@@ -57,6 +57,35 @@ jobs:
 
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
+  windows-build:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+      shell: bash.exe
+    working_directory: C:\repo
+    steps:
+      - attach_workspace:
+          at: C:\repo
+
+      - run: mkdir test-results
+
+      # UNIT TESTS
+      - run:
+          name: test
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+          when: always
+
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          when: always
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts: # upload test coverage as artifact.
+          path: test-coverage
 
   self-evaluation:
     <<: *defaults
@@ -203,16 +232,18 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
+      - windows-build:
+          requires:
+            - build
       - unpackaged-sanity:
           requires:
-            - build
+            - windows-build
       - self-evaluation:
           requires:
-            - build
+            - windows-build
       - publish-latest:
-          # This job should only run after 'build' finishes successfully.
+          # This job should only run after 'self-evaluation' finishes successfully.
           requires:
-            - build
             - self-evaluation
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
