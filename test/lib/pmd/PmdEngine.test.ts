@@ -7,6 +7,8 @@ import Sinon = require('sinon');
 import {PmdEngine}  from '../../../src/lib/pmd/PmdEngine'
 import {uxEvents} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import { CUSTOM_CONFIG } from '../../../src/Constants';
+import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 
 TestOverrides.initializeTestSetup();
 class TestPmdEngine extends PmdEngine {
@@ -15,8 +17,18 @@ class TestPmdEngine extends PmdEngine {
 	}
 }
 
-describe('PmdEngine', () => {
+describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 	const testPmdEngine = new TestPmdEngine();
+
+	const configFilePath = '/some/file/path/rule-ref.xml';
+	const engineOptionsWithPmdCustom = new Map<string, string>([
+		[CUSTOM_CONFIG.PmdConfig, configFilePath]
+	]);
+	const emptyEngineOptions = new Map<string, string>();
+
+	const engineOptionsWithEslintCustom = new Map<string, string>([
+		[CUSTOM_CONFIG.EslintConfig, configFilePath]
+	]);
 
 	before(async () => {
 		Sinon.createSandbox();
@@ -79,5 +91,105 @@ describe('PmdEngine', () => {
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
 		})
+	});
+
+	describe('testing shouldEngineRun()', () => {
+		const engine = new PmdEngine();
+
+		before(async () => {
+			await engine.init();
+		});
+
+		it('should decide to NOT run when engineOptions map contains pmdconfig', () => {
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[],
+				[],
+				engineOptionsWithPmdCustom
+			);
+
+			expect(shouldEngineRun).to.be.false;
+		});
+
+		it('should decide to NOT run when RuleGroup is empty', () => {
+			const shouldEngineRun = engine.shouldEngineRun(
+				[], // empty RuleGroup
+				[],
+				[],
+				emptyEngineOptions
+			);
+
+			expect(shouldEngineRun).to.be.false;
+		});
+
+		it('should decide to run when engineOptions map does not contain pmdconfig', () => {
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[],
+				[],
+				emptyEngineOptions
+			);
+
+			expect(shouldEngineRun).to.be.true;
+		});
+
+		it('should decide to run when engineOptions map contains only eslint config', () => {
+			const shouldEngineRun = engine.shouldEngineRun(
+				[DataGenerator.getDummyRuleGroup()],
+				[],
+				[],
+				engineOptionsWithEslintCustom
+			);
+
+			expect(shouldEngineRun).to.be.true;
+		});
+	});
+
+	describe('tests for isEngineRequested()', () => {
+		const engine = new PmdEngine();
+
+		before(async () => {
+			await engine.init();
+		});
+
+		it('should return true when custom config is not present and filter contains "pmd"', () => {
+			const filteredNames = ['eslint-lwc', 'pmd'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.true;
+		});
+
+		it('should return false when custom config is not present but filter does not contain "pmd"', () => {
+			const filteredNames = ['eslint-lwc', 'retire-js'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return false when custom config is present even if filter contains "pmd"', () => {
+			const filteredNames = ['eslint-lwc', 'pmd'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithPmdCustom);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return false when custom config is not present and if filter contains a value that starts with "pmd"', () => {
+			const filteredNames = ['eslint-lwc', 'pmd-custom'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return true when custom config for only eslint is present and filter contains "pmd"', () => {
+			const filteredNames = ['eslint-lwc', 'pmd'];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.true;
+		});
 	});
 });

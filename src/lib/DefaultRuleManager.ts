@@ -69,7 +69,7 @@ export class DefaultRuleManager implements RuleManager {
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		const engines: RuleEngine[] = await this.resolveEngineFilters(filters);
+		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
@@ -78,7 +78,8 @@ export class DefaultRuleManager implements RuleManager {
 			const engineRules = rules.filter(r => r.engine === e.getName());
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
-			if (engineRules.length > 0 && engineTargets.length > 0) {
+			
+			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {
@@ -108,7 +109,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 	}
 
-	private async resolveEngineFilters(filters: RuleFilter[]): Promise<RuleEngine[]> {
+	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
 		let filteredEngineNames: readonly string[] = null;
 		for (const filter of filters) {
 			if (filter.filterType === FilterType.ENGINE) {
@@ -120,7 +121,7 @@ export class DefaultRuleManager implements RuleManager {
 		// just return any enabled engines.
 		// This lets us quietly introduce new engines by making them disabled by default but still available if explicitly
 		// specified.
-		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[]) : Controller.getEnabledEngines();
+		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions) : Controller.getEnabledEngines();
 	}
 
 	/**

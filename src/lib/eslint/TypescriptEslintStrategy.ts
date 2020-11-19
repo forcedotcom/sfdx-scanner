@@ -6,6 +6,7 @@ import {RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
+import { ProcessRuleViolationType } from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -34,7 +35,7 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"useEslintrc": false, // Will not use external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
@@ -107,12 +108,14 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	/**
 	 * Converts the eslint message that requires the scanned files to be a subset of the files specified by tsconfig.json
 	 */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
-		const message: string = ruleViolation.message;
+	processRuleViolation(): ProcessRuleViolationType {
+		return (fileName: string, ruleViolation: RuleViolation): void => {
+			const message: string = ruleViolation.message;
 
-		if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
-			message.endsWith('The file must be included in at least one of the projects provided.')) {
-			ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+			if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
+				message.endsWith('The file must be included in at least one of the projects provided.')) {
+				ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+			}
 		}
 	}
 
