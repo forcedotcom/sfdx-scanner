@@ -38,6 +38,16 @@
         en: Managing Custom Rules
       url: /custom-rules/manage
 - title:
+    en: Custom Configuration
+  baseUrl: /custom-config/
+  children:
+    - title:
+        en: PMD Configuration
+      url: /custom-config/pmd
+    - title:
+        en: ESLint Configuration
+      url: /custom-config/eslint
+- title:
     en: Architecture
   baseUrl: /architecture/
   children:
