@@ -25,6 +25,8 @@ $ sfdx scanner:run [-c <array>] [-r <array>] [-e <array>] [-t <array> | undefine
   -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
   -v, --violations-cause-error				When violations are detected, exit with code equal to the severity of the most severe violation.
   --tsconfig				tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
+  --pmdconfig     Location of rule reference XML, if user wishes to run PMD with custom config.
+  --eslintconfig  Location of .eslintrc.json, if user wishes to run Eslint with custom config.
   --env 				JSON-formatted string that overrides ESLint's default environmental variables.
   --json				Format output as json
   --verbose				Emit additional command output to stdout
@@ -78,6 +80,16 @@ Use --engine to include or exclude engines. Regardless of their current 'disable
 In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
 ```bash
 $ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
+```
+
+To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+```bash
+$ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
+```
+
+To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+```bash
+$ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 ```
 
 ## Demo
