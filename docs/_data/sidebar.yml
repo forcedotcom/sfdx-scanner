@@ -28,16 +28,6 @@
         en: scanner:rule:remove
       url: /scanner-commands/remove
 - title:
-    en: Custom Rules
-  baseUrl: /custom-rules/
-  children:
-    - title:
-        en: Authoring Custom Rules
-      url: /custom-rules/author
-    - title:
-        en: Managing Custom Rules
-      url: /custom-rules/manage
-- title:
     en: Custom Configuration
   baseUrl: /custom-config/
   children:
@@ -47,6 +37,16 @@
     - title:
         en: ESLint Configuration
       url: /custom-config/eslint
+- title:
+    en: Custom Rules
+  baseUrl: /custom-rules/
+  children:
+    - title:
+        en: Authoring Custom Rules
+      url: /custom-rules/author
+    - title:
+        en: Managing Custom Rules
+      url: /custom-rules/manage
 - title:
     en: Architecture
   baseUrl: /architecture/
