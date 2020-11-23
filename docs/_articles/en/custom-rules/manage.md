@@ -57,7 +57,7 @@ Use the ``` --force ``` parameter to bypass confirmation of the removal.
 
 ## Eslint Custom Rules
 
-Custom Rules on Eslint are handled through [Custom Config capabilities](./en/custom-config/eslint/).
+Custom Rules on Eslint are handled through the Scanner plugin's [Custom Config capabilities](./en/custom-config/eslint/).
 
 ### Adding Rule(s)
 

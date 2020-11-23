@@ -7,7 +7,7 @@ lang: en
 
 Let's say your codebase has specific and repetitive coding issues that you want to address and clean up. Ideally you'd use the built-in rules of the Salesforce CLI Scanner to find these rule violations. But sometimes the problems exist only in the context of your codebase, and the built-in rules may not catch them. In this case, create your own _custom rules_ to highlight these issues as rule violations when you scan your code.
 
-PMD and Eslint's custom rules work very differently. This causes Scanner plugin to deal with both types in distinctly different ways. Please note that information related to PMD Custom Rules does not apply to Eslint Custom Rules.
+PMD and Eslint's custom rules work very differently. This causes Scanner plugin to deal with both types in distinctly different ways. Please note that information related to PMD Custom Rules does NOT apply to Eslint Custom Rules.
 
 ---
 
@@ -42,11 +42,11 @@ Here's an example of using ```jar``` to create a JAR file:
 
 ### Writing Eslint Custom Rules
 
-Writing custom Eslint rules requires creating a custom Eslint plugin and defining rules within it. Here is [Eslint's official documentation on writing rules](https://eslint.org/docs/developer-guide/working-with-rules). Also, there are many tutorials and blogs that explain the process clearly. In this documentation, we'll focus the specific elements that help the rule work with the Scanner plugin.
+Writing custom Eslint rules requires creating a custom Eslint plugin and defining rules within it. Here is [Eslint's official documentation on writing rules](https://eslint.org/docs/developer-guide/working-with-rules). Also, there are many tutorials and blogs that explain this process in detail. In this documentation, we'll focus on the specific elements that help the rule work with the Scanner plugin.
 
 ### Adding Rule as NPM Dependency
 
-While rule is written, please make sure the rule definition contains documentation. We are specifically looking for a format like this:
+While writing the rule, please make sure the rule definition contains documentation. We are specifically looking for a format like this:
 ```bash
 // Rule definition in index.js or where you choose to store it
 ...

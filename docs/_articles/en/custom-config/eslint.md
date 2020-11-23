@@ -24,8 +24,6 @@ However, while giving you the power, the Scanner also offloads some responsibili
 3. `.eslintignore` is not evaluated today. Please use your target patterns in the `--target` flag that is passed in with `scanner:run` command. As a reminder, `--target` can take a comma separated list of any combination of files, directories, positive patterns and negations.
 
 4. If you have written your configuration to execute Typescript, make sure your tsconfig file is added to the configuration under `parserOptions.project`. `--tsconfig` flag cannot be used with `--eslintconfig` flag.
-
-5. `package.json` with embedded eslint configuration is not supported.
 ```bash
 //.eslintrc.json
 ...
@@ -34,6 +32,9 @@ However, while giving you the power, the Scanner also offloads some responsibili
 	},
 ...
 ```
+
+5. `package.json` with embedded eslint configuration is not supported.
+
 
 
 ## Restrictions with Scanner Plugin
