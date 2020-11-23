@@ -28,6 +28,16 @@
         en: scanner:rule:remove
       url: /scanner-commands/remove
 - title:
+    en: Custom Configuration
+  baseUrl: /custom-config/
+  children:
+    - title:
+        en: PMD Configuration
+      url: /custom-config/pmd
+    - title:
+        en: ESLint Configuration
+      url: /custom-config/eslint
+- title:
     en: Custom Rules
   baseUrl: /custom-rules/
   children:

@@ -73,5 +73,11 @@ module.exports = {
 	Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
+
+	To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+		E.g, $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
+
+	To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+		E.g., $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 	`
 };
