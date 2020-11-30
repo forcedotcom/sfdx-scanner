@@ -66,10 +66,10 @@
 		},
 		{
 			"paths": [
-				"rulesets/ecmascript/braces.xml",
-				"rulesets/apex/braces.xml"
+				"rulesets/apex/security.xml",
+				"rulesets/vf/security.xml"
 			],
-			"name": "Braces",
+			"name": "Security",
 			"engine": "pmd"
 		}
 	],

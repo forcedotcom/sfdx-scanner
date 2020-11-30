@@ -60,8 +60,7 @@ export default class Run extends ScannerCommand {
 			char: 't',
 			description: messages.getMessage('flags.targetDescription'),
 			longDescription: messages.getMessage('flags.targetDescriptionLong'),
-			// If you're specifying local files, it doesn't make much sense to let you specify anything else.
-			exclusive: ['org']
+			required: true
 		}),
 		// These flags modify how the process runs, rather than what it consumes.
 		format: flags.enum({
@@ -108,11 +107,6 @@ export default class Run extends ScannerCommand {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
 
-		// We don't yet support running rules against an org, so we'll just throw an error for now.
-		if (this.flags.org) {
-			throw new SfdxError('Running rules against orgs is not yet supported', null, null, this.getInternalErrorCode());
-		}
-
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
 
@@ -125,9 +119,6 @@ export default class Run extends ScannerCommand {
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
 		const target = this.flags.target || [];
-		if (this.args.file) {
-			target.push(this.args.file);
-		}
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
 		let output: RecombinedRuleResults = null;
@@ -176,11 +167,6 @@ export default class Run extends ScannerCommand {
 	}
 
 	private validateFlags(): void {
-		// file, --target and --org are mutually exclusive, but they can't all be null.
-		if (!this.args.file && !this.flags.target && !this.flags.org) {
-			throw new SfdxError(messages.getMessage('validations.mustTargetSomething'), null, null, this.getInternalErrorCode());
-		}
-
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
 		}

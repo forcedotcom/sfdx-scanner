@@ -38,10 +38,10 @@ export const EngineBase = {
  * These are the filter values that Users can filter by when using
  * --engine flag
  */
-export const AllowedEngineFilters = [ 
-	ENGINE.ESLINT, 
-	ENGINE.ESLINT_LWC, 
-	ENGINE.ESLINT_TYPESCRIPT, 
+export const AllowedEngineFilters = [
+	ENGINE.ESLINT,
+	ENGINE.ESLINT_LWC,
+	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS
 ]
@@ -52,7 +52,8 @@ export enum LANGUAGE {
 	JAVA = 'java',
 	JAVASCRIPT = 'javascript',
 	PLSQL = 'plsql',
-	TYPESCRIPT = 'typescript'
+	TYPESCRIPT = 'typescript',
+	VISUALFORCE = 'vf'
 }
 
 export const Services = {

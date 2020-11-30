@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
-import {FilterType, RuleFilter} from './RuleFilter';
+import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
@@ -78,7 +78,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineRules = rules.filter(r => r.engine === e.getName());
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
-			
+
 			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
@@ -112,8 +112,8 @@ export class DefaultRuleManager implements RuleManager {
 	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
 		let filteredEngineNames: readonly string[] = null;
 		for (const filter of filters) {
-			if (filter.filterType === FilterType.ENGINE) {
-				filteredEngineNames = filter.filterValues;
+			if (isEngineFilter(filter)) {
+				filteredEngineNames = filter.getEngines();
 				break;
 			}
 		}

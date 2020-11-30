@@ -5,16 +5,16 @@ import { FileHandler } from '../../../src/lib/util/FileHandler';
 import * as path from 'path';
 import {Controller} from '../../../src/Controller';
 import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
-import LocalCatalog from '../../../src/lib/services/LocalCatalog';
-import fs = require('fs');
 import { fail } from 'assert';
 import {RuleResult, RuleViolation} from '../../../src/types';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import * as TestUtils from '../../TestUtils';
 
-const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-const CATALOG_FIXTURE_RULE_COUNT = 15;
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 let ruleManager: RuleManager = null;
+
+TestOverrides.initializeTestSetup();
 
 class TestTypescriptEslintStrategy extends TypescriptEslintStrategy {
 	public async checkEngineOptionsForTsconfig(engineOptions: Map<string, string>): Promise<string> {
@@ -176,22 +176,7 @@ describe('TypescriptEslint Strategy', () => {
 
 		describe('typescript file not in tsconfig.json causes error', () => {
 			before(async () => {
-				// Make sure all catalogs exist where they're supposed to.
-				if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
-					throw new Error('Fake catalog does not exist');
-				}
-
-				// Make sure all catalogs have the expected number of rules.
-				const catalogJson = JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-				if (catalogJson.rules.length !== CATALOG_FIXTURE_RULE_COUNT) {
-					throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + CATALOG_FIXTURE_RULE_COUNT);
-				}
-
-				// Stub out the LocalCatalog's getCatalog method so it always returns the fake catalog, whose contents are known,
-				// and never overwrites the real catalog. (Or we could use the IOC container to do this without sinon.)
-				Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
-					return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-				});
+				TestUtils.stubCatalogFixture();
 
 				// Declare our rule manager.
 				ruleManager = await Controller.createRuleManager();
@@ -199,6 +184,7 @@ describe('TypescriptEslint Strategy', () => {
 				process.chdir(path.join('test', 'code-fixtures', 'projects'));
 			});
 			after(() => {
+				Sinon.restore();
 				process.chdir("../../..");
 			});
 

@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
-import {FilterType, RuleFilter} from '../../../lib/RuleFilter';
+import {RuleFilter, SourcePackageFilter} from '../../../lib/RuleFilter';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
@@ -80,7 +80,7 @@ export default class Remove extends ScannerCommand {
 		if (!this.flags.force) {
 			// Step 6a: We'll want to create filter criteria.
 			const filters: RuleFilter[] = [];
-			filters.push(new RuleFilter(FilterType.SOURCEPACKAGE, deletablePaths));
+			filters.push(new SourcePackageFilter(deletablePaths));
 
 			// Step 6b: We'll want to retrieve the matching rules.
 			const rm = await Controller.createRuleManager();
