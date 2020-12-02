@@ -102,7 +102,7 @@ export abstract class RuleFilter {
 		return (!this.filterValues || this.filterValues.length === 0);
 	}
 
-	protected static mapFilterValues(filterValues: string[]): {positive: string[]; negative: string[]} {
+	protected static processForPosAndNegFilterValues(filterValues: string[]): {positive: string[]; negative: string[]} {
 		filterValues = filterValues.map(v => v.trim());
 		const positive = filterValues.filter(v => !v.startsWith(NEGATION_CHAR));
 		const negative = filterValues.filter(v => v.startsWith(NEGATION_CHAR)).map(v => v.substr(1));
@@ -115,7 +115,7 @@ export abstract class RuleFilter {
  */
 abstract class PositiveRuleFilter extends RuleFilter {
     constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
-		const mapped = RuleFilter.mapFilterValues(filterValues);
+		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 		if (mapped.negative.length > 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'Exceptions', 'RuleFilter.PositiveOnly', [filterDisplayName]);
 		}
@@ -128,7 +128,7 @@ abstract class PositiveRuleFilter extends RuleFilter {
  */
 abstract class NegateableRuleFilter extends RuleFilter {
     constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
-		const mapped = RuleFilter.mapFilterValues(filterValues);
+		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 
 		// Throw an exception if there are mixed types
 		if (mapped.positive.length > 0 && mapped.negative.length > 0) {

@@ -31,7 +31,7 @@ function listContentsOverlap<T>(list1: T[], list2: T[]): boolean {
  *
  * @return the number of rules returned
  */
-async function getRulesFilteredByCategoryCount (includeDefaultDisabled: boolean, includedCategories: string[]=undefined, excludeCategories: string[]=undefined): Promise<number> {
+async function getRulesFilteredByCategoryCount(includeDefaultDisabled: boolean, includedCategories: string[]=undefined, excludeCategories: string[]=undefined): Promise<number> {
 	const catalog = getCatalogJson();
 	const enabledEngineNames = (await Controller.getEnabledEngines()).map(e => e.getName());
 	let rules: Rule[] = catalog.rules.filter(r => (includeDefaultDisabled || r.defaultEnabled) && enabledEngineNames.includes(r.engine));

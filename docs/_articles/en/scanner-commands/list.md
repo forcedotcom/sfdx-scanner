@@ -44,5 +44,10 @@ If you specify multiple filters, they are combined with a logical AND. This exam
 $ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
 ```
 
+When you negate a category, the category is excluded. This example returns all rules except those in the Design or Best Practices categories. The values must be enclosed in single quotes.
+```bash
+$ sfdx scanner:rule:list --category '!Design,!Best Practices'
+```
+
 ## Demo
 ![List Example](./assets/images/list.gif) 
