@@ -32,6 +32,10 @@ The values supplied to a single filter are handled with a logical OR.
 	E.g., $ sfdx scanner:rule:list --language apex,javascript
 		Returns all rules for Apex OR Javascript.
 
+Categories can be excluded by specifying the negation operator, the values must be enclosed in single quotes.
+	E.g., $ sfdx scanner:rule:list --category '!Design,!Best Practices'
+		Returns all rules except those in the Design or Best Practices categories.
+
 Different filters are combined with a logical AND.
 	E.g., $ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
 		Returns all rules that:

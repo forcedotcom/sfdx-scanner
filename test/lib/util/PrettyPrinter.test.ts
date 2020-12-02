@@ -1,18 +1,25 @@
 import {expect} from 'chai';
-import {FilterType, RuleFilter} from '../../../src/lib/RuleFilter';
+import {CategoryFilter, RuleFilter, RulenameFilter} from '../../../src/lib/RuleFilter';
 import * as PrettyPrinter from '../../../src/lib/util/PrettyPrinter';
 import {Rule} from '../../../src/types';
 
 
-function createRuleFilter(filterType: FilterType): {ruleFilter: RuleFilter; expectedRuleFilterString: string} {
-	const expectedRuleFilterString = `RuleFilter[filterType=${filterType}, filterValues=Rule1,Rule2]`;
-	const ruleFilter = new RuleFilter(filterType, ['Rule1', 'Rule2']);
+function createRulenameFilter(): {ruleFilter: RuleFilter; expectedRuleFilterString: string} {
+	const expectedRuleFilterString = `RuleFilter[filterType=RulenameFilter, filterValues=Rule1,Rule2, negated=false]`;
+	const ruleFilter = new RulenameFilter(['Rule1', 'Rule2']);
 	return {ruleFilter, expectedRuleFilterString};
 }
 
+function createCategoryFilter(): {ruleFilter: RuleFilter; expectedRuleFilterString: string} {
+	const expectedRuleFilterString = `RuleFilter[filterType=CategoryFilter, filterValues=Rule3,Rule4, negated=false]`;
+	const ruleFilter = new CategoryFilter(['Rule3', 'Rule4']);
+	return {ruleFilter, expectedRuleFilterString};
+}
+
+
 function createRuleFilters(): {ruleFilters: RuleFilter[]; expectedRuleFiltersString: string} {
-	const ruleFilter1 = createRuleFilter(FilterType.RULENAME);
-	const ruleFilter2 = createRuleFilter(FilterType.LANGUAGE);
+	const ruleFilter1 = createRulenameFilter();
+	const ruleFilter2 = createCategoryFilter();
 	const ruleFilters: RuleFilter[] = [ruleFilter1.ruleFilter, ruleFilter2.ruleFilter];
 	const expectedRuleFiltersString = `[${ruleFilter1.expectedRuleFilterString},${ruleFilter2.expectedRuleFilterString}]`;
 	return {ruleFilters, expectedRuleFiltersString};
@@ -84,7 +91,7 @@ describe(('PrettyPrinter tests'), () => {
 	});
 
 	it('should print a RuleFilter', () => {
-		const {ruleFilter, expectedRuleFilterString} = createRuleFilter(FilterType.CATEGORY);
+		const {ruleFilter, expectedRuleFilterString} = createCategoryFilter();
 		expect(PrettyPrinter.stringifyRuleFilter(ruleFilter)).equals(expectedRuleFilterString);
 	});
 

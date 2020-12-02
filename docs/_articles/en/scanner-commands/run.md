@@ -44,18 +44,23 @@ This example evaluates all rules against ```somefile.js```.
 $ sfdx scanner:run --format xml --target "somefile.js"
 ```
 
-When you specify multiple categories or rulesets, the results are combined with a logical OR. This example evaluates all rules in the Design and Best Practices categories and all rules in the Braces ruleset.
+When you specify multiple categories, the categories are combined with a logical OR. This example evaluates all rules in the Design or Best Practices categories.
 ```bash
-$ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
-```       
+$ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices"
+```
+
+When you negate a category, the category is excluded. This example evaluates all rules except those in the Design or Best Practices categories. The values must be enclosed in single quotes.
+```bash
+$ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
+```
 
 Wrap globs in quotes.  This example evaluates rules against all ```*.js``` files in the current directory, except for ```IgnoreMe.js```.
 
 Unix example:
-```bash    
+```bash
 $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
 ````
-Windows example: 
+Windows example:
 ```DOS
 > sfdx scanner:run --target ".\**\*.js,!.\**\IgnoreMe.js" ...
 ```
@@ -93,6 +98,4 @@ $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 ```
 
 ## Demo
-![Run Example](./assets/images/run.gif) 
-
-
+![Run Example](./assets/images/run.gif)

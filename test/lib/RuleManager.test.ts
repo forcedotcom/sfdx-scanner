@@ -1,29 +1,24 @@
 import {expect} from 'chai';
-import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
 
 import {Controller} from '../../src/Controller';
 import {Rule, RuleGroup, RuleTarget} from '../../src/types';
 
-import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
+import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
 import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
 import {uxEvents} from '../../src/lib/ScannerEvents';
 
-import LocalCatalog from '../../src/lib/services/LocalCatalog';
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
 import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
+import * as TestUtils from '../TestUtils';
 
 TestOverrides.initializeTestSetup();
-
-const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-const CATALOG_FIXTURE_RULE_COUNT = 15;
-const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 11;
 
 let ruleManager: RuleManager = null;
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
@@ -41,22 +36,7 @@ describe('RuleManager', () => {
 	});
 
 	before(async () => {
-		// Make sure all catalogs exist where they're supposed to.
-		if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
-			throw new Error('Fake catalog does not exist');
-		}
-
-		// Make sure all catalogs have the expected number of rules.
-		const catalogJson = JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-		if (catalogJson.rules.length !== CATALOG_FIXTURE_RULE_COUNT) {
-			throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + CATALOG_FIXTURE_RULE_COUNT);
-		}
-
-		// Stub out the LocalCatalog's getCatalog method so it always returns the fake catalog, whose contents are known,
-		// and never overwrites the real catalog. (Or we could use the IOC container to do this without sinon.)
-		Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
-			return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-		});
+		TestUtils.stubCatalogFixture();
 
 		// Declare our rule manager.
 		ruleManager = await Controller.createRuleManager();
@@ -69,7 +49,7 @@ describe('RuleManager', () => {
 				const allRules = await ruleManager.getRulesMatchingCriteria([]);
 
 				// Expect all default-enabled rules to have been returned.
-				expect(allRules).to.have.lengthOf(CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
+				expect(allRules).to.have.lengthOf(TestUtils.CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
 			});
 		});
 
@@ -78,8 +58,8 @@ describe('RuleManager', () => {
 				// Set up our filter array.
 				const category = 'Best Practices';
 				const filters = [
-					new RuleFilter(FilterType.CATEGORY, [category]),
-					new RuleFilter(FilterType.ENGINE, ['pmd'])];
+					new CategoryFilter([category]),
+					new EngineFilter(['pmd'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -94,7 +74,7 @@ describe('RuleManager', () => {
 			it('Filtering by multiple categories returns any rule in either category', async () => {
 				// Set up our filter array.
 				const categories = ['Best Practices', 'Design'];
-				const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+				const filters = [new CategoryFilter(categories)];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -112,7 +92,7 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by ruleset only', () => {
 			it('Filtering by a single ruleset returns only the rules in that ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.RULESET, ['Braces'])];
+				const filters = [new RulesetFilter(['Braces'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -123,7 +103,7 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple rulesets returns any rule in either ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'Best Practices'])];
+				const filters = [new RulesetFilter(['Braces', 'Best Practices'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -136,7 +116,7 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by language', () => {
 			it('Filtering by a single language returns only rules targeting that language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex'])];
+				const filters = [new LanguageFilter(['apex'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -147,7 +127,7 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple languages returns any rule targeting either language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex', 'javascript'])];
+				const filters = [new LanguageFilter(['apex', 'javascript'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -162,8 +142,8 @@ describe('RuleManager', () => {
 				// Set up our filter array.
 				const category = 'Best Practices';
 				const filters = [
-					new RuleFilter(FilterType.LANGUAGE, ['javascript']),
-					new RuleFilter(FilterType.CATEGORY, [category])
+					new LanguageFilter(['javascript']),
+					new CategoryFilter([category])
 				];
 
 				// Pass the filter array into the manager.
@@ -180,7 +160,7 @@ describe('RuleManager', () => {
 		describe('Edge Case: No rules match criteria', () => {
 			it('When no rules match the given criteria, an empty list is returned', async () => {
 				// Define our preposterous filter array.
-				const impossibleFilters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
+				const impossibleFilters = [new CategoryFilter(['beebleborp'])];
 
 				// Pass our filters into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(impossibleFilters);
@@ -252,7 +232,7 @@ describe('RuleManager', () => {
 					const validTargets = ['js/**/*.js', 'app/force-app/main/default/classes', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -271,7 +251,7 @@ describe('RuleManager', () => {
 					// Set up our filter array.
 					const category = 'Best Practices';
 					const filters = [
-						new RuleFilter(FilterType.CATEGORY, [category])];
+						new CategoryFilter([category])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -293,7 +273,7 @@ describe('RuleManager', () => {
 				it('Filtering by multiple categories runs any rule in either category', async () => {
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -314,7 +294,7 @@ describe('RuleManager', () => {
 			describe('Edge Cases', () => {
 				it('When no rules match the given criteria, an empty string is returned', async () => {
 					// Define our preposterous filter array.
-					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
+					const filters = [new CategoryFilter(['beebleborp'])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
@@ -325,7 +305,7 @@ describe('RuleManager', () => {
 					const invalidTarget = ['does-not-exist.js'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -339,7 +319,7 @@ describe('RuleManager', () => {
 					const invalidTarget = ['app/force-app/main/default/no-such-directory'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -352,7 +332,7 @@ describe('RuleManager', () => {
 					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', 'app/force-app/main/default/no-such-directory'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -366,7 +346,7 @@ describe('RuleManager', () => {
 					const validTargets = ['js/**/*.js', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
