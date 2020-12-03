@@ -286,7 +286,7 @@ export default class Run extends ScannerCommand {
 		return messages.getMessage('output.writtenToOutFile', [this.flags.outfile]);
 	}
 
-	private writeToConsole(results: string | {columns; rows;}): string {
+	private writeToConsole(results: string | {columns; rows}): string {
 		// Figure out what format we need.
 		const format: OUTPUT_FORMAT = this.determineOutputFormat();
 		// Prepare the format mismatch message in case we need it later.

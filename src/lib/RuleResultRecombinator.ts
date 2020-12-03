@@ -65,7 +65,7 @@ export class RuleResultRecombinator {
 		}
 		if (results && results.length > 0) {
 			results.forEach(res => {
-				let ees: EngineExecutionSummary = summaryMap.get(res.engine);
+				const ees: EngineExecutionSummary = summaryMap.get(res.engine);
 				ees.fileCount += 1;
 				ees.violationCount += res.violations.length;
 			});
