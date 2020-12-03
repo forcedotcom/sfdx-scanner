@@ -222,17 +222,38 @@ export default class Run extends ScannerCommand {
 	}
 
 	private processOutput(rrr: RecombinedRuleResults): AnyJson {
-		const {minSev, results} = rrr;
-		// If the results were an empty string, it means we found no violations.
+		const {minSev, summaryMap, results} = rrr;
+		// If the results were an empty string, then we found no violations.
 		if (results === '') {
-			// We can just log a message to the console, and also return it for the --json route.
-			const msg = messages.getMessage('output.noViolationsDetected');
+			const msg = messages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
 			this.ux.log(msg);
 			return msg;
-		} else if (this.flags.outfile) {
-			return this.writeToOutfile(minSev, results);
+		}
+		// In addition to processing the results, we need to build a summary message indicating what happened.
+		let msg = this.buildEngineSummaryMessage(rrr);
+		// We surface violations to the user by writing them to the console or a file.
+		msg += ' ' + (this.flags.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
+
+		// Now that we have our completed summary message, we need to do something with it. We'll either throw it as an
+		// exception or log it to the console.
+		if (minSev > 0 && this.flags['violations-cause-error']) {
+			throw new SfdxError(msg, null, null, minSev);
 		} else {
-			return this.formatAndDisplayOutput(minSev, results);
+			this.ux.log(msg);
+		}
+
+		// Finally, we need to return something for use by the --json flag.
+		if (this.flags.outfile) {
+			// If we used an outfile, we should just return the summary message, since that says where the file is.
+			return msg;
+		} else if (typeof results === 'string') {
+			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
+			// before returning. Otherwise, we should just return the result string.
+			return this.determineOutputFormat() === OUTPUT_FORMAT.JSON ? JSON.parse(results) : results;
+		} else {
+			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
+			// in the table.
+			return results.rows;
 		}
 	}
 
@@ -240,28 +261,32 @@ export default class Run extends ScannerCommand {
 		return this.flags['violations-cause-error'] ? INTERNAL_ERROR_CODE : 1;
 	}
 
-	private writeToOutfile(minSev: number, results: string | {columns; rows}): AnyJson {
+	private buildEngineSummaryMessage(rrr: RecombinedRuleResults): string {
+		const {summaryMap, minSev} = rrr;
+		let msg = [...summaryMap.entries()]
+			.map(([engine, summary]) => {
+				return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
+			})
+			.join(' ');
+		// If we're supposed to throw an exception for violations, we need to add an extra sentence to the summary message.
+		if (minSev > 0 && this.flags['violations-cause-error']) {
+			msg += ` ${messages.getMessage('output.sevDetectionSummary', [minSev])}`;
+		}
+		return msg;
+	}
+
+	private writeToOutfile(results: string | {columns; rows}): string {
 		try {
-			fs.writeFileSync(this.flags.outfile, results)
+			fs.writeFileSync(this.flags.outfile, results);
 		} catch (e) {
 			// Rethrow any errors.
 			throw new SfdxError(e.message || e, null, null, this.getInternalErrorCode());
 		}
-		// Afterwards, we need to build a message saying that we wrote to the correct file.
-		const outfileMsg = messages.getMessage('output.writtenToOutFile', [this.flags.outfile]);
-		if (minSev > 0 && this.flags['violations-cause-error']) {
-			// If the user gave us the flag to throw errors when we find violations, we should prefix the message with
-			// one about the errors we found, and throw the whole thing as an exception.
-			const errMsg = messages.getMessage('output.sevDetectionSummary', [minSev]) + ' ' + outfileMsg;
-			throw new SfdxError(errMsg, null, null, minSev);
-		} else {
-			// Otherwise, we can just log the message, then return it for the --json route.
-			this.ux.log(outfileMsg);
-			return outfileMsg;
-		}
+		// Return a message indicating the action we took.
+		return messages.getMessage('output.writtenToOutFile', [this.flags.outfile]);
 	}
 
-	private formatAndDisplayOutput(minSev: number, results: string | {columns; rows}): AnyJson {
+	private writeToConsole(results: string | {columns; rows;}): string {
 		// Figure out what format we need.
 		const format: OUTPUT_FORMAT = this.determineOutputFormat();
 		// Prepare the format mismatch message in case we need it later.
@@ -289,22 +314,6 @@ export default class Run extends ScannerCommand {
 			default:
 				throw new SfdxError(msg, null, null, this.getInternalErrorCode());
 		}
-		// Now that we've displayed the results, we need to figure out what to return. If the flag for throwing an error
-		// in response to violations is present, we'll need to do that. Otherwise, we need to return some value to be used
-		// by the --json flag.
-		if (this.flags['violations-cause-error'] && minSev > 0) {
-			// When the error flag is active, we need to throw an error. So generate the message and throw it.
-			const errMsg = messages.getMessage('output.sevDetectionSummary', [minSev])
-				+ ' ' + messages.getMessage('output.pleaseSeeAbove');
-			throw new SfdxError(errMsg, null, null, minSev);
-		} else if (typeof results === 'string') {
-			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
-			// and return. Otherwise we should just return the result string.
-			return format === OUTPUT_FORMAT.JSON ? JSON.parse(results) : results;
-		} else {
-			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
-			// in the table.
-			return results.rows;
-		}
+		return messages.getMessage('output.writtenToConsole');
 	}
 }

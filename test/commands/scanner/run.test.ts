@@ -57,7 +57,7 @@ describe('scanner:run', function () {
 						'--format', 'xml'
 					])
 					.it('When the file contains no violations, a message is logged to the console', ctx => {
-						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					});
 			});
 
@@ -183,7 +183,16 @@ describe('scanner:run', function () {
 		});
 
 		describe('Output Type: CSV', () => {
-			function validateCsvOutput(csv: string): void {
+			function validateCsvOutput(contents: string, expectSummary=true): void {
+				// If there's a summary, then it'll be separated from the CSV by an empty line.
+				const [csv, summary] = contents.trim().split(/\n\r?\n/);
+				if (expectSummary) {
+					expect(summary).to.not.equal(undefined, 'Expected summary to be not undefined');
+					expect(summary).to.not.equal(null, 'Expected summary to be not null');
+					expect(summary).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
+				}
+				// Since it's a CSV, the rows themselves are separated by newline chaacters, and there's a header row we
+				// need to discard.
 				const rows = csv.trim().split('\n');
 				rows.shift();
 
@@ -207,7 +216,7 @@ describe('scanner:run', function () {
 				])
 				.it('Properly writes CSV to console', ctx => {
 					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					validateCsvOutput(ctx.stdout);
+					validateCsvOutput(ctx.stdout, true);
 				});
 
 			setupCommandTest
@@ -224,13 +233,14 @@ describe('scanner:run', function () {
 				})
 				.it('Properly writes CSV to file', ctx => {
 					// Verify that the correct message is displayed to user
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
 					const fileContents = fs.readFileSync('testout.csv').toString();
-					validateCsvOutput(fileContents);
+					validateCsvOutput(fileContents, false);
 				});
 
 			setupCommandTest
@@ -240,7 +250,7 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
@@ -256,7 +266,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
 					expect(fs.existsSync('testout.csv')).to.be.false;
 				});
@@ -320,7 +330,7 @@ describe('scanner:run', function () {
 					'--format', 'html'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
@@ -336,7 +346,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
 					expect(fs.existsSync(outputFile)).to.be.false;
 				});
@@ -361,7 +371,9 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('Properly writes JSON to console', ctx => {
-					validateJsonOutput(ctx.stdout);
+					const stdout = ctx.stdout;
+					expect(stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+					validateJsonOutput(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				});
 
 			setupCommandTest
@@ -378,6 +390,7 @@ describe('scanner:run', function () {
 				})
 				.it('Properly writes JSON to file', ctx => {
 					// Verify that the correct message is displayed to user
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
 
@@ -394,7 +407,7 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
@@ -410,7 +423,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
 					expect(fs.existsSync('testout.json')).to.be.false;
 				});
@@ -442,7 +455,7 @@ describe('scanner:run', function () {
 					'--format', 'table'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 		});
 
@@ -530,7 +543,7 @@ describe('scanner:run', function () {
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected'));
+					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 		});
 
@@ -544,8 +557,8 @@ describe('scanner:run', function () {
 					'--violations-cause-error'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'));
-					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should not be present');
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Error should not be present');
 				});
 
 			setupCommandTest
@@ -563,7 +576,7 @@ describe('scanner:run', function () {
 					// Assert rows have the right error on the right line.
 					expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
 					expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
-					expect(ctx.stderr).to.contain(runMessages.getMessage('output.pleaseSeeAbove'), 'Error should be present');
+					expect(ctx.stderr).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Error should be present');
 				});
 		});
 
@@ -644,7 +657,7 @@ describe('scanner:run', function () {
 					])
 					.it('When only malformed code is supplied, no violations are detected but a warning is logged', ctx => {
 						// Expect the output to include the "No violations" string.
-						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected'), 'No violations should be found');
+						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']), 'No violations should be found');
 						// Expect stderr to include the warning indicating that the file's output was skipped. We don't care much
 						// about the message from PMD, so just replace it with an empty string so it doesn't fail anything.
 						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
@@ -702,7 +715,7 @@ describe('scanner:run', function () {
 				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
 					expect(ctx.stderr, ctx.stdout).to.be.empty;
-					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{")));
+					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{"), ctx.stdout.lastIndexOf("}]") + 2));
 					// Look through all of the results and gather a set of unique engines
 					const uniqueEngines = new Set(results.map(r => { return r.engine }));
 					expect(uniqueEngines).to.be.an("Set").that.has.length(2);
@@ -736,7 +749,8 @@ describe('scanner:run', function () {
 			])
 			.it('By default, frameworks such as QUnit are not included in the baseConfig', ctx => {
 				// We expect there to be 2 errors about qunit-related syntax being undefined.
-				const parsedCtx = JSON.parse(ctx.stdout);
+				const stdout = ctx.stdout;
+				const parsedCtx = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(parsedCtx[0].violations.length).to.equal(2, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
 				expect(parsedCtx[0].violations[0].message).to.contain("'QUnit' is not defined.");
 			});

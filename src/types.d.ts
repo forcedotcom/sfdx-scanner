@@ -32,9 +32,15 @@ export type RuleResult = {
 	violations: RuleViolation[];
 };
 
+export type EngineExecutionSummary = {
+	fileCount: number;
+	violationCount: number;
+};
+
 export type RecombinedRuleResults = {
 	minSev: number;
 	results: string | {columns; rows};
+	summaryMap: Map<string,EngineExecutionSummary>;
 };
 
 export type RuleViolation = {

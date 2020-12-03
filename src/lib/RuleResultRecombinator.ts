@@ -1,6 +1,6 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
+import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
 import {OUTPUT_FORMAT} from './RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from './util/FileHandler';
@@ -10,7 +10,7 @@ import * as csvStringify from 'csv-stringify';
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
@@ -35,7 +35,7 @@ export class RuleResultRecombinator {
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
-		return {minSev: this.findMinSev(results), results: formattedResults};
+		return {minSev: this.findMinSev(results), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
 	}
 
 	private static findMinSev(results: RuleResult[]): number {
@@ -53,6 +53,24 @@ export class RuleResultRecombinator {
 		}
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;
+	}
+
+	private static generateSummaryMap(results: RuleResult[], executedEngines: Set<string>): Map<string, EngineExecutionSummary> {
+		const summaryMap: Map<string, EngineExecutionSummary> = new Map();
+		for (const e of executedEngines.values()) {
+			summaryMap.set(e, {
+				fileCount: 0,
+				violationCount: 0
+			});
+		}
+		if (results && results.length > 0) {
+			results.forEach(res => {
+				let ees: EngineExecutionSummary = summaryMap.get(res.engine);
+				ees.fileCount += 1;
+				ees.violationCount += res.violations.length;
+			});
+		}
+		return summaryMap;
 	}
 
 	private static constructXml(results: RuleResult[]): string {
