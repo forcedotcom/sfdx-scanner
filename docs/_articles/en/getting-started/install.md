@@ -37,6 +37,17 @@ TOPICS
   Run help for each topic below to view subcommands
 
   scanner:rule  View/add rules that are used to scan code.
-
+  
 ```
 
+## CI/CD
+
+To insure code quality rules are respected, even if developers did not install or run sfdx-scanner locally, you can setup sfdx-scanner in your CI pipelines (Github actions, Circle CI, Travis, Jenkins...)
+
+### Mega-Linter
+
+[sfdx-scanner](https://nvuillam.github.io/mega-linter/descriptors/salesforce_sfdx_scanner/) is natively included in [Mega-Linter](https://nvuillam.github.io/mega-linter/) (with 70 other linters). Add it in your pipeline, and it will be automatically run.
+
+### Manually
+
+Add `sfdx scanner:run --violations-cause-error` in your pipeline definition
