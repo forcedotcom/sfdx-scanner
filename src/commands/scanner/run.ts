@@ -232,7 +232,7 @@ export default class Run extends ScannerCommand {
 		// In addition to processing the results, we need to build a summary message indicating what happened.
 		let msg = this.buildEngineSummaryMessage(rrr);
 		// We surface violations to the user by writing them to the console or a file.
-		msg += ' ' + (this.flags.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
+		msg += '\n' + (this.flags.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
 
 		// Now that we have our completed summary message, we need to do something with it. We'll either throw it as an
 		// exception or log it to the console.
@@ -267,10 +267,10 @@ export default class Run extends ScannerCommand {
 			.map(([engine, summary]) => {
 				return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
 			})
-			.join(' ');
+			.join('\n');
 		// If we're supposed to throw an exception for violations, we need to add an extra sentence to the summary message.
 		if (minSev > 0 && this.flags['violations-cause-error']) {
-			msg += ` ${messages.getMessage('output.sevDetectionSummary', [minSev])}`;
+			msg += `\n${messages.getMessage('output.sevDetectionSummary', [minSev])}`;
 		}
 		return msg;
 	}
