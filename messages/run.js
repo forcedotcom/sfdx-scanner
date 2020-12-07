@@ -36,9 +36,11 @@ module.exports = {
 		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {
-		"noViolationsDetected": "No rule violations found.",
+		"noViolationsDetected": "Executed engines: %s. No rule violations found.",
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
+		"engineSummaryTemplate": "Executed %s, found %s violation(s) across %s file(s).",
 		"writtenToOutFile": "Rule violations have been written to %s.",
+		"writtenToConsole": "Rule violations logged to console above.",
 		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
 		"pleaseSeeAbove": "Please see the logs above.",
 		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."

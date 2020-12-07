@@ -63,7 +63,10 @@ export class DefaultRuleManager implements RuleManager {
 	}
 
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+		// Declare a variable that we can later use to store the engine results, as well as something to help us track
+		// which engines actually ran.
 		let results: RuleResult[] = [];
+		const executedEngines: Set<string> = new Set();
 
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
@@ -81,6 +84,7 @@ export class DefaultRuleManager implements RuleManager {
 
 			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
+				executedEngines.add(e.getName());
 				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
@@ -103,7 +107,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
 			this.logger.trace(`Recombining results into requested format ${format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, format);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, format, executedEngines);
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}

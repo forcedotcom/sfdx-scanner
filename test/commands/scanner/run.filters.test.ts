@@ -29,7 +29,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				'--engine', 'eslint-lwc'
 			])
 			.it('LWC Engine detects LWC errors', ctx => {
-				const results = JSON.parse(ctx.stdout);
+				const stdout = ctx.stdout;
+				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
 					.to.be.an('Array').that.has.length(1);
 				const messages = results[0].violations.map(v => v.message);
@@ -52,7 +53,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length).to.equal(1, 'Should only be violations from one file');
 					expect(output[0].engine).to.equal('eslint');
 					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(55);
@@ -74,7 +76,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length).to.equal(1, 'Should only be violations from one file');
 					expect(output[0].engine).to.equal('eslint-lwc');
 					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(13);
@@ -98,7 +101,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length).to.equal(1, 'Should only be violations from one file');
 					expect(output[0].engine).to.equal('eslint-typescript');
 					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(2);
@@ -120,7 +124,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length).to.equal(1, 'Should only be violations from one file');
 					expect(output[0].engine).to.equal('pmd');
 					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(2);
@@ -143,7 +148,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length, TestUtils.prettyPrint(output)).to.equal(4);
 					for (const file of output) {
 						expect(file.engine).to.equal('pmd');
@@ -165,7 +171,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					'--category', category
 				])
 				.it('Only correct categories are returned', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					const stdout = ctx.stdout;
+					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length, TestUtils.prettyPrint(output)).to.equal(4);
 					for (const file of output) {
 						expect(file.engine).to.equal('pmd');
