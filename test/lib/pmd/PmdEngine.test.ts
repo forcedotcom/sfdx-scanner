@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import {Messages} from '@salesforce/core';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {RuleResult} from '../../../src/types';
 import path = require('path');
@@ -10,10 +11,17 @@ import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 
+Messages.importMessagesDirectory(__dirname);
+const engineMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
+
 TestOverrides.initializeTestSetup();
 class TestPmdEngine extends PmdEngine {
 	public processStdOut(stdout: string): RuleResult[] {
 		return super.processStdOut(stdout);
+	}
+
+	public processStdErr(stderr: string): string {
+		return super.processStdErr(stderr);
 	}
 }
 
@@ -53,6 +61,33 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 		});
 	});
 
+	describe('processStdErr()', () => {
+		it('Converts PMD\'s RuleSetNotFoundException into a more readable message', async () => {
+			// This file contains the stderr created by using a custom PMD Config that referenced a misspelled category.
+			// It caused a RuleSetNotFoundException, whose message is exceptionally messy.
+			const stderrPath = path.join('test', 'code-fixtures', 'pmd-results', 'RuleSetNotFound-example.txt');
+			const fileHandler: FileHandler = new FileHandler();
+			const stderr: string = await fileHandler.readFile(stderrPath);
+			expect(stderr).to.not.be.null;
+
+			const simplifiedMessage = testPmdEngine.processStdErr(stderr);
+			const expectedMessage = engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
+			expect(simplifiedMessage).to.equal(expectedMessage, 'Stderr not properly simplified');
+		});
+
+		it('If PMD\'s error matches no simplification templates, the error is returned as-is', async () => {
+			// This file contains the stderr created by using a custom PMD Config that referenced a misspelled rule.
+			// PMD terminated pretty gracefully, and with a straightforward error message that we want to keep.
+			const stderrPath = path.join('test', 'code-fixtures', 'pmd-results', 'misspelled-rulename-example.txt');
+			const fileHandler: FileHandler = new FileHandler();
+			const stderr: string = await fileHandler.readFile(stderrPath);
+			expect(stderr).to.not.be.null;
+
+			const simplifiedMessage = testPmdEngine.processStdErr(stderr);
+			expect(simplifiedMessage).to.equal(stderr, 'No simplification should have occurred');
+		});
+	});
+
 	describe('emitErrorsAndWarnings()', () => {
 		it('Non file XML nodes are filtered converted to UX events', async () => {
 			const expectedError = `PMD failed to evaluate against file 'Foo.java'. Message: Issue with Foo`;
@@ -78,19 +113,19 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const results = await testPmdEngine.processStdOut('');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 
 		it('Missing closing tag', async () => {
 			const results = await testPmdEngine.processStdOut('<?xml blah blah blah');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 
 		it('Missing opening tag', async () => {
 			const results = await testPmdEngine.processStdOut('blah blah blah</pmd>');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 	});
 
 	describe('testing shouldEngineRun()', () => {

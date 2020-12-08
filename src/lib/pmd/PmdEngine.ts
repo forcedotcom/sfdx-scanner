@@ -12,7 +12,8 @@ import { FileHandler } from '../util/FileHandler';
 import { EventCreator } from '../util/EventCreator';
 
 Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
+const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
+const engineMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "PmdEngine");
 
 interface PmdViolation extends Element {
 	attributes: {
@@ -87,8 +88,9 @@ abstract class BasePmdEngine implements RuleEngine {
 			this.logger.trace(`Found ${results.length} for PMD`);
 			return results;
 		} catch (e) {
+			console.log(`errmsg: ${e.message || e}`);
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
-			throw new SfdxError(e.message || e);
+			throw new SfdxError(this.processStdErr(e.message || e));
 		}
 	}
 
@@ -123,6 +125,40 @@ abstract class BasePmdEngine implements RuleEngine {
 		}
 
 		return violations;
+	}
+
+	/**
+	 * Identifies some common PMD errors and translates the messy error messages into something a bit more understandable.
+	 * @param {string} stderr - The stderr stream from a PMD execution.
+	 * @returns {string} The error, reinterpreted and simplified to the best of our abilities.
+	 */
+	protected processStdErr(stderr: string): string {
+		if (stderr.includes('SEVERE: Ruleset not found') && stderr.includes('RuleSetNotFoundException')) {
+			return this.translateRuleSetNotFoundException(stderr);
+		} else {
+			// If the error didn't match any of the templates that we know we can convert, just return it as-is.
+			return stderr;
+		}
+	}
+
+	/**
+	 * Converts the messy output of a PMD RuleSetNotFoundException into something more useful to the user.
+	 * @param {string} stderr - The stderr stream from a PMD execution.
+	 * @returns {string} The error, reinterpreted and simplified to the best of our abilities.
+	 */
+	protected translateRuleSetNotFoundException(stderr: string): string {
+		// Errors of this type will have a 'RulesetNotFoundException' present.
+		const errRegex = /RuleSetNotFoundException: Can't find resource '(\S+)' for rule '(\S+)'/;
+		const regexResult: string[] = errRegex.exec(stderr);
+		// We're expecting the results to be a length-3 array, with the first item being the entire match, and the second
+		// and third being the capture groups we defined in the regex.
+		if (regexResult && regexResult.length === 3) {
+			return engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', regexResult.slice(1));
+		} else {
+			// If we weren't able to match the template, just return the log we were given. That way, at least we don't
+			// make it any worse.
+			return stderr;
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -172,7 +208,7 @@ abstract class BasePmdEngine implements RuleEngine {
 				case "error":
 					uxEvents.emit(
 						"warning-always",
-						messages.getMessage("warning.pmdSkippedFile", [
+						eventMessages.getMessage("warning.pmdSkippedFile", [
 							attributes.filename,
 							attributes.msg
 						])
@@ -182,7 +218,7 @@ abstract class BasePmdEngine implements RuleEngine {
 				case "suppressedviolation":
 					uxEvents.emit(
 						"warning-always",
-						messages.getMessage("warning.pmdSuppressedViolation", [
+						eventMessages.getMessage("warning.pmdSuppressedViolation", [
 							attributes.filename,
 							attributes.msg,
 							attributes.suppressiontype,
@@ -194,7 +230,7 @@ abstract class BasePmdEngine implements RuleEngine {
 				case "configerror":
 					uxEvents.emit(
 						"warning-always",
-						messages.getMessage("warning.pmdConfigError", [
+						eventMessages.getMessage("warning.pmdConfigError", [
 							attributes.rule,
 							attributes.msg
 						])
