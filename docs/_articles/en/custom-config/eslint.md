@@ -19,11 +19,13 @@ However, while giving you the power, the Scanner also offloads some responsibili
 
 1. **IMPORTANT:** Make sure that you have all the NPM dependencies installed (including Eslint) in the directory where you run the `scanner:run` command.
 
-2. Ensure correctness of `.eslintrc.json`. Only JSON format of `.eslintrc` is supported today. However, there are no restrictions on the filename.
+2. **IMPORTANT:** Your custom configuration will [cascade into other configurations in the project](https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy), as though you had run Eslint directly with the [`-c/--config` flag](https://eslint.org/docs/user-guide/configuring#using-configuration-files-1). Please make sure your custom configuration performs the necessary overrides.
 
-3. `.eslintignore` is not evaluated today. Please use your target patterns in the `--target` flag that is passed in with `scanner:run` command. As a reminder, `--target` can take a comma separated list of any combination of files, directories, positive patterns and negations.
+3. Ensure correctness of `.eslintrc.json`. Only JSON format of `.eslintrc` is supported today. However, there are no restrictions on the filename.
 
-4. If you have written your configuration to execute Typescript, make sure your tsconfig file is added to the configuration under `parserOptions.project`. `--tsconfig` flag cannot be used with `--eslintconfig` flag.
+4. `.eslintignore` is not evaluated today. Please use your target patterns in the `--target` flag that is passed in with `scanner:run` command. As a reminder, `--target` can take a comma separated list of any combination of files, directories, positive patterns and negations.
+
+5. If you have written your configuration to execute Typescript, make sure your tsconfig file is added to the configuration under `parserOptions.project`. `--tsconfig` flag cannot be used with `--eslintconfig` flag.
 ```bash
 //.eslintrc.json
 ...
@@ -33,7 +35,7 @@ However, while giving you the power, the Scanner also offloads some responsibili
 ...
 ```
 
-5. `package.json` with embedded eslint configuration is not supported.
+6. `package.json` with embedded eslint configuration is not supported.
 
 
 
