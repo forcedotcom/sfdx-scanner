@@ -88,7 +88,6 @@ abstract class BasePmdEngine implements RuleEngine {
 			this.logger.trace(`Found ${results.length} for PMD`);
 			return results;
 		} catch (e) {
-			console.log(`errmsg: ${e.message || e}`);
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
 			throw new SfdxError(this.processStdErr(e.message || e));
 		}
