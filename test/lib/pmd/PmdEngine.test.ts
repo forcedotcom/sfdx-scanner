@@ -1,6 +1,6 @@
 import 'reflect-metadata';
+import {Messages} from '@salesforce/core';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
-import {RuleResult} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
 import Sinon = require('sinon');
@@ -10,15 +10,13 @@ import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 
+Messages.importMessagesDirectory(__dirname);
+const engineMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
+
 TestOverrides.initializeTestSetup();
-class TestPmdEngine extends PmdEngine {
-	public processStdOut(stdout: string): RuleResult[] {
-		return super.processStdOut(stdout);
-	}
-}
 
 describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
-	const testPmdEngine = new TestPmdEngine();
+	const testPmdEngine = new PmdEngine();
 
 	const configFilePath = '/some/file/path/rule-ref.xml';
 	const engineOptionsWithPmdCustom = new Map<string, string>([
@@ -47,9 +45,36 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const xml: string = await fileHandler.readFile(xmlPath);
 			expect(xml).to.not.be.null;
 
-			const results = testPmdEngine.processStdOut(xml);
+			const results = (testPmdEngine as any).processStdOut(xml);
 			expect(results).to.be.length(1, 'Results should be for be a single file');
 			expect(results[0].violations).to.be.length(13, 'The file should have 13 violations');
+		});
+	});
+
+	describe('processStdErr()', () => {
+		it('Converts PMD\'s RuleSetNotFoundException into a more readable message', async () => {
+			// This file contains the stderr created by using a custom PMD Config that referenced a misspelled category.
+			// It caused a RuleSetNotFoundException, whose message is exceptionally messy.
+			const stderrPath = path.join('test', 'code-fixtures', 'pmd-results', 'RuleSetNotFound-example.txt');
+			const fileHandler: FileHandler = new FileHandler();
+			const stderr: string = await fileHandler.readFile(stderrPath);
+			expect(stderr).to.not.be.null;
+
+			const simplifiedMessage = (testPmdEngine as any).processStdErr(stderr);
+			const expectedMessage = engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
+			expect(simplifiedMessage).to.equal(expectedMessage, 'Stderr not properly simplified');
+		});
+
+		it('If PMD\'s error matches no simplification templates, the error is returned as-is', async () => {
+			// This file contains the stderr created by using a custom PMD Config that referenced a misspelled rule.
+			// PMD terminated pretty gracefully, and with a straightforward error message that we want to keep.
+			const stderrPath = path.join('test', 'code-fixtures', 'pmd-results', 'misspelled-rulename-example.txt');
+			const fileHandler: FileHandler = new FileHandler();
+			const stderr: string = await fileHandler.readFile(stderrPath);
+			expect(stderr).to.not.be.null;
+
+			const simplifiedMessage = (testPmdEngine as any).processStdErr(stderr);
+			expect(simplifiedMessage).to.equal(stderr, 'No simplification should have occurred');
 		});
 	});
 
@@ -65,7 +90,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const xml: string = await fileHandler.readFile(xmlPath);
 			expect(xml).to.not.be.null;
 
-			await testPmdEngine.processStdOut(xml);
+			await (testPmdEngine as any).processStdOut(xml);
 			Sinon.assert.callCount(uxSpy, 3);
 			Sinon.assert.calledWith(uxSpy, 'warning-always', expectedConfigError);
 			Sinon.assert.calledWith(uxSpy, 'warning-always', expectedError);
@@ -75,22 +100,22 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 
 	describe('processStdout unusual cases', () => {
 		it('Empty stdout', async () => {
-			const results = await testPmdEngine.processStdOut('');
+			const results = await (testPmdEngine as any).processStdOut('');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 
 		it('Missing closing tag', async () => {
-			const results = await testPmdEngine.processStdOut('<?xml blah blah blah');
+			const results = await (testPmdEngine as any).processStdOut('<?xml blah blah blah');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 
 		it('Missing opening tag', async () => {
-			const results = await testPmdEngine.processStdOut('blah blah blah</pmd>');
+			const results = await (testPmdEngine as any).processStdOut('blah blah blah</pmd>');
 			expect(results).to.be.not.null;
 			expect(results).to.be.lengthOf(0);
-		})
+		});
 	});
 
 	describe('testing shouldEngineRun()', () => {
