@@ -89,7 +89,7 @@ abstract class BasePmdEngine implements RuleEngine {
 			return results;
 		} catch (e) {
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
-			throw new SfdxError(this.processStdErr(e.message || e));
+			throw new SfdxError(this.processStdErr(e.message));
 		}
 	}
 
@@ -131,7 +131,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	 * @param {string} stderr - The stderr stream from a PMD execution.
 	 * @returns {string} The error, reinterpreted and simplified to the best of our abilities.
 	 */
-	protected processStdErr(stderr: string): string {
+	private processStdErr(stderr: string): string {
 		if (stderr.includes('SEVERE: Ruleset not found') && stderr.includes('RuleSetNotFoundException')) {
 			return this.translateRuleSetNotFoundException(stderr);
 		} else {
@@ -145,7 +145,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	 * @param {string} stderr - The stderr stream from a PMD execution.
 	 * @returns {string} The error, reinterpreted and simplified to the best of our abilities.
 	 */
-	protected translateRuleSetNotFoundException(stderr: string): string {
+	private translateRuleSetNotFoundException(stderr: string): string {
 		// Errors of this type will have a 'RulesetNotFoundException' present.
 		const errRegex = /RuleSetNotFoundException: Can't find resource '(\S+)' for rule '(\S+)'/;
 		const regexResult: string[] = errRegex.exec(stderr);
