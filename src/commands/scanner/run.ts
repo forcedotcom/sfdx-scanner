@@ -229,13 +229,15 @@ export default class Run extends ScannerCommand {
 			this.ux.log(msg);
 			return msg;
 		}
-		// In addition to processing the results, we need to build a summary message indicating what happened.
-		let msg = this.buildEngineSummaryMessage(rrr);
-		// We surface violations to the user by writing them to the console or a file.
-		msg += '\n' + (this.flags.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
+		// Part of processing the results is determining what we need to log to the console.
+		let outputPieces: string[] = this.buildRunSummaryMessage(rrr);
+		// We surface violations to the user by writing them to the console or a file. These methods do that as a side effect,
+		// and return the message we should display to the user at the end.
+		outputPieces = [...outputPieces, this.flags.outfile ? this.writeToOutfile(results) : this.writeToConsole(results)];
 
-		// Now that we have our completed summary message, we need to do something with it. We'll either throw it as an
-		// exception or log it to the console.
+		// Now we can create our message by joining all of our pieces, then display it to the user by either logging
+		// it to the console or throwing it as an exception.
+		const msg = outputPieces.join('\n').trim();
 		if (minSev > 0 && this.flags['violations-cause-error']) {
 			throw new SfdxError(msg, null, null, minSev);
 		} else {
@@ -261,18 +263,23 @@ export default class Run extends ScannerCommand {
 		return this.flags['violations-cause-error'] ? INTERNAL_ERROR_CODE : 1;
 	}
 
-	private buildEngineSummaryMessage(rrr: RecombinedRuleResults): string {
+	private buildRunSummaryMessage(rrr: RecombinedRuleResults): string[] {
 		const {summaryMap, minSev} = rrr;
-		let msg = [...summaryMap.entries()]
-			.map(([engine, summary]) => {
-				return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
-			})
-			.join('\n');
+		let msgPieces: string[] = [];
+		// Until we decide how we ultimately want to handle W-8388246's run summary message, we'll just have this
+		// always be skipped.
+		if (this.flags['no-such-flag']) {
+			const engineSummaries = [...summaryMap.entries()]
+				.map(([engine, summary]) => {
+					return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
+				});
+			msgPieces = [...msgPieces, ...engineSummaries];
+		}
 		// If we're supposed to throw an exception for violations, we need to add an extra sentence to the summary message.
 		if (minSev > 0 && this.flags['violations-cause-error']) {
-			msg += `\n${messages.getMessage('output.sevDetectionSummary', [minSev])}`;
+			msgPieces.push(`${messages.getMessage('output.sevDetectionSummary', [minSev])}`);
 		}
-		return msg;
+		return msgPieces;
 	}
 
 	private writeToOutfile(results: string | {columns; rows}): string {
@@ -314,6 +321,8 @@ export default class Run extends ScannerCommand {
 			default:
 				throw new SfdxError(msg, null, null, this.getInternalErrorCode());
 		}
-		return messages.getMessage('output.writtenToConsole');
+		// When we actually figure out a solution for W-8388246, we can have this start returning a meaningful message.
+		// Until then, an empty string is fine.
+		return '';
 	}
 }
