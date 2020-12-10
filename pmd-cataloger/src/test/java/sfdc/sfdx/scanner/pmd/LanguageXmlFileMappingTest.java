@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static sfdc.sfdx.scanner.TestConstants.*;
 
 import java.util.Arrays;
@@ -108,6 +109,11 @@ public class LanguageXmlFileMappingTest {
 	@Test
 	public void testExceptionIsThrownWhenRulesetPathCollides() {
 		testCollision("rulesets/performance.xml");
+	}
+
+	@Test
+	public void testShouldFail() {
+		fail("QA For W-8460376-QA");
 	}
 
 	/**
