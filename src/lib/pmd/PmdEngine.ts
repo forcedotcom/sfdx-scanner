@@ -282,9 +282,9 @@ export class PmdEngine extends BasePmdEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return !isCustomConfig(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& filterValues.some((value, index, array) => {
+		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
 			return value === this.getName();
-		});
+		}));
 	}
 
 	/**
@@ -339,9 +339,9 @@ export class CustomPmdEngine extends BasePmdEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return isCustomConfig(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& filterValues.some((value, index, array) => {
+		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
 			return value.startsWith(EngineBase.PMD);
-		});
+		}));
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

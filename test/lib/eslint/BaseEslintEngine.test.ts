@@ -391,6 +391,22 @@ describe('Tests for BaseEslintEngine', () => {
 
 			expect(isEngineRequested).to.be.true;
 		});
+
+		it('should return true when custom config is not present and filter is empty', () => {
+			const filteredNames = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.true;	
+		});
+
+		it('should return false when custom eslint config is present and filter is empty', () => {
+			const filteredNames = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.false;	
+		});
 	});
 });
 

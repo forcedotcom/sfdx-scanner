@@ -244,6 +244,17 @@ describe('RuleManager', () => {
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 0);
 				});
+
+				it('Single target file does not match', async () => {
+					const invalidTarget = ['does-not-exist.js'];
+					// No filters
+					const filters = [];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+				});
 			});
 
 			describe('Test Case: Run by category', () => {

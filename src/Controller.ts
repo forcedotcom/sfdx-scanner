@@ -64,12 +64,12 @@ export const Controller = {
 		return engines;
 	},
 
-	getEnabledEngines: async (): Promise<RuleEngine[]> => {
+	getEnabledEngines: async (engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> => {
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
 		const engines: RuleEngine[] = [];
 
 		for (const engine of allEngines) {
-			if (await engine.isEnabled()) {
+			if (await engine.isEnabled() && engine.isEngineRequested([/*no filter values*/], engineOptions)) {
 				engines.push(engine);
 			}
 		}

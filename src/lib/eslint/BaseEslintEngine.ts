@@ -164,9 +164,9 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return !this.helper.isCustomRun(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& filterValues.some((value, index, array) => {
+		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
 			return value === this.getName();
-		});
+		}));
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {

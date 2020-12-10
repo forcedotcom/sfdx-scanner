@@ -25,9 +25,9 @@ export class CustomEslintEngine implements RuleEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return this.helper.isCustomRun(engineOptions)
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& filterValues.some((value, index, array) => {
+		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
 			return value.startsWith(EngineBase.ESLINT);
-		});
+		}));
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {
