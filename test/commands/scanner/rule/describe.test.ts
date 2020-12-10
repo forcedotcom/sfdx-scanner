@@ -7,12 +7,14 @@ describe('scanner:rule:describe', () => {
 		describe('Test Case: No matching rules', () => {
 			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
 			setupCommandTest
+				.timeout(10000)
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
 				.it('Correct warning is displayed', ctx => {
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
 				});
 
 			setupCommandTest
+				.timeout(10000)
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
 				.it('--json flag yields correct results', ctx => {
 					const ctxJson = JSON.parse(ctx.stdout);

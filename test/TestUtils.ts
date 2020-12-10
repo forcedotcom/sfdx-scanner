@@ -44,11 +44,9 @@ export function stubCatalogFixture(): void {
  * 		expect(ctx.stdout).to.contain('No rule violations found.');
  * 	});
  */
-const setupCommandTest = test
+export const setupCommandTest = test
 	.do(() => TestOverrides.initializeTestSetup())
 	.stdout()
 	.stderr();
-
-export {setupCommandTest};
 
 
