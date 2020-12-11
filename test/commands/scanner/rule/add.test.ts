@@ -9,10 +9,10 @@ import path = require('path');
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
-describe('scanner:rule:add', () => {
-	describe('E2E', () => {
+describe('scanner:rule:add', async () => {
+	describe('E2E', async () => {
 		const myLanguage = 'apex';
-		describe('Test Case: Adding individual JARs', () => {
+		describe('Test Case: Adding individual JARs', async () => {
 			// Create four temporary directories, each having a single JAR.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -78,7 +78,7 @@ describe('scanner:rule:add', () => {
 		});
 
 
-		describe('Test Case: Adding all JARs in a folder', () => {
+		describe('Test Case: Adding all JARs in a folder', async () => {
 			// Create two temporary directories, each containing three JARs.
 			const tmpDir1 = fs.mkdtempSync(path.join(os.tmpdir(), 'foo-'));
 			const tmpJar1 = path.join(tmpDir1, 'bar1.jar');
@@ -143,8 +143,8 @@ describe('scanner:rule:add', () => {
 		});
 	});
 
-	describe('Validations', () => {
-		describe('Language validations', () => {
+	describe('Validations', async () => {
+		describe('Language validations', async () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			setupCommandTest
 				.command(['scanner:rule:add', '--path', '/some/local/path'])
@@ -160,7 +160,7 @@ describe('scanner:rule:add', () => {
 				});
 		});
 
-		describe('Path validations', () => {
+		describe('Path validations', async () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			setupCommandTest
 				.command(['scanner:rule:add', '--language', 'apex'])
