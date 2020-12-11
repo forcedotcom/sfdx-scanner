@@ -40,7 +40,7 @@ export default class Describe extends ScannerCommand {
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
-		const rules = await ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters);
+		const rules = ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters);
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.

@@ -23,7 +23,7 @@ export interface RuleManager {
 	 * Returns rules that match only the provided filters, completely ignoring any implicit filtering.
 	 * @param filters
 	 */
-	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]>;
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Rule[];
 
 	/**
 	 * @param engineOptions - see RuleEngine#run
