@@ -6,6 +6,9 @@ import {CustomPmdEngine}  from '../../../src/lib/pmd/PmdEngine'
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 import { Messages } from '@salesforce/core';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
+
+TestOverrides.initializeTestSetup();
 
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
 
@@ -83,7 +86,7 @@ describe('Tests for CustomPmdEngine implementation', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithPmdCustom);
 
-			expect(isEngineRequested).to.be.false;		
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return false when custom config is not present even if filter contains "pmd"', () => {
@@ -91,7 +94,7 @@ describe('Tests for CustomPmdEngine implementation', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.false;		
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return true when custom config is present and filter contains a string that starts with "pmd"', () => {
@@ -107,7 +110,7 @@ describe('Tests for CustomPmdEngine implementation', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
 
-			expect(isEngineRequested).to.be.false;		
+			expect(isEngineRequested).to.be.false;
 		});
 	});
 
@@ -121,11 +124,11 @@ describe('Tests for CustomPmdEngine implementation', () => {
 		after(() => {
 			Sinon.restore();
 		});
-		it('should throw error when Config file does not exist', () => {
+		it('should throw error when Config file does not exist', async () => {
 			Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
 
 			try {
-				engine.run(
+				await engine.run(
 					[DataGenerator.getDummyRuleGroup()],
 					[],
 					[DataGenerator.getDummyTarget()],
