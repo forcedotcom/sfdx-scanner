@@ -44,7 +44,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 
 	describe('--category and --engine flag', () => {
 		describe('Eslint Javascript Engine --category flag', () => {
-			const category = 'Stylistic Issues';
+			const category = 'Possible Errors';
+			const expectedViolationCount = 4;
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'dom_parser', 'dom_parserController.js'),
@@ -57,7 +58,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 					expect(output.length).to.equal(1, 'Should only be violations from one file');
 					expect(output[0].engine).to.equal('eslint');
-					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(55);
+					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
 
 					// Make sure only violations are returned for the requested category
 					for (const v of output[0].violations) {
