@@ -5,6 +5,9 @@ import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
 import messages = require('../../../messages/PmdLanguageManager');
 import { ENGINE } from '../../../src/Constants';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
+
+TestOverrides.initializeTestSetup();
 
 describe('PmdLanguageManager', () => {
 	describe('getSupportedLanguages()', () => {
