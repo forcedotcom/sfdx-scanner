@@ -4,24 +4,6 @@ import messages = require('../../../../messages/describe');
 
 describe('scanner:rule:describe', () => {
 	describe('E2E', () => {
-		describe('Test Case: No matching rules', () => {
-			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
-			setupCommandTest
-				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
-				.it('Correct warning is displayed', ctx => {
-					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
-				});
-
-			setupCommandTest
-				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
-				.it('--json flag yields correct results', ctx => {
-					const ctxJson = JSON.parse(ctx.stdout);
-					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
-					expect(ctxJson.warnings.length).to.equal(1, 'Should be one warning');
-					expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning message should match');
-				});
-		});
-
 		describe('Test Case: One matching rule', () => {
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields'])
@@ -84,6 +66,24 @@ describe('scanner:rule:describe', () => {
 				expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning should match');
 			  });
 			 */
+		});
+
+		describe('Test Case: No matching rules', () => {
+			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
+			setupCommandTest
+				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
+				.it('Correct warning is displayed', ctx => {
+					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
+				});
+
+			setupCommandTest
+				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
+				.it('--json flag yields correct results', ctx => {
+					const ctxJson = JSON.parse(ctx.stdout);
+					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
+					expect(ctxJson.warnings.length).to.equal(1, 'Should be one warning');
+					expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning message should match');
+				});
 		});
 
 		describe('Error handling', () => {
