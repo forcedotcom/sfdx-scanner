@@ -1,9 +1,30 @@
 import {expect} from '@salesforce/command/lib/test';
 import {setupCommandTest} from '../../../TestUtils';
-import messages = require('../../../../messages/describe');
+import { Messages } from '@salesforce/core';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
 describe('scanner:rule:describe', () => {
 	describe('E2E', () => {
+		describe('Test Case: No matching rules', () => {
+			const formattedWarning = messages.getMessage('output.noMatchingRules', ['DefinitelyFakeRule']);
+			setupCommandTest
+				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
+				.it('Correct warning is displayed', ctx => {
+					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
+				});
+
+			setupCommandTest
+				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
+				.it('--json flag yields correct results', ctx => {
+					const ctxJson = JSON.parse(ctx.stdout);
+					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
+					expect(ctxJson.warnings.length).to.equal(1, 'Should be one warning');
+					expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning message should match');
+				});
+		});
+
 		describe('Test Case: One matching rule', () => {
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields'])
@@ -33,9 +54,7 @@ describe('scanner:rule:describe', () => {
 
 		describe('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
-			const formattedWarning = messages.output.multipleMatchingRules
-				.replace('{0}', '3')
-				.replace('{1}', 'constructor-super');
+			const formattedWarning = messages.getMessage('output.multipleMatchingRules', ['3', 'constructor-super']);
 
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])
@@ -66,24 +85,6 @@ describe('scanner:rule:describe', () => {
 				expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning should match');
 			  });
 			 */
-		});
-
-		describe('Test Case: No matching rules', () => {
-			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
-			setupCommandTest
-				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
-				.it('Correct warning is displayed', ctx => {
-					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should match');
-				});
-
-			setupCommandTest
-				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule', '--json'])
-				.it('--json flag yields correct results', ctx => {
-					const ctxJson = JSON.parse(ctx.stdout);
-					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
-					expect(ctxJson.warnings.length).to.equal(1, 'Should be one warning');
-					expect(ctxJson.warnings[0]).to.equal(formattedWarning, 'Warning message should match');
-				});
 		});
 
 		describe('Error handling', () => {
