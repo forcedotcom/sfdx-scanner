@@ -5,9 +5,9 @@ import { Messages } from '@salesforce/core';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
-describe('scanner:rule:describe', () => {
-	describe('E2E', () => {
-		describe('Test Case: No matching rules', () => {
+describe('scanner:rule:describe', async () => {
+	describe('E2E', async () => {
+		describe('Test Case: No matching rules', async () => {
 			const formattedWarning = messages.getMessage('output.noMatchingRules', ['DefinitelyFakeRule']);
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
@@ -25,7 +25,7 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		describe('Test Case: One matching rule', () => {
+		describe('Test Case: One matching rule', async () => {
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'TooManyFields'])
 				.it('Displayed output matches expectations', ctx => {
@@ -52,7 +52,7 @@ describe('scanner:rule:describe', () => {
 				});
 		});
 
-		describe('Test Case: Multiple matching rules', () => {
+		describe('Test Case: Multiple matching rules', async () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
 			const formattedWarning = messages.getMessage('output.multipleMatchingRules', ['3', 'constructor-super']);
 
@@ -87,7 +87,7 @@ describe('scanner:rule:describe', () => {
 			 */
 		});
 
-		describe('Error handling', () => {
+		describe('Error handling', async () => {
 			setupCommandTest
 				.command(['scanner:rule:describe'])
 				.it('Must input a rule name', ctx => {
