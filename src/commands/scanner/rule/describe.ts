@@ -44,12 +44,10 @@ export default class Describe extends ScannerCommand {
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
-			this.ux.warn(messages.getMessage('output.noMatchingRules').replace('{0}', this.flags.rulename));
+			this.ux.warn(messages.getMessage('output.noMatchingRules', [this.flags.rulename]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = messages.getMessage('output.multipleMatchingRules')
-				.replace('{0}', rules.length.toString())
-				.replace('{1}', this.flags.rulename);
+			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.flags.rulename]);
 			this.ux.warn(msg);
 			rules.forEach((rule, idx) => {
 				this.ux.styledHeader('Rule #' + (idx + 1));

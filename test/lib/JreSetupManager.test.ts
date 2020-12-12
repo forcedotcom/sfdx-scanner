@@ -6,6 +6,10 @@ import {verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetu
 import childProcess = require('child_process');
 import {Messages} from '@salesforce/core';
 import {before} from 'mocha';
+import * as TestOverrides from '../test-related-lib/TestOverrides';
+
+TestOverrides.initializeTestSetup();
+
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
