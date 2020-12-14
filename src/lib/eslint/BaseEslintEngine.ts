@@ -7,6 +7,7 @@ import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
+import * as engineUtils from '../util/CommonEngineUtils';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -163,10 +164,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return !this.helper.isCustomRun(engineOptions)
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
-			return value === this.getName();
-		}));
+		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {

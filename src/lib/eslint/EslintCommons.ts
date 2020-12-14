@@ -3,6 +3,8 @@ import * as path from 'path';
 import { CUSTOM_CONFIG } from '../../Constants';
 import { RuleResult, RuleViolation, ESMessage, ESRule, ESReport } from '../../types';
 import { FileHandler } from '../util/FileHandler';
+import * as engineUtils from '../util/CommonEngineUtils';
+
 
 // Defining a function signature that will be returned by EslintStrategy.processRuleViolation()
 // This provides a safe way to pass around the callback function
@@ -31,7 +33,7 @@ export class StaticDependencies {
 export class EslintProcessHelper {
 
 	isCustomRun(engineOptions: Map<string, string>): boolean {
-		return engineOptions.has(CUSTOM_CONFIG.EslintConfig);
+		return engineUtils.isCustomRun(CUSTOM_CONFIG.EslintConfig, engineOptions);
 	}
 
 	addRuleResultsFromReport(

@@ -10,6 +10,8 @@ import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
 import { FileHandler } from '../util/FileHandler';
 import { EventCreator } from '../util/EventCreator';
+import * as engineUtils from '../util/CommonEngineUtils';
+
 
 Messages.importMessagesDirectory(__dirname);
 const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -253,8 +255,8 @@ abstract class BasePmdEngine implements RuleEngine {
 	}
 }
 
-function isCustomConfig(engineOptions: Map<string, string>): boolean {
-	return engineOptions.has(CUSTOM_CONFIG.PmdConfig);
+function isCustomRun(engineOptions: Map<string, string>): boolean {
+	return engineUtils.isCustomRun(CUSTOM_CONFIG.PmdConfig, engineOptions);
 }
 
 export class PmdEngine extends BasePmdEngine {
@@ -274,17 +276,14 @@ export class PmdEngine extends BasePmdEngine {
 		rules: Rule[],
 		target: RuleTarget[],
 		engineOptions: Map<string, string>): boolean {
-		return !isCustomConfig(engineOptions)
+		return !isCustomRun(engineOptions)
 			&& (ruleGroups.length > 0); // TODO: there's a bug in DefaultRuleManager that's populating Rules instead of RuleGroups when --engine filter is used
 		//TODO: targetPaths count should be ideally included here
 	}
 
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
-		return !isCustomConfig(engineOptions)
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
-			return value === this.getName();
-		}));
+		return !isCustomRun(engineOptions)
+		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
 	/**
@@ -332,16 +331,13 @@ export class CustomPmdEngine extends BasePmdEngine {
 		rules: Rule[],
 		target: RuleTarget[],
 		engineOptions: Map<string, string>): boolean {
-		return isCustomConfig(engineOptions);
+		return isCustomRun(engineOptions);
 		//TODO: targetPaths count should be ideally included here
 	}
 
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
-		return isCustomConfig(engineOptions)
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& (filterValues.length === 0 || filterValues.some((value, index, array) => {
-			return value.startsWith(EngineBase.PMD);
-		}));
+		return isCustomRun(engineOptions)
+		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.PMD, filterValues);
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
