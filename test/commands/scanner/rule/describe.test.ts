@@ -1,11 +1,14 @@
 import {expect} from '@salesforce/command/lib/test';
 import {setupCommandTest} from '../../../TestUtils';
-import messages = require('../../../../messages/describe');
+import { Messages } from '@salesforce/core';
+
+Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
 describe('scanner:rule:describe', () => {
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {
-			const formattedWarning = messages.output.noMatchingRules.replace('{0}', 'DefinitelyFakeRule');
+			const formattedWarning = messages.getMessage('output.noMatchingRules', ['DefinitelyFakeRule']);
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'DefinitelyFakeRule'])
 				.it('Correct warning is displayed', ctx => {
@@ -51,9 +54,7 @@ describe('scanner:rule:describe', () => {
 
 		describe('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
-			const formattedWarning = messages.output.multipleMatchingRules
-				.replace('{0}', '3')
-				.replace('{1}', 'constructor-super');
+			const formattedWarning = messages.getMessage('output.multipleMatchingRules', ['3', 'constructor-super']);
 
 			setupCommandTest
 				.command(['scanner:rule:describe', '--rulename', 'constructor-super'])

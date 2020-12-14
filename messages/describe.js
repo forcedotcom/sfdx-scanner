@@ -9,8 +9,8 @@ module.exports = {
 		"rulenameDescriptionLong": "Name of the rule to describe in more detail."
 	},
 	"output": {
-		"noMatchingRules": "No rules exist with the name '{0}'",
-		"multipleMatchingRules": "Found {0} rules with the name '{1}'"
+		"noMatchingRules": "No rules exist with the name '%s'",
+		"multipleMatchingRules": "Found %s rules with the name '%s'"
 	},
 	"examples": {
 		// The example for when only one rule matches the provided name.
