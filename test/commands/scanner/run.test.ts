@@ -216,7 +216,7 @@ describe('scanner:run', function () {
 				])
 				.it('Properly writes CSV to console', ctx => {
 					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					validateCsvOutput(ctx.stdout, true);
+					validateCsvOutput(ctx.stdout, false);
 				});
 
 			setupCommandTest
@@ -372,7 +372,6 @@ describe('scanner:run', function () {
 				])
 				.it('Properly writes JSON to console', ctx => {
 					const stdout = ctx.stdout;
-					expect(stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
 					validateJsonOutput(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				});
 
