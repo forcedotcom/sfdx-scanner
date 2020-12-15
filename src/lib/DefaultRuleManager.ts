@@ -58,8 +58,8 @@ export class DefaultRuleManager implements RuleManager {
 	 * Returns rules that match only the provided filters, completely ignoring any implicit filtering.
 	 * @param filters
 	 */
-	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]> {
-		return Promise.resolve(this.catalog.getRulesMatchingFilters(filters));
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Rule[] {
+		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {

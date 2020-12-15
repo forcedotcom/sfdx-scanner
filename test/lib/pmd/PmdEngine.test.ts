@@ -216,5 +216,21 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 
 			expect(isEngineRequested).to.be.true;
 		});
+
+		it('should return false when custom config exists and filter is empty', () => {
+			const filteredNames = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithPmdCustom);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return true when custom config is not present and filter is empty', () => {
+			const filteredNames = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.true;
+		});
 	});
 });

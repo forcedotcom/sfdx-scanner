@@ -6,6 +6,7 @@ import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {ENGINE} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
+import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
@@ -111,10 +112,7 @@ export class RetireJsEngine implements RuleEngine {
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		return filterValues.some((value, index, array) => {
-			return value === this.getName();
-		});
+		return engineUtils.isValueInFilter(this.getName(), filterValues);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars

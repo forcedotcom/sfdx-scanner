@@ -114,6 +114,21 @@ describe("Tests for CustomEslintEngine", () => {
 			expect(isEngineRequested).to.be.false;
 		});
 
+		it('should return false when filter is empty and engineOptions is empty', () => {
+			const filteredValues = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.false;
+		});
+
+		it('should return true when filter is empty and engineOptions contains eslintconfig', () => {
+			const filteredValues = [];
+
+			const isEngineRequested = engine.isEngineRequested(filteredValues, engineOptionsWithEslintCustom);
+
+			expect(isEngineRequested).to.be.true;
+		});
 
 	});
 

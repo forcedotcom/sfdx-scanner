@@ -4,7 +4,7 @@ import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import { EventCreator } from '../util/EventCreator';
-
+import * as engineUtils from '../util/CommonEngineUtils';
 
 
 export class CustomEslintEngine implements RuleEngine {
@@ -24,10 +24,7 @@ export class CustomEslintEngine implements RuleEngine {
 
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return this.helper.isCustomRun(engineOptions)
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
-		&& filterValues.some((value, index, array) => {
-			return value.startsWith(EngineBase.ESLINT);
-		});
+		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.ESLINT, filterValues);
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {
