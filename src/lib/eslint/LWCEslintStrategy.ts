@@ -1,6 +1,6 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ESRule, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import { ProcessRuleViolationType } from './EslintCommons';
 
@@ -56,6 +56,10 @@ export class LWCEslintStrategy implements EslintStrategy {
 	filterUnsupportedPaths(paths: string[]): string[] {
 		// TODO: fill in the filtering logic - this method could be removed if we fix an issue with getTargetPatterns in TypescriptEslintStrategy
 		return paths;
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		return rulesByName;
 	}
 
 	// TODO: Submit PR against elsint-plugin-lwc

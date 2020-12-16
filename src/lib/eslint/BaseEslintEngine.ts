@@ -48,6 +48,9 @@ export interface EslintStrategy {
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
 
+	/** Filters out any rules that should be excluded from the catalog */
+	filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule>;
+
 	/** Allow the strategy to convert the RuleViolation */
 	processRuleViolation(): ProcessRuleViolationType;
 }
@@ -104,7 +107,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 			// Get all rules supported by eslint
 			const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
-			const allRules = cli.getRules();
+			const allRules = this.strategy.filterDisallowedRules(cli.getRules());
 
 			// Add eslint rules to catalog
 			allRules.forEach((esRule: ESRule, key: string) => {

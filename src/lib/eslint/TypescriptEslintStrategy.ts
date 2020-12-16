@@ -2,7 +2,7 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ESRule, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
@@ -18,12 +18,7 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
-	"baseConfig": {
-		"extends": [
-			"plugin:@typescript-eslint/recommended",
-			"plugin:@typescript-eslint/eslint-recommended"
-		]
-	},
+	"baseConfig": {},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -77,6 +72,39 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		const filteredPaths = paths.filter(p => p.endsWith(".ts"));
 		this.logger.trace(`Input paths: ${paths}, Filtered paths: ${filteredPaths}`);
 		return filteredPaths;
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		// We want to identify rules that are deprecated, and rules that are extended by other rules, so we can manually
+		// filter them out.
+		const extendedRules: Set<string> = new Set();
+		const deprecatedRules: Set<string> = new Set();
+
+		for (const [name, rule] of rulesByName.entries()) {
+			if (rule.meta.deprecated) {
+				deprecatedRules.add(name);
+			}
+			if (rule.meta.docs.extendsBaseRule) {
+				// The `extendsBaseRule` property can be a string, representing the name of the rule being extended.
+				if (typeof rule.meta.docs.extendsBaseRule === 'string') {
+					extendedRules.add(rule.meta.docs.extendsBaseRule);
+				} else {
+					// Alternatively, it can just be the boolean true, which implies that the rule being extended shares
+					// the same name as this one, but is in the ESLint space instead of the Typescript space. So we strip
+					// the `@typescript-eslint/` from this rule's name and use that.
+					extendedRules.add(name.slice(19));
+				}
+			}
+		}
+
+		// Now, we'll want to create a new Map containing every rule that isn't deprecated or extended.
+		const filteredMap: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			if (!extendedRules.has(name) && !deprecatedRules.has(name)) {
+				filteredMap.set(name, rule);
+			}
+		}
+		return filteredMap;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

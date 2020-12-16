@@ -443,6 +443,7 @@ function getDummyCliEngine(esRuleMap: Map<string, ESRule> = DataGenerator.getDum
 	const CLIEngineMock: typeof CLIEngine = Mockito.mock(CLIEngine);
 
 	Mockito.when(CLIEngineMock.getRules()).thenReturn(esRuleMap);
+	Mockito.when(MockStrategy.filterDisallowedRules(esRuleMap)).thenReturn(esRuleMap);
 	Mockito.when(CLIEngineMock.executeOnFiles(Mockito.anything())).thenReturn(esReport);
 
 	return Mockito.instance(CLIEngineMock);

@@ -76,10 +76,12 @@ export type RuleEvent = {
  */
 export type ESRule = {
 	meta: {
+		deprecated?: boolean;
 		docs: {
 			description: string;
 			category: string;
 			recommended: boolean;
+			extendsBaseRule?: boolean|string;
 			url: string;
 		};
 		/* eslint-disable @typescript-eslint/no-explicit-any */
