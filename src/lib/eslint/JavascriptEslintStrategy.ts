@@ -68,15 +68,9 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
-		const filteredRules: Map<string,ESRule> = new Map();
-		for (const [name, rule] of rulesByName.entries()) {
-			// Keep all rules except the deprecated ones.
-			if (!rule.meta.deprecated) {
-				filteredRules.set(name, rule);
-			}
-		}
-		return filteredRules;
+		return EslintStrategyHelper.filterDisallowedRules(rulesByName);
 	}
+
 
 	processRuleViolation(): ProcessRuleViolationType {
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

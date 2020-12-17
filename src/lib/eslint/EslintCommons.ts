@@ -31,6 +31,17 @@ export class StaticDependencies {
 }
 
 export class EslintStrategyHelper {
+	static filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule> {
+		const filteredRules: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			// Keep all rules except the deprecated ones.
+			if (!rule.meta.deprecated) {
+				filteredRules.set(name, rule);
+			}
+		}
+		return filteredRules;
+	}
+
 	static isDefaultEnabled(recommendedConfig: LooseObject, ruleName: string): boolean {
 		// ESLint rules are considered "enabled by default" as long as they're present in the "recommended" config with
 		// a severity of anything other than "off".
