@@ -2,7 +2,7 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, RuleViolation} from '../../types';
+import {ESRule, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
@@ -44,6 +44,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private logger: Logger;
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
+	private recommendedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -52,6 +53,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.fileHandler = new FileHandler();
 		this.outputProcessor = await OutputProcessor.create({});
+		const pathToRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'recommended.json'));
+		this.recommendedConfig = JSON.parse(await this.fileHandler.readFile(pathToRecommendedConfig));
 		this.initialized = true;
 	}
 
@@ -105,6 +109,15 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			}
 		}
 		return filteredMap;
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		const recommendation = this.recommendedConfig.rules[name];
+		return recommendation && recommendation !== 'off';
+	}
+
+	getDefaultConfig(ruleName: string): LooseObject {
+		return null;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

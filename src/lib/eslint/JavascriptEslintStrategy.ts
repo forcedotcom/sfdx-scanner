@@ -1,8 +1,9 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, RuleViolation} from '../../types';
+import {ESRule, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import { ProcessRuleViolationType } from './EslintCommons';
+import path = require('path');
 
 const ES_CONFIG = {
 	"baseConfig": {},
@@ -20,6 +21,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
+	private recommendedConfig: LooseObject;
 	protected logger: Logger;
 
 	async init(): Promise<void> {
@@ -27,6 +29,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 			return;
 		}
 		this.logger = await Logger.child(this.getEngine().valueOf());
+		const pathToRecommendedConfig = require.resolve('eslint').replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
+		this.recommendedConfig = require(pathToRecommendedConfig);
 		this.initialized = true;
 	}
 
@@ -51,6 +55,15 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	filterUnsupportedPaths(paths: string[]): string[] {
 		// TODO: fill in the filtering logic - this method could be removed if we fix an issue with getTargetPatterns in TypescriptEslintStrategy
 		return paths;
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		const recommendation = this.recommendedConfig.rules[name];
+		return recommendation && recommendation !== 'off';
+	}
+
+	getDefaultConfig(ruleName: string): LooseObject {
+		return null;
 	}
 
 	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {

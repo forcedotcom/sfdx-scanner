@@ -133,7 +133,7 @@ describe('Tests for BaseEslintEngine', () => {
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
 
 				// verify config
-				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).second();
+				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).first();
 				expect(capturedConfig[0]).instanceOf(Object);
 				const config = <Object>capturedConfig[0];
 				expect(config['cwd']).equals(target.target);

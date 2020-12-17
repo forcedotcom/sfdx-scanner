@@ -1,18 +1,13 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, RuleViolation} from '../../types';
+import {ESRule, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import { ProcessRuleViolationType } from './EslintCommons';
 
 const ES_CONFIG = {
 	"parser": "babel-eslint",
 	"plugins": ["@lwc/eslint-plugin-lwc"],
-	"baseConfig": {
-		"extends": [
-			"eslint:recommended",
-			"@salesforce/eslint-config-lwc/base"
-		]
-	},
+	"baseConfig": {},
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
@@ -21,17 +16,25 @@ const ES_CONFIG = {
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
 
+function isArray(o: string|any[]): o is any[] {
+	return o && (o as any[]).map != null;
+}
+
 export class LWCEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
 	protected logger: Logger;
+	private recommendedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
 		this.logger = await Logger.child(this.getEngine().valueOf());
+		const pathToRecommendedConfig = require.resolve('@salesforce/eslint-config-lwc')
+			.replace('index.js', 'base.js');
+		this.recommendedConfig = require(pathToRecommendedConfig);
 		this.initialized = true;
 	}
 
@@ -60,6 +63,28 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
 		return rulesByName;
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		const recommendation = this.recommendedConfig.rules[name];
+		if (typeof recommendation === 'string') {
+			return recommendation !== 'off';
+		} else if (isArray(recommendation)) {
+			return recommendation[0] !== 'off';
+		}
+		return false;
+	}
+
+	getDefaultConfig(ruleName: string): LooseObject {
+		const recommendation = this.recommendedConfig.rules[ruleName];
+		if (!recommendation) {
+			return null;
+		} else if (typeof recommendation === 'string') {
+			return null;
+		} else if (isArray(recommendation) && recommendation.length > 1) {
+			return recommendation[1];
+		}
+		return null;
 	}
 
 	// TODO: Submit PR against elsint-plugin-lwc

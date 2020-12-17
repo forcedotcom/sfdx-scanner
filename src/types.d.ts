@@ -7,6 +7,7 @@ export type Rule = {
 	rulesets: string[];
 	languages: string[];
 	defaultEnabled: boolean;
+	defaultConfig?: any;
 	url?: string;
 }
 

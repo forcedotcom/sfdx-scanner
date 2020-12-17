@@ -51,6 +51,10 @@ export interface EslintStrategy {
 	/** Filters out any rules that should be excluded from the catalog */
 	filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule>;
 
+	ruleDefaultEnabled(name: string): boolean;
+
+	getDefaultConfig(ruleName: string): LooseObject;
+
 	/** Allow the strategy to convert the RuleViolation */
 	processRuleViolation(): ProcessRuleViolationType;
 }
@@ -148,7 +152,8 @@ export abstract class BaseEslintEngine implements RuleEngine {
 			categories: [docs.category],
 			rulesets: [docs.category],
 			languages: [...this.strategy.getLanguages()],
-			defaultEnabled: docs.recommended,
+			defaultEnabled: this.strategy.ruleDefaultEnabled(key),
+			defaultConfig: this.strategy.getDefaultConfig(key),
 			url: docs.url
 		};
 		return rule;
@@ -173,8 +178,8 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		// Get sublist of rules supported by the engine
-		const filteredRules = await this.selectRelevantRules(rules);
-		if (Object.keys(filteredRules).length === 0) {
+		const configuredRules = this.configureRules(rules);
+		if (Object.keys(configuredRules).length === 0) {
 			// No rules to run
 			this.logger.trace('No matching rules to run. Nothing to execute.');
 			return [];
@@ -190,7 +195,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
 				const config = {cwd};
 
-				config["rules"] = filteredRules;
+				config["rules"] = configuredRules;
 
 				target.paths = this.strategy.filterUnsupportedPaths(target.paths);
 
@@ -236,23 +241,15 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		}
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private async selectRelevantRules(rules: Rule[]): Promise<Record<string,any>> {
-		const filteredRules = {};
-
-		// the eslint engines will run all rules explicitly enabled and all 'recommended' rules
-		// that are inherited from the 'extends' configuration attribute. Disable all rules that
-		// the engine would run by default. The requested rules will be  enabled below.
-		if (rules.length > 0) {
-			for (const rule of (await this.getCatalog()).rules.filter(r => r.defaultEnabled)) {
-				filteredRules[rule.name] = 'off';
+	private configureRules(rules: Rule[]): LooseObject {
+		const configuredRules: LooseObject = {};
+		rules.forEach((rule) => {
+			configuredRules[rule.name] = ['error'];
+			if (rule.defaultConfig) {
+				configuredRules[rule.name].push(rule.defaultConfig);
 			}
-		}
-
-		rules.forEach(rule => filteredRules[rule.name] = 'error');
-
-		this.logger.trace(`Count of rules selected for ${this.getName()}: ${rules.length}`);
-		return filteredRules;
+		});
+		return configuredRules;
 	}
 
 }
