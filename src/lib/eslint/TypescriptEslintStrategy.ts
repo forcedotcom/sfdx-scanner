@@ -2,11 +2,11 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -18,12 +18,7 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
-	"baseConfig": {
-		"extends": [
-			"plugin:@typescript-eslint/recommended",
-			"plugin:@typescript-eslint/eslint-recommended"
-		]
-	},
+	"baseConfig": {},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -49,6 +44,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private logger: Logger;
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
+	private recommendedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -57,6 +53,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.fileHandler = new FileHandler();
 		this.outputProcessor = await OutputProcessor.create({});
+		const pathToRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'recommended.json'));
+		this.recommendedConfig = JSON.parse(await this.fileHandler.readFile(pathToRecommendedConfig));
 		this.initialized = true;
 	}
 
@@ -77,6 +76,47 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		const filteredPaths = paths.filter(p => p.endsWith(".ts"));
 		this.logger.trace(`Input paths: ${paths}, Filtered paths: ${filteredPaths}`);
 		return filteredPaths;
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		// We want to identify rules that are deprecated, and rules that are extended by other rules, so we can manually
+		// filter them out.
+		const extendedRules: Set<string> = new Set();
+		const deprecatedRules: Set<string> = new Set();
+
+		for (const [name, rule] of rulesByName.entries()) {
+			if (rule.meta.deprecated) {
+				deprecatedRules.add(name);
+			}
+			if (rule.meta.docs.extendsBaseRule) {
+				// The `extendsBaseRule` property can be a string, representing the name of the rule being extended.
+				if (typeof rule.meta.docs.extendsBaseRule === 'string') {
+					extendedRules.add(rule.meta.docs.extendsBaseRule);
+				} else {
+					// Alternatively, it can be just the boolean true, which indicates that this rule extends a base rule
+					// with the exact same name. So to determine the base rule's name, we need to remove all namespacing
+					// information from this rule's name, i.e. strip everything up through the last '/' character.
+					extendedRules.add(name.slice(name.lastIndexOf('/') + 1));
+				}
+			}
+		}
+
+		// Now, we'll want to create a new Map containing every rule that isn't deprecated or extended.
+		const filteredMap: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			if (!extendedRules.has(name) && !deprecatedRules.has(name)) {
+				filteredMap.set(name, rule);
+			}
+		}
+		return filteredMap;
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+	}
+
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

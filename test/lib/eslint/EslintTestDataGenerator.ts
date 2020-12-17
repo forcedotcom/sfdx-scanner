@@ -50,6 +50,99 @@ export function getDummyEsRule(category: string = 'myCategory', description: str
 	}
 }
 
+export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
+	const dummyMap: Map<string, ESRule> = new Map();
+	dummyMap.set('fake-active', {
+		meta: {
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+	dummyMap.set('fake-deprecated', {
+		meta: {
+			deprecated: true,
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+	dummyMap.set('fake-extended-a', {
+		meta: {
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+	dummyMap.set('fake-extended-b', {
+		meta: {
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+	dummyMap.set('@typescript-eslint/fake-extended-a', {
+		meta: {
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				extendsBaseRule: true,
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+	dummyMap.set('@typescript-eslint/renamed-b-extension', {
+		meta: {
+			docs: {
+				description: 'Lorem Ipsum',
+				category: 'Praise the Sun',
+				recommended: true,
+				extendsBaseRule: 'fake-extended-b',
+				url: 'someURL'
+			},
+			schema: [{
+				element: 'value'
+			}]
+		},
+		create: () => { }
+	});
+
+	return dummyMap;
+}
+
 export function getDummyEsReport(results: ESResult[] = [getDummyEsResult()]): ESReport {
 	return {
 		results: results,

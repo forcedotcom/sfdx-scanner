@@ -1,18 +1,13 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
 
 const ES_CONFIG = {
 	"parser": "babel-eslint",
 	"plugins": ["@lwc/eslint-plugin-lwc"],
-	"baseConfig": {
-		"extends": [
-			"eslint:recommended",
-			"@salesforce/eslint-config-lwc/base"
-		]
-	},
+	"baseConfig": {},
 	"ignorePatterns": [
 		"node_modules/!**"
 	],
@@ -26,12 +21,16 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	private initialized: boolean;
 	protected logger: Logger;
+	private recommendedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
 			return;
 		}
 		this.logger = await Logger.child(this.getEngine().valueOf());
+		const pathToRecommendedConfig = require.resolve('@salesforce/eslint-config-lwc')
+			.replace('index.js', 'base.js');
+		this.recommendedConfig = require(pathToRecommendedConfig);
 		this.initialized = true;
 	}
 
@@ -56,6 +55,18 @@ export class LWCEslintStrategy implements EslintStrategy {
 	filterUnsupportedPaths(paths: string[]): string[] {
 		// TODO: fill in the filtering logic - this method could be removed if we fix an issue with getTargetPatterns in TypescriptEslintStrategy
 		return paths;
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		return EslintStrategyHelper.filterDisallowedRules(rulesByName);
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+	}
+
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
 	// TODO: Submit PR against elsint-plugin-lwc

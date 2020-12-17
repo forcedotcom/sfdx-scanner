@@ -7,6 +7,9 @@ export type Rule = {
 	rulesets: string[];
 	languages: string[];
 	defaultEnabled: boolean;
+	// The expectation is that default configurations for other engines will be defined as their own types, which will
+	// be OR'd together in this property.
+	defaultConfig?: ESRuleConfig;
 	url?: string;
 }
 
@@ -14,6 +17,11 @@ export type LooseObject = {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	[key: string]: any;
 }
+
+// This is a DESCRIPTIVE definition based on observation of ESLint and a few of its derivatives, NOT a proscriptive one
+// to which all other ESLint-like engines are expected to adhere. If rules are discovered that violate this definition,
+// changing the definition should be considered a viable option.
+export type ESRuleConfig = string|Array<string|LooseObject>;
 
 export type RuleGroup = {
 	engine: string;
@@ -76,10 +84,12 @@ export type RuleEvent = {
  */
 export type ESRule = {
 	meta: {
+		deprecated?: boolean;
 		docs: {
 			description: string;
 			category: string;
 			recommended: boolean;
+			extendsBaseRule?: boolean|string;
 			url: string;
 		};
 		/* eslint-disable @typescript-eslint/no-explicit-any */

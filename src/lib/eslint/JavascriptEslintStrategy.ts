@@ -1,13 +1,12 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
+import path = require('path');
 
 const ES_CONFIG = {
-	"baseConfig": {
-		"extends": ["eslint:recommended"]
-	},
+	"baseConfig": {},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -22,6 +21,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
+	private recommendedConfig: LooseObject;
 	protected logger: Logger;
 
 	async init(): Promise<void> {
@@ -29,6 +29,10 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 			return;
 		}
 		this.logger = await Logger.child(this.getEngine().valueOf());
+		// When we're building our catalog, we'll want to get any bonus configuration straight from the horse's mouth.
+		// This lets us do that.
+		const pathToRecommendedConfig = require.resolve('eslint').replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
+		this.recommendedConfig = require(pathToRecommendedConfig);
 		this.initialized = true;
 	}
 
@@ -54,6 +58,19 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		// TODO: fill in the filtering logic - this method could be removed if we fix an issue with getTargetPatterns in TypescriptEslintStrategy
 		return paths;
 	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+	}
+
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		return EslintStrategyHelper.filterDisallowedRules(rulesByName);
+	}
+
 
 	processRuleViolation(): ProcessRuleViolationType {
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

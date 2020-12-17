@@ -133,7 +133,7 @@ describe('Tests for BaseEslintEngine', () => {
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
 
 				// verify config
-				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).second();
+				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).first();
 				expect(capturedConfig[0]).instanceOf(Object);
 				const config = <Object>capturedConfig[0];
 				expect(config['cwd']).equals(target.target);
@@ -443,6 +443,7 @@ function getDummyCliEngine(esRuleMap: Map<string, ESRule> = DataGenerator.getDum
 	const CLIEngineMock: typeof CLIEngine = Mockito.mock(CLIEngine);
 
 	Mockito.when(CLIEngineMock.getRules()).thenReturn(esRuleMap);
+	Mockito.when(MockStrategy.filterDisallowedRules(esRuleMap)).thenReturn(esRuleMap);
 	Mockito.when(CLIEngineMock.executeOnFiles(Mockito.anything())).thenReturn(esReport);
 
 	return Mockito.instance(CLIEngineMock);

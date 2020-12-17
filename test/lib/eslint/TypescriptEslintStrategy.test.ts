@@ -7,6 +7,7 @@ import {Controller} from '../../../src/Controller';
 import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
 import { fail } from 'assert';
 import {RuleResult, RuleViolation} from '../../../src/types';
+import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
 
@@ -29,6 +30,39 @@ class TestTypescriptEslintStrategy extends TypescriptEslintStrategy {
 describe('TypescriptEslint Strategy', () => {
 	afterEach(() => {
 		Sinon.restore();
+	});
+
+	describe('filterDisallowedRules()', () => {
+		it('Removes deprecated rules', async () => {
+			const tsStrategy = new TestTypescriptEslintStrategy();
+			await tsStrategy.init();
+
+			// THIS IS THE PART BEING TESTED
+			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+
+			expect(filteredRules.has('fake-deprecated')).to.equal(false, 'Deprecated rule should be removed');
+		});
+
+		it('Removes rules that are extended by other rules', async () => {
+			const tsStrategy = new TestTypescriptEslintStrategy();
+			await tsStrategy.init();
+
+			// THIS IS THE PART BEING TESTED
+			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+
+			expect(filteredRules.has('fake-extended-a')).to.equal(false, 'Extended rule should be removed');
+			expect(filteredRules.has('fake-extended-b')).to.equal(false, 'Extended rule should be removed');
+		});
+
+		it('Keeps non-deprecated, non-extended rules', async () => {
+			const tsStrategy = new TestTypescriptEslintStrategy();
+			await tsStrategy.init();
+
+			// THIS IS THE PART BEING TESTED
+			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+
+			expect(filteredRules.has('fake-active')).to.equal(true, 'Active rule should be kept');
+		});
 	});
 
 	describe('Test cases with tsconfig.json', () => {
