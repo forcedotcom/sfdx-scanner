@@ -1,7 +1,7 @@
 import { CLIEngine } from 'eslint';
 import * as path from 'path';
 import { CUSTOM_CONFIG } from '../../Constants';
-import { RuleResult, RuleViolation, ESMessage, ESRule, ESReport } from '../../types';
+import { LooseObject, RuleResult, RuleViolation, ESMessage, ESRule, ESRuleConfig, ESReport } from '../../types';
 import { FileHandler } from '../util/FileHandler';
 import * as engineUtils from '../util/CommonEngineUtils';
 
@@ -27,6 +27,26 @@ export class StaticDependencies {
 
 	getFileHandler(): FileHandler {
 		return new FileHandler();
+	}
+}
+
+export class EslintStrategyHelper {
+	static isDefaultEnabled(recommendedConfig: LooseObject, ruleName: string): boolean {
+		// ESLint rules are considered "enabled by default" as long as they're present in the "recommended" config with
+		// a severity of anything other than "off".
+		const recommendation: ESRuleConfig = recommendedConfig.rules[ruleName];
+		return recommendation && !(recommendation.indexOf('off') === 0);
+	}
+
+	static getDefaultConfig(recommendedConfig: LooseObject, ruleName: string): ESRuleConfig {
+		const recommendation: ESRuleConfig = recommendedConfig.rules[ruleName];
+		// BASE ASSUMPTION: If the config specifies a rule as "off", it is unlikely to also specify a meaningful default
+		// config for that rule. So we can return null for any rules set to "off".
+		if (!recommendation || recommendation.indexOf('off') === 0) {
+			return null;
+		} else {
+			return recommendation;
+		}
 	}
 }
 

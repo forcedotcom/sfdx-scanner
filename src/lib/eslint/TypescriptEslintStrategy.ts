@@ -2,11 +2,11 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, LooseObject, RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -112,12 +112,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		const recommendation = this.recommendedConfig.rules[name];
-		return recommendation && recommendation !== 'off';
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
 	}
 
-	getDefaultConfig(ruleName: string): LooseObject {
-		return null;
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

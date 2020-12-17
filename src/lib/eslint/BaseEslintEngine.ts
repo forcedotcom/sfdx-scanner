@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule} from '../../types';
+import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
@@ -51,9 +51,20 @@ export interface EslintStrategy {
 	/** Filters out any rules that should be excluded from the catalog */
 	filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule>;
 
+	/**
+	 * Indicates whether the rule with the specified name should be treated as enabled by default (i.e., run in the
+	 * absence of filter criteria).
+	 * @param {string} name - The name of a rule.
+	 * @returns {boolean} true if the rule should be enabled by default.
+	 */
 	ruleDefaultEnabled(name: string): boolean;
 
-	getDefaultConfig(ruleName: string): LooseObject;
+	/**
+	 * Returns the default configuration associated with the specified rule, as per the corresponding "recommended" ruleset.
+	 * @param {string} ruleName - The name of a rule in this engine.
+	 * @returns {ESRuleConfig} The rule's default recommended configuration.
+	 */
+	getDefaultConfig(ruleName: string): ESRuleConfig;
 
 	/** Allow the strategy to convert the RuleViolation */
 	processRuleViolation(): ProcessRuleViolationType;
@@ -241,13 +252,17 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		}
 	}
 
-	private configureRules(rules: Rule[]): LooseObject {
+	/**
+	 * Uses a list of rules to generate an object suitable for use as the "rules" property of an ESLint configuration.
+	 * @param {Rule[]} rules - A list of rules that we want to run
+	 * @returns {[key: string]: ESRuleConfig} A mapping from rule names to the configuration at which they should run.
+	 * @private
+	 */
+	private configureRules(rules: Rule[]): {[key: string]: ESRuleConfig} {
 		const configuredRules: LooseObject = {};
-		rules.forEach((rule) => {
-			configuredRules[rule.name] = ['error'];
-			if (rule.defaultConfig) {
-				configuredRules[rule.name].push(rule.defaultConfig);
-			}
+		rules.forEach(rule => {
+			// If the rule has a default configuration associated with it, we use it. Otherwise, we default to "error".
+			configuredRules[rule.name] = rule.defaultConfig || 'error';
 		});
 		return configuredRules;
 	}

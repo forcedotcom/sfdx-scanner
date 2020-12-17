@@ -1,8 +1,8 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, LooseObject, RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
 import path = require('path');
 
 const ES_CONFIG = {
@@ -29,6 +29,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 			return;
 		}
 		this.logger = await Logger.child(this.getEngine().valueOf());
+		// When we're building our catalog, we'll want to get any bonus configuration straight from the horse's mouth.
+		// This lets us do that.
 		const pathToRecommendedConfig = require.resolve('eslint').replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
 		this.recommendedConfig = require(pathToRecommendedConfig);
 		this.initialized = true;
@@ -58,16 +60,22 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		const recommendation = this.recommendedConfig.rules[name];
-		return recommendation && recommendation !== 'off';
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
 	}
 
-	getDefaultConfig(ruleName: string): LooseObject {
-		return null;
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
 	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
-		return rulesByName;
+		const filteredRules: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			// Keep all rules except the deprecated ones.
+			if (!rule.meta.deprecated) {
+				filteredRules.set(name, rule);
+			}
+		}
+		return filteredRules;
 	}
 
 	processRuleViolation(): ProcessRuleViolationType {

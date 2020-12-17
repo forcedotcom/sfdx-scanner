@@ -1,8 +1,8 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE} from '../../Constants';
-import {ESRule, LooseObject, RuleViolation} from '../../types';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { ProcessRuleViolationType } from './EslintCommons';
+import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
 
 const ES_CONFIG = {
 	"parser": "babel-eslint",
@@ -15,10 +15,6 @@ const ES_CONFIG = {
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
-
-function isArray(o: string|any[]): o is any[] {
-	return o && (o as any[]).map != null;
-}
 
 export class LWCEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
@@ -62,29 +58,22 @@ export class LWCEslintStrategy implements EslintStrategy {
 	}
 
 	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
-		return rulesByName;
+		const filteredRules: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			// Keep all rules except the deprecated ones.
+			if (!rule.meta.deprecated) {
+				filteredRules.set(name, rule);
+			}
+		}
+		return filteredRules;
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		const recommendation = this.recommendedConfig.rules[name];
-		if (typeof recommendation === 'string') {
-			return recommendation !== 'off';
-		} else if (isArray(recommendation)) {
-			return recommendation[0] !== 'off';
-		}
-		return false;
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
 	}
 
-	getDefaultConfig(ruleName: string): LooseObject {
-		const recommendation = this.recommendedConfig.rules[ruleName];
-		if (!recommendation) {
-			return null;
-		} else if (typeof recommendation === 'string') {
-			return null;
-		} else if (isArray(recommendation) && recommendation.length > 1) {
-			return recommendation[1];
-		}
-		return null;
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
 	// TODO: Submit PR against elsint-plugin-lwc
