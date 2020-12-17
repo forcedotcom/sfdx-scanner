@@ -93,10 +93,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 				if (typeof rule.meta.docs.extendsBaseRule === 'string') {
 					extendedRules.add(rule.meta.docs.extendsBaseRule);
 				} else {
-					// Alternatively, it can just be the boolean true, which implies that the rule being extended shares
-					// the same name as this one, but is in the ESLint space instead of the Typescript space. So we strip
-					// the `@typescript-eslint/` from this rule's name and use that.
-					extendedRules.add(name.slice(19));
+					// Alternatively, it can be just the boolean true, which indicates that this rule extends a base rule
+					// with the exact same name. So to determine the base rule's name, we need to remove all namespacing
+					// information from this rule's name, i.e. strip everything up through the last '/' character.
+					extendedRules.add(name.slice(name.lastIndexOf('/') + 1));
 				}
 			}
 		}
