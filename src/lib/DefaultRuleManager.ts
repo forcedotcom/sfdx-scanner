@@ -125,7 +125,7 @@ export class DefaultRuleManager implements RuleManager {
 		// just return any enabled engines.
 		// This lets us quietly introduce new engines by making them disabled by default but still available if explicitly
 		// specified.
-		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions) : Controller.getEnabledEngines();
+		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions) : Controller.getEnabledEngines(engineOptions);
 	}
 
 	/**
