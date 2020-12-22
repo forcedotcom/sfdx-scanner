@@ -3,6 +3,7 @@ import { setupCommandTest } from "../../TestUtils";
 import path = require('path');
 import { expect } from "@oclif/test";
 import {ENGINE} from '../../../src/Constants';
+import normalize = require('normalize-path');
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -41,7 +42,7 @@ describe('scanner:run with custom config E2E', () => {
 			'--pmdconfig', customPmdConfig])
 		.it('should display warning that we are about to run PMD with custom config', (ctx) => {
 			const stdout = ctx.stdout;			
-			const expectedMessage = eventMessages.getMessage('info.customPmdHeadsUp', [customPmdConfig]);
+			const expectedMessage = eventMessages.getMessage('info.customPmdHeadsUp', [normalize(customPmdConfig)]);
 
 			expect(stdout).contains(expectedMessage);
 		});
@@ -74,7 +75,7 @@ describe('scanner:run with custom config E2E', () => {
 			'--eslintconfig', customEslintConfig])
 		.it('should display warning that we are about to run Eslint with custom config', (ctx) => {
 			const stdout = ctx.stdout;			
-			const expectedMessage = eventMessages.getMessage('info.customEslintHeadsUp', [customEslintConfig]);
+			const expectedMessage = eventMessages.getMessage('info.customEslintHeadsUp', [normalize(customEslintConfig)]);
 							
 			expect(stdout).contains(expectedMessage);
 		});
