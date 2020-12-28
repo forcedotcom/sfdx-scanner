@@ -91,7 +91,7 @@ abstract class BasePmdEngine implements RuleEngine {
 			return results;
 		} catch (e) {
 			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
-			throw new SfdxError(this.processStdErr(e.message));
+			throw new SfdxError(this.processStdErr(e.message || e));
 		}
 	}
 
