@@ -1,9 +1,9 @@
-import childProcess = require('child_process');
 import path = require('path');
 import {AsyncCreatable} from '@salesforce/kit';
 import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
+import cspawn = require('cross-spawn');
 
 export const PMD_VERSION = '6.29.0';
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
@@ -49,7 +49,7 @@ export abstract class PmdSupport extends AsyncCreatable {
 		const [command, args] = await this.buildCommandArray();
 
 		return new Promise<string>((res, rej) => {
-			const cp = childProcess.spawn(command, args);
+			const cp = cspawn.spawn(command, args);
 			this.monitorChildProcess(cp, res, rej);
 		});
 	}
