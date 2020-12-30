@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG, EngineBase} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
@@ -29,6 +29,40 @@ interface PmdViolation extends Element {
 		ruleset: string;
 	};
 }
+
+type HardcodedRuleDetail = {
+	base: {
+		name: string;
+		category: string;
+	};
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	nodeIdentifier: (node: any) => boolean;
+	severity: number;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	msgFormatter: (node: any) => string;
+};
+
+const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
+	{
+		base: HARDCODED_RULES.FILES_MUST_COMPILE,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		nodeIdentifier: (node: any): boolean => {
+			return node.name === 'error' && node.attributes.msg.toLowerCase().startsWith('pmdexception: error while parsing');
+		},
+		severity: 1,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		msgFormatter: (node: any): string => {
+			// We want to take the message property that the node already has, since that's the one that describes what happened.
+			const topLevelMsg = node.attributes.msg;
+			// We also want the exception that caused this exception to throw, since that's the one that usually has information
+			// about lines and columns.
+			const causationStart = node.elements[0].cdata.indexOf('Caused by: ');
+			const causationEnd = node.elements[0].cdata.indexOf('\n', causationStart);
+			return `${topLevelMsg}\n${node.elements[0].cdata.slice(causationStart, causationEnd)}`;
+		}
+	}
+];
+
 
 abstract class BasePmdEngine implements RuleEngine {
 
@@ -162,34 +196,81 @@ abstract class BasePmdEngine implements RuleEngine {
 		}
 	}
 
+	/**
+	 * Indicates whether the scanner should consider a given node as representing PMD violations. Some nodes don't technically
+	 * contain violations, but should be treated as fake violations of fake rules.
+	 * @param node - A top-level node from PMD's results.
+	 * @returns {boolean} true if the node represents rule violations in the scanner's opinion.
+	 * @private
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private nodeRepresentsViolations(node: any): boolean {
+		// `file` nodes always contain violations.
+		if (node.name === 'file') {
+			return true;
+		}
+		// Other types of nodes don't technically contain violations, but sometimes they indicate problems that we want
+		// to surface in the same manner as true violations, instead of errors or warnings.
+		return HARDCODED_RULE_DETAILS.some((detail: HardcodedRuleDetail): boolean => detail.nodeIdentifier(node));
+	}
+
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected xmlToRuleResults(elements: any): RuleResult[] {
 		// Provide results for nodes that are files.
-		const files = elements.filter(e => 'file' === e.name);
+		const violationNodes = elements.filter(this.nodeRepresentsViolations);
 
-		return files.map(
-			(f): RuleResult => {
-				return {
-					engine: this.getName(),
-					fileName: f.attributes['name'],
-					violations: f.elements.map(
-						(v: PmdViolation) => {
-							return {
-								line: v.attributes.beginline,
-								column: v.attributes.begincolumn,
-								endLine: v.attributes.endline,
-								endColumn: v.attributes.endcolumn,
-								severity: v.attributes.priority,
-								ruleName: v.attributes.rule,
-								category: v.attributes.ruleset,
-								url: v.attributes.externalInfoUrl,
-								message: this.toText(v)
-							};
-						}
-					)
-				};
+		return violationNodes.map((node): RuleResult => {
+			switch (node.name) {
+				case 'file':
+					return this.fileNodeToRuleResult(node);
+				case 'error':
+					return this.errorNodeToRuleResult(node);
+				default:
+					// This shouldn't be possible, but it's best practice for every switch to have a default.
+					throw new SfdxError(`Encountered violation node of unexpected type ${node.name}`);
 			}
-		);
+		});
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private fileNodeToRuleResult(element: any): RuleResult {
+		return {
+			engine: this.getName(),
+			fileName: element.attributes['name'],
+			violations: element.elements.map(
+				(v: PmdViolation) => {
+					return {
+						line: v.attributes.beginline,
+						column: v.attributes.begincolumn,
+						endLine: v.attributes.endline,
+						endColumn: v.attributes.endcolumn,
+						severity: v.attributes.priority,
+						ruleName: v.attributes.rule,
+						category: v.attributes.ruleset,
+						url: v.attributes.externalInfoUrl,
+						message: this.toText(v)
+					};
+				}
+			)
+		};
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	private errorNodeToRuleResult(element: any): RuleResult {
+		const hardcodedDetails = HARDCODED_RULE_DETAILS.find(details => details.nodeIdentifier(element));
+
+		return {
+			engine: this.getName(),
+			fileName: element.attributes.filename,
+			violations: [{
+				line: 1,
+				column: 1,
+				severity: hardcodedDetails.severity,
+				ruleName: hardcodedDetails.base.name,
+				category: hardcodedDetails.base.category,
+				message: hardcodedDetails.msgFormatter(element)
+			}]
+		};
 	}
 
 	/**
@@ -199,7 +280,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	private emitErrorsAndWarnings(elements: any): void {
 		// Provide results for nodes that aren't files.
-		const nodes = elements.filter(e => 'file' !== e.name);
+		const nodes = elements.filter(e => !this.nodeRepresentsViolations(e));
 
 		// See https://github.com/pmd/pmd/blob/master/pmd-core/src/main/resources/report_2_0_0.xsd
 		// for node schema
