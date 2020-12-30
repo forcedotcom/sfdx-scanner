@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {ENGINE, LANGUAGE} from '../../Constants';
+import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
@@ -85,6 +85,11 @@ export class LWCEslintStrategy implements EslintStrategy {
 				// Convert the append 'v' to the version if it is missing
 				newUrl = newUrl.replace(/\/blob\/([0-9])/, '/blob/v$1');
 				ruleViolation.url = newUrl;
+			}
+			if (ruleViolation.message.startsWith('Parsing error:')) {
+				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
+				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
+				ruleViolation.message = ruleViolation.message.split('\n')[0];
 			}
 		}
 		
