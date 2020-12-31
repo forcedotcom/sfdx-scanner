@@ -37,17 +37,20 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 		Sinon.restore();
 	});
 	describe('processStdOut()', () => {
-		it('Non file XML nodes are filtered out of results', async () => {
-			// This file contains non 'file' nodes that are direct children of the pmd node.
-			// These nodes should be filtered out of the results without causing any errors.
+		it('Nodes that do not represent violations are filtered out of results', async () => {
+			// This file contains a `file`-type node and a mix of other node types that are direct children of the `pmd`
+			// node. The file nodes and the error nodes representing parser errors should be converted to violations.
+			// Anything else should be filtered out of the results without problems.
 			const xmlPath = path.join('test', 'code-fixtures', 'pmd-results', 'result-with-errors.txt');
 			const fileHandler: FileHandler = new FileHandler();
 			const xml: string = await fileHandler.readFile(xmlPath);
 			expect(xml).to.not.be.null;
 
 			const results = (testPmdEngine as any).processStdOut(xml);
-			expect(results).to.be.length(1, 'Results should be for be a single file');
-			expect(results[0].violations).to.be.length(13, 'The file should have 13 violations');
+			expect(results).to.be.length(3, 'Should be three result entries');
+			expect(results[0].violations).to.be.length(13, 'Unexpected violation count in 1st entry');
+			expect(results[1].violations).to.be.length(1, 'Unexpected violation count in 2nd entry');
+			expect(results[2].violations).to.be.length(1, 'Unexpected violation count in 3rd entry');
 		});
 	});
 

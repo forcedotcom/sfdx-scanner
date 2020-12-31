@@ -1,16 +1,21 @@
 import { expect } from 'chai';
 import Sinon = require('sinon');
+import * as path from 'path';
+import { fail } from 'assert';
+import {Messages} from '@salesforce/core';
+import {HARDCODED_RULES} from '../../../src/Constants';
+import {ProcessRuleViolationType} from '../../../src/lib/eslint/EslintCommons';
 import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/lib/eslint/TypescriptEslintStrategy';
 import { FileHandler } from '../../../src/lib/util/FileHandler';
-import * as path from 'path';
 import {Controller} from '../../../src/Controller';
 import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
-import { fail } from 'assert';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
 
+Messages.importMessagesDirectory(__dirname);
+const strategyMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 let ruleManager: RuleManager = null;
@@ -30,6 +35,51 @@ class TestTypescriptEslintStrategy extends TypescriptEslintStrategy {
 describe('TypescriptEslint Strategy', () => {
 	afterEach(() => {
 		Sinon.restore();
+	});
+
+	describe('processRuleViolation()', () => {
+		let violationProcessor: ProcessRuleViolationType = null;
+		before(async () => {
+			const tsStrategy = new TestTypescriptEslintStrategy();
+			await tsStrategy.init();
+			violationProcessor = tsStrategy.processRuleViolation();
+		});
+
+		it('Parser errors are properly modified', () => {
+			const fileName = path.join('ts-sample-project', 'src', 'fileWithBadSyntax.ts');
+			const syntaxError: RuleViolation = {
+				"line": 1,
+				"column": 5,
+				"severity": 2,
+				"message": "Parsing error: ';' expected.",
+				"ruleName": null,
+				"category": "",
+				"url": ""
+			};
+
+			violationProcessor(fileName, syntaxError);
+
+			expect(syntaxError.ruleName).to.equal(HARDCODED_RULES.FILES_MUST_COMPILE.name, 'Wrong rulename assigned');
+			expect(syntaxError.category).to.equal(HARDCODED_RULES.FILES_MUST_COMPILE.category, 'Wrong category applied');
+		});
+
+		it('Errors about un-included TS files are properly modified', () => {
+			const fileName = path.join('test', 'code-fixtures', 'projects', 'ts', 'simpleYetWrong.ts');
+			const unincludedFileError: RuleViolation = {
+				"line": null,
+				"column": null,
+				"severity": 2,
+				"message": "Parsing error: \"parserOptions.project\" has been set for @typescript-eslint/parser.\nThe file does not match your project config: test/code-fixtures/projects/ts/src/simpleYetWrong.ts.\nThe file must be included in at least one of the projects provided.",
+				"ruleName": null,
+				"category": "",
+				"url": ""
+			};
+
+			violationProcessor(fileName, unincludedFileError);
+
+			// We expect that the processor method modified the error message.
+			expect(unincludedFileError.message).to.equal(strategyMessages.getMessage('FileNotIncludedByTsConfig', [fileName, 'tsconfig.json']), 'Incorrect msg');
+		});
 	});
 
 	describe('filterDisallowedRules()', () => {
