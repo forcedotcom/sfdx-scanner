@@ -644,6 +644,7 @@ describe('scanner:run', function () {
 						expect(violations.length).to.equal(4, 'Violations detected in the file');
 					});
 			});
+		});
 
 		describe('Error handling', () => {
 			setupCommandTest
