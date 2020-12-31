@@ -9,7 +9,6 @@ import events = require('../../../messages/EventKeyTemplates');
 
 Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
-const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 describe('scanner:run', function () {
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
