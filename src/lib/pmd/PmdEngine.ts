@@ -52,13 +52,20 @@ const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 		severity: 1,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		msgFormatter: (node: any): string => {
-			// We want to take the message property that the node already has, since that's the one that describes what happened.
-			const topLevelMsg = node.attributes.msg;
-			// We also want the exception that caused this exception to throw, since that's the one that usually has information
-			// about lines and columns.
+			// We'll construct an array of strings and then join them together into a formatted message at the end.
+			const msgComponents: string[] = [];
+
+			// We want the message property that the node already has, since that's the one that directly described what happened.
+			msgComponents.push(node.attributes.msg);
+			// In general, the top-level exception will have exceptions below it that provide more information about lines,
+			// columns, etc. Look for that.
 			const causationStart = node.elements[0].cdata.indexOf('Caused by: ');
-			const causationEnd = node.elements[0].cdata.indexOf('\n', causationStart);
-			return `${topLevelMsg}\n${node.elements[0].cdata.slice(causationStart, causationEnd)}`;
+			if (causationStart > -1) {
+				const causationEnd = node.elements[0].cdata.indexOf('\n', causationStart);
+				msgComponents.push(node.elements[0].cdata.slice(causationStart, causationEnd));
+			}
+			// Now we'll combine our pieces and return that.
+			return msgComponents.join('\n');
 		}
 	}
 ];
@@ -226,10 +233,19 @@ abstract class BasePmdEngine implements RuleEngine {
 				case 'error':
 					return this.errorNodeToRuleResult(node);
 				default:
-					// This shouldn't be possible, but it's best practice for every switch to have a default.
-					throw new SfdxError(`Encountered violation node of unexpected type ${node.name}`);
+					// This shouldn't be possible, but it's best practice for every switch to have a default. We'd respond
+					// by logging a verbose warning about the node type to the user, and writing the actual node itself
+					// to the internal logs.
+					uxEvents.emit(
+						"warning-verbose",
+						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
+							node.name
+						])
+					);
+					this.logger.warn(`Unknown result node ${JSON.stringify(node)}`);
+					return null;
 			}
-		});
+		}).filter((rr: RuleResult): boolean => rr != null);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -320,8 +336,14 @@ abstract class BasePmdEngine implements RuleEngine {
 					break;
 
 				default:
+					uxEvents.emit(
+						"warning-verbose",
+						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
+							node.name
+						])
+					);
 					this.logger.warn(
-						`Unknown non-file node ${JSON.stringify(node)}`
+						`Unknown non-result node ${JSON.stringify(node)}`
 					);
 			}
 		}
