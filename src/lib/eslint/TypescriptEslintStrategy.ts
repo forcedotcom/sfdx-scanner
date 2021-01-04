@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
-import {ENGINE, LANGUAGE} from '../../Constants';
+import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
@@ -155,6 +155,9 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
 				message.endsWith('The file must be included in at least one of the projects provided.')) {
 				ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+			} else if (message.startsWith('Parsing error:')) {
+				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
+				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
 			}
 		}
 	}

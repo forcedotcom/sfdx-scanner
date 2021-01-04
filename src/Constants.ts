@@ -71,3 +71,10 @@ export enum CUSTOM_CONFIG {
 	EslintConfig = "EslintConfig",
 	PmdConfig = "PmdConfig"
 }
+
+export const HARDCODED_RULES = {
+	FILES_MUST_COMPILE: {
+		name: 'files-must-compile',
+		category: 'Scanner Internal'
+	}
+};

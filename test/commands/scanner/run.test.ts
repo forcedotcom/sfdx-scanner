@@ -9,7 +9,6 @@ import events = require('../../../messages/EventKeyTemplates');
 
 Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
-const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 describe('scanner:run', function () {
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
@@ -642,45 +641,6 @@ describe('scanner:run', function () {
 						// ApexUnitTestClassShouldHaveAsserts, FieldNamingConventions, UnusedLocalVariable, and VariableNamingConventions
 						// We'll just make sure that we have the right number of them.
 						expect(violations.length).to.equal(4, 'Violations detected in the file');
-					});
-			});
-
-			describe('Test Case: Evaluating rules against invalid code', () => {
-				const pathToBadSyntax = path.join('test', 'code-fixtures', 'invalid-apex', 'BadSyntax1.cls');
-				const pathToGoodSyntax = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
-				setupCommandTest
-					.command(['scanner:run',
-						'--ruleset', 'ApexUnit',
-						'--target', pathToBadSyntax,
-						'--format', 'xml'
-					])
-					.it('When only malformed code is supplied, no violations are detected but a warning is logged', ctx => {
-						// Expect the output to include the "No violations" string.
-						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']), 'No violations should be found');
-						// Expect stderr to include the warning indicating that the file's output was skipped. We don't care much
-						// about the message from PMD, so just replace it with an empty string so it doesn't fail anything.
-						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
-					});
-
-				setupCommandTest
-					.command(['scanner:run',
-						'--ruleset', 'ApexUnit',
-						'--target', `${pathToBadSyntax},${pathToGoodSyntax}`,
-						'--format', 'xml'
-					])
-					.it('When a malformed file and a valid file are supplied, the malformed file does not tank the process', ctx => {
-						// stdout should be the same as if we'd only run against the good file.
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						// stderr should include the warning indicating that the file was skipped.
-						expect(ctx.stderr).to.contain(eventMessages.getMessage('warning.pmdSkippedFile', [path.resolve(pathToBadSyntax), '']), 'Warning should be displayed');
 					});
 			});
 		});

@@ -1,5 +1,5 @@
 import { EslintStrategy } from './BaseEslintEngine';
-import {ENGINE, LANGUAGE} from '../../Constants';
+import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
@@ -75,7 +75,10 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	processRuleViolation(): ProcessRuleViolationType {
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 		return (fileName: string, ruleViolation: RuleViolation): void => {
-			// Intentionally left blank
+			if (ruleViolation.message.startsWith('Parsing error:')) {
+				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
+				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
+			}
 		}
 	}
 }

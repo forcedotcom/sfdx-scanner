@@ -14,6 +14,7 @@ module.exports = {
 		"customRuleFileNotFound": "Custom rule file path [%s] for language [%s] was not found.",
 		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",
 		"pmdSuppressedViolation": "PMD suppressed violation against file '%s'. Message: %s. Suppression Type: %s. User Message: %s",
+		"unexpectedPmdNodeType": "Encountered unexpected PMD node of type '%s'",
 		"pmdConfigError": "PMD failed to evaluate rule '%s'. Message: %s"
 	},
 	"error": {

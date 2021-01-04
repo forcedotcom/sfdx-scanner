@@ -46,6 +46,57 @@ Parameter 'verbose' is not assigned and could be declared final
 </violation>
 </file>
 <error filename="Foo.java" msg="Issue with Foo"/>
+<error filename="/Users/jfeingold/Code/sfdx-scanner/invalid-test.xml" msg="PMDException: Error while parsing /Users/jfeingold/Code/sfdx-scanner/invalid-test.xml">
+<![CDATA[net.sourceforge.pmd.PMDException: Error while parsing /Users/jfeingold/Code/sfdx-scanner/invalid-test.xml
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCodeWithoutCache(SourceCodeProcessor.java:110)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCode(SourceCodeProcessor.java:89)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCode(SourceCodeProcessor.java:51)
+    at net.sourceforge.pmd.processor.PmdRunnable.call(PmdRunnable.java:78)
+    at net.sourceforge.pmd.processor.PmdRunnable.call(PmdRunnable.java:24)
+    at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+    at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+    at java.lang.Thread.run(Thread.java:748)
+Caused by: net.sourceforge.pmd.lang.ast.ParseException: org.xml.sax.SAXParseException; lineNumber: 9; columnNumber: 9; The end-tag for element type "result" must end with a '>' delimiter.
+    at net.sourceforge.pmd.lang.xml.ast.XmlParser.parseDocument(XmlParser.java:59)
+    at net.sourceforge.pmd.lang.xml.ast.XmlParser.parse(XmlParser.java:65)
+    at net.sourceforge.pmd.lang.xml.XmlParser.parse(XmlParser.java:38)
+    at net.sourceforge.pmd.SourceCodeProcessor.parse(SourceCodeProcessor.java:121)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSource(SourceCodeProcessor.java:185)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCodeWithoutCache(SourceCodeProcessor.java:107)
+    ... 10 more
+Caused by: org.xml.sax.SAXParseException; lineNumber: 9; columnNumber: 9; The end-tag for element type "result" must end with a '>' delimiter.
+    at com.sun.org.apache.xerces.internal.parsers.DOMParser.parse(DOMParser.java:257)
+    at com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderImpl.parse(DocumentBuilderImpl.java:339)
+    at net.sourceforge.pmd.lang.xml.ast.XmlParser.parseDocument(XmlParser.java:54)
+    ... 15 more
+]]>
+</error>
+<error filename="/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/apex/InvalidTestApex.cls" msg="PMDException: Error while parsing /Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/apex/InvalidTestApex.cls">
+<![CDATA[net.sourceforge.pmd.PMDException: Error while parsing /Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/apex/InvalidTestApex.cls
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCodeWithoutCache(SourceCodeProcessor.java:110)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCode(SourceCodeProcessor.java:89)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCode(SourceCodeProcessor.java:51)
+    at net.sourceforge.pmd.processor.PmdRunnable.call(PmdRunnable.java:78)
+    at net.sourceforge.pmd.processor.PmdRunnable.call(PmdRunnable.java:24)
+    at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+    at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511)
+    at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+    at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+    at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+    at java.lang.Thread.run(Thread.java:748)
+Caused by: net.sourceforge.pmd.lang.ast.ParseException: apex.jorje.services.exception.ParseException: Syntax(error = MissingSyntax(loc = (7, 16, 75, 76), actual = '!', expected = ;))
+    at net.sourceforge.pmd.lang.apex.ast.ApexParser.parse(ApexParser.java:64)
+    at net.sourceforge.pmd.lang.apex.ApexParser.parse(ApexParser.java:45)
+    at net.sourceforge.pmd.SourceCodeProcessor.parse(SourceCodeProcessor.java:121)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSource(SourceCodeProcessor.java:185)
+    at net.sourceforge.pmd.SourceCodeProcessor.processSourceCodeWithoutCache(SourceCodeProcessor.java:107)
+    ... 10 more
+// I, Josh, redacted 100+ lines of extra stack trace from this error. Trust me, it wasn't any new information.
+]]>
+</error>
 <configerror rule="LoosePackageCoupling" msg="No packages or classes specified"/>
 <suppressedviolation filename="Bar.java" msg="Rule suppressed message" suppressiontype="Warning" usermsg="Rule user message" />
 </pmd>
