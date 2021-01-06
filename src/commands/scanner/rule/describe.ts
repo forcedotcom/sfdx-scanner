@@ -66,6 +66,7 @@ export default class Describe extends ScannerCommand {
 	}
 
 	private async styleRules(rules: Rule[]): Promise<DescribeStyledRule[]> {
+		// Opting to use .getAllEngines() instead of .getEnabledEngines() so we don't have to futz with the engineOptions param.
 		const allEngines = await Controller.getAllEngines();
 		const enabledEngineNames: Set<string> = new Set();
 		for (const engine of allEngines) {
