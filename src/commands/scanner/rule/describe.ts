@@ -12,6 +12,10 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
+type DescribeStyledRule = Rule & {
+	enabled: boolean;
+};
+
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
 	public static description = messages.getMessage('commandDescription');
@@ -40,7 +44,7 @@ export default class Describe extends ScannerCommand {
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
-		const rules = ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters);
+		const rules: DescribeStyledRule[] = await this.styleRules(ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters));
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
@@ -50,23 +54,37 @@ export default class Describe extends ScannerCommand {
 			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.flags.rulename]);
 			this.ux.warn(msg);
 			rules.forEach((rule, idx) => {
-				this.ux.styledHeader('Rule #' + (idx + 1));
+				this.ux.styledHeader(`Rule #${idx + 1}`);
 				this.logStyledRule(rule);
 			});
 		} else {
+			// If there's exactly one rule, we don't need to do anything special, and can just log the rule.
 			this.logStyledRule(rules[0]);
 		}
 		// We need to return something for when the --json flag is used, so we'll just return the list of rules.
 		return JSON.parse(JSON.stringify(rules));
 	}
 
-	private static formatRuleForDescribe(rule: Rule): object {
-		// Strip any whitespace off of the description.
-		rule.description = rule.description.trim();
-		return rule;
+	private async styleRules(rules: Rule[]): Promise<DescribeStyledRule[]> {
+		const allEngines = await Controller.getAllEngines();
+		const enabledEngineNames: Set<string> = new Set();
+		for (const engine of allEngines) {
+			if (await engine.isEnabled()) {
+				enabledEngineNames.add(engine.getName());
+			}
+		}
+		return rules.map(r => {
+			const styledRule: DescribeStyledRule = {
+				...r,
+				enabled: enabledEngineNames.has(r.engine)
+			};
+			// Strip any whitespace off of the description.
+			styledRule.description = styledRule.description.trim();
+			return styledRule;
+		});
 	}
 
-	private logStyledRule(rule: Rule): void {
-		this.ux.styledObject(Describe.formatRuleForDescribe(rule), ['name', 'categories', 'rulesets', 'languages', 'description', 'message']);
+	private logStyledRule(rule: DescribeStyledRule): void {
+		this.ux.styledObject(rule, ['name', 'engine', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
 	}
 }
