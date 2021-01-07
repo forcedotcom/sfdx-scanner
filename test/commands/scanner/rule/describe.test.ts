@@ -32,6 +32,8 @@ describe('scanner:rule:describe', () => {
 					// Rather than compare every attribute, we'll just compare a few so we can be reasonably confident we got the right
 					// rule.
 					expect(ctx.stdout).to.match(/name:\s+TooManyFields/, 'Name should be \'TooManyFields\'');
+					expect(ctx.stdout).to.match(/engine:\s+pmd/, 'Engine should be PMD');
+					expect(ctx.stdout).to.match(/enabled:\s+true/, 'Rule is enabled');
 					expect(ctx.stdout).to.match(/categories:\s+Design/, 'Category should be \'Design\'');
 					expect(ctx.stdout).to.match(/languages:\s+apex/, 'Language should be \'apex\'');
 					expect(ctx.stdout).to.match(/message:\s+Too many fields/, 'Message should match');
