@@ -4,9 +4,12 @@ import {LANGUAGE} from '../../Constants'
 import {Logger, SfdxError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import { ENGINE } from '../../Constants';
+import {uxEvents} from '../ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
-const LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
+const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
+
+const VALID_LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['apex', 'apex'],
 	['java', 'java'],
 	['javascript', 'javascript'],
@@ -23,6 +26,17 @@ const LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['xml', 'xml'],
 	['pom', 'xml'],
 	['xsl', 'xml']
+]);
+
+// This is a subset of the languages in VALID_LANGUAGES_BY_ALIAS. It exists so we can telegraph our intention to end PMD
+// support for all languages except for these.
+const SUPPORTED_LANGUAGES: Set<string> = new Set([
+	'apex',
+	'java',
+	'javascript',
+	'plsql',
+	'visualforce',
+	'xml'
 ]);
 
 let INSTANCE: PmdLanguageManager = null;
@@ -42,8 +56,8 @@ class PmdLanguageManager extends AsyncCreatable {
 	}
 
 	public resolveLanguageAlias(alias: string): string {
-		if (LANGUAGES_BY_ALIAS.has(alias.toLowerCase())) {
-			const lang = LANGUAGES_BY_ALIAS.get(alias.toLowerCase());
+		if (VALID_LANGUAGES_BY_ALIAS.has(alias.toLowerCase())) {
+			const lang = VALID_LANGUAGES_BY_ALIAS.get(alias.toLowerCase());
 			this.logger.trace(`Resolving language alias ${alias} to ${lang}`);
 			return lang;
 		} else {
@@ -60,8 +74,13 @@ class PmdLanguageManager extends AsyncCreatable {
 			if (lang) {
 				if (LANGUAGE.JAVASCRIPT === lang) {
 					throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdCatalogWrapper', 'JavascriptNotSupported');
+				} else if (!SUPPORTED_LANGUAGES.has(lang)) {
+					uxEvents.emit(
+						'warning-always',
+						eventMessages.getMessage('warning.langMarkedForDeath', [lang])
+					);
 				}
-					langs.push(lang);
+				langs.push(lang);
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);
