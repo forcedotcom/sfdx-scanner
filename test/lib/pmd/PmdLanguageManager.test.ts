@@ -102,14 +102,14 @@ describe('PmdLanguageManager', () => {
 
 		describe('When config includes a language marked for termination', () => {
 			const langs = ['JaVa', 'PlSqL', 'modelica', 'scala'];
-			const langsMarkedForDeath = [langs[2], langs[3]];
+			let uxSpy;
 
 			before(() => {
 				Sinon.createSandbox();
+				uxSpy = Sinon.spy(uxEvents, 'emit');
 				// Simulate a config that specifies (among other languages) at least one language for which we intend to
 				// pull support.
 				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(langs);
-
 			});
 
 			after(() => {
@@ -117,17 +117,16 @@ describe('PmdLanguageManager', () => {
 			});
 
 			it('Emits warning for each such language', async () => {
-				let idx = 0;
-				uxEvents.on('warning-always', msg => {
-					expect(msg).to.equal(eventMessages.getMessage('warning.langMarkedForDeath', [langsMarkedForDeath[idx]]), 'Wrong message logged');
-					idx += 1;
-				});
-
 				const outLangs = await PmdLanguageManager.getSupportedLanguages();
 				// All languages should be included, since they're all valid.
 				expect(outLangs.length).to.equal(4, 'Wrong number of supported langs output');
-				expect(idx).to.equal(2, 'Wrong number of warnings output');
-
+				Sinon.assert.callCount(uxSpy, 2);
+				expect(
+					uxSpy.getCall(0).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeath', ['modelica']))
+				).to.equal(true, 'Wrong warning logged');
+				expect(
+					uxSpy.getCall(1).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeath', ['scala']))
+				).to.equal(true, 'Wrong warning logged');
 			});
 		})
 	});
