@@ -120,4 +120,17 @@ The annotated JSON below shows you what you should remove
         },
 ... Rest of file removed for clarity ...
 ```
+<!-- When we actually remove support for those languages (or if we decide not to), we'll need to remove this entry and
+update the `pmd-engine.md` file -->
+### Commands display `Future releases will not include PMD support for \[Language X\].'
 
+There are plans to remove the PMD support for all languages except the following:
+- Apex
+- Java
+- Visualforce
+- XML
+- PL/SQL
+
+If this would present you hardship, please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
+Otherwise, remove any languages besides those listed above from the PMD engine's `supportedLanguages` array in your
+`${HOME}/.sfdx-scanner/Config.json` file.
