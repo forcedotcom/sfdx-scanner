@@ -122,10 +122,10 @@ describe('PmdLanguageManager', () => {
 				expect(outLangs.length).to.equal(4, 'Wrong number of supported langs output');
 				Sinon.assert.callCount(uxSpy, 2);
 				expect(
-					uxSpy.getCall(0).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeath', ['modelica']))
+					uxSpy.getCall(0).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeprecation', ['modelica']))
 				).to.equal(true, 'Wrong warning logged');
 				expect(
-					uxSpy.getCall(1).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeath', ['scala']))
+					uxSpy.getCall(1).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeprecation', ['scala']))
 				).to.equal(true, 'Wrong warning logged');
 			});
 		})

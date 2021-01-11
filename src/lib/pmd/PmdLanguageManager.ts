@@ -77,7 +77,7 @@ class PmdLanguageManager extends AsyncCreatable {
 				} else if (!SUPPORTED_LANGUAGES.has(lang)) {
 					uxEvents.emit(
 						'warning-always',
-						eventMessages.getMessage('warning.langMarkedForDeath', [lang])
+						eventMessages.getMessage('warning.langMarkedForDeprecation', [lang])
 					);
 				}
 				langs.push(lang);
