@@ -74,7 +74,8 @@ class JreSetupManager extends AsyncCreatable {
 			javaHome = await this.autoDetectJavaHome();
 		}
 
-		// At this point, if we don't have a javaHome, we throw an error and ask user to add it themselves
+		// If we reach this point and we somehow still haven't found a javaHome, then we're pretty thoroughly hosed.
+		// So we'll just throw an error telling the user to set it themselves.
 		if (!javaHome) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
 		}
@@ -104,7 +105,7 @@ class JreSetupManager extends AsyncCreatable {
 		try {
 			await fileHandler.stats(javaHome);
 		} catch (error) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome, error.code]);
 		}
 	}
 
