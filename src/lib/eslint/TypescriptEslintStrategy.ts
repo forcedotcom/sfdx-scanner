@@ -45,6 +45,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
 	private recommendedConfig: LooseObject;
+	private recTypeCheckingConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -55,7 +56,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.outputProcessor = await OutputProcessor.create({});
 		const pathToRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended.json'));
+		const pathToRecTypeCheckConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.json'));
 		this.recommendedConfig = JSON.parse(await this.fileHandler.readFile(pathToRecommendedConfig));
+		this.recTypeCheckingConfig = JSON.parse(await this.fileHandler.readFile(pathToRecTypeCheckConfig));
 		this.initialized = true;
 	}
 
@@ -112,11 +116,13 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name)
+			|| EslintStrategyHelper.isDefaultEnabled(this.recTypeCheckingConfig, name);
 	}
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {
-		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
+		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.recTypeCheckingConfig, ruleName);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
