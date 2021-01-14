@@ -101,7 +101,7 @@ describe('PmdLanguageManager', () => {
 		});
 
 		describe('When config includes a language marked for termination', () => {
-			const langs = ['JaVa', 'PlSqL', 'modelica', 'scala'];
+			const langs = ['JaVa', 'ViSuAlFoRcE', 'modelica', 'scala'];
 			let uxSpy;
 
 			before(() => {

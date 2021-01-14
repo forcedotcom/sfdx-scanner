@@ -34,7 +34,6 @@ const SUPPORTED_LANGUAGES: Set<string> = new Set([
 	'apex',
 	'java',
 	'javascript',
-	'plsql',
 	'visualforce',
 	'xml'
 ]);
