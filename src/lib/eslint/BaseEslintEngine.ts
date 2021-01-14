@@ -155,6 +155,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private processRule(key: string, docs: any): Rule {
 		// Massage eslint rule into Catalog rule format
+		//console.log(`START rule ${key} for engine ${this.getName()}`);
 		const rule = {
 			engine: this.getName(),
 			sourcepackage: this.getName(),
@@ -167,6 +168,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 			defaultConfig: this.strategy.getDefaultConfig(key),
 			url: docs.url
 		};
+		//console.log(`END rule ${key} from engine ${this.getName()}`);
 		return rule;
 	}
 

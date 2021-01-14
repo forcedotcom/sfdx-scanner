@@ -2,7 +2,7 @@ import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
+import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 
 const ES_CONFIG = {
 	"parser": "babel-eslint",
@@ -62,7 +62,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+		return EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name) === RuleDefaultStatus.ENABLED;
 	}
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {

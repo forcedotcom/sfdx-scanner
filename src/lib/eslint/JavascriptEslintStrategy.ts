@@ -2,7 +2,7 @@ import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
-import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
+import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import path = require('path');
 
 const ES_CONFIG = {
@@ -60,7 +60,10 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name);
+		// Since Vanilla ESLint only has one configuration to consult, if that config doesn't explicitly enable the rule,
+		// it's treated as disabled.
+		const status: RuleDefaultStatus = EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name);
+		return status === RuleDefaultStatus.ENABLED;
 	}
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {

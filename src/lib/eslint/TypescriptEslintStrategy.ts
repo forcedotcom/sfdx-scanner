@@ -6,7 +6,7 @@ import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
-import { EslintStrategyHelper, ProcessRuleViolationType } from './EslintCommons';
+import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -44,8 +44,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private logger: Logger;
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
-	private recommendedConfig: LooseObject;
-	private recTypeCheckingConfig: LooseObject;
+	private baseEslintConfig: LooseObject;
+	private extendedEslintConfig: LooseObject;
+	private untypedConfig: LooseObject;
+	private typedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -54,12 +56,22 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.fileHandler = new FileHandler();
 		this.outputProcessor = await OutputProcessor.create({});
-		const pathToRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
+		const pathToBaseConfig = require.resolve('eslint')
+			.replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
+		this.baseEslintConfig = require(pathToBaseConfig);
+
+		const pathToExtendedBaseConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
+		this.extendedEslintConfig = require(pathToExtendedBaseConfig).default.overrides[0];
+
+		const pathToUntypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended.json'));
-		const pathToRecTypeCheckConfig = require.resolve('@typescript-eslint/eslint-plugin')
+		this.untypedConfig = JSON.parse(await this.fileHandler.readFile(pathToUntypedRecommendedConfig));
+
+		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.json'));
-		this.recommendedConfig = JSON.parse(await this.fileHandler.readFile(pathToRecommendedConfig));
-		this.recTypeCheckingConfig = JSON.parse(await this.fileHandler.readFile(pathToRecTypeCheckConfig));
+		this.typedConfig = JSON.parse(await this.fileHandler.readFile(pathToTypedRecommendedConfig));
+
 		this.initialized = true;
 	}
 
@@ -116,13 +128,22 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	ruleDefaultEnabled(name: string): boolean {
-		return EslintStrategyHelper.isDefaultEnabled(this.recommendedConfig, name)
-			|| EslintStrategyHelper.isDefaultEnabled(this.recTypeCheckingConfig, name);
+		// Check the configs in descending order of priority, i.e. start with the one that would override the others.
+		const status: RuleDefaultStatus = EslintStrategyHelper.getDefaultStatus(this.typedConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.untypedConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.extendedEslintConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.baseEslintConfig, name);
+
+		// Return true only if the highest-priority status is explicitly enabled.
+		return status === RuleDefaultStatus.ENABLED;
 	}
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {
-		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName)
-			|| EslintStrategyHelper.getDefaultConfig(this.recTypeCheckingConfig, ruleName);
+		// Get the highest-priority configuration we can find.
+		return EslintStrategyHelper.getDefaultConfig(this.typedConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.untypedConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.extendedEslintConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.baseEslintConfig, ruleName);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
