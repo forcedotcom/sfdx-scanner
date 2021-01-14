@@ -211,7 +211,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	 * @private
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private nodeRepresentsViolations(node: any): boolean {
+	private nodeRepresentsViolations = (node: any): boolean => {
 		// `file` nodes always contain violations.
 		if (node.name === 'file') {
 			return true;
@@ -219,7 +219,7 @@ abstract class BasePmdEngine implements RuleEngine {
 		// Other types of nodes don't technically contain violations, but sometimes they indicate problems that we want
 		// to surface in the same manner as true violations, instead of errors or warnings.
 		return HARDCODED_RULE_DETAILS.some((detail: HardcodedRuleDetail): boolean => detail.nodeIdentifier(node));
-	}
+	};
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	protected xmlToRuleResults(elements: any): RuleResult[] {
