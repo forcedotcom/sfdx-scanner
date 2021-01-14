@@ -13,7 +13,7 @@ export interface ProcessRuleViolationType { (fileName: string, ruleViolation: Ru
 export enum RuleDefaultStatus {
 	ENABLED = 'enabled',
 	DISABLED = 'disabled'
-};
+}
 
 
 export class StaticDependencies {

@@ -62,8 +62,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	ruleDefaultEnabled(name: string): boolean {
 		// Since Vanilla ESLint only has one configuration to consult, if that config doesn't explicitly enable the rule,
 		// it's treated as disabled.
-		const status: RuleDefaultStatus = EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name);
-		return status === RuleDefaultStatus.ENABLED;
+		return EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name) === RuleDefaultStatus.ENABLED;
 	}
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {
