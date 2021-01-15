@@ -10,6 +10,11 @@ import * as engineUtils from '../util/CommonEngineUtils';
 // This provides a safe way to pass around the callback function
 export interface ProcessRuleViolationType { (fileName: string, ruleViolation: RuleViolation): void}
 
+export enum RuleDefaultStatus {
+	ENABLED = 'enabled',
+	DISABLED = 'disabled'
+}
+
 
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -42,11 +47,20 @@ export class EslintStrategyHelper {
 		return filteredRules;
 	}
 
-	static isDefaultEnabled(recommendedConfig: LooseObject, ruleName: string): boolean {
-		// ESLint rules are considered "enabled by default" as long as they're present in the "recommended" config with
-		// a severity of anything other than "off".
+	static getDefaultStatus(recommendedConfig: LooseObject, ruleName: string): RuleDefaultStatus {
+		// If a rule is absent from the "recommended" configuration, then its status could be inherited from another config.
+		// To represent the unknown state, we'll just return null.
+
+		// See if this configuration has an entry for the rule in question.
 		const recommendation: ESRuleConfig = recommendedConfig.rules[ruleName];
-		return recommendation && !(recommendation.indexOf('off') === 0);
+		if (!recommendation) {
+			// If the rule is absent from the config, its status can be inherited from other configs. To represent this
+			// ambiguous state, return null.
+			return null;
+		}
+		// If there's a recommendation, then we'll treat the rule as default-enabled unless the recommended severity is
+		// "off".
+		return recommendation.indexOf('off') === 0 ? RuleDefaultStatus.DISABLED : RuleDefaultStatus.ENABLED;
 	}
 
 	static getDefaultConfig(recommendedConfig: LooseObject, ruleName: string): ESRuleConfig {
