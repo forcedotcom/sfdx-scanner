@@ -61,7 +61,7 @@ const edgeCaseResults: RuleResult[] = [
 			"url": "https://eslint.org/docs/rules/no-unused-vars"
 		}]
 	}
-]
+];
 
 const allFakeRuleResults: RuleResult[] = [
 	{
@@ -212,7 +212,7 @@ describe('RuleResultRecombinator', () => {
 				const someFakeResults = [allFakeRuleResults[0]];
 
 				// Create our reformatted results.
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -220,6 +220,9 @@ describe('RuleResultRecombinator', () => {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1], [1]);
 					expect(minSev).to.equal(2, 'Most severe problem should have been level 2');
+					expect(summaryMap.size).to.equal(2, 'All engines supposedly executed should be present in the summary map');
+					expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 0, violationCount: 0}, 'Since no PMD violations were provided, none should be summarized');
+					expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Since ESLint violations were provided, they should be summarized');
 				}
 			});
 
@@ -228,7 +231,7 @@ describe('RuleResultRecombinator', () => {
 				const someFakeResults = [allFakeRuleResults[1]];
 
 				// Create our reformatted results.
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -236,12 +239,15 @@ describe('RuleResultRecombinator', () => {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile2], [2]);
 					expect(minSev).to.equal(1, 'Most severe problem should have been level 1');
+					expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+					expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 0, violationCount: 0}, 'PMD summary should be correct');
+					expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 1, violationCount: 2}, 'ESLint summary should be correct');
 				}
 			});
 
 			it('Properly handles multiple files with multiple violations', async () => {
 				// Create our reformatted results from the entire sample.
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -249,6 +255,9 @@ describe('RuleResultRecombinator', () => {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1, sampleFile2, sampleFile3], [1, 2, 3]);
 					expect(minSev).to.equal(1, 'Most severe problem should have been level 1');
+					expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+					expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+					expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 				}
 			});
 		});
@@ -256,7 +265,7 @@ describe('RuleResultRecombinator', () => {
 		describe('Output Format: JSON', () => {
 			const messageIsTrimmed = false;
 			it ('Happy Path', async () => {
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JSON);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
@@ -276,10 +285,13 @@ describe('RuleResultRecombinator', () => {
 				expect(rrIndex).to.equal(3, 'Rule Result Index');
 
 				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
-				const results = await (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.JSON)).results;
+				const results = await (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.JSON, new Set(['eslint']))).results;
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -341,7 +353,7 @@ describe('RuleResultRecombinator', () => {
 			}
 
 			it ('Happy Path', async () => {
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.XML);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
@@ -361,10 +373,13 @@ describe('RuleResultRecombinator', () => {
 				expect(rrIndex).to.equal(3, 'Rule Result Index');
 
 				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
-				const results =  (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.XML)).results;
+				const results =  (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.XML, new Set(['eslint']))).results;
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -407,7 +422,7 @@ describe('RuleResultRecombinator', () => {
 			}
 
 			it ('Happy Path', async () => {
-				const {minSev, results} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.CSV);
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {
@@ -441,10 +456,13 @@ describe('RuleResultRecombinator', () => {
 				expect(problemNumber).to.equal(7, 'Problem Number Index');
 
 				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
-				const results = (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.CSV)).results;
+				const results = (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.CSV, new Set(['eslint']))).results;
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {

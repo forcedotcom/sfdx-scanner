@@ -5,6 +5,52 @@ lang: en
 
 Here are some troubleshooting tips to fix common issues when you use the Salesforce CLI Scanner plug-in.
 
+## Using `scanner:run` command
+
+### I sometimes see more rules violations when I specify the categories with `scanner:run` command than when I execute it for the same target without filters. What is this inconsistency?
+
+This is working as designed. Some rules are default-enabled by eslint while some other rules are not. Executing `scanner:run` without filters causes only default-enabled rules to be invoked, and specifying a category filter with `scanner:run` includes all rules under the selected categories to be invoked irrespective of their default-enabled setting. As of today, we do not provide a way to modify default-enable settings for rules.
+
+### The `scanner:run` command results in the error `JavaScript heap out of memory`.
+
+The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
+
+```bash
+$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
+```
+
+### The `scanner:run` command throws a ParseException when executing against my Visualforce files as target.
+
+Please check if the affected Visualforce pages/components render correctly.
+
+If it does, check if it has an HTML tag that has an attribute with a dot? PMD has an [open issue](https://github.com/pmd/pmd/issues/2765) and we are working with them to fix it.
+If this is a new issue, please let us know.
+
+---
+
+## `scanner:run` command with eslint-typescript
+
+### The `scanner:run` command output contains the message `'<file_name>' does not reside in a location that is included by your tsconfig.json 'include' attribute`.
+
+The ESLint engine requires that any typescript files that are scanned must be included by the tsconfig. [More Information](https://github.com/typescript-eslint/typescript-eslint/releases/tag/v2.0.0)
+
+Update your tsconfig's `include` attribute to include `<file_name>`
+
+
+### The `scanner:run` command fails with the error `Unable to find 'tsconfig.json' in current directory X`, even though I'm not scanning any TypeScript files.
+
+The most likely cause is that you're scanning TypeScript files without realizing it.
+
+If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
+being ignored by the scanner, since dependent modules may have TypeScript files that you don't know about.
+
+Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
+used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
+property, and add `!**/bower_components/**` to exclude Bower dependencies.
+
+---
+
+## Using Custom Rules
 
 ### My custom rule Java file doesn’t compile.
 * Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
@@ -29,11 +75,17 @@ One possible reason is that the Java version you used to build your code is diff
 
 One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version {{ site.data.versions.pmd }}. Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
 
+---
 
-### I sometimes see more rules violations when I specify the categories with `scanner:run` command than when I execute it for the same target without filters. What is this inconsistency?
+## Using Custom config
 
-This is working as designed. Some rules are default-enabled by eslint while some other rules are not. Executing `scanner:run` without filters causes only default-enabled rules to be invoked, and specifying a category filter with `scanner:run` includes all rules under the selected categories to be invoked irrespective of their default-enabled setting. As of today, we do not provide a way to modify default-enable settings for rules.
+### When using `--eslintconfig` flag, I get a `Cannot find module <some_module>` error
 
+In the directory where you execute the `scanner:run` command, install the required eslint dependencies using `npm install <some_module>`
+
+---
+
+## Common to multiple commands
 
 ### Commands display `Javascript is not currently supported by the PMD engine`.
 
@@ -68,35 +120,17 @@ The annotated JSON below shows you what you should remove
         },
 ... Rest of file removed for clarity ...
 ```
+<!-- When we actually remove support for those languages (or if we decide not to), we'll need to remove this entry and
+update the `pmd-engine.md` file -->
+### Commands display `Future releases will not include PMD support for \[Language X\].'
 
-### The `scanner:run` command output contains the message `'<file_name>' does not reside in a location that is included by your tsconfig.json 'include' attribute`.
+There are plans to remove the PMD support for all languages except the following:
+- Apex
+- Java
+- Visualforce
+- XML
+- PL/SQL
 
-The ESLint engine requires that any typescript files that are scanned must be included by the tsconfig. [More Information](https://github.com/typescript-eslint/typescript-eslint/releases/tag/v2.0.0)
-
-Update your tsconfig's `include` attribute to include `<file_name>`
-
-### The `scanner:run` command results in the error `JavaScript heap out of memory`.
-
-The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
-
-```bash
-$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
-```
-
-### The `scanner:run` command fails with the error `Unable to find 'tsconfig.json' in current directory X`, even though I'm not scanning any TypeScript files.
-
-The most likely cause is that you're scanning TypeScript files without realizing it.
-
-If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
-being ignored by the scanner, since dependent modules may have TypeScript files that you don't know about.
-
-Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
-used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
-property, and add `!**/bower_components/**` to exclude Bower dependencies.
-
-### The `scanner:run` command throws a ParseException when executing against my Visualforce files as target.
-
-Please check if the affected Visualforce pages/components render correctly.
-
-If it does, check if it has an HTML tag that has an attribute with a dot? PMD has an [open issue](https://github.com/pmd/pmd/issues/2765) and we are working with them to fix it.
-If this is a new issue, please let us know.
+If this would present you hardship, please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
+Otherwise, remove any languages besides those listed above from the PMD engine's `supportedLanguages` array in your
+`${HOME}/.sfdx-scanner/Config.json` file.

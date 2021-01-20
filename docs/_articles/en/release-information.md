@@ -3,6 +3,48 @@ title: Release Information
 lang: en
 ---
 
+## [v2.5.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.5.0) (01-20-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.4.0...v2.5.0)
+
+### Release Summary
+
+* Changes to allow custom config for PMD and Eslint
+* Added enhanced summary message to the end of all flows
+* We now intercept all PMD errors and convert them into rule violations
+* Underlying PMD Engine is upgraded to 6.30.0 (from 6.29.0)
+* Bug fixes 
+
+**Closed issues:**
+
+- Enable eslintrc rules to be used by default for JS files [\#330](https://github.com/forcedotcom/sfdx-scanner/issues/330)
+- Invalid Java Home [\#316](https://github.com/forcedotcom/sfdx-scanner/issues/316)
+- XML validation throws warning at PMDException [\#277](https://github.com/forcedotcom/sfdx-scanner/issues/277)
+- eslint-lwc engine not running by default on scanner:run [\#276](https://github.com/forcedotcom/sfdx-scanner/issues/276)
+- Internal error running scanner commands from VS Code terminal with custom rules [\#261](https://github.com/forcedotcom/sfdx-scanner/issues/261)
+- Let standard PMD rules be disabled by config file/args [\#246](https://github.com/forcedotcom/sfdx-scanner/issues/246)
+- @W-8046146@ Digitally Sign the Plugin [\#241](https://github.com/forcedotcom/sfdx-scanner/issues/241)
+
+**Merged pull requests:**
+
+- @W-8668445@: Removing PLSQL from the list of fully supported languages. [\#333](https://github.com/forcedotcom/sfdx-scanner/pull/333)
+- @W-8668445@: Added soft warning for languages we plan on deprecating. [\#331](https://github.com/forcedotcom/sfdx-scanner/pull/331)
+- @W-8115400@: Added new fields to Describe output. [\#328](https://github.com/forcedotcom/sfdx-scanner/pull/328)
+- @W-8578721@: Updated PMD to 6.30.0. [\#327](https://github.com/forcedotcom/sfdx-scanner/pull/327)
+- @W-8565689@: Updated error messages about javaHome identification fai… [\#326](https://github.com/forcedotcom/sfdx-scanner/pull/326)
+- @W-8615780@: Changed the way parsing errors are handled so it is consistent across engines. [\#324](https://github.com/forcedotcom/sfdx-scanner/pull/324)
+- @W-8559396@ Fixing engine selection bug and adding more end to end tests [\#321](https://github.com/forcedotcom/sfdx-scanner/pull/321)
+- @W-8033718@: Rules that are extended by other rules are now excluded from catalog generation. Same with deprecated rules. [\#320](https://github.com/forcedotcom/sfdx-scanner/pull/320)
+- @W-8517960@: Updated documentation for eslint custom configuration to… [\#311](https://github.com/forcedotcom/sfdx-scanner/pull/311)
+- @W-8497246@: We now intercept arcane PMD errors and convert them into… [\#310](https://github.com/forcedotcom/sfdx-scanner/pull/310)
+- @W-8388246@: Added enhanced summary message to the end of all flows. [\#306](https://github.com/forcedotcom/sfdx-scanner/pull/306)
+- @W-7992418@ Allow negated category filtering [\#305](https://github.com/forcedotcom/sfdx-scanner/pull/305)
+- @W-8266225@ Documentation for Custom config [\#301](https://github.com/forcedotcom/sfdx-scanner/pull/301)
+- @W-8266225@ Changes to allow custom config for PMD and Eslint [\#297](https://github.com/forcedotcom/sfdx-scanner/pull/297)
+- @W-8340323@: Added tentative documentation for PMD, and ESLint variants. [\#294](https://github.com/forcedotcom/sfdx-scanner/pull/294)
+- @W-8332099@: Changed the way we handle errors from RetireJS. [\#284](https://github.com/forcedotcom/sfdx-scanner/pull/284)
+
+
 ## [v2.4.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.4.0) (11-04-2020)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.3.0...v2.4.0)

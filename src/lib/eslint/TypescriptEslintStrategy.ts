@@ -1,11 +1,12 @@
 import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
-import {ENGINE, LANGUAGE} from '../../Constants';
-import {RuleViolation} from '../../types';
+import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
+import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../../lib/util/Utils';
+import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -17,12 +18,7 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 
 const ES_PLUS_TS_CONFIG = {
 	"parser": "@typescript-eslint/parser",
-	"baseConfig": {
-		"extends": [
-			"plugin:@typescript-eslint/recommended",
-			"plugin:@typescript-eslint/eslint-recommended"
-		]
-	},
+	"baseConfig": {},
 	"parserOptions": {
 		"sourceType": "module",
 		"ecmaVersion": 2018,
@@ -34,7 +30,7 @@ const ES_PLUS_TS_CONFIG = {
 		"lib/**",
 		"node_modules/**"
 	],
-	"useEslintrc": false, // TODO derive from existing eslintrc if found and desired
+	"useEslintrc": false, // Will not use external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
@@ -48,6 +44,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private logger: Logger;
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
+	private baseEslintConfig: LooseObject;
+	private extendedEslintConfig: LooseObject;
+	private untypedConfig: LooseObject;
+	private typedConfig: LooseObject;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -56,6 +56,22 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.fileHandler = new FileHandler();
 		this.outputProcessor = await OutputProcessor.create({});
+		const pathToBaseConfig = require.resolve('eslint')
+			.replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
+		this.baseEslintConfig = require(pathToBaseConfig);
+
+		const pathToExtendedBaseConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
+		this.extendedEslintConfig = require(pathToExtendedBaseConfig).default.overrides[0];
+
+		const pathToUntypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'recommended.json'));
+		this.untypedConfig = JSON.parse(await this.fileHandler.readFile(pathToUntypedRecommendedConfig));
+
+		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
+			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.json'));
+		this.typedConfig = JSON.parse(await this.fileHandler.readFile(pathToTypedRecommendedConfig));
+
 		this.initialized = true;
 	}
 
@@ -76,6 +92,58 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		const filteredPaths = paths.filter(p => p.endsWith(".ts"));
 		this.logger.trace(`Input paths: ${paths}, Filtered paths: ${filteredPaths}`);
 		return filteredPaths;
+	}
+
+	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+		// We want to identify rules that are deprecated, and rules that are extended by other rules, so we can manually
+		// filter them out.
+		const extendedRules: Set<string> = new Set();
+		const deprecatedRules: Set<string> = new Set();
+
+		for (const [name, rule] of rulesByName.entries()) {
+			if (rule.meta.deprecated) {
+				deprecatedRules.add(name);
+			}
+			if (rule.meta.docs.extendsBaseRule) {
+				// The `extendsBaseRule` property can be a string, representing the name of the rule being extended.
+				if (typeof rule.meta.docs.extendsBaseRule === 'string') {
+					extendedRules.add(rule.meta.docs.extendsBaseRule);
+				} else {
+					// Alternatively, it can be just the boolean true, which indicates that this rule extends a base rule
+					// with the exact same name. So to determine the base rule's name, we need to remove all namespacing
+					// information from this rule's name, i.e. strip everything up through the last '/' character.
+					extendedRules.add(name.slice(name.lastIndexOf('/') + 1));
+				}
+			}
+		}
+
+		// Now, we'll want to create a new Map containing every rule that isn't deprecated or extended.
+		const filteredMap: Map<string,ESRule> = new Map();
+		for (const [name, rule] of rulesByName.entries()) {
+			if (!extendedRules.has(name) && !deprecatedRules.has(name)) {
+				filteredMap.set(name, rule);
+			}
+		}
+		return filteredMap;
+	}
+
+	ruleDefaultEnabled(name: string): boolean {
+		// Check the configs in descending order of priority, i.e. start with the one that would override the others.
+		const status: RuleDefaultStatus = EslintStrategyHelper.getDefaultStatus(this.typedConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.untypedConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.extendedEslintConfig, name)
+			|| EslintStrategyHelper.getDefaultStatus(this.baseEslintConfig, name);
+
+		// Return true only if the highest-priority status is explicitly enabled.
+		return status === RuleDefaultStatus.ENABLED;
+	}
+
+	getDefaultConfig(ruleName: string): ESRuleConfig {
+		// Get the highest-priority configuration we can find.
+		return EslintStrategyHelper.getDefaultConfig(this.typedConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.untypedConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.extendedEslintConfig, ruleName)
+			|| EslintStrategyHelper.getDefaultConfig(this.baseEslintConfig, ruleName);
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -107,12 +175,17 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	/**
 	 * Converts the eslint message that requires the scanned files to be a subset of the files specified by tsconfig.json
 	 */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void {
-		const message: string = ruleViolation.message;
+	processRuleViolation(): ProcessRuleViolationType {
+		return (fileName: string, ruleViolation: RuleViolation): void => {
+			const message: string = ruleViolation.message;
 
-		if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
-			message.endsWith('The file must be included in at least one of the projects provided.')) {
-			ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+			if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
+				message.endsWith('The file must be included in at least one of the projects provided.')) {
+				ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+			} else if (message.startsWith('Parsing error:')) {
+				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
+				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
+			}
 		}
 	}
 

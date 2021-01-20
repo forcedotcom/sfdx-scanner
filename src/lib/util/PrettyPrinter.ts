@@ -37,7 +37,7 @@ export function stringifyMapOfMaps(mapOfMap: Map<string, Map<string, Set<string>
  * @param filter RuleFilter to stringify
  */
 export function stringifyRuleFilter(filter: RuleFilter): string {
-	return `RuleFilter[filterType=${filter.filterType}, filterValues=${filter.filterValues}]`;
+	return filter.prettyPrint();
 }
 
 /**

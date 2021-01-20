@@ -11,6 +11,8 @@ defaults: &defaults
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   release-management: salesforce/npm-release-management@3.5.1
+  codecov: codecov/codecov@1.1.1
+  gradle: circleci/gradle@2.2.0
 
 jobs:
   build:
@@ -47,6 +49,46 @@ jobs:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
+
+      - codecov/upload:
+          file: test-coverage/coverage-final.json
+
+      - gradle/collect_test_results:
+          reports_path: pmd-cataloger/build/reports/
+          test_results_path: pmd-cataloger/build/test-results/
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts: # upload test coverage as artifact.
+          path: test-coverage
+  windows-build:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+      shell: bash.exe
+    working_directory: C:\repo
+    steps:
+      - attach_workspace:
+          at: C:\repo
+
+      - run: mkdir test-results
+
+      # UNIT TESTS
+      - run:
+          name: test
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+          when: always
+
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          when: always
+
+      - gradle/collect_test_results:
+          reports_path: pmd-cataloger/build/reports/
+          test_results_path: pmd-cataloger/build/test-results/
 
       - store_test_results:
           path: test-results
@@ -159,6 +201,25 @@ jobs:
           at: ~/repo
 
       - run:
+          name: Verify branch of origin
+          command: |
+            if [ -z "$CIRCLE_TAG" ]
+            then
+               # If we're not actually working from a tag, then just exit. We only want to deploy tags.
+               exit 1
+            fi
+            # For these two exports, the git command is logging out every local and remote branch that contains the tag.
+            # That gets piped into a grep command so we can look for specific branches in the results.
+            export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG|grep release)
+            export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG|grep master)
+            # Our typical flow is feature branch -> dev -> release -> master. We want to publish tags based on release.
+            # So we'll abort if the tag isn't present in release, or if it's present in master.
+            if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
+            then
+               exit 1
+            fi
+
+      - run:
           command: npm run prepack
       # Update the path so that node modules installed by the release-management orb are found
       # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
@@ -180,16 +241,18 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
+      - windows-build:
+          requires:
+            - build
       - unpackaged-sanity:
           requires:
-            - build
+            - windows-build
       - self-evaluation:
           requires:
-            - build
+            - windows-build
       - publish-latest:
-          # This job should only run after 'build' finishes successfully.
+          # This job should only run after 'self-evaluation' finishes successfully.
           requires:
-            - build
             - self-evaluation
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.

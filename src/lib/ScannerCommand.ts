@@ -1,5 +1,5 @@
 import {SfdxCommand} from '@salesforce/command';
-import {FilterType, RuleFilter} from './RuleFilter';
+import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
 import {uxEvents} from './ScannerEvents';
 
 export abstract class ScannerCommand extends SfdxCommand {
@@ -8,28 +8,28 @@ export abstract class ScannerCommand extends SfdxCommand {
 		const filters: RuleFilter[] = [];
 		// Create a filter for any provided categories.
 		if (this.flags.category && this.flags.category.length) {
-			filters.push(new RuleFilter(FilterType.CATEGORY, this.flags.category));
+			filters.push(new CategoryFilter(this.flags.category));
 		}
 
 		// Create a filter for any provided rulesets.
 		if (this.flags.ruleset && this.flags.ruleset.length) {
-			filters.push(new RuleFilter(FilterType.RULESET, this.flags.ruleset));
+			filters.push(new RulesetFilter(this.flags.ruleset));
 		}
 
 		// Create a filter for any provided languages.
 		if (this.flags.language && this.flags.language.length) {
-			filters.push(new RuleFilter(FilterType.LANGUAGE, this.flags.language));
+			filters.push(new LanguageFilter(this.flags.language));
 		}
 
 		// Create a filter for provided rule names.
 		// NOTE: Only a single rule name can be provided. It will be treated as a singleton list.
 		if (this.flags.rulename) {
-			filters.push(new RuleFilter(FilterType.RULENAME, [this.flags.rulename]));
+			filters.push(new RulenameFilter([this.flags.rulename]));
 		}
 
 		// Create a filter for any provided engines.
 		if (this.flags.engine && this.flags.engine.length) {
-			filters.push(new RuleFilter(FilterType.ENGINE, this.flags.engine));
+			filters.push(new EngineFilter(this.flags.engine));
 		}
 
 		return filters;

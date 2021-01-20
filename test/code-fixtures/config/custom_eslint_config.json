@@ -1,0 +1,20 @@
+{
+	"root": "true",
+	"parser": "@typescript-eslint/parser",
+	"baseConfig": {
+		"extends": [
+			"plugin:@typescript-eslint/recommended",
+			"plugin:@typescript-eslint/eslint-recommended"
+		]
+	},
+	"parserOptions": {
+		"project": "test/code-fixtures/projects/tsconfig.json",
+		"sourceType": "module",
+		"ecmaVersion": 2018
+	},
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"rules": {
+	}
+}

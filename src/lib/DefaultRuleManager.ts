@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
-import {FilterType, RuleFilter} from './RuleFilter';
+import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
@@ -58,18 +58,21 @@ export class DefaultRuleManager implements RuleManager {
 	 * Returns rules that match only the provided filters, completely ignoring any implicit filtering.
 	 * @param filters
 	 */
-	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Promise<Rule[]> {
-		return Promise.resolve(this.catalog.getRulesMatchingFilters(filters));
+	getRulesMatchingOnlyExplicitCriteria(filters: RuleFilter[]): Rule[] {
+		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+		// Declare a variable that we can later use to store the engine results, as well as something to help us track
+		// which engines actually ran.
 		let results: RuleResult[] = [];
+		const executedEngines: Set<string> = new Set();
 
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const ps: Promise<RuleResult[]>[] = [];
-		const engines: RuleEngine[] = await this.resolveEngineFilters(filters);
+		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
@@ -78,8 +81,10 @@ export class DefaultRuleManager implements RuleManager {
 			const engineRules = rules.filter(r => r.engine === e.getName());
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
-			if (engineRules.length > 0 && engineTargets.length > 0) {
+
+			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
+				executedEngines.add(e.getName());
 				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
@@ -102,17 +107,17 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
 			this.logger.trace(`Recombining results into requested format ${format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, format);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, format, executedEngines);
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
 	}
 
-	private async resolveEngineFilters(filters: RuleFilter[]): Promise<RuleEngine[]> {
+	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
 		let filteredEngineNames: readonly string[] = null;
 		for (const filter of filters) {
-			if (filter.filterType === FilterType.ENGINE) {
-				filteredEngineNames = filter.filterValues;
+			if (isEngineFilter(filter)) {
+				filteredEngineNames = filter.getEngines();
 				break;
 			}
 		}
@@ -120,7 +125,7 @@ export class DefaultRuleManager implements RuleManager {
 		// just return any enabled engines.
 		// This lets us quietly introduce new engines by making them disabled by default but still available if explicitly
 		// specified.
-		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[]) : Controller.getEnabledEngines();
+		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions) : Controller.getEnabledEngines(engineOptions);
 	}
 
 	/**
@@ -132,7 +137,7 @@ export class DefaultRuleManager implements RuleManager {
 	 *
 	 * Any items from the 'targets' array that result in a match are added to the 'matchedTargets' Set.
 	 */
-	private async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
+	protected async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
 		const engineTargets = await engine.getTargetPatterns();
@@ -193,7 +198,14 @@ export class DefaultRuleManager implements RuleManager {
 					// If the target is a directory, we should get everything in it, convert relative paths to absolute
 					// paths, and then filter based our matcher.
 					const relativePaths = await globby(target);
-					ruleTargets.push({target, isDirectory: true, paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))});
+					const ruleTarget = {
+						target,
+						isDirectory: true,
+						paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
+					};
+					if (ruleTarget.paths.length > 0) {
+						ruleTargets.push(ruleTarget);
+					}
 				} else {
 					// The target is just a file. Validate it against our matcher, and add it if eligible.
 					const absolutePath = path.resolve(target);

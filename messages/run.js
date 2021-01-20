@@ -5,15 +5,10 @@ module.exports = {
 	You can choose the format of output and decide between printing the results directly
 	or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
-		"rulenameDescription": "[description of 'rulename' parameter]",                   // TODO: Change this once the flag is implemented.
 		"categoryDescription": "categor(ies) of rules to run",
 		"categoryDescriptionLong": "One or more categories of rules to run. Multiple values can be specified as a comma-separated list.",
 		"rulesetDescription": "[deprecated] ruleset(s) of rules to run",
 		"rulesetDescriptionLong": "[Deprecated] One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
-		"severityDescription": "[description of 'severity' parameter]",                   // TODO: Change this once the flag is implemented.
-		"excluderuleDescription": "[description of 'exclude-rule' parameter]",            // TODO: Change this once the flag is implemented.
-		"orgDescription": "[description of 'org' parameter]",                             // TODO: Change this once the flag is implemented.
-		"suppresswarningsDescription": "[description of 'suppress-warnings' parameter]",  // TODO: Change this once the flag is implemented.
 		"targetDescription": "location of source code",
 		"targetDescriptionLong": "Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list",
 		"formatDescription": "format of results",
@@ -28,29 +23,40 @@ module.exports = {
 		"vceDescription": "throws an error when violations are detected",
 		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
 		'engineDescription': "engine(s) to run",
-		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list."
+		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list.",
+		'eslintConfigDescription': 'location of eslintrc config to customize eslint engine',
+		'eslintConfigDescriptionLong': 'Location of eslintrc to customize eslint engine',
+		'pmdConfigDescription': 'location of PMD rule reference XML file to customize rule selection',
+		'pmdConfigDescriptionLong': 'Location of PMD rule reference XML file to customize rule selection'
 	},
 	"validations": {
-		"mustTargetSomething": "Please specify a codebase using --target.", // TODO: Once --org is implemented, rewrite this message.
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
-		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv."
+		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv.",
+		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {
-		"noViolationsDetected": "No rule violations found.",
+		"noViolationsDetected": "Executed engines: %s. No rule violations found.",
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
+		"engineSummaryTemplate": "Executed %s, found %s violation(s) across %s file(s).",
 		"writtenToOutFile": "Rule violations have been written to %s.",
+		"writtenToConsole": "Rule violations logged to console above.",
 		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
-		"pleaseSeeAbove": "Please see the logs above."
+		"pleaseSeeAbove": "Please see the logs above.",
+		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
 	},
 	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
 	"examples": `Invoking without specifying any rules causes all rules to be run.
 	E.g., $ sfdx scanner:run --format xml --target "somefile.js"
 		Evaluates all rules against somefile.js.
 
-	Specifying multiple categories or rulesets is treated as a logical OR.
-		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices" --ruleset "Braces"
-			Evaluates all rules in the Design and Best Practices categories, and all rules in the Braces ruleset.
+	Specifying multiple categories is treated as a logical OR.
+		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices"
+			Evaluates all rules in the Design or Best Practices categories.
+
+	Categories can be excluded by specifying the negation operator, the values must be enclosed in single quotes.
+		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
+			Evaluates all rules except those in the Design or Best Practices categories.
 
 	Wrap globs in quotes.
 		Unix example:    $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
@@ -72,5 +78,11 @@ module.exports = {
 	Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
+
+	To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+		E.g, $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
+
+	To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+		E.g., $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 	`
 };

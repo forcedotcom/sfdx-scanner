@@ -1,19 +1,24 @@
 import {expect} from 'chai';
-import {Controller} from '../../src/Controller';
-import {FilterType, RuleFilter} from '../../src/lib/RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
-import LocalCatalog from '../../src/lib/services/LocalCatalog';
-import fs = require('fs');
 import path = require('path');
 import Sinon = require('sinon');
-import * as TestOverrides from '../test-related-lib/TestOverrides';
+
+import {Controller} from '../../src/Controller';
+import {Rule, RuleGroup, RuleTarget} from '../../src/types';
+
+import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
+import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
+import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
 import {uxEvents} from '../../src/lib/ScannerEvents';
 
-TestOverrides.initializeTestSetup();
+import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
+import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
-const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-const CATALOG_FIXTURE_RULE_COUNT = 15;
-const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 11;
+import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
+
+import * as TestOverrides from '../test-related-lib/TestOverrides';
+import * as TestUtils from '../TestUtils';
+
+TestOverrides.initializeTestSetup();
 
 let ruleManager: RuleManager = null;
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
@@ -31,22 +36,7 @@ describe('RuleManager', () => {
 	});
 
 	before(async () => {
-		// Make sure all catalogs exist where they're supposed to.
-		if (!fs.existsSync(CATALOG_FIXTURE_PATH)) {
-			throw new Error('Fake catalog does not exist');
-		}
-
-		// Make sure all catalogs have the expected number of rules.
-		const catalogJson = JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-		if (catalogJson.rules.length !== CATALOG_FIXTURE_RULE_COUNT) {
-			throw new Error('Fake catalog has ' + catalogJson.rules.length + ' rules instead of ' + CATALOG_FIXTURE_RULE_COUNT);
-		}
-
-		// Stub out the LocalCatalog's getCatalog method so it always returns the fake catalog, whose contents are known,
-		// and never overwrites the real catalog. (Or we could use the IOC container to do this without sinon.)
-		Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
-			return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
-		});
+		TestUtils.stubCatalogFixture();
 
 		// Declare our rule manager.
 		ruleManager = await Controller.createRuleManager();
@@ -59,7 +49,7 @@ describe('RuleManager', () => {
 				const allRules = await ruleManager.getRulesMatchingCriteria([]);
 
 				// Expect all default-enabled rules to have been returned.
-				expect(allRules).to.have.lengthOf(CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
+				expect(allRules).to.have.lengthOf(TestUtils.CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT, 'All rules should have been returned');
 			});
 		});
 
@@ -68,8 +58,8 @@ describe('RuleManager', () => {
 				// Set up our filter array.
 				const category = 'Best Practices';
 				const filters = [
-					new RuleFilter(FilterType.CATEGORY, [category]),
-					new RuleFilter(FilterType.ENGINE, ['pmd'])];
+					new CategoryFilter([category]),
+					new EngineFilter(['pmd'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -84,7 +74,7 @@ describe('RuleManager', () => {
 			it('Filtering by multiple categories returns any rule in either category', async () => {
 				// Set up our filter array.
 				const categories = ['Best Practices', 'Design'];
-				const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+				const filters = [new CategoryFilter(categories)];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -102,7 +92,7 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by ruleset only', () => {
 			it('Filtering by a single ruleset returns only the rules in that ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.RULESET, ['Braces'])];
+				const filters = [new RulesetFilter(['Braces'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -113,7 +103,7 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple rulesets returns any rule in either ruleset', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.RULESET, ['Braces', 'Best Practices'])];
+				const filters = [new RulesetFilter(['Braces', 'Best Practices'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -126,7 +116,7 @@ describe('RuleManager', () => {
 		describe('Test Case: Filtering by language', () => {
 			it('Filtering by a single language returns only rules targeting that language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex'])];
+				const filters = [new LanguageFilter(['apex'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -137,7 +127,7 @@ describe('RuleManager', () => {
 
 			it('Filtering by multiple languages returns any rule targeting either language', async () => {
 				// Set up our filter array.
-				const filters = [new RuleFilter(FilterType.LANGUAGE, ['apex', 'javascript'])];
+				const filters = [new LanguageFilter(['apex', 'javascript'])];
 
 				// Pass the filter array into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
@@ -152,8 +142,8 @@ describe('RuleManager', () => {
 				// Set up our filter array.
 				const category = 'Best Practices';
 				const filters = [
-					new RuleFilter(FilterType.LANGUAGE, ['javascript']),
-					new RuleFilter(FilterType.CATEGORY, [category])
+					new LanguageFilter(['javascript']),
+					new CategoryFilter([category])
 				];
 
 				// Pass the filter array into the manager.
@@ -170,7 +160,7 @@ describe('RuleManager', () => {
 		describe('Edge Case: No rules match criteria', () => {
 			it('When no rules match the given criteria, an empty list is returned', async () => {
 				// Define our preposterous filter array.
-				const impossibleFilters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
+				const impossibleFilters = [new CategoryFilter(['beebleborp'])];
 
 				// Pass our filters into the manager.
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(impossibleFilters);
@@ -242,7 +232,7 @@ describe('RuleManager', () => {
 					const validTargets = ['js/**/*.js', 'app/force-app/main/default/classes', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -254,6 +244,17 @@ describe('RuleManager', () => {
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 0);
 				});
+
+				it('Single target file does not match', async () => {
+					const invalidTarget = ['does-not-exist.js'];
+					// No filters
+					const filters = [];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+
+					expect(results).to.equal('');
+					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+				});
 			});
 
 			describe('Test Case: Run by category', () => {
@@ -261,7 +262,7 @@ describe('RuleManager', () => {
 					// Set up our filter array.
 					const category = 'Best Practices';
 					const filters = [
-						new RuleFilter(FilterType.CATEGORY, [category])];
+						new CategoryFilter([category])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -283,7 +284,7 @@ describe('RuleManager', () => {
 				it('Filtering by multiple categories runs any rule in either category', async () => {
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -304,7 +305,7 @@ describe('RuleManager', () => {
 			describe('Edge Cases', () => {
 				it('When no rules match the given criteria, an empty string is returned', async () => {
 					// Define our preposterous filter array.
-					const filters = [new RuleFilter(FilterType.CATEGORY, ['beebleborp'])];
+					const filters = [new CategoryFilter(['beebleborp'])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
@@ -315,7 +316,7 @@ describe('RuleManager', () => {
 					const invalidTarget = ['does-not-exist.js'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -329,7 +330,7 @@ describe('RuleManager', () => {
 					const invalidTarget = ['app/force-app/main/default/no-such-directory'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -342,7 +343,7 @@ describe('RuleManager', () => {
 					const invalidTargets = ['does-not-exist-1.js', 'does-not-exist-2.js', 'app/force-app/main/default/no-such-directory'];
 					// Set up our filter array.
 					const categories = ['Best Practices', 'Error Prone'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 
@@ -356,7 +357,7 @@ describe('RuleManager', () => {
 					const validTargets = ['js/**/*.js', '!**/negative-filter-does-not-exist/**'];
 					// Set up our filter array.
 					const categories = ['Possible Errors'];
-					const filters = [new RuleFilter(FilterType.CATEGORY, categories)];
+					const filters = [new CategoryFilter(categories)];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
@@ -369,6 +370,201 @@ describe('RuleManager', () => {
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
 				});
+			});
+		});
+	});
+
+	describe('unpackTargets()', () => {
+		// We want to create a subclass of DefaultRuleManager that exposes the protected method `unpackTargets()`.
+		// In order to do that, we'll also need a very basic implementation of RuleCatalog to give to the constructor.
+		// That way, we can sidestep any need to mess with the controller or IoC.
+		class DummyCatalog implements RuleCatalog {
+			getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
+				return [];
+			}
+
+			getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {
+				return [];
+			}
+
+			init(): Promise<void> {
+				return;
+			}
+
+		}
+		class UnpackTargetsDRM extends DefaultRuleManager {
+			constructor() {
+				super(new DummyCatalog());
+			}
+
+			public async unpackTargets(engine: RuleEngine, targets: string[], matchedTargets: Set<string>): Promise<RuleTarget[]> {
+				return super.unpackTargets(engine, targets, matchedTargets);
+			}
+		}
+
+		describe('Positive matching', () => {
+			it('File-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/folder-a/SomeGenericFile.js', // This file is real and should be included.
+					'test/code-fixtures/projects/dep-test-app/folder-e/JsStaticResource1.resource', // This file is also real and should be included.
+					'test/code-fixtures/apex/SomeTestClass.cls', // This file is real, but should be excluded since it's Apex.
+					'test/beep/boop/not/real.js' // This file isn't real, and shouldn't be included.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong file matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[1], 'Wrong file matched');
+				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Directory-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/folder-a', // This directory is real and contains JS files, so it should be included.
+					'test/code-fixtures/apex', // This directory is real, but contains only Apex, so should be excluded.
+					'test/beep/boop/not/real' // This directory doesn't exist at all, and should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong directory matched');
+				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+
+			it('Positive glob-type targets are properly matched', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'test/code-fixtures/projects/dep-test-app/**/*Generic*.js', // This glob matches some JS files, and should be included.
+					'test/code-fixtures/apex/**/*.cls', // This glob only matches Apex files, so it should be excluded.
+					'test/code-fixtures/beep/boop/**/*' // This glob won't match anything at all, so it should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[0], 'Wrong glob matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+		});
+
+		describe('Negative matching', () => {
+			it('Negative globs properly interact with file targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/folder-b/**/*', // This is our negative glob.
+					'test/code-fixtures/projects/dep-test-app/folder-a/SomeGenericFile.js', // This file is real and should be included.
+					'test/code-fixtures/projects/dep-test-app/folder-b/AnotherGenericFile.js' // This file is real, but matches the negative glob and should be excluded.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(1, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[1], 'Wrong file matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Negative globs properly interact with directory targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/*Static*', // Negative Glob #1
+					'!**/*3.5.1.js', // Negative Glob #2
+					'test/code-fixtures/projects/dep-test-app/folder-a', // This real directory should be included since no files match negative globs.
+					'test/code-fixtures/projects/dep-test-app/folder-b', // This real directory should be included since only some files match negative globs.
+					'test/code-fixtures/projects/dep-test-app/folder-e' // This real directory should be excluded since all files match negative globs.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[2], 'Wrong directory matched');
+				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[3], 'Wrong directory matched');
+				expect(results[1].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
+			});
+
+			it('Negative globs properly interact with positive glob targets', async () => {
+				// All of the tests will use the RetireJS engine, since it's got the most straightforward inclusion/exclusion rules.
+				const engine = new RetireJsEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized to Unix paths.
+				const targets = [
+					'!**/*-3.5.1.js', // Negative Glob #1
+					'!**/folder-e/**', // Negative Glob #2
+					'test/code-fixtures/projects/dep-test-app/**/*Generic*.js', // This glob should be included since none of its files are excluded by negative globs.
+					'test/code-fixtures/projects/dep-test-app/**/jquery*.js', // This glob should be included since only some of its files are excluded by negative globs.
+					'test/code-fixtures/projects/dep-test-app/**/*Static*' // This glob should be excluded since all of its files are excluded by negative globs.
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targets[2], 'Wrong glob matched');
+				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+				expect(results[1].target).to.equal(targets[3], 'Wrong glob matched');
+				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 		});
 	});

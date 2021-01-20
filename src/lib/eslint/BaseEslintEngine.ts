@@ -1,13 +1,13 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, ESRule, ESReport, ESMessage} from '../../types';
+import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
-import {CLIEngine} from 'eslint';
-import * as path from 'path';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
+import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
+import * as engineUtils from '../util/CommonEngineUtils';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -48,23 +48,26 @@ export interface EslintStrategy {
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
 
+	/** Filters out any rules that should be excluded from the catalog */
+	filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule>;
+
+	/**
+	 * Indicates whether the rule with the specified name should be treated as enabled by default (i.e., run in the
+	 * absence of filter criteria).
+	 * @param {string} name - The name of a rule.
+	 * @returns {boolean} true if the rule should be enabled by default.
+	 */
+	ruleDefaultEnabled(name: string): boolean;
+
+	/**
+	 * Returns the default configuration associated with the specified rule, as per the corresponding "recommended" ruleset.
+	 * @param {string} ruleName - The name of a rule in this engine.
+	 * @returns {ESRuleConfig} The rule's default recommended configuration.
+	 */
+	getDefaultConfig(ruleName: string): ESRuleConfig;
+
 	/** Allow the strategy to convert the RuleViolation */
-	processRuleViolation(fileName: string, ruleViolation: RuleViolation): void;
-}
-
-export class StaticDependencies {
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	createCLIEngine(config: Record<string,any>): CLIEngine {
-		return new CLIEngine(config);
-	}
-
-	resolveTargetPath(target: string): string {
-		return path.resolve(target);
-	}
-
-	getCurrentWorkingDirectory(): string {
-		return process.cwd();
-	}
+	processRuleViolation(): ProcessRuleViolationType;
 }
 
 export abstract class BaseEslintEngine implements RuleEngine {
@@ -74,6 +77,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 	private initializedBase: boolean;
 	protected outputProcessor: OutputProcessor;
 	private baseDependencies: StaticDependencies;
+	private helper: EslintProcessHelper;
 	private config: Config;
 	private catalog: Catalog;
 
@@ -88,6 +92,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		this.strategy = strategy;
 		this.logger = await Logger.child(this.getName());
 		this.baseDependencies = baseDependencies;
+		this.helper = new EslintProcessHelper();
 
 		this.initializedBase = true;
 	}
@@ -117,7 +122,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 			// Get all rules supported by eslint
 			const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
-			const allRules = cli.getRules();
+			const allRules = this.strategy.filterDisallowedRules(cli.getRules());
 
 			// Add eslint rules to catalog
 			allRules.forEach((esRule: ESRule, key: string) => {
@@ -158,22 +163,34 @@ export abstract class BaseEslintEngine implements RuleEngine {
 			categories: [docs.category],
 			rulesets: [docs.category],
 			languages: [...this.strategy.getLanguages()],
-			defaultEnabled: docs.recommended,
+			defaultEnabled: this.strategy.ruleDefaultEnabled(key),
+			defaultConfig: this.strategy.getDefaultConfig(key),
 			url: docs.url
 		};
 		return rule;
 	}
 
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+
+		return !this.helper.isCustomRun(engineOptions)
+			&& (target && target.length > 0)
+			&& rules.length > 0;
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		return !this.helper.isCustomRun(engineOptions)
+		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
+	}
+
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
-		// If we didn't find any paths, we're done.
-		if (!targets || targets.length === 0) {
-			this.logger.trace('No matching target files found. Nothing to execute.');
-			return [];
-		}
 
 		// Get sublist of rules supported by the engine
-		const filteredRules = await this.selectRelevantRules(rules);
-		if (Object.keys(filteredRules).length === 0) {
+		const configuredRules = this.configureRules(rules);
+		if (Object.keys(configuredRules).length === 0) {
 			// No rules to run
 			this.logger.trace('No matching rules to run. Nothing to execute.');
 			return [];
@@ -189,7 +206,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
 				const config = {cwd};
 
-				config["rules"] = filteredRules;
+				config["rules"] = configuredRules;
 
 				target.paths = this.strategy.filterUnsupportedPaths(target.paths);
 
@@ -226,7 +243,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 				this.logger.trace(`Finished running ${this.getName()}`);
 
 				// Map results to supported format
-				this.addRuleResultsFromReport(results, report, cli.getRules());
+				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, report, cli.getRules(), this.strategy.processRuleViolation());
 			}
 
 			return results;
@@ -235,58 +252,19 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		}
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private async selectRelevantRules(rules: Rule[]): Promise<Record<string,any>> {
-		const filteredRules = {};
-
-		// the eslint engines will run all rules explicitly enabled and all 'recommended' rules
-		// that are inherited from the 'extends' configuration attribute. Disable all rules that
-		// the engine would run by default. The requested rules will be  enabled below.
-		if (rules.length > 0) {
-			for (const rule of (await this.getCatalog()).rules.filter(r => r.defaultEnabled)) {
-				filteredRules[rule.name] = 'off';
-			}
-		}
-
-		rules.forEach(rule => filteredRules[rule.name] = 'error');
-
-		this.logger.trace(`Count of rules selected for ${this.getName()}: ${rules.length}`);
-		return filteredRules;
+	/**
+	 * Uses a list of rules to generate an object suitable for use as the "rules" property of an ESLint configuration.
+	 * @param {Rule[]} rules - A list of rules that we want to run
+	 * @returns {[key: string]: ESRuleConfig} A mapping from rule names to the configuration at which they should run.
+	 * @private
+	 */
+	private configureRules(rules: Rule[]): {[key: string]: ESRuleConfig} {
+		const configuredRules: LooseObject = {};
+		rules.forEach(rule => {
+			// If the rule has a default configuration associated with it, we use it. Otherwise, we default to "error".
+			configuredRules[rule.name] = rule.defaultConfig || 'error';
+		});
+		return configuredRules;
 	}
 
-	private addRuleResultsFromReport(results: RuleResult[], report: ESReport, ruleMap: Map<string, ESRule>): void {
-		for (const r of report.results) {
-			// Only add report entries that have actual violations to report.
-			if (r.messages && r.messages.length > 0) {
-				results.push(this.toRuleResult(r.filePath, r.messages, ruleMap));
-			}
-		}
-	}
-
-	private toRuleResult(fileName: string, messages: ESMessage[], ruleMap: Map<string, ESRule>): RuleResult {
-		return {
-			engine: this.getName(),
-			fileName,
-			violations: messages.map(
-				(v): RuleViolation => {
-					const rule = ruleMap.get(v.ruleId);
-					const category = rule ? rule.meta.docs.category : "";
-					const url = rule ? rule.meta.docs.url : "";
-					const violation: RuleViolation = {
-						line: v.line,
-						column: v.column,
-						severity: v.severity,
-						message: v.message,
-						ruleName: v.ruleId,
-						category,
-						url
-					};
-
-					this.strategy.processRuleViolation(fileName, violation);
-
-					return violation;
-				}
-			)
-		};
-	}
 }

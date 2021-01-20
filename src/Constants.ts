@@ -18,18 +18,42 @@ export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 export enum ENGINE {
 	PMD = 'pmd',
+	PMD_CUSTOM = 'pmd-custom',
 	ESLINT = 'eslint',
 	ESLINT_LWC = 'eslint-lwc',
 	ESLINT_TYPESCRIPT = 'eslint-typescript',
+	ESLINT_CUSTOM = 'eslint-custom',
 	RETIRE_JS = 'retire-js'
 }
+
+/**
+ * Main engine types that have more than one variation
+ */
+export const EngineBase = {
+	PMD: 'pmd',
+	ESLINT: 'eslint'
+}
+
+/**
+ * These are the filter values that Users can filter by when using
+ * --engine flag
+ */
+export const AllowedEngineFilters = [
+	ENGINE.ESLINT,
+	ENGINE.ESLINT_LWC,
+	ENGINE.ESLINT_TYPESCRIPT,
+	ENGINE.PMD,
+	ENGINE.RETIRE_JS
+]
+
 
 export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',
 	JAVASCRIPT = 'javascript',
 	PLSQL = 'plsql',
-	TYPESCRIPT = 'typescript'
+	TYPESCRIPT = 'typescript',
+	VISUALFORCE = 'vf'
 }
 
 export const Services = {
@@ -42,3 +66,15 @@ export const Services = {
 };
 
 export const INTERNAL_ERROR_CODE = 500;
+
+export enum CUSTOM_CONFIG {
+	EslintConfig = "EslintConfig",
+	PmdConfig = "PmdConfig"
+}
+
+export const HARDCODED_RULES = {
+	FILES_MUST_COMPILE: {
+		name: 'files-must-compile',
+		category: 'Scanner Internal'
+	}
+};

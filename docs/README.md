@@ -30,7 +30,7 @@ bundle install
 bundle exec jekyll serve
 ```
 
-Navigate to: http://127.0.0.1:4000/
+Navigate to: http://127.0.0.1:4000/sfdx-scanner/
 
 
 ## Relative URLs

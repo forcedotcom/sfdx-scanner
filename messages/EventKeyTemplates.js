@@ -3,15 +3,19 @@ module.exports = {
 		"categoryImplicitlyRun": "Implicitly including %s rules from category '%s'",
 		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s",
 		"usingEngineConfigFile": "Using engine configuration file at %s",
-		"generalInternalLog": "Log from Java: %s"
+		"generalInternalLog": "Log from Java: %s",
+		"customEslintHeadsUp": "About to run Eslint with custom config in %s. Please make sure your current directory has all the required NPM dependencies.",
+		"customPmdHeadsUp": "About to run PMD with custom config in %s. Please make sure that any custom rule references have already been added to the plugin through scanner:rule:add command."	
 	},
 	"warning": {
 		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
 		"invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
 		"xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
+		"langMarkedForDeprecation": "Future releases will not include PMD support for %s. If this would cause you hardship, please log an issue on github.com/forcedotcom/sfdx-scanner",
 		"customRuleFileNotFound": "Custom rule file path [%s] for language [%s] was not found.",
 		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",
 		"pmdSuppressedViolation": "PMD suppressed violation against file '%s'. Message: %s. Suppression Type: %s. User Message: %s",
+		"unexpectedPmdNodeType": "Encountered unexpected PMD node of type '%s'",
 		"pmdConfigError": "PMD failed to evaluate rule '%s'. Message: %s"
 	},
 	"error": {
