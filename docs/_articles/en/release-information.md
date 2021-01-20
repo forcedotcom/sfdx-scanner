@@ -3,9 +3,9 @@ title: Release Information
 lang: en
 ---
 
-## [v2.5.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.5.0) (01-20-2021)
+## [v2.5.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.5.1) (01-20-2021)
 
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.4.0...v2.5.0)
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.4.0...v2.5.1)
 
 ### Release Summary
 
