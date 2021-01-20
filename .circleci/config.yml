@@ -251,8 +251,9 @@ workflows:
           requires:
             - windows-build
       - publish-latest:
-          # This job should only run after 'self-evaluation' finishes successfully.
+          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
           requires:
+            - build
             - self-evaluation
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
