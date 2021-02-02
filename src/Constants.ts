@@ -51,7 +51,6 @@ export enum LANGUAGE {
 	APEX = 'apex',
 	JAVA = 'java',
 	JAVASCRIPT = 'javascript',
-	PLSQL = 'plsql',
 	TYPESCRIPT = 'typescript',
 	VISUALFORCE = 'vf'
 }

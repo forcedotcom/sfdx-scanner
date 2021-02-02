@@ -1,13 +1,9 @@
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {LANGUAGE} from '../../Constants'
-import {Logger, SfdxError, Messages} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import { ENGINE } from '../../Constants';
-import {uxEvents} from '../ScannerEvents';
-
-Messages.importMessagesDirectory(__dirname);
-const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
 
 const VALID_LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['apex', 'apex'],
@@ -15,27 +11,11 @@ const VALID_LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['javascript', 'javascript'],
 	['ecmascript', 'javascript'],
 	['js', 'javascript'],
-	['jsp', 'jsp'],
-	['modelica', 'modelica'],
-	['plsql', 'plsql'],
-	['pl/sql', 'plsql'],
-	['pl-sql', 'plsql'],
-	['scala', 'scala'],
 	['vf', 'visualforce'],
 	['visualforce', 'visualforce'],
 	['xml', 'xml'],
 	['pom', 'xml'],
 	['xsl', 'xml']
-]);
-
-// This is a subset of the languages in VALID_LANGUAGES_BY_ALIAS. It exists so we can telegraph our intention to end PMD
-// support for all languages except for these.
-const SUPPORTED_LANGUAGES: Set<string> = new Set([
-	'apex',
-	'java',
-	'javascript',
-	'visualforce',
-	'xml'
 ]);
 
 let INSTANCE: PmdLanguageManager = null;
@@ -73,13 +53,9 @@ class PmdLanguageManager extends AsyncCreatable {
 			if (lang) {
 				if (LANGUAGE.JAVASCRIPT === lang) {
 					throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdCatalogWrapper', 'JavascriptNotSupported');
-				} else if (!SUPPORTED_LANGUAGES.has(lang)) {
-					uxEvents.emit(
-						'warning-always',
-						eventMessages.getMessage('warning.langMarkedForDeprecation', [lang])
-					);
+				} else {
+					langs.push(lang);
 				}
-				langs.push(lang);
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);

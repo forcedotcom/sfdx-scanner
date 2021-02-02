@@ -89,7 +89,7 @@ describe('PmdCatalogWrapper', () => {
 					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
 					// Spoof a CustomPathManager that claims that a custom JAR exists for plsql, using a weird alias for that language.
 					const customJars: Map<string, Set<string>> = new Map();
-					customJars.set('Pl/SqL', new Set([irrelevantPath]));
+					customJars.set('ViSuAlFoRcE', new Set([irrelevantPath]));
 					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
 				});
@@ -103,7 +103,7 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					const customJarValue = `plsql=${irrelevantPath}`;
+					const customJarValue = `visualforce=${irrelevantPath}`;
 					const defaultJarPattern = /^apex=.*pmd-apex-.*.jar$/;
 					validateCustomAndDefaultJarParams(params, customJarValue, defaultJarPattern);
 				});
@@ -115,7 +115,7 @@ describe('PmdCatalogWrapper', () => {
 					// Spoof a config that claims that only apex is the supported language
 					Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
 					const customJars: Map<string, Set<string>> = new Map();
-					customJars.set('pl/sql', new Set([irrelevantPath]));
+					customJars.set('visualforce', new Set([irrelevantPath]));
 					customJars.set(LANGUAGE.JAVA, new Set());
 					Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).resolves(customJars);
 					Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
@@ -130,7 +130,7 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					const customJarValue = `plsql=${irrelevantPath}`;
+					const customJarValue = `visualforce=${irrelevantPath}`;
 					const defaultJarPattern = /^apex=.*jar$/;
 
 					validateCustomAndDefaultJarParams(params, customJarValue, defaultJarPattern);
