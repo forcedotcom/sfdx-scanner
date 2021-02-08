@@ -1,99 +1,36 @@
 import 'reflect-metadata';
 import {StaticResourceHandler, StaticResourceType} from '../../../src/lib/util/StaticResourceHandler';
-import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {expect} from 'chai';
-import Sinon = require('sinon');
+import path = require('path');
 
 describe('StaticResourceHandler', () => {
 	describe('identifyStaticResourceType', () => {
-		describe('JS-type resources', () => {
-			const fakeJsMeta = `<?xml version="1.0" encoding="UTF-8"?>\n<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">\n\t<cacheControl>Public</cacheControl>
-\t<contentType>text/javascript</contentType>\n\t<description>JsStaticResource1</description>\n</StaticResource>`;
+		it('Text-type static resources are properly identified', async () => {
+			const srh = new StaticResourceHandler();
+			const paths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'HtmlStaticResource1.resource'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource1.resource'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource2.resource')
+			];
 
-			before(() => {
-				Sinon.createSandbox();
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'readFile').resolves(fakeJsMeta);
-			});
-
-			after(() => {
-				Sinon.restore();
-			});
-
-			it('Properly identifies JS-type resources', async () => {
-				const srh = new StaticResourceHandler();
-				const res: StaticResourceType = await srh.identifyStaticResourceType('meaningless/path/to/file.resource');
-				expect(res).to.equal(StaticResourceType.JS, 'Resource should be recognized as JS-type');
-			});
+			for (const p of paths) {
+				const srType: StaticResourceType = await srh.identifyStaticResourceType(p);
+				expect(srType).to.equal(StaticResourceType.TEXT, 'File should be identified as text');
+			}
 		});
 
-		describe('ZIP-type resources', () => {
-			const fakeZipMeta = `<?xml version="1.0" encoding="UTF-8"?>\n<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">\n\t<cacheControl>Public</cacheControl>
-\t<contentType>application/zip</contentType>\n\t<description>ZipStaticResource1</description>\n</StaticResource>`;
-
-			before(() => {
-				Sinon.createSandbox();
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'readFile').resolves(fakeZipMeta);
-			});
-
-			after(() => {
-				Sinon.restore();
-			});
-
-			it('Properly identifies ZIP-type resources', async () => {
-				const srh = new StaticResourceHandler();
-				const res: StaticResourceType = await srh.identifyStaticResourceType('meaningless/path/to/file.resource');
-				expect(res).to.equal(StaticResourceType.ZIP, 'Resource should be recognized as ZIP-type');
-			});
+		it('ZIP-type resources are properly identified', async () => {
+			const srh = new StaticResourceHandler();
+			const filePath = path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'leaflet.resource');
+			const srType: StaticResourceType = await srh.identifyStaticResourceType(filePath);
+			expect(srType).to.equal(StaticResourceType.ZIP, 'File should be identified as ZIP');
 		});
 
-		describe('Other resource types', () => {
-			const fakeHtmlMeta = `<?xml version="1.0" encoding="UTF-8"?>\n<StaticResource xmlns="http://soap.sforce.com/2006/04/metadata">\n\t<cacheControl>Public</cacheControl>
-\t<contentType>text/html</contentType>\n\t<description>HtmlStaticResource1</description>\n</StaticResource>`;
-
-			before(() => {
-				Sinon.createSandbox();
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
-				Sinon.stub(FileHandler.prototype, 'readFile').resolves(fakeHtmlMeta);
-			});
-
-			after(() => {
-				Sinon.restore();
-			});
-
-			it('Properly identifies other resources as OTHER', async () => {
-				const srh = new StaticResourceHandler();
-				const res: StaticResourceType = await srh.identifyStaticResourceType('meaningless/path/to/file.resource');
-				expect(res).to.equal(StaticResourceType.OTHER, 'Resource should be recognized as OTHER');
-			});
+		it('Other types of resources are properly identified as OTHER', async () => {
+			const srh = new StaticResourceHandler();
+			const filePath = path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'RandomMeme.resource');
+			const srType: StaticResourceType = await srh.identifyStaticResourceType(filePath);
+			expect(srType).to.equal(StaticResourceType.OTHER, 'File should be identified as OTHER');
 		});
-
-		describe('Non-resource files', () => {
-			before(() => {
-				Sinon.createSandbox();
-				Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
-			});
-
-			after(() => {
-				Sinon.restore();
-			});
-
-			it('When no resource-meta.xml file can be found, returns null', async () => {
-				const srh = new StaticResourceHandler();
-				const res: StaticResourceType = await srh.identifyStaticResourceType('meaningless/path/to/file.resource');
-				expect(res).to.equal(null, 'Null value returned when no meta file exists');
-			});
-		});
-
-
-
-
-
-
-
-
-
-
 	});
 })

@@ -279,7 +279,9 @@ export class RetireJsEngine implements RuleEngine {
 				// to handle them.
 				const ext: string = path.extname(originalPath.toLowerCase());
 				const srType = ext === '.resource' ? await this.srh.identifyStaticResourceType(originalPath) : null;
-				if (ext === '.js' || srType === StaticResourceType.JS) {
+				if (ext === '.js' || srType === StaticResourceType.TEXT) {
+					// Text-based Static Resources must be treated as potential JS files. So we'll copy and alias them
+					// as .js.
 					this.aliasJsFile(tmpParent, originalPath);
 				} else if (ext === '.zip' || srType === StaticResourceType.ZIP) {
 					this.aliasZipFile(tmpParent, originalPath);

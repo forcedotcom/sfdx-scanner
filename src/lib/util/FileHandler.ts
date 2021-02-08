@@ -45,6 +45,18 @@ export class FileHandler {
 		});
 	}
 
+	readFileAsBuffer(filename: string): Promise<Buffer> {
+		return new Promise<Buffer>((resolve, reject) => {
+			return fs.readFile(filename, (err, data) => {
+				if (!err) {
+					resolve(data);
+				} else {
+					reject(err);
+				}
+			});
+		});
+	}
+
 	readFile(filename: string): Promise<string> {
 		return new Promise<string>((resolve, reject) => {
 			return fs.readFile(filename, 'utf-8', ((err, data) => {
