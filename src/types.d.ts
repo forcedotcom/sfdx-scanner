@@ -61,6 +61,7 @@ export type RuleViolation = {
 	message: string;
 	category: string;
 	url?: string;
+	exception?: boolean;
 };
 
 export type Catalog = {

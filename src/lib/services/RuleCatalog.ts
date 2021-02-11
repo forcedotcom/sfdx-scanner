@@ -14,4 +14,6 @@ export interface RuleCatalog {
 	getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[];
 
 	getRulesMatchingFilters(filters: RuleFilter[]): Rule[];
+
+	getRule(engine: string, ruleName: string): Rule;
 }
