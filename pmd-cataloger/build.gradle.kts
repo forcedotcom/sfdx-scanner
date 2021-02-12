@@ -16,11 +16,11 @@ val skippableJarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
   """^groovy.*\.jar""".toRegex(),
   """^lenses.*\.jar""".toRegex(),
   """^parsers.*\.jar""".toRegex(),
-  """^pmd-(cpp|cs|dart|fortran|go|groovy|jsp|kotlin|lua|matlab|modelica|objectivec|perl|php|plsql|python|ruby|scala|swift|ui)-[\d\.]*\.jar""".toRegex(),
+  """^pmd-(cpp|cs|dart|fortran|go|groovy|jsp|kotlin|lua|matlab|modelica|objectivec|perl|php|plsql|python|ruby|scala|swift|ui)[-_\d\.]*\.jar""".toRegex(),
   """^protobuf-java-[\d\.]*\.jar""".toRegex(),
   """^scala.*\.jar""".toRegex(),
   """^sourcecode_[\d\.-]*\.jar""".toRegex(),
-  """^trees_\d\.-]*\.jar""".toRegex()
+  """^trees_[\d\.-]*\.jar""".toRegex()
 )
 
 repositories {
