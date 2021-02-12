@@ -182,9 +182,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
 				message.endsWith('The file must be included in at least one of the projects provided.')) {
 				ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+				ruleViolation.exception = true;
 			} else if (message.startsWith('Parsing error:')) {
 				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
 				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
+				ruleViolation.exception = true;
 			}
 		}
 	}

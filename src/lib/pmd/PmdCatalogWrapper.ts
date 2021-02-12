@@ -6,11 +6,11 @@ import * as PrettyPrinter from '../util/PrettyPrinter';
 import * as JreSetupManager from './../JreSetupManager';
 import {OutputProcessor} from './OutputProcessor';
 import * as PmdLanguageManager from './PmdLanguageManager';
-import {PMD_LIB, PMD_VERSION, PmdSupport} from './PmdSupport';
+import {PMD_LIB, PmdSupport} from './PmdSupport';
 import path = require('path');
 import {uxEvents} from '../ScannerEvents';
 import { Controller } from '../../Controller';
-import { PMD_CATALOG_FILE } from '../../Constants';
+import { PMD_CATALOG_FILE, PMD_VERSION } from '../../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');

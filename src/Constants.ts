@@ -1,6 +1,13 @@
 import os = require('os');
 import path = require('path');
 
+export const PMD_VERSION = '6.31.0';
+export const CATALOG_FILE = 'Catalog.json';
+export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
+export const CONFIG_FILE = 'Config.json';
+export const PMD_CATALOG_FILE = 'PmdCatalog.json';
+export const INTERNAL_ERROR_CODE = 500;
+
 export interface EnvOverridable {
 	getSfdxScannerPath(): string;
 }
@@ -10,11 +17,6 @@ export class ProdOverrides implements EnvOverridable {
 		return path.join(os.homedir(), '.sfdx-scanner');
 	}
 }
-
-export const CATALOG_FILE = 'Catalog.json';
-export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
-export const CONFIG_FILE = 'Config.json';
-export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 export enum ENGINE {
 	PMD = 'pmd',
@@ -63,8 +65,6 @@ export const Services = {
 	RulePathManager: "RulePathManager",
 	EnvOverridable: "EnvOverridable"
 };
-
-export const INTERNAL_ERROR_CODE = 500;
 
 export enum CUSTOM_CONFIG {
 	EslintConfig = "EslintConfig",

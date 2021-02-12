@@ -1,12 +1,13 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../types';
-import {OUTPUT_FORMAT} from './RuleManager';
+import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
+import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
-import {FileHandler} from './util/FileHandler';
+import {FileHandler} from '../util/FileHandler';
 import * as Mustache from 'mustache';
 import htmlEscaper = require('html-escaper');
 import * as csvStringify from 'csv-stringify';
+import { constructSarif } from './SarifFormatter'
 
 export class RuleResultRecombinator {
 
@@ -14,23 +15,26 @@ export class RuleResultRecombinator {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
-			case OUTPUT_FORMAT.JSON:
-				formattedResults = this.constructJson(results);
-				break;
 			case OUTPUT_FORMAT.CSV:
 				formattedResults = await this.constructCsv(results);
 				break;
-			case OUTPUT_FORMAT.XML:
-				formattedResults = this.constructXml(results);
+			case OUTPUT_FORMAT.HTML:
+				formattedResults = await this.constructHtml(results);
+				break;
+			case OUTPUT_FORMAT.JSON:
+				formattedResults = this.constructJson(results);
 				break;
 			case OUTPUT_FORMAT.JUNIT:
 				formattedResults = this.constructJunit(results);
 				break;
+			case OUTPUT_FORMAT.SARIF:
+				formattedResults = await constructSarif(results);
+				break;
 			case OUTPUT_FORMAT.TABLE:
 				formattedResults = this.constructTable(results);
 				break;
-			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results);
+			case OUTPUT_FORMAT.XML:
+				formattedResults = this.constructXml(results);
 				break;
 			default:
 				throw new SfdxError('Unrecognized output format.');
@@ -250,7 +254,7 @@ URL: ${url}
 
 		// Populate the template with a JSON payload of the violations
 		const fileHandler = new FileHandler();
-		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', 'html-templates', 'simple.mustache'));
+		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', '..', 'html-templates', 'simple.mustache'));
 		const args = ['sfdx', 'scanner:run'];
 		for (const arg of process.argv.slice(3)) {
 			if (arg.startsWith('-')) {

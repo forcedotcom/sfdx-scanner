@@ -5,7 +5,7 @@ import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
 import cspawn = require('cross-spawn');
 
-export const PMD_VERSION = '6.31.0';
+
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 export const PMD_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd', 'lib');
 

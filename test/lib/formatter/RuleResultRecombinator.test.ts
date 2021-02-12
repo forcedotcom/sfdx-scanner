@@ -1,10 +1,13 @@
 import {expect} from 'chai';
-import {RuleResult, RuleViolation} from '../../src/types';
-import {RuleResultRecombinator} from '../../src/lib/RuleResultRecombinator';
-import {OUTPUT_FORMAT} from '../../src/lib/RuleManager';
+import {RuleResult, RuleViolation} from '../../../src/types';
+import {RuleResultRecombinator} from '../../../src/lib/formatter/RuleResultRecombinator';
+import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import path = require('path');
 import * as csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import { ENGINE, PMD_VERSION } from '../../../src/Constants';
+import { fail } from 'assert';
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
 const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js');
@@ -95,7 +98,8 @@ const allFakeRuleResults: RuleResult[] = [
 			"message": "'unusedVar' is assigned a value but never used.",
 			"ruleName": "no-unused-vars",
 			"category": "Variables",
-			"url": "https://eslint.org/docs/rules/no-unused-vars"
+			"url": "https://eslint.org/docs/rules/no-unused-vars",
+			"exception": true
 		}]
 	},
 	{
@@ -107,9 +111,9 @@ const allFakeRuleResults: RuleResult[] = [
 			"endLine": 2,
 			"endColumn": 57,
 			"severity": 4,
-			"ruleName": "UnusedImports",
+			"ruleName": "ApexAssertionsShouldIncludeMessage",
 			"category": "Best Practices",
-			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#unusedimports",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage",
 			"message": "\nAvoid unused imports such as 'sfdc.sfdx.scanner.messaging.SfdxMessager'\n"
 		}, {
 			"line": 4,
@@ -117,9 +121,9 @@ const allFakeRuleResults: RuleResult[] = [
 			"endLine": 56,
 			"endColumn": 1,
 			"severity": 3,
-			"ruleName": "CommentRequired",
+			"ruleName": "ApexDoc",
 			"category": "Documentation",
-			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentrequired",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#apexdoc",
 			"message": "\nEnum comments are required\n"
 		}, {
 			"line": 5,
@@ -127,8 +131,8 @@ const allFakeRuleResults: RuleResult[] = [
 			"endLine": 5,
 			"endColumn": 2,
 			"severity": 3,
-			"ruleName": "CommentSize",
-			"category": "Documentation",
+			"ruleName": "ApexUnitTestClassShouldHaveAsserts",
+			"category": "Best Practices",
 			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentsize",
 			"message": "\nComment is too large: Line too long\n"
 		}]
@@ -156,6 +160,8 @@ function validateJson(ruleResult: RuleResult, expectedResults: RuleResult[], exp
 }
 
 describe('RuleResultRecombinator', () => {
+	beforeEach(() => TestOverrides.initializeTestSetup());
+
 	describe('#recombineAndReformatResults()', () => {
 		describe('Output Format: JUnit', () => {
 			// This is a function for validating JUnit-formatted XMLs.
@@ -259,6 +265,138 @@ describe('RuleResultRecombinator', () => {
 					expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 					expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 				}
+			});
+		});
+
+		describe('Output Format: Sarif', () => {
+			function validateEslintSarif(run: unknown): void {
+				const driver = run['tool']['driver'];
+				expect(driver.name).to.equal('eslint');
+				expect(driver.version).to.equal('6.8.0');
+				expect(driver.informationUri).to.equal('https://eslint.org');
+
+				// tool.driver.rules
+				expect(driver['rules']).to.have.lengthOf(1, 'Rules');
+				const rule = driver['rules'][0];
+				expect(rule.id).to.equal('no-unused-vars');
+				expect(rule.shortDescription.text).to.equal('disallow unused variables');
+				expect(rule.properties.category).to.equal('Variables');
+				expect(rule.properties.severity).to.equal(2);
+				expect(rule.helpUri).to.equal('https://eslint.org/docs/rules/no-unused-vars');
+
+				// one of the violations has 'exception=2'. It will end up in the toolExecutionNotifications node
+				expect(run['results']).to.have.lengthOf(2, 'Results');
+				const results = run['results'];
+				for (let i=0; i<results.length; i++) {
+					const result = results[i];
+					expect(result.ruleId).to.equal('no-unused-vars');
+					expect(result.ruleIndex).to.equal(0);
+					expect(result.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.startsWith('file://'));
+				}
+
+				let result = results[0];
+				expect(result.level).to.equal('error');
+				expect(result.message.text).to.equal(`'unusedParam1' is defined but never used.`);
+				expect(result.locations).to.have.lengthOf(1, 'Locations');
+				expect(result.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.endsWith('Users/SomeUser/samples/sample-file1.js'));
+				expect(result.locations[0].physicalLocation.region.startLine).to.equal(2);
+				expect(result.locations[0].physicalLocation.region.startColumn).to.equal(11);
+
+				result = results[1];
+				expect(result.level).to.equal('warning');
+				expect(result.message.text).to.equal(`'unusedParam2' is defined but never used.`);
+				expect(result.locations).to.have.lengthOf(1, 'Locations');
+				expect(result.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.endsWith('Users/SomeUser/samples/sample-file2.js'));
+				expect(result.locations[0].physicalLocation.region.startLine).to.equal(4);
+				expect(result.locations[0].physicalLocation.region.startColumn).to.equal(11);
+
+				// invocations. any violations with exception=true will show up here
+				expect(run['invocations']).to.have.lengthOf(1, 'Invocations');
+				const invocation = run['invocations'][0];
+				expect(invocation.executionSuccessful).to.be.false;
+				expect(invocation.toolExecutionNotifications).to.have.lengthOf(1, 'Tool Execution');
+				const toolExecution = invocation.toolExecutionNotifications[0];
+				expect(toolExecution.message.text).to.equal(`'unusedVar' is assigned a value but never used.`);
+				expect(toolExecution.locations).to.have.lengthOf(1, 'Locations');
+				expect(toolExecution.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.startsWith('file://'));
+				expect(toolExecution.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.endsWith('Users/SomeUser/samples/sample-file2.js'));
+			}
+
+			function validatePMDSarif(run: unknown): void {
+				const driver = run['tool']['driver'];
+				expect(driver.name).to.equal('pmd');
+				expect(driver.version).to.equal(PMD_VERSION);
+				expect(driver.informationUri).to.equal('https://pmd.github.io/pmd');
+
+				// tool.driver.rules
+				expect(driver['rules']).to.have.lengthOf(3, 'Rules');
+				expect(run['results']).to.have.lengthOf(3, 'Results');
+				expect(run['tool']['driver']['rules']).to.have.lengthOf(3, 'Rules');
+
+				let rule = driver['rules'][0];
+				expect(rule.id).to.equal('ApexAssertionsShouldIncludeMessage');
+				expect(rule.shortDescription.text).to.equal(`The second parameter of System.assert/third parameter of System.assertEquals/System.assertNotEquals is a message.\nHaving a second/third parameter provides more information and makes it easier to debug the test failure and\nimproves the readability of test output.`);
+				expect(rule.properties.category).to.equal('Best Practices');
+				expect(rule.properties.severity).to.equal(4);
+				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage');
+
+				rule = driver['rules'][1];
+				expect(rule.id).to.equal('ApexDoc');
+				expect(rule.shortDescription.text).to.satisfy(r => r.startsWith('This rule validates that:\n\n* ApexDoc comments'));
+				expect(rule.properties.category).to.equal('Documentation');
+				expect(rule.properties.severity).to.equal(3);
+				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#apexdoc');
+
+				rule = driver['rules'][2];
+				expect(rule.id).to.equal('ApexUnitTestClassShouldHaveAsserts');
+				expect(rule.shortDescription.text).to.satisfy(r => r.startsWith(`Apex unit tests should include at least one assertion.`));
+				expect(rule.properties.category).to.equal('Best Practices');
+				expect(rule.properties.severity).to.equal(3);
+				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentsize');
+
+				// Deep validation of results and rules is skipped, the only thing different from the eslint results
+				// is that the ruleIndex should be different for each violation
+				expect(run['results']).to.have.lengthOf(3, 'Results');
+				const results = run['results'];
+
+				let result = results[0];
+				expect(result.ruleIndex).to.equal(0);
+
+				result = results[1];
+				expect(result.ruleIndex).to.equal(1);
+
+				result = results[2];
+				expect(result.ruleIndex).to.equal(2);
+
+				// invocations
+				expect(run['invocations']).to.have.lengthOf(1, 'Invocations');
+				const invocation = run['invocations'][0];
+				expect(invocation.executionSuccessful).to.be.true;
+				expect(invocation.toolExecutionNotifications).to.have.lengthOf(0, 'Tool Execution');
+			}
+
+			it ('Happy Path', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i=0; i<runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.ESLINT) {
+						validateEslintSarif(run);
+					} else if (engine === ENGINE.PMD) {
+						validatePMDSarif(run);
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 		});
 

@@ -83,8 +83,8 @@ export class EslintProcessHelper {
 
 	addRuleResultsFromReport(
 		engineName: string,
-		results: RuleResult[], 
-		report: ESReport, 
+		results: RuleResult[],
+		report: ESReport,
 		ruleMap: Map<string, ESRule>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): void {
 			for (const r of report.results) {
@@ -97,8 +97,8 @@ export class EslintProcessHelper {
 
 	toRuleResult(
 		engineName: string,
-		fileName: string, 
-		messages: ESMessage[], 
+		fileName: string,
+		messages: ESMessage[],
 		ruleMap: Map<string, ESRule>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): RuleResult {
 		return {
