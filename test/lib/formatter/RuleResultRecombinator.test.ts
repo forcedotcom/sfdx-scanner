@@ -354,7 +354,19 @@ describe('RuleResultRecombinator', () => {
 				expect(rule.properties.severity).to.equal(3);
 				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentsize');
 
-				// Deep validation of results and rules is skipped. The code is the same as that tested in the eslint method above.
+				// Deep validation of results and rules is skipped, the only thing different from the eslint results
+				// is that the ruleIndex should be different for each violation
+				expect(run['results']).to.have.lengthOf(3, 'Results');
+				const results = run['results'];
+
+				let result = results[0];
+				expect(result.ruleIndex).to.equal(0);
+
+				result = results[1];
+				expect(result.ruleIndex).to.equal(1);
+
+				result = results[2];
+				expect(result.ruleIndex).to.equal(2);
 
 				// invocations
 				expect(run['invocations']).to.have.lengthOf(1, 'Invocations');

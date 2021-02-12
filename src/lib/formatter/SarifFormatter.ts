@@ -12,10 +12,21 @@ const WARNING = 'warning';
 
 /**
  * Formatter based on https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html
+ *
+ * The sarif format contains an array of "run" objects. There is a one to one mapping between a run
+ * and an engine. For example, an invocation that executes the eslint and pmd engines will have two
+ * run objects.
  */
 abstract class SarifFormatter {
+	/**
+	 * Each run contains an array of rules that ran. The violations refer to these rules by their
+	 * id and their index. This map keeps track of the index for a given rule.
+	 */
 	private readonly ruleMap: Map<string, number>;
-	private ruleIndex: number;
+	/**
+	 * The initial json object that contains basic information such as the engine name.
+	 * This object will be added to as the violations are processed.
+	 */
 	private readonly jsonTemplate: unknown;
 	protected readonly engine: string;
 
@@ -24,12 +35,18 @@ abstract class SarifFormatter {
 		this.jsonTemplate = deepCopy(toolJson);
 		this.jsonTemplate['results'] = [];
 		this.jsonTemplate['invocations'] = [];
-		this.ruleIndex = 0;
 		this.ruleMap = new Map<string, number>();
 	}
 
+	/**
+	 * Converts the rule violation to either "warning" or "error"
+	 * See https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127839
+	 */
 	protected abstract getLevel(violation: RuleViolation): string;
 
+	/**
+	 * Return a location that is used by violations and errors
+	 */
 	private getLocation(r: RuleResult): unknown {
 		return {
 			physicalLocation: {
@@ -40,6 +57,10 @@ abstract class SarifFormatter {
 		};
 	}
 
+	/**
+	 * Find all unique rules and add them to ruleMap
+	 * @return the array that is appended to tool.driver.rules for the given run
+	 */
 	private populateRuleMap(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown[] {
 		const rules = [];
 		for (const r of ruleResults) {
@@ -52,7 +73,7 @@ abstract class SarifFormatter {
 					const vRule: Rule = catalog.getRule(r.engine, v.ruleName);
 					// v.Rule may be undefined if there was an error
 					const description: string = vRule?.description ? vRule.description : v.message;
-					this.ruleMap.set(v.ruleName, this.ruleIndex++);
+					this.ruleMap.set(v.ruleName, this.ruleMap.size);
 					const rule = {
 						id: v.ruleName,
 						shortDescription: {
@@ -74,6 +95,12 @@ abstract class SarifFormatter {
 		return rules;
 	}
 
+	/**
+	 * Convert an array of RuleResults to a run object. A given engine may create multiple RuleResult
+	 * objects for a given invocation, this typically happens if multiple targets are provided.
+	 * Multiple RuleResult objects will be consolidated into a single run object.
+	 * https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127675
+	 */
 	public format(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown {
 		const runJson = deepCopy(this.jsonTemplate);
 		const results = runJson.results;
@@ -89,6 +116,7 @@ abstract class SarifFormatter {
 				// Create a new location for each violation, it may contain region specific information
 				const location = this.getLocation(r);
 
+				// Violations that are exceptions are placed in the invocation.toolExecutionNotifications array
 				if (v.exception) {
 					invocation.executionSuccessful = false;
 					invocation.toolExecutionNotifications.push({
@@ -98,6 +126,7 @@ abstract class SarifFormatter {
 						}
 					});
 				} else {
+					// Regular violations are placed in the results array
 					// W-8881776: line and column are sometimes strings, but the schema requires them to be numbers
 					const region = {
 						startLine: parseInt(`${v.line}`),
@@ -133,6 +162,10 @@ abstract class SarifFormatter {
 	}
 }
 
+/**
+ * Generates a run object for all eslint based engines.
+ * The tool.driver.name will be the specific engine that ran.
+ */
 class ESLintSarifFormatter extends SarifFormatter {
 	constructor(engine: string) {
 		super(engine,
@@ -154,6 +187,9 @@ class ESLintSarifFormatter extends SarifFormatter {
 	}
 }
 
+/**
+ * Generates a run object for all pmd based engines.
+ */
 class PMDSarifFormatter extends SarifFormatter {
 	constructor(engine: string) {
 		super(engine,
@@ -175,6 +211,9 @@ class PMDSarifFormatter extends SarifFormatter {
 	}
 }
 
+/**
+ * Generates a run object for retire-js
+ */
 class RetireJsSarifFormatter extends SarifFormatter {
 	constructor(engine: string) {
 		super(engine,
@@ -200,13 +239,15 @@ class RetireJsSarifFormatter extends SarifFormatter {
 
 const getSarifFormatter = (engine: string): SarifFormatter => {
 	if (engine === ENGINE.ESLINT_CUSTOM) {
-		// Expose the eslint-custom engine as eslint
+		// Expose the eslint-custom engine as eslint, the users don't need to know it
+		// was the custom implementation
 		return new ESLintSarifFormatter(ENGINE.ESLINT);
 	} else if (engine.startsWith(ENGINE.ESLINT)) {
 		// All other eslint engines are exposed as-is
 		return new ESLintSarifFormatter(engine);
 	} else if (engine.startsWith(ENGINE.PMD)) {
-		// Use the same formatter for pmd and pmd-custom
+		// Use the same formatter for pmd and pmd-custom, the users don't need to know it
+		// was the custom implementation
 		return new PMDSarifFormatter(ENGINE.PMD);
 	} else if (engine === ENGINE.RETIRE_JS) {
 		return new RetireJsSarifFormatter(engine);
@@ -215,6 +256,10 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
 	}
 }
 
+/**
+ * Convert an array of RuleResults to a sarif document. The rules are separated by engine name.
+ * A new "run" object is created for each engine that was run
+ */
 const constructSarif = async (results: RuleResult[]): Promise<string> => {
 	// Obtain the catalog and pass it in, this avoids multiple initializations
 	// when waiting for promises in parallel
@@ -226,7 +271,8 @@ const constructSarif = async (results: RuleResult[]): Promise<string> => {
 		]
 	};
 
-	// Map of engine->RuleResult[]
+	// Partition the RuleResults by the engine that generated them. Certain engines may
+	// have multiple RuleResults depending on how the targets were provided to the run command.
 	const filteredResults: Map<string, RuleResult[]> = new Map<string, RuleResult[]>();
 	for (const r of results) {
 		if (!filteredResults.has(r.engine)) {
@@ -235,6 +281,7 @@ const constructSarif = async (results: RuleResult[]): Promise<string> => {
 		filteredResults.get(r.engine).push(r);
 	}
 
+	// Create a new run object for each engine/results pair
 	for (const [engine, ruleResults] of filteredResults.entries()) {
 		const formatter: SarifFormatter = getSarifFormatter(engine);
 		sarif.runs.push(formatter.format(catalog, ruleResults));
