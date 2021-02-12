@@ -94,7 +94,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	public abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
 
 	public abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
-	
+
 	public abstract isEnabled(): Promise<boolean>;
 
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
@@ -124,7 +124,7 @@ abstract class BasePmdEngine implements RuleEngine {
 				return [];
 			}
 			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
-			
+
 			const selectedTargets = targetPaths.join(',');
 			const stdout = await PmdWrapper.execute(selectedTargets, selectedRules);
 			const results = this.processStdOut(stdout);
@@ -284,7 +284,8 @@ abstract class BasePmdEngine implements RuleEngine {
 				severity: hardcodedDetails.severity,
 				ruleName: hardcodedDetails.base.name,
 				category: hardcodedDetails.base.category,
-				message: hardcodedDetails.msgFormatter(element)
+				message: hardcodedDetails.msgFormatter(element),
+				exception: true
 			}]
 		};
 	}
@@ -445,9 +446,9 @@ export class CustomPmdEngine extends BasePmdEngine {
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	public async run(
-		ruleGroups: RuleGroup[], 
-		rules: Rule[], 
-		targets: RuleTarget[], 
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		targets: RuleTarget[],
 		engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		const selectedRules = await this.getCustomConfig(engineOptions);

@@ -5,7 +5,7 @@ import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
-import {RuleResultRecombinator} from './RuleResultRecombinator';
+import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';

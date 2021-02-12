@@ -21,6 +21,7 @@ export default class LocalCatalog implements RuleCatalog {
 
 	private engines: RuleEngine[];
 	private initialized: boolean;
+	private ruleMap: Map<string, Rule>;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -128,8 +129,20 @@ export default class LocalCatalog implements RuleCatalog {
 			this.logger.trace(`Populating Catalog JSON.`);
 			await this.rebuildCatalogIfNecessary();
 			this.catalog = await this.readCatalogJson();
+			this.ruleMap = new Map<string, Rule>();
+			this.catalog.rules.forEach(r => {
+				this.ruleMap.set(`${r.engine}:${r.name}`, r);
+			});
 		}
 		return this.catalog;
+	}
+
+	/**
+	 * More efficient mechanism to get a rule by engine/name without
+	 * iterating via a RuleFilter
+	 */
+	public getRule(engine: string, ruleName: string): Rule {
+		return this.ruleMap.get(`${engine}:${ruleName}`);
 	}
 
 	private async rebuildCatalogIfNecessary(): Promise<[boolean, string]> {
@@ -159,6 +172,7 @@ export default class LocalCatalog implements RuleCatalog {
 	private static catalogIsStale(): boolean {
 		// TODO: Pretty soon, we'll want to add sophisticated logic to determine whether the catalog is stale. But for now,
 		//  we'll just return true so we always rebuild the catalog.
+		// Revisit #getRule when this changes
 		return true;
 	}
 

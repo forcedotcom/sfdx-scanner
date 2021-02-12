@@ -67,7 +67,7 @@ export default class Run extends ScannerCommand {
 			char: 'f',
 			description: messages.getMessage('flags.formatDescription'),
 			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
+			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
 		}),
 		outfile: flags.string({
 			char: 'o',
@@ -218,6 +218,7 @@ export default class Run extends ScannerCommand {
 				case OUTPUT_FORMAT.CSV:
 				case OUTPUT_FORMAT.HTML:
 				case OUTPUT_FORMAT.JSON:
+				case OUTPUT_FORMAT.SARIF:
 				case OUTPUT_FORMAT.XML:
 					return fileExtension;
 				default:

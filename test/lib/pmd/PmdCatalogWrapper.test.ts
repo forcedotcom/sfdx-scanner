@@ -1,12 +1,11 @@
 import {PmdCatalogWrapper} from '../../../src/lib/pmd/PmdCatalogWrapper';
-import {PMD_VERSION} from '../../../src/lib/pmd/PmdSupport';
 import {PmdEngine} from '../../../src/lib/pmd/PmdEngine';
 import {CustomRulePathManager} from '../../../src/lib/CustomRulePathManager';
 import {Config} from '../../../src/lib/util/Config';
 import {expect} from 'chai';
 import Sinon = require('sinon');
 import path = require('path');
-import {ENGINE,LANGUAGE} from '../../../src/Constants';
+import {ENGINE,LANGUAGE,PMD_VERSION} from '../../../src/Constants';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {uxEvents} from '../../../src/lib/ScannerEvents';
 import { after } from 'mocha';
