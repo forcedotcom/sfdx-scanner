@@ -398,6 +398,28 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
+
+			it ('Run with no violations returns engines that were run', async () => {
+				const results = await (await RuleResultRecombinator.recombineAndReformatResults([], OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']))).results;
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i=0; i<runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.ESLINT || engine === ENGINE.PMD) {
+						expect(run['results']).to.have.lengthOf(0, 'Results');
+
+						expect(run['invocations']).to.have.lengthOf(1, 'Invocations');
+						const invocation = run['invocations'][0];
+						expect(invocation.executionSuccessful).to.be.true;
+						expect(invocation.toolExecutionNotifications).to.have.lengthOf(0, 'Tool Execution');
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+			});
 		});
 
 		describe('Output Format: JSON', () => {

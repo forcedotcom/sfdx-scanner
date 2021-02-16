@@ -28,7 +28,7 @@ export class RuleResultRecombinator {
 				formattedResults = this.constructJunit(results);
 				break;
 			case OUTPUT_FORMAT.SARIF:
-				formattedResults = await constructSarif(results);
+				formattedResults = await constructSarif(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.TABLE:
 				formattedResults = this.constructTable(results);
