@@ -17,13 +17,10 @@ lang: en
 
 **Closed issues:**
 
-- Generation of a code quality report in a JSON file that implements a subset of the Code Climate spec. [\#329](https://github.com/forcedotcom/sfdx-scanner/issues/329)
 - Support SARIF JSON Format [\#309](https://github.com/forcedotcom/sfdx-scanner/issues/309)
-- The Scanner should \(only\) use each engine default configs/rulesets [\#248](https://github.com/forcedotcom/sfdx-scanner/issues/248)
 
 **Merged pull requests:**
 
-- @W-8553897@ Include sarif run node for all engines [\#353](https://github.com/forcedotcom/sfdx-scanner/pull/353)
 - @W-8629051@: trees and pmd-scala JARs are now properly removed from d… [\#352](https://github.com/forcedotcom/sfdx-scanner/pull/352)
 - @W-8553897@ Add sarif formatter [\#350](https://github.com/forcedotcom/sfdx-scanner/pull/350)
 - @W-8841422@: Updating RetireJS to v2.2.4. [\#349](https://github.com/forcedotcom/sfdx-scanner/pull/349)
@@ -52,6 +49,7 @@ lang: en
 - Internal error running scanner commands from VS Code terminal with custom rules [\#261](https://github.com/forcedotcom/sfdx-scanner/issues/261)
 - Let standard PMD rules be disabled by config file/args [\#246](https://github.com/forcedotcom/sfdx-scanner/issues/246)
 - @W-8046146@ Digitally Sign the Plugin [\#241](https://github.com/forcedotcom/sfdx-scanner/issues/241)
+- The Scanner should \(only\) use each engine default configs/rulesets [\#248](https://github.com/forcedotcom/sfdx-scanner/issues/248)
 
 **Merged pull requests:**
 
