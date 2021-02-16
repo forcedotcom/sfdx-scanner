@@ -260,7 +260,7 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
  * Convert an array of RuleResults to a sarif document. The rules are separated by engine name.
  * A new "run" object is created for each engine that was run
  */
-const constructSarif = async (results: RuleResult[]): Promise<string> => {
+const constructSarif = async (results: RuleResult[], executedEngines: Set<string>): Promise<string> => {
 	// Obtain the catalog and pass it in, this avoids multiple initializations
 	// when waiting for promises in parallel
 	const catalog: RuleCatalog = await Controller.getCatalog();
@@ -273,11 +273,12 @@ const constructSarif = async (results: RuleResult[]): Promise<string> => {
 
 	// Partition the RuleResults by the engine that generated them. Certain engines may
 	// have multiple RuleResults depending on how the targets were provided to the run command.
+	// Some engines may have no results, these engines should still generate a "run" node
 	const filteredResults: Map<string, RuleResult[]> = new Map<string, RuleResult[]>();
+	for (const engine of executedEngines) {
+		filteredResults.set(engine, []);
+	}
 	for (const r of results) {
-		if (!filteredResults.has(r.engine)) {
-			filteredResults.set(r.engine, []);
-		}
 		filteredResults.get(r.engine).push(r);
 	}
 
