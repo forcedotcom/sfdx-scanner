@@ -5,6 +5,28 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.6.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.6.0) (02-17-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.5.1...v2.6.0)
+
+### Release Summary
+
+* Support for SARIF JSON Format
+* Underlying PMD Engine is upgraded to 6.31.0 (from 6.30.0) 
+* RetireJS upgraded to v2.2.4
+
+**Closed issues:**
+
+- Support SARIF JSON Format [\#309](https://github.com/forcedotcom/sfdx-scanner/issues/309)
+
+**Merged pull requests:**
+
+- @W-8629051@: trees and pmd-scala JARs are now properly removed from d… [\#352](https://github.com/forcedotcom/sfdx-scanner/pull/352)
+- @W-8553897@ Add sarif formatter [\#350](https://github.com/forcedotcom/sfdx-scanner/pull/350)
+- @W-8841422@: Updating RetireJS to v2.2.4. [\#349](https://github.com/forcedotcom/sfdx-scanner/pull/349)
+- @W-8841422@: RetireJS now determines file eligibility by checking con… [\#348](https://github.com/forcedotcom/sfdx-scanner/pull/348)
+- @W-8629051@: Pulled the trigger on PMD language deprecation, and excl… [\#344](https://github.com/forcedotcom/sfdx-scanner/pull/344)
+
 
 ## [v2.5.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.5.1) (01-20-2021)
 
@@ -27,6 +49,7 @@ lang: en
 - Internal error running scanner commands from VS Code terminal with custom rules [\#261](https://github.com/forcedotcom/sfdx-scanner/issues/261)
 - Let standard PMD rules be disabled by config file/args [\#246](https://github.com/forcedotcom/sfdx-scanner/issues/246)
 - @W-8046146@ Digitally Sign the Plugin [\#241](https://github.com/forcedotcom/sfdx-scanner/issues/241)
+- The Scanner should \(only\) use each engine default configs/rulesets [\#248](https://github.com/forcedotcom/sfdx-scanner/issues/248)
 
 **Merged pull requests:**
 
