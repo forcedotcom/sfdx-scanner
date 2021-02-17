@@ -6,6 +6,7 @@ export enum OUTPUT_FORMAT {
 	HTML = 'html',
 	JSON = 'json',
 	JUNIT = 'junit',
+	SARIF = 'sarif',
 	TABLE = 'table',
 	XML = 'xml'
 }

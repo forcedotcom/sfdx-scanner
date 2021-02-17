@@ -36,7 +36,7 @@ describe('RetireJsEngine', () => {
 	});
 
 	describe('createTmpDirWithDuplicatedTargets()', () => {
-		it('Duplicates only specifically targeted files', async () => {
+		it('Duplicates only specifically targeted .js files', async () => {
 			// We'll want some paths that simulate matching a glob.
 			const globPaths = [
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-a', 'jquery-3.1.0.js'),
@@ -45,6 +45,8 @@ describe('RetireJsEngine', () => {
 			// We'll want some paths that simulate matching a whole directory.
 			const dirPaths = [
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Burrito.js'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'ChineseRestaurantMenu.html'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'RandomMeme.png'),
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Taco.js')
 			];
 			// We'll want some paths that simulate matching a single file.
@@ -80,11 +82,15 @@ describe('RetireJsEngine', () => {
 			const dupedFileBaseNames = dupedFiles.map(f => path.basename(f));
 			const expectedFileNames = [...globPaths, ...dirPaths, ...filePaths].map(f => path.basename(f));
 			for (const e of expectedFileNames) {
-				expect(dupedFileBaseNames).to.include(e, 'Expected duplicate file missing from array');
+				if (e.endsWith('.js')) {
+					expect(dupedFileBaseNames).to.include(e, 'Unexpectedly failed to duplicate file');
+				} else {
+					expect(dupedFileBaseNames).to.not.include(e, 'Unexpectedly duplicated non-JS file');
+				}
 			}
 		});
 
-		it('Targeted JS-type static resources are duplicated and renamed', async () => {
+		it('Targeted text-based static resources are duplicated and renamed', async () => {
 			// We'll want some paths that simulate matching an entire directory. Importantly, the resources are a mixture
 			// of JS and non-JS.
 			const resourcePaths = [
@@ -106,17 +112,18 @@ describe('RetireJsEngine', () => {
 			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
 			// We expect various files to exist somewhere in the temp directory.
 			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*')));
-			expect(dupedFiles.length).to.equal(2, 'Wrong number of files copied');
+			expect(dupedFiles.length).to.equal(3, 'Wrong number of files copied');
 			// Expect each of the copied files to have a `.js` extension.
 			for (const d of dupedFiles) {
 				expect(path.extname(d)).to.equal('.js', 'Copied static resource should have .js file extension');
 			}
 		});
 
-		it('ZIPs and ZIP-type static resources are unpacked', async () => {
+		it('ZIPs and ZIP-type static resources are unpacked, other binaries are ignored', async () => {
 			const zipPaths = [
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'AngularJS.zip'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'leaflet.resource')
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'leaflet.resource'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'RandomMeme.resource')
 			];
 
 			const targets: RuleTarget[] = [{
@@ -133,8 +140,10 @@ describe('RetireJsEngine', () => {
 			expect(await fh.exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
 			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
 			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
+			const extractedRandomMeme = await globby(normalize(path.join(tmpDir, '**', 'RandomMeme-extracted', '**', '*')));
 			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
 			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
+			expect(extractedRandomMeme.length).to.equal(0, 'Somehow extracted files from a PNG');
 		});
 	});
 

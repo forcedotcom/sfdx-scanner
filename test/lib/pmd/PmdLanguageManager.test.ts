@@ -6,13 +6,11 @@ import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
 import messages = require('../../../messages/PmdLanguageManager');
 import { ENGINE } from '../../../src/Constants';
-import {uxEvents} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
 
 Messages.importMessagesDirectory(__dirname);
-const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
 
 describe('PmdLanguageManager', () => {
 	describe('getSupportedLanguages()', () => {
@@ -36,7 +34,7 @@ describe('PmdLanguageManager', () => {
 		});
 
 		describe('When Config specifies weirdly aliased language names', () => {
-			const weirdlyAliasedLangs = ['ApEx', 'JaVa', 'Pl/SqL'];
+			const weirdlyAliasedLangs = ['ApEx', 'JaVa', 'ViSuAlFoRcE'];
 
 			before(() => {
 				Sinon.createSandbox();
@@ -50,7 +48,7 @@ describe('PmdLanguageManager', () => {
 
 			it('Aliases are successfully resolved into a viable language name', async () => {
 				const langs = await PmdLanguageManager.getSupportedLanguages();
-				expect(langs).to.deep.equal([LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.PLSQL], 'Aliases to languages should have been resolved');
+				expect(langs).to.deep.equal([LANGUAGE.APEX, LANGUAGE.JAVA, 'visualforce'], 'Aliases to languages should have been resolved');
 			});
 		});
 
@@ -99,35 +97,5 @@ describe('PmdLanguageManager', () => {
 				}
 			});
 		});
-
-		describe('When config includes a language marked for termination', () => {
-			const langs = ['JaVa', 'ViSuAlFoRcE', 'modelica', 'scala'];
-			let uxSpy;
-
-			before(() => {
-				Sinon.createSandbox();
-				uxSpy = Sinon.spy(uxEvents, 'emit');
-				// Simulate a config that specifies (among other languages) at least one language for which we intend to
-				// pull support.
-				Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves(langs);
-			});
-
-			after(() => {
-				Sinon.restore();
-			});
-
-			it('Emits warning for each such language', async () => {
-				const outLangs = await PmdLanguageManager.getSupportedLanguages();
-				// All languages should be included, since they're all valid.
-				expect(outLangs.length).to.equal(4, 'Wrong number of supported langs output');
-				Sinon.assert.callCount(uxSpy, 2);
-				expect(
-					uxSpy.getCall(0).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeprecation', ['modelica']))
-				).to.equal(true, 'Wrong warning logged');
-				expect(
-					uxSpy.getCall(1).calledWith('warning-always', eventMessages.getMessage('warning.langMarkedForDeprecation', ['scala']))
-				).to.equal(true, 'Wrong warning logged');
-			});
-		})
 	});
 });

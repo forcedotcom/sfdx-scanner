@@ -8,9 +8,20 @@ group = "sfdx"
 version = "1.0"
 
 val distDir = "$buildDir/../../dist"
-val pmdVersion = "6.30.0"
+val pmdVersion = "6.31.0"
 val pmdFile = "pmd-bin-$pmdVersion.zip"
 val pmdUrl = "https://github.com/pmd/pmd/releases/download/pmd_releases%2F${pmdVersion}/${pmdFile}"
+val skippableJarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
+  """^fastparse.*\.jar""".toRegex(),
+  """^groovy.*\.jar""".toRegex(),
+  """^lenses.*\.jar""".toRegex(),
+  """^parsers.*\.jar""".toRegex(),
+  """^pmd-(cpp|cs|dart|fortran|go|groovy|jsp|kotlin|lua|matlab|modelica|objectivec|perl|php|plsql|python|ruby|scala|swift|ui)[-_\d\.]*\.jar""".toRegex(),
+  """^protobuf-java-[\d\.]*\.jar""".toRegex(),
+  """^scala.*\.jar""".toRegex(),
+  """^sourcecode_[\d\.-]*\.jar""".toRegex(),
+  """^trees_[\d\.-]*\.jar""".toRegex()
+)
 
 repositories {
   mavenCentral()
@@ -26,6 +37,9 @@ tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd") {
 tasks.register<Copy>("installPmd") {
   dependsOn("downloadPmd")
   from(zipTree("$buildDir/$pmdFile"))
+  exclude { details: FileTreeElement ->
+    skippableJarRegexes.any {it.containsMatchIn(details.file.name)}
+  }
   into("$distDir/pmd")
   // TODO include("just the *.jars etc. we care about")
   includeEmptyDirs = false

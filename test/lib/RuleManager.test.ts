@@ -379,6 +379,10 @@ describe('RuleManager', () => {
 		// In order to do that, we'll also need a very basic implementation of RuleCatalog to give to the constructor.
 		// That way, we can sidestep any need to mess with the controller or IoC.
 		class DummyCatalog implements RuleCatalog {
+			getRule(engine: string, ruleName: string): Rule {
+				throw new Error('Method not implemented.');
+			}
+
 			getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
 				return [];
 			}

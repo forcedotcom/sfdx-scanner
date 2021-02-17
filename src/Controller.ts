@@ -5,8 +5,9 @@ import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
 import {EnvOverridable, Services, AllowedEngineFilters} from './Constants';
 import {RuleManager} from './lib/RuleManager';
-import {RuleEngine} from './lib/services/RuleEngine'
+import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
+import {RuleCatalog} from './lib/services/RuleCatalog';
 
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
@@ -19,6 +20,12 @@ function enginesToString(engines: RuleEngine[]): string {
 // TODO: This is probably more appropriately called a Factory
 export const Controller = {
 	container,
+
+	getCatalog: async (): Promise<RuleCatalog> => {
+		const catalog = container.resolve<RuleCatalog>(Services.RuleCatalog);
+		await catalog.init();
+		return catalog;
+	},
 
 	getConfig: async (): Promise<Config> => {
 		const config = container.resolve<Config>(Services.Config);

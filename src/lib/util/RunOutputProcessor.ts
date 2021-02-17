@@ -113,11 +113,12 @@ export class RunOutputProcessor {
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
-			case OUTPUT_FORMAT.JSON:
 			case OUTPUT_FORMAT.CSV:
-			case OUTPUT_FORMAT.XML:
-			case OUTPUT_FORMAT.JUNIT:
 			case OUTPUT_FORMAT.HTML:
+			case OUTPUT_FORMAT.JSON:
+			case OUTPUT_FORMAT.JUNIT:
+			case OUTPUT_FORMAT.SARIF:
+			case OUTPUT_FORMAT.XML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
 					throw new SfdxError(msg, null, null, this.getInternalErrorCode());
