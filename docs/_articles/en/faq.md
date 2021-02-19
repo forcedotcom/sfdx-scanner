@@ -60,7 +60,7 @@ A: You must:
 #### Q: How do I update the Salesforce CLI Scanner?
 A: You must:
 - Update the plugin to the latest version by following the instructions listed [here](./en/getting-started/install/#upgrade-plug-in)
-- To update to a specific version of the plugin, here is the example `sfdx plugins:install @salesforce/sfdx-scanner@2.3.0`
+- To update to a specific version of the plugin, here is the example `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}`
 
 #### Q: How can I use `Salesforce CLI Scanner` in my CI/CD?
 A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD. You'll also probably want to do the following:
