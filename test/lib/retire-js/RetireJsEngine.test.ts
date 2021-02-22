@@ -146,13 +146,18 @@ describe('RetireJsEngine', () => {
 			// Verify that files were actually extracted from AngularJS.zip, and that every JS file has the expected alias.
 			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
 			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
+
 			for (const subpath of extractedAngular) {
 				if (path.extname(subpath).toLowerCase() === '.js') {
-					// We want to make sure that each file in the ZIP was aliased back to its relative position within the ZIP.
-					// We'll use everything after AngularJS-extracted to build the expected directories.
+					// The paths returned by globby are normalized, but the aliases are denormalized.
+					const denormedPath = subpath.replace(/\//g, path.sep);
+
+					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
+					// Create that normalized path segment so we can use it to generate the expected output.
 					const relativeRoot = `AngularJS-extracted`;
 					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
-					expect(testEngine.dealiasFile(subpath)).to.equal(`${angularPath}:${subpath.slice(relativeRootStartPoint)}`);
+					const expectedTruePath = `${angularPath}:${subpath.slice(relativeRootStartPoint)}`;
+					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
 				}
 			}
 
@@ -161,9 +166,15 @@ describe('RetireJsEngine', () => {
 			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
 			for (const subpath of extractedLeaflet) {
 				if (path.extname(subpath).toLowerCase() === '.js') {
+					// The paths returned by globby are normalized, but the aliases are denormalized.
+					const denormedPath = subpath.replace(/\//g, path.sep);
+
+					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
+					// Create that normalized path segment so we can use it to generate the expected output.
 					const relativeRoot = `leaflet-extracted`;
 					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
-					expect(testEngine.dealiasFile(subpath)).to.equal(`${leafletPath}:${subpath.slice(relativeRootStartPoint)}`);
+					const expectedTruePath = `${leafletPath}:${subpath.slice(relativeRootStartPoint)}`;
+					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
 				}
 			}
 			// Nothing should be extracted from RandomMeme, because it's a picture.
