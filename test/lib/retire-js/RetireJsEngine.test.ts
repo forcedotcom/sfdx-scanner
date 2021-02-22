@@ -147,8 +147,10 @@ describe('RetireJsEngine', () => {
 			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
 			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
 
+			let fileCounter = 0;
 			for (const subpath of extractedAngular) {
 				if (path.extname(subpath).toLowerCase() === '.js') {
+					fileCounter += 1;
 					// The paths returned by globby are normalized, but the aliases are denormalized.
 					const denormedPath = subpath.replace(/\//g, path.sep);
 
@@ -160,12 +162,15 @@ describe('RetireJsEngine', () => {
 					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
 				}
 			}
+			expect(fileCounter).to.be.at.least(1, 'At least one JS file should be pulled from AngularJS');
 
 			// Same verification as above.
+			fileCounter = 0;
 			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
 			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
 			for (const subpath of extractedLeaflet) {
 				if (path.extname(subpath).toLowerCase() === '.js') {
+					fileCounter += 1;
 					// The paths returned by globby are normalized, but the aliases are denormalized.
 					const denormedPath = subpath.replace(/\//g, path.sep);
 
@@ -177,6 +182,7 @@ describe('RetireJsEngine', () => {
 					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
 				}
 			}
+			expect(fileCounter).to.be.at.least(1, 'At least one JS file is pulled from leaflet');
 			// Nothing should be extracted from RandomMeme, because it's a picture.
 			const extractedRandomMeme = await globby(normalize(path.join(tmpDir, '**', 'RandomMeme-extracted', '**', '*')));
 			expect(extractedRandomMeme.length).to.equal(0, 'Somehow extracted files from a PNG');
