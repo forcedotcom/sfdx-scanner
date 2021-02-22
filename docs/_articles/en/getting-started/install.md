@@ -10,21 +10,20 @@ Like all the Salesforce CLI plug-ins, you install the Scanner CLI plug-in with o
 
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner
-This plugin is not digitally signed and its authenticity cannot be verified. Continue installation y/n?: y
-Finished digital signature check.
 Installing plugin @salesforce/sfdx-scanner...
-installed v1.0.30 
+installed v{{ site.data.versions.scanner }} 
 ```
 
 #### Check that the scanner plug-in is installed
 ```bash
 $ sfdx plugins
-@salesforce/sfdx-scanner 1.0.30
+@salesforce/sfdx-scanner {{ site.data.versions.scanner }}
 ```
 #### Install or upgrade to a specific version using the following command
 ```bash
-$ sfdx plugins:install @salesforce/sfdx-scanner@2.3.0
-Installing plugin @salesforce/sfdx-scanner... installed v2.3.0
+$ sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}
+Installing plugin @salesforce/sfdx-scanner... 
+installed v{{ site.data.versions.scanner }}
 ```
 
 #### Display the usage and help for the scanner commands
