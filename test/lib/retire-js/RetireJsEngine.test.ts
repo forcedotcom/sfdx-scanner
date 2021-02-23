@@ -24,10 +24,14 @@ class TestableRetireJsEngine extends RetireJsEngine {
 	public addFakeAliasData(original: string, alias: string): void {
 		this.originalFilesByAlias.set(alias, original);
 	}
+
+	public dealiasFile(alias: string): string {
+		return this.originalFilesByAlias.get(alias);
+	}
 }
 
 describe('RetireJsEngine', () => {
-	let testEngine;
+	let testEngine: TestableRetireJsEngine;
 
 	beforeEach(async () => {
 		testEngine = new TestableRetireJsEngine();
@@ -120,14 +124,15 @@ describe('RetireJsEngine', () => {
 		});
 
 		it('ZIPs and ZIP-type static resources are unpacked, other binaries are ignored', async () => {
-			const zipPaths = [
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'AngularJS.zip'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'leaflet.resource'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'RandomMeme.resource')
-			];
+			const targetDir: string = path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f');
+
+			const angularPath: string = path.resolve(targetDir, 'AngularJS.zip');
+			const leafletPath: string = path.resolve(targetDir, 'leaflet.resource');
+			const randomMemePath: string = path.resolve(targetDir, 'RandomMeme.resource');
+			const zipPaths = [angularPath, leafletPath, randomMemePath];
 
 			const targets: RuleTarget[] = [{
-				target: path.dirname(zipPaths[0]),
+				target: targetDir,
 				isDirectory: true,
 				paths: zipPaths
 			}];
@@ -138,11 +143,48 @@ describe('RetireJsEngine', () => {
 			// We expect the temp directory to still exist, since the process hasn't actually exited yet.
 			const fh = new FileHandler();
 			expect(await fh.exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
+			// Verify that files were actually extracted from AngularJS.zip, and that every JS file has the expected alias.
 			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
-			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
-			const extractedRandomMeme = await globby(normalize(path.join(tmpDir, '**', 'RandomMeme-extracted', '**', '*')));
 			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
+
+			let fileCounter = 0;
+			for (const subpath of extractedAngular) {
+				if (path.extname(subpath).toLowerCase() === '.js') {
+					fileCounter += 1;
+					// The paths returned by globby are normalized, but the aliases are denormalized.
+					const denormedPath = subpath.replace(/\//g, path.sep);
+
+					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
+					// Create that normalized path segment so we can use it to generate the expected output.
+					const relativeRoot = `AngularJS-extracted`;
+					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
+					const expectedTruePath = `${angularPath}:${subpath.slice(relativeRootStartPoint)}`;
+					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
+				}
+			}
+			expect(fileCounter).to.be.at.least(1, 'At least one JS file should be pulled from AngularJS');
+
+			// Same verification as above.
+			fileCounter = 0;
+			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
 			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
+			for (const subpath of extractedLeaflet) {
+				if (path.extname(subpath).toLowerCase() === '.js') {
+					fileCounter += 1;
+					// The paths returned by globby are normalized, but the aliases are denormalized.
+					const denormedPath = subpath.replace(/\//g, path.sep);
+
+					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
+					// Create that normalized path segment so we can use it to generate the expected output.
+					const relativeRoot = `leaflet-extracted`;
+					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
+					const expectedTruePath = `${leafletPath}:${subpath.slice(relativeRootStartPoint)}`;
+					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
+				}
+			}
+			expect(fileCounter).to.be.at.least(1, 'At least one JS file is pulled from leaflet');
+			// Nothing should be extracted from RandomMeme, because it's a picture.
+			const extractedRandomMeme = await globby(normalize(path.join(tmpDir, '**', 'RandomMeme-extracted', '**', '*')));
 			expect(extractedRandomMeme.length).to.equal(0, 'Somehow extracted files from a PNG');
 		});
 	});

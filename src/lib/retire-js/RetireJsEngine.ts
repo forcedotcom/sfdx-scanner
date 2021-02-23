@@ -429,11 +429,16 @@ export class RetireJsEngine implements RuleEngine {
 				zip.on('error', rej);
 
 				zip.on('ready', () => {
-					// Before we do the extraction, we want to map the aliased JS files within the ZIP back to the ZIP itself,
-					// since the ZIP is the real original file.
+					// Before we do the extraction, we want to give each zipped JS file an alias corresponding to its
+					// location within the ZIP. That way, each file will produce unique violations, instead of all files
+					// within the ZIP producing identical violations.
 					for (const {name} of Object.values(zip.entries())) {
 						if (path.extname(name).toLowerCase() === '.js') {
-							this.originalFilesByAlias.set(path.join(zipDst, name), zipSrc);
+							const aliasPath = path.join(zipDst, name);
+							// The "original path" will be the ZIP's original path, suffixed with the file's relative path
+							// within the ZIP.
+							const originalPath = `${zipSrc}:${name}`;
+							this.originalFilesByAlias.set(aliasPath, originalPath);
 						}
 					}
 					// Passing null as the first parameter to this method causes it to extract the entire ZIP.
