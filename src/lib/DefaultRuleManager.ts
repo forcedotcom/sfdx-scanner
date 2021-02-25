@@ -184,7 +184,7 @@ export class DefaultRuleManager implements RuleManager {
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				// Filter the targets based on our target patterns.
-				const filteredTargets = pm.filterPathsByPatterns(absoluteMatchingTargets);
+				const filteredTargets = await pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
 					target,
 					paths: filteredTargets
@@ -201,7 +201,7 @@ export class DefaultRuleManager implements RuleManager {
 					const ruleTarget = {
 						target,
 						isDirectory: true,
-						paths: pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
+						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
 					};
 					if (ruleTarget.paths.length > 0) {
 						ruleTargets.push(ruleTarget);
@@ -209,7 +209,7 @@ export class DefaultRuleManager implements RuleManager {
 				} else {
 					// The target is just a file. Validate it against our matcher, and add it if eligible.
 					const absolutePath = path.resolve(target);
-					if (pm.pathMatchesPatterns(absolutePath)) {
+					if (await pm.pathMatchesPatterns(absolutePath)) {
 						ruleTargets.push({target, paths: [absolutePath]});
 					}
 				}

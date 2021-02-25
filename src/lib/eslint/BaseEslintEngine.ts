@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule} from '../../types';
+import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {RuleEngine} from '../services/RuleEngine';
@@ -111,7 +111,7 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		return await this.config.isEngineEnabled(this.strategy.getEngine());
 	}
 
-	async getTargetPatterns(): Promise<string[]> {
+	async getTargetPatterns(): Promise<TargetPattern[]> {
 		return await this.config.getTargetPatterns(this.strategy.getEngine());
 	}
 
