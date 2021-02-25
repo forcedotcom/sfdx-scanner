@@ -1,4 +1,4 @@
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 
 export interface RuleEngine {
 
@@ -10,7 +10,7 @@ export interface RuleEngine {
 	/**
 	 * Patterns of target that an engine can process
 	 */
-	getTargetPatterns(): Promise<string[]>;
+	getTargetPatterns(): Promise<TargetPattern[]>;
 
 	/**
 	 * Fetches the default catalog of rules supported by the engine
