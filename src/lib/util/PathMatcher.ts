@@ -22,11 +22,16 @@ export class PathMatcher {
 	}
 
 
+	/**
+	 * Creates an asynchronous function that accepts a path resolves to true if it matches the given patterns.
+	 * @param {TargetPattern[]} patterns - The patterns against which a path should be tested.
+	 */
 	private generateMatchingFunction(patterns: TargetPattern[]): TargetMatchingFunction {
 		const {inclusionPatterns, exclusionPatterns, advancedPatterns} = this.sortPatterns(patterns);
 
 		const inclusionMatcher = picomatch(inclusionPatterns);
 		const exclusionMatcher = picomatch(exclusionPatterns);
+		// Each of the advanced patterns generates its own matching function, which will be applied in sequence.
 		const advancedMatchers = advancedPatterns.map(ap => this.generateAdvancedMatcher(ap));
 
 		return async (t: string): Promise<boolean> => {
@@ -44,6 +49,10 @@ export class PathMatcher {
 		}
 	}
 
+	/**
+	 * Sorts patterns into simple inclusion patterns, simple exclusion patterns, and complex patterns.
+	 * @param patterns
+	 */
 	private sortPatterns(patterns: TargetPattern[]): SortedPatterns {
 		// We want to sort patterns into simple inclusion patterns, simple exclusion patterns, and advanced patterns.
 		const inclusionPatterns: BasicTargetPattern[] = [];
@@ -85,6 +94,10 @@ export class PathMatcher {
 		};
 	}
 
+	/**
+	 * Generates a matching function for a single advanced pattern.
+	 * @param pattern
+	 */
 	private generateAdvancedMatcher(pattern: AdvancedTargetPattern): TargetMatchingFunction {
 		const baseMatcher = this.generateMatchingFunction(pattern.basePatterns);
 

@@ -2,7 +2,7 @@ import {Logger, SfdxError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
 import {RuleEngine} from '../services/RuleEngine';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
+import {AdvancedTargetPattern, Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 import {ENGINE} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
@@ -81,6 +81,7 @@ export class RetireJsEngine implements RuleEngine {
 	// aliases, and we need maps to track relationships between aliases and originals.
 	private static NEXT_TMPDIR_IDX = 0;
 	private static NEXT_TMPFILE_IDX = 0;
+	private static NEXT_TMPZIP_IDX = 0;
 
 	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
 	protected originalFilesByAlias: Map<string, string> = new Map();
@@ -97,7 +98,20 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 	public async getTargetPatterns(): Promise<TargetPattern[]> {
-		return this.config.getTargetPatterns(ENGINE.RETIRE_JS);
+		const advancedPatterns: AdvancedTargetPattern[] = [{
+			// This pattern should be applied to any file.
+			basePatterns: ["**/**"],
+			advancedMatcher: (t: string): Promise<boolean> => {
+				const ext = path.extname(t);
+				// Replace the file's extension with .resource-meta.xml.
+				const extlessFilePath = ext === '' ? t : t.slice(0, ext.length * -1);
+				const metaFilePath = extlessFilePath + ".resource-meta.xml";
+				// If a file with that name exists, then this is a hidden static resource, and should be targeted.
+				return this.fh.exists(metaFilePath);
+			}
+		}];
+		// We want all of the target patterns in the config, as well as .zip and our advanced pattern.
+		return [...await this.config.getTargetPatterns(ENGINE.RETIRE_JS), '**/*.zip', ...advancedPatterns];
 	}
 
 	public getCatalog(): Promise<Catalog> {
@@ -320,6 +334,11 @@ export class RetireJsEngine implements RuleEngine {
 		return `TMPFILE_${RetireJsEngine.NEXT_TMPFILE_IDX++}.js`;
 	}
 
+	private getNextZipAlias(): string {
+		return `TMPZIP_${RetireJsEngine.NEXT_TMPZIP_IDX++}`;
+	}
+
+
 	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await this.fh.tmpDirWithCleanup();
@@ -331,7 +350,7 @@ export class RetireJsEngine implements RuleEngine {
 				// At this point, we can't alias all types of files to the same extent. So we'll use different submethods
 				// to handle them.
 				const ext: string = path.extname(originalPath.toLowerCase());
-				const srType = ext === '.resource' ? await this.srh.identifyStaticResourceType(originalPath) : null;
+				const srType = ext !== '.js' ? await this.srh.identifyStaticResourceType(originalPath) : null;
 				if (ext === '.js' || srType === StaticResourceType.TEXT) {
 					// Text-based Static Resources must be treated as potential JS files. So we'll copy and alias them
 					// as .js files.
@@ -364,9 +383,9 @@ export class RetireJsEngine implements RuleEngine {
 		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
-		// Static Resource files need to be changed to `.js` files so RetireJS can see them. We'll also give them aliases
-		// to make sure that they can't conflict with `.js` files in the same directory.
-		const aliasFile: string = path.extname(originalPath) === '.resource' ? this.getNextFileAlias() : path.basename(originalPath);
+		// Files that aren't explicitly .js need to have their extension changed, otherwise RetireJS can't see them.
+		// We'll also alias them to make sure they can't conflict with actual .js files in the same directory.
+		const aliasFile: string = path.extname(originalPath) !== '.js' ? this.getNextFileAlias() : path.basename(originalPath);
 
 		const fullAlias = path.join(aliasDir, aliasFile);
 
@@ -379,8 +398,8 @@ export class RetireJsEngine implements RuleEngine {
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
 		// ZIPs require an additional layer of aliasing, since two ZIPs in the same directory could have similar contents.
-		// We'll derive this layer of aliasing based on the name of the ZIP.
-		const zipLayer = `${path.basename(originalPath, path.extname(originalPath))}-extracted`;
+		// We'll derive this alias using a sequential generator to avoid collisions.
+		const zipLayer = this.getNextZipAlias();
 		this.zipDstByZipSrc.set(originalPath, path.join(aliasDir, zipLayer));
 	}
 
