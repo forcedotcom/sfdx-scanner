@@ -34,7 +34,7 @@ export class StaticResourceHandler {
 			throw new SfdxError(`Could not read ${filename}: ${e.message || e}`);
 		}
 
-		let fileType: StaticResourceType = this.identifyBufferType(buffer);
+		const fileType: StaticResourceType = this.identifyBufferType(buffer);
 		this.resultCache.set(filename, fileType);
 		return fileType;
 	}
