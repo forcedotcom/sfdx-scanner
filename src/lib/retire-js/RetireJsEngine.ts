@@ -235,8 +235,7 @@ export class RetireJsEngine implements RuleEngine {
 				const originalFile = this.originalFilesByAlias.get(data.file);
 
 				// Each entry in the `data` array yields a single RuleResult. If we already have a RuleResult associated
-				// with this original file (happens when a ZIP contains multiple insecure files), we'll keep using that.
-				// Otherwise, we need to build a new one.
+				// with this original file, we'll keep using that. Otherwise, we'll have to create a new one.
 				const ruleResult: RuleResult = ruleResultsByFile.has(originalFile)
 					? ruleResultsByFile.get(originalFile)
 					: {
@@ -436,42 +435,40 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(dupPromises);
 	}
 
-	protected async extractZips(): Promise<void[]> {
-		const zipExtractionPromises: Promise<void>[] = [];
-		for (const [zipSrc, zipDst] of this.zipDstByZipSrc.entries()) {
-			zipExtractionPromises.push(new Promise((res, rej) => {
-				const zip = new StreamZip({
-					file: zipSrc,
-					storeEntries: true
-				});
+	protected async extractZip(zipSrc: string, zipDst: string): Promise<void> {
+		// Open the ZIP.
+		const zip = new StreamZip.async({
+			file: zipSrc,
+			storeEntries: true
+		});
 
-				zip.on('error', rej);
+		// Not sure why, but this method demands an argument that doesn't seem to be used anywhere. Passing in null.
+		const entries = await zip.entries(null);
+		// Iterate over every entry in the ZIP.
+		for (const {name, isDirectory} of Object.values(entries)) {
+			// Skip directories and non-text files.
+			if (isDirectory || this.srh.identifyBufferType(await zip.entryData(name)) !== StaticResourceType.TEXT) {
+				continue;
+			}
 
-				zip.on('ready', () => {
-					// Before we do the extraction, we want to give each zipped JS file an alias corresponding to its
-					// location within the ZIP. That way, each file will produce unique violations, instead of all files
-					// within the ZIP producing identical violations.
-					for (const {name} of Object.values(zip.entries())) {
-						if (path.extname(name).toLowerCase() === '.js') {
-							const aliasPath = path.join(zipDst, name);
-							// The "original path" will be the ZIP's original path, suffixed with the file's relative path
-							// within the ZIP.
-							const originalPath = `${zipSrc}:${name}`;
-							this.originalFilesByAlias.set(aliasPath, originalPath);
-						}
-					}
-					// Passing null as the first parameter to this method causes it to extract the entire ZIP.
-					zip.extract(null, zipDst, (err) => {
-						if (err) {
-							rej(err);
-						} else {
-							res();
-						}
-					});
-				});
-			}));
+			// Each zipped text file needs to be mapped to an alias corresponding to its location within the ZIP.
+			// that way, violations can be tied to individual files within the ZIP instead of the ZIP as a whole.
+			const originalPath = `${zipSrc}:${name}`;
+
+			// Additionally, files that aren't explicitly .js files need to be converted into such files during extraction,
+			// so they're visible to RetireJS.
+			const aliasPath = path.join(zipDst, path.dirname(name), path.extname(name) !== '.js' ? this.getNextFileAlias() : path.basename(name));
+			this.originalFilesByAlias.set(aliasPath, originalPath);
+
+			await zip.extract(name, aliasPath);
 		}
+		return await zip.close();
+	}
 
-		return Promise.all(zipExtractionPromises);
+	protected async extractZips(): Promise<void[]> {
+		return Promise.all(
+			[...this.zipDstByZipSrc.entries()]
+				.map(([zipSrc, zipDst]) => {return this.extractZip(zipSrc, zipDst)})
+		);
 	}
 }

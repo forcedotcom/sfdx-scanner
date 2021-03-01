@@ -197,10 +197,26 @@ describe('RetireJsEngine', () => {
 				await testEngine.createTmpDirWithDuplicatedTargets(targets);
 
 				// ================ ASSERTIONS ================
+				const expectedZipContents = [
+					'HtmlFile.html',
+					'HtmlFileWithOddExt.foo',
+					'HtmlFileWithoutExt',
+					'JsFile.js',
+					'JsFileWithOddExt.foo',
+					'JsFileWithoutExt'
+				];
+				const actualDupedFiles = new Set([...testEngine.getAliasMap().values()]);
+
 				// For each of the ZIPs...
 				for (const zipPath of zipPaths) {
 					// Verify that the ZIP was extracted.
 					expect(testEngine.getZipMap().has(zipPath)).to.equal(true, `Zip file ${zipPath} should have been extracted`);
+
+					// Verify that all of the expected files in the zip were aliased.
+					for (const expectedFile of expectedZipContents) {
+						const fullPath = `${zipPath}:${expectedFile}`;
+						expect(actualDupedFiles.has(fullPath)).to.equal(true, `Zip contents ${fullPath} should be aliased`);
+					}
 				}
 			});
 
@@ -218,7 +234,7 @@ describe('RetireJsEngine', () => {
 	});
 
 	describe('processOutput()', () => {
-		it('Properly dealiases and processes results from non-zipped file', async () => {
+		it('Properly dealiases and processes results from files', async () => {
 			// First, we need to seed the test engine with some fake aliases.
 			const firstOriginal = path.join('first', 'unimportant', 'path', 'jquery-3.1.0.js');
 			const firstAlias = path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js');
@@ -294,13 +310,15 @@ describe('RetireJsEngine', () => {
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
 		});
 
-		it('Results from ZIP contents are properly consolidated', async () => {
+		// Changes to the codebase make it unclear how this corner case would occur, but it's worth having the automation
+		// so we avoid introducing any weird bugs in the future.
+		it('Corner Case: When file has multiple aliases, results are consolidated', async () => {
 			// First, we need to seed the engine with some fake data.
-			const originalZip = path.join('unimportant', 'path', 'to', 'SomeBundle.zip');
-			const firstAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-a', 'jquery-3.1.0.js');
-			const secondAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-b', 'angular-scenario.js');
-			testEngine.addFakeAliasData(originalZip, firstAlias);
-			testEngine.addFakeAliasData(originalZip, secondAlias);
+			const originalFile = path.join('unimportant', 'path', 'to', 'SomeFile.js');
+			const firstAlias = path.join('unimportant', 'alias', 'for', 'Alias1.js');
+			const secondAlias = path.join('unimportant', 'alias', 'for', 'Alias2.js');
+			testEngine.addFakeAliasData(originalFile, firstAlias);
+			testEngine.addFakeAliasData(originalFile, secondAlias);
 
 			// Next, we want to spoof some output that looks like it came from RetireJS.
 			const fakeRetireOutput = {
@@ -358,8 +376,8 @@ describe('RetireJsEngine', () => {
 			const results: RuleResult[] = testEngine.processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
 
 			// Now we run our assertions.
-			expect(results.length).to.equal(1, 'Should be one result object, since both "files" are in the same "zip".');
-			expect(results[0].fileName).to.equal(originalZip, 'Path should properly de-alias back to the ZIP');
+			expect(results.length).to.equal(1, 'Should be one result object, since both aliases correspond to the same original file');
+			expect(results[0].fileName).to.equal(originalFile, 'Path should properly de-alias back to the ZIP');
 			expect(results[0].violations.length).to.equal(3, 'All violations should be consolidated properly');
 			expect(results[0].violations[0].severity).to.equal(2, 'Severity should be translated to 2');
 			expect(results[0].violations[1].severity).to.equal(1, 'Sev should be translated to 1');

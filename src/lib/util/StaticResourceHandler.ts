@@ -34,15 +34,18 @@ export class StaticResourceHandler {
 			throw new SfdxError(`Could not read ${filename}: ${e.message || e}`);
 		}
 
-		let fileType: StaticResourceType = null;
-		if (isText(null, buffer)) {
-			fileType = StaticResourceType.TEXT;
-		} else if (isZip(buffer)) {
-			fileType = StaticResourceType.ZIP;
-		} else {
-			fileType = StaticResourceType.OTHER;
-		}
+		let fileType: StaticResourceType = this.identifyBufferType(buffer);
 		this.resultCache.set(filename, fileType);
 		return fileType;
+	}
+
+	public identifyBufferType(buffer: Buffer): StaticResourceType {
+		if (isText(null, buffer)) {
+			return StaticResourceType.TEXT;
+		} else if (isZip(buffer)) {
+			return StaticResourceType.ZIP;
+		} else {
+			return StaticResourceType.OTHER;
+		}
 	}
 }
