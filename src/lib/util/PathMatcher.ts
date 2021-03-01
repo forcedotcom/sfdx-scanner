@@ -35,17 +35,20 @@ export class PathMatcher {
 		const advancedMatchers = advancedPatterns.map(ap => this.generateAdvancedMatcher(ap));
 
 		return async (t: string): Promise<boolean> => {
-			// Return true if ALL of the following are true:
-			// -- All existing exclusion patterns are satisfied.
-			// -- EITHER...
-			//    -- There are neither inclusion patterns nor complex patterns.
-			//    -- Any existing inclusion pattern is satisfied.
-			//    -- Any existing complex pattern is satisfied.
-			return (exclusionPatterns.length === 0 || !exclusionMatcher(t))
-				&& ((!inclusionPatterns.length && !advancedPatterns.length)
-					|| inclusionMatcher(t)
-					|| (await Promise.all(advancedMatchers.map(am => am(t)))).includes(true)
-				);
+			if (exclusionPatterns.length && exclusionMatcher(t)) {
+				// If any of our exclusion patterns are matched, the path doesn't match.
+				return false;
+			} else {
+				if (!inclusionPatterns.length && !advancedPatterns.length) {
+					// If there are neither inclusion patterns nor advanced patterns, then the path vacuously matches.
+					return true;
+				} else {
+					// If any inclusion pattern or advanced pattern is satisfied, the path matches.
+					return inclusionMatcher(t)
+						// Apply each advanced matcher to the path, then check if any of them returned true.
+						|| (await Promise.all(advancedMatchers.map(am => am(t)))).includes(true);
+				}
+			}
 		}
 	}
 
