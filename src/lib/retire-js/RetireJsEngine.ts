@@ -2,7 +2,7 @@ import {Logger, SfdxError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
 import {RuleEngine} from '../services/RuleEngine';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
+import {AdvancedTargetPattern, Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 import {ENGINE} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
@@ -81,6 +81,7 @@ export class RetireJsEngine implements RuleEngine {
 	// aliases, and we need maps to track relationships between aliases and originals.
 	private static NEXT_TMPDIR_IDX = 0;
 	private static NEXT_TMPFILE_IDX = 0;
+	private static NEXT_TMPZIP_IDX = 0;
 
 	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
 	protected originalFilesByAlias: Map<string, string> = new Map();
@@ -96,8 +97,21 @@ export class RetireJsEngine implements RuleEngine {
 		return RetireJsEngine.ENGINE_NAME;
 	}
 
-	public async getTargetPatterns(): Promise<string[]> {
-		return this.config.getTargetPatterns(ENGINE.RETIRE_JS);
+	public async getTargetPatterns(): Promise<TargetPattern[]> {
+		const advancedPatterns: AdvancedTargetPattern[] = [{
+			// This pattern should be applied to any file.
+			basePatterns: ["**/**"],
+			advancedMatcher: (t: string): Promise<boolean> => {
+				const ext = path.extname(t);
+				// Replace the file's extension with .resource-meta.xml.
+				const extlessFilePath = ext === '' ? t : t.slice(0, ext.length * -1);
+				const metaFilePath = extlessFilePath + ".resource-meta.xml";
+				// If a file with that name exists, then this is a hidden static resource, and should be targeted.
+				return this.fh.exists(metaFilePath);
+			}
+		}];
+		// We want all of the target patterns in the config, as well as .zip and our advanced pattern.
+		return [...await this.config.getTargetPatterns(ENGINE.RETIRE_JS), '**/*.zip', ...advancedPatterns];
 	}
 
 	public getCatalog(): Promise<Catalog> {
@@ -221,8 +235,7 @@ export class RetireJsEngine implements RuleEngine {
 				const originalFile = this.originalFilesByAlias.get(data.file);
 
 				// Each entry in the `data` array yields a single RuleResult. If we already have a RuleResult associated
-				// with this original file (happens when a ZIP contains multiple insecure files), we'll keep using that.
-				// Otherwise, we need to build a new one.
+				// with this original file, we'll keep using that. Otherwise, we'll have to create a new one.
 				const ruleResult: RuleResult = ruleResultsByFile.has(originalFile)
 					? ruleResultsByFile.get(originalFile)
 					: {
@@ -320,6 +333,11 @@ export class RetireJsEngine implements RuleEngine {
 		return `TMPFILE_${RetireJsEngine.NEXT_TMPFILE_IDX++}.js`;
 	}
 
+	private getNextZipAlias(): string {
+		return `TMPZIP_${RetireJsEngine.NEXT_TMPZIP_IDX++}`;
+	}
+
+
 	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await this.fh.tmpDirWithCleanup();
@@ -331,7 +349,7 @@ export class RetireJsEngine implements RuleEngine {
 				// At this point, we can't alias all types of files to the same extent. So we'll use different submethods
 				// to handle them.
 				const ext: string = path.extname(originalPath.toLowerCase());
-				const srType = ext === '.resource' ? await this.srh.identifyStaticResourceType(originalPath) : null;
+				const srType = ext !== '.js' ? await this.srh.identifyStaticResourceType(originalPath) : null;
 				if (ext === '.js' || srType === StaticResourceType.TEXT) {
 					// Text-based Static Resources must be treated as potential JS files. So we'll copy and alias them
 					// as .js files.
@@ -364,9 +382,9 @@ export class RetireJsEngine implements RuleEngine {
 		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
-		// Static Resource files need to be changed to `.js` files so RetireJS can see them. We'll also give them aliases
-		// to make sure that they can't conflict with `.js` files in the same directory.
-		const aliasFile: string = path.extname(originalPath) === '.resource' ? this.getNextFileAlias() : path.basename(originalPath);
+		// Files that aren't explicitly .js need to have their extension changed, otherwise RetireJS can't see them.
+		// We'll also alias them to make sure they can't conflict with actual .js files in the same directory.
+		const aliasFile: string = path.extname(originalPath) !== '.js' ? this.getNextFileAlias() : path.basename(originalPath);
 
 		const fullAlias = path.join(aliasDir, aliasFile);
 
@@ -379,8 +397,8 @@ export class RetireJsEngine implements RuleEngine {
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
 		// ZIPs require an additional layer of aliasing, since two ZIPs in the same directory could have similar contents.
-		// We'll derive this layer of aliasing based on the name of the ZIP.
-		const zipLayer = `${path.basename(originalPath, path.extname(originalPath))}-extracted`;
+		// We'll derive this alias using a sequential generator to avoid collisions.
+		const zipLayer = this.getNextZipAlias();
 		this.zipDstByZipSrc.set(originalPath, path.join(aliasDir, zipLayer));
 	}
 
@@ -417,42 +435,40 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(dupPromises);
 	}
 
-	protected async extractZips(): Promise<void[]> {
-		const zipExtractionPromises: Promise<void>[] = [];
-		for (const [zipSrc, zipDst] of this.zipDstByZipSrc.entries()) {
-			zipExtractionPromises.push(new Promise((res, rej) => {
-				const zip = new StreamZip({
-					file: zipSrc,
-					storeEntries: true
-				});
+	protected async extractZip(zipSrc: string, zipDst: string): Promise<void> {
+		// Open the ZIP.
+		const zip = new StreamZip.async({
+			file: zipSrc,
+			storeEntries: true
+		});
 
-				zip.on('error', rej);
+		// Not sure why, but this method demands an argument that doesn't seem to be used anywhere. Passing in null.
+		const entries = await zip.entries(null);
+		// Iterate over every entry in the ZIP.
+		for (const {name, isDirectory} of Object.values(entries)) {
+			// Skip directories and non-text files.
+			if (isDirectory || this.srh.identifyBufferType(await zip.entryData(name)) !== StaticResourceType.TEXT) {
+				continue;
+			}
 
-				zip.on('ready', () => {
-					// Before we do the extraction, we want to give each zipped JS file an alias corresponding to its
-					// location within the ZIP. That way, each file will produce unique violations, instead of all files
-					// within the ZIP producing identical violations.
-					for (const {name} of Object.values(zip.entries())) {
-						if (path.extname(name).toLowerCase() === '.js') {
-							const aliasPath = path.join(zipDst, name);
-							// The "original path" will be the ZIP's original path, suffixed with the file's relative path
-							// within the ZIP.
-							const originalPath = `${zipSrc}:${name}`;
-							this.originalFilesByAlias.set(aliasPath, originalPath);
-						}
-					}
-					// Passing null as the first parameter to this method causes it to extract the entire ZIP.
-					zip.extract(null, zipDst, (err) => {
-						if (err) {
-							rej(err);
-						} else {
-							res();
-						}
-					});
-				});
-			}));
+			// Each zipped text file needs to be mapped to an alias corresponding to its location within the ZIP.
+			// that way, violations can be tied to individual files within the ZIP instead of the ZIP as a whole.
+			const originalPath = `${zipSrc}:${name}`;
+
+			// Additionally, files that aren't explicitly .js files need to be converted into such files during extraction,
+			// so they're visible to RetireJS.
+			const aliasPath = path.join(zipDst, path.dirname(name), path.extname(name) !== '.js' ? this.getNextFileAlias() : path.basename(name));
+			this.originalFilesByAlias.set(aliasPath, originalPath);
+
+			await zip.extract(name, aliasPath);
 		}
+		return await zip.close();
+	}
 
-		return Promise.all(zipExtractionPromises);
+	protected async extractZips(): Promise<void[]> {
+		return Promise.all(
+			[...this.zipDstByZipSrc.entries()]
+				.map(([zipSrc, zipDst]) => {return this.extractZip(zipSrc, zipDst)})
+		);
 	}
 }

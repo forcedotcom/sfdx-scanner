@@ -134,3 +134,14 @@ export type ESMessage = {
 		text: string;
 	};
 }
+
+export type TargetPattern = BasicTargetPattern|AdvancedTargetPattern;
+
+export type AdvancedTargetPattern = {
+	basePatterns: BasicTargetPattern[];
+	advancedMatcher: TargetMatchingFunction;
+}
+
+export type TargetMatchingFunction = (t: string) => Promise<boolean>;
+
+export type BasicTargetPattern = string;

@@ -1,18 +1,17 @@
 import 'reflect-metadata';
-import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {RuleResult, RuleTarget} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
 import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import globby = require('globby');
-import normalize = require('normalize-path');
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 
 
 TestOverrides.initializeTestSetup();
 
 class TestableRetireJsEngine extends RetireJsEngine {
+	private invertedAliasMap = null;
+
 	public processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		return super.processOutput(cmdOutput, ruleName);
 	}
@@ -25,8 +24,24 @@ class TestableRetireJsEngine extends RetireJsEngine {
 		this.originalFilesByAlias.set(alias, original);
 	}
 
-	public dealiasFile(alias: string): string {
-		return this.originalFilesByAlias.get(alias);
+	public getAliasMap(): Map<string,string> {
+		return this.originalFilesByAlias;
+	}
+
+	public getInvertedAliasMap(): Map<string,string> {
+		if (this.invertedAliasMap === null) {
+			const invertedMap: Map<string,string> = new Map();
+
+			for (const [key, value] of this.originalFilesByAlias.entries()) {
+				invertedMap.set(value, key);
+			}
+			this.invertedAliasMap = invertedMap;
+		}
+		return this.invertedAliasMap;
+	}
+
+	public getZipMap(): Map<string,string> {
+		return this.zipDstByZipSrc;
 	}
 }
 
@@ -40,157 +55,186 @@ describe('RetireJsEngine', () => {
 	});
 
 	describe('createTmpDirWithDuplicatedTargets()', () => {
-		it('Duplicates only specifically targeted .js files', async () => {
-			// We'll want some paths that simulate matching a glob.
+
+		describe('Text files', () => {
+			// ============= TEST SETUP ==============
+			// Create a target that simulates a glob matching two JS files.
 			const globPaths = [
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-a', 'jquery-3.1.0.js'),
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-b', 'jquery-3.5.1.js')
 			];
-			// We'll want some paths that simulate matching a whole directory.
-			const dirPaths = [
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Burrito.js'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'ChineseRestaurantMenu.html'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'RandomMeme.png'),
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Taco.js')
-			];
-			// We'll want some paths that simulate matching a single file.
-			const filePaths = [
-				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-d', 'OrangeChicken.js')
-			];
-
-			// Use these paths to simulate some RuleTargets.
-			const targets: RuleTarget[] = [{
-				// Simulate a target that matched a glob.
+			const globTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', '**', 'jquery*.js'),
 				paths: globPaths
-			}, {
-				// Simulate a target that matched a directory.
+			};
+
+			// Create a target that simulates matching an entire directory containing some JS files.
+			const dirPaths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Burrito.js'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c', 'Taco.js')
+			];
+			const dirTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c'),
 				isDirectory: true,
 				paths: dirPaths
-			}, {
-				// Simulate a target that matched a single file directly.
+			};
+
+			// Create a target that simulates matching a single JS file directly.
+			const filePaths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-d', 'OrangeChicken.js')
+			];
+			const fileTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-d', 'OrangeChicken.js'),
 				paths: filePaths
-			}];
+			};
 
-			// THIS IS THE ACTUAL METHOD BEING TESTED: Construct our temporary directory.
-			const tmpDir: string = await testEngine.createTmpDirWithDuplicatedTargets(targets);
-
-			// We expect the directory to still exist, since the process hasn't actually exited yet.
-			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
-			// We expect the various files to exist somewhere in the temp directory.
-			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*')));
-			expect(dupedFiles.length).to.equal(5, 'Wrong number of files copied.');
-			// Make sure the files themselves have the names we expect.
-			const dupedFileBaseNames = dupedFiles.map(f => path.basename(f));
-			const expectedFileNames = [...globPaths, ...dirPaths, ...filePaths].map(f => path.basename(f));
-			for (const e of expectedFileNames) {
-				if (e.endsWith('.js')) {
-					expect(dupedFileBaseNames).to.include(e, 'Unexpectedly failed to duplicate file');
-				} else {
-					expect(dupedFileBaseNames).to.not.include(e, 'Unexpectedly duplicated non-JS file');
-				}
-			}
-		});
-
-		it('Targeted text-based static resources are duplicated and renamed', async () => {
-			// We'll want some paths that simulate matching an entire directory. Importantly, the resources are a mixture
-			// of JS and non-JS.
+			// Create a target that simulates matching a directory full of .resource files.
 			const resourcePaths = [
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource1.resource'),
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'JsStaticResource2.resource'),
+				// Even though this resource is an HTML file instead of a JS file, we still expect it to be duplicated
+				// because it's still a text file.
 				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e', 'HtmlStaticResource1.resource'),
 			];
-
-			const targets: RuleTarget[] = [{
-				target: path.dirname(resourcePaths[0]),
+			const resourceTarget: RuleTarget = {
+				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e'),
 				isDirectory: true,
 				paths: resourcePaths
-			}];
+			};
 
-			// THIS IS THE ACTUAL METHOD BEING TESTED: Construct our temporary directory.
-			const tmpDir: string = await testEngine.createTmpDirWithDuplicatedTargets(targets);
+			// Create a target that simulates matching a directory containing a bunch of files with weird/absent extensions,
+			// but corresponding .resource-meta.xml files denoting them as static resources.
+			const implicitResourcePaths = [
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-g', 'JsResWithOddExt.foo'),
+				path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-g', 'JsResWithoutExt')
+			];
+			const implicitResourceTarget: RuleTarget = {
+				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-g'),
+				isDirectory: true,
+				paths: implicitResourcePaths
+			};
 
-			// We expect the directory to still exist, since the process hasn't actually exited yet.
-			expect(await new FileHandler().exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
-			// We expect various files to exist somewhere in the temp directory.
-			const dupedFiles: string[] = await globby(normalize(path.join(tmpDir, '**', '*')));
-			expect(dupedFiles.length).to.equal(3, 'Wrong number of files copied');
-			// Expect each of the copied files to have a `.js` extension.
-			for (const d of dupedFiles) {
-				expect(path.extname(d)).to.equal('.js', 'Copied static resource should have .js file extension');
-			}
+			// Put all of our targets into an array.
+			const targets: RuleTarget[] = [globTarget, dirTarget, fileTarget, resourceTarget, implicitResourceTarget];
+
+
+			it('Files with a .js extension are duplicated', async () => {
+				// ================= INVOCATION OF TEST METHOD ============
+				await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+				// ================ ASSERTIONS ================
+				// Create an array of the files we're looking for, and a set of all the files that were aliased.
+				const expectedDupedFiles: string[] = [...globPaths, ...dirPaths, ...filePaths];
+				const actualDupedFiles: Set<string> = new Set([...testEngine.getAliasMap().values()]);
+
+				expectedDupedFiles.forEach((expectedFile) => {
+					expect(actualDupedFiles.has(expectedFile)).to.equal(true, `JS file ${expectedFile} was not duplicated`);
+					expect(testEngine.getInvertedAliasMap().get(expectedFile).endsWith('.js')).to.equal(true, 'Alias should end in .js');
+				});
+			});
+
+			it('Files with a .resource extension are duplicated and given a .js alias', async () => {
+				// ================= INVOCATION OF TEST METHOD ============
+				await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+				// ================ ASSERTIONS ================
+				// Create an array of the files we're looking for, and a set of all the files that were aliased.
+				const expectedDupedFiles: string[] = resourcePaths;
+				const actualDupedFiles: Set<string> = new Set([...testEngine.getAliasMap().values()]);
+
+				expectedDupedFiles.forEach((expectedFile) => {
+					expect(actualDupedFiles.has(expectedFile)).to.equal(true, `Explicit resource file ${expectedFile} was not duplicated`);
+					expect(testEngine.getInvertedAliasMap().get(expectedFile).endsWith('.js')).to.equal(true, 'Alias should end in .js');
+				});
+			});
+
+			it('Files accompanied by a .resource-meta.xml file are duplicated and given a .js alias', async () => {
+				// ================= INVOCATION OF TEST METHOD ============
+				await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+				// ================ ASSERTIONS ================
+				// Create an array of the files we're looking for, and a set of all the files that were aliased.
+				const expectedDupedFiles: string[] = implicitResourcePaths;
+				const actualDupedFiles: Set<string> = new Set([...testEngine.getAliasMap().values()]);
+
+				expectedDupedFiles.forEach((expectedFile) => {
+					expect(actualDupedFiles.has(expectedFile)).to.equal(true, `Implicit resource file ${expectedFile} was not duplicated`);
+					expect(testEngine.getInvertedAliasMap().get(expectedFile).endsWith('.js')).to.equal(true, 'Alias should end in .js');
+				});
+			});
 		});
 
-		it('ZIPs and ZIP-type static resources are unpacked, other binaries are ignored', async () => {
-			const targetDir: string = path.resolve('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f');
-
-			const angularPath: string = path.resolve(targetDir, 'AngularJS.zip');
-			const leafletPath: string = path.resolve(targetDir, 'leaflet.resource');
-			const randomMemePath: string = path.resolve(targetDir, 'RandomMeme.resource');
-			const zipPaths = [angularPath, leafletPath, randomMemePath];
-
-			const targets: RuleTarget[] = [{
-				target: targetDir,
-				isDirectory: true,
+		describe('Binary files', () => {
+			// ===================== TEST SETUP =========
+			// Create a target that simulates a glob matching a bunch of different ZIPs.
+			const zipPaths = [
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFile.zip'),
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileAsResource.resource'),
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileWithNoExt'),
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileWithOddExt.foo')
+			];
+			const zipTarget: RuleTarget = {
+				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFile*'),
 				paths: zipPaths
-			}];
+			};
 
-			// THIS IS THE ACTUAL METHOD BEING TESTED: Construct our temporary directory.
-			const tmpDir: string = await testEngine.createTmpDirWithDuplicatedTargets(targets);
+			// Create a target that simulates a glob matching a bunch of image files.
+			const imgPaths = [
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ImageFileAsResource.resource'),
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ImageFileWithNoExt'),
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ImageFileWithOddExt.foo')
+			];
+			const imgTarget: RuleTarget = {
+				target: path.join('test', 'code-fixtures', 'project', 'dep-test-app', 'folder-f', 'ImageFile*'),
+				paths: imgPaths
+			};
 
-			// We expect the temp directory to still exist, since the process hasn't actually exited yet.
-			const fh = new FileHandler();
-			expect(await fh.exists(tmpDir)).to.equal(true, `Temp directory ${tmpDir} should still exist.`);
-			// Verify that files were actually extracted from AngularJS.zip, and that every JS file has the expected alias.
-			const extractedAngular = await globby(normalize(path.join(tmpDir, '**', 'AngularJS-extracted', '**', '*')));
-			expect(extractedAngular.length).to.be.greaterThan(0, 'Should be some copied Angular files');
+			const targets: RuleTarget[] = [zipTarget, imgTarget];
 
-			let fileCounter = 0;
-			for (const subpath of extractedAngular) {
-				if (path.extname(subpath).toLowerCase() === '.js') {
-					fileCounter += 1;
-					// The paths returned by globby are normalized, but the aliases are denormalized.
-					const denormedPath = subpath.replace(/\//g, path.sep);
 
-					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
-					// Create that normalized path segment so we can use it to generate the expected output.
-					const relativeRoot = `AngularJS-extracted`;
-					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
-					const expectedTruePath = `${angularPath}:${subpath.slice(relativeRootStartPoint)}`;
-					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
+			it('ZIPs are extracted, and text files within are aliased', async () => {
+				// ================= INVOCATION OF TEST METHOD ============
+				await testEngine.createTmpDirWithDuplicatedTargets(targets);
+
+				// ================ ASSERTIONS ================
+				const expectedZipContents = [
+					'HtmlFile.html',
+					'HtmlFileWithOddExt.foo',
+					'HtmlFileWithoutExt',
+					'JsFile.js',
+					'JsFileWithOddExt.foo',
+					'JsFileWithoutExt'
+				];
+				const actualDupedFiles = new Set([...testEngine.getAliasMap().values()]);
+
+				// For each of the ZIPs...
+				for (const zipPath of zipPaths) {
+					// Verify that the ZIP was extracted.
+					expect(testEngine.getZipMap().has(zipPath)).to.equal(true, `Zip file ${zipPath} should have been extracted`);
+
+					// Verify that all of the expected files in the zip were aliased.
+					for (const expectedFile of expectedZipContents) {
+						const fullPath = `${zipPath}:${expectedFile}`;
+						expect(actualDupedFiles.has(fullPath)).to.equal(true, `Zip contents ${fullPath} should be aliased`);
+					}
 				}
-			}
-			expect(fileCounter).to.be.at.least(1, 'At least one JS file should be pulled from AngularJS');
+			});
 
-			// Same verification as above.
-			fileCounter = 0;
-			const extractedLeaflet = await globby(normalize(path.join(tmpDir, '**', 'leaflet-extracted', '**', '*')));
-			expect(extractedLeaflet.length).to.be.greaterThan(0, 'Should be some copied Leaflet files');
-			for (const subpath of extractedLeaflet) {
-				if (path.extname(subpath).toLowerCase() === '.js') {
-					fileCounter += 1;
-					// The paths returned by globby are normalized, but the aliases are denormalized.
-					const denormedPath = subpath.replace(/\//g, path.sep);
+			it('Non-ZIP binary files are ignored', async () => {
+				// ================= INVOCATION OF TEST METHOD ============
+				await testEngine.createTmpDirWithDuplicatedTargets(targets);
 
-					// The path to the ZIP is denormalized, but the supplemental relative path after that is normalized.
-					// Create that normalized path segment so we can use it to generate the expected output.
-					const relativeRoot = `leaflet-extracted`;
-					const relativeRootStartPoint = subpath.lastIndexOf(relativeRoot) + relativeRoot.length + 1;
-					const expectedTruePath = `${leafletPath}:${subpath.slice(relativeRootStartPoint)}`;
-					expect(testEngine.dealiasFile(denormedPath)).to.equal(expectedTruePath);
+				// ================ ASSERTIONS ================
+				// Verify that none of the images were treated as zips.
+				for (const imgPath of imgPaths) {
+					expect(testEngine.getZipMap().has(imgPath)).to.equal(false, `Extraction should not be attempted on image file ${imgPath}`);
 				}
-			}
-			expect(fileCounter).to.be.at.least(1, 'At least one JS file is pulled from leaflet');
-			// Nothing should be extracted from RandomMeme, because it's a picture.
-			const extractedRandomMeme = await globby(normalize(path.join(tmpDir, '**', 'RandomMeme-extracted', '**', '*')));
-			expect(extractedRandomMeme.length).to.equal(0, 'Somehow extracted files from a PNG');
+			});
 		});
 	});
 
 	describe('processOutput()', () => {
-		it('Properly dealiases and processes results from non-zipped file', async () => {
+		it('Properly dealiases and processes results from files', async () => {
 			// First, we need to seed the test engine with some fake aliases.
 			const firstOriginal = path.join('first', 'unimportant', 'path', 'jquery-3.1.0.js');
 			const firstAlias = path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js');
@@ -266,13 +310,15 @@ describe('RetireJsEngine', () => {
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
 		});
 
-		it('Results from ZIP contents are properly consolidated', async () => {
+		// Changes to the codebase make it unclear how this corner case would occur, but it's worth having the automation
+		// so we avoid introducing any weird bugs in the future.
+		it('Corner Case: When file has multiple aliases, results are consolidated', async () => {
 			// First, we need to seed the engine with some fake data.
-			const originalZip = path.join('unimportant', 'path', 'to', 'SomeBundle.zip');
-			const firstAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-a', 'jquery-3.1.0.js');
-			const secondAlias = path.join('unimportant', 'alias', 'for', 'SomeBundle-extracted', 'subfolder-b', 'angular-scenario.js');
-			testEngine.addFakeAliasData(originalZip, firstAlias);
-			testEngine.addFakeAliasData(originalZip, secondAlias);
+			const originalFile = path.join('unimportant', 'path', 'to', 'SomeFile.js');
+			const firstAlias = path.join('unimportant', 'alias', 'for', 'Alias1.js');
+			const secondAlias = path.join('unimportant', 'alias', 'for', 'Alias2.js');
+			testEngine.addFakeAliasData(originalFile, firstAlias);
+			testEngine.addFakeAliasData(originalFile, secondAlias);
 
 			// Next, we want to spoof some output that looks like it came from RetireJS.
 			const fakeRetireOutput = {
@@ -330,8 +376,8 @@ describe('RetireJsEngine', () => {
 			const results: RuleResult[] = testEngine.processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
 
 			// Now we run our assertions.
-			expect(results.length).to.equal(1, 'Should be one result object, since both "files" are in the same "zip".');
-			expect(results[0].fileName).to.equal(originalZip, 'Path should properly de-alias back to the ZIP');
+			expect(results.length).to.equal(1, 'Should be one result object, since both aliases correspond to the same original file');
+			expect(results[0].fileName).to.equal(originalFile, 'Path should properly de-alias back to the ZIP');
 			expect(results[0].violations.length).to.equal(3, 'All violations should be consolidated properly');
 			expect(results[0].violations[0].severity).to.equal(2, 'Severity should be translated to 2');
 			expect(results[0].violations[1].severity).to.equal(1, 'Sev should be translated to 1');

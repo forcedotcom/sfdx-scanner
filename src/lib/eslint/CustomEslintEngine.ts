@@ -1,4 +1,4 @@
-import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport } from '../../types';
+import {Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport, TargetPattern} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
@@ -34,7 +34,7 @@ export class CustomEslintEngine implements RuleEngine {
 		this.eventCreator = await EventCreator.create({});
 	}
 
-	async getTargetPatterns(): Promise<string[]> {
+	async getTargetPatterns(): Promise<TargetPattern[]> {
 		return Promise.resolve(["**"]); // TODO: We need a different way to set target pattern. Somehow eslintrc's ignore pattern doesn't work as expected
 	}
 
