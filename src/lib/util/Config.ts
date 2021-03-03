@@ -4,8 +4,10 @@ import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
+import {VersionUpgradeManager, VersionUpgradeError} from './VersionUpgradeManager';
 
 export type ConfigContent = {
+	currentVersion?: string;
 	javaHome?: string;
 	engines?: EngineConfigContent[];
 	targetPatterns?: string[];
@@ -96,6 +98,7 @@ export class Config {
 
 	configContent!: ConfigContent;
 	fileHandler!: FileHandler;
+	versionUpgradeManager!: VersionUpgradeManager;
 	private typeChecker: TypeChecker;
 	private sfdxScannerPath: string;
 	private configFilePath: string;
@@ -110,12 +113,39 @@ export class Config {
 
 		this.typeChecker = new TypeChecker();
 		this.fileHandler = new FileHandler();
+		this.versionUpgradeManager = new VersionUpgradeManager();
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 		this.configFilePath = path.join(this.sfdxScannerPath, CONFIG_FILE);
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
 
 		this.initialized = true;
+		// Upgrades MUST happen AFTER the config is marked as initialized, to prevent any unexpected recursion.
+		await this.upgradeConfig();
+	}
+
+	private async upgradeConfig(): Promise<void> {
+		if (this.versionUpgradeManager.upgradeRequired(this.configContent.currentVersion)) {
+			let error: Error = null;
+			try {
+				this.configContent.currentVersion = await this.versionUpgradeManager.upgradeToLatest(this.configContent.currentVersion);
+			} catch (e) {
+				// We'll want to rethrow this error later, but we're not ready yet.
+				error = e;
+				if (e instanceof VersionUpgradeError) {
+					// It's possible that some upgrades were successfully applied before the one that failed, and we don't
+					// want to reapply those. So we'll upgrade the current version to the last successful version.
+					this.configContent.currentVersion = e.getLastSuccessfulVersion();
+				}
+			}
+			// Persist any changes that were made.
+			await this.writeConfig();
+
+			// If an error was thrown during the upgrade, rethrow it. Otherwise, we're done.
+			if (error) {
+				throw error;
+			}
+		}
 	}
 
 	public async setJavaHome(value: string): Promise<void> {
