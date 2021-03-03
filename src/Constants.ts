@@ -1,7 +1,7 @@
 import os = require('os');
 import path = require('path');
 
-export const PMD_VERSION = '6.31.0';
+export const PMD_VERSION = '6.32.0';
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';

@@ -342,7 +342,7 @@ describe('RuleResultRecombinator', () => {
 
 				rule = driver['rules'][1];
 				expect(rule.id).to.equal('ApexDoc');
-				expect(rule.shortDescription.text).to.satisfy(r => r.startsWith('This rule validates that:\n\n* ApexDoc comments'));
+				expect(rule.shortDescription.text).to.satisfy(r => r.indexOf('ApexDoc comments are present for classes') >= 0);
 				expect(rule.properties.category).to.equal('Documentation');
 				expect(rule.properties.severity).to.equal(3);
 				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#apexdoc');
