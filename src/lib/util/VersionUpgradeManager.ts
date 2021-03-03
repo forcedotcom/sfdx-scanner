@@ -17,7 +17,20 @@ type VersionUpgradeScript = () => Promise<void>;
 const upgradeScriptsByVersion: Map<string, VersionUpgradeScript> = new Map();
 
 
-// ================ CLASS =====================
+// ================ CLASSES =====================
+export class VersionUpgradeError extends Error {
+	private readonly version: string;
+
+	constructor(msg: string, version: string) {
+		super(msg);
+		this.version = version;
+	}
+
+	public getLastSuccessfulVersion(): string {
+		return this.version;
+	}
+}
+
 export class VersionUpgradeManager {
 	private readonly currentVersion: string;
 	private upgradeScriptsByVersion: Map<string,VersionUpgradeScript>;
@@ -68,18 +81,5 @@ export class VersionUpgradeManager {
 	public async upgradeToLatest(fromVersion: string): Promise<string> {
 		await this.upgrade(fromVersion, this.currentVersion);
 		return this.currentVersion;
-	}
-}
-
-export class VersionUpgradeError extends Error {
-	private readonly version: string;
-
-	constructor(msg: string, version: string) {
-		super(msg);
-		this.version = version;
-	}
-
-	public getLastSuccessfulVersion(): string {
-		return this.version;
 	}
 }
