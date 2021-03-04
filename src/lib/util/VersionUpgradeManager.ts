@@ -1,8 +1,11 @@
 // ================ IMPORTS ===================
 import semver = require('semver');
+import {ConfigContent, EngineConfigContent} from './Config';
+import {ENGINE} from '../../Constants';
+import {RetireJsEngine} from '../retire-js/RetireJsEngine';
 
 // ================ TYPES =====================
-type VersionUpgradeScript = () => Promise<void>;
+type VersionUpgradeScript = (config?: ConfigContent) => Promise<void>;
 
 
 // ================ CONSTANTS =================
@@ -15,21 +18,20 @@ type VersionUpgradeScript = () => Promise<void>;
 // - You can assume that every previous upgrade script was successfully executed.
 // - Make sure that if your script fails, it fails cleanly. Roll back changes, and provide a clear error message.
 const upgradeScriptsByVersion: Map<string, VersionUpgradeScript> = new Map();
+upgradeScriptsByVersion.set('v2.7.0', async (config: ConfigContent): Promise<void> => {
+	// v2.7.0 adds advanced target patterns and generally enhances the RetireJS integration, and some of the patterns
+	// that used to be in the config are now hardcoded into the engine. The config's targetPatterns array should be
+	// scoured of any such patterns. Other patterns should be permitted to stay, since they might be meaningful.
+	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS);
+	if (retireJsConfig) {
+		const hardcodedPatterns: Set<string> = new Set(RetireJsEngine.getSimpleTargetPatterns());
+		retireJsConfig.targetPatterns = retireJsConfig.targetPatterns.filter(s => !hardcodedPatterns.has(s));
+	}
+});
 
 
 // ================ CLASSES =====================
-export class VersionUpgradeError extends Error {
-	private readonly version: string;
-
-	constructor(msg: string, version: string) {
-		super(msg);
-		this.version = version;
-	}
-
-	public getLastSuccessfulVersion(): string {
-		return this.version;
-	}
-}
+export class VersionUpgradeError extends Error {}
 
 export class VersionUpgradeManager {
 	private readonly currentVersion: string;
@@ -55,31 +57,29 @@ export class VersionUpgradeManager {
 		});
 	}
 
-	private async upgrade(fromVersion: string, toVersion: string): Promise<void> {
+	private async upgrade(config: ConfigContent, fromVersion: string, toVersion: string): Promise<void> {
 		// We want to sequentially apply all of the upgrade scripts between the fromVersion and the toVersion, so we'll
 		// need to get all of those versions.
 		const versions: string[] = this.getVersionsBetween(fromVersion, toVersion);
 
-		// We want to keep track of the latest version whose upgrade script ran successfully, for error-handling purposes.
-		let lastSuccessfulVersion = null;
-
 		// Handle each upgrade script in sequence.
 		for (const version of versions) {
-			if (this.upgradeScriptsByVersion.has(version)) {
-				try {
-					await this.upgradeScriptsByVersion.get(version)();
-				} catch (e) {
-					// If the upgrade script fails, prefix the error so it's clear where it came from.
-					throw new VersionUpgradeError(`Upgrade script for ${version} failed: ${e.message ||e }`, lastSuccessfulVersion);
-				}
+			try {
+				await this.upgradeScriptsByVersion.get(version)(config);
+			} catch (e) {
+				// If the upgrade script fails, prefix the error so it's clear where it came from, then rethrow it.
+				throw new VersionUpgradeError(`Upgrade script for ${version} failed: ${e.message || e}`);
 			}
-			// If we're here, we're considered to have successfully upgraded to this version.
-			lastSuccessfulVersion = version;
+			// If we're here, we're considered to have successfully upgraded to this version. So we'll update the config
+			// to reflect that.
+			config.currentVersion = version;
 		}
+		// If we successfully run all of the upgrade scripts, we can upgrade directly to the toVersion and be done.
+		config.currentVersion = toVersion;
 	}
 
-	public async upgradeToLatest(fromVersion: string): Promise<string> {
-		await this.upgrade(fromVersion, this.currentVersion);
+	public async upgradeToLatest(config: ConfigContent, fromVersion: string): Promise<string> {
+		await this.upgrade(config, fromVersion, this.currentVersion);
 		return this.currentVersion;
 	}
 }

@@ -58,7 +58,8 @@ describe('Config.js tests', () => {
 				]
 			}
 		],
-		"javaHome": "/my/test/java/home"
+		"javaHome": "/my/test/java/home",
+		"currentVersion": require('../../../package.json').version
 	};
 
 	describe('Verifying config behavior', () => {

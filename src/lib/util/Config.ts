@@ -4,7 +4,7 @@ import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
-import {VersionUpgradeManager, VersionUpgradeError} from './VersionUpgradeManager';
+import {VersionUpgradeManager} from './VersionUpgradeManager';
 
 export type ConfigContent = {
 	currentVersion?: string;
@@ -59,12 +59,7 @@ const DEFAULT_CONFIG: ConfigContent = {
         },
 		{
 			name: ENGINE.RETIRE_JS,
-			targetPatterns: [
-				'**/*.js',
-				'**/*.resource',
-				'!**/node_modules/**',
-				'!**/bower_components/**'
-			],
+			targetPatterns: [],
 			disabled: true
 		}
 	]
@@ -74,15 +69,20 @@ class TypeChecker {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	stringArrayCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
-		if (Array.isArray(value) && value.length > 0) {
-			value.forEach((item) => {
-				if (typeof item != 'string') {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'OnlyStringAllowedInStringArray', [propertyName, engine.valueOf(), String(value)]);
-				}
-			});
-			return true;
+		if (Array.isArray(value)) {
+			if (value.length > 0) {
+				value.forEach((item) => {
+					if (typeof item != 'string') {
+						throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'OnlyStringAllowedInStringArray', [propertyName, engine.valueOf(), String(value)]);
+					}
+				});
+				return true;
+			} else {
+				return true;
+			}
+		} else {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
 		}
-		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
 	};
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -128,16 +128,12 @@ export class Config {
 		if (this.versionUpgradeManager.upgradeRequired(this.configContent.currentVersion)) {
 			let error: Error = null;
 			try {
-				this.configContent.currentVersion = await this.versionUpgradeManager.upgradeToLatest(this.configContent.currentVersion);
+				this.configContent.currentVersion = await this.versionUpgradeManager.upgradeToLatest(this.configContent, this.configContent.currentVersion);
 			} catch (e) {
-				// We'll want to rethrow this error later, but we're not ready yet.
+				// Keep the error so we can rethrow it.
 				error = e;
-				if (e instanceof VersionUpgradeError) {
-					// It's possible that some upgrades were successfully applied before the one that failed, and we don't
-					// want to reapply those. So we'll upgrade the current version to the last successful version.
-					this.configContent.currentVersion = e.getLastSuccessfulVersion();
-				}
 			}
+
 			// Persist any changes that were made.
 			await this.writeConfig();
 

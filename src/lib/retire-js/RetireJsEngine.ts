@@ -76,6 +76,14 @@ export class RetireJsEngine implements RuleEngine {
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 
+	private static SIMPLE_TARGET_PATTERNS: ReadonlyArray<string> = [
+		'**/*.js',
+		'**/*.resource',
+		'**/*.zip',
+		'!**/node_modules/**',
+		'!**/bower_components/**'
+	];
+
 	// When we're duplicating files, we want to make sure that each duplicate file's path is unique. We'll do that by
 	// generating aliases associated with portions of the original path. We need incrementing indexes to generate unique
 	// aliases, and we need maps to track relationships between aliases and originals.
@@ -97,6 +105,10 @@ export class RetireJsEngine implements RuleEngine {
 		return RetireJsEngine.ENGINE_NAME;
 	}
 
+	public static getSimpleTargetPatterns(): ReadonlyArray<string> {
+		return RetireJsEngine.SIMPLE_TARGET_PATTERNS;
+	}
+
 	public async getTargetPatterns(): Promise<TargetPattern[]> {
 		const advancedPatterns: AdvancedTargetPattern[] = [{
 			// This pattern should be applied to any file.
@@ -110,8 +122,8 @@ export class RetireJsEngine implements RuleEngine {
 				return this.fh.exists(metaFilePath);
 			}
 		}];
-		// We want all of the target patterns in the config, as well as .zip and our advanced pattern.
-		return [...await this.config.getTargetPatterns(ENGINE.RETIRE_JS), '**/*.zip', ...advancedPatterns];
+		// We want all of the target patterns in the config, as well as all of our default patterns.
+		return [...await this.config.getTargetPatterns(ENGINE.RETIRE_JS), ...RetireJsEngine.SIMPLE_TARGET_PATTERNS, ...advancedPatterns];
 	}
 
 	public getCatalog(): Promise<Catalog> {
