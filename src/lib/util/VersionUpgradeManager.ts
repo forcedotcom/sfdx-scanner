@@ -11,14 +11,12 @@ type VersionUpgradeScript = (config?: ConfigContent) => Promise<void>;
 // ================ CONSTANTS =================
 
 // RULES FOR WRITING UPGRADE SCRIPTS:
-// - You're allowed to use Controller.getConfig() if you need, but avoid calling Config.writeConfig(), since the config
-//   will call that method for you after all the scripts run.
-// - Ideally, your script should require no parameters. If parameters must be added, they should be sufficiently generic
-//   that providing them to other scripts isn't troublesome.
+// - Ideally, your script should require no parameters beyond the ConfigContent object. If more parameters must be added,
+//   they should be sufficiently generic that providing them to other scripts isn't troublesome.
 // - You can assume that every previous upgrade script was successfully executed.
 // - Make sure that if your script fails, it fails cleanly. Roll back changes, and provide a clear error message.
 const upgradeScriptsByVersion: Map<string, VersionUpgradeScript> = new Map();
-upgradeScriptsByVersion.set('v2.7.0', async (config: ConfigContent): Promise<void> => {
+upgradeScriptsByVersion.set('v2.7.0', (config: ConfigContent): Promise<void> => {
 	// v2.7.0 adds advanced target patterns and generally enhances the RetireJS integration, and some of the patterns
 	// that used to be in the config are now hardcoded into the engine. The config's targetPatterns array should be
 	// scoured of any such patterns. Other patterns should be permitted to stay, since they might be meaningful.
@@ -27,6 +25,7 @@ upgradeScriptsByVersion.set('v2.7.0', async (config: ConfigContent): Promise<voi
 		const hardcodedPatterns: Set<string> = new Set(RetireJsEngine.getSimpleTargetPatterns());
 		retireJsConfig.targetPatterns = retireJsConfig.targetPatterns.filter(s => !hardcodedPatterns.has(s));
 	}
+	return Promise.resolve();
 });
 
 
