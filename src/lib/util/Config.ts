@@ -4,7 +4,7 @@ import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
-import {VersionUpgradeManager} from './VersionUpgradeManager';
+import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
 export type ConfigContent = {
 	currentVersion?: string;
@@ -126,20 +126,42 @@ export class Config {
 
 	private async upgradeConfig(): Promise<void> {
 		if (this.versionUpgradeManager.upgradeRequired(this.configContent.currentVersion)) {
-			let error: Error = null;
+			// Start by creating a copy of the existing config, so we have it if we need it to create a backup file.
+			// Also determine where such a file would go.
+			const existingConfig: ConfigContent = JSON.parse(JSON.stringify(this.configContent));
+			const backupFileName = `${CONFIG_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
+
+			let upgradeError = null;
+			let persistConfig = true;
 			try {
-				this.configContent.currentVersion = await this.versionUpgradeManager.upgradeToLatest(this.configContent, this.configContent.currentVersion);
+				await this.versionUpgradeManager.upgradeToLatest(this.configContent, this.configContent.currentVersion);
 			} catch (e) {
-				// Keep the error so we can rethrow it.
-				error = e;
+				// If the error included a partially-upgraded config, we should switch our config to that, so the partial
+				// upgrade can be persisted.
+				if (e instanceof VersionUpgradeError) {
+					this.configContent = e.getLastSafeConfig();
+				} else {
+					// Otherwise, we should assume that the configuration is entirely unsafe, and prevent any data persistance.
+					persistConfig = false;
+				}
+				// Persist the original config as a backup file so the user doesn't lose it.
+				await this.fileHandler.writeFile(path.join(this.sfdxScannerPath, backupFileName), JSON.stringify(existingConfig, null, 4));
+				// Hang onto the error so we can rethrow it.
+				upgradeError = e;
 			}
 
-			// Persist any changes that were made.
-			await this.writeConfig();
+			// Persist any changes that were successfully made.
+			if (persistConfig) {
+				await this.writeConfig();
+			}
 
-			// If an error was thrown during the upgrade, rethrow it. Otherwise, we're done.
-			if (error) {
-				throw error;
+			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
+			if (upgradeError) {
+				throw SfdxError.create('@salesforce/sfdx-scanner',
+					'Config',
+					'UpgradeFailureTroubleshooting',
+					[upgradeError.message || upgradeError, backupFileName, this.configFilePath]
+				);
 			}
 		}
 	}

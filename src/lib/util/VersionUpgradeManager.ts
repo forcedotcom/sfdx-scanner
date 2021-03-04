@@ -1,14 +1,20 @@
 // ================ IMPORTS ===================
 import semver = require('semver');
+import {Messages} from '@salesforce/core';
 import {ConfigContent, EngineConfigContent} from './Config';
 import {ENGINE} from '../../Constants';
 import {RetireJsEngine} from '../retire-js/RetireJsEngine';
+
+// Initialize Messages with the current plugin directory
+Messages.importMessagesDirectory(__dirname);
 
 // ================ TYPES =====================
 type VersionUpgradeScript = (config?: ConfigContent) => Promise<void>;
 
 
 // ================ CONSTANTS =================
+
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'VersionUpgradeManager');
 
 // RULES FOR WRITING UPGRADE SCRIPTS:
 // - Ideally, your script should require no parameters beyond the ConfigContent object. If more parameters must be added,
@@ -30,7 +36,18 @@ upgradeScriptsByVersion.set('v2.7.0', (config: ConfigContent): Promise<void> => 
 
 
 // ================ CLASSES =====================
-export class VersionUpgradeError extends Error {}
+export class VersionUpgradeError extends Error {
+	private readonly lastSafeConfig: ConfigContent;
+
+	constructor(message: string, lastSafeConfig: ConfigContent) {
+		super(message);
+		this.lastSafeConfig = lastSafeConfig;
+	}
+
+	public getLastSafeConfig(): ConfigContent {
+		return this.lastSafeConfig;
+	}
+}
 
 export class VersionUpgradeManager {
 	private readonly currentVersion: string;
@@ -63,11 +80,14 @@ export class VersionUpgradeManager {
 
 		// Handle each upgrade script in sequence.
 		for (const version of versions) {
+			// Store the config as it currently exists.
+			const existingConfig: ConfigContent = JSON.parse(JSON.stringify(config));
 			try {
 				await this.upgradeScriptsByVersion.get(version)(config);
 			} catch (e) {
-				// If the upgrade script fails, prefix the error so it's clear where it came from, then rethrow it.
-				throw new VersionUpgradeError(`Upgrade script for ${version} failed: ${e.message || e}`);
+				// If the script failed, prefix the error so it's clear where it came from, then throw a new error with
+				// the prefixed message and the last safe configuration.
+				throw new VersionUpgradeError(messages.getMessage('upgradeFailed', [version, e.message || e]), existingConfig);
 			}
 			// If we're here, we're considered to have successfully upgraded to this version. So we'll update the config
 			// to reflect that.
@@ -77,8 +97,7 @@ export class VersionUpgradeManager {
 		config.currentVersion = toVersion;
 	}
 
-	public async upgradeToLatest(config: ConfigContent, fromVersion: string): Promise<string> {
+	public async upgradeToLatest(config: ConfigContent, fromVersion: string): Promise<void> {
 		await this.upgrade(config, fromVersion, this.currentVersion);
-		return this.currentVersion;
 	}
 }

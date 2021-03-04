@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {VersionUpgradeManager} from '../../../src/lib/util/VersionUpgradeManager';
+import {VersionUpgradeError, VersionUpgradeManager} from '../../../src/lib/util/VersionUpgradeManager';
 import {ConfigContent} from '../../../src/lib/util/Config';
 import {ENGINE} from '../../../src/Constants';
 import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine';
@@ -25,17 +25,45 @@ describe('VersionUpgradeManager', () => {
 		let upgradesCalled = [];
 
 		successfulManagerAsAny.upgradeScriptsByVersion = new Map([
-			[v2_6_0, async () => {upgradesCalled.push(v2_6_0)}],
-			[v2_7_0, async () => {upgradesCalled.push(v2_7_0)}],
-			[v2_7_8, async () => {upgradesCalled.push(v2_7_8)}],
-			[v19_9_9, async () => {upgradesCalled.push(v19_9_9)}],
-			[v22_0_0, async () => {upgradesCalled.push(v22_0_0)}]
+			[v2_6_0, async (c: ConfigContent) => {
+				c.javaHome = v2_6_0;
+				upgradesCalled.push(v2_6_0);
+			}],
+			[v2_7_0, async (c: ConfigContent) => {
+				c.javaHome = v2_7_0;
+				upgradesCalled.push(v2_7_0);
+			}],
+			[v2_7_8, async (c: ConfigContent) => {
+				c.javaHome = v2_7_8;
+				upgradesCalled.push(v2_7_8);
+			}],
+			[v19_9_9, async (c: ConfigContent) => {
+				c.javaHome = v19_9_9;
+				upgradesCalled.push(v19_9_9);
+			}],
+			[v22_0_0, async (c: ConfigContent) => {
+				c.javaHome = v22_0_0;
+				upgradesCalled.push(v22_0_0);
+			}]
 		]);
 		failingManagerAsAny.upgradeScriptsByVersion = new Map([
-			[v2_6_1, async () => {upgradesCalled.push(v2_6_1)}],
-			[v2_7_0, async () => {upgradesCalled.push(v2_7_0)}],
-			[v2_7_8, async () => {throw new Error('Hardcoded failure')}],
-			[v4_3_2, async () => {upgradesCalled.push(v4_3_2)}]
+			[v2_6_1, async (c: ConfigContent) => {
+				c.javaHome = v2_6_1;
+				upgradesCalled.push(v2_6_1);
+			}],
+			[v2_7_0, async (c: ConfigContent) => {
+				c.javaHome = v2_7_0;
+				upgradesCalled.push(v2_7_0);
+			}],
+			[v2_7_8, async (c: ConfigContent) => {
+				c.javaHome = v2_7_8;
+				upgradesCalled.push(v2_7_8);
+				throw new Error('Hardcoded failure');
+			}],
+			[v4_3_2, async (c: ConfigContent) => {
+				c.javaHome = v4_3_2;
+				upgradesCalled.push(v4_3_2);
+			}]
 		]);
 		successfulManagerAsAny.currentVersion = failingManagerAsAny.currentVersion = v22_0_0;
 
@@ -74,31 +102,40 @@ describe('VersionUpgradeManager', () => {
 				// Call the tested method.
 				await successfulManagerAsAny.upgrade(testConfig, v2_6_1, v4_3_2);
 
-				// Three versions are within the target range, but only two of them have an upgrade script attached.
+				// Two versions between the fromVersion and toVersion have upgrade scripts.
 				expect(upgradesCalled.length).to.equal(2, 'Wrong number of scripts called');
 				expect(upgradesCalled[0]).to.equal(v2_7_0, `Upgrades out of order`);
 				expect(upgradesCalled[1]).to.equal(v2_7_8, `Upgrades out of order`);
+				// The last script's value should have been persisted.
+				expect(testConfig.javaHome).to.equal(v2_7_8, 'Most recent changes should trump all others');
+				// Even though the toVersion has no upgrade script, it's what we upgraded to, so that's what the final
+				// currentVersion should be.
 				expect(testConfig.currentVersion).to.equal(v4_3_2, 'currentVersion should be up-to-date');
 			});
 
-			it('Upgrade scripts are atomic', async () => {
+			it('Fails safely and cleanly', async () => {
 				const testConfig: ConfigContent = {
 					currentVersion: null
 				};
 
 				// Reset the upgrade tracker.
 				upgradesCalled = [];
+
 				try {
 					await failingManagerAsAny.upgrade(testConfig, v2_6_0, v19_9_9);
-					expect(true).to.equal(false, 'Error should be thrown before this line is reached');
+					// It shouldn't be possible to reach this point.
+					expect(true).to.equal(false, 'Expected error was never thrown');
 				} catch (e) {
-					// Three versions fall within the target range, but since the third script fails, only the first two
-					// should be executed.
-					expect(upgradesCalled.length).to.equal(2, `Wrong number of scripts called`);
+					// Four versions within the target range have upgrade scripts, but the third fails, so the fourth
+					// should never run.
+					expect(upgradesCalled.length).to.equal(3, 'Wrong number of upgrade scripts called');
 					expect(upgradesCalled[0]).to.equal(v2_6_1, `Upgrades out of order`);
 					expect(upgradesCalled[1]).to.equal(v2_7_0, `Upgrades out of order`);
+					expect(upgradesCalled[2]).to.equal(v2_7_8, `Upgrades out of order`);
+
+					// The error should mention the version on which we failed, and include the safe config immediately before.
 					expect(e.message).to.include(v2_7_8, `Failed on wrong version`);
-					expect(testConfig.currentVersion).to.equal(v2_7_0, `Rolled back to wrong version`);
+					expect((e as VersionUpgradeError).getLastSafeConfig().javaHome).to.equal(v2_7_0, 'Failed changes should be rolled back');
 				}
 			});
 		});
