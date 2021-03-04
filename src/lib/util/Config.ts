@@ -3,7 +3,7 @@ import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
-import {deepCopy} from '../../lib/util/Utils';
+import {deepCopy} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
 export type ConfigContent = {
@@ -21,6 +21,7 @@ export type EngineConfigContent = {
 }
 
 const DEFAULT_CONFIG: ConfigContent = {
+	currentVersion: require('../../../package.json').version,
 	engines: [
 		{
 			name: ENGINE.PMD,
