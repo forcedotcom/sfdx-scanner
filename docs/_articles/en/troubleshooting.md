@@ -120,11 +120,10 @@ The annotated JSON below shows you what you should remove
         },
 ... Rest of file removed for clarity ...
 ```
-<!-- When we actually remove support for those languages (or if we decide not to), we'll need to remove this entry and
-update the `pmd-engine.md` file -->
-### Commands display `Future releases will not include PMD support for \[Language X\].'
 
-There are plans to remove the PMD support for all languages except the following:
+## Supported languages for PMD.
+
+We have removed the PMD support for all languages except the following:
 - Apex
 - Java
 - Visualforce
