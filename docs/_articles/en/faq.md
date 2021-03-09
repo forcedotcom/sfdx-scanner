@@ -21,24 +21,10 @@ A: No! `Salesforce CLI Scanner` can be used on any codebase.
 ## Questions about language support
 
 #### Q: What languages does `Salesforce CLI Scanner` support?
-A: By default, `Salesforce CLI Scanner` supports code written in Apex, VisualForce, Java, JavaScript, XML, PL/SQL and TypeScript.
+A: By default, `Salesforce CLI Scanner` supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript.
 
 #### Q: How do get support to additional languages?
 Please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner). We'll try to help you out. 
-
-#### Q: How do I add a supported language to `Salesforce CLI Scanner`?
-A: By default, supported languages are added. If you still need, follow the steps below.
-
-The file types targeted by each rule engine are defined in `~/.sfdx-scanner/Config.json` in the `targetPatterns` property for each entry.
-
-To make a particular rule engine scan a new language (from the set of [supported languages](./en/troubleshooting/#supported-languages-for-pmd)), add that language's file extension to the `targetPatterns` property for that rule engine in `~/.sfdx-scanner/Config.json`. For example, to start scanning Python files with PMD, add `**/*.py` to the `targetPatterns` property for PMD.
-
-Updating the `~/.sfdx-scanner/Config.json` file doesn't add any rules against that language. If you want to run rules against the new language, write them yourself and add them with the `scanner:rule:add` command.
-
-#### Q: How do I remove a supported language from `Salesforce CLI Scanner`?
-A: Remove the language's file extensions from all `targetPatterns` properties in `~/.sfdx-scanner/Config.json`. The `Salesforce CLI Scanner` plug-in then ignores files of that type.
-
-Removing this information from the `~/.sfdx-scanner/Config.json`file doesn't remove existing custom rules from the registry. To remove existing custom rules, run the `scanner:rule:remove` command.
 
 ## Questions about adding and removing rules
 

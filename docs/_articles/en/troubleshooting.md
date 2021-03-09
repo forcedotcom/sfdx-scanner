@@ -128,7 +128,7 @@ We have removed the PMD support for all languages except the following:
 - Java
 - Visualforce
 - XML
-- PL/SQL
+
 
 If this would present you hardship, please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
 Otherwise, remove any languages besides those listed above from the PMD engine's `supportedLanguages` array in your
