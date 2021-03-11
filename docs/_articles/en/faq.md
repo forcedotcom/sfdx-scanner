@@ -21,19 +21,10 @@ A: No! `Salesforce CLI Scanner` can be used on any codebase.
 ## Questions about language support
 
 #### Q: What languages does `Salesforce CLI Scanner` support?
-A: By default, `Salesforce CLI Scanner` supports code written in Apex, VisualForce, Java, JavaScript, and TypeScript. You can extend it to support any language.
+A: By default, `Salesforce CLI Scanner` supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript.
 
-#### Q: How do I add a language to `Salesforce CLI Scanner`?
-A: The file types targeted by each rule engine are defined in `~/.sfdx-scanner/Config.json` in the `targetPatterns` property for each entry.
-
-To make a particular rule engine scan a new language, add that language's file extension to the `targetPatterns` property for that rule engine in `~/.sfdx-scanner/Config.json`. For example, to start scanning Python files with PMD, add `**/*.py` to the `targetPatterns` property for PMD.
-
-Updating the `~/.sfdx-scanner/Config.json` file doesn't add any rules against that language. If you want to run rules against the new language, write them yourself and add them with the `scanner:rule:add` command.
-
-#### Q: How do I remove a language from `Salesforce CLI Scanner`?
-A: Remove the language's file extensions from all `targetPatterns` properties in `~/.sfdx-scanner/Config.json`. The `Salesforce CLI Scanner` plug-in then ignores files of that type.
-
-Removing this information from the `~/.sfdx-scanner/Config.json`file doesn't remove existing custom rules from the registry. To remove existing custom rules, run the `scanner:rule:remove` command.
+#### Q: How do get support to additional languages?
+Please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner). We'll try to help you out. 
 
 ## Questions about adding and removing rules
 
@@ -48,7 +39,7 @@ If the language is not already supported, you must additionally follow the steps
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the [`scanner:rule:add`](./en/scanner-commands/add/#example) command.
 
-If the language is not already supported, follow the steps in "How do I add a new language to `Salesforce CLI Scanner`?"
+If the language is not already supported, follow the steps in "How do I add a new supported language to `Salesforce CLI Scanner`?"
 
 ## Questions about dependencies and setup
 
