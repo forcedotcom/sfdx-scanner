@@ -217,10 +217,11 @@ describe('RetireJsEngine', () => {
 					'JsFileWithoutExt'
 				];
 
+				// Paths within a ZIP are normalized to UNIX.
 				const verticalZipContents = [
-					path.join('FilledParentFolder', 'ChildFolderWithText', 'JsFile.js'),
-					path.join('FilledParentFolder', 'ChildFolderWithText', 'JsFileWithOddExt.foo'),
-					path.join('FilledParentFolder', 'ChildFolderWithText', 'JsFileWithoutExt')
+					'FilledParentFolder/ChildFolderWithText/JsFile.js',
+					'FilledParentFolder/ChildFolderWithText/JsFileWithOddExt.foo',
+					'FilledParentFolder/ChildFolderWithText/JsFileWithoutExt
 				];
 
 				const actualDupedFiles = new Set([...testEngine.getAliasMap().values()]);
