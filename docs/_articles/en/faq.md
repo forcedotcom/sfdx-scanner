@@ -23,7 +23,7 @@ A: No! `Salesforce CLI Scanner` can be used on any codebase.
 #### Q: What languages does `Salesforce CLI Scanner` support?
 A: By default, `Salesforce CLI Scanner` supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript.
 
-#### Q: How do get support to additional languages?
+#### Q: How do I get support for additional languages?
 Please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner). We'll try to help you out. 
 
 ## Questions about adding and removing rules
@@ -33,8 +33,8 @@ A: That depends on the engine in question.
 - __PMD__: Add the language's name to the PMD's `supportedLanguages` array in
 `~/.sfdx-scanner/Config.json`.
 <br/>
-If the language is not already supported, you must additionally follow the steps outlined above in
-["How do I add a new language to `Salesforce CLI Scanner`?"](./en/faq/#q-how-do-i-add-a-new-language-to-sfdx-scanner).
+If the language is not already supported, please log an Issue as per
+["How do I get support for additional languages?"](./en/faq/#q-how-do-i-get-support-for-additional-languages).
 
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the [`scanner:rule:add`](./en/scanner-commands/add/#example) command.
