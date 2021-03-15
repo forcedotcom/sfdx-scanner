@@ -221,7 +221,7 @@ describe('RetireJsEngine', () => {
 				const verticalZipContents = [
 					'FilledParentFolder/ChildFolderWithText/JsFile.js',
 					'FilledParentFolder/ChildFolderWithText/JsFileWithOddExt.foo',
-					'FilledParentFolder/ChildFolderWithText/JsFileWithoutExt
+					'FilledParentFolder/ChildFolderWithText/JsFileWithoutExt'
 				];
 
 				const actualDupedFiles = new Set([...testEngine.getAliasMap().values()]);
