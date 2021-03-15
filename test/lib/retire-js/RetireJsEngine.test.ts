@@ -166,16 +166,27 @@ describe('RetireJsEngine', () => {
 
 		describe('Binary files', () => {
 			// ===================== TEST SETUP =========
-			// Create a target that simulates a glob matching a bunch of different ZIPs.
-			const zipPaths = [
+			// Create a target that simulates a glob matching a bunch of different ZIPs, all of which were generated
+			// from the same contents. Crucially, this ZIP has no directories within it; its structure is totally flat.
+			const flatZipPaths = [
 				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFile.zip'),
 				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileAsResource.resource'),
 				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileWithNoExt'),
 				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFileWithOddExt.foo')
 			];
-			const zipTarget: RuleTarget = {
+			const flatZipTarget: RuleTarget = {
 				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFile*'),
-				paths: zipPaths
+				paths: flatZipPaths
+			};
+
+			// Create a target that simulates directly matching a ZIP. Crucially, this ZIP has directories, some of which
+			// are empty, and others are not.
+			const verticalZipPaths = [
+				path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-h', 'ZipWithDirectories.zip')
+			];
+			const verticalZipTarget: RuleTarget = {
+				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-h', '*.zip'),
+				paths: verticalZipPaths
 			};
 
 			// Create a target that simulates a glob matching a bunch of image files.
@@ -189,7 +200,7 @@ describe('RetireJsEngine', () => {
 				paths: imgPaths
 			};
 
-			const targets: RuleTarget[] = [zipTarget, imgTarget];
+			const targets: RuleTarget[] = [flatZipTarget, verticalZipTarget, imgTarget];
 
 
 			it('ZIPs are extracted, and text files within are aliased', async () => {
@@ -197,7 +208,7 @@ describe('RetireJsEngine', () => {
 				await testEngine.createTmpDirWithDuplicatedTargets(targets);
 
 				// ================ ASSERTIONS ================
-				const expectedZipContents = [
+				const flatZipContents = [
 					'HtmlFile.html',
 					'HtmlFileWithOddExt.foo',
 					'HtmlFileWithoutExt',
@@ -205,19 +216,40 @@ describe('RetireJsEngine', () => {
 					'JsFileWithOddExt.foo',
 					'JsFileWithoutExt'
 				];
+
+				// Paths within a ZIP are normalized to UNIX.
+				const verticalZipContents = [
+					'FilledParentFolder/ChildFolderWithText/JsFile.js',
+					'FilledParentFolder/ChildFolderWithText/JsFileWithOddExt.foo',
+					'FilledParentFolder/ChildFolderWithText/JsFileWithoutExt'
+				];
+
 				const actualDupedFiles = new Set([...testEngine.getAliasMap().values()]);
 
-				// For each of the ZIPs...
-				for (const zipPath of zipPaths) {
+				// For each of the flat ZIPs...
+				for (const zipPath of flatZipPaths) {
 					// Verify that the ZIP was extracted.
 					expect(testEngine.getZipMap().has(zipPath)).to.equal(true, `Zip file ${zipPath} should have been extracted`);
 
 					// Verify that all of the expected files in the zip were aliased.
-					for (const expectedFile of expectedZipContents) {
+					for (const expectedFile of flatZipContents) {
 						const fullPath = `${zipPath}:${expectedFile}`;
 						expect(actualDupedFiles.has(fullPath)).to.equal(true, `Zip contents ${fullPath} should be aliased`);
 					}
 				}
+
+				// For the vertical ZIPs...
+				for (const zipPath of verticalZipPaths) {
+					// Verify that the ZIP was extracted.
+					expect(testEngine.getZipMap().has(zipPath)).to.equal(true, `Zip file ${zipPath} should have been extracted`);
+
+					// Verify that all of the expected files in the zip were aliased.
+					for (const expectedFile of verticalZipContents) {
+						const fullPath = `${zipPath}:${expectedFile}`;
+						expect(actualDupedFiles.has(fullPath)).to.equal(true, `Zip contents ${fullPath} should be aliased`);
+					}
+				}
+
 			});
 
 			it('Non-ZIP binary files are ignored', async () => {

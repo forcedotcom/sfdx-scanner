@@ -464,14 +464,20 @@ export class RetireJsEngine implements RuleEngine {
 			}
 
 			// Each zipped text file needs to be mapped to an alias corresponding to its location within the ZIP.
-			// that way, violations can be tied to individual files within the ZIP instead of the ZIP as a whole.
-			const originalPath = `${zipSrc}:${name}`;
+			// That way, each violation can be tied to an individual file within the ZIP instead of the ZIP as a whole.
+			const originalPath =`${zipSrc}:${name}`;
 
-			// Additionally, files that aren't explicitly .js files need to be converted into such files during extraction,
-			// so they're visible to RetireJS.
-			const aliasPath = path.join(zipDst, path.dirname(name), path.extname(name) !== '.js' ? this.getNextFileAlias() : path.basename(name));
+			// We derive the alias path using the path to the ZIP's alias folder, and any pathing information within the
+			// file itself. If there's no corresponding directory yet, we need to create it.
+			const aliasDir = path.join(zipDst, path.dirname(name));
+			await this.fh.mkdirIfNotExists(aliasDir);
+			// Furthermore, files that aren't already .js files need to be converted during extraction, so they're visible
+			// to RetireJS.
+			const aliasFile = path.extname(name) !== '.js' ? this.getNextFileAlias() : path.basename(name);
+
+			// Combine the two to get our full alias path.
+			const aliasPath = path.join(aliasDir, aliasFile);
 			this.originalFilesByAlias.set(aliasPath, originalPath);
-
 			await zip.extract(name, aliasPath);
 		}
 		return await zip.close();
