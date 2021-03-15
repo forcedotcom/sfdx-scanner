@@ -121,6 +121,8 @@ The annotated JSON below shows you what you should remove
 ... Rest of file removed for clarity ...
 ```
 
+---
+
 ## Supported languages for PMD.
 
 We have removed the PMD support for all languages except the following:
