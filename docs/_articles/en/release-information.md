@@ -5,7 +5,7 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
-## [v2.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.6.0) (03-17-2021)
+## [v2.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.7.0) (03-17-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.6.0...v2.7.0)
 
