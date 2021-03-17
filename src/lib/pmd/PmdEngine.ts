@@ -1,7 +1,7 @@
 import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget} from '../../types';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 import {RuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constants';
@@ -80,7 +80,7 @@ abstract class BasePmdEngine implements RuleEngine {
 	protected eventCreator: EventCreator;
 	private initialized: boolean;
 
-	getTargetPatterns(): Promise<string[]> {
+	getTargetPatterns(): Promise<TargetPattern[]> {
 		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
 

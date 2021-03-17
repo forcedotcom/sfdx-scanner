@@ -5,6 +5,26 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.7.0) (03-17-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.6.0...v2.7.0)
+
+**Closed issues:**
+
+- \[BUG\] [\#366](https://github.com/forcedotcom/sfdx-scanner/issues/366)
+- eslint: Parsing error: Unexpected character '@' [\#360](https://github.com/forcedotcom/sfdx-scanner/issues/360)
+
+**Merged pull requests:**
+
+- @W-8902730@: ZIPs containing directories are now properly handled. [\#368](https://github.com/forcedotcom/sfdx-scanner/pull/368)
+- @W-8675055@: Fixed some issues with the documentation. [\#367](https://github.com/forcedotcom/sfdx-scanner/pull/367)
+- @W-8675055@ Changes to docs for supported languages \(PMD\) [\#365](https://github.com/forcedotcom/sfdx-scanner/pull/365)
+- @W-895007@ Upgrade PMD from 6.31.0 to 6.32.0 [\#364](https://github.com/forcedotcom/sfdx-scanner/pull/364)
+- @W-8956131@: Implemented versioning schema to allow easy upgrades. [\#363](https://github.com/forcedotcom/sfdx-scanner/pull/363)
+- @W-8914422@: RetireJS is now better at identifying static resources and scanning the contents of ZIPs. [\#362](https://github.com/forcedotcom/sfdx-scanner/pull/362)
+- @W-8902730@: RetireJS violations within a ZIP are now associated with… [\#361](https://github.com/forcedotcom/sfdx-scanner/pull/361)
+- @W-8903300@ DOC: Remove warning 'not digitally signed' [\#359](https://github.com/forcedotcom/sfdx-scanner/pull/359)
+
 ## [v2.6.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.6.0) (02-17-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.5.1...v2.6.0)

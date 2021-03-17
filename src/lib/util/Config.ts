@@ -3,9 +3,11 @@ import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
-import {deepCopy} from '../../lib/util/Utils';
+import {deepCopy} from './Utils';
+import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
 export type ConfigContent = {
+	currentVersion?: string;
 	javaHome?: string;
 	engines?: EngineConfigContent[];
 	targetPatterns?: string[];
@@ -19,6 +21,7 @@ export type EngineConfigContent = {
 }
 
 const DEFAULT_CONFIG: ConfigContent = {
+	currentVersion: require('../../../package.json').version,
 	engines: [
 		{
 			name: ENGINE.PMD,
@@ -57,12 +60,7 @@ const DEFAULT_CONFIG: ConfigContent = {
         },
 		{
 			name: ENGINE.RETIRE_JS,
-			targetPatterns: [
-				'**/*.js',
-				'**/*.resource',
-				'!**/node_modules/**',
-				'!**/bower_components/**'
-			],
+			targetPatterns: [],
 			disabled: true
 		}
 	]
@@ -72,15 +70,20 @@ class TypeChecker {
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	stringArrayCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
-		if (Array.isArray(value) && value.length > 0) {
-			value.forEach((item) => {
-				if (typeof item != 'string') {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'OnlyStringAllowedInStringArray', [propertyName, engine.valueOf(), String(value)]);
-				}
-			});
-			return true;
+		if (Array.isArray(value)) {
+			if (value.length > 0) {
+				value.forEach((item) => {
+					if (typeof item != 'string') {
+						throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'OnlyStringAllowedInStringArray', [propertyName, engine.valueOf(), String(value)]);
+					}
+				});
+				return true;
+			} else {
+				return true;
+			}
+		} else {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
 		}
-		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidStringArrayValue', [propertyName, engine.valueOf(), String(value)]);
 	};
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
@@ -96,6 +99,7 @@ export class Config {
 
 	configContent!: ConfigContent;
 	fileHandler!: FileHandler;
+	versionUpgradeManager!: VersionUpgradeManager;
 	private typeChecker: TypeChecker;
 	private sfdxScannerPath: string;
 	private configFilePath: string;
@@ -110,12 +114,57 @@ export class Config {
 
 		this.typeChecker = new TypeChecker();
 		this.fileHandler = new FileHandler();
+		this.versionUpgradeManager = new VersionUpgradeManager();
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 		this.configFilePath = path.join(this.sfdxScannerPath, CONFIG_FILE);
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
 
 		this.initialized = true;
+		// Upgrades MUST happen AFTER the config is marked as initialized, to prevent any unexpected recursion.
+		await this.upgradeConfig();
+	}
+
+	private async upgradeConfig(): Promise<void> {
+		if (this.versionUpgradeManager.upgradeRequired(this.configContent.currentVersion)) {
+			// Start by creating a copy of the existing config, so we have it if we need it to create a backup file.
+			// Also determine where such a file would go.
+			const existingConfig: ConfigContent = JSON.parse(JSON.stringify(this.configContent));
+			const backupFileName = `${CONFIG_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
+
+			let upgradeError = null;
+			let persistConfig = true;
+			try {
+				await this.versionUpgradeManager.upgradeToLatest(this.configContent, this.configContent.currentVersion);
+			} catch (e) {
+				// If the error included a partially-upgraded config, we should switch our config to that, so the partial
+				// upgrade can be persisted.
+				if (e instanceof VersionUpgradeError) {
+					this.configContent = e.getLastSafeConfig();
+				} else {
+					// Otherwise, we should assume that the configuration is entirely unsafe, and prevent any data persistance.
+					persistConfig = false;
+				}
+				// Persist the original config as a backup file so the user doesn't lose it.
+				await this.fileHandler.writeFile(path.join(this.sfdxScannerPath, backupFileName), JSON.stringify(existingConfig, null, 4));
+				// Hang onto the error so we can rethrow it.
+				upgradeError = e;
+			}
+
+			// Persist any changes that were successfully made.
+			if (persistConfig) {
+				await this.writeConfig();
+			}
+
+			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
+			if (upgradeError) {
+				throw SfdxError.create('@salesforce/sfdx-scanner',
+					'Config',
+					'UpgradeFailureTroubleshooting',
+					[upgradeError.message || upgradeError, backupFileName, this.configFilePath]
+				);
+			}
+		}
 	}
 
 	public async setJavaHome(value: string): Promise<void> {
