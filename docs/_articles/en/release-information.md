@@ -5,6 +5,20 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.7.0...v2.8.0)
+
+**Closed issues:**
+
+- \[Feature Request\] CHANGELOG [\#371](https://github.com/forcedotcom/sfdx-scanner/issues/371)
+
+**Merged pull requests:**
+
+- @W-9086306@ Upgrading to PMD 6.33.0 [\#379](https://github.com/forcedotcom/sfdx-scanner/pull/379)
+- @W-9090976@ Bump y18n from 4.0.0 to 4.0.1 [\#377](https://github.com/forcedotcom/sfdx-scanner/pull/377)
+- @W-9090976@ Bump kramdown from 2.3.0 to 2.3.1 in /docs [\#376](https://github.com/forcedotcom/sfdx-scanner/pull/376)
+
 ## [v2.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.7.0) (03-17-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.6.0...v2.7.0)
