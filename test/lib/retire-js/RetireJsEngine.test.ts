@@ -1,8 +1,8 @@
 import 'reflect-metadata';
-import {RuleResult, RuleTarget} from '../../../src/types';
+import {Rule, RuleResult, RuleTarget} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
-import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine'
+import {RetireJsEngine, RetireJsInvocation} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 
@@ -42,6 +42,14 @@ class TestableRetireJsEngine extends RetireJsEngine {
 
 	public getZipMap(): Map<string,string> {
 		return this.zipDstByZipSrc;
+	}
+
+	public buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
+		return super.buildCliInvocations(rules, target);
+	}
+
+	public static getVulnRepoPath(): string {
+		return super.VULN_JSON_PATH;
 	}
 }
 
@@ -444,56 +452,81 @@ describe('RetireJsEngine', () => {
 				}
 			});
 		});
+	});
 
-		describe('Tests for shouldEngineRun()', () => {
-			it('should always return true if the engine was not filtered out', () => {
-				expect(testEngine.shouldEngineRun([],[],[],new Map<string,string>())).to.be.true;
-			});
+	describe('shouldEngineRun()', () => {
+		it('should always return true if the engine was not filtered out', () => {
+			expect(testEngine.shouldEngineRun([],[],[],new Map<string,string>())).to.be.true;
+		});
+	});
+
+	describe('isEngineRequested()', () => {
+		const emptyEngineOptions = new Map<string, string>();
+
+		const configFilePath = '/some/file/path/config.json';
+		const engineOptionsWithEslintCustom = new Map<string, string>([
+			[CUSTOM_CONFIG.EslintConfig, configFilePath]
+		]);
+		const engineOptionsWithPmdCustom = new Map<string, string>([
+			[CUSTOM_CONFIG.PmdConfig, configFilePath]
+		]);
+
+		it('should return true if filter contains "retire-js" and engineOptions map is empty', () => {
+			const filterValues = ['retire-js', 'pmd'];
+
+			const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
+
+			expect(isEngineRequested).to.be.true;
 		});
 
-		describe('Tests for isEngineRequested()', () => {
-			const emptyEngineOptions = new Map<string, string>();
+		it('should return true if filter contains "retire-js" and engineOptions map contains eslint config', () => {
+			const filterValues = ['retire-js', 'pmd'];
 
-			const configFilePath = '/some/file/path/config.json';
-			const engineOptionsWithEslintCustom = new Map<string, string>([
-				[CUSTOM_CONFIG.EslintConfig, configFilePath]
-			]);
-			const engineOptionsWithPmdCustom = new Map<string, string>([
-				[CUSTOM_CONFIG.PmdConfig, configFilePath]
-			]);
-			
-			it('should return true if filter contains "retire-js" and engineOptions map is empty', () => {
-				const filterValues = ['retire-js', 'pmd'];
+			const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithEslintCustom);
 
-				const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
+			expect(isEngineRequested).to.be.true;
+		});
 
-				expect(isEngineRequested).to.be.true;
-			});
+		it('should return true if filter contains "retire-js" and engineOptions map contains pmd config', () => {
+			const filterValues = ['retire-js', 'pmd'];
 
-			it('should return true if filter contains "retire-js" and engineOptions map contains eslint config', () => {
-				const filterValues = ['retire-js', 'pmd'];
+			const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithPmdCustom);
 
-				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithEslintCustom);
+			expect(isEngineRequested).to.be.true;
+		});
 
-				expect(isEngineRequested).to.be.true;
-			});
+		it('should return false if filter does not contain "retire-js" irrespective of engineOptions', () => {
+			const filterValues = ['eslint-lwc', 'pmd'];
 
-			it('should return true if filter contains "retire-js" and engineOptions map contains pmd config', () => {
-				const filterValues = ['retire-js', 'pmd'];
+			const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
 
-				const isEngineRequested = testEngine.isEngineRequested(filterValues, engineOptionsWithPmdCustom);
+			expect(isEngineRequested).to.be.false;
+		});
+	});
 
-				expect(isEngineRequested).to.be.true;
-			});
+	describe('buildCliInvocations()', () => {
+		it('Properly invokes Insecure Bundled Dependencies rule', async () => {
+			// Get the bundled dependency rule from the catalog.
+			const bundledDepRule: Rule = (await testEngine.getCatalog()).rules.find(r => r.name === 'insecure-bundled-dependencies');
+			// If we don't have a rule, we can't do any tests.
+			expect(bundledDepRule).to.not.equal(null, 'Rule must exist');
 
-			it('should return false if filter does not contain "retire-js" irrespective of engineOptions', () => {
-				const filterValues = ['eslint-lwc', 'pmd'];
+			// Invocation of tested method: Build an object describing the RetireJS invocations.
+			const target: string = path.join('target', 'does', 'not', 'matter', 'here');
+			const invocations: RetireJsInvocation[] = testEngine.buildCliInvocations([bundledDepRule], target);
 
-				const isEngineRequested = testEngine.isEngineRequested(filterValues, emptyEngineOptions);
-
-				expect(isEngineRequested).to.be.false;
-			});
-
+			// Assertions:
+			// There should be exactly one invocation, since there was exactly one rule.
+			expect(invocations.length).to.equal(1, 'Should be one invocation');
+			const invocation = invocations[0];
+			expect(invocation.rule).to.equal('insecure-bundled-dependencies', 'Invocation is for incorrect rule');
+			expect(invocation.args[0]).to.equal('--js');
+			expect(invocation.args[1]).to.equal('--jspath');
+			expect(invocation.args[2]).to.equal(target);
+			expect(invocation.args[3]).to.equal('--outputformat');
+			expect(invocation.args[4]).to.equal('json');
+			expect(invocation.args[5]).to.equal('--jsrepo');
+			expect(invocation.args[6]).to.equal(TestableRetireJsEngine.getVulnRepoPath());
 		});
 	});
 });

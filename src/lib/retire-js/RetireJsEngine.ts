@@ -38,7 +38,7 @@ const retireJsCatalog: Catalog = {
  * The various permutations of RetireJS are each handled with separate rules, so we'll use this structure to associate
  * a particular invocation of RetireJS with a particular rule.
  */
-type RetireJsInvocation = {
+export type RetireJsInvocation = {
 	args: string[];
 	rule: string;
 };
@@ -75,6 +75,9 @@ export class RetireJsEngine implements RuleEngine {
 	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
+	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
+	// local path instead.
+	protected static VULN_JSON_PATH: string = require.resolve('./RetireJsVulns.json');
 
 	private static SIMPLE_TARGET_PATTERNS: ReadonlyArray<string> = [
 		'**/*.js',
@@ -157,15 +160,16 @@ export class RetireJsEngine implements RuleEngine {
 		return (await Promise.all(retireJsPromises)).reduce((all, next) => [...all, ...next], []);
 	}
 
-	private buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
+	protected buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
 		const invocationArray: RetireJsInvocation[] = [];
 		for (const rule of rules) {
 			switch (rule.name) {
 				case INSECURE_BUNDLED_DEPS:
 					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
 					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
+					// We also hardcode a locally-stored vulnerability repo instead of allowing use of the default one.
 					invocationArray.push({
-						args: ['--js', '--jspath', target, '--outputformat', 'json'],
+						args: ['--js', '--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
 						rule: rule.name
 					});
 					break;
