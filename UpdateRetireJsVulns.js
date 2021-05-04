@@ -35,9 +35,13 @@ function loadJson(repoUrl) {
 
 loadJson('https://raw.githubusercontent.com/RetireJS/retire.js/master/repository/jsrepository.json')
 	.then((repoJson) => {
+		console.log(`Successfully downloaded raw RetireJS repo file`);
 		// Sanitize the JSON by deleting all of the `func` attributes.
 		for (const key of Object.keys(repoJson)) {
-			delete repoJson[key].extractors.func;
+			if (repoJson[key].extractors.func) {
+				console.log(`Removing property: ${key}.extractors.func`);
+				delete repoJson[key].extractors.func;
+			}
 		}
 
 		return fsPromises.writeFile(RETIREJS_VULNS_PATH, JSON.stringify(repoJson, null, 2));
