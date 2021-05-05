@@ -17,7 +17,7 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - run: git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH"
+      - run: git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
 
       # Download and cache dependencies
       - restore_cache:
