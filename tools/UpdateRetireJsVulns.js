@@ -1,3 +1,11 @@
+/**
+ * Downloads and sanitizes the latest version of RetireJS's catalog of JS vulnerabilities, then writes the resulting JSON
+ * to sfdx-scanner/src/lib/retire-js/RetireJsVulns.json.
+ *
+ * Usage: From the root folder of the project, run `node tools/UpdateRetireJsVulns.js`.
+ */
+
+
 // == IMPORTS AND GLOBALS ==
 const URL = require('url');
 const https = require('https');
