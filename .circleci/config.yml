@@ -11,7 +11,6 @@ defaults: &defaults
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   release-management: salesforce/npm-release-management@3.5.1
-  codecov: codecov/codecov@1.1.1
   gradle: circleci/gradle@2.2.0
 
 jobs:
@@ -49,9 +48,6 @@ jobs:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
-
-      - codecov/upload:
-          file: test-coverage/coverage-final.json
 
       - gradle/collect_test_results:
           reports_path: pmd-cataloger/build/reports/
