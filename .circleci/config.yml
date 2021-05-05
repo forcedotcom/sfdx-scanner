@@ -17,7 +17,7 @@ jobs:
   build:
     <<: *defaults
     steps:
-      - checkout
+      - run: git clone --depth 1 "$CIRCLE_REPOSITORY_URL" --branch "$CIRCLE_BRANCH"
 
       # Download and cache dependencies
       - restore_cache:
@@ -149,7 +149,7 @@ jobs:
       size: "medium"
 
     steps:
-      - checkout
+      - run: git clone --depth 1 "$CIRCLE_REPOSITORY_URL" --branch "$CIRCLE_BRANCH"
 
       - run:
           name: "Install sfdx cli"
@@ -180,7 +180,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - checkout
+      - run: git clone --depth 1 "$CIRCLE_REPOSITORY_URL" --branch "$CIRCLE_BRANCH"
       - run:
           name: "Merge release"
           command: |
