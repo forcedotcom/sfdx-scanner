@@ -38,7 +38,7 @@ const retireJsCatalog: Catalog = {
  * The various permutations of RetireJS are each handled with separate rules, so we'll use this structure to associate
  * a particular invocation of RetireJS with a particular rule.
  */
-type RetireJsInvocation = {
+export type RetireJsInvocation = {
 	args: string[];
 	rule: string;
 };
@@ -75,6 +75,9 @@ export class RetireJsEngine implements RuleEngine {
 	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
 	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
+	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
+	// local path instead.
+	private static VULN_JSON_PATH: string = require.resolve('./RetireJsVulns.json');
 
 	private static SIMPLE_TARGET_PATTERNS: ReadonlyArray<string> = [
 		'**/*.js',
@@ -91,9 +94,9 @@ export class RetireJsEngine implements RuleEngine {
 	private static NEXT_TMPFILE_IDX = 0;
 	private static NEXT_TMPZIP_IDX = 0;
 
-	protected aliasDirsByOriginalDir: Map<string, string> = new Map();
-	protected originalFilesByAlias: Map<string, string> = new Map();
-	protected zipDstByZipSrc: Map<string, string> = new Map();
+	private aliasDirsByOriginalDir: Map<string, string> = new Map();
+	private originalFilesByAlias: Map<string, string> = new Map();
+	private zipDstByZipSrc: Map<string, string> = new Map();
 
 	private logger: Logger;
 	private fh: FileHandler;
@@ -164,8 +167,9 @@ export class RetireJsEngine implements RuleEngine {
 				case INSECURE_BUNDLED_DEPS:
 					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
 					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
+					// We also hardcode a locally-stored vulnerability repo instead of allowing use of the default one.
 					invocationArray.push({
-						args: ['--js', '--jspath', target, '--outputformat', 'json'],
+						args: ['--js', '--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
 						rule: rule.name
 					});
 					break;
@@ -213,7 +217,7 @@ export class RetireJsEngine implements RuleEngine {
 		});
 	}
 
-	protected processFailure(stdout: string, stderr: string): string {
+	private processFailure(stdout: string, stderr: string): string {
 		this.logger.warn(`Processing RetireJS failure. stdout: ${stdout}\nstderr: ${stderr}`);
 		// Either stdout or stderr could contain the error information, depending on what the error was. We'll try the
 		// same tactics on each one, and hopefully we'll find what we're looking for.
@@ -237,7 +241,7 @@ export class RetireJsEngine implements RuleEngine {
 		return stderr;
 	}
 
-	protected processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
+	private processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
 		// The output should be a valid result JSON.
 		try {
 			const outputJson: RetireJsOutput = RetireJsEngine.convertStringToResultObj(cmdOutput);
@@ -350,7 +354,7 @@ export class RetireJsEngine implements RuleEngine {
 	}
 
 
-	protected async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
+	private async createTmpDirWithDuplicatedTargets(targets: RuleTarget[]): Promise<string> {
 		// Create a temporary parent directory into which we'll transplant all of our target files.
 		const tmpParent: string = await this.fh.tmpDirWithCleanup();
 
@@ -390,7 +394,7 @@ export class RetireJsEngine implements RuleEngine {
 		return tmpParent;
 	}
 
-	protected aliasJsFile(tmpParent: string, originalPath: string): void {
+	private aliasJsFile(tmpParent: string, originalPath: string): void {
 		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
@@ -404,7 +408,7 @@ export class RetireJsEngine implements RuleEngine {
 		this.originalFilesByAlias.set(fullAlias, originalPath);
 	}
 
-	protected aliasZipFile(tmpParent: string, originalPath: string): void {
+	private aliasZipFile(tmpParent: string, originalPath: string): void {
 		// We'll need to derive an aliased subdirectory to duplicate this file into, so we can prevent name collision.
 		const aliasDir: string = this.deriveDirectoryAlias(tmpParent, originalPath);
 
@@ -414,7 +418,7 @@ export class RetireJsEngine implements RuleEngine {
 		this.zipDstByZipSrc.set(originalPath, path.join(aliasDir, zipLayer));
 	}
 
-	protected deriveDirectoryAlias(tmpParent: string, originalPath: string): string {
+	private deriveDirectoryAlias(tmpParent: string, originalPath: string): string {
 		// By converting the directory portion of each path into a unique alias, we can make sure that the alias paths
 		// remain unique, and thereby avoid name collision.
 		const originalDir = path.dirname(originalPath);
@@ -424,7 +428,7 @@ export class RetireJsEngine implements RuleEngine {
 		return this.aliasDirsByOriginalDir.get(originalDir);
 	}
 
-	protected async createAliasDirectories(): Promise<void[]> {
+	private async createAliasDirectories(): Promise<void[]> {
 		const dirCreationPromises: Promise<void>[] = [];
 		for (const aliasDir of this.aliasDirsByOriginalDir.values()) {
 			dirCreationPromises.push(this.fh.mkdirIfNotExists(aliasDir));
@@ -439,7 +443,7 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(zipDestPromises);
 	}
 
-	protected async duplicateJsFiles(): Promise<void[]> {
+	private async duplicateJsFiles(): Promise<void[]> {
 		const dupPromises: Promise<void>[] = [];
 		for (const [alias, original] of this.originalFilesByAlias.entries()) {
 			dupPromises.push(this.fh.duplicateFile(original, alias));
@@ -447,7 +451,7 @@ export class RetireJsEngine implements RuleEngine {
 		return Promise.all(dupPromises);
 	}
 
-	protected async extractZip(zipSrc: string, zipDst: string): Promise<void> {
+	private async extractZip(zipSrc: string, zipDst: string): Promise<void> {
 		// Open the ZIP.
 		const zip = new StreamZip.async({
 			file: zipSrc,
@@ -483,7 +487,7 @@ export class RetireJsEngine implements RuleEngine {
 		return await zip.close();
 	}
 
-	protected async extractZips(): Promise<void[]> {
+	private async extractZips(): Promise<void[]> {
 		return Promise.all(
 			[...this.zipDstByZipSrc.entries()]
 				.map(([zipSrc, zipDst]) => {return this.extractZip(zipSrc, zipDst)})
