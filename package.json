@@ -38,7 +38,12 @@
 		"xml-js": "^1.6.11"
 	},
 	"resolutions": {
-		"bl": "^4.0.3"
+		"bl": "^4.0.3",
+		"lodash": "^4.17.21",
+		"ajv": "^6.12.3",
+		"minimist": "^1.2.3",
+		"hosted-git-info": "^3.0.8",
+		"glob-parent": "^5.1.2"
 	},
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
