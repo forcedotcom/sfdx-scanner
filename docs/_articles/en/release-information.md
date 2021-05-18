@@ -5,6 +5,31 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.0)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.8.0...v2.9.0)
+
+### Release Summary
+* RetireJS Engine works offline
+* Underlying PMD Engine is upgraded to 6.34.0 (from 6.33.0) 
+* Bug fixes and dependencies upgraded
+
+**Closed issues:**
+
+- \[Feature Request\] - Suppress Violation [\#386](https://github.com/forcedotcom/sfdx-scanner/issues/386)
+- Running scanner throws JAVA error\[BUG\] [\#381](https://github.com/forcedotcom/sfdx-scanner/issues/381)
+
+**Merged pull requests:**
+
+- @W-9156805@ Disabling some features while XML parsing [\#399](https://github.com/forcedotcom/sfdx-scanner/pull/399)
+- @W-9266722@ Update fingerprint used for certificate pinning [\#398](https://github.com/forcedotcom/sfdx-scanner/pull/398)
+- @W-9230264@ Bump nokogiri from 1.11.0 to 1.11.4 in /docs [\#397](https://github.com/forcedotcom/sfdx-scanner/pull/397)
+- @W-9219050@: Changed RetireJsEngine to use locally stored version of … [\#395](https://github.com/forcedotcom/sfdx-scanner/pull/395)
+- @W-9230264@: Updated third-party dependencies. [\#393](https://github.com/forcedotcom/sfdx-scanner/pull/393)
+- @W-9230027@: Update PMD to 6.34.0. [\#392](https://github.com/forcedotcom/sfdx-scanner/pull/392)
+- @W-9230725@: Removed CodeCov and Appveyor. [\#389](https://github.com/forcedotcom/sfdx-scanner/pull/389)
+- @W-9282442@ Bump rexml from 3.2.4 to 3.2.5 in /docs [\#385](https://github.com/forcedotcom/sfdx-scanner/pull/385)
+
 ## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.7.0...v2.8.0)
