@@ -20,9 +20,9 @@ commands:
       - run: |
           if [ -z "$CIRCLE_BRANCH" ]
           then
-            git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
+            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
           else
-            git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
+            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
           fi
 jobs:
   build:
