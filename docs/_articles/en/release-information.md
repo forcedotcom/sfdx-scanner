@@ -5,7 +5,7 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
-## [v2.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.0)
+## [v2.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.0) (05-19-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.8.0...v2.9.0)
 
@@ -30,7 +30,7 @@ lang: en
 - @W-9230725@: Removed CodeCov and Appveyor. [\#389](https://github.com/forcedotcom/sfdx-scanner/pull/389)
 - @W-9282442@ Bump rexml from 3.2.4 to 3.2.5 in /docs [\#385](https://github.com/forcedotcom/sfdx-scanner/pull/385)
 
-## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0)
+## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0) (04-13-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.7.0...v2.8.0)
 
