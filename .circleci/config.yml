@@ -237,6 +237,9 @@ jobs:
           tag: latest
           use_tarfile: true
       - release-management/create-github-release
+    environment:
+      # Fingerprint for developer.salesforce.com
+      SFDX_DEVELOPER_TRUSTED_FINGERPRINT: "3E:6C:CA:83:EA:88:92:E0:6C:7C:5C:ED:43:A6:0A:6C:33:74:5E:7F"
 
 workflows:
   version: 2.1
