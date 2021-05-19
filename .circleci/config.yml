@@ -17,7 +17,13 @@ orbs:
 commands:
   https_checkout:
     steps:
-      - run: git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
+      - run: |
+          if [ -z "$CIRCLE_BRANCH" ]
+          then
+            git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
+          else
+            git clone --depth 1 "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
+          fi
 jobs:
   build:
     <<: *defaults
