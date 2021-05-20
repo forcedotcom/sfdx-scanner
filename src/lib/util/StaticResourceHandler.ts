@@ -1,6 +1,6 @@
 import {SfdxError} from '@salesforce/core';
 import {FileHandler} from './FileHandler';
-import {isText} from 'istextorbinary';
+import {isBinaryFileSync} from 'isbinaryfile';
 import isZip = require('is-zip');
 
 
@@ -40,10 +40,10 @@ export class StaticResourceHandler {
 	}
 
 	public identifyBufferType(buffer: Buffer): StaticResourceType {
-		if (isText(null, buffer)) {
-			return StaticResourceType.TEXT;
-		} else if (isZip(buffer)) {
+		if (isZip(buffer)) {
 			return StaticResourceType.ZIP;
+		} else if (!isBinaryFileSync(buffer)) {
+			return StaticResourceType.TEXT;
 		} else {
 			return StaticResourceType.OTHER;
 		}
