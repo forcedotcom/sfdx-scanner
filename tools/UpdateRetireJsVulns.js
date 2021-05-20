@@ -11,7 +11,7 @@ const URL = require('url');
 const https = require('https');
 const fsPromises = require('fs').promises;
 
-const RETIREJS_VULNS_PATH = require('path').resolve("src", "lib", "retire-js", "RetireJsVulns.json");
+const RETIREJS_VULNS_PATH = require('path').resolve("retire-js", "RetireJsVulns.json");
 
 
 function loadJson(repoUrl) {
