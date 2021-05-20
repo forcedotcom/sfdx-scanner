@@ -7,23 +7,13 @@ lang: en
 
 ## [v2.9.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.1) (05-21-2021)
 
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.0...v2.9.1)
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.8.0...v2.9.1)
 
 ### Release Summary
 
-* RetireJS will now work offlinbe
+* RetireJS will now work offline
 * Underlying PMD Engine is upgraded to 6.34.0 (from 6.33.0) 
 * Bug fixes
-
-**Merged pull requests:**
-
-- @W-9296240@ Switch library used to detect binary files [\#411](https://github.com/forcedotcom/sfdx-scanner/pull/411)
-- @W-9282230@ Fixing changelog to update 2.8 release information [\#409](https://github.com/forcedotcom/sfdx-scanner/pull/409)
-- @W-9295472@: Moved vulnerability catalog into different folder, force… [\#408](https://github.com/forcedotcom/sfdx-scanner/pull/408)
-
-## [v2.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.0) (05-19-2021)
-
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.8.0...v2.9.0)
 
 **Closed issues:**
 
@@ -32,6 +22,8 @@ lang: en
 
 **Merged pull requests:**
 
+- @W-9296240@ Switch library used to detect binary files [\#411](https://github.com/forcedotcom/sfdx-scanner/pull/411)
+- @W-9295472@: Moved vulnerability catalog into different folder, force… [\#408](https://github.com/forcedotcom/sfdx-scanner/pull/408)
 - @W-9156805@ Disabling some features while XML parsing [\#399](https://github.com/forcedotcom/sfdx-scanner/pull/399)
 - @W-9266722@ Update fingerprint used for certificate pinning [\#398](https://github.com/forcedotcom/sfdx-scanner/pull/398)
 - @W-9230264@ Bump nokogiri from 1.11.0 to 1.11.4 in /docs [\#397](https://github.com/forcedotcom/sfdx-scanner/pull/397)
