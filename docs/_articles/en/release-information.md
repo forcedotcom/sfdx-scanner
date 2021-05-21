@@ -17,6 +17,7 @@ lang: en
 
 **Closed issues:**
 
+- \[BUG\] @W-9296240@ Commands result in error "Unable to determine a suitable edition, even after broadening." [\#412](https://github.com/forcedotcom/sfdx-scanner/issues/412)
 - \[Feature Request\] - Suppress Violation [\#386](https://github.com/forcedotcom/sfdx-scanner/issues/386)
 - Running scanner throws JAVA error\[BUG\] [\#381](https://github.com/forcedotcom/sfdx-scanner/issues/381)
 
@@ -33,7 +34,7 @@ lang: en
 - @W-9230725@: Removed CodeCov and Appveyor. [\#389](https://github.com/forcedotcom/sfdx-scanner/pull/389)
 - @W-9282442@ Bump rexml from 3.2.4 to 3.2.5 in /docs [\#385](https://github.com/forcedotcom/sfdx-scanner/pull/385)
 
-## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0)
+## [v2.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.8.0) (04-13-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.7.0...v2.8.0)
 
