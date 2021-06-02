@@ -1,15 +1,16 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {AdvancedTargetPattern, Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
-import {ENGINE} from '../../Constants';
+import {ENGINE, Severity} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
 import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
+
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -68,7 +69,7 @@ type RetireJsOutput = {
 	errors?: string[];
 };
 
-export class RetireJsEngine implements RuleEngine {
+export class RetireJsEngine extends AbstractRuleEngine {
 	public static ENGINE_ENUM: ENGINE = ENGINE.RETIRE_JS;
 	public static ENGINE_NAME: string = ENGINE.RETIRE_JS.valueOf();
 	// RetireJS isn't really built to be invoked programmatically, so we'll need to invoke it as a CLI command. However, we
@@ -142,6 +143,20 @@ export class RetireJsEngine implements RuleEngine {
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return engineUtils.isValueInFilter(this.getName(), filterValues);
+	}
+
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1:
+				return Severity.HIGH;
+			case 2:
+				return Severity.MODERATE;
+			case 3:
+				return Severity.LOW;
+			default:
+				return Severity.MODERATE;
+
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars

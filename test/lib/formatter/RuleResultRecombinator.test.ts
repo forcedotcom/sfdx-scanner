@@ -139,17 +139,101 @@ const allFakeRuleResults: RuleResult[] = [
 	}
 ];
 
+const allFakeRuleResultsNormalized: RuleResult[] = [
+	{
+		engine: 'eslint',
+		fileName: sampleFile1,
+		violations: [{
+			"line": 2,
+			"column": 11,
+			"severity": 2,
+			"normalizedSeverity": 1,
+			"message": "'unusedParam1' is defined but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars"
+		}]
+	},
+	{
+		engine: 'eslint',
+		fileName: sampleFile2,
+		violations: [{
+			"line": 4,
+			"column": 11,
+			"severity": 1,
+			"normalizedSeverity": 2,
+			"message": "'unusedParam2' is defined but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars"
+		}, {
+			"line": 6,
+			"column": 9,
+			"severity": 2,
+			"normalizedSeverity": 1,
+			"message": "'unusedVar' is assigned a value but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars",
+			"exception": true
+		}]
+	},
+	{
+		engine: "pmd",
+		fileName: sampleFile3,
+		violations: [{
+			"line": 2,
+			"column": 1,
+			"endLine": 2,
+			"endColumn": 57,
+			"severity": 4,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexAssertionsShouldIncludeMessage",
+			"category": "Best Practices",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage",
+			"message": "\nAvoid unused imports such as 'sfdc.sfdx.scanner.messaging.SfdxMessager'\n"
+		}, {
+			"line": 4,
+			"column": 8,
+			"endLine": 56,
+			"endColumn": 1,
+			"severity": 3,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexDoc",
+			"category": "Documentation",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#apexdoc",
+			"message": "\nEnum comments are required\n"
+		}, {
+			"line": 5,
+			"column": 1,
+			"endLine": 5,
+			"endColumn": 2,
+			"severity": 3,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexUnitTestClassShouldHaveAsserts",
+			"category": "Best Practices",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentsize",
+			"message": "\nComment is too large: Line too long\n"
+		}]
+	}
+];
+
 function isString(x: string | {columns; rows}): x is string {
 	return typeof x === 'string';
 }
 
-function validateJson(ruleResult: RuleResult, expectedResults: RuleResult[], expectedRuleResultIndex: number, expectedViolationIndex: number, trimMessage: boolean): void {
+function validateJson(ruleResult: RuleResult, expectedResults: RuleResult[], expectedRuleResultIndex: number, expectedViolationIndex: number, trimMessage: boolean, normalizeSeverity: boolean): void {
 	const expectedRuleResult = expectedResults[expectedRuleResultIndex];
 	const expectedViolation: RuleViolation = expectedRuleResult.violations[expectedViolationIndex];
 	const violation: RuleViolation = ruleResult.violations[expectedViolationIndex];
 	expect(ruleResult.fileName).to.equal(expectedRuleResult.fileName, 'Filename');
 	expect(ruleResult.engine).to.equal(expectedRuleResult.engine, 'Engine');
 	expect(violation.severity).to.equal(expectedViolation.severity, 'Severity');
+	if (normalizeSeverity) {
+		expect(violation.normalizedSeverity).to.equal(expectedViolation.normalizedSeverity, 'Normalized Severity');
+	} else {
+		expect(violation.normalizedSeverity).to.equal(undefined);
+	}
 	expect(violation.line).to.equal(expectedViolation.line, 'Line');
 	expect(violation.column).to.equal(expectedViolation.column, 'Column');
 	expect(violation.ruleName).to.equal(expectedViolation.ruleName, 'Rule Name');
@@ -269,7 +353,7 @@ describe('RuleResultRecombinator', () => {
 		});
 
 		describe('Output Format: Sarif', () => {
-			function validateEslintSarif(run: unknown): void {
+			function validateEslintSarif(run: unknown, normalizeSeverity: boolean): void {
 				const driver = run['tool']['driver'];
 				expect(driver.name).to.equal('eslint');
 				expect(driver.version).to.equal('6.8.0');
@@ -282,6 +366,11 @@ describe('RuleResultRecombinator', () => {
 				expect(rule.shortDescription.text).to.equal('disallow unused variables');
 				expect(rule.properties.category).to.equal('Variables');
 				expect(rule.properties.severity).to.equal(2);
+				if (normalizeSeverity) {
+					expect(rule.properties.normalizedSeverity).to.equal(1);
+				} else {
+					expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				}
 				expect(rule.helpUri).to.equal('https://eslint.org/docs/rules/no-unused-vars');
 
 				// one of the violations has 'exception=2'. It will end up in the toolExecutionNotifications node
@@ -322,7 +411,7 @@ describe('RuleResultRecombinator', () => {
 				expect(toolExecution.locations[0].physicalLocation.artifactLocation.uri).to.satisfy(l => l.endsWith('Users/SomeUser/samples/sample-file2.js'));
 			}
 
-			function validatePMDSarif(run: unknown): void {
+			function validatePMDSarif(run: unknown, normalizeSeverity: boolean): void {
 				const driver = run['tool']['driver'];
 				expect(driver.name).to.equal('pmd');
 				expect(driver.version).to.equal(PMD_VERSION);
@@ -338,6 +427,11 @@ describe('RuleResultRecombinator', () => {
 				expect(rule.shortDescription.text).to.equal(`The second parameter of System.assert/third parameter of System.assertEquals/System.assertNotEquals is a message.\nHaving a second/third parameter provides more information and makes it easier to debug the test failure and\nimproves the readability of test output.`);
 				expect(rule.properties.category).to.equal('Best Practices');
 				expect(rule.properties.severity).to.equal(4);
+				if (normalizeSeverity) {
+					expect(rule.properties.normalizedSeverity).to.equal(3);
+				} else {
+					expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				}
 				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage');
 
 				rule = driver['rules'][1];
@@ -385,9 +479,33 @@ describe('RuleResultRecombinator', () => {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
 					if (engine === ENGINE.ESLINT) {
-						validateEslintSarif(run);
+						validateEslintSarif(run, false);
 					} else if (engine === ENGINE.PMD) {
-						validatePMDSarif(run);
+						validatePMDSarif(run, false);
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy Path - normalized', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i=0; i<runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.ESLINT) {
+						validateEslintSarif(run, true);
+					} else if (engine === ENGINE.PMD) {
+						validatePMDSarif(run, true);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
 					}
@@ -434,7 +552,33 @@ describe('RuleResultRecombinator', () => {
 				allFakeRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed);
+						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				// It's one more than the number of RuleResults because of the post increment.
+				expect(rrIndex).to.equal(3, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy Path - normalized', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
+				const ruleResults: RuleResult[] = JSON.parse(results as string);
+				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
 						vIndex++;
 					});
 					rrIndex++
@@ -460,7 +604,7 @@ describe('RuleResultRecombinator', () => {
 				edgeCaseResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], edgeCaseResults, rrIndex, vIndex, messageIsTrimmed);
+						validateJson(ruleResults[rrIndex], edgeCaseResults, rrIndex, vIndex, messageIsTrimmed, false);
 						vIndex++;
 					});
 					rrIndex++
@@ -474,7 +618,7 @@ describe('RuleResultRecombinator', () => {
 
 		describe('Output Format: XML', () => {
 			const messageIsTrimmed = true;
-			async function convertXmlToJson(results: string): Promise<RuleResult[]> {
+			async function convertXmlToJson(results: string, normalizeSeverity: boolean): Promise<RuleResult[]> {
 				const parsedXml = await new Promise((resolve, reject) => {
 					parseString(results as string, (err, output) => {
 						if (err) {
@@ -492,6 +636,7 @@ describe('RuleResultRecombinator', () => {
 					record['violation'].forEach(v => {
 						violations.push({
 							severity: parseInt(v['$']['severity']),
+							normalizedSeverity: (normalizeSeverity ? parseInt(v['$']['normalizedSeverity']) : undefined),
 							line: parseInt(v['$']['line']),
 							column: parseInt(v['$']['column']),
 							ruleName: v['$']['rule'],
@@ -514,7 +659,7 @@ describe('RuleResultRecombinator', () => {
 
 			it ('Happy Path', async () => {
 				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
-				const ruleResults: RuleResult[] = await convertXmlToJson(results as string);
+				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, false);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
 				// Validate each of the problem rows
@@ -522,7 +667,33 @@ describe('RuleResultRecombinator', () => {
 				allFakeRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed);
+						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				// It's one more than the number of RuleResults because of the post increment.
+				expect(rrIndex).to.equal(3, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy Path - normalized', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
+				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, true);
+				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
 						vIndex++;
 					});
 					rrIndex++
@@ -540,7 +711,7 @@ describe('RuleResultRecombinator', () => {
 
 			it ('Edge Cases', async () => {
 				const results =  (await RuleResultRecombinator.recombineAndReformatResults(edgeCaseResults, OUTPUT_FORMAT.XML, new Set(['eslint']))).results;
-				const ruleResults: RuleResult[] = await convertXmlToJson(results as string);
+				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, false);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
 				// Validate each of the problem rows
@@ -548,7 +719,7 @@ describe('RuleResultRecombinator', () => {
 				edgeCaseResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], edgeCaseResults, rrIndex, vIndex, messageIsTrimmed);
+						validateJson(ruleResults[rrIndex], edgeCaseResults, rrIndex, vIndex, messageIsTrimmed, false);
 						vIndex++;
 					});
 					rrIndex++
@@ -565,20 +736,32 @@ describe('RuleResultRecombinator', () => {
 		});
 
 		describe('Output Format: CSV', () => {
-			function validateCsvRow(violation, expectedResults: RuleResult[], expectedRuleResultIndex: number, expectedViolationIndex: number, expectedProblemNumber: number): void {
+			function validateCsvRow(violation, expectedResults: RuleResult[], expectedRuleResultIndex: number, expectedViolationIndex: number, expectedProblemNumber: number, normalizeSeverity: boolean): void {
 				const expectedRuleResult = expectedResults[expectedRuleResultIndex];
 				const expectedViolation = expectedRuleResult.violations[expectedViolationIndex];
 				expect(violation[0]).to.equal(`${expectedProblemNumber}`, 'Problem number');
 				expect(violation[1]).to.equal(expectedRuleResult.fileName, 'Filename');
 				expect(violation[2]).to.equal(`${expectedViolation.severity}`, 'Severity');
-				expect(violation[3]).to.equal(`${expectedViolation.line}`, 'Line');
-				expect(violation[4]).to.equal(`${expectedViolation.column}`, 'Column');
-				expect(violation[5]).to.equal(expectedViolation.ruleName, 'Rule Name');
-				// The message is trimmed before converting to CSV
-				expect(violation[6]).to.equal(expectedViolation.message.trim(), 'Message');
-				expect(violation[7]).to.equal(expectedViolation.url, 'Url');
-				expect(violation[8]).to.equal(expectedViolation.category, 'Category');
-				expect(violation[9]).to.equal(expectedRuleResult.engine, 'Engine');
+				if (normalizeSeverity){
+					expect(violation[3]).to.equal(`${expectedViolation.normalizedSeverity}`, 'Normalized Severity');
+					expect(violation[4]).to.equal(`${expectedViolation.line}`, 'Line');
+					expect(violation[5]).to.equal(`${expectedViolation.column}`, 'Column');
+					expect(violation[6]).to.equal(expectedViolation.ruleName, 'Rule Name');
+					// The message is trimmed before converting to CSV
+					expect(violation[7]).to.equal(expectedViolation.message.trim(), 'Message');
+					expect(violation[8]).to.equal(expectedViolation.url, 'Url');
+					expect(violation[9]).to.equal(expectedViolation.category, 'Category');
+					expect(violation[10]).to.equal(expectedRuleResult.engine, 'Engine');
+				} else {
+					expect(violation[3]).to.equal(`${expectedViolation.line}`, 'Line');
+					expect(violation[4]).to.equal(`${expectedViolation.column}`, 'Column');
+					expect(violation[5]).to.equal(expectedViolation.ruleName, 'Rule Name');
+					// The message is trimmed before converting to CSV
+					expect(violation[6]).to.equal(expectedViolation.message.trim(), 'Message');
+					expect(violation[7]).to.equal(expectedViolation.url, 'Url');
+					expect(violation[8]).to.equal(expectedViolation.category, 'Category');
+					expect(violation[9]).to.equal(expectedRuleResult.engine, 'Engine');
+				}
 			}
 
 			it ('Happy Path', async () => {
@@ -604,7 +787,47 @@ describe('RuleResultRecombinator', () => {
 				allFakeRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateCsvRow(records[problemNumber], allFakeRuleResults, rrIndex, vIndex, problemNumber);
+						validateCsvRow(records[problemNumber], allFakeRuleResults, rrIndex, vIndex, problemNumber, false);
+						vIndex++;
+						problemNumber++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				// It's one more than the number of problems because of the post increment.
+				expect(problemNumber).to.equal(7, 'Problem Number Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy Path - normalized', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
+				const records = await new Promise((resolve, reject) => {
+					csvParse(results as string, (err, output) => {
+						if (err) {
+							reject(err);
+						}
+						resolve(output);
+					});
+				});
+				expect(records).to.have.lengthOf(7, 'Expected allFakeRuleResults violations plus the header');
+
+				// Validate the header
+				const header = records[0];
+				// TODO: More validation
+				expect(header[0]).to.equal('Problem');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				let problemNumber = 1;
+				allFakeRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateCsvRow(records[problemNumber], allFakeRuleResultsNormalized, rrIndex, vIndex, problemNumber, true);
 						vIndex++;
 						problemNumber++;
 					});
@@ -643,7 +866,7 @@ describe('RuleResultRecombinator', () => {
 				edgeCaseResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateCsvRow(records[problemNumber], edgeCaseResults, rrIndex, vIndex, problemNumber);
+						validateCsvRow(records[problemNumber], edgeCaseResults, rrIndex, vIndex, problemNumber, false);
 						vIndex++;
 						problemNumber++;
 					});
