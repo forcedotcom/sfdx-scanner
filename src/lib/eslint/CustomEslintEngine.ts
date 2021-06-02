@@ -1,13 +1,15 @@
 import {Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport, TargetPattern} from '../../types';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import { EventCreator } from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {Severity} from '../Severity';
 
 
-export class CustomEslintEngine implements RuleEngine {
+
+export class CustomEslintEngine extends AbstractRuleEngine {
 
 	private dependencies: StaticDependencies;
 	private helper: EslintProcessHelper;
@@ -46,6 +48,21 @@ export class CustomEslintEngine implements RuleEngine {
 			rulesets: []
 		};
 		return Promise.resolve(catalog);
+	}
+
+	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
+		for (let x=0; x<results.length; x++){
+            for (let y=0; y<results[x].violations.length; y++){
+                if (results[x].violations[y].severity == 2) {
+					results[x].violations[y].severity = Severity.High;
+				} else if (results[x].violations[y].severity == 1) {
+					results[x].violations[y].severity = Severity.Low;
+				} else {
+					results[x].violations[y].severity = Severity.None;
+				} 
+            }
+        }
+		return results;
 	}
 
 	shouldEngineRun(

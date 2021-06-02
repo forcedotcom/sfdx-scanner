@@ -2,7 +2,7 @@ import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
@@ -11,6 +11,7 @@ import {uxEvents} from "../ScannerEvents";
 import { FileHandler } from '../util/FileHandler';
 import { EventCreator } from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {Severity} from '../Severity';
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -71,7 +72,7 @@ const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 ];
 
 
-abstract class BasePmdEngine implements RuleEngine {
+abstract class BasePmdEngine extends AbstractRuleEngine {
 
 	protected logger: Logger;
 	protected config: Config;
@@ -100,6 +101,23 @@ abstract class BasePmdEngine implements RuleEngine {
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
 	public abstract getCatalog(): Promise<Catalog>;
+
+	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
+		for (let x=0; x<results.length; x++){
+            for (let y=0; y<results[x].violations.length; y++){
+				if (results[x].violations[y].severity == 1) {
+					results[x].violations[y].severity = Severity.High;
+				} else if (results[x].violations[y].severity == 2) {
+					results[x].violations[y].severity = Severity.Medium;
+				} else if (results[x].violations[y].severity >= 3) {
+					results[x].violations[y].severity = Severity.Low;
+				} else {
+					results[x].violations[y].severity = Severity.None;
+				} 
+            }
+        }
+		return results;
+	}
 
 	public async init(): Promise<void> {
 		if (this.initialized) {

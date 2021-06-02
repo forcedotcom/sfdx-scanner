@@ -1,7 +1,7 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {AdvancedTargetPattern, Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 import {ENGINE} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
@@ -10,6 +10,8 @@ import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
+import {Severity} from '../Severity';
+
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
@@ -68,7 +70,7 @@ type RetireJsOutput = {
 	errors?: string[];
 };
 
-export class RetireJsEngine implements RuleEngine {
+export class RetireJsEngine extends AbstractRuleEngine {
 	public static ENGINE_ENUM: ENGINE = ENGINE.RETIRE_JS;
 	public static ENGINE_NAME: string = ENGINE.RETIRE_JS.valueOf();
 	// RetireJS isn't really built to be invoked programmatically, so we'll need to invoke it as a CLI command. However, we
@@ -128,6 +130,21 @@ export class RetireJsEngine implements RuleEngine {
 
 	public getCatalog(): Promise<Catalog> {
 		return Promise.resolve(retireJsCatalog);
+	}
+
+	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
+		for (let x=0; x<results.length; x++){
+            for (let y=0; y<results[x].violations.length; y++){
+                if (results[x].violations[y].severity == 2) {
+					results[x].violations[y].severity = Severity.High;
+				} else if (results[x].violations[y].severity == 1) {
+					results[x].violations[y].severity = Severity.Low;
+				} else {
+					results[x].violations[y].severity = Severity.None;
+				} 
+            }
+        }
+		return results;
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

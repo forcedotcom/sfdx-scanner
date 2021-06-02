@@ -85,7 +85,7 @@ export class DefaultRuleManager implements RuleManager {
 			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
-				ps.push(e.run(engineGroups, engineRules, engineTargets, engineOptions));
+				ps.push(e.runHighLevel(engineGroups, engineRules, engineTargets, engineOptions));
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
 			}

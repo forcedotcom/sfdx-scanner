@@ -2,12 +2,14 @@ import {Logger, SfdxError} from '@salesforce/core';
 import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {Severity} from '../Severity';
+
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -70,7 +72,7 @@ export interface EslintStrategy {
 	processRuleViolation(): ProcessRuleViolationType;
 }
 
-export abstract class BaseEslintEngine implements RuleEngine {
+export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 	private strategy: EslintStrategy;
 	protected logger: Logger;
@@ -150,6 +152,21 @@ export abstract class BaseEslintEngine implements RuleEngine {
 		}
 
 		return Promise.resolve(this.catalog);
+	}
+
+	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
+		for (let x=0; x<results.length; x++){
+            for (let y=0; y<results[x].violations.length; y++){
+                if (results[x].violations[y].severity == 2) {
+					results[x].violations[y].severity = Severity.High;
+				} else if (results[x].violations[y].severity == 1) {
+					results[x].violations[y].severity = Severity.Low;
+				} else {
+					results[x].violations[y].severity = Severity.None;
+				} 
+            }
+        }
+		return results;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */

@@ -18,6 +18,11 @@ export interface RuleEngine {
 	getCatalog(): Promise<Catalog>;
 
 	/**
+	 * Converts the severity created by engine to a normalized value across all engines.
+	 */
+	normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>;
+
+	/**
 	 * Helps make decision to run an engine or not based on the Rules, Target paths and
 	 * the Engine Options selected per run. At this point, we should be already past filtering.
 	 */
@@ -26,7 +31,7 @@ export interface RuleEngine {
 	/**
 	 * @param engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */
-	run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+	runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
 
 	/**
 	 * Invokes sync/async initialization required for the engine
@@ -49,4 +54,24 @@ export interface RuleEngine {
 	 * based on the values provided in the --engine filter and Engine Options
 	 */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+}
+
+export abstract class AbstractRuleEngine implements RuleEngine {
+
+	abstract getName(): string;
+    abstract getTargetPatterns(): Promise<TargetPattern[]>;
+    abstract getCatalog(): Promise<Catalog>;
+    abstract normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>;
+    abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
+    abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+    abstract init(): Promise<void>;
+	abstract matchPath(path: string): boolean;
+	abstract isEnabled(): Promise<boolean>;
+	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+
+    async runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>{
+        const results = await this.run(ruleGroups, rules, target, engineOptions);
+        const normalizedResults = this.normalizeSeverity(results);
+        return normalizedResults;
+    }
 }
