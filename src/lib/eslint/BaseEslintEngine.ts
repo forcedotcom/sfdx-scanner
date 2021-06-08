@@ -8,7 +8,7 @@ import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../Severity';
+import {Severity} from '../util/Severity';
 
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
@@ -158,11 +158,11 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 		for (let x=0; x<results.length; x++){
             for (let y=0; y<results[x].violations.length; y++){
                 if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.High;
+					results[x].violations[y].severity = Severity.HIGH;
 				} else if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.Low;
+					results[x].violations[y].severity = Severity.MODERATE;
 				} else {
-					results[x].violations[y].severity = Severity.None;
+					results[x].violations[y].severity = Severity.NONE;
 				} 
             }
         }

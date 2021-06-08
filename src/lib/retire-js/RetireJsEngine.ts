@@ -10,7 +10,7 @@ import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
-import {Severity} from '../Severity';
+import {Severity} from '../util/Severity';
 
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
@@ -135,12 +135,14 @@ export class RetireJsEngine extends AbstractRuleEngine {
 	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
 		for (let x=0; x<results.length; x++){
             for (let y=0; y<results[x].violations.length; y++){
-                if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.High;
-				} else if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.Low;
+				if (results[x].violations[y].severity == 1) {
+					results[x].violations[y].severity = Severity.HIGH;
+				} else if (results[x].violations[y].severity == 2) {
+					results[x].violations[y].severity = Severity.MODERATE;
+				} else if (results[x].violations[y].severity >= 3) {
+					results[x].violations[y].severity = Severity.LOW;
 				} else {
-					results[x].violations[y].severity = Severity.None;
+					results[x].violations[y].severity = Severity.NONE;
 				} 
             }
         }

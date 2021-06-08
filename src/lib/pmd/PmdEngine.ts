@@ -11,7 +11,7 @@ import {uxEvents} from "../ScannerEvents";
 import { FileHandler } from '../util/FileHandler';
 import { EventCreator } from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../Severity';
+import {Severity} from '../util/Severity';
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -106,13 +106,13 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		for (let x=0; x<results.length; x++){
             for (let y=0; y<results[x].violations.length; y++){
 				if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.High;
+					results[x].violations[y].severity = Severity.HIGH;
 				} else if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.Medium;
+					results[x].violations[y].severity = Severity.MODERATE;
 				} else if (results[x].violations[y].severity >= 3) {
-					results[x].violations[y].severity = Severity.Low;
+					results[x].violations[y].severity = Severity.LOW;
 				} else {
-					results[x].violations[y].severity = Severity.None;
+					results[x].violations[y].severity = Severity.NONE;
 				} 
             }
         }
