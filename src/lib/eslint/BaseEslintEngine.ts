@@ -8,7 +8,7 @@ import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../util/Severity';
+import {Severity} from '../../Constants';
 
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.

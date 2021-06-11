@@ -8,10 +8,10 @@ import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constant
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
-import { FileHandler } from '../util/FileHandler';
-import { EventCreator } from '../util/EventCreator';
+import {FileHandler} from '../util/FileHandler';
+import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../util/Severity';
+import {Severity} from '../../Constants';
 
 
 Messages.importMessagesDirectory(__dirname);

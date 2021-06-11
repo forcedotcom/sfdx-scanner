@@ -10,7 +10,7 @@ import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
-import {Severity} from '../util/Severity';
+import {Severity} from '../../Constants';
 
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a

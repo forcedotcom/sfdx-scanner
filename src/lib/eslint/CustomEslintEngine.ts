@@ -3,9 +3,9 @@ import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
-import { EventCreator } from '../util/EventCreator';
+import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../util/Severity';
+import {Severity} from '../../Constants';
 
 
 
