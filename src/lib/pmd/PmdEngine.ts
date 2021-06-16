@@ -11,8 +11,6 @@ import {uxEvents} from "../ScannerEvents";
 import {FileHandler} from '../util/FileHandler';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../../Constants';
-
 
 Messages.importMessagesDirectory(__dirname);
 const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -101,23 +99,6 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
 	public abstract getCatalog(): Promise<Catalog>;
-
-	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
-		for (let x=0; x<results.length; x++){
-            for (let y=0; y<results[x].violations.length; y++){
-				if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.HIGH;
-				} else if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.MODERATE;
-				} else if (results[x].violations[y].severity >= 3) {
-					results[x].violations[y].severity = Severity.LOW;
-				} else {
-					results[x].violations[y].severity = Severity.NONE;
-				} 
-            }
-        }
-		return results;
-	}
 
 	public async init(): Promise<void> {
 		if (this.initialized) {

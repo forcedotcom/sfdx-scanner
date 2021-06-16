@@ -5,9 +5,6 @@ import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from 
 import {Logger, SfdxError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../../Constants';
-
-
 
 export class CustomEslintEngine extends AbstractRuleEngine {
 
@@ -48,21 +45,6 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			rulesets: []
 		};
 		return Promise.resolve(catalog);
-	}
-
-	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
-		for (let x=0; x<results.length; x++){
-            for (let y=0; y<results[x].violations.length; y++){
-                if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.HIGH;
-				} else if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.MODERATE;
-				} else {
-					results[x].violations[y].severity = Severity.NONE;
-				} 
-            }
-        }
-		return results;
 	}
 
 	shouldEngineRun(

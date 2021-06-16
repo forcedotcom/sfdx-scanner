@@ -1,3 +1,4 @@
+import {Severity, severityMap} from '../../Constants';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 
 export interface RuleEngine {
@@ -61,7 +62,6 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract getName(): string;
     abstract getTargetPatterns(): Promise<TargetPattern[]>;
     abstract getCatalog(): Promise<Catalog>;
-    abstract normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>;
     abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
     abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
     abstract init(): Promise<void>;
@@ -74,4 +74,17 @@ export abstract class AbstractRuleEngine implements RuleEngine {
         const normalizedResults = this.normalizeSeverity(results);
         return normalizedResults;
     }
+	
+	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
+		for (let x=0; x<results.length; x++){
+            for (let y=0; y<results[x].violations.length; y++){
+				results[x].violations[y].severity = this.getSeverity(results[x].violations[y].severity, results[x].engine);
+            }
+        }
+		return results;
+	}
+
+	public getSeverity(severity: number, engine: string): Severity{
+		return severityMap.get(engine).get(severity);
+	}
 }

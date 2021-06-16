@@ -8,8 +8,6 @@ import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Severity} from '../../Constants';
-
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -152,21 +150,6 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 		}
 
 		return Promise.resolve(this.catalog);
-	}
-
-	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
-		for (let x=0; x<results.length; x++){
-            for (let y=0; y<results[x].violations.length; y++){
-                if (results[x].violations[y].severity == 2) {
-					results[x].violations[y].severity = Severity.HIGH;
-				} else if (results[x].violations[y].severity == 1) {
-					results[x].violations[y].severity = Severity.MODERATE;
-				} else {
-					results[x].violations[y].severity = Severity.NONE;
-				} 
-            }
-        }
-		return results;
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
