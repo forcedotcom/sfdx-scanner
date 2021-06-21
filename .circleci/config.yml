@@ -13,22 +13,11 @@ orbs:
   release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
 
-
-commands:
-  https_checkout:
-    steps:
-      - run: |
-          if [ -z "$CIRCLE_BRANCH" ]
-          then
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
-          else
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
-          fi
 jobs:
   build:
     <<: *defaults
     steps:
-      - https_checkout
+      - checkout
 
       # Download and cache dependencies
       - restore_cache:
@@ -160,7 +149,7 @@ jobs:
       size: "medium"
 
     steps:
-      - https_checkout
+      - checkout
 
       - run:
           name: "Install sfdx cli"
@@ -191,7 +180,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - https_checkout
+      - checkout
       - run:
           name: "Merge release"
           command: |
