@@ -259,7 +259,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 						column: v.attributes.begincolumn,
 						endLine: v.attributes.endline,
 						endColumn: v.attributes.endcolumn,
-						severity: v.attributes.priority,
+						severity: Number(v.attributes.priority),
 						ruleName: v.attributes.rule,
 						category: v.attributes.ruleset,
 						url: v.attributes.externalInfoUrl,

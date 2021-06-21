@@ -11,31 +11,31 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: PmdEngine = new PmdEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.PMD)).to.equal(1);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.PMD)).to.equal(2);
         }
         );
 
-        it('test severity value 3', async () =>
+        it('test severity value 3', () =>
         {
             expect(testEngine.getSeverity(3, ENGINE.PMD)).to.equal(3);
         }
         );
 
-        it('test severity value 4', async () =>
+        it('test severity value 4', () =>
         {
             expect(testEngine.getSeverity(4, ENGINE.PMD)).to.equal(3);
         }
         );
 
-        it('test severity value 5', async () =>
+        it('test severity value 5', () =>
         {
             expect(testEngine.getSeverity(5, ENGINE.PMD)).to.equal(3);
         }
@@ -47,31 +47,31 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: CustomPmdEngine = new CustomPmdEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.PMD_CUSTOM)).to.equal(1);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.PMD_CUSTOM)).to.equal(2);
         }
         );
 
-        it('test severity value 3', async () =>
+        it('test severity value 3', () =>
         {
             expect(testEngine.getSeverity(3, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
         );
 
-        it('test severity value 4', async () =>
+        it('test severity value 4', () =>
         {
             expect(testEngine.getSeverity(4, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
         );
 
-        it('test severity value 5', async () =>
+        it('test severity value 5', () =>
         {
             expect(testEngine.getSeverity(5, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
@@ -83,13 +83,13 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: CustomEslintEngine = new CustomEslintEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.ESLINT_CUSTOM)).to.equal(2);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.ESLINT_CUSTOM)).to.equal(1);
         }
@@ -101,13 +101,13 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: JavascriptEslintEngine = new JavascriptEslintEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.ESLINT)).to.equal(2);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.ESLINT)).to.equal(1);
         }
@@ -119,13 +119,13 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: LWCEslintEngine = new LWCEslintEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.ESLINT_LWC)).to.equal(2);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.ESLINT_LWC)).to.equal(1);
         }
@@ -137,13 +137,13 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: TypescriptEslintEngine = new TypescriptEslintEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.ESLINT_TYPESCRIPT)).to.equal(2);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.ESLINT_TYPESCRIPT)).to.equal(1);
         }
@@ -155,19 +155,19 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: RetireJsEngine = new RetireJsEngine();
 
-        it('test severity value 1', async () =>
+        it('test severity value 1', () =>
         {
             expect(testEngine.getSeverity(1, ENGINE.RETIRE_JS)).to.equal(1);
         }
         );
 
-        it('test severity value 2', async () =>
+        it('test severity value 2', () =>
         {
             expect(testEngine.getSeverity(2, ENGINE.RETIRE_JS)).to.equal(2);
         }
         );
 
-        it('test severity value 3', async () =>
+        it('test severity value 3', () =>
         {
             expect(testEngine.getSeverity(3, ENGINE.RETIRE_JS)).to.equal(3);
         }
