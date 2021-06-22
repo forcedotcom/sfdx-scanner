@@ -15,20 +15,18 @@ orbs:
 
 
 commands:
-  https_checkout:
+  auth_and_checkout:
     steps:
-      - run: |
-          if [ -z "$CIRCLE_BRANCH" ]
-          then
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
-          else
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
-          fi
+      - add_ssh_keys:
+          fingerprints:
+            - "8b:63:f7:89:2c:ee:38:43:b6:b2:d5:9a:55:8e:6e:61"
+      - checkout
+
 jobs:
   build:
     <<: *defaults
     steps:
-      - https_checkout
+      - auth_and_checkout
 
       # Download and cache dependencies
       - restore_cache:
@@ -160,7 +158,7 @@ jobs:
       size: "medium"
 
     steps:
-      - https_checkout
+      - auth_and_checkout
 
       - run:
           name: "Install sfdx cli"
@@ -191,7 +189,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - https_checkout
+      - auth_and_checkout
       - run:
           name: "Merge release"
           command: |
