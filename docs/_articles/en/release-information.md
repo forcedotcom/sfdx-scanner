@@ -5,6 +5,20 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.9.2](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.2) (06-23-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.1...v2.9.2)
+
+**Closed issues:**
+
+- Code Scanner not working on Windows [\#417](https://github.com/forcedotcom/sfdx-scanner/issues/417)
+- "Unable to determine a suitable edition, even after broadening." \[BUG\] @W-9296240@ Commands result in error. [\#412](https://github.com/forcedotcom/sfdx-scanner/issues/412)
+
+**Merged pull requests:**
+
+- @W-9344448@: Updated local RetireJS catalog to reflect recent changes. [\#418](https://github.com/forcedotcom/sfdx-scanner/pull/418)
+- @W-9282230@ Changes to release information to include closed issue [\#415](https://github.com/forcedotcom/sfdx-scanner/pull/415)
+
 ## [v2.9.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.1) (05-21-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.8.0...v2.9.1)
