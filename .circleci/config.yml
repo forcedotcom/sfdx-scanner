@@ -19,6 +19,7 @@ commands:
     steps:
       - add_ssh_keys:
           fingerprints:
+            # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
 
