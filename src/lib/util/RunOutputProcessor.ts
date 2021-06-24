@@ -14,6 +14,7 @@ const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 export type RunOutputOptions = {
 	format: OUTPUT_FORMAT;
 	violationsCauseException: boolean;
+	severityForError?: number;
 	outfile?: string;
 }
 
@@ -51,6 +52,8 @@ export class RunOutputProcessor {
 		msgComponents = msgComponents.filter(cmp => cmp && cmp.length > 0);
 		const msg = msgComponents.join('\n');
 		if (minSev > 0 && this.opts.violationsCauseException) {
+			throw new SfdxError(msg, null, null, minSev);
+		} else if (this.opts.severityForError && minSev <= this.opts.severityForError) {
 			throw new SfdxError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
@@ -90,7 +93,7 @@ export class RunOutputProcessor {
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
-		if (minSev > 0 && this.opts.violationsCauseException) {
+		if ((minSev > 0 && this.opts.violationsCauseException) || (this.opts.severityForError && minSev <= this.opts.severityForError)) {
 			msgParts.push(runMessages.getMessage('output.sevDetectionSummary', [minSev]));
 		}
 		return msgParts;

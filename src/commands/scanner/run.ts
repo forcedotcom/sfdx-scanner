@@ -99,8 +99,16 @@ export default class Run extends ScannerCommand {
 			char: 'v',
 			description: messages.getMessage('flags.vceDescription'),
 			longDescription: messages.getMessage('flags.vceDescriptionLong'),
-			exclusive: ['json']
-		})
+			exclusive: ['json'],
+			deprecated: {
+				messageOverride: messages.getMessage('flags.vceParamDeprecationWarning')
+			}
+		}),
+		'severity-for-error': flags.number({
+            char: 's',
+            description: messages.getMessage('flags.sfeDescription'),
+            longDescription: messages.getMessage('flags.sfeDescriptionLong'),
+        })
 	};
 
 	public async run(): Promise<AnyJson> {
@@ -131,6 +139,7 @@ export default class Run extends ScannerCommand {
 		return new RunOutputProcessor({
 			format,
 			violationsCauseException: this.flags['violations-cause-error'],
+			severityForError: this.flags['severity-for-error'],
 			outfile: this.flags.outfile
 		}, this.ux)
 			.processRunOutput(output);
