@@ -32,9 +32,16 @@ describe('scanner:run', function () {
 					'--severity-for-error', '1'
 				])
 				.it('When no violations are found equal to or greater than flag value, no error is thrown', ctx => {
-					//error should not be thrown and we don't see a severity that fits flag value
 
-                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 4, 1]), 'Error should be present');
+                    const output = JSON.parse(ctx.stdout);
+                    // check that test file still has severities of 3
+                    for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+                            expect(output[i].violations[j].severity).to.equal(3);
+                        }
+                    }
+
+                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.sevDetectionSummary', ['1']));
                 
 				});
 
@@ -46,8 +53,15 @@ describe('scanner:run', function () {
 				])
 				.it('When violations are found equal to or greater than flag value, an error is thrown', ctx => {
 
+                    const output = JSON.parse(ctx.stdout);
+                    // check that test file still has severities of 3
+                    for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+                            expect(output[i].violations[j].severity).to.equal(3);
+                        }
+                    }
                     expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
-                    
+
 				});
 		});
 
