@@ -46,9 +46,9 @@ export default class LocalCatalog implements RuleCatalog {
 	public getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
-		// If we weren't given any filters, that should be treated as implicitly including all rules. Since PMD defines its
-		// rules in category files, we should just return all paths corresponding to a category.
-		if (!filters || filters.length === 0) {
+		// We only care about category and ruleset filters. If we didn't get any of those, we can implicitly include all
+		// rules. We do that by returning all categories, since every rule has a category.
+		if (!filters || filters.filter(isRuleGroupFilter).length === 0) {
 			return this.getAllCategoryPaths();
 		}
 		// If we actually do have filters, we'll want to iterate over all of them and see which ones
