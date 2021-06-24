@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "2.8.0",
+	"version": "2.9.2",
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -21,7 +21,7 @@
 		"globby": "^11.0.0",
 		"html-escaper": "^3.0.0",
 		"is-zip": "^1.0.0",
-		"istextorbinary": "^5.12.0",
+		"isbinaryfile": "^4.0.8",
 		"mustache": "^4.0.1",
 		"node-stream-zip": "1.13.2",
 		"normalize-path": "^3.0.0",
@@ -74,7 +74,8 @@
 		"/messages",
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json",
-		"/html-templates"
+		"/html-templates",
+		"/retire-js"
 	],
 	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
 	"keywords": [
