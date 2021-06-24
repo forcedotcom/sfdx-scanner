@@ -108,6 +108,7 @@ export default class Run extends ScannerCommand {
             char: 's',
             description: messages.getMessage('flags.sfeDescription'),
             longDescription: messages.getMessage('flags.sfeDescriptionLong'),
+			exclusive: ['json']
         })
 	};
 
