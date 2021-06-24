@@ -33,29 +33,9 @@ describe('scanner:run', function () {
 				])
 				.it('When no violations are found equal to or greater than flag value, no error is thrown', ctx => {
 					//error should not be thrown and we don't see a severity that fits flag value
-					const output = JSON.parse(ctx.stdout);
 
-                    let shouldError: boolean = false;
-
-                    for (let i=0; i<output.length; i++) {
-                        for (let j=0; j<output[i].violations.length; j++) {
-                            if (output[i].violations[j].severity == 1) {
-                                shouldError = true;
-                            }
-                        }
-                    }
-
-                    if (shouldError) {
-                        expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['1']));
-                    } else {
-                        const output = JSON.parse(ctx.stdout);
-                        expect(output[0].violations[0].message).to.contain('Apex unit tests should System.assert()');
-                        expect(output[0].violations[1].message).to.contain('Apex unit tests should System.assert()');
-                        expect(output[0].violations[2].message).to.contain("Variable 'd1' defined but not used");
-                        expect(output[0].violations[3].message).to.contain("Variable 'd2' defined but not used");
-                        expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 4, 1]), 'Error should be present');
-                    }
-					
+                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 4, 1]), 'Error should be present');
+                
 				});
 
 			setupCommandTest
@@ -66,29 +46,8 @@ describe('scanner:run', function () {
 				])
 				.it('When violations are found equal to or greater than flag value, an error is thrown', ctx => {
 
-                    const output = JSON.parse(ctx.stdout);
-
-                    let shouldError: boolean = false;
-
-                    for (let i=0; i<output.length; i++) {
-                        for (let j=0; j<output[i].violations.length; j++) {
-                            if (output[i].violations[j].severity >= 3) {
-                                shouldError = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (shouldError) {
-                        expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
-                    } else {
-                        const output = JSON.parse(ctx.stdout);
-                        expect(output[0].violations[0].message).to.contain('Apex unit tests should System.assert()');
-                        expect(output[0].violations[1].message).to.contain('Apex unit tests should System.assert()');
-                        expect(output[0].violations[2].message).to.contain("Variable 'd1' defined but not used");
-                        expect(output[0].violations[3].message).to.contain("Variable 'd2' defined but not used");
-                        expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 4, 1]), 'Error should be present');
-                    }
+                    expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
+                    
 				});
 		});
 
