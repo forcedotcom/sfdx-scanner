@@ -76,12 +76,13 @@ export abstract class AbstractRuleEngine implements RuleEngine {
     }
 	
 	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
-		for (let x=0; x<results.length; x++){
-            for (let y=0; y<results[x].violations.length; y++){
-				results[x].violations[y].severity = this.getSeverity(results[x].violations[y].severity, results[x].engine);
-            }
-        }
-		return results;
+		const normalizedResults: RuleResult[] = JSON.parse(JSON.stringify(results));
+		for (let result of normalizedResults) {
+			for (let violation of result.violations) {
+				violation.severity = this.getSeverity(violation.severity, result.engine);
+			}
+		}
+		return normalizedResults;
 	}
 
 	public getSeverity(severity: number, engine: string): Severity{
