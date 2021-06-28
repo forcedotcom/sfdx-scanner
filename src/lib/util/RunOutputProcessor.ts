@@ -53,7 +53,7 @@ export class RunOutputProcessor {
 		const msg = msgComponents.join('\n');
 		if (minSev > 0 && this.opts.violationsCauseException) {
 			throw new SfdxError(msg, null, null, minSev);
-		} else if (this.opts.severityForError && minSev <= this.opts.severityForError) {
+		} else if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
 			throw new SfdxError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
@@ -79,6 +79,14 @@ export class RunOutputProcessor {
 		return this.opts.violationsCauseException ? INTERNAL_ERROR_CODE : 1;
 	}
 
+	private shouldErrorForSeverity(minSev: number, severityForError): boolean {
+		if (severityForError == undefined) return false; // flag not used
+		// We want to throw an error when the highest severity (smallest num) is 
+		// equal to or more severe (equal to or less than number-wise) than the inputted number
+		if (minSev <= this.opts.severityForError) return true; 
+		return false;
+	}
+
 	private buildRunSummaryMsgParts(rrr: RecombinedRuleResults): string[] {
 		const {summaryMap, minSev} = rrr;
 		let msgParts: string[] = [];
@@ -93,7 +101,7 @@ export class RunOutputProcessor {
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
-		if ((minSev > 0 && this.opts.violationsCauseException) || (this.opts.severityForError && minSev <= this.opts.severityForError)) {
+		if ((minSev > 0 && this.opts.violationsCauseException) || (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
 			msgParts.push(runMessages.getMessage('output.sevDetectionSummary', [minSev]));
 		}
 		return msgParts;
