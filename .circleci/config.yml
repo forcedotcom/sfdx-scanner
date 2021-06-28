@@ -22,6 +22,16 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
+  sanity_test:
+    parameters:
+      cmd:
+        type: string
+    steps:
+      - run:
+          name: "sanity_test_list"
+          command: << parameters.cmd >> scanner:rule:list
+
+
 
 jobs:
   build:
@@ -49,25 +59,28 @@ jobs:
           paths: .
 
       # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
+#      - run:
+#          name: test
+#          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+#          when: always
+#
+#      - run:
+#          name: eslint
+#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+#          when: always
 
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
+      - sanity_test:
+          cmd: bin/run
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+#      - gradle/collect_test_results:
+#          reports_path: pmd-cataloger/build/reports/
+#          test_results_path: pmd-cataloger/build/test-results/
+#
+#      - store_test_results:
+#          path: test-results
+#
+#      - store_artifacts: # upload test coverage as artifact.
+#          path: test-coverage
   windows-build:
     executor:
       name: win/default # executor type
@@ -250,36 +263,37 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      - windows-build:
-          requires:
-            - build
-      - unpackaged-sanity:
-          requires:
-            - windows-build
-      - self-evaluation:
-          requires:
-            - windows-build
-      - publish-latest:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
-          requires:
-            - build
-            - self-evaluation
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
-      - packaged-sanity:
-          requires:
-            - publish-latest
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+#      - windows-build:
+#          requires:
+#            - build
+#      - unpackaged-sanity:
+#          requires:
+#            - windows-build
+#      - self-evaluation:
+#          requires:
+#            - windows-build
+#      - publish-latest:
+#          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
+#          requires:
+#            - build
+#            - self-evaluation
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#      - packaged-sanity:
+#          requires:
+#            - publish-latest
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#
