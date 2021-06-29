@@ -22,14 +22,42 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
+  set_sanity_test_envvars:
+    parameters:
+      sep:
+        type: string
+    steps:
+      - run:
+          name: "Set $FORCE_APP_PATH"
+          command: |
+            FORCE_APP_PATH=".<< parameters.sep >>test<< parameters.sep >>code-fixtures<< parameters.sep >>projects<< parameters.sep >>app<< parameters.sep >>force-app
+  # The sanity_test command is meant to smoke test the entire plugin. It does so by running a series of operations that
+  # collectively capture a vertical slice of the plugin, hitting every major piece of functionality. If they all succeed,
+  # then we can conclude that the plugin is approximately stable.
   sanity_test:
     parameters:
       cmd:
         type: string
+      sep:
+        type: string
     steps:
+      - set_sanity_test_envvars
+          sep: << parameters.sep >>
       - run:
-          name: "sanity_test_list"
+          name: "List all rules w/out filters"
           command: << parameters.cmd >> scanner:rule:list
+      - run:
+          name: "Filter rules by engine"
+          command: << parameters.cmd >> scanner:rule:list --engine eslint
+      - run:
+          name: "Describe a real rule"
+          command: << parameters.cmd >> scanner:rule:describe -n EmptyCatchBlock
+      - run:
+          name: "Describe non-existent rule"
+          command: << parameters.cmd >> scanner:rule:describe -n NotAnActualRule
+      - run:
+          name: "Run rules against the force-app" # This should run the PMD and ESLint engines
+          command: << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile test-results<< parameters.sep >>run1.xml
 
 
 
@@ -71,6 +99,7 @@ jobs:
 
       - sanity_test:
           cmd: bin/run
+          sep: /
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
