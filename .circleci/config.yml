@@ -35,6 +35,8 @@ commands:
         type: string
     steps:
       - run:
+          command: echo $SEP
+      - run:
           name: "List all rules w/out filters"
           command: << parameters.cmd >> scanner:rule:list
       - run:
@@ -55,6 +57,8 @@ commands:
 jobs:
   build:
     <<: *defaults
+    environment:
+      SEP: /
     steps:
       - auth_and_checkout
 
