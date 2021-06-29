@@ -56,8 +56,8 @@ commands:
           name: "Run rules against a typescript file" # This should run ESLint-Typescript
           command: |
             BASE_PATH=".${SEP}test${SEP}code-fixtures${SEP}$projects${SEP}"
-            TARGET=".${BASE_PATH}ts${SEP}src${SEP}simpleYetWrong.ts"
-            TSCONFIG=".${BASE_PATH}tsconfig.json"
+            TARGET="${BASE_PATH}ts${SEP}src${SEP}simpleYetWrong.ts"
+            TSCONFIG="${BASE_PATH}tsconfig.json"
             OUTFILE_PATH=".${SEP}test-results${SEP}run2.xml"
             << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
       - run:
