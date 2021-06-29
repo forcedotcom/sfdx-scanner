@@ -50,7 +50,24 @@ commands:
           command: << parameters.cmd >> scanner:rule:describe -n NotAnActualRule
       - run:
           name: "Run rules against the force-app" # This should run the PMD and ESLint engines
-          command: << parameters.cmd >> scanner:run --target << parameters.forceapppath >> --format junit --outfile << parameters.testresultspath >>run1.xml
+          command: |
+            FORCE_APP_PATH=".$SEPtest$SEPcode-fixtures$SEPprojects$SEPapp$SEPforce-app"
+            OUTFILE_PATH=".$SEPtest-results$SEPrun1.xml"
+            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH
+      - run:
+          name: "Run rules against a typescript file" # This should run ESLint-Typescript
+          command: |
+            BASE_PATH=".$SEPtest$SEPcode-fixtures$SEP$projects$SEP"
+            TARGET=".$BASE_PATHts$SEPsrc$SEPsimpleYetWrong.ts"
+            TSCONFIG=".$BASE_PATHtsconfig.json"
+            OUTFILE_PATH=".$SEPtest-results$SEPrun2.xml"
+            << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
+      - run:
+          name: "Run RetireJS against a folder" # This should run RetireJS
+          command: |
+            TARGET_PATH=".$SEPtest$SEPcode-fixtures$SEPprojects$SEPdep-test-app$SEPfolder-a"
+            OUTFILE_PATH=".$SEPtest-results$SEPrun3.xml"
+            << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
 
 
 
