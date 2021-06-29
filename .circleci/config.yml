@@ -22,6 +22,71 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
+  # The sanity_test command is meant to smoke test the entire plugin. It does so by running a series of operations that
+  # collectively capture a vertical slice of the plugin, hitting every major piece of functionality. If they all succeed,
+  # then we can conclude that the plugin is approximately stable.
+  sanity_test:
+    parameters:
+      cmd:
+        type: string
+    steps:
+      - run:
+          name: "List all rules w/out filters"
+          command: << parameters.cmd >> scanner:rule:list
+      - run:
+          name: "Filter rules by engine"
+          command: << parameters.cmd >> scanner:rule:list --engine eslint
+      - run:
+          name: "Describe a real rule"
+          command: << parameters.cmd >> scanner:rule:describe -n EmptyCatchBlock
+      - run:
+          name: "Describe non-existent rule"
+          command: << parameters.cmd >> scanner:rule:describe -n NotAnActualRule
+      - run:
+          name: "Run rules against the force-app" # This should run the PMD and ESLint engines
+          command: |
+            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run1.xml"
+            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH
+      - run:
+          name: "Run rules against a typescript file" # This should run ESLint-Typescript
+          command: |
+            BASE_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}"
+            TARGET="${BASE_PATH}ts${SEP}src${SEP}simpleYetWrong.ts"
+            TSCONFIG="${BASE_PATH}tsconfig.json"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run2.xml"
+            << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
+      - run:
+          name: "Run RetireJS against a folder" # This should run RetireJS
+          command: |
+            TARGET_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}dep-test-app${SEP}folder-a"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
+            << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
+      - run:
+          name: "Add custom rules"
+          command: |
+            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.cmd >> scanner:rule:add --language apex --path $RULE_PATH
+      - run:
+          name: "List rules including custom rule"
+          command: << parameters.cmd >> scanner:rule:list --engine pmd
+      - run:
+          name: "Describe a custom rule"
+          command: << parameters.cmd >> scanner:rule:describe -n fakerule1 # This is the name of a rule in the jar we added.
+      - run:
+          name: "Run a custom rule"
+          command: |
+            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
+            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH --category SomeCat1 # This is a category added by the custom rule JAR
+      - run:
+          name: "Remove the custom rules"
+          command: |
+            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.cmd >> scanner:rule:remove --path $RULE_PATH --force # Use the force flag to skip confirmation
+      - run:
+          name: "List the rules a third time" # This should make sure that removing the custom rules didn't break anything
+          command: << parameters.cmd >> scanner:rule:list
 
 jobs:
   build:
@@ -132,6 +197,8 @@ jobs:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
+    environment:
+      SEP: \
 
     steps:
       # Commands are run in a Windows virtual machine environment
@@ -140,14 +207,8 @@ jobs:
 
       - run: md test-results
 
-      - run:
-          name: "List rules"
-          command: bin\run.cmd scanner:rule:list
-
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+      - sanity_test:
+          cmd: bin\run.cmd
 
       # Upload results
       - store_test_results:
@@ -157,6 +218,8 @@ jobs:
     executor:
       name: win/default # executor type
       size: "medium"
+    environment:
+      SEP: \
 
     steps:
       - auth_and_checkout
@@ -171,14 +234,8 @@ jobs:
           shell: cmd.exe
           command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
-      - run:
-          name: "List rules"
-          command: sfdx scanner:rule:list
-
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+      - sanity_test:
+          cmd: sfdx
 
       # Upload results
       - store_test_results:
