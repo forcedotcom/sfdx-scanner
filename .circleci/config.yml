@@ -88,6 +88,10 @@ jobs:
 #          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
 #          when: always
 
+      # NOTE: This one might not need to be copied?
+      - run:
+          command: mkdir test-results
+
       - sanity_test:
           cmd: bin/run
           forceapppath: test/code-fixtures/projects/app/force-app
