@@ -29,10 +29,6 @@ commands:
     parameters:
       cmd:
         type: string
-      forceapppath:
-        type: string
-      testresultspath:
-        type: string
     steps:
       - run:
           name: "List all rules w/out filters"
@@ -66,8 +62,31 @@ commands:
             TARGET_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}dep-test-app${SEP}folder-a"
             OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
             << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
-
-
+      - run:
+          name: "Add custom rules"
+          command: |
+            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.cmd >> scanner:rule:add --language apex --path $RULE_PATH
+      - run:
+          name: "List rules including custom rule"
+          command: << parameters.cmd >> scanner:rule:list --engine pmd
+      - run:
+          name: "Describe a custom rule"
+          command: << parameters.cmd >> scanner:rule:describe -n fakerule1 # This is the name of a rule in the jar we added.
+      - run:
+          name: "Run a custom rule"
+          command: |
+            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
+            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH --category SomeCat1 # This is a category added by the custom rule JAR
+      - run:
+          name: "Remove the custom rules"
+          command: |
+            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.cmd >> scanner:rule:remove --path $RULE_PATH --force # Use the force flag to skip confirmation
+      - run:
+          name: "List the rules a third time" # This should make sure that removing the custom rules didn't break anything
+          command: << parameters.cmd >> scanner:rule:list
 
 jobs:
   build:
@@ -113,8 +132,6 @@ jobs:
 
       - sanity_test:
           cmd: bin/run
-          forceapppath: test/code-fixtures/projects/app/force-app
-          testresultspath: test-results/
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
