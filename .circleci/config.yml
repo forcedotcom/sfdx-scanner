@@ -35,8 +35,6 @@ commands:
         type: string
     steps:
       - run:
-          command: echo $SEP
-      - run:
           name: "List all rules w/out filters"
           command: << parameters.cmd >> scanner:rule:list
       - run:
@@ -51,22 +49,22 @@ commands:
       - run:
           name: "Run rules against the force-app" # This should run the PMD and ESLint engines
           command: |
-            FORCE_APP_PATH=".$SEPtest$SEPcode-fixtures$SEPprojects$SEPapp$SEPforce-app"
-            OUTFILE_PATH=".$SEPtest-results$SEPrun1.xml"
+            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run1.xml"
             << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH
       - run:
           name: "Run rules against a typescript file" # This should run ESLint-Typescript
           command: |
-            BASE_PATH=".$SEPtest$SEPcode-fixtures$SEP$projects$SEP"
-            TARGET=".$BASE_PATHts$SEPsrc$SEPsimpleYetWrong.ts"
+            BASE_PATH=".${SEP}test${SEP}code-fixtures${SEP}$projects${SEP}"
+            TARGET=".$BASE_PATHts${SEP}src${SEP}simpleYetWrong.ts"
             TSCONFIG=".$BASE_PATHtsconfig.json"
-            OUTFILE_PATH=".$SEPtest-results$SEPrun2.xml"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run2.xml"
             << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
       - run:
           name: "Run RetireJS against a folder" # This should run RetireJS
           command: |
-            TARGET_PATH=".$SEPtest$SEPcode-fixtures$SEPprojects$SEPdep-test-app$SEPfolder-a"
-            OUTFILE_PATH=".$SEPtest-results$SEPrun3.xml"
+            TARGET_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}dep-test-app${SEP}folder-a"
+            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
             << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
 
 
