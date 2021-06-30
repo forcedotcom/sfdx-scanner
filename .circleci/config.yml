@@ -226,7 +226,7 @@ jobs:
           envVarPrefix: "Env:"
 
       # Upload results
-      - store_test_results:
+      - store_artifacts:
           path: test-results
 
   packaged-sanity:
@@ -255,8 +255,8 @@ jobs:
           envVarPrefix: "Env:"
 
       # Upload results
-      - store_test_results:
-          path: test-results
+      - store_artifacts:
+          - path: test-results
 
   auto-merge-release:
     <<: *defaults
