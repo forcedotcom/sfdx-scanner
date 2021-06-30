@@ -29,6 +29,12 @@ commands:
     parameters:
       cmd:
         type: string
+      # This parameter is needed because some shells require variable declarations to have the `$` and others don't.
+      # E.g., in a normal bash shell, you can do `MYVAR=whatever`, but in powershell, you have to do `$MYVAR=whatever`.
+      # This parameter handles that.
+      varDecPrefix:
+        default: ""
+        type: string
     steps:
       - run:
           name: "List all rules w/out filters"
@@ -45,27 +51,27 @@ commands:
       - run:
           name: "Run rules against the force-app" # This should run the PMD and ESLint engines
           command: |
-            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
-            OUTFILE_PATH=".${SEP}test-results${SEP}run1.xml"
+            << parameters.varDecPrefix >>FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            << parameters.varDecPrefix >>OUTFILE_PATH=".${SEP}test-results${SEP}run1.xml"
             << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH
       - run:
           name: "Run rules against a typescript file" # This should run ESLint-Typescript
           command: |
-            BASE_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}"
-            TARGET="${BASE_PATH}ts${SEP}src${SEP}simpleYetWrong.ts"
-            TSCONFIG="${BASE_PATH}tsconfig.json"
-            OUTFILE_PATH=".${SEP}test-results${SEP}run2.xml"
+            << parameters.varDecPrefix >>BASE_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}"
+            << parameters.varDecPrefix >>TARGET="${BASE_PATH}ts${SEP}src${SEP}simpleYetWrong.ts"
+            << parameters.varDecPrefix >>TSCONFIG="${BASE_PATH}tsconfig.json"
+            << parameters.varDecPrefix >>OUTFILE_PATH=".${SEP}test-results${SEP}run2.xml"
             << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
       - run:
           name: "Run RetireJS against a folder" # This should run RetireJS
           command: |
-            TARGET_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}dep-test-app${SEP}folder-a"
-            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
+            << parameters.varDecPrefix >>TARGET_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}dep-test-app${SEP}folder-a"
+            << parameters.varDecPrefix >>OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
             << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
       - run:
           name: "Add custom rules"
           command: |
-            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.varDecPrefix >>RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
             << parameters.cmd >> scanner:rule:add --language apex --path $RULE_PATH
       - run:
           name: "List rules including custom rule"
@@ -76,13 +82,13 @@ commands:
       - run:
           name: "Run a custom rule"
           command: |
-            FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
-            OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
+            << parameters.varDecPrefix >>FORCE_APP_PATH=".${SEP}test${SEP}code-fixtures${SEP}projects${SEP}app${SEP}force-app"
+            << parameters.varDecPrefix >>OUTFILE_PATH=".${SEP}test-results${SEP}run3.xml"
             << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH --category SomeCat1 # This is a category added by the custom rule JAR
       - run:
           name: "Remove the custom rules"
           command: |
-            RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
+            << parameters.varDecPrefix >>RULE_PATH=".${SEP}test${SEP}test-jars${SEP}apex${SEP}testjar1.jar"
             << parameters.cmd >> scanner:rule:remove --path $RULE_PATH --force # Use the force flag to skip confirmation
       - run:
           name: "List the rules a third time" # This should make sure that removing the custom rules didn't break anything
@@ -130,8 +136,8 @@ jobs:
       - run:
           command: mkdir test-results
 
-      - sanity_test:
-          cmd: bin/run
+#      - sanity_test:
+#          cmd: bin/run
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
@@ -156,25 +162,25 @@ jobs:
       - run: mkdir test-results
 
       # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+#      - run:
+#          name: test
+#          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+#          when: always
+#
+#      - run:
+#          name: eslint
+#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+#          when: always
+#
+#      - gradle/collect_test_results:
+#          reports_path: pmd-cataloger/build/reports/
+#          test_results_path: pmd-cataloger/build/test-results/
+#
+#      - store_test_results:
+#          path: test-results
+#
+#      - store_artifacts: # upload test coverage as artifact.
+#          path: test-coverage
 
   self-evaluation:
     <<: *defaults
@@ -206,6 +212,8 @@ jobs:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
+    environment:
+      SEP: \
 
     steps:
       # Commands are run in a Windows virtual machine environment
@@ -214,49 +222,43 @@ jobs:
 
       - run: md test-results
 
-      - run:
-          name: "List rules"
-          command: bin\run.cmd scanner:rule:list
+      - run: echo $SEP
 
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
-          path: test-results
+#      - sanity_test:
+#          cmd: bin\run.cmd
+#          varDecPrefix: $
+#
+#      # Upload results
+#      - store_test_results:
+#          path: test-results
 
   packaged-sanity:
     executor:
       name: win/default # executor type
       size: "medium"
+    environment:
+      SEP: \
 
     steps:
       - auth_and_checkout
 
-      - run:
-          name: "Install sfdx cli"
-          shell: cmd.exe
-          command: npm install -g sfdx-cli
-
-      - run:
-          name: "Install plugin"
-          shell: cmd.exe
-          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
-
-      - run:
-          name: "List rules"
-          command: sfdx scanner:rule:list
-
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
-          path: test-results
+#      - run:
+#          name: "Install sfdx cli"
+#          shell: cmd.exe
+#          command: npm install -g sfdx-cli
+#
+#      - run:
+#          name: "Install plugin"
+#          shell: cmd.exe
+#          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+#
+#      - sanity_test:
+#          cmd: sfdx
+#          varDecPrefix: $
+#
+#      # Upload results
+#      - store_test_results:
+#          path: test-results
 
   auto-merge-release:
     <<: *defaults
@@ -324,15 +326,15 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-#      - windows-build:
-#          requires:
-#            - build
-#      - unpackaged-sanity:
-#          requires:
-#            - windows-build
-#      - self-evaluation:
-#          requires:
-#            - windows-build
+      - windows-build:
+          requires:
+            - build
+      - unpackaged-sanity:
+          requires:
+            - windows-build
+      - self-evaluation:
+          requires:
+            - windows-build
 #      - publish-latest:
 #          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
 #          requires:
