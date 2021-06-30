@@ -222,7 +222,7 @@ jobs:
 
       - run: md test-results
 
-      - run: echo $SEP
+      - run: echo $Env:SEP
 
 #      - sanity_test:
 #          cmd: bin\run.cmd
