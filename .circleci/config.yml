@@ -222,7 +222,10 @@ jobs:
 
       - run: md test-results
 
-      - run: echo $Env:SEP
+      - run: |
+        echo ${Env:SEP}
+        $MY_VAR=".${Env:SEP}beep-boop${Env:SEP}bleep-bloop"
+        echo $MY_VAR
 
 #      - sanity_test:
 #          cmd: bin\run.cmd
