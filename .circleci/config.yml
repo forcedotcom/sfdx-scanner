@@ -213,7 +213,7 @@ jobs:
       size: "medium"
     working_directory: C:\repo
     environment:
-      SEP: \
+      SEP: "\"
 
     steps:
       # Commands are run in a Windows virtual machine environment
@@ -237,7 +237,7 @@ jobs:
       name: win/default # executor type
       size: "medium"
     environment:
-      SEP: \
+      SEP: "\"
 
     steps:
       - auth_and_checkout
