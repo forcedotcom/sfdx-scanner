@@ -158,6 +158,8 @@ jobs:
       # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
       shell: bash.exe
     working_directory: C:\repo
+    environment:
+      SEP: \
     steps:
       - attach_workspace:
           at: C:\repo
