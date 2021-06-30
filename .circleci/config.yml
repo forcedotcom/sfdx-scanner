@@ -256,7 +256,7 @@ jobs:
 
       # Upload results
       - store_artifacts:
-          - path: test-results
+          path: test-results
 
   auto-merge-release:
     <<: *defaults
