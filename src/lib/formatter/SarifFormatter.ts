@@ -74,13 +74,6 @@ abstract class SarifFormatter {
 				if (!this.ruleMap.has(v.ruleName)) {
 					const vRule: Rule = catalog.getRule(r.engine, v.ruleName);
 
-					const properties = {
-						category: v.category,
-						severity: v.severity,
-						normalizedSeverity: undefined
-					}
-					if (this.normalizeSeverity) properties.normalizedSeverity = v.normalizedSeverity;
-					
 					// v.Rule may be undefined if there was an error
 					const description: string = vRule?.description ? vRule.description : v.message;
 					this.ruleMap.set(v.ruleName, this.ruleMap.size);
@@ -90,7 +83,11 @@ abstract class SarifFormatter {
 							// Replace newline at beginning and end of line
 							text: description.trim().replace(/^\n/, '').replace(/\n$/, '')
 						},
-						properties: properties
+						properties: {
+						category: v.category,
+						severity: v.severity,
+						normalizedSeverity: (this.normalizeSeverity ? v.normalizedSeverity : undefined)
+					}
 					};
 					if (v.url) {
 						rule['helpUri'] = v.url;
