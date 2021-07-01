@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {OUTPUT_FORMAT, OUTPUT_OPTIONS} from '../RuleManager';
+import {OUTPUT_FORMAT, OutputOptions} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
 import * as Mustache from 'mustache';
@@ -11,7 +11,7 @@ import { constructSarif } from './SarifFormatter'
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], outputOptions: OUTPUT_OPTIONS, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], outputOptions: OutputOptions, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
 		switch (outputOptions.format) {
@@ -22,16 +22,16 @@ export class RuleResultRecombinator {
 				formattedResults = await this.constructHtml(results, outputOptions.normalizeSeverity);
 				break;
 			case OUTPUT_FORMAT.JSON:
-				formattedResults = this.constructJson(results);
+				formattedResults = this.constructJson(results); // normalizeSeverity not needed because the json will display automatically if it sees the value
 				break;
 			case OUTPUT_FORMAT.JUNIT:
-				formattedResults = this.constructJunit(results);
+				formattedResults = this.constructJunit(results); // normalizeSeverity not needed because this output format doesn't include severity
 				break;
 			case OUTPUT_FORMAT.SARIF:
-				formattedResults = await constructSarif(results, executedEngines, outputOptions.normalizeSeverity);//
+				formattedResults = await constructSarif(results, executedEngines, outputOptions.normalizeSeverity);
 				break;
 			case OUTPUT_FORMAT.TABLE:
-				formattedResults = this.constructTable(results);
+				formattedResults = this.constructTable(results); // normalizeSeverity not needed because this output format doesn't include severity
 				break;
 			case OUTPUT_FORMAT.XML:
 				formattedResults = this.constructXml(results, outputOptions.normalizeSeverity);
@@ -48,25 +48,16 @@ export class RuleResultRecombinator {
 			return 0;
 		}
 		let minSev = null;
-
+		
 		// if -n or -s flag used, minSev is calculated with normal value
-		if (normalizeSeverity) {
-			for (const res of results) {
-				for (const violation of res.violations) {
-					if (!minSev || violation.severity < minSev) {
-						minSev = violation.normalizedSeverity;
-					}
-				}
+		for (const res of results) {
+			for (const violation of res.violations) {
+			  var severity = (violation.normalizedSeverity == undefined)? violation.severity : violation.normalizedSeverity;
+			  if (!minSev || severity < minSev) {
+				minSev = severity;
+			  }
 			}
-		} else {
-			for (const res of results) {
-				for (const violation of res.violations) {
-					if (!minSev || violation.severity < minSev) {
-						minSev = violation.severity;
-					}
-				}
-			}
-		}
+		  }
 		
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;
@@ -123,8 +114,11 @@ export class RuleResultRecombinator {
 				const escapedUrl = this.safeHtmlEscape(v.url);
 
 				problemCount++;
-				if (normalizeSeverity) violations += `<violation severity="${v.severity}" normalizedSeverity="${v.normalizedSeverity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
-				else violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				if (normalizeSeverity) {
+					violations += `<violation severity="${v.severity}" normalizedSeverity="${v.normalizedSeverity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				} else {
+					violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				}
 
 			}
 			resultXml += `
@@ -308,8 +302,11 @@ URL: ${url}
 			const fileName = result.fileName;
 			for (const v of result.violations) {
 				const msg = v.message.trim();
-				if (normalizeSeverity) csvRows.push([++problemCount, fileName, v.severity, v.normalizedSeverity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
-				else csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+				if (normalizeSeverity) {
+					csvRows.push([++problemCount, fileName, v.severity, v.normalizedSeverity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+				} else {
+					csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+				}
 			}
 		}
 

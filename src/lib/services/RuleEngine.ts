@@ -1,4 +1,4 @@
-import {Severity, severityMap} from '../../Constants';
+import {Severity, SeverityMap} from '../../Constants';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 
 export interface RuleEngine {
@@ -32,7 +32,7 @@ export interface RuleEngine {
 	/**
 	 * @param engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */
-	runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>;
+	runEngine(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>;
 
 	/**
 	 * Invokes sync/async initialization required for the engine
@@ -60,16 +60,16 @@ export interface RuleEngine {
 export abstract class AbstractRuleEngine implements RuleEngine {
 
 	abstract getName(): string;
-    abstract getTargetPatterns(): Promise<TargetPattern[]>;
-    abstract getCatalog(): Promise<Catalog>;
-    abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
-    abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
-    abstract init(): Promise<void>;
+	abstract getTargetPatterns(): Promise<TargetPattern[]>;
+	abstract getCatalog(): Promise<Catalog>;
+	abstract shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
+	abstract run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+	abstract init(): Promise<void>;
 	abstract matchPath(path: string): boolean;
 	abstract isEnabled(): Promise<boolean>;
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
-    async runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>{
+    async runEngine(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>{
         const results = await this.run(ruleGroups, rules, target, engineOptions);
 		if (normalizeSeverity) {
 			this.normalizeSeverity(results);
@@ -86,6 +86,6 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	}
 
 	public getNormalSeverity(severity: number, engine: string): Severity{
-		return severityMap.get(engine).get(severity);
+		return SeverityMap.get(engine).get(severity);
 	}
 }

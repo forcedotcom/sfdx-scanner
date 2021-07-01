@@ -81,11 +81,17 @@ export class RunOutputProcessor {
 
 	// determines if -s flag should cause an error 
 	private shouldErrorForSeverity(minSev: number, severityForError): boolean {
-		if (severityForError == undefined) return false; // flag not used
-		if (minSev == 0) return false;
+		if (severityForError == undefined) {
+			return false; // flag not used
+		}
+		if (minSev == 0) {
+			return false;
+		}
 		// We want to throw an error when the highest severity (smallest num) is 
 		// equal to or more severe (equal to or less than number-wise) than the inputted number
-		if (minSev <= this.opts.severityForError) return true; 
+		if (minSev <= this.opts.severityForError) {
+			return true; 
+		}
 		return false;
 	}
 

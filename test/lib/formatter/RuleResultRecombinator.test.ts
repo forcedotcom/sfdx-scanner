@@ -229,8 +229,11 @@ function validateJson(ruleResult: RuleResult, expectedResults: RuleResult[], exp
 	expect(ruleResult.fileName).to.equal(expectedRuleResult.fileName, 'Filename');
 	expect(ruleResult.engine).to.equal(expectedRuleResult.engine, 'Engine');
 	expect(violation.severity).to.equal(expectedViolation.severity, 'Severity');
-	if (normalizeSeverity) expect(violation.normalizedSeverity).to.equal(expectedViolation.normalizedSeverity, 'Normalized Severity');
-	else expect(violation.normalizedSeverity).to.equal(undefined);
+	if (normalizeSeverity) {
+		expect(violation.normalizedSeverity).to.equal(expectedViolation.normalizedSeverity, 'Normalized Severity');
+	} else {
+		expect(violation.normalizedSeverity).to.equal(undefined);
+	}
 	expect(violation.line).to.equal(expectedViolation.line, 'Line');
 	expect(violation.column).to.equal(expectedViolation.column, 'Column');
 	expect(violation.ruleName).to.equal(expectedViolation.ruleName, 'Rule Name');
@@ -363,8 +366,11 @@ describe('RuleResultRecombinator', () => {
 				expect(rule.shortDescription.text).to.equal('disallow unused variables');
 				expect(rule.properties.category).to.equal('Variables');
 				expect(rule.properties.severity).to.equal(2);
-				if (normalizeSeverity) expect(rule.properties.normalizedSeverity).to.equal(1);
-				else expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				if (normalizeSeverity) {
+					expect(rule.properties.normalizedSeverity).to.equal(1);
+				} else {
+					expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				}
 				expect(rule.helpUri).to.equal('https://eslint.org/docs/rules/no-unused-vars');
 
 				// one of the violations has 'exception=2'. It will end up in the toolExecutionNotifications node
@@ -421,8 +427,11 @@ describe('RuleResultRecombinator', () => {
 				expect(rule.shortDescription.text).to.equal(`The second parameter of System.assert/third parameter of System.assertEquals/System.assertNotEquals is a message.\nHaving a second/third parameter provides more information and makes it easier to debug the test failure and\nimproves the readability of test output.`);
 				expect(rule.properties.category).to.equal('Best Practices');
 				expect(rule.properties.severity).to.equal(4);
-				if (normalizeSeverity) expect(rule.properties.normalizedSeverity).to.equal(3);
-				else expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				if (normalizeSeverity) {
+					expect(rule.properties.normalizedSeverity).to.equal(3);
+				} else {
+					expect(rule.properties.normalizedSeverity).to.equal(undefined);
+				}
 				expect(rule.helpUri).to.equal('https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage');
 
 				rule = driver['rules'][1];

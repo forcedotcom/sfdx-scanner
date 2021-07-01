@@ -5,7 +5,7 @@ import {LooseObject, RecombinedRuleResults} from '../../types';
 import {AllowedEngineFilters, INTERNAL_ERROR_CODE} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
-import {OUTPUT_FORMAT, OUTPUT_OPTIONS} from '../../lib/RuleManager';
+import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
 import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import {RunOutputProcessor} from '../../lib/util/RunOutputProcessor';
@@ -108,7 +108,7 @@ export default class Run extends ScannerCommand {
             char: 's',
             description: messages.getMessage('flags.sfeDescription'),
             longDescription: messages.getMessage('flags.sfeDescriptionLong'),
-			exclusive: ['json']
+			exclusive: ['json', 'violations-cause-error'],
         }),
 		"normalize-severity": flags.boolean({
 			char: 'n',
@@ -121,13 +121,16 @@ export default class Run extends ScannerCommand {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
 
+		// if severty-for-error flag is used, we want to make sure the severities are normalized
+		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-for-error'];
+
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
 
 		// We need to derive the output format, either from information that was explicitly provided or from default values.
 		// We can't use the defaultValue property for the flag, because there needs to be a difference between defaulting
 		// to a value and having the user explicitly select it.
-		const outputOptions: OUTPUT_OPTIONS = {format: this.determineOutputFormat(), normalizeSeverity: this.flags['normalize-severity']};
+		const outputOptions: OutputOptions = {format: this.determineOutputFormat(), normalizeSeverity: normalizeSeverity};
 		const ruleManager = await Controller.createRuleManager();
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
@@ -195,9 +198,6 @@ export default class Run extends ScannerCommand {
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
 			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
-
-		// if severty-for-error flag is used, we want to make sure the severities are normalized
-		if (this.flags['severity-for-error']) this.flags['normalize-severity'] = true;
 
 		// Be liberal with the user, but do log an info message if they choose a file extension that does not match their format.
 		if (this.flags.format && this.flags.outfile) {

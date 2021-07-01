@@ -8,7 +8,6 @@ Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 
 describe('scanner:run', function () {
-	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('E2E', () => {
 		
@@ -79,14 +78,23 @@ describe('scanner:run', function () {
 					for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
 							if (output[i].engine.includes("pmd")){
-								if (output[i].violations[j].severity == 1) expect(output[i].violations[j].normalizedSeverity).to.equal(1);
-								else if (output[i].violations[j].severity == 2) expect(output[i].violations[j].normalizedSeverity).to.equal(2);
-								else if (output[i].violations[j].severity == 3) expect(output[i].violations[j].normalizedSeverity).to.equal(3);
-								else if (output[i].violations[j].severity == 4) expect(output[i].violations[j].normalizedSeverity).to.equal(3);
-								else if (output[i].violations[j].severity == 5) expect(output[i].violations[j].normalizedSeverity).to.equal(3);	
-							} else if (output[i].engine.includes("eslint")){
-								if (output[i].violations[j].severity == 1) expect(output[i].violations[j].normalizedSeverity).to.equal(2);
-								else if (output[i].violations[j].severity == 2) expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+								if (output[i].violations[j].severity == 1) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+								} else if (output[i].violations[j].severity == 2) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								} else if (output[i].violations[j].severity == 3) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								} else if (output[i].violations[j].severity == 4) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								} else if (output[i].violations[j].severity == 5) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);	
+								}
+							} else if (output[i].engine.includes("eslint")) {
+								if (output[i].violations[j].severity == 1) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								} else if (output[i].violations[j].severity == 2) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+								}
 							}
 													
                         }
