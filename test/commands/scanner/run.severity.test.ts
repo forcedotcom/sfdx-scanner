@@ -65,5 +65,50 @@ describe('scanner:run', function () {
 				});
 		});
 
+		describe('--normalize-severity flag', () => {
+
+			setupCommandTest
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures'),
+					'--format', 'json',
+					'-n'
+				])
+				.it('Ensure normalized severity is correct', ctx => {
+					const output = JSON.parse(ctx.stdout);
+
+					for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+							if (output[i].engine.includes("pmd")){
+								if (output[i].violations[j].severity == 1) expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+								else if (output[i].violations[j].severity == 2) expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								else if (output[i].violations[j].severity == 3) expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								else if (output[i].violations[j].severity == 4) expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								else if (output[i].violations[j].severity == 5) expect(output[i].violations[j].normalizedSeverity).to.equal(3);	
+							} else if (output[i].engine.includes("eslint")){
+								if (output[i].violations[j].severity == 1) expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								else if (output[i].violations[j].severity == 2) expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+							}
+													
+                        }
+                    }
+				});
+
+			setupCommandTest
+				.command(['scanner:run',
+					'--target', path.join('test', 'code-fixtures'),
+					'--format', 'json'
+				])
+				.it('Ensure normalized severity is not outputted when -n not provided', ctx => {
+					const output = JSON.parse(ctx.stdout);
+
+					for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+							expect(output[i].violations[j].normalizedSeverity).to.equal(undefined);													
+                        }
+                    }
+				});
+			
+		});
+
 	});
 });
