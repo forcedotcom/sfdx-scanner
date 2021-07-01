@@ -13,31 +13,31 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.PMD)).to.equal(1);
+            expect(testEngine.getNormalSeverity(1, ENGINE.PMD)).to.equal(1);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.PMD)).to.equal(2);
+            expect(testEngine.getNormalSeverity(2, ENGINE.PMD)).to.equal(2);
         }
         );
 
         it('test severity value 3', () =>
         {
-            expect(testEngine.getSeverity(3, ENGINE.PMD)).to.equal(3);
+            expect(testEngine.getNormalSeverity(3, ENGINE.PMD)).to.equal(3);
         }
         );
 
         it('test severity value 4', () =>
         {
-            expect(testEngine.getSeverity(4, ENGINE.PMD)).to.equal(3);
+            expect(testEngine.getNormalSeverity(4, ENGINE.PMD)).to.equal(3);
         }
         );
 
         it('test severity value 5', () =>
         {
-            expect(testEngine.getSeverity(5, ENGINE.PMD)).to.equal(3);
+            expect(testEngine.getNormalSeverity(5, ENGINE.PMD)).to.equal(3);
         }
         );
     }
@@ -49,31 +49,31 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.PMD_CUSTOM)).to.equal(1);
+            expect(testEngine.getNormalSeverity(1, ENGINE.PMD_CUSTOM)).to.equal(1);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.PMD_CUSTOM)).to.equal(2);
+            expect(testEngine.getNormalSeverity(2, ENGINE.PMD_CUSTOM)).to.equal(2);
         }
         );
 
         it('test severity value 3', () =>
         {
-            expect(testEngine.getSeverity(3, ENGINE.PMD_CUSTOM)).to.equal(3);
+            expect(testEngine.getNormalSeverity(3, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
         );
 
         it('test severity value 4', () =>
         {
-            expect(testEngine.getSeverity(4, ENGINE.PMD_CUSTOM)).to.equal(3);
+            expect(testEngine.getNormalSeverity(4, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
         );
 
         it('test severity value 5', () =>
         {
-            expect(testEngine.getSeverity(5, ENGINE.PMD_CUSTOM)).to.equal(3);
+            expect(testEngine.getNormalSeverity(5, ENGINE.PMD_CUSTOM)).to.equal(3);
         }
         );
     }
@@ -85,13 +85,13 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.ESLINT_CUSTOM)).to.equal(2);
+            expect(testEngine.getNormalSeverity(1, ENGINE.ESLINT_CUSTOM)).to.equal(2);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.ESLINT_CUSTOM)).to.equal(1);
+            expect(testEngine.getNormalSeverity(2, ENGINE.ESLINT_CUSTOM)).to.equal(1);
         }
         );
     }
@@ -103,13 +103,13 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.ESLINT)).to.equal(2);
+            expect(testEngine.getNormalSeverity(1, ENGINE.ESLINT)).to.equal(2);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.ESLINT)).to.equal(1);
+            expect(testEngine.getNormalSeverity(2, ENGINE.ESLINT)).to.equal(1);
         }
         );
     }
@@ -121,13 +121,13 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.ESLINT_LWC)).to.equal(2);
+            expect(testEngine.getNormalSeverity(1, ENGINE.ESLINT_LWC)).to.equal(2);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.ESLINT_LWC)).to.equal(1);
+            expect(testEngine.getNormalSeverity(2, ENGINE.ESLINT_LWC)).to.equal(1);
         }
         );
     }
@@ -139,13 +139,13 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.ESLINT_TYPESCRIPT)).to.equal(2);
+            expect(testEngine.getNormalSeverity(1, ENGINE.ESLINT_TYPESCRIPT)).to.equal(2);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.ESLINT_TYPESCRIPT)).to.equal(1);
+            expect(testEngine.getNormalSeverity(2, ENGINE.ESLINT_TYPESCRIPT)).to.equal(1);
         }
         );
     }
@@ -157,19 +157,19 @@ describe('normalizeSeverity', () =>
 
         it('test severity value 1', () =>
         {
-            expect(testEngine.getSeverity(1, ENGINE.RETIRE_JS)).to.equal(1);
+            expect(testEngine.getNormalSeverity(1, ENGINE.RETIRE_JS)).to.equal(1);
         }
         );
 
         it('test severity value 2', () =>
         {
-            expect(testEngine.getSeverity(2, ENGINE.RETIRE_JS)).to.equal(2);
+            expect(testEngine.getNormalSeverity(2, ENGINE.RETIRE_JS)).to.equal(2);
         }
         );
 
         it('test severity value 3', () =>
         {
-            expect(testEngine.getSeverity(3, ENGINE.RETIRE_JS)).to.equal(3);
+            expect(testEngine.getNormalSeverity(3, ENGINE.RETIRE_JS)).to.equal(3);
         }
         );
     }

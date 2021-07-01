@@ -21,7 +21,7 @@ export interface RuleEngine {
 	/**
 	 * Converts the severity created by engine to a normalized value across all engines.
 	 */
-	normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>;
+	normalizeSeverity(results: RuleResult[]);
 
 	/**
 	 * Helps make decision to run an engine or not based on the Rules, Target paths and
@@ -32,7 +32,7 @@ export interface RuleEngine {
 	/**
 	 * @param engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */
-	runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>;
+	runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>;
 
 	/**
 	 * Invokes sync/async initialization required for the engine
@@ -69,23 +69,23 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract isEnabled(): Promise<boolean>;
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
-    async runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]>{
+    async runHighLevel(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>{
         const results = await this.run(ruleGroups, rules, target, engineOptions);
-        const normalizedResults = this.normalizeSeverity(results);
-        return normalizedResults;
+		if (normalizeSeverity) {
+			this.normalizeSeverity(results);
+		}
+        return results;
     }
 	
-	public async normalizeSeverity(results: RuleResult[]): Promise<RuleResult[]>{
-		const normalizedResults: RuleResult[] = JSON.parse(JSON.stringify(results));
-		for (let result of normalizedResults) {
-			for (let violation of result.violations) {
-				violation.severity = this.getSeverity(violation.severity, result.engine);
+	public async normalizeSeverity(results: RuleResult[]){
+		for (const result of results) {
+			for (const violation of result.violations) {
+				violation.normalizedSeverity = this.getNormalSeverity(violation.severity, result.engine);
 			}
 		}
-		return normalizedResults;
 	}
 
-	public getSeverity(severity: number, engine: string): Severity{
+	public getNormalSeverity(severity: number, engine: string): Severity{
 		return severityMap.get(engine).get(severity);
 	}
 }

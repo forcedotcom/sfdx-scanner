@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {OUTPUT_FORMAT} from '../RuleManager';
+import {OUTPUT_FORMAT, OUTPUT_OPTIONS} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
 import * as Mustache from 'mustache';
@@ -11,15 +11,15 @@ import { constructSarif } from './SarifFormatter'
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], outputOptions: OUTPUT_OPTIONS, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
-		switch (format) {
+		switch (outputOptions.format) {
 			case OUTPUT_FORMAT.CSV:
-				formattedResults = await this.constructCsv(results);
+				formattedResults = await this.constructCsv(results, outputOptions.normalizeSeverity);
 				break;
 			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results);
+				formattedResults = await this.constructHtml(results, outputOptions.normalizeSeverity);
 				break;
 			case OUTPUT_FORMAT.JSON:
 				formattedResults = this.constructJson(results);
@@ -28,33 +28,46 @@ export class RuleResultRecombinator {
 				formattedResults = this.constructJunit(results);
 				break;
 			case OUTPUT_FORMAT.SARIF:
-				formattedResults = await constructSarif(results, executedEngines);
+				formattedResults = await constructSarif(results, executedEngines, outputOptions.normalizeSeverity);//
 				break;
 			case OUTPUT_FORMAT.TABLE:
 				formattedResults = this.constructTable(results);
 				break;
 			case OUTPUT_FORMAT.XML:
-				formattedResults = this.constructXml(results);
+				formattedResults = this.constructXml(results, outputOptions.normalizeSeverity);
 				break;
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
-		return {minSev: this.findMinSev(results), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
+		return {minSev: this.findMinSev(results, outputOptions.normalizeSeverity), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
 	}
 
-	private static findMinSev(results: RuleResult[]): number {
+	private static findMinSev(results: RuleResult[], normalizeSeverity: boolean): number {
 		// If there are no results, then there are no errors.
 		if (!results || results.length === 0) {
 			return 0;
 		}
 		let minSev = null;
-		for (const res of results) {
-			for (const violation of res.violations) {
-				if (!minSev || violation.severity < minSev) {
-					minSev = violation.severity;
+
+		// if -n or -s flag used, minSev is calculated with normal value
+		if (normalizeSeverity) {
+			for (const res of results) {
+				for (const violation of res.violations) {
+					if (!minSev || violation.severity < minSev) {
+						minSev = violation.normalizedSeverity;
+					}
+				}
+			}
+		} else {
+			for (const res of results) {
+				for (const violation of res.violations) {
+					if (!minSev || violation.severity < minSev) {
+						minSev = violation.severity;
+					}
 				}
 			}
 		}
+		
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;
 	}
@@ -77,7 +90,7 @@ export class RuleResultRecombinator {
 		return summaryMap;
 	}
 
-	private static constructXml(results: RuleResult[]): string {
+	private static constructXml(results: RuleResult[], normalizeSeverity: boolean): string {
 		let resultXml = ``;
 
 		// If the results were just an empty string, we can return it.
@@ -110,7 +123,9 @@ export class RuleResultRecombinator {
 				const escapedUrl = this.safeHtmlEscape(v.url);
 
 				problemCount++;
-				violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				if (normalizeSeverity) violations += `<violation severity="${v.severity}" normalizedSeverity="${v.normalizedSeverity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				else violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+
 			}
 			resultXml += `
       <result file="${escapedFileName}" engine="${result.engine}">
@@ -227,12 +242,11 @@ URL: ${url}
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
-	private static async constructHtml(results: RuleResult[]): Promise<string> {
+	private static async constructHtml(results: RuleResult[], normalizeSeverity: boolean): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
-
 		const violations = [];
 		for (const result of results) {
 			for (const v of result.violations) {
@@ -243,7 +257,7 @@ URL: ${url}
 					column: v.column,
 					endLine: v.endLine || null,
 					endColumn: v.endColumn || null,
-					severity: v.severity,
+					severity: (normalizeSeverity ? v.normalizedSeverity : v.severity),
 					ruleName: v.ruleName,
 					category: v.category,
 					url: v.url,
@@ -274,22 +288,28 @@ URL: ${url}
 		return Mustache.render(template, templateData);
 	}
 
-	private static async constructCsv(results: RuleResult[]): Promise<string> {
+	private static async constructCsv(results: RuleResult[], normalizeSeverity: boolean): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
 
 		const csvRows = [];
-		// Gradually build our CSV, starting with these columns.
-		csvRows.push(['Problem', 'File', 'Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
-		let problemCount = 0;
 
+		if (normalizeSeverity){
+			csvRows.push(['Problem', 'File', 'Severity', 'Normalized Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
+		} else {
+			csvRows.push(['Problem', 'File', 'Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
+
+		}
+
+		let problemCount = 0;
 		for (const result of results) {
 			const fileName = result.fileName;
 			for (const v of result.violations) {
 				const msg = v.message.trim();
-				csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+				if (normalizeSeverity) csvRows.push([++problemCount, fileName, v.severity, v.normalizedSeverity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+				else csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
 			}
 		}
 

@@ -4,7 +4,7 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {OUTPUT_FORMAT, RuleManager} from './RuleManager';
+import {OUTPUT_OPTIONS, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -62,7 +62,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], outputOptions: OUTPUT_OPTIONS, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];
@@ -85,7 +85,7 @@ export class DefaultRuleManager implements RuleManager {
 			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
-				ps.push(e.runHighLevel(engineGroups, engineRules, engineTargets, engineOptions));
+				ps.push(e.runHighLevel(engineGroups, engineRules, engineTargets, engineOptions, outputOptions.normalizeSeverity));
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
 			}
@@ -106,8 +106,8 @@ export class DefaultRuleManager implements RuleManager {
 			const psResults: RuleResult[][] = await Promise.all(ps);
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
-			this.logger.trace(`Recombining results into requested format ${format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, format, executedEngines);
+			this.logger.trace(`Recombining results into requested format ${outputOptions.format}`);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, outputOptions, executedEngines);
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}

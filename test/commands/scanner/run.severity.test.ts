@@ -37,7 +37,7 @@ describe('scanner:run', function () {
                     // check that test file still has severities of 3
                     for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
-                            expect(output[i].violations[j].severity).to.equal(3);
+                            expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
 
@@ -57,7 +57,7 @@ describe('scanner:run', function () {
                     // check that test file still has severities of 3
                     for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
-                            expect(output[i].violations[j].severity).to.equal(3);
+                            expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
                     expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
