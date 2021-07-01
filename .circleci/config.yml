@@ -22,80 +22,6 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
-  # The sanity_test command is meant to smoke test the entire plugin. It does so by running a series of operations that
-  # collectively capture a vertical slice of the plugin, hitting every major piece of functionality. If they all succeed,
-  # then we can conclude that the plugin is approximately stable.
-  sanity_test:
-    parameters:
-      cmd:
-        type: string
-      # This parameter is needed because some shells require variable declarations to have the `$` and others don't.
-      # E.g., in a normal bash shell, you can do `MYVAR=whatever`, but in powershell, you have to do `$MYVAR=whatever`.
-      # This parameter handles that.
-      varDecPrefix:
-        default: ""
-        type: string
-      envVarPrefix:
-        default: ""
-        type: string
-    steps:
-      - run:
-          name: "List all rules w/out filters"
-          command: << parameters.cmd >> scanner:rule:list
-      - run:
-          name: "Filter rules by engine"
-          command: << parameters.cmd >> scanner:rule:list --engine eslint
-      - run:
-          name: "Describe a real rule"
-          command: << parameters.cmd >> scanner:rule:describe -n EmptyCatchBlock
-      - run:
-          name: "Describe non-existent rule"
-          command: << parameters.cmd >> scanner:rule:describe -n NotAnActualRule
-      - run:
-          name: "Run rules against the force-app" # This should run the PMD and ESLint engines
-          command: |
-            << parameters.varDecPrefix >>FORCE_APP_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}code-fixtures${<< parameters.envVarPrefix >>SEP}projects${<< parameters.envVarPrefix >>SEP}app${<< parameters.envVarPrefix >>SEP}force-app"
-            << parameters.varDecPrefix >>OUTFILE_PATH=".${<< parameters.envVarPrefix >>SEP}test-results${<< parameters.envVarPrefix >>SEP}run1.xml"
-            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH
-      - run:
-          name: "Run rules against a typescript file" # This should run ESLint-Typescript
-          command: |
-            << parameters.varDecPrefix >>BASE_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}code-fixtures${<< parameters.envVarPrefix >>SEP}projects${<< parameters.envVarPrefix >>SEP}"
-            << parameters.varDecPrefix >>TARGET="${BASE_PATH}ts${<< parameters.envVarPrefix >>SEP}src${<< parameters.envVarPrefix >>SEP}simpleYetWrong.ts"
-            << parameters.varDecPrefix >>TSCONFIG="${BASE_PATH}tsconfig.json"
-            << parameters.varDecPrefix >>OUTFILE_PATH=".${<< parameters.envVarPrefix >>SEP}test-results${<< parameters.envVarPrefix >>SEP}run2.xml"
-            << parameters.cmd >> scanner:run --target $TARGET --format junit --tsconfig $TSCONFIG --outfile $OUTFILE_PATH
-      - run:
-          name: "Run RetireJS against a folder" # This should run RetireJS
-          command: |
-            << parameters.varDecPrefix >>TARGET_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}code-fixtures${<< parameters.envVarPrefix >>SEP}projects${<< parameters.envVarPrefix >>SEP}dep-test-app${<< parameters.envVarPrefix >>SEP}folder-a"
-            << parameters.varDecPrefix >>OUTFILE_PATH=".${<< parameters.envVarPrefix >>SEP}test-results${<< parameters.envVarPrefix >>SEP}run3.xml"
-            << parameters.cmd >> scanner:run --engine retire-js --target $TARGET_PATH --format junit --outfile $OUTFILE_PATH
-      - run:
-          name: "Add custom rules"
-          command: |
-            << parameters.varDecPrefix >>RULE_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}test-jars${<< parameters.envVarPrefix >>SEP}apex${<< parameters.envVarPrefix >>SEP}testjar1.jar"
-            << parameters.cmd >> scanner:rule:add --language apex --path $RULE_PATH
-      - run:
-          name: "List rules including custom rule"
-          command: << parameters.cmd >> scanner:rule:list --engine pmd
-      - run:
-          name: "Describe a custom rule"
-          command: << parameters.cmd >> scanner:rule:describe -n fakerule1 # This is the name of a rule in the jar we added.
-      - run:
-          name: "Run a custom rule"
-          command: |
-            << parameters.varDecPrefix >>FORCE_APP_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}code-fixtures${<< parameters.envVarPrefix >>SEP}projects${<< parameters.envVarPrefix >>SEP}app${<< parameters.envVarPrefix >>SEP}force-app"
-            << parameters.varDecPrefix >>OUTFILE_PATH=".${<< parameters.envVarPrefix >>SEP}test-results${<< parameters.envVarPrefix >>SEP}run3.xml"
-            << parameters.cmd >> scanner:run --target $FORCE_APP_PATH --format junit --outfile $OUTFILE_PATH --category SomeCat1 # This is a category added by the custom rule JAR
-      - run:
-          name: "Remove the custom rules"
-          command: |
-            << parameters.varDecPrefix >>RULE_PATH=".${<< parameters.envVarPrefix >>SEP}test${<< parameters.envVarPrefix >>SEP}test-jars${<< parameters.envVarPrefix >>SEP}apex${<< parameters.envVarPrefix >>SEP}testjar1.jar"
-            << parameters.cmd >> scanner:rule:remove --path $RULE_PATH --force # Use the force flag to skip confirmation
-      - run:
-          name: "List the rules a third time" # This should make sure that removing the custom rules didn't break anything
-          command: << parameters.cmd >> scanner:rule:list
 
 jobs:
   build:
@@ -139,8 +65,9 @@ jobs:
       - run:
           command: mkdir test-results
 
-      - sanity_test:
-          cmd: bin/run
+      - run:
+          name: "Local sanity"
+          command: ./smoke-tests/bash-posix.sh bin/run
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
@@ -165,8 +92,10 @@ jobs:
           at: C:\repo
 
       - run: mkdir test-results
-      - sanity_test:
-          cmd: bin/run
+        -
+      - run:
+          name: "Local sanity"
+          command: ./smoke-tests/bash-windows.sh bin/run
 
       # UNIT TESTS
 #      - run:
