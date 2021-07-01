@@ -141,16 +141,11 @@ jobs:
       - run: md test-results
 
       - run:
-          name: "List rules"
-          command: bin\run.cmd scanner:rule:list
+          name: "Unpackaged sanity test"
+          command: smoke-tests\powershell.cmd bin\run.cmd
 
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
+      # Upload an artifact for the results, so they're visible without failing the test.
+      - store_artifacts:
           path: test-results
 
   packaged-sanity:
@@ -172,16 +167,11 @@ jobs:
           command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
       - run:
-          name: "List rules"
-          command: sfdx scanner:rule:list
+          name: "Packaged sanity test"
+          command: smoke-tests\powershell.cmd sfdx
 
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
+      # Upload an artifact for the results, so they're visible without failing the tests
+      - store_artifacts:
           path: test-results
 
   auto-merge-release:
