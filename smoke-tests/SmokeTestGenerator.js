@@ -31,7 +31,7 @@ ${cmt} FROM THE PROJECT ROOT!\n`;
 	}
 
 	// Bash and cmd have different ways of declaring variables.
-	header += `EXE_NAME=${isBash ? '$1' : '%1'}\n`;
+	header += isBash ? 'EXE_NAME=$1\n' : 'SET EXE_NAME=%1\n';
 
 	return header;
 }

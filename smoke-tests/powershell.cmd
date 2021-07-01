@@ -5,7 +5,7 @@ REM of the plugin, hitting every major piece of functionality. If they all succe
 REM the plugin is approximately stable.
 REM DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/SmokeTestGenerator.js AND RERUN THAT SCRIPT
 REM FROM THE PROJECT ROOT!
-EXE_NAME=%1
+SET EXE_NAME=%1
 echo "==== List all rules w/out filters ===="
 %EXE_NAME% scanner:rule:list || exit
 echo "==== Filter rules by engine ===="
