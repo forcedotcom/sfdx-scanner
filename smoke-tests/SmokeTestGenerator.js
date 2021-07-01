@@ -14,6 +14,7 @@ function generateScriptHeader(isBash) {
 	// Bash scripts require a special header.
 	let header = isBash ? '#!/bin/bash\n' : "";
 
+	// All the scripts should have this boilerplate disclaimer.
 	header += `# Auto-generated on ${new Date(Date.now()).toDateString()}
 #
 # This script smoke-tests the entire plugin by running a series of commands that collectively capture a
@@ -21,11 +22,15 @@ function generateScriptHeader(isBash) {
 # conclude that the plugin is approximately stable.
 #
 # DO NOT EDIT THIS SCRIPT DIRECTLY!
-# INSTEAD, MAKE CHANGES IN 	./SmokeTestGenerator.js, 
+# INSTEAD, MAKE CHANGES IN 	./SmokeTestGenerator.js, AND RERUN THAT SCRIPT FROM THE PROJECT ROOT DIRECTORY.
 
 `;
 
-	header += isBash ? 'set -e\n' : "";
+	// Bash and powershell require different flags to be set to make them exit after an error.
+	header += isBash ? 'set -e\n' : '$ErrorActionPreference="Stop"\n';
+
+	// Bash and powershell reference arguments differently, but variables identically. So we'll create a variable here.
+	header += isBash ? "EXE_NAME=$1\n" : "$EXE_NAME=$args[0]\n";
 	return header;
 }
 
@@ -39,36 +44,38 @@ function generateScriptContent(delim) {
 	const resultsPath = ['test-results'];
 
 	return `echo "List all rules w/out filters"
-$1 scanner:rule:list
+$EXE_NAME scanner:rule:list
 echo "Filter rules by engine"
-$1 scanner:rule:list --engine eslint
+$EXE_NAME scanner:rule:list --engine eslint
 echo "Describe a real rule"
-$1 scanner:rule:describe -n EmptyCatchBlock
+$EXE_NAME scanner:rule:describe -n EmptyCatchBlock
 echo "Describe a non-existent rule"
-$1 scanner:rule:describe -n NotAnActualRule
+$EXE_NAME scanner:rule:describe -n NotAnActualRule
 echo "Run rules against force-app, which should hit PMD and ESLint engines"
-$1 scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run1.xml'], delim)}
+$EXE_NAME scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run1.xml'], delim)}
 echo "Run rules against a typescript file, which should run ESLint-Typescript"
-$1 scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'run2.xml'], delim)}
+$EXE_NAME scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'run2.xml'], delim)}
 echo "Run RetireJS against a folder"
-$1 scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'run3.xml'], delim)}
+$EXE_NAME scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'run3.xml'], delim)}
 echo "Add a JAR of custom rules"
-$1 scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}
+$EXE_NAME scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}
 echo "List the rules, including the custom ones"
-$1 scanner:rule:list --engine pmd
+$EXE_NAME scanner:rule:list --engine pmd
 echo "Describe a custom rule"
-$1 scanner:rule:describe -n fakerule1
+$EXE_NAME scanner:rule:describe -n fakerule1
 echo "Run a custom rule"
-$1 scanner:run --format junit --category "SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}
+$EXE_NAME scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}
 echo "Remove a custom rule"
-$1 scanner:rule:remove --path ${buildPath(customRulePath, delim)} --force
+$EXE_NAME scanner:rule:remove --path ${buildPath(customRulePath, delim)} --force
 echo "List the rules a final time, to make sure nothing broke"
-$1 scanner:rule:list`;
+$EXE_NAME scanner:rule:list`;
 }
 
 
 // We need the following set of smoke tests:
-// Bash scripts for both POSIX and Windows that run a local version of the plugin.
+// Bash scripts for both POSIX and Windows.
 fs.writeFileSync(path.join('smoke-tests', 'bash-posix.sh'), generateScriptHeader(true) + generateScriptContent('/'));
 fs.writeFileSync(path.join('smoke-tests', 'bash-windows.sh'), generateScriptHeader(true) + generateScriptContent('\\'));
+// A .cmd script for Powershell
+fs.writeFileSync(path.join('smoke-tests', 'ps-windows.cmd'), generateScriptHeader(false) + generateScriptContent('\\'));
 

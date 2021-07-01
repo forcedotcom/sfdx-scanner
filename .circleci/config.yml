@@ -165,10 +165,9 @@ jobs:
             $MY_VAR=".${Env:SEP}beep-boop${Env:SEP}bleep-bloop"
             echo $MY_VAR
 
-      - sanity_test:
-          cmd: bin\run.cmd
-          varDecPrefix: $
-          envVarPrefix: "Env:"
+      - run:
+          name: "San"
+          command: smoke-tests\ps-windows.cmd bin\run.cmd
 #
 #      # Upload results
 #      - store_test_results:

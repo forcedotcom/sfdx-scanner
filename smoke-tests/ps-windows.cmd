@@ -1,4 +1,3 @@
-#!/bin/bash
 # Auto-generated on Thu Jul 01 2021
 #
 # This script smoke-tests the entire plugin by running a series of commands that collectively capture a
@@ -8,8 +7,8 @@
 # DO NOT EDIT THIS SCRIPT DIRECTLY!
 # INSTEAD, MAKE CHANGES IN 	./SmokeTestGenerator.js, AND RERUN THAT SCRIPT FROM THE PROJECT ROOT DIRECTORY.
 
-set -e
-EXE_NAME=$1
+$ErrorActionPreference="Stop"
+$EXE_NAME=$args[0]
 echo "List all rules w/out filters"
 $EXE_NAME scanner:rule:list
 echo "Filter rules by engine"
