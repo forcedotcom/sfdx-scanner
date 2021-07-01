@@ -65,9 +65,9 @@ jobs:
       - run:
           command: mkdir test-results
 
-      - run:
-          name: "Local sanity"
-          command: ./smoke-tests/bash.sh bin/run
+#      - run:
+#          name: "Local sanity"
+#          command: ./smoke-tests/bash.sh bin/run
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
@@ -93,10 +93,10 @@ jobs:
 
       - run: mkdir test-results
 
-      - run:
-          name: "Local sanity"
-          command: ./smoke-tests/bash.sh bin/run
-
+#      - run:
+#          name: "Local sanity"
+#          command: ./smoke-tests/bash.sh bin/run
+#
       # UNIT TESTS
 #      - run:
 #          name: test

@@ -78,12 +78,12 @@ function generateScriptBody(isBash, delim) {
 	];
 
 	// In a cmd script, the only reliable way to exit after an error is to append an extra statement to every line.
-	if (!isBash) {
-		for (let i = 1; i < commands.length; i += 2) {
-			// This little snippet should only be executed if the command fails.
-			commands[i] += ' || exit';
-		}
-	}
+//	if (!isBash) {
+//		for (let i = 1; i < commands.length; i += 2) {
+//			// This little snippet should only be executed if the command fails.
+//			commands[i] += ' || exit';
+//		}
+//	}
 
 	// Combine the commands together and return the script body.
 	return commands.join('\n');
