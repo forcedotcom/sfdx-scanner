@@ -139,6 +139,85 @@ const allFakeRuleResults: RuleResult[] = [
 	}
 ];
 
+const allFakeRuleResultsNormalized: RuleResult[] = [
+	{
+		engine: 'eslint',
+		fileName: sampleFile1,
+		violations: [{
+			"line": 2,
+			"column": 11,
+			"severity": 2,
+			"normalizedSeverity": 1,
+			"message": "'unusedParam1' is defined but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars"
+		}]
+	},
+	{
+		engine: 'eslint',
+		fileName: sampleFile2,
+		violations: [{
+			"line": 4,
+			"column": 11,
+			"severity": 1,
+			"normalizedSeverity": 2,
+			"message": "'unusedParam2' is defined but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars"
+		}, {
+			"line": 6,
+			"column": 9,
+			"severity": 2,
+			"normalizedSeverity": 1,
+			"message": "'unusedVar' is assigned a value but never used.",
+			"ruleName": "no-unused-vars",
+			"category": "Variables",
+			"url": "https://eslint.org/docs/rules/no-unused-vars",
+			"exception": true
+		}]
+	},
+	{
+		engine: "pmd",
+		fileName: sampleFile3,
+		violations: [{
+			"line": 2,
+			"column": 1,
+			"endLine": 2,
+			"endColumn": 57,
+			"severity": 4,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexAssertionsShouldIncludeMessage",
+			"category": "Best Practices",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_bestpractices.html#apexassertionsshouldincludemessage",
+			"message": "\nAvoid unused imports such as 'sfdc.sfdx.scanner.messaging.SfdxMessager'\n"
+		}, {
+			"line": 4,
+			"column": 8,
+			"endLine": 56,
+			"endColumn": 1,
+			"severity": 3,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexDoc",
+			"category": "Documentation",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#apexdoc",
+			"message": "\nEnum comments are required\n"
+		}, {
+			"line": 5,
+			"column": 1,
+			"endLine": 5,
+			"endColumn": 2,
+			"severity": 3,
+			"normalizedSeverity": 3,
+			"ruleName": "ApexUnitTestClassShouldHaveAsserts",
+			"category": "Best Practices",
+			"url": "https://pmd.github.io/pmd-6.22.0/pmd_rules_java_documentation.html#commentsize",
+			"message": "\nComment is too large: Line too long\n"
+		}]
+	}
+];
+
 function isString(x: string | {columns; rows}): x is string {
 	return typeof x === 'string';
 }
@@ -426,6 +505,32 @@ describe('RuleResultRecombinator', () => {
 			const messageIsTrimmed = false;
 			it ('Happy Path', async () => {
 				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, new Set(['eslint', 'pmd']));
+				const ruleResults: RuleResult[] = JSON.parse(results as string);
+				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				// It's one more than the number of RuleResults because of the post increment.
+				expect(rrIndex).to.equal(3, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
+				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy Path', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: true}, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
