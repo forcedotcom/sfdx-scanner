@@ -112,9 +112,8 @@ export default class Run extends ScannerCommand {
         }),
 		"normalize-severity": flags.boolean({
 			char: 'n',
-			//TODO: create new messages
-			description: messages.getMessage('flags.vceDescription'),
-			longDescription: messages.getMessage('flags.vceDescriptionLong')
+			description: messages.getMessage('flags.nsDescription'),
+			longDescription: messages.getMessage('flags.nsDescriptionLong')
 		}),
 	};
 

@@ -71,7 +71,7 @@ describe('scanner:run', function () {
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures'),
 					'--format', 'json',
-					'-n'
+					'--normalize-severity'
 				])
 				.it('Ensure normalized severity is correct', ctx => {
 					const output = JSON.parse(ctx.stdout);
@@ -98,7 +98,7 @@ describe('scanner:run', function () {
 					'--target', path.join('test', 'code-fixtures'),
 					'--format', 'json'
 				])
-				.it('Ensure normalized severity is not outputted when -n not provided', ctx => {
+				.it('Ensure normalized severity is not outputted when --normalize-severity not provided', ctx => {
 					const output = JSON.parse(ctx.stdout);
 
 					for (let i=0; i<output.length; i++) {
