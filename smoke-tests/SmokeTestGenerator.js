@@ -43,31 +43,31 @@ function generateScriptContent(delim) {
 	const customRulePath = ['test', 'test-jars', 'apex', 'testjar1.jar'];
 	const resultsPath = ['test-results'];
 
-	return `echo "List all rules w/out filters"
+	return `echo "==== List all rules w/out filters ===="
 $EXE_NAME scanner:rule:list
-echo "Filter rules by engine"
+echo "==== Filter rules by engine ===="
 $EXE_NAME scanner:rule:list --engine eslint
-echo "Describe a real rule"
+echo "==== Describe a real rule ===="
 $EXE_NAME scanner:rule:describe -n EmptyCatchBlock
-echo "Describe a non-existent rule"
+echo "==== Describe a non-existent rule ===="
 $EXE_NAME scanner:rule:describe -n NotAnActualRule
-echo "Run rules against force-app, which should hit PMD and ESLint engines"
+echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="
 $EXE_NAME scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run1.xml'], delim)}
-echo "Run rules against a typescript file, which should run ESLint-Typescript"
+echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="
 $EXE_NAME scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'run2.xml'], delim)}
-echo "Run RetireJS against a folder"
+echo "==== Run RetireJS against a folder ===="
 $EXE_NAME scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'run3.xml'], delim)}
-echo "Add a JAR of custom rules"
+echo "==== Add a JAR of custom rules ===="
 $EXE_NAME scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}
-echo "List the rules, including the custom ones"
+echo "==== List the rules, including the custom ones ===="
 $EXE_NAME scanner:rule:list --engine pmd
-echo "Describe a custom rule"
+echo "==== Describe a custom rule ===="
 $EXE_NAME scanner:rule:describe -n fakerule1
-echo "Run a custom rule"
+echo "==== Run a custom rule ===="
 $EXE_NAME scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}
-echo "Remove a custom rule"
+echo "==== Remove a custom rule ===="
 $EXE_NAME scanner:rule:remove --path ${buildPath(customRulePath, delim)} --force
-echo "List the rules a final time, to make sure nothing broke"
+echo "==== List the rules a final time, to make sure nothing broke ===="
 $EXE_NAME scanner:rule:list`;
 }
 
@@ -75,7 +75,7 @@ $EXE_NAME scanner:rule:list`;
 // We need the following set of smoke tests:
 // Bash scripts for both POSIX and Windows.
 fs.writeFileSync(path.join('smoke-tests', 'bash-posix.sh'), generateScriptHeader(true) + generateScriptContent('/'));
-fs.writeFileSync(path.join('smoke-tests', 'bash-windows.sh'), generateScriptHeader(true) + generateScriptContent('\\'));
+fs.writeFileSync(path.join('smoke-tests', 'bash-windows.sh'), generateScriptHeader(true) + generateScriptContent('/'));
 // A .cmd script for Powershell
 fs.writeFileSync(path.join('smoke-tests', 'ps-windows.cmd'), generateScriptHeader(false) + generateScriptContent('\\'));
 
