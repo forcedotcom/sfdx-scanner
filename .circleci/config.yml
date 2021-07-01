@@ -67,7 +67,7 @@ jobs:
 
       - run:
           name: "Local sanity"
-          command: ./smoke-tests/bash-posix.sh bin/run
+          command: ./smoke-tests/bash.sh bin/run
 
 #      - gradle/collect_test_results:
 #          reports_path: pmd-cataloger/build/reports/
@@ -95,7 +95,7 @@ jobs:
 
       - run:
           name: "Local sanity"
-          command: ./smoke-tests/bash-windows.sh bin/run
+          command: ./smoke-tests/bash.sh bin/run
 
       # UNIT TESTS
 #      - run:
@@ -167,7 +167,7 @@ jobs:
 
       - run:
           name: "San"
-          command: smoke-tests\ps-windows.cmd bin\run.cmd
+          command: smoke-tests\powershell.cmd bin\run.cmd
 #
 #      # Upload results
 #      - store_test_results:

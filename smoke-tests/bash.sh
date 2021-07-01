@@ -1,13 +1,10 @@
 #!/bin/bash
 # Auto-generated on Thu Jul 01 2021
-#
-# This script smoke-tests the entire plugin by running a series of commands that collectively capture a
-# vertical slice of the plugin, hitting every major piece of functionality. If they all succeed, we can reasonably
-# conclude that the plugin is approximately stable.
-#
-# DO NOT EDIT THIS SCRIPT DIRECTLY!
-# INSTEAD, MAKE CHANGES IN 	./SmokeTestGenerator.js, AND RERUN THAT SCRIPT FROM THE PROJECT ROOT DIRECTORY.
-
+# This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
+# of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
+# the plugin is approximately stable.
+# DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/SmokeTestGenerator.js AND RERUN THAT SCRIPT
+# FROM THE PROJECT ROOT!
 set -e
 EXE_NAME=$1
 echo "==== List all rules w/out filters ===="
