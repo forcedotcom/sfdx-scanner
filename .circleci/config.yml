@@ -92,7 +92,7 @@ jobs:
           at: C:\repo
 
       - run: mkdir test-results
-        -
+
       - run:
           name: "Local sanity"
           command: ./smoke-tests/bash-windows.sh bin/run
