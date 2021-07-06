@@ -6,7 +6,6 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: cimg/node:current
     - image: circleci/openjdk:11.0.2-jdk-node
 
 orbs:
@@ -23,6 +22,14 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
+  upgrade_node:
+    steps:
+      - run:
+          name: "List versions"
+          command: |
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm ls-remote --lts
 
 jobs:
   build:
@@ -32,6 +39,8 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
+      - upgrade_node
+
 
       # Download and cache dependencies
   #      - restore_cache:
@@ -85,6 +94,7 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
+      - upgrade_node
 
   #      - run: mkdir test-results
   #
@@ -147,6 +157,7 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
+      - upgrade_node
 
   #      - run: md test-results
   #
