@@ -55,6 +55,8 @@ commands:
           name: "try nvm"
           shell: bash.exe
           command: |
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             VERSION_CHART=`nvm list available | sed -n 4p`
             IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
             if [ "<< parameters.version >>" = "current" ]; then
@@ -147,7 +149,7 @@ jobs:
       - run:
           name: "Get node version again"
           command: node -v
-  
+
       #- upgrade_node
 
   #      - run: mkdir test-results
