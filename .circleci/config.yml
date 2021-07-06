@@ -55,6 +55,7 @@ commands:
           name: "try nvm"
           command: |
             nvm install --lts
+            node -v
 
 jobs:
   build:
