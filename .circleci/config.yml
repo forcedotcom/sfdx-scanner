@@ -60,17 +60,16 @@ commands:
             if [ "<< parameters.version >>" = "current" ]; then
               echo "We wanted current"
               WANTED_VERSION=`echo ${VERSION_ARRAY[1]} | sed 's/ *$//g'`
-              WANTED_VERSION=v${WANTED_VERSION}
             elif [ "<< parameters.version >>" = "lts" ]; then
               echo "We wanted LTS"
               WANTED_VERSION=`echo ${VERSION_ARRAY[2]} | sed 's/ *$//g'`
-              WANTED_VERSION=v${WANTED_VERSION}
             else
               echo "We wanted garbage"
               WANTED_VERSION="NOTHING. GO AWAY"
             fi
             echo $WANTED_VERSION
-            nvm install ${WANTED_VERSION}
+            nvm install v${WANTED_VERSION}
+            nvm use ${WANTED_VERSION}
             node -v
 #            VERSION_CHART=`nvm list available`
 #            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
@@ -145,6 +144,10 @@ jobs:
 
       - windows_upgrade_node:
           version: lts
+      - run:
+          name: "Get node version again"
+          command: node -v
+  
       #- upgrade_node
 
   #      - run: mkdir test-results
