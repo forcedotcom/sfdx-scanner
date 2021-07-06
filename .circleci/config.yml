@@ -53,9 +53,13 @@ commands:
     steps:
       - run:
           name: "try nvm"
-          shell: powershell.exe
+          shell: bash.exe
           command: |
-            nvm list available | -split '|'
+            VERSION_CHART=`nvm list available`
+            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
+            for i in "${VERSION_ARRAY[@]}"; do
+              echo $i
+            done
 
 jobs:
   build:
