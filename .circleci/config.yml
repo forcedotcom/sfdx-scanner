@@ -45,6 +45,16 @@ commands:
       - run:
           name: "Check version"
           command: node -v
+  windows_upgrade_node:
+    parameters:
+      version:
+        type: string
+        default: "current"
+    steps:
+      - run:
+          name: "try nvm"
+          command: |
+            nvm ls-remote
 
 jobs:
   build:
@@ -110,6 +120,9 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
+
+      - windows_upgrade_node:
+          version: current
       #- upgrade_node
 
   #      - run: mkdir test-results
