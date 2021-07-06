@@ -141,6 +141,8 @@ jobs:
       - run: md test-results
 
       - run:
+          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
+          # operations succeed, then we can reasonably assume that the plugin is stable.
           name: "Unpackaged sanity test"
           command: smoke-tests\powershell.cmd bin\run.cmd
 
@@ -167,6 +169,8 @@ jobs:
           command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
       - run:
+          # Run through our sanity test script against the published version of the plugin, which we installed in the
+          # previous step. If all of these pass, we can assume the plugin is stable.
           name: "Packaged sanity test"
           command: smoke-tests\powershell.cmd sfdx
 

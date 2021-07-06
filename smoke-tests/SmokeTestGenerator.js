@@ -2,6 +2,8 @@
  * This script auto-generates bash/cmd scripts meant to test smoke test the entire plugin. These scripts will do so by
  * running a series of operations that collectively capture a vertical slice of the plugin, hitting every major piece
  * of functionality. If they all succeed, then we can conclude that the plugin is approximately stable.
+ * Invoke from the project root folder, e.g.
+ * `node smoke-tests/SmokeTestGenerator.js`
  *
  * @author Josh Feingold
  */
