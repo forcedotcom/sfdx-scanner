@@ -55,7 +55,7 @@ jobs:
           name: "Get node version"
           command: node -v
       - unix_upgrade_node
-          version: "current"
+          version: current
 
 
       # Download and cache dependencies
