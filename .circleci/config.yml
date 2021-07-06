@@ -54,7 +54,7 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
-      - unix_upgrade_node
+      - unix_upgrade_node:
           version: current
 
 
