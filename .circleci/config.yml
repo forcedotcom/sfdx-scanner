@@ -53,6 +53,7 @@ commands:
     steps:
       - run:
           name: "try nvm"
+          shell: powershell.exe
           command: |
             nvm list available | -split '|'
 
