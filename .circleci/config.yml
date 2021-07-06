@@ -27,8 +27,9 @@ commands:
       - run:
           name: "List versions"
           command: |
-            npm install -g n
-            n ls-remote 
+            npm install n
+            npx n ls-remote current
+            npx n ls-remote lts
 
 jobs:
   build:
