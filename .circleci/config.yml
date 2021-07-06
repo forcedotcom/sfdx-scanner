@@ -3,52 +3,11 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2.1
-
-posix_current: &posix_current
+defaults: &defaults
   working_directory: ~/repo
   docker:
     - image: circleci/openjdk:11.0.2-jdk-node
     - image: cimg/node:current
-
-posix_lts: &posix_lts
-  working_directory: ~/repo
-  docker:
-    - image: circleci/openjdk:11.0.2-jdk-node
-    - image: cimg/node:lts
-
-win_bash_current: &win_bash_current
-  working_directory: C:\repo
-  executor:
-    name: win/default # executor type
-    size: "medium"
-    shell: bash.exe
-  docker:
-    - image: cimg/node:current
-
-win_bash_lts: &win_bash_lts
-  working_directory: C:\repo
-  executor:
-    name: win/default # executor type
-    size: "medium"
-    shell: bash.exe
-  docker:
-    - image: cimg/node:lts
-
-win_ps_current: &win_ps_current
-  working_directory: C:\repo
-  executor:
-    name: win/default # executor type
-    size: "medium"
-  docker:
-    - image: cimg/node:current
-
-win_ps_lts: &win_ps_lts
-  working_directory: C:\repo
-  executor:
-    name: win/default # executor type
-    size: "medium"
-  docker:
-    - image: cimg/node:lts
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
@@ -67,7 +26,7 @@ commands:
 
 jobs:
   build:
-    <<: *posix_current
+    <<: *defaults
     steps:
       - auth_and_checkout
       - run:
@@ -75,47 +34,51 @@ jobs:
           command: node -v
 
       # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: yarn --ignore-scripts
-      - run: yarn build
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      - persist_to_workspace:
-          root: ~/repo
-          paths: .
-
-      # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+  #      - restore_cache:
+  #          keys:
+  #            - v1-dependencies-{{ checksum "package.json" }}
+  #            # fallback to using the latest cache if no exact match is found
+  #            - v1-dependencies-
+  #
+  #      - run: yarn --ignore-scripts
+  #      - run: yarn build
+  #
+  #      - save_cache:
+  #          paths:
+  #            - node_modules
+  #          key: v1-dependencies-{{ checksum "package.json" }}
+  #
+  #      - persist_to_workspace:
+  #          root: ~/repo
+  #          paths: .
+  #
+  #      # UNIT TESTS
+  #      - run:
+  #          name: test
+  #          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+  #          when: always
+  #
+  #      - run:
+  #          name: eslint
+  #          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+  #          when: always
+  #
+  #      - gradle/collect_test_results:
+  #          reports_path: pmd-cataloger/build/reports/
+  #          test_results_path: pmd-cataloger/build/test-results/
+  #
+  #      - store_test_results:
+  #          path: test-results
+  #
+  #      - store_artifacts: # upload test coverage as artifact.
+  #          path: test-coverage
   windows-build:
-    # We need to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
-    <<: *win_bash_current
+    executor:
+      name: win/default # executor type
+      size: "medium"
+      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+      shell: bash.exe
+    working_directory: C:\repo
     steps:
       - attach_workspace:
           at: C:\repo
@@ -123,56 +86,59 @@ jobs:
           name: "Get node version"
           command: node -v
 
-      - run: mkdir test-results
-
-      # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+  #      - run: mkdir test-results
+  #
+  #      # UNIT TESTS
+  #      - run:
+  #          name: test
+  #          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+  #          when: always
+  #
+  #      - run:
+  #          name: eslint
+  #          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+  #          when: always
+  #
+  #      - gradle/collect_test_results:
+  #          reports_path: pmd-cataloger/build/reports/
+  #          test_results_path: pmd-cataloger/build/test-results/
+  #
+  #      - store_test_results:
+  #          path: test-results
+  #
+  #      - store_artifacts: # upload test coverage as artifact.
+  #          path: test-coverage
 
   self-evaluation:
-    <<: *posix_current
+    <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
 
-      - run: mkdir test-results
-
-      - run:
-          name: "list rules"
-          command: bin/run scanner:rule:list
-
-      - run:
-          name: "self-evaluate"
-          command: |
-            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
-          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
-          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts:
-          path: test-results
+  #      - run: mkdir test-results
+  #
+  #      - run:
+  #          name: "list rules"
+  #          command: bin/run scanner:rule:list
+  #
+  #      - run:
+  #          name: "self-evaluate"
+  #          command: |
+  #            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
+  #          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
+  #          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
+  #
+  #      - store_test_results:
+  #          path: test-results
+  #
+  #      - store_artifacts:
+  #          path: test-results
 
   unpackaged-sanity:
-    <<: *win_ps_current
+    executor:
+      name: win/default # executor type
+      size: "medium"
+    working_directory: C:\repo
 
     steps:
       # Commands are run in a Windows virtual machine environment
@@ -182,23 +148,25 @@ jobs:
           name: "Get node version"
           command: node -v
 
-      - run: md test-results
-
-      - run:
-          name: "List rules"
-          command: bin\run.cmd scanner:rule:list
-
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
-          path: test-results
+  #      - run: md test-results
+  #
+  #      - run:
+  #          name: "List rules"
+  #          command: bin\run.cmd scanner:rule:list
+  #
+  #      - run:
+  #          name: "Run rules"
+  #          working_directory: test\projects\app
+  #          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
+  #
+  #      # Upload results
+  #      - store_test_results:
+  #          path: test-results
 
   packaged-sanity:
-    <<: *win_ps_current
+    executor:
+      name: win/default # executor type
+      size: "medium"
 
     steps:
       - auth_and_checkout
@@ -227,7 +195,7 @@ jobs:
           path: test-results
 
   auto-merge-release:
-    <<: *posix_current
+    <<: *defaults
     steps:
       - add_ssh_keys:
           fingerprints:
@@ -243,7 +211,7 @@ jobs:
             git merge release --commit --no-edit -m "Automerge release to dev"
             git push origin dev
   publish-latest:
-    <<: *posix_current
+    <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
