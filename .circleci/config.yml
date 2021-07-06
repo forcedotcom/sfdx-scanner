@@ -54,7 +54,7 @@ commands:
       - run:
           name: "try nvm"
           command: |
-            nvm list available
+            nvm list available | -split '|'
 
 jobs:
   build:
