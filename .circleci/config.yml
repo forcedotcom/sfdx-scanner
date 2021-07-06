@@ -37,7 +37,7 @@ commands:
           name: "Update node"
           command: |
             # Save the desired version to a variable.
-            DESIRED_VERSION=`npx n ls-remote << parameters.version >>`
+            DESIRED_VERSION=v`npx n ls-remote << parameters.version >>`
             # Install the desired version.
             curl -sSL "https://nodejs.org/dist/${DESIRED_VERSION}/node-${DESIRED_VERSION}-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-${DESIRED_VERSION}-linux-x64/bin/node
             # Install NPM
