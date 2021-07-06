@@ -54,6 +54,8 @@ export class RunOutputProcessor {
 		if (minSev > 0 && this.opts.violationsCauseException) {
 			throw new SfdxError(msg, null, null, minSev);
 		} else if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
+			// We want to throw an error when the highest severity (smallest num) is 
+			// equal to or more severe (equal to or less than number-wise) than the inputted number
 			throw new SfdxError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
@@ -81,14 +83,13 @@ export class RunOutputProcessor {
 
 	// determines if -s flag should cause an error 
 	private shouldErrorForSeverity(minSev: number, severityForError): boolean {
-		if (severityForError == undefined) {
+		if (severityForError === undefined) {
 			return false; // flag not used
 		}
-		if (minSev == 0) {
+		if (minSev === 0) {
 			return false;
 		}
-		// We want to throw an error when the highest severity (smallest num) is 
-		// equal to or more severe (equal to or less than number-wise) than the inputted number
+		
 		if (minSev <= this.opts.severityForError) {
 			return true; 
 		}

@@ -84,13 +84,3 @@ export enum Severity {
 	MODERATE = 2,
 	HIGH = 1
 }
-
-export const SeverityMap = new Map([
-	[ENGINE.PMD.toString(), new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]])],
-    [ENGINE.PMD_CUSTOM.toString(), new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]])],
-	[ENGINE.ESLINT.toString(), new Map([[1, Severity.MODERATE],[2, Severity.HIGH]])],
-	[ENGINE.ESLINT_LWC.toString(), new Map([[1, Severity.MODERATE],[2, Severity.HIGH]])],
-	[ENGINE.ESLINT_TYPESCRIPT.toString(), new Map([[1, Severity.MODERATE],[2, Severity.HIGH]])],
-	[ENGINE.ESLINT_CUSTOM.toString(), new Map([[1, Severity.MODERATE],[2, Severity.HIGH]])],
-	[ENGINE.RETIRE_JS.toString(), new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW]])]
-]);

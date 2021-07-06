@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {OUTPUT_FORMAT, OutputOptions} from '../RuleManager';
+import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
 import * as Mustache from 'mustache';
@@ -11,38 +11,38 @@ import { constructSarif } from './SarifFormatter'
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], outputOptions: OutputOptions, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
-		switch (outputOptions.format) {
+		switch (format) {
 			case OUTPUT_FORMAT.CSV:
-				formattedResults = await this.constructCsv(results, outputOptions.normalizeSeverity);
+				formattedResults = await this.constructCsv(results);
 				break;
 			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results, outputOptions.normalizeSeverity);
+				formattedResults = await this.constructHtml(results);
 				break;
 			case OUTPUT_FORMAT.JSON:
-				formattedResults = this.constructJson(results); // normalizeSeverity not needed because the json will display automatically if it sees the value
+				formattedResults = this.constructJson(results);
 				break;
 			case OUTPUT_FORMAT.JUNIT:
-				formattedResults = this.constructJunit(results); // normalizeSeverity not needed because this output format doesn't include severity
+				formattedResults = this.constructJunit(results);
 				break;
 			case OUTPUT_FORMAT.SARIF:
-				formattedResults = await constructSarif(results, executedEngines, outputOptions.normalizeSeverity);
+				formattedResults = await constructSarif(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.TABLE:
-				formattedResults = this.constructTable(results); // normalizeSeverity not needed because this output format doesn't include severity
+				formattedResults = this.constructTable(results); 
 				break;
 			case OUTPUT_FORMAT.XML:
-				formattedResults = this.constructXml(results, outputOptions.normalizeSeverity);
+				formattedResults = this.constructXml(results);
 				break;
 			default:
 				throw new SfdxError('Unrecognized output format.');
 		}
-		return {minSev: this.findMinSev(results, outputOptions.normalizeSeverity), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
+		return {minSev: this.findMinSev(results), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
 	}
 
-	private static findMinSev(results: RuleResult[], normalizeSeverity: boolean): number {
+	private static findMinSev(results: RuleResult[]): number {
 		// If there are no results, then there are no errors.
 		if (!results || results.length === 0) {
 			return 0;
@@ -52,7 +52,7 @@ export class RuleResultRecombinator {
 		// if -n or -s flag used, minSev is calculated with normal value
 		for (const res of results) {
 			for (const violation of res.violations) {
-			  var severity = (violation.normalizedSeverity == undefined)? violation.severity : violation.normalizedSeverity;
+			  var severity = (violation.normalizedSeverity === undefined)? violation.severity : violation.normalizedSeverity;
 			  if (!minSev || severity < minSev) {
 				minSev = severity;
 			  }
@@ -81,13 +81,15 @@ export class RuleResultRecombinator {
 		return summaryMap;
 	}
 
-	private static constructXml(results: RuleResult[], normalizeSeverity: boolean): string {
+	private static constructXml(results: RuleResult[]): string {
 		let resultXml = ``;
 
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return resultXml;
 		}
+
+		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
 
 		let problemCount = 0;
 
@@ -114,11 +116,13 @@ export class RuleResultRecombinator {
 				const escapedUrl = this.safeHtmlEscape(v.url);
 
 				problemCount++;
+				let severityAttributes = `severity="${v.severity}"`;
+
 				if (normalizeSeverity) {
-					violations += `<violation severity="${v.severity}" normalizedSeverity="${v.normalizedSeverity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
-				} else {
-					violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+					severityAttributes += ` normalizedSeverity="${v.normalizedSeverity}"`;
 				}
+
+				violations += `<violation ${severityAttributes} line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
 
 			}
 			resultXml += `
@@ -236,11 +240,14 @@ URL: ${url}
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
-	private static async constructHtml(results: RuleResult[], normalizeSeverity: boolean): Promise<string> {
+	private static async constructHtml(results: RuleResult[]): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
+
+		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
+
 		const violations = [];
 		for (const result of results) {
 			for (const v of result.violations) {
@@ -282,31 +289,35 @@ URL: ${url}
 		return Mustache.render(template, templateData);
 	}
 
-	private static async constructCsv(results: RuleResult[], normalizeSeverity: boolean): Promise<string> {
+	private static async constructCsv(results: RuleResult[]): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
 
+		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
+
 		const csvRows = [];
 
-		if (normalizeSeverity){
-			csvRows.push(['Problem', 'File', 'Severity', 'Normalized Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
-		} else {
-			csvRows.push(['Problem', 'File', 'Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
-
-		}
+		const columns: string[] = ['Problem', 'File', 'Severity']; 
+        if (normalizeSeverity) {
+           columns.push('Normalized Severity')
+        }
+        columns.push('Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine');
+        csvRows.push(columns);
 
 		let problemCount = 0;
 		for (const result of results) {
 			const fileName = result.fileName;
 			for (const v of result.violations) {
 				const msg = v.message.trim();
+
+				const row = [++problemCount, fileName, v.severity];
 				if (normalizeSeverity) {
-					csvRows.push([++problemCount, fileName, v.severity, v.normalizedSeverity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
-				} else {
-					csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+					row.push(v.normalizedSeverity);
 				}
+				row.push(v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine)
+				csvRows.push(row);
 			}
 		}
 
