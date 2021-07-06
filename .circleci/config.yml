@@ -54,7 +54,7 @@ commands:
       - run:
           name: "try nvm"
           command: |
-            nvm ls-remote
+            nvm install --lts
 
 jobs:
   build:
