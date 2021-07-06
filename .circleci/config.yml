@@ -72,7 +72,7 @@ commands:
             echo $WANTED_VERSION
             nvm install v${WANTED_VERSION}
             nvm use ${WANTED_VERSION}
-            node -v
+#            node -v
 #            VERSION_CHART=`nvm list available`
 #            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
 #            for i in "${VERSION_ARRAY[@]}"; do
