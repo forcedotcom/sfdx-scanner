@@ -22,15 +22,28 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
-  upgrade_node:
+  unix_upgrade_node:
+    parameters:
+      version:
+        type: string
+        default: "current"
     steps:
+      # Install `n`, a library that we can use to resolve node version aliases.
       - run:
-          name: "Install specific node"
+          name: "Install `n`"
+          command: npm install n
+      # Use `n` to determine the desired version, then install it.
+      - run:
+          name: "Update node"
           command: |
-            curl -sSL "https://nodejs.org/dist/v11.10.0/node-v11.10.0-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v11.10.0-linux-x64/bin/node
-                        curl https://www.npmjs.com/install.sh | sudo bash
+            # Save the desired version to a variable.
+            DESIRED_VERSION=`npx n ls-remote << parameters.version >>`
+            # Install the desired version.
+            curl -sSL "https://nodejs.org/dist/${DESIRED_VERSION}/node-${DESIRED_VERSION}-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-${DESIRED_VERSION}-linux-x64/bin/node
+            # Install NPM
+            curl https://www.npmjs.com/install.sh | sudo bash
       - run:
-          name: "current version"
+          name: "Check version"
           command: node -v
 
 jobs:
@@ -41,7 +54,8 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
-      - upgrade_node
+      - unix_upgrade_node
+          version: "current"
 
 
       # Download and cache dependencies
@@ -96,7 +110,7 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
-      - upgrade_node
+      #- upgrade_node
 
   #      - run: mkdir test-results
   #
@@ -159,7 +173,7 @@ jobs:
       - run:
           name: "Get node version"
           command: node -v
-      - upgrade_node
+      #- upgrade_node
 
   #      - run: md test-results
   #
