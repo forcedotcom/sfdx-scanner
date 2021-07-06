@@ -55,7 +55,11 @@ commands:
           name: "try nvm"
           shell: bash.exe
           command: |
-            nvm list available | sed -n 4p
+            VERSION_CHART=`nvm list available | sed -n 4p`
+            IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
+            for i in "${VERSION_ARRAY[@]}"; do
+              echo $i
+            done
 #            VERSION_CHART=`nvm list available`
 #            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
 #            for i in "${VERSION_ARRAY[@]}"; do
