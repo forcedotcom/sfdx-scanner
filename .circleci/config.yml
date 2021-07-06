@@ -60,7 +60,7 @@ commands:
             if [ "<< parameters.version >> = "current" ]; then
               echo "We want the CURRENT version, ${VERSION_ARRAY[0]}"
             elif [ "<< parameters.version >> = "lts" ]; then
-              echo "We want the LTS version, ${VERSION_ARRAY[1]
+              echo "We want the LTS version, ${VERSION_ARRAY[1]}"
             else
               echo "What you want is nonsense, get out of here"
             fi
