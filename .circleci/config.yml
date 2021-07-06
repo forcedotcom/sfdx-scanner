@@ -58,12 +58,13 @@ commands:
             VERSION_CHART=`nvm list available | sed -n 4p`
             IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
             if [ "<< parameters.version >>" = "current" ]; then
-              echo "We want the CURRENT version, ${VERSION_ARRAY[0]}"
+              WANTED_VERSION=${VERSION_ARRAY[0]}
             elif [ "<< parameters.version >>" = "lts" ]; then
-              echo "We want the LTS version, ${VERSION_ARRAY[1]}"
+              WANTED_VERSION=${VERSION_ARRAY[1]}
             else
-              echo "What you want is nonsense, get out of here"
+              WANTED_VERSION="NOTHING. GO AWAY"
             fi
+            echo $WANTED_VERSION
 #            VERSION_CHART=`nvm list available`
 #            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
 #            for i in "${VERSION_ARRAY[@]}"; do
@@ -136,7 +137,7 @@ jobs:
           command: node -v
 
       - windows_upgrade_node:
-          version: current
+          version: lts
       #- upgrade_node
 
   #      - run: mkdir test-results
