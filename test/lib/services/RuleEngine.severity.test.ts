@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import { ENGINE } from '../../../src/Constants';
+import {ENGINE} from '../../../src/Constants';
 import {CustomEslintEngine} from '../../../src/lib/eslint/CustomEslintEngine';
 import {JavascriptEslintEngine, LWCEslintEngine, TypescriptEslintEngine} from '../../../src/lib/eslint/EslintEngine';
 import {CustomPmdEngine, PmdEngine} from '../../../src/lib/pmd/PmdEngine';
