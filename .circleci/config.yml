@@ -25,11 +25,13 @@ commands:
   upgrade_node:
     steps:
       - run:
-          name: "List versions"
+          name: "Install specific node"
           command: |
-            npm install n
-            npx n ls-remote current
-            npx n ls-remote lts
+            curl -sSL "https://nodejs.org/dist/v11.10.0/node-v11.10.0-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-v11.10.0-linux-x64/bin/node
+                        curl https://www.npmjs.com/install.sh | sudo bash
+      - run:
+          name: "current version"
+          command: node -v
 
 jobs:
   build:
