@@ -59,10 +59,12 @@ commands:
             IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
             if [ "<< parameters.version >>" = "current" ]; then
               echo "We wanted current"
-              WANTED_VERSION=v${VERSION_ARRAY[1]}
+              WANTED_VERSION=`echo ${VERSION_ARRAY[1]} | sed 's/ *$//g'`
+              WANTED_VERSION=v${WANTED_VERSION}
             elif [ "<< parameters.version >>" = "lts" ]; then
               echo "We wanted LTS"
-              WANTED_VERSION=v${VERSION_ARRAY[2]}
+              WANTED_VERSION=`echo ${VERSION_ARRAY[2]} | sed 's/ *$//g'`
+              WANTED_VERSION=v${WANTED_VERSION}
             else
               echo "We wanted garbage"
               WANTED_VERSION="NOTHING. GO AWAY"
