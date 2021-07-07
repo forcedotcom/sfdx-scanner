@@ -55,8 +55,6 @@ commands:
           name: "try nvm"
           shell: bash.exe
           command: |
-#            export NVM_DIR="/opt/circleci/.nvm"
-#            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             VERSION_CHART=`nvm list available | sed -n 4p`
             IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
             if [ "<< parameters.version >>" = "current" ]; then
@@ -72,6 +70,8 @@ commands:
             echo $WANTED_VERSION
             nvm install v${WANTED_VERSION}
             nvm use ${WANTED_VERSION}
+#            export NVM_DIR="/opt/circleci/.nvm"
+#            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 #            node -v
 #            VERSION_CHART=`nvm list available`
 #            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
