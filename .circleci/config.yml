@@ -48,7 +48,7 @@ commands:
         type: string
         default: "current"
     steps:
-      -run:
+      - run:
         name: "Upgrade node"
         # Using bash for this operation prevents the command from getting even hairier than it already is.
         shell: bash.exe
