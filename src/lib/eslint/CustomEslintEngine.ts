@@ -26,8 +26,15 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.ESLINT, filterValues);
 	}
 
-	getNormalizedSeverityMap(): Map<number, Severity> {
-		return new Map([[1, Severity.MODERATE],[2, Severity.HIGH]]);
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1: {
+				return Severity.MODERATE;
+			}
+			case 2: {
+				return Severity.HIGH;
+			}
+		}
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {

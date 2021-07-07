@@ -145,8 +145,18 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return engineUtils.isValueInFilter(this.getName(), filterValues);
 	}
 
-	getNormalizedSeverityMap(): Map<number, Severity> {
-		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW]]);
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1: {
+				return Severity.HIGH;
+			}
+			case 2: {
+				return Severity.MODERATE;
+			}
+			case 3: {
+				return Severity.LOW;
+			}
+		}
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars

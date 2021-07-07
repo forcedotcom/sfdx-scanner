@@ -254,8 +254,15 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 		}
 	}
 
-	getNormalizedSeverityMap(): Map<number, Severity> {
-		return new Map([[1, Severity.MODERATE],[2, Severity.HIGH]]);
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1: {
+				return Severity.MODERATE;
+			}
+			case 2: {
+				return Severity.HIGH;
+			}
+		}
 	}
 
 	/**

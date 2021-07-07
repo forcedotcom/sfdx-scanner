@@ -89,7 +89,7 @@ export class RuleResultRecombinator {
 			return resultXml;
 		}
 
-		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
 
 		let problemCount = 0;
 
@@ -116,13 +116,9 @@ export class RuleResultRecombinator {
 				const escapedUrl = this.safeHtmlEscape(v.url);
 
 				problemCount++;
-				let severityAttributes = `severity="${v.severity}"`;
 
-				if (normalizeSeverity) {
-					severityAttributes += ` normalizedSeverity="${v.normalizedSeverity}"`;
-				}
-
-				violations += `<violation ${severityAttributes} line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+				const normalizedSeverityPortion = normalizeSeverity ? `normalizedSeverity="${v.normalizedSeverity}"` : "";
+				violations += `<violation severity="${v.severity}" ${normalizedSeverityPortion} line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
 
 			}
 			resultXml += `
@@ -246,7 +242,7 @@ URL: ${url}
 			return '';
 		}
 
-		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
 
 		const violations = [];
 		for (const result of results) {
@@ -295,7 +291,7 @@ URL: ${url}
 			return '';
 		}
 
-		const normalizeSeverity: boolean = !(results[0].violations[0].normalizedSeverity === undefined)
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
 
 		const csvRows = [];
 

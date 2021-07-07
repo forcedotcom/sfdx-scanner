@@ -63,7 +63,7 @@ abstract class SarifFormatter {
 	 */
 	private populateRuleMap(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown[] {
 		const rules = [];
-		const normalizeSeverity: boolean = ruleResults.length > 0 && !(ruleResults[0].violations[0].normalizedSeverity === undefined);
+		const normalizeSeverity: boolean = ruleResults.length > 0 && ruleResults[0].violations.length > 0 && !(ruleResults[0].violations[0].normalizedSeverity === undefined);
 		for (const r of ruleResults) {
 			for (const v of r.violations) {
 				// Exceptions aren't tied to a rule
@@ -85,7 +85,7 @@ abstract class SarifFormatter {
 						properties: {
 						category: v.category,
 						severity: v.severity,
-						normalizedSeverity: (normalizeSeverity ? v.normalizedSeverity : undefined)
+						normalizedSeverity: (normalizeSeverity ? v.normalizedSeverity : undefined) // when set to undefined, normalizedSeverity will not appear in output
 					}
 					};
 					if (v.url) {

@@ -68,7 +68,7 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract matchPath(path: string): boolean;
 	abstract isEnabled(): Promise<boolean>;
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
-	abstract getNormalizedSeverityMap(): Map<number, Severity>;
+	abstract getNormalizedSeverity(severity: number): Severity;
 
     async runEngine(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>{
         const results = await this.run(ruleGroups, rules, target, engineOptions);
@@ -81,12 +81,8 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	public async normalizeSeverity(results: RuleResult[]){
 		for (const result of results) {
 			for (const violation of result.violations) {
-				violation.normalizedSeverity = this.getNormalSeverity(violation.severity, result.engine);
+				violation.normalizedSeverity = this.getNormalizedSeverity(violation.severity);
 			}
 		}
-	}
-
-	public getNormalSeverity(severity: number, engine: string): Severity{
-		return this.getNormalizedSeverityMap().get(severity);
 	}
 }

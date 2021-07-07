@@ -98,6 +98,26 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1: {
+				return Severity.HIGH;
+			}
+			case 2: {
+				return Severity.MODERATE;
+			}
+			case 3: {
+				return Severity.LOW;
+			}
+			case 4: {
+				return Severity.LOW;
+			}
+			case 5: {
+				return Severity.LOW;
+			}
+		}
+	}
+
 	public abstract getCatalog(): Promise<Catalog>;
 
 	public async init(): Promise<void> {
@@ -389,10 +409,6 @@ export class PmdEngine extends BasePmdEngine {
 		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
-	getNormalizedSeverityMap(): Map<number, Severity> {
-		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]]);
-	}
-
 	/**
 	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
@@ -445,10 +461,6 @@ export class CustomPmdEngine extends BasePmdEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return isCustomRun(engineOptions)
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.PMD, filterValues);
-	}
-
-	getNormalizedSeverityMap(): Map<number, Severity> {
-		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]]);
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
