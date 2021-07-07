@@ -3,7 +3,7 @@ import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {AdvancedTargetPattern, Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
-import {ENGINE} from '../../Constants';
+import {ENGINE, Severity} from '../../Constants';
 import {StaticResourceHandler, StaticResourceType} from '../util/StaticResourceHandler';
 import {FileHandler} from '../util/FileHandler';
 import * as engineUtils from '../util/CommonEngineUtils';
@@ -143,6 +143,10 @@ export class RetireJsEngine extends AbstractRuleEngine {
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return engineUtils.isValueInFilter(this.getName(), filterValues);
+	}
+
+	getNormalizedSeverityMap(): Map<number, Severity> {
+		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW]]);
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars

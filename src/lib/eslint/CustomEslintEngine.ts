@@ -1,6 +1,6 @@
 import {Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
-import {CUSTOM_CONFIG, ENGINE, EngineBase} from '../../Constants';
+import {CUSTOM_CONFIG, ENGINE, EngineBase, Severity} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
@@ -24,6 +24,10 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return this.helper.isCustomRun(engineOptions)
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.ESLINT, filterValues);
+	}
+
+	getNormalizedSeverityMap(): Map<number, Severity> {
+		return new Map([[1, Severity.MODERATE],[2, Severity.HIGH]]);
 	}
 
 	async init(dependencies = new StaticDependencies()): Promise<void> {

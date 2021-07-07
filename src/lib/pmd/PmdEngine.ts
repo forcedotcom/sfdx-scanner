@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
@@ -389,6 +389,10 @@ export class PmdEngine extends BasePmdEngine {
 		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
+	getNormalizedSeverityMap(): Map<number, Severity> {
+		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]]);
+	}
+
 	/**
 	 * Note: PMD is a little strange, only accepting rulesets or categories (aka Rule Groups) as input, rather than
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
@@ -441,6 +445,10 @@ export class CustomPmdEngine extends BasePmdEngine {
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return isCustomRun(engineOptions)
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.PMD, filterValues);
+	}
+
+	getNormalizedSeverityMap(): Map<number, Severity> {
+		return new Map([[1, Severity.HIGH],[2, Severity.MODERATE],[3, Severity.LOW],[4, Severity.LOW],[5, Severity.LOW]]);
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
