@@ -70,7 +70,10 @@ commands:
             echo $WANTED_VERSION
             nvm install v${WANTED_VERSION}
             nvm use ${WANTED_VERSION}
-            npm install -g yarn
+      - run:
+          name: "install yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 #            export NVM_DIR="/opt/circleci/.nvm"
 #            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 #            node -v
