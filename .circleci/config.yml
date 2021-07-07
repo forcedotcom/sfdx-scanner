@@ -73,6 +73,11 @@ commands:
             # Install the desired version, and switch to it.
             nvm install v${WANTED_VERSION}
             nvm use ${WANTED_VERSION}
+      - run:
+          # For some reason, changing the node version makes us lose the yarn installation. So we have to reinstall it.
+          name: "Re-install yarn"
+          shell: bash.exe
+          command: npm install -g yarn
           
 jobs:
   build:
