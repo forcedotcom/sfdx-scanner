@@ -49,30 +49,30 @@ commands:
         default: "current"
     steps:
       - run:
-        name: "Upgrade node"
-        # Using bash for this operation prevents the command from getting even hairier than it already is.
-        shell: bash.exe
-        command: |
-          # nvm, aka node version manager, is preinstalled on Windows executors. We'll use it to dealias the versions.
-          # The output of the `list available` command is a weird ascii-formatted chart. We want the first actual line of
-          # data.
-          VERSION_CHART=`nvm list available | sed -n 4p`
-          # The cells in the chart are delineated with the '|' character, so we'll split it using that character.
-          IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
-          # Depending on the alias, we'll want one of the entries in this array.
-          if [ "<< parameters.version >>" = "current" ]; then
-            WANTED_VERSION=${VERSION_ARRAY[1]}
-          elif [ "<< parameters.version >>" = "lts" ]; then
-            WANTED_VERSION=${VERSION_ARRAY[2]}
-          else
-            echo "Please specify either 'lts' or 'current' for the version parameter"
-            exit -1
-          fi
-          # The version is going to have a whole bunch of leading and trailing spaces, so we need to strip those away.
-          WANTED_VERSION=`echo ${WANTED_VERSION} | sed 's/ *$//g'`
-          # Install the desired version, and switch to it.
-          nvm install v${WANTED_VERSION}
-          nvm use ${WANTED_VERSION}
+          name: "Upgrade node"
+          # Using bash for this operation prevents the command from getting even hairier than it already is.
+          shell: bash.exe
+          command: |
+            # nvm, aka node version manager, is preinstalled on Windows executors. We'll use it to dealias the versions.
+            # The output of the `list available` command is a weird ascii-formatted chart. We want the first actual line of
+            # data.
+            VERSION_CHART=`nvm list available | sed -n 4p`
+            # The cells in the chart are delineated with the '|' character, so we'll split it using that character.
+            IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
+            # Depending on the alias, we'll want one of the entries in this array.
+            if [ "<< parameters.version >>" = "current" ]; then
+              WANTED_VERSION=${VERSION_ARRAY[1]}
+            elif [ "<< parameters.version >>" = "lts" ]; then
+              WANTED_VERSION=${VERSION_ARRAY[2]}
+            else
+              echo "Please specify either 'lts' or 'current' for the version parameter"
+              exit -1
+            fi
+            # The version is going to have a whole bunch of leading and trailing spaces, so we need to strip those away.
+            WANTED_VERSION=`echo ${WANTED_VERSION} | sed 's/ *$//g'`
+            # Install the desired version, and switch to it.
+            nvm install v${WANTED_VERSION}
+            nvm use ${WANTED_VERSION}
           
 jobs:
   build:
