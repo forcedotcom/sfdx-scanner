@@ -22,12 +22,66 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
-
+  unix_node_upgrade:
+    parameters:
+      version:
+        type: string
+        default: "current"
+    steps:
+      # Install `n`, a library that we can use to resolve node version aliases.
+      - run:
+          name: "Install `n`"
+          command: npm install n
+      # Use `n` to identify the target version, then install it.
+      - run:
+          name: "Update node"
+          command: |
+            # Define a variable denoting the target version. Prefix it with 'v', so it can be inserted into URLs.
+            DESIRED_VERSION=v`npx n ls-remote << parameters.version >>`
+            # Install the desired version.
+            curl -sSL "https://nodejs.org/dist/${DESIRED_VERSION}/node-${DESIRED_VERSION}-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-${DESIRED_VERSION}-linux-x64/bin/node
+            # Install NPM
+            curl https://www.npmjs.com/install.sh | sudo bash
+  windows_node_upgrade:
+    parameters:
+      version:
+        type: string
+        default: "current"
+    steps:
+      -run:
+        name: "Upgrade node"
+        # Using bash for this operation prevents the command from getting even hairier than it already is.
+        shell: bash.exe
+        command: |
+          # nvm, aka node version manager, is preinstalled on Windows executors. We'll use it to dealias the versions.
+          # The output of the `list available` command is a weird ascii-formatted chart. We want the first actual line of
+          # data.
+          VERSION_CHART=`nvm list available | sed -n 4p`
+          # The cells in the chart are delineated with the '|' character, so we'll split it using that character.
+          IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
+          # Depending on the alias, we'll want one of the entries in this array.
+          if [ "<< parameters.version >>" = "current" ]; then
+            WANTED_VERSION=${VERSION_ARRAY[1]}
+          elif [ "<< parameters.version >>" = "lts" ]; then
+            WANTED_VERSION=${VERSION_ARRAY[2]}
+          else
+            echo "Please specify either 'lts' or 'current' for the version parameter"
+            exit -1
+          fi
+          # The version is going to have a whole bunch of leading and trailing spaces, so we need to strip those away.
+          WANTED_VERSION=`echo ${WANTED_VERSION} | sed 's/ *$//g'`
+          # Install the desired version, and switch to it.
+          nvm install v${WANTED_VERSION}
+          nvm use ${WANTED_VERSION}
+          
 jobs:
   build:
     <<: *defaults
     steps:
       - auth_and_checkout
+      # Upgrade Node to the Active LTS version
+      - unix_node_upgrade:
+          version: lts
 
       # Download and cache dependencies
       - restore_cache:
@@ -78,6 +132,9 @@ jobs:
     steps:
       - attach_workspace:
           at: C:\repo
+      - windows_node_upgrade:
+          version: lts
+      - run: node -v
 
       - run: mkdir test-results
 
@@ -137,6 +194,9 @@ jobs:
       # Commands are run in a Windows virtual machine environment
       - attach_workspace:
           at: C:\repo
+      - windows_node_upgrade:
+          version: lts
+      - run: node -v
 
       - run: md test-results
 
@@ -157,6 +217,9 @@ jobs:
 
     steps:
       - auth_and_checkout
+      - windows_node_upgrade:
+          version: lts
+      - run: node -v
 
       - run:
           name: "Install sfdx cli"
