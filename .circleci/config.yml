@@ -37,6 +37,7 @@ jobs:
             echo yarn location is `which yarn`
       - node/install:
           install-npm: false
+          lts: true
   #    - run:
   #        name: "Upgrade node"
   #        command: .circleci/unix-node-upgrade.sh lts
@@ -48,44 +49,44 @@ jobs:
             echo yarn location is `which yarn`
 
       # Download and cache dependencies
-  #      - restore_cache:
-  #          keys:
-  #            - v1-dependencies-{{ checksum "package.json" }}
-  #            # fallback to using the latest cache if no exact match is found
-  #            - v1-dependencies-
-  #
-  #      - run: yarn --ignore-scripts
-  #      - run: yarn build
-  #
-  #      - save_cache:
-  #          paths:
-  #            - node_modules
-  #          key: v1-dependencies-{{ checksum "package.json" }}
-  #
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run: yarn --ignore-scripts
+      - run: yarn build
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
       - persist_to_workspace:
           root: ~/repo
           paths: .
-  #
-  #      # UNIT TESTS
-  #      - run:
-  #          name: test
-  #          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-  #          when: always
-  #
-  #      - run:
-  #          name: eslint
-  #          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-  #          when: always
-  #
-  #      - gradle/collect_test_results:
-  #          reports_path: pmd-cataloger/build/reports/
-  #          test_results_path: pmd-cataloger/build/test-results/
-  #
-  #      - store_test_results:
-  #          path: test-results
-  #
-  #      - store_artifacts: # upload test coverage as artifact.
-  #          path: test-coverage
+
+      # UNIT TESTS
+      - run:
+          name: test
+          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+          when: always
+
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          when: always
+
+      - gradle/collect_test_results:
+          reports_path: pmd-cataloger/build/reports/
+          test_results_path: pmd-cataloger/build/test-results/
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts: # upload test coverage as artifact.
+          path: test-coverage
   windows-build:
     executor:
       name: win/default # executor type
