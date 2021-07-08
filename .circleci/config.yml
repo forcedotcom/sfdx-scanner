@@ -12,6 +12,7 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
+  node: circleci/node@4.5.1
 
 
 commands:
@@ -28,6 +29,14 @@ jobs:
     <<: *defaults
     steps:
       - auth_and_checkout
+
+      # We want our unit tests to run with the lts version of node.
+      - node/install:
+          install-npm: false
+          lts: true
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       # Download and cache dependencies
       - restore_cache:
@@ -78,6 +87,15 @@ jobs:
     steps:
       - attach_workspace:
           at: C:\repo
+
+      - run:
+          name: "Upgrade node to LTS"
+          # The script has to be run in bash.
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       - run: mkdir test-results
 
@@ -138,6 +156,14 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
+      - run:
+          name: "Upgrade node to LTS"
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
+
       - run: md test-results
 
       - run:
@@ -157,6 +183,14 @@ jobs:
 
     steps:
       - auth_and_checkout
+
+      - run:
+          name: "Upgrade node to LTS"
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       - run:
           name: "Install sfdx cli"
