@@ -35,7 +35,8 @@ jobs:
             echo node is `node -v`
             echo node location is `which node`
             echo yarn location is `which yarn`
-      - node/install
+      - node/install:
+          install-npm: false
   #    - run:
   #        name: "Upgrade node"
   #        command: .circleci/unix-node-upgrade.sh lts
