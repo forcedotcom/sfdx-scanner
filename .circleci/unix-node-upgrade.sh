@@ -30,7 +30,8 @@ grep ${DESIRED_FILE}.tar.xz SHASUMS256.txt | sha256sum -c -
 sudo tar --strip-components=2 -xJ -C /usr/local/bin/ ${DESIRED_FILE}/bin/node -f ${DESIRED_FILE}.tar.xz
 
 # Install NPM using the locally-copied install script.
-sudo .circleci/npm-install.sh
+#sudo .circleci/npm-install.sh
+sudo apt install npm
 
 # Delete the downloaded files.
 rm -f ${DESIRED_FILE}.tar.xz
