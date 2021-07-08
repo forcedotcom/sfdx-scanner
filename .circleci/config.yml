@@ -105,6 +105,7 @@ jobs:
           shell: bash.exe
           command: |
             pwd
+            ls
             tools/circleci-windows-node-upgrade.sh lts
       - run:
           name: "Get node version again"
