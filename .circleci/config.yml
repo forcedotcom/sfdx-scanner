@@ -36,7 +36,7 @@ jobs:
             echo yarn location is `which yarn`
       - run:
           name: "Upgrade node"
-          command: tools/circleci-unix-node-upgrade.sh lts
+          command: .circleci/unix-node-upgrade.sh lts
       - run:
           name: "Get node version"
           command: |
@@ -106,7 +106,7 @@ jobs:
           command: |
             pwd
             ls
-            tools/circleci-windows-node-upgrade.sh lts
+            .circleci/windows-node-upgrade.sh lts
       - run:
           name: "Get node version again"
           command: |
