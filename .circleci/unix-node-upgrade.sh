@@ -19,9 +19,9 @@ curl -sSL -O https://nodejs.org/dist/${DESIRED_VERSION}/${DESIRED_FILE}.tar.xz
 curl -O https://nodejs.org/dist/${DESIRED_VERSION}/SHASUMS256.txt
 
 # Verify the integrity of the checksum file. That means importing an active GPG key, and pulling the appropriate .sig file.
-gpg --keyserver pool.sks-keyservers.net --recv-keys DD8F2338BAE7501E3DD5AC78C273792F7D83545D
-curl -O https://nodejs.org/dist/${DESIRED_VERSION}/SHASUMS256.txt.sig
-gpg --verify SHASUMS256.txt.sig SHASUMS256.txt
+# gpg --keyserver pool.sks-keyservers.net --recv-keys DD8F2338BAE7501E3DD5AC78C273792F7D83545D
+# curl -O https://nodejs.org/dist/${DESIRED_VERSION}/SHASUMS256.txt.sig
+# gpg --verify SHASUMS256.txt.sig SHASUMS256.txt
 
 # Validate the tar with the checksum.
 grep ${DESIRED_FILE}.tar.xz SHASUMS256.txt | sha256sum -c -
