@@ -100,21 +100,17 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
-			case 1: {
+			case 1:
 				return Severity.HIGH;
-			}
-			case 2: {
+			case 2:
 				return Severity.MODERATE;
-			}
-			case 3: {
+			case 3: 
+			case 4:
+			case 5:
 				return Severity.LOW;
-			}
-			case 4: {
-				return Severity.LOW;
-			}
-			case 5: {
-				return Severity.LOW;
-			}
+			default:
+				this.logger.error("Couldn't normalize severity value: ", severity)
+				return Severity.MODERATE;
 		}
 	}
 

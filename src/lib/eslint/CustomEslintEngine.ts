@@ -28,12 +28,13 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
-			case 1: {
+			case 1: 
 				return Severity.MODERATE;
-			}
-			case 2: {
+			case 2: 
 				return Severity.HIGH;
-			}
+			default:
+				this.logger.error("Couldn't normalize severity value: ", severity)
+				return Severity.MODERATE;
 		}
 	}
 
