@@ -37,4 +37,5 @@ nvm install ${WANTED_VERSION}
 nvm use ${WANTED_VERSION}
 
 # For some reason, changing the node version requires us to manually reinstall yarn.
+nvm on
 npm install -g yarn
