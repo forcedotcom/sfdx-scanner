@@ -31,7 +31,7 @@ sudo tar --strip-components=2 -xJ -C /usr/local/bin/ ${DESIRED_FILE}/bin/node -f
 
 # Install NPM using the locally-copied install script.
 #sudo .circleci/npm-install.sh
-sudo apt install npm
+sudo apt install npm -f
 
 # Delete the downloaded files.
 rm -f ${DESIRED_FILE}.tar.xz
