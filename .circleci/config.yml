@@ -103,7 +103,9 @@ jobs:
           name: "Upgrade node"
           # The script must be run in Bash.
           shell: bash.exe
-          command: ./tools/circleci-windows-node-upgrade.sh lts
+          command: |
+            pwd
+            tools/circleci-windows-node-upgrade.sh lts
       - run:
           name: "Get node version again"
           command: |
