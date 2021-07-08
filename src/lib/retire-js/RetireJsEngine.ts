@@ -154,7 +154,6 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			case 3:
 				return Severity.LOW;
 			default:
-				this.logger.error("Couldn't normalize severity value: ", severity)
 				return Severity.MODERATE;
 
 		}

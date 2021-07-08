@@ -39,6 +39,12 @@ describe('normalizeSeverity', () =>
             expect(testEngine.getNormalizedSeverity(5)).to.equal(3);
         }
         );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
+        }
+        );
     }
     );
 
@@ -75,6 +81,12 @@ describe('normalizeSeverity', () =>
             expect(testEngine.getNormalizedSeverity(5)).to.equal(3);
         }
         );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
+        }
+        );
     }
     );
 
@@ -91,6 +103,12 @@ describe('normalizeSeverity', () =>
         it('test severity value 2', () =>
         {
             expect(testEngine.getNormalizedSeverity(2)).to.equal(1);
+        }
+        );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
         }
         );
     }
@@ -111,6 +129,12 @@ describe('normalizeSeverity', () =>
             expect(testEngine.getNormalizedSeverity(2)).to.equal(1);
         }
         );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
+        }
+        );
     }
     );
 
@@ -129,6 +153,13 @@ describe('normalizeSeverity', () =>
             expect(testEngine.getNormalizedSeverity(2)).to.equal(1);
         }
         );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
+        }
+        );
+        
     }
     );
 
@@ -145,6 +176,12 @@ describe('normalizeSeverity', () =>
         it('test severity value 2', () =>
         {
             expect(testEngine.getNormalizedSeverity(2)).to.equal(1);
+        }
+        );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
         }
         );
     }
@@ -169,6 +206,12 @@ describe('normalizeSeverity', () =>
         it('test severity value 3', () =>
         {
             expect(testEngine.getNormalizedSeverity(3)).to.equal(3);
+        }
+        );
+
+        it('test invalid severity value 100', () =>
+        {
+            expect(testEngine.getNormalizedSeverity(100)).to.equal(2);
         }
         );
     }

@@ -52,12 +52,12 @@ export class RuleResultRecombinator {
 		// if -n or -s flag used, minSev is calculated with normal value
 		for (const res of results) {
 			for (const violation of res.violations) {
-			  var severity = (violation.normalizedSeverity === undefined)? violation.severity : violation.normalizedSeverity;
-			  if (!minSev || severity < minSev) {
-				minSev = severity;
-			  }
+				const severity = (violation.normalizedSeverity === undefined)? violation.severity : violation.normalizedSeverity;
+				if (!minSev || severity < minSev) {
+					minSev = severity;
+				}
 			}
-		  }
+		}
 		
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;

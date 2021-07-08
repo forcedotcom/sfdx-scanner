@@ -261,7 +261,6 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 			case 2: 
 				return Severity.HIGH;
 			default:
-				this.logger.error("Couldn't normalize severity value: ", severity)
 				return Severity.MODERATE;
 		}
 	}

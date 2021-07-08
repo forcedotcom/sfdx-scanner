@@ -109,7 +109,6 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			case 5:
 				return Severity.LOW;
 			default:
-				this.logger.error("Couldn't normalize severity value: ", severity)
 				return Severity.MODERATE;
 		}
 	}

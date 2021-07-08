@@ -12,8 +12,8 @@ export enum OUTPUT_FORMAT {
 }
 
 export type OutputOptions  = {
-	format: OUTPUT_FORMAT,
-	normalizeSeverity: boolean
+	format: OUTPUT_FORMAT;
+	normalizeSeverity: boolean;
 }
 
 export interface RuleManager {
