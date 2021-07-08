@@ -12,6 +12,7 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
+  node: circleci/node@4.5.1
 
 
 commands:
@@ -34,9 +35,10 @@ jobs:
             echo node is `node -v`
             echo node location is `which node`
             echo yarn location is `which yarn`
-      - run:
-          name: "Upgrade node"
-          command: .circleci/unix-node-upgrade.sh lts
+      - node/install
+  #    - run:
+  #        name: "Upgrade node"
+  #        command: .circleci/unix-node-upgrade.sh lts
       - run:
           name: "Get node version"
           command: |
