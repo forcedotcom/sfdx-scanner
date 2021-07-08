@@ -9,17 +9,30 @@ VERSION_ALIAS=$1
 # Install `n`, a module that we can use to resolve the node alias into an actual version.
 npm install n
 
-# De-alias the desired version. Prefix it with a 'v', since it doesn't have that already and we need it to have that.
+# We'll want to de-alias the desired version, prefix it with a 'v', and use it to construct the name of the tar we want.
 DESIRED_VERSION=v`npx n ls-remote ${VERSION_ALIAS}`
+DESIRED_FILE="node-${DESIRED_VERSION}-linux-x64"
 
-# Install the desired version.
-curl -sSL "https://nodejs.org/dist/${DESIRED_VERSION}/node-${DESIRED_VERSION}-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-${DESIRED_VERSION}-linux-x64/bin/node
+# Download both the desired tar and the associated checksum file.
+# Note about flags: -s == --silent, -S == --show-error, -L == --location (follows redirects)
+curl -sSL -O https://nodejs.org/dist/${DESIRED_VERSION}/${DESIRED_FILE}.tar.xz
+curl -O https://nodejs.org/dist/${DESIRED_VERSION}/SHASUMS256.txt
 
-# Install NPM
-curl https://www.npmjs.com/install.sh | sudo bash
+# Validate the tar using the checksum.
+grep ${DESIRED_FILE}.tar.xz SHASUMS256.txt | sha256sum -c -
 
-# Verify that we're using the correct node version.
-if [ `node -v` != "${DESIRED_VERSION}" ]; then
-	echo Still using the wrong node version. Expected ${DESIRED_VERSION}, got `node -v`
+# Extract the node executable.
+sudo tar --strip-components=2 -xJ -C /usr/local/bin/ ${DESIRED_FILE}/bin/node -f ${DESIRED_FILE}.tar.xz
+
+# Install NPM using the locally-copied install script
+sudo .circleci/npm-install.sh
+
+# Delete the downloaded files, since we no longer need them.
+rm -f ${DESIRED_FILE}.tar.xz
+rm -f SHASUMS256.txt
+
+# Verify that we're now using the correct version of node.
+if [[ `node -v` != "${DESIRED_VERSION}" ]]; then
+	echo Still using wrong node version. Expected ${DESIRED_VERSION}, got `node -v`
 	exit -1
 fi
