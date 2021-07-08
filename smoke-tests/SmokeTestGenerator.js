@@ -101,7 +101,7 @@ function generateScript(isBash, delim) {
 
 // We need the following set of smoke tests:
 // A Bash script that can be run in POSIX or in Windows' bash.exe.
-fs.writeFileSync(path.join('smoke-tests', 'bash.sh'), generateScript(true, '/'));
+fs.writeFileSync(path.join('smoke-tests', 'smoke-test.sh'), generateScript(true, '/'));
 // A .cmd script that can be run in Powershell or the Windows command prompt.
-fs.writeFileSync(path.join('smoke-tests', 'powershell.cmd'), generateScript(false, '\\'));
+fs.writeFileSync(path.join('smoke-tests', 'smoke-test.cmd'), generateScript(false, '\\'));
 

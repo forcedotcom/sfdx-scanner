@@ -144,7 +144,7 @@ jobs:
           # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
           # operations succeed, then we can reasonably assume that the plugin is stable.
           name: "Unpackaged sanity test"
-          command: smoke-tests\powershell.cmd bin\run.cmd
+          command: smoke-tests\smoke-test.cmd bin\run.cmd
 
       # Upload an artifact for the results, so they're visible without failing the test.
       - store_artifacts:
@@ -172,7 +172,7 @@ jobs:
           # Run through our sanity test script against the published version of the plugin, which we installed in the
           # previous step. If all of these pass, we can assume the plugin is stable.
           name: "Packaged sanity test"
-          command: smoke-tests\powershell.cmd sfdx
+          command: smoke-tests\smoke-test.cmd sfdx
 
       # Upload an artifact for the results, so they're visible without failing the tests
       - store_artifacts:
