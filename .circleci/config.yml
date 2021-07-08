@@ -22,66 +22,6 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
-  unix_upgrade_node:
-    parameters:
-      version:
-        type: string
-        default: "current"
-    steps:
-      # Install `n`, a library that we can use to resolve node version aliases.
-      - run:
-          name: "Install `n`"
-          command: npm install n
-      # Use `n` to determine the desired version, then install it.
-      - run:
-          name: "Update node"
-          command: |
-            # Save the desired version to a variable.
-            DESIRED_VERSION=v`npx n ls-remote << parameters.version >>`
-            # Install the desired version.
-            curl -sSL "https://nodejs.org/dist/${DESIRED_VERSION}/node-${DESIRED_VERSION}-linux-x64.tar.xz" | sudo tar --strip-components=2 -xJ -C /usr/local/bin/ node-${DESIRED_VERSION}-linux-x64/bin/node
-            # Install NPM
-            curl https://www.npmjs.com/install.sh | sudo bash
-      - run:
-          name: "Check version"
-          command: node -v
-  windows_upgrade_node:
-    parameters:
-      version:
-        type: string
-        default: "current"
-    steps:
-      - run:
-          name: "try nvm"
-          shell: bash.exe
-          command: |
-            VERSION_CHART=`nvm list available | sed -n 4p`
-            IFS='|' read -ra VERSION_ARRAY \<<< $VERSION_CHART
-            if [ "<< parameters.version >>" = "current" ]; then
-              echo "We wanted current"
-              WANTED_VERSION=`echo ${VERSION_ARRAY[1]} | sed 's/ *$//g'`
-            elif [ "<< parameters.version >>" = "lts" ]; then
-              echo "We wanted LTS"
-              WANTED_VERSION=`echo ${VERSION_ARRAY[2]} | sed 's/ *$//g'`
-            else
-              echo "We wanted garbage"
-              WANTED_VERSION="NOTHING. GO AWAY"
-            fi
-            echo $WANTED_VERSION
-            nvm install v${WANTED_VERSION}
-            nvm use ${WANTED_VERSION}
-      - run:
-          name: "install yarn"
-          shell: bash.exe
-          command: npm install -g yarn
-#            export NVM_DIR="/opt/circleci/.nvm"
-#            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-#            node -v
-#            VERSION_CHART=`nvm list available`
-#            IFS='|' read -ra VERSION_ARRAY <<< "$VERSION_CHART"
-#            for i in "${VERSION_ARRAY[@]}"; do
-#              echo $i
-#            done
 
 jobs:
   build:
@@ -94,8 +34,9 @@ jobs:
             echo node is `node -v`
             echo node location is `which node`
             echo yarn location is `which yarn`
-      - unix_upgrade_node:
-          version: lts
+      - run:
+          name: "Upgrade node"
+          command: .circleci/unix-node-upgrade.sh lts
       - run:
           name: "Get node version"
           command: |
@@ -158,9 +99,11 @@ jobs:
             echo node is `node -v`
             echo node location is `which node`
             echo yarn location is `which yarn`
-
-      - windows_upgrade_node:
-          version: lts
+      - run:
+          name: "Upgrade node"
+          # The script must be run in Bash.
+          shell: bash.exe
+          command: .circleci\windows-node.upgrade.sh lts
       - run:
           name: "Get node version again"
           command: |
