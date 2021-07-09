@@ -191,9 +191,6 @@ jobs:
             echo "yarn typescript"
             yarn list | grep typescript
             echo "npm -g typescript"
-            npm list -g | grep typescript || true
-            echo "npm typescript"
-            npm list | grep typescript
 
       - run:
           name: "Install sfdx cli"
@@ -230,45 +227,37 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
-      - run:
-          name: "Bash nonsense"
-          shell: bash.exe
-          command: |
-            npx --help
-            npx tsc --version
-            echo "yarn -g typescript"
-            yarn list -g | grep typescript
-            echo "yarn typescript"
-            yarn list | grep typescript
-            echo "npm -g typescript"
-            npm list -g | grep typescript
-            echo "npm typescript"
-            npm list | grep typescript
+#      - run:
+#          name: "Bash nonsense"
+#          shell: bash.exe
+#          command: |
+#            npx --help
+#            npx tsc --version
+#            echo "yarn -g typescript"
+#            yarn list -g | grep typescript
+#            echo "yarn typescript"
+#            yarn list | grep typescript
+#            echo "npm -g typescript"
+#            npm list -g | grep typescript
+#            echo "npm typescript"
+#            npm list | grep typescript
+#
+#      - run:
+#          name: "Upgrade node to LTS"
+#          shell: bash.exe
+#          command: .circleci/windows-node-upgrade.sh lts
 
-      - run:
-          name: "Upgrade node to LTS"
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
+#      - run:
+#          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
+#          name: "Reinstall yarn"
+#          shell: bash.exe
+#          command: npm install -g yarn
 
-      - run:
-          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
-          name: "Reinstall yarn"
-          shell: bash.exe
-          command: npm install -g yarn
-
-      - run:
-          name: "Bash nonsense again"
-          shell: bash.exe
-          command: |
-            npx --help
-            echo "yarn -g typescript"
-            yarn list -g | grep typescript
-            echo "yarn typescript"
-            yarn list | grep typescript
-            echo "npm -g typescript"
-            npm list -g | grep typescript
-            echo "npm typescript"
-            npm list | grep typescript
+#      - run:
+#          name: "Bash nonsense again"
+#          shell: bash.exe
+#          command: |
+#            echo
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
