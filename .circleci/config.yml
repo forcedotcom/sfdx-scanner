@@ -191,7 +191,7 @@ jobs:
             echo "yarn typescript"
             yarn list | grep typescript
             echo "npm -g typescript"
-            npm list -g | grep typescript
+            npm list -g | grep typescript || true
             echo "npm typescript"
             npm list | grep typescript
 
@@ -284,7 +284,8 @@ jobs:
           name: "Build and install tarball"
           shell: bash.exe
           command: |
-            npm pack
+            ls
+            yarn pack
             echo $?
             pwd
             ls
@@ -402,21 +403,21 @@ workflows:
             tags:
               only: /.*/
       # Step 2: Run the unit tests on Windows. This waits for the Linux tests to finish so that it can use the same build.
-      - windows-unit-tests:
-          requires:
-            - linux-unit-tests
+#      - windows-unit-tests:
+#          requires:
+#            - linux-unit-tests
       # Step 3a: Run the plugin against itself.
       - self-evaluation:
           requires:
-            - windows-unit-tests
+            - linux-unit-tests
       # Step 3b: Run the Linux smoke tests.
       - linux-tarball-smoke-tests:
           requires:
-            - windows-unit-tests
+            - linux-unit-tests
       # Step 3c: Run the Windows smoke tests.
       - windows-tarball-smoke-tests:
           requires:
-            - windows-unit-tests
+            - linux-unit-tests
 
 
 #  test-publish:
