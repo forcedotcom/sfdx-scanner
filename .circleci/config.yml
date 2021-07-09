@@ -325,21 +325,21 @@ workflows:
             tags:
               only: /.*/
       # Step 2: Run the unit tests on Windows. This waits for the Linux tests to finish so that it can use the same build.
-      - windows-build:
+      - windows-unit-tests:
           requires:
             - build
       # Step 3a: Run the plugin against itself.
       - self-evaluation:
           requires:
-            - windows-build
+            - windows-unit-tests
       # Step 3b: Run the Linux smoke tests.
       - linux-tarball-smoke-tests:
           requires:
-            - windows-build
+            - windows-unit-tests
       # Step 3c: Run the Windows smoke tests.
       - windows-tarball-smoke-tests:
           requires:
-            - windows-build
+            - windows-unit-tests
 
 
 #  test-publish:
