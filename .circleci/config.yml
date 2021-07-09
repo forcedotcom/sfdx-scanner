@@ -170,11 +170,11 @@ jobs:
             yarn list -g | grep typescript
             echo "yarn typescript"
             yarn list | grep typescript
-            echo "npm -g typescript"
-            npm list -g | grep typescript
-            echo "npm typescript"
-            npm list | grep typescript
 
+      # echo "npm -g typescript"
+      # npm list -g | grep typescript
+      # echo "npm typescript"
+      # npm list | grep typescript
       # Upgrade node to the specified version.
       - node/install:
           install-npm: false
@@ -234,6 +234,8 @@ jobs:
           name: "Bash nonsense"
           shell: bash.exe
           command: |
+            npx --help
+            npx tsc --version
             echo "yarn -g typescript"
             yarn list -g | grep typescript
             echo "yarn typescript"
@@ -258,6 +260,7 @@ jobs:
           name: "Bash nonsense again"
           shell: bash.exe
           command: |
+            npx --help
             echo "yarn -g typescript"
             yarn list -g | grep typescript
             echo "yarn typescript"
