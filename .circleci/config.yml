@@ -233,13 +233,9 @@ jobs:
           shell: bash.exe
           command: |
             npm pack
-#            npx tsc -b
-#            yarn pack --filename tarball.tgz
             echo $?
             pwd
             ls
-            # The `y` is necessary to simulate agreeing to install an unsigned plugin.
-            # echo y | sfdx plugins:install file://`pwd`/tarball.tgz
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
       - run:
