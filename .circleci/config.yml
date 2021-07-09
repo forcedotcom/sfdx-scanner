@@ -282,7 +282,7 @@ jobs:
             echo $?
             pwd
             ls
-            sfdx plugins:install file://`pwd`/tarball.tgz
+            echo y | sfdx plugins:install file://`pwd`/tarball.tgz
 
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
