@@ -242,16 +242,16 @@ jobs:
 #            echo "npm typescript"
 #            npm list | grep typescript
 #
-#      - run:
-#          name: "Upgrade node to LTS"
-#          shell: bash.exe
-#          command: .circleci/windows-node-upgrade.sh lts
+      - run:
+          name: "Upgrade node to LTS"
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
 
-#      - run:
-#          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
-#          name: "Reinstall yarn"
-#          shell: bash.exe
-#          command: npm install -g yarn
+      - run:
+          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn@1.13.0
 
 #      - run:
 #          name: "Bash nonsense again"
