@@ -251,7 +251,11 @@ jobs:
           # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
           name: "Reinstall yarn"
           shell: bash.exe
-          command: npm install -g yarn@1.13.0
+          command: |
+            npm install -g yarn
+            rm -rf node_modules
+            yarn --ignore-scripts
+            
 
 #      - run:
 #          name: "Bash nonsense again"
