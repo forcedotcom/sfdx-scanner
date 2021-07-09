@@ -327,7 +327,7 @@ workflows:
       # Step 2: Run the unit tests on Windows. This waits for the Linux tests to finish so that it can use the same build.
       - windows-unit-tests:
           requires:
-            - build
+            - linux-unit-tests
       # Step 3a: Run the plugin against itself.
       - self-evaluation:
           requires:
