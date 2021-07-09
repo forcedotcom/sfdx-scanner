@@ -171,6 +171,10 @@ jobs:
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
+      - run:
+          name: "Install sfdx cli"
+          command: npm install -g sfdx-cli
+
       # Create a directory for the test output.
       - run: mkdir test-results
 
@@ -214,6 +218,11 @@ jobs:
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
+
+      - run:
+          name: "Install sfdx cli"
+          shell: cmd.exe
+          command: npm install -g sfdx-cli
 
       - run: md test-results
 
