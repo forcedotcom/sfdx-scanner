@@ -163,6 +163,18 @@ jobs:
       - attach_workspace:
           at: ~/repo
 
+      - run:
+          name: "Bash nonsense"
+          command: |
+            echo "yarn -g typescript"
+            yarn list -g | grep typescript
+            echo "yarn typescript"
+            yarn list | grep typescript
+            echo "npm -g typescript"
+            npm list -g | grep typescript
+            echo "npm typescript"
+            npm list | grep typescript
+
       # Upgrade node to the specified version.
       - node/install:
           install-npm: false
@@ -170,6 +182,18 @@ jobs:
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
+
+      - run:
+          name: "Bash nonsense again"
+          command: |
+            echo "yarn -g typescript"
+            yarn list -g | grep typescript
+            echo "yarn typescript"
+            yarn list | grep typescript
+            echo "npm -g typescript"
+            npm list -g | grep typescript
+            echo "npm typescript"
+            npm list | grep typescript
 
       - run:
           name: "Install sfdx cli"
@@ -207,6 +231,19 @@ jobs:
           at: C:\repo
 
       - run:
+          name: "Bash nonsense"
+          shell: bash.exe
+          command: |
+            echo "yarn -g typescript"
+            yarn list -g | grep typescript
+            echo "yarn typescript"
+            yarn list | grep typescript
+            echo "npm -g typescript"
+            npm list -g | grep typescript
+            echo "npm typescript"
+            npm list | grep typescript
+
+      - run:
           name: "Upgrade node to LTS"
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
@@ -217,6 +254,18 @@ jobs:
           shell: bash.exe
           command: npm install -g yarn
 
+      - run:
+          name: "Bash nonsense again"
+          shell: bash.exe
+          command: |
+            echo "yarn -g typescript"
+            yarn list -g | grep typescript
+            echo "yarn typescript"
+            yarn list | grep typescript
+            echo "npm -g typescript"
+            npm list -g | grep typescript
+            echo "npm typescript"
+            npm list | grep typescript
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
