@@ -25,7 +25,7 @@ commands:
       - checkout
 
 jobs:
-  build:
+  linux-unit-tests:
     <<: *defaults
     steps:
       - auth_and_checkout
@@ -77,7 +77,7 @@ jobs:
 
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
-  windows-build:
+  windows-unit-tests:
     executor:
       name: win/default # executor type
       size: "medium"
@@ -93,6 +93,12 @@ jobs:
           # The script has to be run in bash.
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
+
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
@@ -145,34 +151,108 @@ jobs:
       - store_artifacts:
           path: test-results
 
-  unpackaged-sanity:
+  linux-tarball-smoke-tests:
+    <<: *defaults
+    parameters:
+      # If true, the tests will use the LTS version of node. If false, the latest version of node will be used instead.
+      lts:
+        type: boolean
+        default: true
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # Upgrade to whatever version of Node we need.
+      - node/install:
+          install-npm: false
+          lts: << parameters.lts >>
+
+      # Log the version of node we're using post-upgrade.
+      - run: node -v
+
+      - run:
+          name: "Install sfdx-cli"
+          command: npm install -g sfdx-cli
+
+      # Create a directory for the test output.
+      - run: mkdir test-results
+
+      # Build and install our tarball.
+      - run:
+          name: "Build and install tarball"
+          command: |
+            yarn pack --filename tarball.tgz
+            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI consisting of the file's full path.
+            echo y | sfdx plugins:install file://`pwd`/tarball.tgz
+
+      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is safe.
+      - run:
+          name: "Smoke Tests"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Upload the results as an artifact instead of as test results, so they don't tank the build.
+      - store_artifacts:
+          path: test-results
+
+  windows-tarball-smoke-tests:
     executor:
-      name: win/default # executor type
+      name: win/default # Executor type
       size: "medium"
+    parameters:
+      # If true, the tests will use the LTS version of node. If false, the latest version of node will be used instead.
+      lts:
+        type: boolean
+        default: true
     working_directory: C:\repo
 
     steps:
-      # Commands are run in a Windows virtual machine environment
+      # Commands are run in a Windows virtual machine environment.
       - attach_workspace:
           at: C:\repo
 
+      # Upgrade node to whatever version we need.
       - run:
-          name: "Upgrade node to LTS"
+          name: "Upgrade node"
           shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
+          command: |
+            DESIRED_VERSION=$(( << parameters.lts >> == true ? "lts" : "current" ))
+            .circleci/windows-node-upgrade.sh ${DESIRED_VERSION}
 
-      # Log the version of node we're using after the upgrade.
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
+
+      # Log the version of node we're using post-upgrade
       - run: node -v
+
+      - run:
+          name: "Install sfdx cli"
+          shell: cmd.exe
+          command: npm install -g sfdx-cli
 
       - run: md test-results
 
+      # Build and install our tarball.
       - run:
-          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
-          # operations succeed, then we can reasonably assume that the plugin is stable.
-          name: "Unpackaged sanity test"
-          command: smoke-tests\smoke-test.cmd bin\run.cmd
+          name: "Build and install tarball"
+          shell: bash.exe
+          command: |
+            # In a Windows VM, we have to blow away the node_modules folder and recreate it. If we don't do that, then
+            # yarn pack will always fail.
+            rm -rf node_modules
+            yarn --ignore-scripts
+            yarn pack --filename tarball.tgz
+            # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, the file URI doesn't have the C: in it.
+            echo y | sfdx plugins:install file:///repo/tarball.tgz
 
-      # Upload an artifact for the results, so they're visible without failing the test.
+      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
+      - run:
+          name: "Smoke Tests"
+          command: smoke-tests\smoke-test.cmd sfdx
+
+      # Upload the results as an artifact instead of as test results, so they don't tank the build.
       - store_artifacts:
           path: test-results
 
@@ -272,26 +352,36 @@ workflows:
   version: 2.1
   test-publish:
     jobs:
-      - build:
+      # Step 1: Run the unit tests on Linux. This happens first because the build step is also done here.
+      - linux-unit-tests:
           filters:
             # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      - windows-build:
+      # Step 2: run the unit tests on Windows.
+      - windows-unit-tests:
           requires:
-            - build
-      - unpackaged-sanity:
-          requires:
-            - windows-build
+            - linux-unit-tests
+      # Step 3A: Run the plugin against itself.
       - self-evaluation:
           requires:
-            - windows-build
-      - publish-latest:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
+            - windows-unit-tests
+      # Step 3B: Run the Linux smoke tests against the tarball.
+      - linux-tarball-smoke-tests:
           requires:
-            - build
+            - windows-unit-tests
+      # Step 3C: Run the Windows smoke tests.
+      - windows-tarball-smoke-tests:
+          requires:
+            - windows-unit-tests
+      # Step 4: Publish the build.
+      - publish-latest:
+          # All of the smoke tests and the self-evaluation must be successful before we can publish.
+          requires:
             - self-evaluation
+            - linux-tarball-smoke-tests
+            - windows-tarball-smoke-tests
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
@@ -300,6 +390,7 @@ workflows:
             tags:
               only:
                 /^v.*/
+      # Step 5: After publishing, run a sanity test against the published version.
       - packaged-sanity:
           requires:
             - publish-latest
