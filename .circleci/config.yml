@@ -57,26 +57,26 @@ jobs:
           root: ~/repo
           paths: .
 
-      # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+      # UNIT TESTS commented out to reduce test runtime.
+#      - run:
+#          name: test
+#          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+#          when: always
+#
+#      - run:
+#          name: eslint
+#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+#          when: always
+#
+#      - gradle/collect_test_results:
+#          reports_path: pmd-cataloger/build/reports/
+#          test_results_path: pmd-cataloger/build/test-results/
+#
+#      - store_test_results:
+#          path: test-results
+#
+#      - store_artifacts: # upload test coverage as artifact.
+#          path: test-coverage
   windows-unit-tests:
     executor:
       name: win/default # executor type
@@ -94,31 +94,38 @@ jobs:
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
 
+      - run:
+          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
+
+
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
       - run: mkdir test-results
 
-      # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+      # UNIT TESTS commented out to reduce test runtime
+#      - run:
+#          name: test
+#          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+#          when: always
+#
+#      - run:
+#          name: eslint
+#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+#          when: always
+#
+#      - gradle/collect_test_results:
+#          reports_path: pmd-cataloger/build/reports/
+#          test_results_path: pmd-cataloger/build/test-results/
+#
+#      - store_test_results:
+#          path: test-results
+#
+#      - store_artifacts: # upload test coverage as artifact.
+#          path: test-coverage
 
   self-evaluation:
     <<: *defaults
@@ -198,6 +205,12 @@ jobs:
           name: "Upgrade node to LTS"
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
+
+      - run:
+          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
