@@ -232,6 +232,7 @@ jobs:
           name: "Build and install tarball"
           shell: bash.exe
           command: |
+            npx tsc -b
             yarn pack --filename tarball.tgz
             echo $?
             pwd
