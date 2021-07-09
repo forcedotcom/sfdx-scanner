@@ -25,7 +25,7 @@ commands:
       - checkout
 
 jobs:
-  build:
+  linux-unit-tests:
     <<: *defaults
     steps:
       - auth_and_checkout
@@ -77,7 +77,7 @@ jobs:
 
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
-  windows-build:
+  windows-unit-tests:
     executor:
       name: win/default # executor type
       size: "medium"
@@ -145,14 +145,52 @@ jobs:
       - store_artifacts:
           path: test-results
 
-  unpackaged-sanity:
+  linux-tarball-smoke-tests:
+    <<: *defaults
+    parameters:
+      # 'True' means the test will use the LTS version of node. 'False' means it will use the latest version of node.
+      lts:
+        type: boolean
+        default: true
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # Upgrade node to the specified version.
+      - node/install:
+          install-npm: false
+          lts: << parameters.lts >>
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
+
+      # Create a directory for the test output.
+      - run: mkdir test-results
+
+      # Build and install our tarball.
+      - run:
+          name: "Build and install tarball"
+          command: |
+            yarn pack --filename tarball.tgz
+            sfdx plugins:install file://`pwd`/tarball.tgz --force
+
+      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
+      - run:
+          name: "Smoke Tests"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Upload the results as an artifact, so they're visible after the fact.
+      - store_artifacts:
+          path: test-results
+
+  windows-tarball-smoke-tests:
     executor:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
 
     steps:
-      # Commands are run in a Windows virtual machine environment
+      # Commands are run in a Windows virtual machine environment.
       - attach_workspace:
           at: C:\repo
 
@@ -166,13 +204,20 @@ jobs:
 
       - run: md test-results
 
+      # Build and install our tarball.
       - run:
-          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
-          # operations succeed, then we can reasonably assume that the plugin is stable.
-          name: "Unpackaged sanity test"
-          command: smoke-tests\smoke-test.cmd bin\run.cmd
+          name: "Build and install tarball"
+          shell: bash.exe
+          command: |
+            yarn pack --filename tarball.tgz
+            sfdx plugins:install file://`pwd`/tarball.tgz --force
 
-      # Upload an artifact for the results, so they're visible without failing the test.
+      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
+      - run:
+          name: "Smoke tests"
+          command: smoke-tests\smoke-test.cmd sfdx
+
+      # Upload the results as an artifact, so they're visible after the fact.
       - store_artifacts:
           path: test-results
 
@@ -272,42 +317,70 @@ workflows:
   version: 2.1
   test-publish:
     jobs:
-      - build:
+      # Step 1: Run the unit tests on Linux.
+      - linux-unit-tests:
           filters:
             # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
+      # Step 2: Run the unit tests on Windows. This waits for the Linux tests to finish so that it can use the same build.
       - windows-build:
           requires:
             - build
-      - unpackaged-sanity:
-          requires:
-            - windows-build
+      # Step 3a: Run the plugin against itself.
       - self-evaluation:
           requires:
             - windows-build
-      - publish-latest:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
+      # Step 3b: Run the Linux smoke tests.
+      - linux-tarball-smoke-tests:
           requires:
-            - build
-            - self-evaluation
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
-      - packaged-sanity:
+            - windows-build
+      # Step 3c: Run the Windows smoke tests.
+      - windows-tarball-smoke-tests:
           requires:
-            - publish-latest
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+            - windows-build
+
+
+#  test-publish:
+#    jobs:
+#      - build:
+#          filters:
+#            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
+#            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
+#            tags:
+#              only: /.*/
+#      - windows-build:
+#          requires:
+#            - build
+#      - unpackaged-sanity:
+#          requires:
+#            - windows-build
+#      - self-evaluation:
+#          requires:
+#            - windows-build
+#      - publish-latest:
+#          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
+#          requires:
+#            - build
+#            - self-evaluation
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#      - packaged-sanity:
+#          requires:
+#            - publish-latest
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#
