@@ -215,7 +215,7 @@ jobs:
           name: "Upgrade node"
           shell: bash.exe
           command: |
-            DESIRED_VERSION=$(( << parameters.lts >> == true ? "lts" : "current" ))
+            DESIRED_VERSION="current" && [[ << parameters.lts >> == true ]] && DESIRED_VERSION="lts"
             .circleci/windows-node-upgrade.sh ${DESIRED_VERSION}
 
       # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
