@@ -232,6 +232,12 @@ jobs:
       # Log the version of node we're using post-upgrade
       - run: node -v
 
+      # Show me the file system
+      - run:
+          name: "ls"
+          shell: bash.exe
+          command: ls
+
       - run:
           name: "Install sfdx cli"
           shell: cmd.exe
@@ -244,7 +250,7 @@ jobs:
           name: "Install tarball"
           shell: bash.exe
           command: |
-            - echo y | sfdx plugins:install file:///repo/tarball.tgz
+            echo y | sfdx plugins:install file:///repo/tarball.tgz
 
       # Build and install our tarball.
 #      - run:
