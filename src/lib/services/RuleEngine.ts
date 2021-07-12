@@ -21,7 +21,7 @@ export interface RuleEngine {
 	/**
 	 * Converts the severity created by engine to a normalized value across all engines.
 	 */
-	normalizeSeverity(results: RuleResult[]);
+	normalizeSeverity(results: RuleResult[]): void;
 
 	/**
 	 * Helps make decision to run an engine or not based on the Rules, Target paths and
