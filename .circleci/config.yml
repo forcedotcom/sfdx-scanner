@@ -174,9 +174,6 @@ jobs:
           name: "Install sfdx-cli"
           command: npm install -g sfdx-cli
 
-      # Create a directory for the test output.
-      - run: mkdir test-results
-
       # Build and install our tarball.
       - run:
           name: "Build and install tarball"
@@ -184,6 +181,14 @@ jobs:
             yarn pack --filename tarball.tgz
             # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI consisting of the file's full path.
             echo y | sfdx plugins:install file://`pwd`/tarball.tgz
+
+      # Persist the workspace, so the tarball is visible to subsequent jobs in this flow.
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+      # Create a directory for the test output.
+      - run: mkdir test-results
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is safe.
       - run:
@@ -234,18 +239,12 @@ jobs:
 
       - run: md test-results
 
-      # Build and install our tarball.
+      # Install our tarball.
       - run:
           name: "Build and install tarball"
           shell: bash.exe
-          command: |
-            # In a Windows VM, we have to blow away the node_modules folder and recreate it. If we don't do that, then
-            # yarn pack will always fail.
-            rm -rf node_modules
-            yarn --ignore-scripts
-            yarn pack --filename tarball.tgz
-            # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, the file URI doesn't have the C: in it.
-            echo y | sfdx plugins:install file:///repo/tarball.tgz
+          # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, note that the file URI doesn't have the C: in it.
+          command: echo y | sfdx plugins:install file:///repo/tarball.tgz
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
       - run:
@@ -359,7 +358,7 @@ workflows:
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      # Step 2: run the unit tests on Windows.
+      # Step 2: Run the unit tests on Windows.
       - windows-unit-tests:
           requires:
             - linux-unit-tests
@@ -371,16 +370,15 @@ workflows:
       - linux-tarball-smoke-tests:
           requires:
             - windows-unit-tests
-      # Step 3C: Run the Windows smoke tests.
+      # Step 4: Run the Windows smoke tests. Do this after the Linux tests because those tests create the tarball.
       - windows-tarball-smoke-tests:
           requires:
-            - windows-unit-tests
-      # Step 4: Publish the build.
+            - linux-tarball-smoke-tests
+      # Step 5: Publish the build.
       - publish-latest:
           # All of the smoke tests and the self-evaluation must be successful before we can publish.
           requires:
             - self-evaluation
-            - linux-tarball-smoke-tests
             - windows-tarball-smoke-tests
           filters:
             # We never want to publish branches, so we need to explicitly ignore all of them.
@@ -390,7 +388,7 @@ workflows:
             tags:
               only:
                 /^v.*/
-      # Step 5: After publishing, run a sanity test against the published version.
+      # Step 6: After publishing, run a sanity test against the published version.
       - packaged-sanity:
           requires:
             - publish-latest
