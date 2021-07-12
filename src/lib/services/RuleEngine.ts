@@ -78,7 +78,7 @@ export abstract class AbstractRuleEngine implements RuleEngine {
         return results;
     }
 	
-	public async normalizeSeverity(results: RuleResult[]): Promise<void>{
+	public normalizeSeverity(results: RuleResult[]): void{
 		for (const result of results) {
 			for (const violation of result.violations) {
 				violation.normalizedSeverity = this.getNormalizedSeverity(violation.severity);
