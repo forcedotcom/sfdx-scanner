@@ -104,14 +104,15 @@ export default class Run extends ScannerCommand {
 				messageOverride: messages.getMessage('flags.vceParamDeprecationWarning')
 			}
 		}),
-		'severity-for-error': flags.number({
+		'severity-threshold': flags.integer({
             char: 's',
-            description: messages.getMessage('flags.sfeDescription'),
-            longDescription: messages.getMessage('flags.sfeDescriptionLong'),
+            description: messages.getMessage('flags.stDescription'),
+            longDescription: messages.getMessage('flags.stDescriptionLong'),
 			exclusive: ['json', 'violations-cause-error'],
+			min: 1,
+			max: 3
         }),
 		"normalize-severity": flags.boolean({
-			char: 'n',
 			description: messages.getMessage('flags.nsDescription'),
 			longDescription: messages.getMessage('flags.nsDescriptionLong')
 		}),
@@ -122,7 +123,7 @@ export default class Run extends ScannerCommand {
 		this.validateFlags();
 
 		// if severty-for-error flag is used, we want to make sure the severities are normalized
-		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-for-error'];
+		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-threshold'];
 
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
@@ -149,7 +150,7 @@ export default class Run extends ScannerCommand {
 		return new RunOutputProcessor({
 			format: outputOptions.format,
 			violationsCauseException: this.flags['violations-cause-error'],
-			severityForError: this.flags['severity-for-error'],
+			severityForError: this.flags['severity-threshold'],
 			outfile: this.flags.outfile
 		}, this.ux)
 			.processRunOutput(output);

@@ -11,13 +11,13 @@ describe('scanner:run', function () {
 
 	describe('E2E', () => {
 		
-		describe('--severity-for-error flag', () => {
+		describe('--severity-threshold flag', () => {
 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
 					'--format', 'json',
-					'--severity-for-error', '3'
+					'--severity-threshold', '3'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
@@ -28,7 +28,7 @@ describe('scanner:run', function () {
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
 					'--format', 'json',
-					'--severity-for-error', '1'
+					'--severity-threshold', '1'
 				])
 				.it('When no violations are found equal to or greater than flag value, no error is thrown', ctx => {
 
@@ -48,7 +48,7 @@ describe('scanner:run', function () {
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
 					'--format', 'json',
-					'--severity-for-error', '3'
+					'--severity-threshold', '3'
 				])
 				.it('When violations are found equal to or greater than flag value, an error is thrown', ctx => {
 
@@ -62,6 +62,27 @@ describe('scanner:run', function () {
                     expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
 
 				});
+
+			setupCommandTest
+                .command(['scanner:run',
+                    '--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+                    '--format', 'json',
+                    '--severity-threshold', '-1'
+                ])
+                .it('Ensure values below the min for severity-threshold cause an error', ctx => {
+                    expect(ctx.stderr).to.contain('Expected integer greater than or equal to 1 but received -1');
+                });
+
+            setupCommandTest
+                .command(['scanner:run',
+                    '--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+                    '--format', 'json',
+                    '--severity-threshold', '5'
+                ])
+                .it('Ensure values above the max for severity-threshold cause an error', ctx => {
+                    expect(ctx.stderr).to.contain('Expected integer less than or equal to 3 but received 5');
+                });
+
 		});
 
 		describe('--normalize-severity flag', () => {
