@@ -12,23 +12,31 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
+  node: circleci/node@4.5.1
 
 
 commands:
-  https_checkout:
+  auth_and_checkout:
     steps:
-      - run: |
-          if [ -z "$CIRCLE_BRANCH" ]
-          then
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_TAG" ~/repo
-          else
-            git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" ~/repo
-          fi
+      - add_ssh_keys:
+          fingerprints:
+            # CircleCI deploy key, allows CircleCI to checkout code from Github.
+            - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
+      - checkout
+
 jobs:
   build:
     <<: *defaults
     steps:
-      - https_checkout
+      - auth_and_checkout
+
+      # We want our unit tests to run with the lts version of node.
+      - node/install:
+          install-npm: false
+          lts: true
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       # Download and cache dependencies
       - restore_cache:
@@ -79,6 +87,15 @@ jobs:
     steps:
       - attach_workspace:
           at: C:\repo
+
+      - run:
+          name: "Upgrade node to LTS"
+          # The script has to be run in bash.
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       - run: mkdir test-results
 
@@ -139,19 +156,24 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
+      - run:
+          name: "Upgrade node to LTS"
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
+
       - run: md test-results
 
       - run:
-          name: "List rules"
-          command: bin\run.cmd scanner:rule:list
+          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
+          # operations succeed, then we can reasonably assume that the plugin is stable.
+          name: "Unpackaged sanity test"
+          command: smoke-tests\smoke-test.cmd bin\run.cmd
 
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: ..\..\..\bin\run.cmd scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
+      # Upload an artifact for the results, so they're visible without failing the test.
+      - store_artifacts:
           path: test-results
 
   packaged-sanity:
@@ -160,7 +182,15 @@ jobs:
       size: "medium"
 
     steps:
-      - https_checkout
+      - auth_and_checkout
+
+      - run:
+          name: "Upgrade node to LTS"
+          shell: bash.exe
+          command: .circleci/windows-node-upgrade.sh lts
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
 
       - run:
           name: "Install sfdx cli"
@@ -173,16 +203,13 @@ jobs:
           command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
 
       - run:
-          name: "List rules"
-          command: sfdx scanner:rule:list
+          # Run through our sanity test script against the published version of the plugin, which we installed in the
+          # previous step. If all of these pass, we can assume the plugin is stable.
+          name: "Packaged sanity test"
+          command: smoke-tests\smoke-test.cmd sfdx
 
-      - run:
-          name: "Run rules"
-          working_directory: test\projects\app
-          command: sfdx scanner:run --target force-app --format junit --outfile ..\..\..\test-results\app.xml
-
-      # Upload results
-      - store_test_results:
+      # Upload an artifact for the results, so they're visible without failing the tests
+      - store_artifacts:
           path: test-results
 
   auto-merge-release:
@@ -191,7 +218,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - https_checkout
+      - auth_and_checkout
       - run:
           name: "Merge release"
           command: |
@@ -239,7 +266,7 @@ jobs:
       - release-management/create-github-release
     environment:
       # Fingerprint for developer.salesforce.com
-      SFDX_DEVELOPER_TRUSTED_FINGERPRINT: "3E:6C:CA:83:EA:88:92:E0:6C:7C:5C:ED:43:A6:0A:6C:33:74:5E:7F"
+      SFDX_DEVELOPER_TRUSTED_FINGERPRINT: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
 
 workflows:
   version: 2.1

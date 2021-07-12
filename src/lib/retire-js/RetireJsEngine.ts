@@ -78,7 +78,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
 	// local path instead.
-	private static VULN_JSON_PATH: string = require.resolve('./RetireJsVulns.json');
+	private static VULN_JSON_PATH: string = require.resolve(path.join('..', '..', '..', 'retire-js', 'RetireJsVulns.json'));
 
 	private static SIMPLE_TARGET_PATTERNS: ReadonlyArray<string> = [
 		'**/*.js',
