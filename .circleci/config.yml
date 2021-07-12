@@ -94,12 +94,11 @@ jobs:
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
 
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
       - run:
-          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
           name: "Reinstall yarn"
           shell: bash.exe
           command: npm install -g yarn
-
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
@@ -155,7 +154,7 @@ jobs:
   linux-tarball-smoke-tests:
     <<: *defaults
     parameters:
-      # 'True' means the test will use the LTS version of node. 'False' means it will use the latest version of node.
+      # If true, the tests will use the LTS version of node. If false, the latest version of node will be used instead.
       lts:
         type: boolean
         default: true
@@ -163,63 +162,52 @@ jobs:
       - attach_workspace:
           at: ~/repo
 
-      - run:
-          name: "Bash nonsense"
-          command: |
-            echo "yarn -g typescript"
-            yarn list -g | grep typescript
-            echo "yarn typescript"
-            yarn list | grep typescript
-
-      # echo "npm -g typescript"
-      # npm list -g | grep typescript
-      # echo "npm typescript"
-      # npm list | grep typescript
-      # Upgrade node to the specified version.
+      # Upgrade to whatever version of Node we need.
       - node/install:
           install-npm: false
           lts: << parameters.lts >>
 
-      # Log the version of node we're using after the upgrade.
+      # Log the version of node we're using post-upgrade.
       - run: node -v
 
       - run:
-          name: "Bash nonsense again"
-          command: |
-            echo "yarn -g typescript"
-            yarn list -g | grep typescript
-            echo "yarn typescript"
-            yarn list | grep typescript
-            echo "npm -g typescript"
-
-      - run:
-          name: "Install sfdx cli"
+          name: "Install sfdx-cli"
           command: npm install -g sfdx-cli
-
-      # Create a directory for the test output.
-      - run: mkdir test-results
 
       # Build and install our tarball.
       - run:
           name: "Build and install tarball"
           command: |
             yarn pack --filename tarball.tgz
-            # The `y` is necessary to simulate agreeing to install an unsigned plugin.
+            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI consisting of the file's full path.
             echo y | sfdx plugins:install file://`pwd`/tarball.tgz
 
-      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
+      # Persist the workspace so it can be reused in the Windows environment.
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+
+      # Create a directory for the test output.
+      - run: mkdir test-results
+
+      # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is safe.
       - run:
           name: "Smoke Tests"
           command: smoke-tests/smoke-test.sh sfdx
 
-      # Upload the results as an artifact, so they're visible after the fact.
+      # Upload the results as an artifact instead of as test results, so they don't tank the build.
       - store_artifacts:
           path: test-results
 
   windows-tarball-smoke-tests:
     executor:
-      name: win/default # executor type
+      name: win/default # Executor type
       size: "medium"
+    parameters:
+      # If true, the tests will use the LTS version of node. If false, the latest version of node will be used instead.
+      lts:
+        type: boolean
+        default: true
     working_directory: C:\repo
 
     steps:
@@ -227,42 +215,21 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
-#      - run:
-#          name: "Bash nonsense"
-#          shell: bash.exe
-#          command: |
-#            npx --help
-#            npx tsc --version
-#            echo "yarn -g typescript"
-#            yarn list -g | grep typescript
-#            echo "yarn typescript"
-#            yarn list | grep typescript
-#            echo "npm -g typescript"
-#            npm list -g | grep typescript
-#            echo "npm typescript"
-#            npm list | grep typescript
-#
+      # Upgrade node to whatever version we need.
       - run:
-          name: "Upgrade node to LTS"
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      - run:
-          # After upgrading the node version on a Windows executor, we need to manually reinstall yarn if we want to use it.
-          name: "Reinstall yarn"
+          name: "Upgrade node"
           shell: bash.exe
           command: |
-            npm install -g yarn
-            rm -rf node_modules
-            yarn --ignore-scripts
+            DESIRED_VERSION="current" && [[ << parameters.lts >> == true ]] && DESIRED_VERSION="lts"
+            .circleci/windows-node-upgrade.sh ${DESIRED_VERSION}
 
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 
-#      - run:
-#          name: "Bash nonsense again"
-#          shell: bash.exe
-#          command: |
-#            echo
-      # Log the version of node we're using after the upgrade.
+      # Log the version of node we're using post-upgrade
       - run: node -v
 
       - run:
@@ -272,25 +239,32 @@ jobs:
 
       - run: md test-results
 
-      # Build and install our tarball.
+      # Install the tarball previous created by the Linux flow.
       - run:
-          name: "Build and install tarball"
+          name: "Install tarball"
           shell: bash.exe
           command: |
-            ls
-            yarn pack --filename tarball.tgz
-            echo $?
-            pwd
-            ls
-            echo y | sfdx plugins:install file:///repo/tarball.tgz
+            - echo | sfdx plugins:install file:///repo/tarball.tgz
 
+      # Build and install our tarball.
+#      - run:
+#          name: "Build and install tarball"
+#          shell: bash.exe
+#          command: |
+#            # In a Windows VM, we have to blow away the node_modules folder and recreate it. If we don't do that, then
+#            # yarn pack will always fail.
+#            rm -rf node_modules
+#            yarn --ignore-scripts
+#            yarn pack --filename tarball.tgz
+#            # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, the file URI doesn't have the C: in it.
+#            echo y | sfdx plugins:install file:///repo/tarball.tgz
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
       - run:
-          name: "Smoke tests"
+          name: "Smoke Tests"
           command: smoke-tests\smoke-test.cmd sfdx
 
-      # Upload the results as an artifact, so they're visible after the fact.
+      # Upload the results as an artifact instead of as test results, so they don't tank the build.
       - store_artifacts:
           path: test-results
 
@@ -390,70 +364,52 @@ workflows:
   version: 2.1
   test-publish:
     jobs:
-      # Step 1: Run the unit tests on Linux.
+      # Step 1: Run the unit tests on Linux. This happens first because the build step is also done here.
       - linux-unit-tests:
           filters:
             # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
             # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
             tags:
               only: /.*/
-      # Step 2: Run the unit tests on Windows. This waits for the Linux tests to finish so that it can use the same build.
-#      - windows-unit-tests:
-#          requires:
-#            - linux-unit-tests
-      # Step 3a: Run the plugin against itself.
+      # Step 2: run the unit tests on Windows.
+      - windows-unit-tests:
+          requires:
+            - linux-unit-tests
+      # Step 3A: Run the plugin against itself.
       - self-evaluation:
           requires:
-            - linux-unit-tests
-      # Step 3b: Run the Linux smoke tests.
+            - windows-unit-tests
+      # Step 3B: Run the Linux smoke tests against the tarball.
       - linux-tarball-smoke-tests:
           requires:
-            - linux-unit-tests
-      # Step 3c: Run the Windows smoke tests.
+            - windows-unit-tests
+      # Step 4: Run the Windows smoke tests. Wait until after the Linux tests finish so we have the tarball accessible.
       - windows-tarball-smoke-tests:
           requires:
-            - linux-unit-tests
-
-
-#  test-publish:
-#    jobs:
-#      - build:
-#          filters:
-#            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-#            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-#            tags:
-#              only: /.*/
-#      - windows-build:
-#          requires:
-#            - build
-#      - unpackaged-sanity:
-#          requires:
-#            - windows-build
-#      - self-evaluation:
-#          requires:
-#            - windows-build
-#      - publish-latest:
-#          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
-#          requires:
-#            - build
-#            - self-evaluation
-#          filters:
-#            # We never want to publish branches, so we need to explicitly ignore all of them.
-#            branches:
-#              ignore: /.*/
-#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-#            tags:
-#              only:
-#                /^v.*/
-#      - packaged-sanity:
-#          requires:
-#            - publish-latest
-#          filters:
-#            # We never want to publish branches, so we need to explicitly ignore all of them.
-#            branches:
-#              ignore: /.*/
-#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-#            tags:
-#              only:
-#                /^v.*/
-#
+            - linux-tarball-smoke-tests
+      # Step 4: Publish the build.
+      - publish-latest:
+          # All of the smoke tests and the self-evaluation must be successful before we can publish.
+          requires:
+            - self-evaluation
+            - windows-tarball-smoke-tests
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
+      # Step 5: After publishing, run a sanity test against the published version.
+      - packaged-sanity:
+          requires:
+            - publish-latest
+          filters:
+            # We never want to publish branches, so we need to explicitly ignore all of them.
+            branches:
+              ignore: /.*/
+            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+            tags:
+              only:
+                /^v.*/
