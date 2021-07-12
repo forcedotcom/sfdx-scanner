@@ -244,7 +244,7 @@ jobs:
           name: "Install tarball"
           shell: bash.exe
           command: |
-            - echo | sfdx plugins:install file:///repo/tarball.tgz
+            - echo y | sfdx plugins:install file:///repo/tarball.tgz
 
       # Build and install our tarball.
 #      - run:
