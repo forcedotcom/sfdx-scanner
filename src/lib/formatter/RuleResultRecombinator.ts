@@ -31,7 +31,7 @@ export class RuleResultRecombinator {
 				formattedResults = await constructSarif(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.TABLE:
-				formattedResults = this.constructTable(results);
+				formattedResults = this.constructTable(results); 
 				break;
 			case OUTPUT_FORMAT.XML:
 				formattedResults = this.constructXml(results);
@@ -48,13 +48,17 @@ export class RuleResultRecombinator {
 			return 0;
 		}
 		let minSev = null;
+		
+		// if -n or -s flag used, minSev is calculated with normal value
 		for (const res of results) {
 			for (const violation of res.violations) {
-				if (!minSev || violation.severity < minSev) {
-					minSev = violation.severity;
+				const severity = (violation.normalizedSeverity === undefined)? violation.severity : violation.normalizedSeverity;
+				if (!minSev || severity < minSev) {
+					minSev = severity;
 				}
 			}
 		}
+		
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;
 	}
@@ -85,6 +89,8 @@ export class RuleResultRecombinator {
 			return resultXml;
 		}
 
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
+
 		let problemCount = 0;
 
 		/*
@@ -110,7 +116,10 @@ export class RuleResultRecombinator {
 				const escapedUrl = this.safeHtmlEscape(v.url);
 
 				problemCount++;
-				violations += `<violation severity="${v.severity}" line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+
+				const normalizedSeverityPortion = normalizeSeverity ? `normalizedSeverity="${v.normalizedSeverity}"` : "";
+				violations += `<violation severity="${v.severity}" ${normalizedSeverityPortion} line="${v.line}" column="${v.column}" endLine="${v.endLine}" endColumn="${v.endColumn}" rule="${escapedRuleName}" category="${escapedCategory}" url="${escapedUrl}">${escapedMessage}</violation>`;
+
 			}
 			resultXml += `
       <result file="${escapedFileName}" engine="${result.engine}">
@@ -233,6 +242,8 @@ URL: ${url}
 			return '';
 		}
 
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
+
 		const violations = [];
 		for (const result of results) {
 			for (const v of result.violations) {
@@ -243,7 +254,7 @@ URL: ${url}
 					column: v.column,
 					endLine: v.endLine || null,
 					endColumn: v.endColumn || null,
-					severity: v.severity,
+					severity: (normalizeSeverity ? v.normalizedSeverity : v.severity),
 					ruleName: v.ruleName,
 					category: v.category,
 					url: v.url,
@@ -280,16 +291,29 @@ URL: ${url}
 			return '';
 		}
 
-		const csvRows = [];
-		// Gradually build our CSV, starting with these columns.
-		csvRows.push(['Problem', 'File', 'Severity', 'Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine']);
-		let problemCount = 0;
+		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
 
+		const csvRows = [];
+
+		const columns: string[] = ['Problem', 'File', 'Severity']; 
+        if (normalizeSeverity) {
+           columns.push('Normalized Severity')
+        }
+        columns.push('Line', 'Column', 'Rule', 'Description', 'URL', 'Category', 'Engine');
+        csvRows.push(columns);
+
+		let problemCount = 0;
 		for (const result of results) {
 			const fileName = result.fileName;
 			for (const v of result.violations) {
 				const msg = v.message.trim();
-				csvRows.push([++problemCount, fileName, v.severity, v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine]);
+
+				const row = [++problemCount, fileName, v.severity];
+				if (normalizeSeverity) {
+					row.push(v.normalizedSeverity);
+				}
+				row.push(v.line, v.column, v.ruleName, msg, v.url, v.category, result.engine)
+				csvRows.push(row);
 			}
 		}
 

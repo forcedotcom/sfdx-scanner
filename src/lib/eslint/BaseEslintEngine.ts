@@ -1,8 +1,8 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern} from '../../types';
-import {ENGINE} from '../../Constants';
+import {ENGINE, Severity} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../../lib/util/Utils';
@@ -70,7 +70,7 @@ export interface EslintStrategy {
 	processRuleViolation(): ProcessRuleViolationType;
 }
 
-export abstract class BaseEslintEngine implements RuleEngine {
+export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 	private strategy: EslintStrategy;
 	protected logger: Logger;
@@ -151,6 +151,8 @@ export abstract class BaseEslintEngine implements RuleEngine {
 
 		return Promise.resolve(this.catalog);
 	}
+
+
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private processRule(key: string, docs: any): Rule {
@@ -249,6 +251,17 @@ export abstract class BaseEslintEngine implements RuleEngine {
 			return results;
 		} catch (e) {
 			throw new SfdxError(e.message || e);
+		}
+	}
+
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1: 
+				return Severity.MODERATE;
+			case 2: 
+				return Severity.HIGH;
+			default:
+				return Severity.MODERATE;
 		}
 	}
 
