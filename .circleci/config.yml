@@ -359,8 +359,8 @@ jobs:
           at: ~/repo
 
       # Delete any tarball that might have survived smoke tests.
-      - run: rm salesforce*.tgz
       - run: ls
+      - run: rm salesforce*.tgz
       # This part is from the publish task.
       - run: npm run prepack
       - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
