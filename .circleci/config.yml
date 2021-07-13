@@ -312,6 +312,65 @@ jobs:
             git pull origin dev
             git merge release --commit --no-edit -m "Automerge release to dev"
             git push origin dev
+#
+#  publish-release-candidate:
+#    <<: *defaults
+#    steps:
+#      - attach_workspace:
+#          at: ~/repo
+#
+#      # We're publishing from a tag, but we want to make sure that tag was created on the correct branch, i.e. release.
+#      - run:
+#          name: "Verify branch of origin"
+#          command: |
+#            if [ -z "$CIRCLE_TAG" ]
+#            then
+#              # If we're not actually working from a tag, just exit. We only want to deploy tags.
+#              exit 1
+#            fi
+#            # For these two exports, the git command is logging out every local and remote branch that contains the tag.
+#            # That gets piped into a grep command, so we can look for specific branches in the results.
+#            export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG | grep release)
+#            export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG | grep master)
+#            # Our typical flow is to merge feature branches into `dev`, then merge `dev` into `release`, then create a
+#            # tag off of the `release` branch, and merge `release` into `master` after the release is finished.
+#            # So we want to make sure that the tag is contained in `release`, but not in `master`.
+#            if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
+#            then
+#              exit 1
+#            fi
+#
+#      - run: npm run prepack
+#
+#      # We have to update the path, so that the node modules installed by the release-management orb are found.
+#      # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
+#      - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin/:$PATH' >> $BASH_ENV
+#
+#      - release-management/sign
+#      - release-management/publish:
+#          access: public
+#          # Give this version the `release-candidate` tag,
+#          tag:
+
+  do-everything-except-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # Delete any tarball that might have survived smoke tests.
+      - run: run salesforce*.tgz
+      - run: ls
+      # This part is from the publish task.
+      - run: npm run prepack
+      - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
+      - release-management/sign
+      # At this point, we are curious if the tarball has been created.
+      - run: ls
+    environment:
+      # Fingerprint for developer.salesforce.com
+      SFDX_DEVELOPER_TRUSTED_FINGERPRINT: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
+
   publish-latest:
     <<: *defaults
     steps:
@@ -379,29 +438,34 @@ workflows:
       - windows-tarball-smoke-tests:
           requires:
             - linux-tarball-smoke-tests
-      # Step 5: Publish the build.
-      - publish-latest:
-          # All of the smoke tests and the self-evaluation must be successful before we can publish.
+      - do-everything-except-release:
           requires:
-            - self-evaluation
             - windows-tarball-smoke-tests
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
-      # Step 6: After publishing, run a sanity test against the published version.
-      - packaged-sanity:
-          requires:
-            - publish-latest
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+            - self-evaluation
+#      # Step 5: Publish the build.
+#      - publish-latest:
+#          # All of the smoke tests and the self-evaluation must be successful before we can publish.
+#          requires:
+#            - self-evaluation
+#            - windows-tarball-smoke-tests
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#      # Step 6: After publishing, run a sanity test against the published version.
+#      - packaged-sanity:
+#          requires:
+#            - publish-latest
+#          filters:
+#            # We never want to publish branches, so we need to explicitly ignore all of them.
+#            branches:
+#              ignore: /.*/
+#            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+#            tags:
+#              only:
+#                /^v.*/
+#
