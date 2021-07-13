@@ -10,6 +10,7 @@ describe('normalizeSeverity', () =>
     {
         const testEngine: PmdEngine = new PmdEngine();
 
+        //
         it('test severity value 1', () =>
         {
             expect(testEngine.getNormalizedSeverity(1)).to.equal(1);
