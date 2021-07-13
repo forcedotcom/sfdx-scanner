@@ -359,7 +359,7 @@ jobs:
           at: ~/repo
 
       # Delete any tarball that might have survived smoke tests.
-      - run: run salesforce*.tgz
+      - run: rm salesforce*.tgz
       - run: ls
       # This part is from the publish task.
       - run: npm run prepack
