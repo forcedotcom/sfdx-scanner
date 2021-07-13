@@ -178,9 +178,11 @@ jobs:
       - run:
           name: "Build and install tarball"
           command: |
-            yarn pack --filename tarball.tgz
+            npm pack
+            # We need to determine the name of the tarball.
+            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
             # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI consisting of the file's full path.
-            echo y | sfdx plugins:install file://`pwd`/tarball.tgz
+            echo y | sfdx plugins:install file://`pwd`/${SFDC_TARBALL}
 
       # Persist the workspace, so the tarball is visible to subsequent jobs in this flow.
       - persist_to_workspace:
@@ -220,8 +222,8 @@ jobs:
           name: "Upgrade node"
           shell: bash.exe
           command: |
-            DESIRED_VERSION="current" && [[ << parameters.lts >> == true ]] && DESIRED_VERSION="lts"
-            .circleci/windows-node-upgrade.sh ${DESIRED_VERSION}
+            WANTED_VERSION="current" && [[ << parameters.lts >> == true ]] && WANTED_VERSION="lts"
+            .circleci/windows-node-upgrade.sh ${WANTED_VERSION}
 
       # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
       - run:
@@ -243,8 +245,11 @@ jobs:
       - run:
           name: "Install tarball"
           shell: bash.exe
-          # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, note that the file URI doesn't have the C: in it.
-          command: echo y | sfdx plugins:install file:///repo/tarball.tgz
+          command: |
+            # We need to get the name of the tarball.
+            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
+            # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, note that the file URI doesn't have the C: in it.
+            echo y | sfdx plugins:install file:///repo/tarball.tgz
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
       - run:
