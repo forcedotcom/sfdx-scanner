@@ -249,7 +249,7 @@ jobs:
             # We need to get the name of the tarball.
             SFDC_TARBALL=$(ls | grep salesforce*.tgz)
             # Pipe in 'y' to simulate agreeing to install an unsigned plugin. Also, note that the file URI doesn't have the C: in it.
-            echo y | sfdx plugins:install file:///repo/tarball.tgz
+            echo y | sfdx plugins:install file:///repo/${SFDC_TARBALL}
 
       # Run the smoke tests. If none of them explode, we can reasonably assume that the plugin is stable.
       - run:
