@@ -43,7 +43,7 @@ $ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
       [deprecated] throws an error when violations are detected
       
   -s, --severity-threshold
-      throws an error when violations of specific severity (or more severe) are detected
+      throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity
 
   --normalize-severity
   	  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity
