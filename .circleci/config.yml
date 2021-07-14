@@ -23,6 +23,12 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
+  windows_install_yarn:
+    steps:
+      - run:
+          name: "Install yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 
 jobs:
   build:
@@ -95,10 +101,7 @@ jobs:
           command: .circleci/windows-node-upgrade.sh lts
 
       # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - run:
-          name: "Reinstall yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+      - windows_install_yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
@@ -168,10 +171,7 @@ jobs:
           command: .circleci/windows-node-upgrade.sh lts
 
       # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - run:
-          name: "Reinstall yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+      - windows_install_yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
@@ -202,10 +202,7 @@ jobs:
           command: .circleci/windows-node-upgrade.sh lts
 
       # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - run:
-          name: "Reinstall yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+      - windows_install_yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
