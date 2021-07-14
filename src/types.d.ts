@@ -58,6 +58,7 @@ export type RuleViolation = {
 	endColumn?: number;
 	ruleName: string;
 	severity: number;
+	normalizedSeverity?: number;
 	message: string;
 	category: string;
 	url?: string;

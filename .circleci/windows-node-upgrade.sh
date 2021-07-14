@@ -35,8 +35,3 @@ WANTED_VERSION=`echo ${WANTED_VERSION}| sed 's/ *$//g'`
 # Install and switch to the desired version
 nvm install ${WANTED_VERSION}
 nvm use ${WANTED_VERSION}
-
-# For reasons that aren't entirely understood, using nvm to change the node version also requires us to manually reinstall
-# yarn, and doing *that* requires us to manually turn on nvm, even though it acts like it's already on.
-nvm on
-npm install -g yarn

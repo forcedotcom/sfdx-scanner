@@ -11,6 +11,11 @@ export enum OUTPUT_FORMAT {
 	XML = 'xml'
 }
 
+export type OutputOptions  = {
+	format: OUTPUT_FORMAT;
+	normalizeSeverity: boolean;
+}
+
 export interface RuleManager {
 	init(): Promise<void>;
 
@@ -29,5 +34,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], format: OUTPUT_FORMAT, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
 }
