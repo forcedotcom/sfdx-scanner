@@ -273,7 +273,7 @@ describe('TypescriptEslint Strategy', () => {
 			});
 
 			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
-				const {results} = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], OUTPUT_FORMAT.JSON, EMPTY_ENGINE_OPTIONS);
+				const {results} = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
 				// Parse the json in order to make the string match easier.
 				// There should be a single violation with a single message
 				const ruleResults: RuleResult[] = JSON.parse(results.toString());

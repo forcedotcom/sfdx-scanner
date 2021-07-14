@@ -2,16 +2,15 @@ import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
-import {RuleEngine} from '../services/RuleEngine';
+import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES} from '../../Constants';
+import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {uxEvents} from "../ScannerEvents";
-import { FileHandler } from '../util/FileHandler';
-import { EventCreator } from '../util/EventCreator';
+import {FileHandler} from '../util/FileHandler';
+import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-
 
 Messages.importMessagesDirectory(__dirname);
 const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
@@ -71,7 +70,7 @@ const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 ];
 
 
-abstract class BasePmdEngine implements RuleEngine {
+abstract class BasePmdEngine extends AbstractRuleEngine {
 
 	protected logger: Logger;
 	protected config: Config;
@@ -98,6 +97,21 @@ abstract class BasePmdEngine implements RuleEngine {
 	public abstract isEnabled(): Promise<boolean>;
 
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+
+	getNormalizedSeverity(severity: number): Severity {
+		switch (severity) {
+			case 1:
+				return Severity.HIGH;
+			case 2:
+				return Severity.MODERATE;
+			case 3: 
+			case 4:
+			case 5:
+				return Severity.LOW;
+			default:
+				return Severity.MODERATE;
+		}
+	}
 
 	public abstract getCatalog(): Promise<Catalog>;
 
@@ -260,7 +274,7 @@ abstract class BasePmdEngine implements RuleEngine {
 						column: v.attributes.begincolumn,
 						endLine: v.attributes.endline,
 						endColumn: v.attributes.endcolumn,
-						severity: v.attributes.priority,
+						severity: Number(v.attributes.priority),
 						ruleName: v.attributes.rule,
 						category: v.attributes.ruleset,
 						url: v.attributes.externalInfoUrl,

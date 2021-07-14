@@ -63,6 +63,7 @@ abstract class SarifFormatter {
 	 */
 	private populateRuleMap(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown[] {
 		const rules = [];
+		const normalizeSeverity: boolean = ruleResults.length > 0 && ruleResults[0].violations.length > 0 && !(ruleResults[0].violations[0].normalizedSeverity === undefined);
 		for (const r of ruleResults) {
 			for (const v of r.violations) {
 				// Exceptions aren't tied to a rule
@@ -71,6 +72,7 @@ abstract class SarifFormatter {
 				}
 				if (!this.ruleMap.has(v.ruleName)) {
 					const vRule: Rule = catalog.getRule(r.engine, v.ruleName);
+
 					// v.Rule may be undefined if there was an error
 					const description: string = vRule?.description ? vRule.description : v.message;
 					this.ruleMap.set(v.ruleName, this.ruleMap.size);
@@ -81,9 +83,10 @@ abstract class SarifFormatter {
 							text: description.trim().replace(/^\n/, '').replace(/\n$/, '')
 						},
 						properties: {
-							category: v.category,
-							severity: v.severity
-						}
+						category: v.category,
+						severity: v.severity,
+						normalizedSeverity: (normalizeSeverity ? v.normalizedSeverity : undefined) // when set to undefined, normalizedSeverity will not appear in output
+					}
 					};
 					if (v.url) {
 						rule['helpUri'] = v.url;
