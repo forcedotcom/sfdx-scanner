@@ -94,6 +94,12 @@ jobs:
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
 
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
+
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
@@ -161,6 +167,12 @@ jobs:
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
 
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
+
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
@@ -188,6 +200,12 @@ jobs:
           name: "Upgrade node to LTS"
           shell: bash.exe
           command: .circleci/windows-node-upgrade.sh lts
+
+      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+      - run:
+          name: "Reinstall yarn"
+          shell: bash.exe
+          command: npm install -g yarn
 
       # Log the version of node we're using after the upgrade.
       - run: node -v
