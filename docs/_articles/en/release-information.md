@@ -9,10 +9,6 @@ lang: en
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.1...v2.9.2)
 
-**Closed issues:**
-
-- Code Scanner not working on Windows [\#417](https://github.com/forcedotcom/sfdx-scanner/issues/417)
-- "Unable to determine a suitable edition, even after broadening." \[BUG\] @W-9296240@ Commands result in error. [\#412](https://github.com/forcedotcom/sfdx-scanner/issues/412)
 
 **Merged pull requests:**
 
