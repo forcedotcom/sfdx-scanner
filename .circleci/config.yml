@@ -273,7 +273,7 @@ jobs:
       # Update the path so that node modules installed by the release-management orb are found
       # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
       - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
-      - release-management/sign
+      - release-management/sign:
           # Fingerprint for sfdx-trust developer.salesforce.com
           fingerprint: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
       - release-management/publish:
