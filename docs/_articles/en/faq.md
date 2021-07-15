@@ -56,16 +56,16 @@ A: You must:
 #### Q: How can I use `Salesforce CLI Scanner` in my CI/CD?
 A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD. You'll also probably want to do the following:
 - Use the `-o/--outfile` flag to write your results to a file, so you'll have an artifact of the results.
-- Use the `-s/--severity-threshold` flag so violations equal to OR above a certain threshold would cause a non-zero exit code, since many CI/CD frameworks care about such things.
+- Use the -s/--severity-threshold flag to cause a non-zero exit code if any violations meet or exceed the provided value, since many CI/CD frameworks care about such things.
 - `-v/--violations-cause-error` flag is deprecated please use `-s/--severity-threshold`. 
 
 ## Questions about Severity Threshold and Normalization
 
 #### Q: How to set a Severity Threshold for a scanner run?
-A: When user runs the scanner with the `-s` or `--severity-threshold` flag and a threshold value, the scanner throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the `--normalize-severity` flag
+A: When user runs the scanner with the `-s` or `--severity-threshold` flag and a threshold value, the scanner throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the severity of the most severe violation(s). Using this flag also implicitly invokes the --normalize-severity flag.
 
 #### Q: How to get normalized severity?
-A: PMD, ESLint & RetireJS all have different scales for reporting the Severity of the violations. When the user runs the scanner with the `--normalize-severity` flag, the `Salesforce CLI Scanner` would normalize the severity of the violations across all the engines that was invoked.  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity	
+A: PMD, ESLint & RetireJS all have different scales for reporting the Severity of the violations. When the user runs the scanner with the `--normalize-severity` flag, the `Salesforce CLI Scanner` will normalize the severity of violations across all invoked engines.  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html output format, the normalized severity is displayed instead of the engine severity	
 
 #### Q: How is the Severity normalized across all the engines?
 A: Following table shows how the severity across all engines are normalized. 
