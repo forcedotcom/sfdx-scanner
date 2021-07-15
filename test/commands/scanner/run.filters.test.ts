@@ -151,13 +151,14 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				.it('Only correct categories are returned', ctx => {
 					const stdout = ctx.stdout;
 					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length, TestUtils.prettyPrint(output)).to.equal(4);
-					for (const file of output) {
-						expect(file.engine).to.equal('pmd');
-						for (const violation of file.violations) {
+
+					expect(output.length).greaterThan(0);
+					for (const result of output) {
+						for (const violation of result.violations) {
 							expect(violation.category, TestUtils.prettyPrint(violation)).to.not.equal(category);
 						}
 					}
+
 				});
 		});
 
@@ -174,10 +175,10 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				.it('Only correct categories are returned', ctx => {
 					const stdout = ctx.stdout;
 					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length, TestUtils.prettyPrint(output)).to.equal(4);
-					for (const file of output) {
-						expect(file.engine).to.equal('pmd');
-						for (const violation of file.violations) {
+					expect(output.length).greaterThan(0);
+
+					for (const result of output) {
+						for (const violation of result.violations) {
 							expect(expectedCategories.has(violation.category), TestUtils.prettyPrint(violation)).to.be.false;
 						}
 					}
