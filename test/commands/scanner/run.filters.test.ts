@@ -152,6 +152,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					const stdout = ctx.stdout;
 					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 
+					expect(output.length).greaterThan(0);
 					for (const result of output) {
 						for (const violation of result.violations) {
 							expect(violation.category, TestUtils.prettyPrint(violation)).to.not.equal(category);
@@ -174,6 +175,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				.it('Only correct categories are returned', ctx => {
 					const stdout = ctx.stdout;
 					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+					expect(output.length).greaterThan(0);
 
 					for (const result of output) {
 						for (const violation of result.violations) {
