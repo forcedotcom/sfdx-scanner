@@ -274,14 +274,13 @@ jobs:
       # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
       - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
       - release-management/sign
+          # Fingerprint for sfdx-trust developer.salesforce.com
+          fingerprint: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
       - release-management/publish:
           access: public
           tag: latest-rc
           use_tarfile: true
       - release-management/create-github-release
-    environment:
-      # Fingerprint for developer.salesforce.com
-      SFDX_DEVELOPER_TRUSTED_FINGERPRINT: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
 
 workflows:
   version: 2.1
