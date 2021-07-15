@@ -12,7 +12,7 @@ You can specify the format of the output as XML, Junit, CSV or table. You can pr
 
 ```bash
 $ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f 
-  csv|html|json|junit|sarif|table|xml] [-o <string>] [--tsconfig <string>] 
+  csv|html|json|junit|sarif|table|xml] [-o <string>] [--normalize-severity] [--severity-threshold] [--tsconfig <string>] 
   [--eslintconfig <string>] [--pmdconfig <string>] [--env <string>] [-v | 
   --json] [--verbose] [--loglevel 
   trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
