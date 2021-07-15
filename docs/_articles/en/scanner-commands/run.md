@@ -11,30 +11,72 @@ You can specify the format of the output as XML, Junit, CSV or table. You can pr
 ## Usage
 
 ```bash
-$ sfdx scanner:run [-c <array>] [-r <array>] [-e <array>] [-t <array> | undefined] [-f xml|junit|csv|table] [-o <string>] [--verbose] [--json]
+$ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f 
+  csv|html|json|junit|sarif|table|xml] [-o <string>] [--normalize-severity] [--severity-threshold] [--tsconfig <string>] 
+  [--eslintconfig <string>] [--pmdconfig <string>] [--env <string>] [-v | 
+  --json] [--verbose] [--loglevel 
+  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 ```
   
 ## Options
 
 ```bash
-  -c, --category=category		One or more categories of rules to run. Specify multiple values as a comma-separated list.
-  -e, --engine=engine 			One or more engines to run. Multiple values can be specified as a comma-separated list.
-  -f, --format=(xml|junit|csv|table) 	Specifies output format with results written directly to the console.
-  -o, --outfile=outfile			Write output to a file
-  -r, --ruleset=ruleset			[Deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
-  -t, --target=target			Source code location. May use glob patterns. Specify multiple values as a comma-separated list
-  -v, --violations-cause-error				When violations are detected, exit with code equal to the severity of the most severe violation.
-  --tsconfig				tsconfig.json location. Required if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
-  --pmdconfig     Location of rule reference XML, if user wishes to run PMD with custom config.
-  --eslintconfig  Location of .eslintrc.json, if user wishes to run Eslint with custom config.
-  --env 				JSON-formatted string that overrides ESLint's default environmental variables.
-  --json				Format output as json
-  --verbose				Emit additional command output to stdout
+  -c, --category=category
+      categor(ies) of rules to run
+
+  -e, --engine=engine
+      engine(s) to run
+
+  -f, --format=(csv|html|json|junit|sarif|table|xml)
+      format of results
+
+  -o, --outfile=outfile
+      location of output file
+
+  -r, --ruleset=ruleset
+      [deprecated] ruleset(s) of rules to run
+
+  -t, --target=target
+      (required) location of source code
+
+  -v, --violations-cause-error
+      [deprecated] throws an error when violations are detected
+      
+  -s, --severity-threshold
+      throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity
+
+  --normalize-severity
+  	  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity
+
+  --env=env
+      JSON-formatted string, overrides ESLint's default environment variables
+
+  --eslintconfig=eslintconfig
+      location of eslintrc config to customize eslint engine
+
+  --json
+      format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATA
+  L)
+      [default: warn] logging level for this command invocation
+
+  --pmdconfig=pmdconfig
+      location of PMD rule reference XML file to customize rule selection
+
+  --tsconfig=tsconfig
+      location of tsconfig.json file
+
+  --verbose
+      emit additional command output to stdout
+
+
 ```
 
 ## Additional Notes
 
---ruleset option is deprecated and will be removed soon. Please use --category instead.
+- `--ruleset` option is deprecated and will be removed soon. Please use --category instead.
+- `-v/--violations-cause-error` flag is deprecated. Please use `-s/--severity-threshold` instead. 
   
 ## Example
 
@@ -95,6 +137,16 @@ $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
 ```bash
 $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
+```
+
+Use `--normalize-severity` to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown). 
+```bash
+$ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
+```
+
+Use `--severity-threshold` to throw a non-zero exit code when rule violations of a specific severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation
+```bash
+$ sfdx scanner:run --target "/some-project/" --severity-threshold 2
 ```
 
 ## Demo
