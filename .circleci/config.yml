@@ -276,7 +276,7 @@ jobs:
       - release-management/sign
       - release-management/publish:
           access: public
-          tag: latest
+          tag: latest-rc
           use_tarfile: true
       - release-management/create-github-release
     environment:
