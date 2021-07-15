@@ -56,7 +56,7 @@ A: You must:
 #### Q: How can I use `Salesforce CLI Scanner` in my CI/CD?
 A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD. You'll also probably want to do the following:
 - Use the `-o/--outfile` flag to write your results to a file, so you'll have an artifact of the results.
-- Use the `-s/--severity-threshold` flag so violations above a certain threshold would cause a non-zero exit code, since many CI/CD frameworks care about such things.
+- Use the `-s/--severity-threshold` flag so violations equal to OR above a certain threshold would cause a non-zero exit code, since many CI/CD frameworks care about such things.
 - `-v/--violations-cause-error` flag is deprecated please use `-s/--severity-threshold`. 
 
 ## Questions about Severity Threshold and Normalization
