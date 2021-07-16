@@ -45,7 +45,7 @@ function buildPath(pathSegs, delim) {
 function generateScriptBody(isBash, delim) {
 	const projectsPath = ['test', 'code-fixtures', 'projects'];
 	const customRulePath = ['test', 'test-jars', 'apex', 'testjar1.jar'];
-	const resultsPath = ['test-results'];
+	const resultsPath = ['smoke-test-results'];
 
 	const exeName = isBash ? '$EXE_NAME' : '%EXE_NAME%';
 

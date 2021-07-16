@@ -69,6 +69,13 @@ jobs:
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
+      # For now, smoke tests are run here against the raw code. When we add tarball testing, we can remove this.
+      - run:
+          name: "smoke tests"
+          command: |
+            mkdir smoke-test-results
+            smoke-tests/smoke-test.sh bin/run
+
       - run:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
@@ -83,6 +90,9 @@ jobs:
 
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
+
+      - store_artifacts:
+          path: smoke-test-results
   windows-build:
     executor:
       name: win/default # executor type
@@ -176,7 +186,7 @@ jobs:
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
-      - run: md test-results
+      - run: md smoke-test-results
 
       - run:
           # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
@@ -186,7 +196,7 @@ jobs:
 
       # Upload an artifact for the results, so they're visible without failing the test.
       - store_artifacts:
-          path: test-results
+          path: smoke-test-results
 
   packaged-sanity:
     executor:
@@ -225,7 +235,7 @@ jobs:
 
       # Upload an artifact for the results, so they're visible without failing the tests
       - store_artifacts:
-          path: test-results
+          path: smoke-test-results
 
   auto-merge-release:
     <<: *defaults
