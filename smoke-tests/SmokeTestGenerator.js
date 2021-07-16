@@ -83,7 +83,7 @@ function generateScriptBody(isBash, delim) {
 	// and you need to postfix it with another snippet to make it actually exit when an error is encountered.
 	if (!isBash) {
 		for (let i = 1; i < commands.length; i += 2) {
-			commands[i] = "call " + commands[i] + " || exit /b";
+			commands[i] = "call " + commands[i] + " || exit /b 1";
 		}
 	}
 
