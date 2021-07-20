@@ -1,6 +1,6 @@
 name: production-smoke-tests
 on:
-  workflow_dispatch
+  pull_request
 #  schedule:
 #    - cron: '45 1,5,9,13,17,21 * * *'
 jobs:
