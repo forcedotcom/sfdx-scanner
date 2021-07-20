@@ -5,6 +5,46 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.0) (07-21-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.2...v2.10.0)
+
+### Release Summary
+
+* New option to Normalize Severity across all engines
+* New option to error out of the scan based on a Severity Threshold
+* Underlying PMD Engine is upgraded to 6.36.0
+* Bug fixes
+
+**Closed issues:**
+
+- Engine for scanner is not working if I specify pmd for Apex classes [\#442](https://github.com/forcedotcom/sfdx-scanner/issues/442)
+- @W-8241107@ Specifying "--engine pmd" finds zero violations [\#260](https://github.com/forcedotcom/sfdx-scanner/issues/260)
+- @W-8063535@ Define PMD min severity [\#308](https://github.com/forcedotcom/sfdx-scanner/issues/308)
+
+**Merged pull requests:**
+
+- @W-8063535@ Changes to severity-threshold message + fixing related tests [\#473](https://github.com/forcedotcom/sfdx-scanner/pull/473)
+- @W-9627245@ New Business Stopping Bug template [\#469](https://github.com/forcedotcom/sfdx-scanner/pull/469)
+- @W-9531390@: Windows smoke test should now exit with code 1 on error. [\#466](https://github.com/forcedotcom/sfdx-scanner/pull/466)
+- @W-9613208@: Hardcode find-java-home to v1.1.0 [\#465](https://github.com/forcedotcom/sfdx-scanner/pull/465)
+- @W-9531390@: Added smoke tests to linux build task, and made smoke te… [\#464](https://github.com/forcedotcom/sfdx-scanner/pull/464)
+- @W-9603086@ Update the fingerprint and change how it is passed [\#463](https://github.com/forcedotcom/sfdx-scanner/pull/463)
+- @W-9531823@: Changed the tag so the release is published as latest-rc… [\#462](https://github.com/forcedotcom/sfdx-scanner/pull/462)
+- @W-9593996@ Upgrade PMD to 6.36.0 [\#461](https://github.com/forcedotcom/sfdx-scanner/pull/461)
+- @W-8063535@ Severity normalizer changes [\#460](https://github.com/forcedotcom/sfdx-scanner/pull/460)
+- @W-9603774@ Update release-information.md to reflect correct 'Closed Issues' for 2.9.2 [\#459](https://github.com/forcedotcom/sfdx-scanner/pull/459)
+- @W-9531534@: Yarn is now installed as a separate run task instead of … [\#456](https://github.com/forcedotcom/sfdx-scanner/pull/456)
+- @W-8063535@ Severity normalizer [\#454](https://github.com/forcedotcom/sfdx-scanner/pull/454)
+- @W-8063535@ Documentation for severity threshold and normalization [\#448](https://github.com/forcedotcom/sfdx-scanner/pull/448)
+- @W-9598768@ Bump addressable from 2.7.0 to 2.8.0 in /docs [\#443](https://github.com/forcedotcom/sfdx-scanner/pull/443)
+- @W-9531534@: Added node orb and bash script to upgrade node to LTS. [\#436](https://github.com/forcedotcom/sfdx-scanner/pull/436)
+- @W-9531390@: Renamed smoke test scripts for clarity. [\#435](https://github.com/forcedotcom/sfdx-scanner/pull/435)
+- @W-9531390@: Replaced sanity test with a more robust and platform-agn… [\#429](https://github.com/forcedotcom/sfdx-scanner/pull/429)
+- @W-8241107@: Non-RuleGroup filters are now ignored by the getRuleGrou… [\#426](https://github.com/forcedotcom/sfdx-scanner/pull/426)
+- @W-9498589@: Update documentation to 2.9.2 version [\#425](https://github.com/forcedotcom/sfdx-scanner/pull/425)
+
+
 ## [v2.9.2](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.2) (06-23-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.1...v2.9.2)
