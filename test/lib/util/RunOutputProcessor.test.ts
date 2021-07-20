@@ -166,8 +166,8 @@ describe('RunOutputProcessor', () => {
 					const output: AnyJson = rop.processRunOutput(fakeTableResults);
 
 					const expectedTableSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.writtenToConsole')}`;
+													${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+													${runMessages.getMessage('output.writtenToConsole')}`;
 
 					Sinon.assert.callCount(tableSpy, 1);
 					Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
@@ -192,9 +192,9 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
 						Sinon.assert.callCount(logSpy, 0);
 						const expectedTableSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToConsole')}`;
+														${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+														${runMessages.getMessage('output.sevDetectionSummary', [1])}
+														${runMessages.getMessage('output.writtenToConsole')}`;
 						expect(e.message).to.equal(expectedTableSummary, 'Exception message incorrectly formed');
 					}
 				});
@@ -216,9 +216,9 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
 						Sinon.assert.callCount(logSpy, 0);
 						const expectedTableSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToConsole')}`;
+														${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+														${runMessages.getMessage('output.sevThresholdSummary', [1])}
+														${runMessages.getMessage('output.writtenToConsole')}`;
 						expect(e.message).to.equal(expectedTableSummary, 'Exception message incorrectly formed');
 					}
 				});
@@ -250,8 +250,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				it('Throws exception on request when violations are found', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.CSV,
-						severityForError: 2,
-						violationsCauseException: false
+						violationsCauseException: true
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -271,7 +270,8 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.CSV,
-						violationsCauseException: true
+						violationsCauseException: false,
+						severityForError: 2,
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -284,7 +284,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.callCount(tableSpy, 0);
 						Sinon.assert.callCount(logSpy, 1);
 						Sinon.assert.calledWith(logSpy, FAKE_CSV_OUTPUT);
-						expect(e.message).to.equal(runMessages.getMessage('output.sevDetectionSummary', [1]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(runMessages.getMessage('output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
 					}
 				});
 
@@ -350,7 +350,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.callCount(tableSpy, 0);
 						Sinon.assert.callCount(logSpy, 1);
 						Sinon.assert.calledWith(logSpy, FAKE_JSON_OUTPUT);
-						expect(e.message).to.equal(runMessages.getMessage('output.sevDetectionSummary', [1]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(runMessages.getMessage('output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
 					}
 				});
 			});
@@ -398,8 +398,8 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
 
 					const expectedCsvSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+													${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+													${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 					Sinon.assert.callCount(tableSpy, 0);
 					Sinon.assert.callCount(logSpy, 1);
 					Sinon.assert.calledWith(logSpy, expectedCsvSummary);
@@ -427,9 +427,9 @@ ${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
 						const expectedCsvSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+													${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+													${runMessages.getMessage('output.sevDetectionSummary', [1])}
+													${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 						expect(e.message).to.equal(expectedCsvSummary, 'Summary was wrong');
 					}
 				});
@@ -454,9 +454,9 @@ ${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
 						const expectedCsvSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+													${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+													${runMessages.getMessage('output.sevThresholdSummary', [1])}
+													${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 						expect(e.message).to.equal(expectedCsvSummary, 'Summary was wrong');
 					}
 				});

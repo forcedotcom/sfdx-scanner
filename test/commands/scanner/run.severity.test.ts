@@ -21,7 +21,7 @@ describe('scanner:run', function () {
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
 					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
-					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']), 'Error should not be present');
+					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 
 			setupCommandTest
@@ -40,7 +40,7 @@ describe('scanner:run', function () {
                         }
                     }
 
-                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.sevDetectionSummary', ['1']));
+                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.sevThresholdSummary', ['1']));
                 
 				});
 
@@ -59,7 +59,7 @@ describe('scanner:run', function () {
                             expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
-                    expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevDetectionSummary', ['3']));
+                    expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']));
 
 				});
 
