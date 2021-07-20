@@ -110,9 +110,16 @@ export class RunOutputProcessor {
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
-		if ((minSev > 0 && this.opts.violationsCauseException) || (this.shouldErrorForSeverity(minSev, this.opts.severityForError))) {
+		// Handles deprecated flag --violations-cause-error
+		if (minSev > 0 && this.opts.violationsCauseException) {
 			msgParts.push(runMessages.getMessage('output.sevDetectionSummary', [minSev]));
 		}
+
+		// Summary to print with --severity-threshold flag
+		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
+			msgParts.push(runMessages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
+		}
+
 		return msgParts;
 	}
 

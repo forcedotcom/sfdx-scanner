@@ -46,7 +46,8 @@ module.exports = {
 		"engineSummaryTemplate": "Executed %s, found %s violation(s) across %s file(s).",
 		"writtenToOutFile": "Rule violations have been written to %s.",
 		"writtenToConsole": "Rule violations logged to console above.",
-		"sevDetectionSummary": "Detected rule violations of severity %s or more severe.",
+		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
+		"sevThresholdSummary": "Detected rule violations of severity %s or more severe.",
 		"pleaseSeeAbove": "Please see the logs above.",
 		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
 	},
