@@ -5,6 +5,24 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.0) (07-21-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.2...v2.10.0)
+
+**Closed issues:**
+
+- Consider @param with type and name [\#421](https://github.com/forcedotcom/sfdx-scanner/issues/421)
+
+**Merged pull requests:**
+
+- @W-9593996@ Upgrade PMD to 6.36.0 [\#461](https://github.com/forcedotcom/sfdx-scanner/pull/461)
+- @W-8063535@ Severity normalizer changes [\#460](https://github.com/forcedotcom/sfdx-scanner/pull/460)
+- @W-8063535@ Severity normalizer [\#454](https://github.com/forcedotcom/sfdx-scanner/pull/454)
+- @W-8063535@ Documentation for severity threshold and normalization [\#448](https://github.com/forcedotcom/sfdx-scanner/pull/448)
+- @W-9598768@ Bump addressable from 2.7.0 to 2.8.0 in /docs [\#443](https://github.com/forcedotcom/sfdx-scanner/pull/443)
+- @W-8241107@: Non-RuleGroup filters are now ignored by the getRuleGrou… [\#426](https://github.com/forcedotcom/sfdx-scanner/pull/426)
+
+
 ## [v2.9.2](https://github.com/forcedotcom/sfdx-scanner/tree/v2.9.2) (06-23-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.1...v2.9.2)
