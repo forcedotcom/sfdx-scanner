@@ -49,8 +49,8 @@ jobs:
       - name: report failures
         if: ${{ failure() }}
         run: |
-          echo 'SFDX install succeeded? ${{ !contains(["failure", "skipped"], steps.sfdx_third_try.outcome) }}
-          echo 'Scanner install succeeded? ${{ !contains(['failure', 'skipped'], steps.scanner_third_try.outcome) }}
+          echo 'SFDX install succeeded? ${{ steps.sfdx_third_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'skipped' }}
+          echo 'Scanner install succeeded? ${{ steps.scanner_third_try.outcome == 'success' || steps.scanner_third_try.outcome == 'skipped' }}
 #
 #
 #
