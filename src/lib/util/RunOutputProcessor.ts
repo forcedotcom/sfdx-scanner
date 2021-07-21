@@ -14,6 +14,7 @@ const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 export type RunOutputOptions = {
 	format: OUTPUT_FORMAT;
 	violationsCauseException: boolean;
+	severityForError?: number;
 	outfile?: string;
 }
 
@@ -52,6 +53,10 @@ export class RunOutputProcessor {
 		const msg = msgComponents.join('\n');
 		if (minSev > 0 && this.opts.violationsCauseException) {
 			throw new SfdxError(msg, null, null, minSev);
+		} else if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
+			// We want to throw an error when the highest severity (smallest num) is 
+			// equal to or more severe (equal to or less than number-wise) than the inputted number
+			throw new SfdxError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
 			this.ux.log(msg);
@@ -76,6 +81,21 @@ export class RunOutputProcessor {
 		return this.opts.violationsCauseException ? INTERNAL_ERROR_CODE : 1;
 	}
 
+	// determines if -s flag should cause an error 
+	private shouldErrorForSeverity(minSev: number, severityForError): boolean {
+		if (severityForError === undefined) {
+			return false; // flag not used
+		}
+		if (minSev === 0) {
+			return false;
+		}
+		
+		if (minSev <= this.opts.severityForError) {
+			return true; 
+		}
+		return false;
+	}
+
 	private buildRunSummaryMsgParts(rrr: RecombinedRuleResults): string[] {
 		const {summaryMap, minSev} = rrr;
 		let msgParts: string[] = [];
@@ -90,9 +110,16 @@ export class RunOutputProcessor {
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
+		// Handles deprecated flag --violations-cause-error
 		if (minSev > 0 && this.opts.violationsCauseException) {
 			msgParts.push(runMessages.getMessage('output.sevDetectionSummary', [minSev]));
 		}
+
+		// Summary to print with --severity-threshold flag
+		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
+			msgParts.push(runMessages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
+		}
+
 		return msgParts;
 	}
 
