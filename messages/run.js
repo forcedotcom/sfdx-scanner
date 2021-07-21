@@ -20,8 +20,13 @@ module.exports = {
 		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
 		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
-		"vceDescription": "throws an error when violations are detected",
-		"vceDescriptionLong": "Throws an error when violations are detected. Exit code is the most severe violation.",
+		"vceDescription": "[deprecated] throws an error when violations are detected",
+		"vceDescriptionLong": "[Deprecated] Throws an error when violations are detected. Exit code is the most severe violation.",
+		"vceParamDeprecationWarning": "--violations-cause-error parameter is being deprecated, use --severity-threshold instead.",
+		"stDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
+        "stDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
+		"nsDescription": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity",
+        "nsDescriptionLong": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity",
 		'engineDescription': "engine(s) to run",
 		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list.",
 		'eslintConfigDescription': 'location of eslintrc config to customize eslint engine',
@@ -42,6 +47,7 @@ module.exports = {
 		"writtenToOutFile": "Rule violations have been written to %s.",
 		"writtenToConsole": "Rule violations logged to console above.",
 		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
+		"sevThresholdSummary": "Detected rule violations of severity %s or more severe.",
 		"pleaseSeeAbove": "Please see the logs above.",
 		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
 	},
@@ -84,5 +90,11 @@ module.exports = {
 
 	To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
 		E.g., $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
+
+	Use --normalize-severity to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown).
+		E.g., $ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
+
+	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
+		E.g., $ sfdx scanner:run --target "/some-project/" --severity-threshold 2
 	`
 };

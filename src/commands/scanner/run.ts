@@ -5,7 +5,7 @@ import {LooseObject, RecombinedRuleResults} from '../../types';
 import {AllowedEngineFilters, INTERNAL_ERROR_CODE} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
-import {OUTPUT_FORMAT} from '../../lib/RuleManager';
+import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
 import {ScannerCommand} from '../../lib/ScannerCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import {RunOutputProcessor} from '../../lib/util/RunOutputProcessor';
@@ -99,13 +99,31 @@ export default class Run extends ScannerCommand {
 			char: 'v',
 			description: messages.getMessage('flags.vceDescription'),
 			longDescription: messages.getMessage('flags.vceDescriptionLong'),
-			exclusive: ['json']
-		})
+			exclusive: ['json'],
+			deprecated: {
+				messageOverride: messages.getMessage('flags.vceParamDeprecationWarning')
+			}
+		}),
+		'severity-threshold': flags.integer({
+            char: 's',
+            description: messages.getMessage('flags.stDescription'),
+            longDescription: messages.getMessage('flags.stDescriptionLong'),
+			exclusive: ['json', 'violations-cause-error'],
+			min: 1,
+			max: 3
+        }),
+		"normalize-severity": flags.boolean({
+			description: messages.getMessage('flags.nsDescription'),
+			longDescription: messages.getMessage('flags.nsDescriptionLong')
+		}),
 	};
 
 	public async run(): Promise<AnyJson> {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
+
+		// if severty-for-error flag is used, we want to make sure the severities are normalized
+		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-threshold'];
 
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
@@ -113,7 +131,7 @@ export default class Run extends ScannerCommand {
 		// We need to derive the output format, either from information that was explicitly provided or from default values.
 		// We can't use the defaultValue property for the flag, because there needs to be a difference between defaulting
 		// to a value and having the user explicitly select it.
-		const format: OUTPUT_FORMAT = this.determineOutputFormat();
+		const outputOptions: OutputOptions = {format: this.determineOutputFormat(), normalizeSeverity: normalizeSeverity};
 		const ruleManager = await Controller.createRuleManager();
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
@@ -121,16 +139,18 @@ export default class Run extends ScannerCommand {
 		const target = this.flags.target || [];
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
+		
 		let output: RecombinedRuleResults = null;
 		try {
-			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, format, engineOptions);
+			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions);
 		} catch (e) {
 			// Rethrow any errors as SFDX errors.
 			throw new SfdxError(e.message || e, null, null, this.getInternalErrorCode());
 		}
 		return new RunOutputProcessor({
-			format,
+			format: outputOptions.format,
 			violationsCauseException: this.flags['violations-cause-error'],
+			severityForError: this.flags['severity-threshold'],
 			outfile: this.flags.outfile
 		}, this.ux)
 			.processRunOutput(output);

@@ -1,7 +1,7 @@
 import os = require('os');
 import path = require('path');
 
-export const PMD_VERSION = '6.34.0';
+export const PMD_VERSION = '6.36.0';
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
@@ -77,3 +77,10 @@ export const HARDCODED_RULES = {
 		category: 'Scanner Internal'
 	}
 };
+
+export enum Severity {
+	NONE = 0,
+	LOW = 3,
+	MODERATE = 2,
+	HIGH = 1
+}
