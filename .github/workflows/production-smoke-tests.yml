@@ -26,3 +26,6 @@ jobs:
         if: ${{ matrix.os != 'windows-2019' }}
         run: smoke-tests/smoke-test.sh sfdx
       # =====
+      - name: Report failures
+        if: ${{ failure() }}
+        run: echo there was a failure
