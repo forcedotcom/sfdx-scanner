@@ -17,6 +17,4 @@ jobs:
           node-version: 'lts/*'
       - run: npm install -g sfdx-cli
       - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
-      - run: sfdx scanner:rule:list
-      - run: ls
-      - run: pwd
+      - run: smoke-tests/smoke-test sfdx
