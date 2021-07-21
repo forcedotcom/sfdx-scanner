@@ -28,7 +28,9 @@ jobs:
       # =====
       - name: create url
         if: ${{ failure() }}
-        run: echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          echo ${{github.run_number}}
       - name: attempt retyr
         if: ${{ failure() && github.run_number < 3 }}
         run: curl --request POST https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/rerun
