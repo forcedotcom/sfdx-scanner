@@ -60,7 +60,7 @@ function generateScriptBody(isBash, delim) {
 		`echo "==== Describe a non-existent rule ===="`,
 		`${exeName} scanner:rule:describe -n NotAnActualRule`,
 		`echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="`,
-		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run1.xml'], delim)}`,
+		`${exeName} scanner:run --format foo --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run1.xml'], delim)}`,
 		`echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="`,
 		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'run2.xml'], delim)}`,
 		`echo "==== Run RetireJS against a folder ===="`,
