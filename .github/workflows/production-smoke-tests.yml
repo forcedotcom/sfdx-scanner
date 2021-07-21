@@ -28,4 +28,14 @@ jobs:
       # =====
       - name: Report failures
         if: ${{ failure() }}
-        run: echo there was a failure
+        shell: bash
+        run: |
+          curl --request POST \
+          --data '{"payload": {
+          "summary": "Production smoke-tests failed on ${{ matrix.os }}",
+          "source": "Github Actions","severity": "critical"
+          },
+          "event_action": "trigger",
+          "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
+          }' \
+          https://events.pagerduty.com/v2/enqueue
