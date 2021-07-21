@@ -20,7 +20,7 @@ jobs:
       - name: SFDX install first try
         id: sfdx_first_try
         continue-on-error: true # Retry after first failure
-        run: exit 1
+        run: exit 0
       - name: SFDX install second try
         id: sfdx_second_try
         if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
