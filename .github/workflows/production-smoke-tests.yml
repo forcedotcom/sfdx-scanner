@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - run: npm install -g sfdx-cli
+      - run: npm view sfd-cli
       - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
       - run: mkdir smoke-test-results
       # ==== Only one of the following two steps will be run =====
