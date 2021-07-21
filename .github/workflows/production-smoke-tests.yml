@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - run: npm install -g sfdx-cli
+      - run: npm view sfd-cli
       - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
       - run: mkdir smoke-test-results
       # ==== Only one of the following two steps will be run =====
@@ -26,16 +26,23 @@ jobs:
         if: ${{ matrix.os != 'windows-2019' }}
         run: smoke-tests/smoke-test.sh sfdx
       # =====
-      - name: Report failures
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-          curl --request POST \
-          --data '{"payload": {
-          "summary": "Production smoke-tests failed on ${{ matrix.os }}",
-          "source": "Github Actions","severity": "critical"
-          },
-          "event_action": "trigger",
-          "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
-          }' \
-          https://events.pagerduty.com/v2/enqueue
+      - run: echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#      - name: Retry up to twice
+#        if: ${{ failure() && github.run_number < 3 }}
+#        shell: bash
+#        run: |
+#
+#      - name: Report failures
+#        if: ${{ failure() }}
+#        shell: bash
+#        run: |
+#          curl --request POST \
+#          --data '{"payload": {
+#          "summary": "Production smoke-tests failed on ${{ matrix.os }}",
+#          "source": "Github Actions","severity": "critical"
+#          },
+#          "event_action": "trigger",
+#          "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
+#          }' \
+#          https://events.pagerduty.com/v2/enqueue
+#
