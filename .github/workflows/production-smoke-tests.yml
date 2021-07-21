@@ -15,28 +15,65 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - run: npm view sfd-cli
-      - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
-      - run: mkdir smoke-test-results
-      # ==== Only one of the following two steps will be run =====
-      - name: Windows smoke tests
-        if: ${{ matrix.os == 'windows-2019' }}
-        run: smoke-tests/smoke-test.cmd sfdx
-      - name: POSIX smoke tests
-        if: ${{ matrix.os != 'windows-2019' }}
-        run: smoke-tests/smoke-test.sh sfdx
-      # =====
-      - name: create url
+      # === Make three attempts to install sfdx through npm ===
+      - name: SFDX install first try
+        id: sfdx_first_try
+        continue-on-error: true # Retry after first failure
+        run: exit 1
+      - name: SFDX install second try
+        id: sfdx_second_try
+        if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
+        continue-on-error: true # Retry after second failure
+        run: exit 1
+      - name: SFDX install third try
+        id: sfdx_third_try
+        if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
+        continue-on-error: false # Give up after the third failure
+        run: echo this is fine
+      # === Make three attempts to install the scanner plugin ===
+      - name: Scanner install first try
+        id: scanner_first_try
+        continue-on-error: true # Retry after first failure
+        run: exit 1
+      - name: Scanner install second try
+        id: scanner_second_try
+        continue-on-error: true # Retry after second failure
+        run: exit 1
+      - name: Scanner install third try
+        id: scanner_third_try
+        continue-on-error: false # Give up after third failure
+        run: echo this is fine
+      # Report failure'
+      - name: report failures
         if: ${{ failure() }}
-        run: |
-          echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          echo ${{github.run_number}} ${{github.event_name}}
-      - name: attempt retyr
-        if: ${{ failure() && github.run_number < 24 }}
-        run: |
-          curl --request POST \
-          --url https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/rerun \
-          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'
+        run: echo there were failures
+#
+#
+#
+#
+#
+#      - run: npm view sfd-cli
+#      - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
+#      - run: mkdir smoke-test-results
+#      # ==== Only one of the following two steps will be run =====
+#      - name: Windows smoke tests
+#        if: ${{ matrix.os == 'windows-2019' }}
+#        run: smoke-tests/smoke-test.cmd sfdx
+#      - name: POSIX smoke tests
+#        if: ${{ matrix.os != 'windows-2019' }}
+#        run: smoke-tests/smoke-test.sh sfdx
+#      # =====
+#      - name: create url
+#        if: ${{ failure() }}
+#        run: |
+#          echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#          echo ${{github.run_number}} ${{github.event_name}}
+#      - name: attempt retyr
+#        if: ${{ failure() && github.run_number < 24 }}
+#        run: |
+#          curl --request POST \
+#          --url https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/rerun \
+#          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}'
 #      - name: Retry up to twice
 #        if: ${{ failure() && github.run_number < 3 }}
 #        shell: bash
