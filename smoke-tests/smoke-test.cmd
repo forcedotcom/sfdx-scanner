@@ -15,7 +15,7 @@ call %EXE_NAME% scanner:rule:describe -n EmptyCatchBlock || exit /b 1
 echo "==== Describe a non-existent rule ===="
 call %EXE_NAME% scanner:rule:describe -n NotAnActualRule || exit /b 1
 echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="
-call %EXE_NAME% scanner:run --format junit --target test\code-fixtures\projects\app\force-app --outfile smoke-test-results\run1.xml || exit /b 1
+call %EXE_NAME% scanner:run --format foo --target test\code-fixtures\projects\app\force-app --outfile smoke-test-results\run1.xml || exit /b 1
 echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="
 call %EXE_NAME% scanner:run --format junit --target test\code-fixtures\projects\ts\src\simpleYetWrong.ts --tsconfig test\code-fixtures\projects\tsconfig.json --outfile smoke-test-results\run2.xml || exit /b 1
 echo "==== Run RetireJS against a folder ===="
