@@ -26,7 +26,9 @@ jobs:
         if: ${{ matrix.os != 'windows-2019' }}
         run: smoke-tests/smoke-test.sh sfdx
       # =====
-      - run: echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: create url
+        if: ${{ failure() }}
+        run: echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
 #      - name: Retry up to twice
 #        if: ${{ failure() && github.run_number < 3 }}
 #        shell: bash
