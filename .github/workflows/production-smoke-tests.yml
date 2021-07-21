@@ -15,11 +15,12 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
+
       # === Make three attempts to install sfdx through npm ===
       - name: SFDX install first try
         id: sfdx_first_try
         continue-on-error: true # Retry after first failure
-        run: echo this is fine
+        run: exit 1
       - name: SFDX install second try
         id: sfdx_second_try
         if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
@@ -30,6 +31,7 @@ jobs:
         if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
         continue-on-error: false # Give up after the third failure
         run: echo this is fine
+
       # === Make three attempts to install the scanner plugin ===
       - name: Scanner install first try
         id: scanner_first_try
@@ -42,11 +44,13 @@ jobs:
       - name: Scanner install third try
         id: scanner_third_try
         continue-on-error: false # Give up after third failure
-        run: echo this is fine
+        run: exit 1
       # Report failure'
       - name: report failures
         if: ${{ failure() }}
-        run: echo there were failures
+        run: |
+          echo 'SFDX install succeeded? ${{ !contains(['failure', 'skipped'], steps.sfdx_third_try.outcome) }}
+          echo 'Scanner install succeeded? ${{ !contains(['failure', 'skipped'], steps.scanner_third_try.outcome) }}
 #
 #
 #
