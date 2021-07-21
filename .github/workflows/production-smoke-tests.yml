@@ -17,6 +17,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install -g sfdx-cli
       - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
+      - run: mkdir smoke-test-results
       # ==== Only one of the following two steps will be run =====
       - name: Windows smoke tests
         if: ${{ matrix.os == 'windows-2019' }}
