@@ -32,8 +32,8 @@ jobs:
           echo https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           echo ${{github.run_number}} ${{github.event_name}}
       - name: attempt retyr
-        if: ${{ failure() && github.run_number < 22 }}
-        run: curl --request POST https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/rerun
+        if: ${{ failure() && github.run_number < 23 }}
+        run: curl --request POST --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/rerun
 #      - name: Retry up to twice
 #        if: ${{ failure() && github.run_number < 3 }}
 #        shell: bash
