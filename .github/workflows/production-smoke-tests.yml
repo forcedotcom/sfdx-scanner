@@ -6,6 +6,7 @@ on:
 jobs:
   production-smoke-test:
     strategy:
+      fail-fast: false
       matrix:
         os: [{os: ubuntu-latest, exe: .sh}, {os: windows-2019, exe: .cmd}]
         node: ['lts/*']
@@ -82,6 +83,7 @@ jobs:
             "custom_details": "Link: ${{ env.RUN_LINK }}. SFDX installed: ${{ env.SFDX_STATUS }}. Scanner installed: ${{ env.SCANNER_STATUS }}. Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
           },
           "event_action": "trigger",
+          "dedup_key": "${{ github.run_id }}",
           "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
           }' \
           https://events.pagerduty.com/v2/enqueue
