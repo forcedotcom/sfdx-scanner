@@ -22,16 +22,16 @@ jobs:
       - name: SFDX install first try
         id: sfdx_first_try
         continue-on-error: true # Retry after first failure
-        run: npm install -g sfdx-cli
+        run: exit 1
       - name: SFDX install second try
         if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
         id: sfdx_second_try
         continue-on-error: true # Retry after second failure
-        run: npm install -g sfdx-cli
+        run: exit 1
       - name: SFDX install third try
         if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
         id: sfdx_third_try
-        run: npm install -g sfdx-cli
+        run: exit 1
 
       # === Make three attempts to install the scanner plugin ===
       - name: Scanner install first try
