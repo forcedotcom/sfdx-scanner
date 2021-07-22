@@ -7,9 +7,9 @@ jobs:
   production-smoke-test:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2019]
+        os: [{os: ubuntu-latest, exe: .sh}, {os: windows-2019, exe: .cmd}]
         node: ['lts/*']
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -22,15 +22,14 @@ jobs:
         continue-on-error: true # Retry after first failure
         run: exit 1
       - name: SFDX install second try
-        id: sfdx_second_try
         if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
+        id: sfdx_second_try
         continue-on-error: true # Retry after second failure
         run: exit 1
       - name: SFDX install third try
-        id: sfdx_third_try
         if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
-        continue-on-error: false # Give up after the third failure
-        run: exit 1
+        id: sfdx_third_try
+        run: exit 0
 
       # === Make three attempts to install the scanner plugin ===
       - name: Scanner install first try
@@ -38,13 +37,14 @@ jobs:
         continue-on-error: true # Retry after first failure
         run: exit 1
       - name: Scanner install second try
+        if: ${{ steps.scanner_first_try.outcome == 'failure' }}
         id: scanner_second_try
         continue-on-error: true # Retry after second failure
         run: exit 1
       - name: Scanner install third try
+        if: ${{ steps.scanner_second_try.outcome == 'failure' }}
         id: scanner_third_try
-        continue-on-error: false # Give up after third failure
-        run: exit 1
+        run: exit 0
       # Report failure'
       - name: report failures
         if: ${{ failure() }}
