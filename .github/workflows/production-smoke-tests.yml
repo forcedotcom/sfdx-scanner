@@ -64,7 +64,7 @@ jobs:
       # === Report any failures ===
       - name: Report failures
         if: ${{ failure() }}
-        run: echo ${{ steps.*.outcome }}
+        run: echo ${{ steps.*.outcome[0] }} ${{ steps.*.outcome[1] }}
 #
 #
 #
