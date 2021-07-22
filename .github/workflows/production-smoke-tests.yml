@@ -79,10 +79,7 @@ jobs:
             "summary": "Production smoke-tests failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
-            "custom_details": "Link: ${{ env.RUN_LINK }}.
-            SFDX installed: ${{ env.SFDX_STATUS }}.
-            Scanner installed: ${{ env.SCANNER_STATUS }}.
-            Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
+            "custom_details": "Link: ${{ env.RUN_LINK }}. SFDX installed: ${{ env.SFDX_STATUS }}. Scanner installed: ${{ env.SCANNER_STATUS }}. Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
           },
           "event_action": "trigger",
           "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
