@@ -40,11 +40,11 @@ jobs:
         if: ${{ steps.scanner_first_try.outcome == 'failure' }}
         id: scanner_second_try
         continue-on-error: true # Retry after second failure
-        run: exit 0
+        run: exit 1
       - name: Scanner install third try
         if: ${{ steps.scanner_second_try.outcome == 'failure' }}
         id: scanner_third_try
-        run: exit 0
+        run: exit 1
 
       # === Make three attempts to execute the smoke tests ===
       - name: Smoke test first try
