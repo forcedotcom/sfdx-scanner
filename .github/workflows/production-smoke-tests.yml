@@ -64,7 +64,9 @@ jobs:
       # === Report any failures ===
       - name: Report failures
         if: ${{ failure() }}
-        run: echo "${{ steps[3].outcome }}"
+        env:
+          STEP_STATES: ${{ toJSON(steps.*.outcome) }}
+        run: echo ${{ env.STEP_STATES }}
 #
 #
 #
