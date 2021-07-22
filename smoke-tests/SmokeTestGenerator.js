@@ -51,6 +51,7 @@ function generateScriptBody(isBash, delim) {
 
 	// Declare an array with all of the commands we intend to execute.
 	const commands = [
+		`echo "====== STARTING SMOKE TEST ======"`,
 		`echo "==== List all rules w/out filters ===="`,
 		`${exeName} scanner:rule:list`,
 		`echo "==== Filter rules by engine ===="`,
@@ -82,7 +83,7 @@ function generateScriptBody(isBash, delim) {
 	// In a cmd script, you need to prepend everything with "call" in order to make sure that the script continues,
 	// and you need to postfix it with another snippet to make it actually exit when an error is encountered.
 	if (!isBash) {
-		for (let i = 1; i < commands.length; i += 2) {
+		for (let i = 2; i < commands.length; i += 2) {
 			commands[i] = "call " + commands[i] + " || exit /b 1";
 		}
 	}
