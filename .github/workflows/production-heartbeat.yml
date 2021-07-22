@@ -1,0 +1,94 @@
+name: production-heartbeat
+on:
+  schedule:
+    # Times are UTC
+    - cron: '45 1,5,9,13,17,21 * * *'
+jobs:
+  production-heartbeat:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        node: ['lts/*']
+    runs-on: ${{ matrix.os.vm }}
+    steps:
+      # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: mkdir smoke-test-results
+      # === Make three attempts to install sfdx through npm ===
+      - name: SFDX install first try
+        id: sfdx_first_try
+        continue-on-error: true # Retry after first failure
+        run: npm install -g sfdx-cli
+      - name: SFDX install second try
+        if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
+        id: sfdx_second_try
+        continue-on-error: true # Retry after second failure
+        run: npm install -g sfdx-cli
+      - name: SFDX install third try
+        if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
+        id: sfdx_third_try
+        run: npm install -g sfdx-cli
+
+      # === Make three attempts to install the scanner plugin ===
+      - name: Scanner install first try
+        id: scanner_first_try
+        continue-on-error: true # Retry after first failure
+        run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
+      - name: Scanner install second try
+        if: ${{ steps.scanner_first_try.outcome == 'failure' }}
+        id: scanner_second_try
+        continue-on-error: true # Retry after second failure
+        run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
+      - name: Scanner install third try
+        if: ${{ steps.scanner_second_try.outcome == 'failure' }}
+        id: scanner_third_try
+        run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
+
+      # === Make three attempts to execute the smoke tests ===
+      - name: Smoke test first try
+        id: smoke_test_first_try
+        continue-on-error: true # Retry after first failure
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - name: Smoke test second try
+        if: ${{ steps.smoke_test_first_try.outcome == 'failure' }}
+        id: smoke_test_second_try
+        continue-on-error: true # Retry after second failure
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - name: Smoke test third try
+        if: ${{ steps.smoke_test_second_try.outcome == 'failure' }}
+        id: smoke_test_third_try
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+
+      # === Report any failures ===
+      - name: Report failures
+        if: ${{ failure() }}
+        shell: bash
+        env:
+          # True if any of the SFDX install attempts have a status of "success"
+          SFDX_STATUS: ${{ steps.sfdx_first_try.outcome == 'success' || steps.sfdx_second_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'success' }}
+          # True if any of the scanner install attempts have a status of "success"
+          SCANNER_STATUS: ${{ steps.scanner_first_try.outcome == 'success' || steps.scanner_second_try.outcome == 'success' || steps.scanner_third_try.outcome == 'success' }}
+          # True if any of the smoke test attempts have a status of "success"
+          SMOKE_TEST_STATUS: ${{ steps.smoke_test_first_try.outcome == 'success' || steps.smoke_test_second_try.outcome == 'success' || steps.smoke_test_third_try.outcome == 'success' }}
+          # A link to this run
+          RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          curl --request POST \
+          --data '{"payload": {
+            "summary": "Production heartbeat script failed on ${{ runner.os }}",
+            "source": "Github Actions",
+            "severity": "critical",
+            "custom_details": "SFDX install succeeded: ${{ env.SFDX_STATUS }}. Scanner install succeeded: ${{ env.SCANNER_STATUS }}. Smoke test run succeeded: ${{ env.SMOKE_TEST_STATUS }}"
+          },
+          "links": [{
+            "href": "${{ env.RUN_LINK }}",
+            "text": "Link to action execution"
+          }],
+          "event_action": "trigger",
+          "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
+          }' \
+          https://events.pagerduty.com/v2/enqueue
