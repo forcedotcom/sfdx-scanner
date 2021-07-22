@@ -64,7 +64,14 @@ jobs:
       # === Report any failures ===
       - name: Report failures
         if: ${{ failure() }}
-        run: echo ${{ (steps.*.outcome)[2] }}
+        env:
+          SFDX_STATUS: ${{ steps.sfdx_first_try.outcome == 'success' || steps.sfdx_second_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'success' }}
+          SCANNER_STATUS: ${{ steps.scanner_first_try.outcome == 'success' || steps.scanner_second_try.outcome == 'success' || steps.scanner_third_try.outcome == 'success' }}
+          SMOKE_TEST_STATUS: ${{ steps.smoke_test_first_try.outcome == 'success' || steps.smoke_test_second_try.outcome == 'success' || steps.smoke_test_third_try.outcome == 'success' }}
+        run: |
+          echo 'SFDX install succeeded? ${{ SFDX_STATUS }}
+          echo 'Scanner install succeeded? ${{ SCANNER_STATUS }}
+          echo 'Smoke test succeeded? ${{ SMOKE_TEST_STATUS }}
 #
 #
 #
