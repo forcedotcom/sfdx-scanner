@@ -65,6 +65,7 @@ jobs:
       # === Report any failures ===
       - name: Report failures
         if: ${{ failure() }}
+        shell: bash
         env:
           # True if any of the SFDX install attempts have a status of "success"
           SFDX_STATUS: ${{ steps.sfdx_first_try.outcome == 'success' || steps.sfdx_second_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'success' }}
