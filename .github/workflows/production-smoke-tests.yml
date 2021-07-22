@@ -79,10 +79,10 @@ jobs:
         run: |
           curl --request POST \
           --data '{"payload": {
-            "summary": "Production smoke-tests failed on ${{ runner.os }}",
+            "summary": "Production heartbeat script failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
-            "custom_details": "SFDX installed: ${{ env.SFDX_STATUS }}. Scanner installed: ${{ env.SCANNER_STATUS }}. Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
+            "custom_details": "SFDX install succeeded: ${{ env.SFDX_STATUS }}. Scanner install succeeded: ${{ env.SCANNER_STATUS }}. Smoke test run succeeded: ${{ env.SMOKE_TEST_STATUS }}"
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
