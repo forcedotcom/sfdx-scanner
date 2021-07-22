@@ -19,19 +19,9 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: mkdir smoke-test-results
       # === Make three attempts to install sfdx through npm ===
-      - name: SFDX install first try
-        id: sfdx_first_try
-        continue-on-error: true # Retry after first failure
-        run: exit 1
-      - name: SFDX install second try
-        if: ${{ steps.sfdx_first_try.outcome == 'failure' }}
-        id: sfdx_second_try
-        continue-on-error: true # Retry after second failure
-        run: npm install -g sfdx-cli
-      - name: SFDX install third try
-        if: ${{ steps.sfdx_second_try.outcome == 'failure' }}
-        id: sfdx_third_try
-        run: npm install -g sfdx-cli
+      - name: Install sfdx
+        id: sfdx_attempt
+        run: npm install -g sfdx-cli || npm install -g sfdx-cli || exit 1
 
       # === Make three attempts to install the scanner plugin ===
       - name: Scanner install first try
@@ -76,7 +66,7 @@ jobs:
         shell: bash
         env:
           # True if any of the SFDX install attempts have a status of "success"
-          SFDX_STATUS: ${{ steps.sfdx_first_try.outcome == 'success' || steps.sfdx_second_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'success' }}
+          SFDX_STATUS: ${{ steps.sfdx_attempt.outcome == 'success' }}
           # True if any of the scanner install attempts have a status of "success"
           SCANNER_STATUS: ${{ steps.scanner_first_try.outcome == 'success' || steps.scanner_second_try.outcome == 'success' || steps.scanner_third_try.outcome == 'success' }}
           # True if any of the smoke test attempts have a status of "success"
