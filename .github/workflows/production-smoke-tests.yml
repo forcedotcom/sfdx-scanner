@@ -67,7 +67,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
-          name: smoke-test-results
+          name: smoke-test-results-${{ runner.os }}
           path: smoke-test-results
 
       # === Report any failures ===
