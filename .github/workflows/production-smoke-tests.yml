@@ -69,9 +69,9 @@ jobs:
           SCANNER_STATUS: ${{ steps.scanner_first_try.outcome == 'success' || steps.scanner_second_try.outcome == 'success' || steps.scanner_third_try.outcome == 'success' }}
           SMOKE_TEST_STATUS: ${{ steps.smoke_test_first_try.outcome == 'success' || steps.smoke_test_second_try.outcome == 'success' || steps.smoke_test_third_try.outcome == 'success' }}
         run: |
-          echo 'SFDX install succeeded? ${{ SFDX_STATUS }}
-          echo 'Scanner install succeeded? ${{ SCANNER_STATUS }}
-          echo 'Smoke test succeeded? ${{ SMOKE_TEST_STATUS }}
+          echo 'SFDX install succeeded? ${{ env.SFDX_STATUS }}
+          echo 'Scanner install succeeded? ${{ env.SCANNER_STATUS }}
+          echo 'Smoke test succeeded? ${{ env.SMOKE_TEST_STATUS }}
 #
 #
 #
