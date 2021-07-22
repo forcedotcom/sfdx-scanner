@@ -82,7 +82,7 @@ jobs:
             "severity": "critical",
             "custom_details": "Link: ${{ env.RUN_LINK }}. SFDX installed: ${{ env.SFDX_STATUS }}. Scanner installed: ${{ env.SCANNER_STATUS }}. Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
           },
-          "link": [{
+          "links": [{
             "href": "${{ env.RUN_LINK }}",
             "text": "Link to action run"
           }],
