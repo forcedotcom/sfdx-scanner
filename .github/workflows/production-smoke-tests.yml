@@ -65,18 +65,30 @@ jobs:
       - name: Report failures
         if: ${{ failure() }}
         env:
+          # True if any of the SFDX install attempts have a status of "success"
           SFDX_STATUS: ${{ steps.sfdx_first_try.outcome == 'success' || steps.sfdx_second_try.outcome == 'success' || steps.sfdx_third_try.outcome == 'success' }}
+          # True if any of the scanner install attempts have a status of "success"
           SCANNER_STATUS: ${{ steps.scanner_first_try.outcome == 'success' || steps.scanner_second_try.outcome == 'success' || steps.scanner_third_try.outcome == 'success' }}
+          # True if any of the smoke test attempts have a status of "success"
           SMOKE_TEST_STATUS: ${{ steps.smoke_test_first_try.outcome == 'success' || steps.smoke_test_second_try.outcome == 'success' || steps.smoke_test_third_try.outcome == 'success' }}
+          # A link to this run
+          RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          echo 'SFDX install succeeded? ${{ env.SFDX_STATUS }}'
-          echo 'Scanner install succeeded? ${{ env.SCANNER_STATUS }}'
-          echo 'Smoke test succeeded? ${{ env.SMOKE_TEST_STATUS }}'
-#
-#
-#
-#
-#
+          curl --request POST \
+          --data '{"payload": {
+            "summary": "Production smoke-tests failed on ${{ runner.os }}",
+            "source": "Github Actions",
+            "severity": "critical",
+            "custom_details": "Link: ${{ env.RUN_LINK }}.
+            SFDX installed: ${{ env.SFDX_STATUS }}.
+            Scanner installed: ${{ env.SCANNER_STATUS }}.
+            Smoke tests run: ${{ env.SMOKE_TEST_STATUS }}"
+          },
+          "event_action": "trigger",
+          "routing_key": "${{ secrets.TEST_PAGERDUTY_KEY }}"
+          }' \
+          https://events.pagerduty.com/v2/enqueue
+
 #      - run: npm view sfd-cli
 #      - run: echo y | sfdx plugins:install @salesforce/sfdx-scanner
 #      - run: mkdir smoke-test-results
