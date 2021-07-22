@@ -6,6 +6,7 @@ on:
 jobs:
   production-heartbeat:
     strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately cancelled. This makes the jobs run to completion instead.
       fail-fast: false
       matrix:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
