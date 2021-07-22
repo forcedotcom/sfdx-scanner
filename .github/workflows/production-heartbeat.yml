@@ -64,6 +64,14 @@ jobs:
         id: smoke_test_third_try
         run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
 
+      # === Upload the smoke-test-results folder as an artifact ===
+      - name: Upload smoke-test-results folder as artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: smoke-test-results-${{ runner.os }}
+          path: smoke-test-results
+
       # === Report any failures ===
       - name: Report failures
         if: ${{ failure() }}
