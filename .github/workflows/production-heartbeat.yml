@@ -50,9 +50,6 @@ jobs:
         if: ${{ failure() }}
         shell: bash
         env:
-          SFDX_STATUS: ${{ steps.sfdx_install.outcome == 'success' }}
-          SCANNER_STATUS: ${{ steps.scanner_install.outcome == 'success' }}
-          SMOKE_TEST_STATUS: ${{ steps.smoke_tests.outcome == 'success' }}
           # A link to this run
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -61,7 +58,7 @@ jobs:
             "summary": "Production heartbeat script failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
-            "custom_details": "SFDX install succeeded: ${{ env.SFDX_STATUS }}. Scanner install succeeded: ${{ env.SCANNER_STATUS }}. Smoke test run succeeded: ${{ env.SMOKE_TEST_STATUS }}"
+            "custom_details": "SFDX install: ${{ steps.sfdx_install.outcome }}. Scanner install: ${{ steps.scanner_install.outcome }}. Smoke tests: ${{ steps.smoke_tests.outcome }}"
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
