@@ -60,7 +60,7 @@ jobs:
             "summary": "Production heartbeat script failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
-            "custom_details": "SFDX install: ${{ steps.sfdx_install.outcome }}. Scanner install: ${{ steps.scanner_install.outcome }}. Smoke tests: ${{ steps.smoke_test.outcome }}"
+            "custom_details": "SFDX install: ${{ steps.sfdx_install.outcome }}. Scanner install: ${{ steps.scanner_install.outcome }}. Smoke tests: ${{ steps.smoke_tests.outcome }}"
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
