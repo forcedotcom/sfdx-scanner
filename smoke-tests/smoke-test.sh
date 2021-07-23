@@ -7,6 +7,7 @@
 # FROM THE PROJECT ROOT!
 set -e
 EXE_NAME=$1
+echo "====== STARTING SMOKE TEST ======"
 echo "==== List all rules w/out filters ===="
 $EXE_NAME scanner:rule:list
 echo "==== Filter rules by engine ===="
