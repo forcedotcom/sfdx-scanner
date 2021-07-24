@@ -11,6 +11,7 @@ import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrate
 import fs = require('fs');
 import untildify = require('untildify');
 import normalize = require('normalize-path');
+import * as path from "path";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -242,6 +243,10 @@ export default class Run extends ScannerCommand {
 
 	private writeToOutfile(minSev: number, results: string | {columns; rows}): AnyJson {
 		try {
+			// Create output folder if not existing
+			if (!fs.existsSync(path.dirname(this.flags.outfile))) {
+				fs.mkdirSync(path.dirname(this.flags.outfile))
+			}
 			fs.writeFileSync(this.flags.outfile, results)
 		} catch (e) {
 			// Rethrow any errors.
