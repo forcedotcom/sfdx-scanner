@@ -52,7 +52,7 @@ function generateScriptBody(isBash, delim) {
 	// Declare an array with all of the commands we intend to execute.
 	const commands = [
 		`echo "====== STARTING SMOKE TEST ======"`,
-		`echo "====== Making Results Directory ======`,
+		`echo "====== Making Results Directory ======"`,
 		isBash ? `mkdir -p smoke-test-results` : `if not exist smoke-test-results mkdir smoke-test-results`,
 		`echo "==== List all rules w/out filters ===="`,
 		`${exeName} scanner:rule:list`,

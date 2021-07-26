@@ -8,7 +8,7 @@
 set -e
 EXE_NAME=$1
 echo "====== STARTING SMOKE TEST ======"
-echo "====== Making Results Directory ======
+echo "====== Making Results Directory ======"
 mkdir -p smoke-test-results
 echo "==== List all rules w/out filters ===="
 $EXE_NAME scanner:rule:list

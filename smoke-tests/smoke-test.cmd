@@ -7,7 +7,7 @@ REM DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/Smo
 REM FROM THE PROJECT ROOT!
 SET EXE_NAME=%1
 echo "====== STARTING SMOKE TEST ======"
-echo "====== Making Results Directory ======
+echo "====== Making Results Directory ======"
 call if not exist smoke-test-results mkdir smoke-test-results || exit /b 1
 echo "==== List all rules w/out filters ===="
 call %EXE_NAME% scanner:rule:list || exit /b 1
