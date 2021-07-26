@@ -1,5 +1,5 @@
 @echo off
-REM Auto-generated on Fri Jul 16 2021
+REM Auto-generated on Mon Jul 26 2021
 REM This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
 REM of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
 REM the plugin is approximately stable.
@@ -7,6 +7,8 @@ REM DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/Smo
 REM FROM THE PROJECT ROOT!
 SET EXE_NAME=%1
 echo "====== STARTING SMOKE TEST ======"
+echo "====== Making Results Directory ======
+call if not exist smoke-test-results mkdir smoke-test-results || exit /b 1
 echo "==== List all rules w/out filters ===="
 call %EXE_NAME% scanner:rule:list || exit /b 1
 echo "==== Filter rules by engine ===="

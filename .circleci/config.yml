@@ -51,8 +51,6 @@ jobs:
           name: "Install release candidate"
           command: sfdx plugins:install --force @salesforce/sfdx-scanner
 
-      - run: mkdir smoke-test-results
-
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
           # assume that the plugin is stable.
@@ -92,8 +90,6 @@ jobs:
           name: "Install release candidate"
           shell: cmd.exe
           command: sfdx plugins:install --force @salesforce/sfdx-scanner
-
-      - run: mkdir smoke-test-results
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
