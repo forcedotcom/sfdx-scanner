@@ -59,9 +59,9 @@ jobs:
           name: "Packaged sanity test"
           command: smoke-tests/smoke-test.sh sfdx
 
-          # Upload an artifact for the results, so they're visible without failing the tests
-          - store_artifacts:
-              path: smoke-test-results
+      # Upload an artifact for the results, so they're visible without failing the tests
+      - store_artifacts:
+          path: smoke-test-results
 
 
   windows-rc-test:
