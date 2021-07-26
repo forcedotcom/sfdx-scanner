@@ -10,7 +10,6 @@ defaults: &defaults
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
-  release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
   node: circleci/node@4.5.1
 
