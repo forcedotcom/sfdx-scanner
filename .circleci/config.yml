@@ -31,7 +31,7 @@ commands:
           command: npm install -g yarn
 
 jobs:
-  build:
+  linux-rc-test:
     <<: *defaults
     steps:
       - auth_and_checkout
@@ -44,161 +44,28 @@ jobs:
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: yarn --ignore-scripts
-      - run: yarn build
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
-
-      - persist_to_workspace:
-          root: ~/repo
-          paths: .
-
-      # UNIT TESTS
       - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      # For now, smoke tests are run here against the raw code. When we add tarball testing, we can remove this.
-      - run:
-          name: "smoke tests"
-          command: |
-            mkdir smoke-test-results
-            smoke-tests/smoke-test.sh bin/run
+          name: "Install sfdx-cli"
+          command: npm install -g sfdx-cli
 
       - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
+          name: "Install release candidate"
+          command: sfdx plugins:install --force @salesforce/sfdx-scanner
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
-
-      - store_artifacts:
-          path: smoke-test-results
-  windows-build:
-    executor:
-      name: win/default # executor type
-      size: "medium"
-      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
-      shell: bash.exe
-    working_directory: C:\repo
-    steps:
-      - attach_workspace:
-          at: C:\repo
+      - run: mkdir smoke-test-results
 
       - run:
-          name: "Upgrade node to LTS"
-          # The script has to be run in bash.
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
+          name: "Packaged sanity test"
+          command: smoke-tests/smoke-test.sh sfdx
 
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
+          # Upload an artifact for the results, so they're visible without failing the tests
+          - store_artifacts:
+              path: smoke-test-results
 
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
 
-      - run: mkdir test-results
-
-      # UNIT TESTS
-      - run:
-          name: test
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
-
-      - run:
-          name: eslint
-          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-          when: always
-
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
-
-  self-evaluation:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
-
-      - run: mkdir test-results
-
-      - run:
-          name: "list rules"
-          command: bin/run scanner:rule:list
-
-      - run:
-          name: "self-evaluate"
-          command: |
-            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
-          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
-          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts:
-          path: test-results
-
-  unpackaged-sanity:
-    executor:
-      name: win/default # executor type
-      size: "medium"
-    working_directory: C:\repo
-
-    steps:
-      # Commands are run in a Windows virtual machine environment
-      - attach_workspace:
-          at: C:\repo
-
-      - run:
-          name: "Upgrade node to LTS"
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
-
-      - run: md smoke-test-results
-
-      - run:
-          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
-          # operations succeed, then we can reasonably assume that the plugin is stable.
-          name: "Unpackaged sanity test"
-          command: smoke-tests\smoke-test.cmd bin\run.cmd
-
-      # Upload an artifact for the results, so they're visible without failing the test.
-      - store_artifacts:
-          path: smoke-test-results
-
-  packaged-sanity:
+  windows-rc-test:
     executor:
       name: win/default # executor type
       size: "medium"
@@ -223,13 +90,15 @@ jobs:
           command: npm install -g sfdx-cli
 
       - run:
-          name: "Install plugin"
+          name: "Install release candidate"
           shell: cmd.exe
-          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+          command: sfdx plugins:install --force @salesforce/sfdx-scanner
+
+      - run: mkdir smoke-test-results
 
       - run:
-          # Run through our sanity test script against the published version of the plugin, which we installed in the
-          # previous step. If all of these pass, we can assume the plugin is stable.
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
           name: "Packaged sanity test"
           command: smoke-tests\smoke-test.cmd sfdx
 
@@ -237,101 +106,9 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
-  auto-merge-release:
-    <<: *defaults
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - auth_and_checkout
-      - run:
-          name: "Merge release"
-          command: |
-            git config user.email "isv.swat@salesforce.com"
-            git config user.name "$CIRCLE_USERNAME"
-            git checkout dev
-            git pull origin dev
-            git merge release --commit --no-edit -m "Automerge release to dev"
-            git push origin dev
-  publish-latest:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
-
-      - run:
-          name: Verify branch of origin
-          command: |
-            if [ -z "$CIRCLE_TAG" ]
-            then
-               # If we're not actually working from a tag, then just exit. We only want to deploy tags.
-               exit 1
-            fi
-            # For these two exports, the git command is logging out every local and remote branch that contains the tag.
-            # That gets piped into a grep command so we can look for specific branches in the results.
-            export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG|grep release)
-            export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG|grep master)
-            # Our typical flow is feature branch -> dev -> release -> master. We want to publish tags based on release.
-            # So we'll abort if the tag isn't present in release, or if it's present in master.
-            if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
-            then
-               exit 1
-            fi
-
-      - run:
-          command: npm run prepack
-      # Update the path so that node modules installed by the release-management orb are found
-      # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
-      - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
-      - release-management/sign:
-          # Fingerprint for sfdx-trust developer.salesforce.com
-          fingerprint: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
-      - release-management/publish:
-          access: public
-          tag: latest-rc
-          use_tarfile: true
-      - release-management/create-github-release
-
 workflows:
   version: 2.1
   test-publish:
     jobs:
-      - build:
-          filters:
-            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-            tags:
-              only: /.*/
-      - windows-build:
-          requires:
-            - build
-      - unpackaged-sanity:
-          requires:
-            - windows-build
-      - self-evaluation:
-          requires:
-            - windows-build
-      - publish-latest:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
-          requires:
-            - build
-            - self-evaluation
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
-      - packaged-sanity:
-          requires:
-            - publish-latest
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+      - linux-rc-test
+      - windows-rc-test
