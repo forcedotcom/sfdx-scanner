@@ -1,8 +1,9 @@
-name: production-heartbeat
+name: production-heartbeat-test
 on:
-  schedule:
-    # Times are UTC
-    - cron: '45 1,5,9,13,17,21 * * *'
+  pull_request
+#  schedule:
+#    # Times are UTC
+#    - cron: '45 1,5,9,13,17,21 * * *'
 jobs:
   production-heartbeat:
     strategy:

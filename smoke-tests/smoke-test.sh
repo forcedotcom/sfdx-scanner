@@ -17,7 +17,7 @@ $EXE_NAME scanner:rule:describe -n EmptyCatchBlock
 echo "==== Describe a non-existent rule ===="
 $EXE_NAME scanner:rule:describe -n NotAnActualRule
 echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="
-$EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/run1.xml
+$EXE_NAME scanner:run --format foo --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/run1.xml
 echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="
 $EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/ts/src/simpleYetWrong.ts --tsconfig test/code-fixtures/projects/tsconfig.json --outfile smoke-test-results/run2.xml
 echo "==== Run RetireJS against a folder ===="
