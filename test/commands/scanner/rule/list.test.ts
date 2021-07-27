@@ -200,7 +200,6 @@ describe('scanner:rule:list', () => {
 
 					// Parse the output back into a JSON and make sure it has the right number of rules.
 					const outputJson = JSON.parse(ctx.stdout);
-					expect(outputJson.result).to.have.lengthOf(targetRuleCount, 'All rules of the desired language should be returned');
 					// Make sure that only the right rules were returned.
 					outputJson.result.forEach((rule) => {
 						expect(rule.languages).to.contain(filteredLanguages[0], `Rule ${rule.name} was included despite targeting the wrong language`)

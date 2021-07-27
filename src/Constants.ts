@@ -25,7 +25,8 @@ export enum ENGINE {
 	ESLINT_LWC = 'eslint-lwc',
 	ESLINT_TYPESCRIPT = 'eslint-typescript',
 	ESLINT_CUSTOM = 'eslint-custom',
-	RETIRE_JS = 'retire-js'
+	RETIRE_JS = 'retire-js',
+	CPD = 'cpd'
 }
 
 /**
@@ -45,7 +46,8 @@ export const AllowedEngineFilters = [
 	ENGINE.ESLINT_LWC,
 	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
-	ENGINE.RETIRE_JS
+	ENGINE.RETIRE_JS,
+	ENGINE.CPD
 ]
 
 
@@ -54,7 +56,9 @@ export enum LANGUAGE {
 	JAVA = 'java',
 	JAVASCRIPT = 'javascript',
 	TYPESCRIPT = 'typescript',
-	VISUALFORCE = 'vf'
+	VISUALFORCE = 'vf',
+	ECMASCRIPT = 'ecmascript',
+	XML = 'xml'
 }
 
 export const Services = {
@@ -84,3 +88,22 @@ export enum Severity {
 	MODERATE = 2,
 	HIGH = 1
 }
+
+//  CPD supported languages: [apex, ecmascript, java, vf, xml]
+export const FILE_EXTS_TO_LANGUAGE: Map<string, LANGUAGE> = new Map([
+	// apex
+	['.cls', LANGUAGE.APEX],
+	['.trigger', LANGUAGE.APEX],
+	// java
+	['.java', LANGUAGE.JAVA],
+	// ecmascript
+	['.js', LANGUAGE.ECMASCRIPT],
+	// vf
+	['.component', LANGUAGE.VISUALFORCE],
+	['.page', LANGUAGE.VISUALFORCE],
+	// xml
+	['.xml', LANGUAGE.XML],
+]);
+
+// Here, current dir __dirname = <base_dir>/sfdx-scanner/src
+export const PMD_LIB = path.join(__dirname, '..', 'dist', 'pmd', 'lib');
