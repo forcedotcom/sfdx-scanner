@@ -71,9 +71,7 @@ jobs:
       # For now, smoke tests are run here against the raw code. When we add tarball testing, we can remove this.
       - run:
           name: "smoke tests"
-          command: |
-            mkdir smoke-test-results
-            smoke-tests/smoke-test.sh bin/run
+          command: smoke-tests/smoke-test.sh bin/run
 
       - run:
           name: eslint
@@ -185,8 +183,6 @@ jobs:
       # Log the version of node we're using after the upgrade.
       - run: node -v
 
-      - run: md smoke-test-results
-
       - run:
           # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
           # operations succeed, then we can reasonably assume that the plugin is stable.
@@ -196,8 +192,38 @@ jobs:
       # Upload an artifact for the results, so they're visible without failing the test.
       - store_artifacts:
           path: smoke-test-results
+  linux-rc-test:
+    <<: *defaults
+    steps:
+      - auth_and_checkout
 
-  packaged-sanity:
+      # We want our unit tests to run with the lts version of node.
+      - node/install:
+          install-npm: false
+          lts: true
+
+      # Log the version of node we're using after the upgrade.
+      - run: node -v
+
+      - run:
+          name: "Install sfdx-cli"
+          command: npm install -g sfdx-cli
+
+      - run:
+          name: "Install release candidate"
+          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
+
+      - run:
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
+          name: "Packaged sanity test"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Upload an artifact for the results, so they're visible without failing the tests
+      - store_artifacts:
+          path: smoke-test-results
+
+  windows-rc-test:
     executor:
       name: win/default # executor type
       size: "medium"
@@ -222,13 +248,13 @@ jobs:
           command: npm install -g sfdx-cli
 
       - run:
-          name: "Install plugin"
+          name: "Install release candidate"
           shell: cmd.exe
-          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
+          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
 
       - run:
-          # Run through our sanity test script against the published version of the plugin, which we installed in the
-          # previous step. If all of these pass, we can assume the plugin is stable.
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
           name: "Packaged sanity test"
           command: smoke-tests\smoke-test.cmd sfdx
 
@@ -236,23 +262,7 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
-  auto-merge-release:
-    <<: *defaults
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - auth_and_checkout
-      - run:
-          name: "Merge release"
-          command: |
-            git config user.email "isv.swat@salesforce.com"
-            git config user.name "$CIRCLE_USERNAME"
-            git checkout dev
-            git pull origin dev
-            git merge release --commit --no-edit -m "Automerge release to dev"
-            git push origin dev
-  publish-latest:
+  publish-release-candidate:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -298,12 +308,12 @@ workflows:
       - self-evaluation:
           requires:
             - windows-build
-      - publish-latest:
+      - publish-release-candidate:
           # This job should only run after 'build' or 'self-evaluation' finishes successfully.
           requires:
             - build
             - self-evaluation
-          filters:
+          filters: &publishing_filters # Set an anchor so we don't have to keep declaring this.
             # We never want to publish branches, so we need to explicitly ignore all of them.
             branches:
               ignore: /.*/
@@ -311,14 +321,13 @@ workflows:
             tags:
               only:
                 /^v.*/
-      - packaged-sanity:
+      - linux-rc-test:
           requires:
-            - publish-latest
+            - publish-release-candidate
           filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+            <<: *publishing_filters # Use the anchor we declared earlier
+      - windows-rc-test:
+          requires:
+            - publish-release-candidate
+          filters:
+            <<: *publishing_filters # Use the anchor we declared earlier
