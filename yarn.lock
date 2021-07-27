@@ -1949,7 +1949,7 @@ find-cache-dir@^3.2.0:
     make-dir "^3.0.2"
     pkg-dir "^4.1.0"
 
-find-java-home@^1.1.0:
+find-java-home@1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/find-java-home/-/find-java-home-1.1.0.tgz#ec3e00c9028b8bc538d8154f52008c88ae69d55d"
   integrity sha512-bSTCKNZ193UM/+ZZoNDzICAEHcVywovkhsWCkZALjCvRXQ+zXTe/XATrrP4CpxkaP6YFhQJOpyRpH0P2U/woDA==

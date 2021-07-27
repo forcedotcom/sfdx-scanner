@@ -18,6 +18,7 @@ export type EngineConfigContent = {
 	disabled?: boolean;
 	targetPatterns: string[];
 	supportedLanguages?: string[];
+	minimumTokens?: number;
 }
 
 const DEFAULT_CONFIG: ConfigContent = {
@@ -62,6 +63,14 @@ const DEFAULT_CONFIG: ConfigContent = {
 			name: ENGINE.RETIRE_JS,
 			targetPatterns: [],
 			disabled: true
+		},
+		{
+			name: ENGINE.CPD,
+			targetPatterns: [
+				"**/*.cls","**/*.page","**/*.component","**/*.trigger"
+			],
+			disabled: true,
+			minimumTokens: 100
 		}
 	]
 };
@@ -92,6 +101,13 @@ class TypeChecker {
 			return true;
 		}
 		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidBooleanValue', [propertyName, engine.valueOf(), String(value)]);
+	};
+
+	numberCheck = (value: any, propertyName: string, engine: ENGINE): boolean => {
+		if (typeof value === 'number') {
+			return true;
+		}
+		throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', 'InvalidNumberValue', [propertyName, engine.valueOf(), String(value)]);
 	};
 }
 
@@ -193,8 +209,16 @@ export class Config {
 		return this.getStringArrayConfigValue('targetPatterns', engine);
 	}
 
+	public getMinimumTokens(engine: ENGINE): Promise<number> {
+		return this.getNumberConfigValue('minimumTokens', engine);
+	}
+
 	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
 		return this.getConfigValue<boolean>(propertyName, engine, this.typeChecker.booleanCheck);
+	}
+
+	protected getNumberConfigValue(propertyName: string, engine: ENGINE): Promise<number> {
+		return this.getConfigValue<number>(propertyName, engine, this.typeChecker.numberCheck);
 	}
 
 	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {

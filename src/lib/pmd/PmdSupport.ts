@@ -1,13 +1,7 @@
-import path = require('path');
-import {AsyncCreatable} from '@salesforce/kit';
-import {ChildProcessWithoutNullStreams} from 'child_process';
 import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
-import cspawn = require('cross-spawn');
-
-
-// Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
-export const PMD_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd', 'lib');
+import { CommandLineSupport } from './CommandLineSupport';
+import { PMD_LIB } from '../../Constants';
 
 /**
  * Output format supported by PMD
@@ -18,7 +12,7 @@ export enum Format {
 	TEXT = 'text'
 }
 
-export abstract class PmdSupport extends AsyncCreatable {
+export abstract class PmdSupport extends CommandLineSupport {
 
 	protected async buildClasspath(): Promise<string[]> {
 		// Include PMD libs into classpath
@@ -34,25 +28,8 @@ export abstract class PmdSupport extends AsyncCreatable {
 		return classpathEntries;
 	}
 
-	/**
-	 * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject functions.
-	 * Resolves/rejects the Promise once the child process finishes.
-	 * @param cp
-	 * @param res
-	 * @param rej
-	 */
-	protected abstract monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void;
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
-
-	protected async runCommand(): Promise<string> {
-		const [command, args] = await this.buildCommandArray();
-
-		return new Promise<string>((res, rej) => {
-			const cp = cspawn.spawn(command, args);
-			this.monitorChildProcess(cp, res, rej);
-		});
-	}
 
 	protected async getCustomRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const customRulePathManager = await Controller.createRulePathManager();
