@@ -390,7 +390,7 @@ workflows:
     jobs:
       # First, we need to run the setup step, which sets up an environment we can use for publishing.
       - setup:
-          filters:
+          filters: &publishing_filters # Set an anchor so we don't have to keep declaring this.
             # We never want to publish branches, so we have to explicitly ignore them.
             branches:
               ignore: /.*/
@@ -402,10 +402,16 @@ workflows:
       - publish-release-candidate:
           requires:
             - setup
+          filters:
+            <<: *publishing_filters
       # Once the release candidate is published, we want to run our smoke tests against it.
       - linux-rc-test:
           requires:
             - publish-release-candidate
+          filters:
+            <<: *publishing_filters
       - windows-rc-test:
           requires:
             - publish-release-candidate
+          filters:
+            <<: *publishing_filters
