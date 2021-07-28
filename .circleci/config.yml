@@ -389,7 +389,7 @@ workflows:
   publish:
     jobs:
       # First, we need to run the setup step, which sets up an environment we can use for publishing.
-      - setup
+      - setup:
           filters:
             # We never want to publish branches, so we have to explicitly ignore them.
             branches:
