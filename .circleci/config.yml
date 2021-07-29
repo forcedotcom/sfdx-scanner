@@ -418,7 +418,7 @@ workflows:
   weekly-smoke-test:
     triggers:
       - schedule:
-          cron: "15 * * * *"
+          cron: "45,50 * * * *"
           filters:
             branches:
               only: "d/W-9668161-exp"
