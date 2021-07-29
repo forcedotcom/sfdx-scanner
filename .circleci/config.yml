@@ -415,19 +415,20 @@ workflows:
             - publish-release-candidate
           filters:
             <<: *publishing_filters
-  weekly-smoke-test:
-    triggers:
-      - schedule:
-          cron: "0 * * * *"
-          filters:
-            branches:
-              only: "d/W-9668161-exp"
-    jobs:
-      # First, we need to run the setup step, which sets up an environment we can use for publishing.
-      - setup
-      - linux-tarball-test:
-          requires:
-            - setup
-      - windows-tarball-test:
-          requires:
-            - setup
+#  weekly-smoke-test:
+#    triggers:
+#      - schedule:
+#          cron: "0 * * * *"
+#          filters:
+#            branches:
+#              only: "d/W-9668161-exp"
+#    jobs:
+#      # First, we need to run the setup step, which sets up an environment we can use for publishing.
+#      - setup
+#      - linux-tarball-test:
+#          requires:
+#            - setup
+#      - windows-tarball-test:
+#          requires:
+#            - setup
+#
