@@ -89,7 +89,7 @@ commands:
 
       - run:
           name: "Install release candidate"
-          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
+          command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
 
 jobs:
   # Purpose: Performs all of the necessary setup for subsequent jobs to work. In general, all workflows should probably
@@ -299,14 +299,6 @@ jobs:
 
       # Prepare the release candidate for running.
       - install_release_candidate
-
-      - run:
-          name: "Install sfdx-cli"
-          command: npm install -g sfdx-cli
-
-      - run:
-          name: "Install release candidate"
-          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
