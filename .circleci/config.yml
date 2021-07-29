@@ -89,6 +89,7 @@ commands:
     steps:
       - run:
           name: "Install SFDX and tarball"
+          shell: bash.exe
           command: |
             npm install -g sfdx-cli
             # We need to determine the name of the tarball
