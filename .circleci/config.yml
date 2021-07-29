@@ -15,6 +15,7 @@ orbs:
 
 
 commands:
+  # Purpose: Checkout the code from github
   auth_and_checkout:
     steps:
       - add_ssh_keys:
@@ -22,18 +23,72 @@ commands:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
-  windows_install_yarn:
+
+  # Purpose: Update node. Currently only upgrades to LTS, but could be trivially parameterized to support other versions.
+  update_node:
+    parameters:
+      os:
+        default: linux
+        description: The OS being tested against
+        enum:
+          - linux
+          - windows
+        type: enum
     steps:
-      - run:
-          name: "Install yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+      # For Linux, we can just use the node orb.
+      - when:
+          condition:
+            equal:
+              - linux
+              - << parameters.os >>
+          steps:
+            - node/install:
+                install-npm: false
+                # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
+                lts: true
+      # For Windows, we need to use a custom bash script.
+      - when:
+          condition:
+            equal:
+              - windows
+              - << parameters.os >>
+          steps:
+            - run:
+                name: "Install node"
+                # This script must explicitly be run in bash.
+                shell: bash.exe
+                # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
+                command: .circleci/windows-node-upgrade.sh lts
+
+            # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+            - run:
+                name: "Install Yarn"
+                shell: bash.exe
+                command: npm install -g yarn
+      # Regardless of OS, we want to log the version of Node we're using post-upgrade.
+      - run: node -v
+
+  # Purpose: Performs all of the follow-up actions after unit tests are executed. E.g., storing results and artifacts.
+  process_unit_test_results:
+    steps:
+      # Store test results and artifacts
+      - gradle/collect_test_results:
+          reports_path: pmd-cataloger/build/reports/
+          test_results_path: pmd-cataloger/build/test-results/
+      - store_test_results:
+          path: test-results
+      - store_artifacts: # upload test coverage as artifact.
+          path: test-coverage
 
 jobs:
-  build:
+  setup:
     <<: *defaults
     steps:
       - auth_and_checkout
+
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: linux
 
       # We want our unit tests to run with the lts version of node.
       - node/install:
@@ -50,8 +105,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # Do the necessary build steps for running unit tests
       - run: yarn --ignore-scripts
       - run: yarn build
+
+      # Do the necessary build steps for running tarball tests
+      - run: npm pack
 
       - save_cache:
           paths:
@@ -62,79 +121,62 @@ jobs:
           root: ~/repo
           paths: .
 
-      # UNIT TESTS
+  linux-unit-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: linux
+
+      # Unit tests
       - run:
           name: test
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
-      # For now, smoke tests are run here against the raw code. When we add tarball testing, we can remove this.
-      - run:
-          name: "smoke tests"
-          command: smoke-tests/smoke-test.sh bin/run
-
+      # Linting
       - run:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
+      - process_unit_test_results
 
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
-
-      - store_artifacts:
-          path: smoke-test-results
-  windows-build:
+  windows-unit-tests:
     executor:
       name: win/default # executor type
       size: "medium"
-      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
       shell: bash.exe
     working_directory: C:\repo
     steps:
       - attach_workspace:
           at: C:\repo
 
-      - run:
-          name: "Upgrade node to LTS"
-          # The script has to be run in bash.
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: windows
 
       - run: mkdir test-results
 
-      # UNIT TESTS
+      # Unit tests
       - run:
           name: test
+          # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+          shell: bash.exe
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
+      # Linting
       - run:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          shell: bash.exe
           when: always
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
-
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
+      - process_unit_test_results
 
   self-evaluation:
     <<: *defaults
@@ -161,49 +203,79 @@ jobs:
       - store_artifacts:
           path: test-results
 
-  unpackaged-sanity:
+
+  linux-tarball-test:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # We'll want to use the LTS version of node
+      - update_node:
+          os: linux
+
+      # Set up the plugin
+      - run:
+          name: "Install SFDX and tarball"
+          command: |
+            npm install -g sfdx-cli
+            # We need to determine the name of the tarball
+            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
+            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI of the file's full path.
+            echo y | sfdx plugins:install file://`pwd`/${SFDC_TARBALL}
+
+      # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
+      - run:
+          name: "smoke test"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
+      - store_artifacts:
+          path: smoke-test-results
+
+  windows-tarball-test:
     executor:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
-
     steps:
-      # Commands are run in a Windows virtual machine environment
+      # Commands are run in a Windows VM environment
       - attach_workspace:
           at: C:\repo
 
+      # Update node to LTS
+      - update_node:
+          os: windows
+
+      # Set up the plugin
       - run:
-          name: "Upgrade node to LTS"
+          name: "Install SFDX and tarball"
           shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
+          command: |
+            npm install -g sfdx-cli
+            # We need to determine the name of the tarball
+            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
+            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin.
+            # Use a URI of the file's full path, but note that the path DOES NOT start with `C:`.
+            echo y | sfdx plugins:install file:///repo/${SFDC_TARBALL}
 
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
-
+      # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
-          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
-          # operations succeed, then we can reasonably assume that the plugin is stable.
-          name: "Unpackaged sanity test"
-          command: smoke-tests\smoke-test.cmd bin\run.cmd
+          name: "smoke test"
+          command: smoke-tests\smoke-test.cmd sfdx
 
-      # Upload an artifact for the results, so they're visible without failing the test.
+      # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
       - store_artifacts:
           path: smoke-test-results
+
   linux-rc-test:
     <<: *defaults
     steps:
       - auth_and_checkout
 
       # We want our unit tests to run with the lts version of node.
-      - node/install:
-          install-npm: false
-          lts: true
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
+      - update_node:
+          os: linux
 
       - run:
           name: "Install sfdx-cli"
@@ -231,16 +303,9 @@ jobs:
     steps:
       - auth_and_checkout
 
-      - run:
-          name: "Upgrade node to LTS"
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
+      # We want to run against the LTS version of node
+      - update_node:
+          os: windows
 
       - run:
           name: "Install sfdx cli"
@@ -291,43 +356,55 @@ jobs:
 
 workflows:
   version: 2.1
-  test-publish:
+  test:
     jobs:
-      - build:
-          filters:
-            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-            tags:
-              only: /.*/
-      - windows-build:
+      # First, we need to do the setup step, which sets up an environment we can use for the tests.
+      # Branches are inclusive by default, and tags are exclusive by default. We want to run on all branches and no tags,
+      # so no explicit filtering is required.
+      - setup
+      # Then we want to do the tests. Windows and Linux each have unit tests and a tarball test, and also we run the plugin
+      # against itself on Linux.
+      - linux-unit-tests:
           requires:
-            - build
-      - unpackaged-sanity:
+            - setup
+      - windows-unit-tests:
           requires:
-            - windows-build
+            - setup
+      - linux-tarball-test:
+          requires:
+            - setup
+      - windows-tarball-test:
+          requires:
+            - setup
       - self-evaluation:
           requires:
-            - windows-build
-      - publish-release-candidate:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
-          requires:
-            - build
-            - self-evaluation
+            - setup
+  publish:
+    jobs:
+      # First, we need to run the setup step, which sets up an environment we can use for publishing.
+      - setup:
           filters: &publishing_filters # Set an anchor so we don't have to keep declaring this.
-            # We never want to publish branches, so we need to explicitly ignore all of them.
+            # We never want to publish branches, so we have to explicitly ignore them.
             branches:
               ignore: /.*/
             # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
             tags:
               only:
                 /^v.*/
+      # Once the setup is done, we can actually attempt the publish.
+      - publish-release-candidate:
+          requires:
+            - setup
+          filters:
+            <<: *publishing_filters
+      # Once the release candidate is published, we want to run our smoke tests against it.
       - linux-rc-test:
           requires:
             - publish-release-candidate
           filters:
-            <<: *publishing_filters # Use the anchor we declared earlier
+            <<: *publishing_filters
       - windows-rc-test:
           requires:
             - publish-release-candidate
           filters:
-            <<: *publishing_filters # Use the anchor we declared earlier
+            <<: *publishing_filters
