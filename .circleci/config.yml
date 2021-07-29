@@ -80,14 +80,38 @@ commands:
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
 
-  windows_install_yarn:
+  # Purpose: Install SFDX, and the locally-built tarball of the plugin.
+  install_local_tarball:
+    parameters:
+      dir-uri:
+        description: The directory for the local install
+        type: string
     steps:
       - run:
-          name: "Install yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+          name: "Install SFDX and tarball"
+          command: |
+            npm install -g sfdx-cli
+            # We need to determine the name of the tarball
+            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+            # We also ought to determine where we are, using the parameter
+            DIR=<< parameters.dir-uri >>
+            # Pipe in a 'y' to simulate agreeing to isntall an unsigned plugin. Use a URI of the file's full path.
+            echo y | sfdx plugins:install "file://${DIR}/${SFDC_TARBALL}"
+
+  # Purpose: Install SFDX, and the release candidate version of the plugin.
+  install_release_candidate:
+    steps:
+      - run:
+          name: "Install SFDX cli"
+          command: npm install -g sfdx-cli
+
+      - run:
+          name: "Install release candidate"
+          command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
 
 jobs:
+  # Purpose: Performs all of the necessary setup for subsequent jobs to work. In general, all workflows should probably
+  # start with this job.
   setup:
     <<: *defaults
     steps:
@@ -128,6 +152,7 @@ jobs:
           root: ~/repo
           paths: .
 
+  # Purpose: Runs the unit tests in a Linux environment.
   linux-unit-tests:
     <<: *defaults
     steps:
@@ -152,6 +177,7 @@ jobs:
 
       - process_unit_test_results
 
+  # Purpose: Runs the unit tests in a Windows environment.
   windows-unit-tests:
     executor:
       name: win/default # executor type
@@ -185,6 +211,7 @@ jobs:
 
       - process_unit_test_results
 
+  # Purpose: Runs the plugin against itself, to make sure we're following our own rules.
   self-evaluation:
     <<: *defaults
     steps:
@@ -192,10 +219,6 @@ jobs:
           at: ~/repo
 
       - run: mkdir test-results
-
-      - run:
-          name: "list rules"
-          command: bin/run scanner:rule:list
 
       - run:
           name: "self-evaluate"
@@ -210,7 +233,8 @@ jobs:
       - store_artifacts:
           path: test-results
 
-
+  # Purpose: In a Linux environment, install the locally-built tarball and run the smoke test script against it.
+  # This helps ensure the overall stability of the plugin prior to publishing.
   linux-tarball-test:
     <<: *defaults
     steps:
@@ -222,14 +246,8 @@ jobs:
           os: linux
 
       # Set up the plugin
-      - run:
-          name: "Install SFDX and tarball"
-          command: |
-            npm install -g sfdx-cli
-            # We need to determine the name of the tarball
-            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
-            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI of the file's full path.
-            echo y | sfdx plugins:install file://`pwd`/${SFDC_TARBALL}
+      - install_local_tarball:
+          dir-uri: "$(pwd)"
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
@@ -240,6 +258,8 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
+  # Purpose: In a Windows environment, install the locally-built tarball and run the smoke test script against it.
+  # This helps ensure the overall stability of the plugin prior to publishing.
   windows-tarball-test:
     executor:
       name: win/default # executor type
@@ -255,16 +275,9 @@ jobs:
           os: windows
 
       # Set up the plugin
-      - run:
-          name: "Install SFDX and tarball"
-          shell: bash.exe
-          command: |
-            npm install -g sfdx-cli
-            # We need to determine the name of the tarball
-            SFDC_TARBALL=$(ls | grep salesforce*.tgz)
-            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin.
-            # Use a URI of the file's full path, but note that the path DOES NOT start with `C:`.
-            echo y | sfdx plugins:install file:///repo/${SFDC_TARBALL}
+      - install_local_tarball:
+          # Note that the URI we provide does NOT start with `C:`.
+          dir-uri: "/repo"
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
@@ -275,6 +288,9 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
+  # Purpose: In a Linux environment, install the published version of the plugin whose tag is `latest-rc`, then run the
+  # smoke test script against it. This helps ensure the overall stability of a release candidate, so we can confidently
+  # promote it to an actual release.
   linux-rc-test:
     <<: *defaults
     steps:
@@ -284,13 +300,8 @@ jobs:
       - update_node:
           os: linux
 
-      - run:
-          name: "Install sfdx-cli"
-          command: npm install -g sfdx-cli
-
-      - run:
-          name: "Install release candidate"
-          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
+      # Prepare the release candidate for running.
+      - install_release_candidate
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
@@ -302,6 +313,9 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
+  # Purpose: In a Windows environment, install the published version of the plugin whose tag is `latest-rc`, then run the
+  # smoke test script against it. This helps ensure the overall stability of a release candidate, so we can confidently
+  # promote it to an actual release.
   windows-rc-test:
     executor:
       name: win/default # executor type
@@ -314,15 +328,8 @@ jobs:
       - update_node:
           os: windows
 
-      - run:
-          name: "Install sfdx cli"
-          shell: cmd.exe
-          command: npm install -g sfdx-cli
-
-      - run:
-          name: "Install release candidate"
-          shell: cmd.exe
-          command: sfdx plugins:install --force @salesforce/sfdx-scanner@latest-rc
+      # Prepare the release candidate for running.
+      - install_release_candidate
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
@@ -334,6 +341,7 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
+  # Purpose: Publish the specified github tag as a package whose tag is `latest-rc`.
   publish-release-candidate:
     <<: *defaults
     steps:
@@ -353,7 +361,7 @@ jobs:
             export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG|grep release)
             export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG|grep master)
             # Our typical flow is feature branch -> dev -> release -> master. We want to publish tags based on release.
-            # So we'll abort if the tag isn't present in release, or if it's present in master.
+            # So we'll abort if the tag IS NOT PRESENT in release, or if it IS PRESENT in master.
             if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
             then
                exit 1
@@ -363,14 +371,15 @@ jobs:
 
 workflows:
   version: 2.1
+  # Purpose: Run unit tests and smoke tests against a branch.
+  # Triggered by: Pull requests from any branch. Since branches are inclusive by default and tags are exclusive by default,
+  # no explicit filters are required.
   test:
     jobs:
-      # First, we need to do the setup step, which sets up an environment we can use for the tests.
-      # Branches are inclusive by default, and tags are exclusive by default. We want to run on all branches and no tags,
-      # so no explicit filtering is required.
+      # Step 1: Set up the test environment.
       - setup
-      # Then we want to do the tests. Windows and Linux each have unit tests and a tarball test, and also we run the plugin
-      # against itself on Linux.
+      # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
+      # step in Linux.
       - linux-unit-tests:
           requires:
             - setup
@@ -386,25 +395,26 @@ workflows:
       - self-evaluation:
           requires:
             - setup
+  # Purpose: Publish a release based on a provided tag.
+  # Triggered by: Creation of tags that start with `v`. This means that we need to explicitly ignore all branches, and
+  # explicitly include all matching tags.
   publish:
     jobs:
-      # First, we need to run the setup step, which sets up an environment we can use for publishing.
+      # Step 1: Set up the publishing environment.
       - setup:
-          filters: &publishing_filters # Set an anchor so we don't have to keep declaring this.
-            # We never want to publish branches, so we have to explicitly ignore them.
+          filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
+              ignore: /.*/ # Ignore all branches.
             tags:
               only:
-                /^v.*/
-      # Once the setup is done, we can actually attempt the publish.
+                /^v.*/ # Include any tags starting with 'v'.
+      # Step 2: Publish the tag as a release candidate.
       - publish-release-candidate:
           requires:
             - setup
           filters:
             <<: *publishing_filters
-      # Once the release candidate is published, we want to run our smoke tests against it.
+      # Step 3: Smoke test the release candidate on both Linux and Windows.
       - linux-rc-test:
           requires:
             - publish-release-candidate
