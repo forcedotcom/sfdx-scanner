@@ -187,10 +187,6 @@ jobs:
       - run: mkdir test-results
 
       - run:
-          name: "list rules"
-          command: bin/run scanner:rule:list
-
-      - run:
           name: "self-evaluate"
           command: |
             bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
