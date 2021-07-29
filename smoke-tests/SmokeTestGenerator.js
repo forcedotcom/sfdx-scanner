@@ -85,7 +85,7 @@ function generateScriptBody(isBash, delim) {
 	// In a cmd script, you need to prepend plugin commands with "call" in order to make sure that the script continues,
 	// and you need to postfix it with another snippet to make it actually exit when an error is encountered.
 	if (!isBash) {
-		for (let i = 2; i < commands.length; i += 2) {
+		for (let i = 4; i < commands.length; i += 2) {
 			commands[i] = "call " + commands[i] + " || exit /b 1";
 		}
 	}
