@@ -80,6 +80,28 @@ commands:
       - store_artifacts: # upload test coverage as artifact.
           path: test-coverage
 
+  # Purpose: Install SFDX, and the locally-built tarball of the plugin.
+  install_local_tarball:
+    parameters:
+      shell:
+        description: The shell executable to use
+        type: string
+      dir-uri:
+        description: The directory for the local install
+        type: string
+    steps:
+      - run:
+          name: "Install SFDX and tarball"
+          shell: << parameters.shell >>
+          command: |
+            npm install -g sfdx-cli
+            # We need to determine the name of the tarball
+            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+            # We also ought to determine where we are, using the parameter
+            DIR=<< parameters.dir-uri >>
+            # Pipe in a 'y' to simulate agreeing to isntall an unsigned plugin. Use a URI of the file's full path.
+            echo y | sfdx plugins:install "file://${DIR}/${SFDC_TARBALL}"
+
   # Purpose: Install SFDX, and the release candidate version of the plugin.
   install_release_candidate:
     steps:
@@ -228,16 +250,10 @@ jobs:
           os: linux
 
       # Set up the plugin
-      - run:
-          name: "Install SFDX and tarball"
-          command: |
-            npm install -g sfdx-cli
-            # We need to determine the name of the tarball
-            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
-            # We also ought to determine where we are.
-            DIR=`pwd`
-            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin. Use a URI of the file's full path.
-            echo y | sfdx plugins:install "file://${DIR}/${SFDC_TARBALL}"
+      - install_local_tarball:
+          dir-uri: "$(pwd)"
+          # This is the default Linux bash shell.
+          shell: "#/bin/bash -eo pipefail"
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
@@ -265,16 +281,11 @@ jobs:
           os: windows
 
       # Set up the plugin
-      - run:
-          name: "Install SFDX and tarball"
+      - install_local_tarball:
+          # Note that the URI we provide does NOT start with `C:`.
+          dir-uri: "/repo"
+          # This script needs to be run with bash, or it won't work.
           shell: bash.exe
-          command: |
-            npm install -g sfdx-cli
-            # We need to determine the name of the tarball
-            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
-            # Pipe in a 'y' to simulate agreeing to install an unsigned plugin.
-            # Use a URI of the file's full path, but note that the path DOES NOT start with `C:`.
-            echo y | sfdx plugins:install "file:///repo/${SFDC_TARBALL}"
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
