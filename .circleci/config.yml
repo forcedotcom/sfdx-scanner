@@ -427,7 +427,7 @@ workflows:
       - setup
       - linux-tarball-test:
           requires:
-            - build
+            - setup
       - windows-tarball-test:
           requires:
-            - build
+            - setup
