@@ -83,13 +83,16 @@ commands:
   # Purpose: Install SFDX, and the locally-built tarball of the plugin.
   install_local_tarball:
     parameters:
+      shell:
+        description: The shell executable to use
+        type: string
       dir-uri:
         description: The directory for the local install
         type: string
     steps:
       - run:
           name: "Install SFDX and tarball"
-          shell: bash.exe
+          shell: << parameters.shell >>
           command: |
             npm install -g sfdx-cli
             # We need to determine the name of the tarball
@@ -249,6 +252,7 @@ jobs:
       # Set up the plugin
       - install_local_tarball:
           dir-uri: "$(pwd)"
+          shell: "#/bin/bash -eo pipefail"
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
@@ -279,6 +283,7 @@ jobs:
       - install_local_tarball:
           # Note that the URI we provide does NOT start with `C:`.
           dir-uri: "/repo"
+          shell: bash.exe
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
