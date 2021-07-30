@@ -401,7 +401,7 @@ jobs:
   intentional-tank:
     <<: *defaults
     steps:
-      run: exit 1
+      - run: exit 1
 
 workflows:
   version: 2.1
@@ -471,7 +471,7 @@ workflows:
   weekly-tarball-test:
     triggers:
       - schedule:
-          cron: "50 * * * *"
+          cron: "59,1,2 * * * *"
           filters:
             branches:
               only: "d/W-9531479-exp"
