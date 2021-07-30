@@ -377,6 +377,16 @@ jobs:
 
       - run: echo "Publishing would occur here. But it is disabled for now."
 
+  # Purpose: Promote the version tagged `latest-rc` to `latest`.
+  promote-release-candidate:
+    <<: *defaults
+    steps:
+      # TODO: Promote the `latest-rc` tag to `latest`
+      - run: echo "Release promotion would happen here, but it is disabled for now"
+
+      # TODO: Delete the `latest-rc` tag.
+      - run: echo "Obsolete tag deletion would happen here, but it is disabled for now"
+
 workflows:
   version: 2.1
   # Purpose: Run unit tests and smoke tests against a branch.
@@ -431,5 +441,12 @@ workflows:
       - windows-rc-test:
           requires:
             - publish-release-candidate
+          filters:
+            <<: *publishing_filters
+      # Step 4: Promote the release candidate to a full release.
+      - promote-release-candidate:
+          requires:
+            - linux-rc-test
+            - windows-rc-test
           filters:
             <<: *publishing_filters
