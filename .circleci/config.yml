@@ -466,7 +466,7 @@ workflows:
   weekly-tarball-test:
     triggers:
       - schedule:
-          cron: "38 * * * *"
+          cron: "42 * * * *"
           filters:
             branches:
               only: "d/W-9531479-exp"
