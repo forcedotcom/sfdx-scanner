@@ -468,29 +468,30 @@ workflows:
             <<: *publishing_filters
   # Purpose: Run the tarball tests on Linux and Windows, against LTS, Maintenance, and Current versions of node.
   # Triggered by: Nothing. Runs automatically on a weekly cadence.
-  weekly-tarball-test:
-    triggers:
-      - schedule:
-          cron: "59,1,2 * * * *"
-          filters:
-            branches:
-              only: "d/W-9531479-exp"
-    jobs:
-      # Step 1: Run the setup task to create the testing environment
-      - setup
-      # Step 2: Create matrices for the tarball jobs to run with both LTS and Latest node.
-      - linux-tarball-test:
-          requires:
-            - setup
-          matrix:
-            parameters:
-              lts: [true, false]
-      - windows-tarball-test:
-          requires:
-            - setup
-          matrix:
-            parameters:
-              lts: [true, false]
-      - intentional-tank:
-          requires:
-            - setup
+#  weekly-tarball-test:
+#    triggers:
+#      - schedule:
+#          cron: "59,1,2 * * * *"
+#          filters:
+#            branches:
+#              only: "d/W-9531479-exp"
+#    jobs:
+#      # Step 1: Run the setup task to create the testing environment
+#      - setup
+#      # Step 2: Create matrices for the tarball jobs to run with both LTS and Latest node.
+#      - linux-tarball-test:
+#          requires:
+#            - setup
+#          matrix:
+#            parameters:
+#              lts: [true, false]
+#      - windows-tarball-test:
+#          requires:
+#            - setup
+#          matrix:
+#            parameters:
+#              lts: [true, false]
+#      - intentional-tank:
+#          requires:
+#            - setup
+#
