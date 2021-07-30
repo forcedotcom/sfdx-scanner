@@ -34,6 +34,10 @@ commands:
           - linux
           - windows
         type: enum
+      lts:
+        default: true # By default we want to use LTS
+        description: Should the LTS version of node be used instead of the latest version
+        type: boolean
     steps:
       # For Linux, we can just use the node orb.
       - when:
@@ -45,7 +49,7 @@ commands:
             - node/install:
                 install-npm: false
                 # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
-                lts: true
+                lts: << parameters.lts >>
       # For Windows, we need to use a custom bash script.
       - when:
           condition:
@@ -57,8 +61,10 @@ commands:
                 name: "Install node"
                 # This script must explicitly be run in bash.
                 shell: bash.exe
-                # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
-                command: .circleci/windows-node-upgrade.sh lts
+                command: |
+                  # Determine whether we want to upgrade to LTS or current
+                  VERSION_ALIAS=$([ < parameters.lts > == true ] && echo "lts" || echo "current")
+                  .circleci/windows-node-upgrade.sh ${VERSION_ALIAS}
 
             # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
             - run:
@@ -124,14 +130,6 @@ jobs:
       # We'll want to use the LTS version of node.
       - update_node:
           os: linux
-
-      # We want our unit tests to run with the lts version of node.
-      - node/install:
-          install-npm: false
-          lts: true
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
 
       # Download and cache dependencies
       - restore_cache:
@@ -241,13 +239,19 @@ jobs:
   # This helps ensure the overall stability of the plugin prior to publishing.
   linux-tarball-test:
     <<: *defaults
+    parameters:
+      lts:
+        default: true
+        description: Should the LTS version of node be used instead of the latest version
+        type: boolean
     steps:
       - attach_workspace:
           at: ~/repo
 
-      # We'll want to use the LTS version of node
+      # We want to either use the LTS version of node, or the current version of node.
       - update_node:
           os: linux
+          lts: << parameters.lts >>
 
       # Set up the plugin
       - install_local_tarball:
@@ -271,14 +275,20 @@ jobs:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
+    parameters:
+      lts:
+        default: true
+        description: Should the LTS version of node be used instead of the latest version
+        type: boolean
     steps:
       # Commands are run in a Windows VM environment
       - attach_workspace:
           at: C:\repo
 
-      # Update node to LTS
+      # We want to either use the LTS version of node, or the current version of node.
       - update_node:
           os: windows
+          lts: << parameters.lts >>
 
       # Set up the plugin
       - install_local_tarball:
@@ -335,6 +345,7 @@ jobs:
       # We want to run against the LTS version of node
       - update_node:
           os: windows
+          lts: true
 
       # Prepare the release candidate for running.
       - install_release_candidate
@@ -450,3 +461,28 @@ workflows:
             - windows-rc-test
           filters:
             <<: *publishing_filters
+  # Purpose: Run the tarball tests on Linux and Windows, against LTS, Maintenance, and Current versions of node.
+  # Triggered by: Nothing. Runs automatically on a weekly cadence.
+  weekly-tarball-test:
+    triggers:
+      - schedule:
+          cron: "29 * * * *"
+          filters:
+            branches:
+              only: "d/W-9531479-exp"
+    jobs:
+      # Step 1: Run the setup task to create the testing environment
+      - setup
+      # Step 2: Create matrices for the tarball jobs to run with both LTS and Latest node.
+      - linux-tarball-test:
+          requires:
+            - setup
+          matrix:
+            parameters:
+              lts: [true, false]
+      - windows-tarball-test:
+          requires:
+            - setup
+          matrix:
+            parameters:
+              lts: [true, false]
