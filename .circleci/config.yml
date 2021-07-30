@@ -63,7 +63,7 @@ commands:
                 shell: bash.exe
                 command: |
                   # Determine whether we want to upgrade to LTS or current
-                  VERSION_ALIAS=$([ < parameters.lts > == true ] && echo "lts" || echo "current")
+                  VERSION_ALIAS=$([ << parameters.lts >> == true ] && echo "lts" || echo "current")
                   .circleci/windows-node-upgrade.sh ${VERSION_ALIAS}
 
             # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
@@ -466,7 +466,7 @@ workflows:
   weekly-tarball-test:
     triggers:
       - schedule:
-          cron: "29 * * * *"
+          cron: "38 * * * *"
           filters:
             branches:
               only: "d/W-9531479-exp"
