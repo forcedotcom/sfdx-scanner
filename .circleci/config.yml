@@ -397,6 +397,11 @@ jobs:
 
       # TODO: Delete the `latest-rc` tag.
       - run: echo "Obsolete tag deletion would happen here, but it is disabled for now"
+  # Purpose: Intentionally tank the build
+  intentional-tank:
+    <<: *defaults
+    steps:
+      run: exit 1
 
 workflows:
   version: 2.1
@@ -466,7 +471,7 @@ workflows:
   weekly-tarball-test:
     triggers:
       - schedule:
-          cron: "1,2,3,4 * * * *"
+          cron: "50 * * * *"
           filters:
             branches:
               only: "d/W-9531479-exp"
@@ -486,3 +491,6 @@ workflows:
           matrix:
             parameters:
               lts: [true, false]
+      - intentional-tank:
+          requires:
+            - setup
