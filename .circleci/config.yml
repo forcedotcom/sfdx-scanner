@@ -63,10 +63,10 @@ commands:
                   equal:
                     - current
                     - << parameters.node-version >>
-                  steps:
-                    - node/install:
-                        install-npm: false
-                        lts: false
+                steps:
+                  - node/install:
+                      install-npm: false
+                      lts: false
       # For Windows, we need to use a custom bash script.
       - when:
           condition:
