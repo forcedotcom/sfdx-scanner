@@ -12,6 +12,7 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   gradle: circleci/gradle@2.2.0
   node: circleci/node@4.5.1
+  release-management: salesforce/npm-release-management@4
 
 
 commands:
@@ -418,17 +419,18 @@ jobs:
                exit 1
             fi
 
-      - run: echo "Publishing would occur here. But it is disabled for now."
+      - release-management/release-package:
+          github-release: true
+          sign: true
+          tag: latest-rc
 
   # Purpose: Promote the version tagged `latest-rc` to `latest`.
   promote-release-candidate:
     <<: *defaults
     steps:
-      # TODO: Promote the `latest-rc` tag to `latest`
-      - run: echo "Release promotion would happen here, but it is disabled for now"
-
-      # TODO: Delete the `latest-rc` tag.
-      - run: echo "Obsolete tag deletion would happen here, but it is disabled for now"
+      - release-management/promote-package:
+          candidate: latest-rc
+          target: latest
 
 workflows:
   version: 2.1
