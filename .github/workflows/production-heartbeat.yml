@@ -1,7 +1,10 @@
 name: production-heartbeat
 on:
   schedule:
-    # Times are UTC
+    # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple values
+    # can be specified with comma-separated lists. All times are UTC.
+    # So this expression means "run at 45 minutes past 1, 5, and 9 AM/PM UTC". The hours were chosen so employees on
+    # US Central Time will start their day with results that are <2 hrs old.
     - cron: '45 1,5,9,13,17,21 * * *'
 jobs:
   production-heartbeat:
