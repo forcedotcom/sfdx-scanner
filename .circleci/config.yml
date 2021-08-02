@@ -150,6 +150,13 @@ jobs:
           os: linux
           node-version: << parameters.node-version >>
 
+  forced-to-fail:
+    <<: *defaults
+    steps:
+      - run:
+          name: "Forced to fail"
+          command: exit -1
+
 workflows:
   version: 2.1
   # Purpose: Run unit tests and smoke tests against a branch.
@@ -159,3 +166,6 @@ workflows:
     jobs:
       - param-testing:
           node-version: lts
+      - forced-to-fail:
+          requires:
+            - param-testing
