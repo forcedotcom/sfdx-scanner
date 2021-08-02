@@ -419,6 +419,14 @@ jobs:
                exit 1
             fi
 
+      - run:
+          name: "Clean repo" # Do any necessary cleanup before running the package commands.
+          command: |
+            # Identify and delete the tarball created by the setup job.
+            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+            rm ${SFDC_TARBALL}
+
+
       - release-management/release-package:
           github-release: true
           sign: true
