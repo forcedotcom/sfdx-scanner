@@ -34,13 +34,10 @@ commands:
           - linux
           - windows
         type: enum
-      node-version:
-        default: lts
-        description: what version of node should be used
-        enum:
-          - lts
-          - current
-        type: enum
+      lts:
+        default: true
+        description: Should LTS be installed. If false, Current will be installed instead.
+        type: boolean
     steps:
       # For Linux, we can just use the node orb.
       - when:
@@ -49,24 +46,9 @@ commands:
               - linux
               - << parameters.os >>
           steps:
-            - when:
-                condition:
-                  equal:
-                    - lts
-                    - << parameters.node-version >>
-                steps:
-                  - node/install:
-                      install-npm: false
-                      lts: true
-            - when:
-                condition:
-                  equal:
-                    - current
-                    - << parameters.node-version >>
-                steps:
-                  - node/install:
-                      install-npm: false
-                      lts: false
+            - node/install:
+                install-npm: false
+                lts: << parameters.lts >>
       # For Windows, we need to use a custom bash script.
       - when:
           condition:
@@ -78,7 +60,7 @@ commands:
                 name: "Install node"
                 # This script must explicitly be run in bash.
                 shell: bash.exe
-                command: .circleci/windows-node-upgrade.sh << parameters.node-version >>
+                command: .circleci/windows-node-upgrade.sh <<# parameters.lts >> lts <</ parameters.lts >> <<^ parameters.lts >> current <</ parameters.lts >>
 
             # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
             - run:
@@ -146,16 +128,56 @@ jobs:
         default: lts
     steps:
       - auth_and_checkout
-      - update_node:
-          os: linux
-          node-version: << parameters.node-version >>
-
-  forced-to-fail:
-    <<: *defaults
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
+  windows-param-testing:
+    executor:
+      name: win/default
+      size: "medium"
+    parameters:
+      node-version:
+        description: What version of node do we want
+        type: enum
+        enum:
+          - current
+          - lts
+        default: lts
     steps:
-      - run:
-          name: "Forced to fail"
-          command: exit -1
+      - auth_and_checkout
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: false
 
 workflows:
   version: 2.1
@@ -166,6 +188,5 @@ workflows:
     jobs:
       - param-testing:
           node-version: current
-      - forced-to-fail:
-          requires:
-            - param-testing
+      - windows-param-testing:
+          node-version: current
