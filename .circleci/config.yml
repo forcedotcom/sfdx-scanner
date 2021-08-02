@@ -165,7 +165,7 @@ workflows:
   test:
     jobs:
       - param-testing:
-          node-version: lts
+          node-version: current
       - forced-to-fail:
           requires:
             - param-testing
