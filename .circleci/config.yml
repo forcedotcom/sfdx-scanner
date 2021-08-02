@@ -490,37 +490,38 @@ workflows:
             <<: *publishing_filters
   # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
   # Triggered by: Nothing. Runs automatically on a weekly cadence.
-  weekly-smoke-test:
-    triggers:
-      - schedule:
-          # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
-          # values can be specified with a comma-separated list. All times are UTC.
-          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
-          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
-          cron: "2 * * * *"
-          filters:
-            branches:
-              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
-              only: "d/W-9531479-b"
-    jobs:
-      # Step 1: Run the setup task to create the testing environment.
-      - setup
-      # Step 2: Create matrices for the tarball jobs to run with both LTS and Current node.
-      - linux-tarball-test:
-          requires:
-            - setup
-          matrix:
-            # The values of the parameters will be appended to the jobs they create.
-            # So we'll get "linux-tarball-test-lts" and "linux-tarball-test-current"
-            parameters:
-              node-version: [lts, current]
-      - windows-tarball-test:
-          requires:
-            - setup
-          matrix:
-            parameters:
-              # The values of the parameters will be appended to the jobs they create.
-              # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
-              node-version: [lts, current]
-
-
+#  weekly-smoke-test:
+#    triggers:
+#      - schedule:
+#          # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
+#          # values can be specified with a comma-separated list. All times are UTC.
+#          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
+#          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
+#          cron: "2 * * * *"
+#          filters:
+#            branches:
+#              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
+#              only: "d/W-9531479-b"
+#    jobs:
+#      # Step 1: Run the setup task to create the testing environment.
+#      - setup
+#      # Step 2: Create matrices for the tarball jobs to run with both LTS and Current node.
+#      - linux-tarball-test:
+#          requires:
+#            - setup
+#          matrix:
+#            # The values of the parameters will be appended to the jobs they create.
+#            # So we'll get "linux-tarball-test-lts" and "linux-tarball-test-current"
+#            parameters:
+#              node-version: [lts, current]
+#      - windows-tarball-test:
+#          requires:
+#            - setup
+#          matrix:
+#            parameters:
+#              # The values of the parameters will be appended to the jobs they create.
+#              # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
+#              node-version: [lts, current]
+#
+#
+#
