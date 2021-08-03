@@ -12,6 +12,7 @@ orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
   gradle: circleci/gradle@2.2.0
   node: circleci/node@4.5.1
+  release-management: salesforce/npm-release-management@4
 
 
 commands:
@@ -392,8 +393,8 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
-  # Purpose: Publish the specified github tag as a package whose tag is `latest-rc`.
-  publish-release-candidate:
+  # Purpose: Verify that the tag about to be published was generated from the right base branch.
+  validate-release-tag:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -417,18 +418,6 @@ jobs:
             then
                exit 1
             fi
-
-      - run: echo "Publishing would occur here. But it is disabled for now."
-
-  # Purpose: Promote the version tagged `latest-rc` to `latest`.
-  promote-release-candidate:
-    <<: *defaults
-    steps:
-      # TODO: Promote the `latest-rc` tag to `latest`
-      - run: echo "Release promotion would happen here, but it is disabled for now"
-
-      # TODO: Delete the `latest-rc` tag.
-      - run: echo "Obsolete tag deletion would happen here, but it is disabled for now"
 
 workflows:
   version: 2.1
@@ -469,25 +458,36 @@ workflows:
             tags:
               only:
                 /^v.*/ # Include any tags starting with 'v'.
-      # Step 2: Publish the tag as a release candidate.
-      - publish-release-candidate:
+      # Step 2: Verify that the tag to be released came from the correct branch.
+      - validate-release-tag:
           requires:
             - setup
           filters:
             <<: *publishing_filters
-      # Step 3: Smoke test the release candidate on both Linux and Windows.
+      # Step 3: Publish the tag as a release candidate.
+      - release-management/release-package:
+          requires:
+            - validate-release-tag
+          github-release: true
+          sign: true
+          tag: latest-rc
+          filters:
+            <<: *publishing_filters
+      # Step 4: Smoke test the release candidate on both Linux and Windows.
       - linux-rc-test:
           requires:
-            - publish-release-candidate
+            - release-management/release-package
           filters:
             <<: *publishing_filters
       - windows-rc-test:
           requires:
-            - publish-release-candidate
+            - release-management/release-package
           filters:
             <<: *publishing_filters
-      # Step 4: Promote the release candidate to a full release.
-      - promote-release-candidate:
+      # Step 5: Promote the release candidate to a full release.
+      - release-management/promote-package:
+          candidate: latest-rc
+          target: latest
           requires:
             - linux-rc-test
             - windows-rc-test
