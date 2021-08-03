@@ -24,7 +24,7 @@ commands:
             - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
       - checkout
 
-  # Purpose: Update node. Currently only upgrades to LTS, but could be trivially parameterized to support other versions.
+  # Purpose: Update node to either LTS or Current version.
   update_node:
     parameters:
       os:
@@ -34,6 +34,10 @@ commands:
           - linux
           - windows
         type: enum
+      lts:
+        description: Should the LTS version of node be installed. If false, Current will be installed instead.
+        type: boolean
+        default: true
     steps:
       # For Linux, we can just use the node orb.
       - when:
@@ -44,8 +48,7 @@ commands:
           steps:
             - node/install:
                 install-npm: false
-                # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
-                lts: true
+                lts: << parameters.lts >>
       # For Windows, we need to use a custom bash script.
       - when:
           condition:
@@ -57,8 +60,9 @@ commands:
                 name: "Install node"
                 # This script must explicitly be run in bash.
                 shell: bash.exe
-                # Currently, we just want to use LTS. If we want to use other versions, we can parameterize this input.
-                command: .circleci/windows-node-upgrade.sh lts
+                command: |
+                  NODE_ALIAS=$(if << parameters.lts >>; then echo lts; else echo current; fi)
+                  .circleci/windows-node-upgrade.sh ${NODE_ALIAS}
 
             # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
             - run:
@@ -124,14 +128,6 @@ jobs:
       # We'll want to use the LTS version of node.
       - update_node:
           os: linux
-
-      # We want our unit tests to run with the lts version of node.
-      - node/install:
-          install-npm: false
-          lts: true
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
 
       # Download and cache dependencies
       - restore_cache:
@@ -241,13 +237,41 @@ jobs:
   # This helps ensure the overall stability of the plugin prior to publishing.
   linux-tarball-test:
     <<: *defaults
+    parameters:
+      node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+        # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
+        # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
+        # ending in "-true".
+        type: enum
+        enum:
+          - lts
+          - current
+        default: lts
+        description: Which version of node should be used.
     steps:
       - attach_workspace:
           at: ~/repo
 
-      # We'll want to use the LTS version of node
-      - update_node:
-          os: linux
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
 
       # Set up the plugin
       - install_local_tarball:
@@ -270,15 +294,34 @@ jobs:
     executor:
       name: win/default # executor type
       size: "medium"
+    parameters:
+      node-version: *node_version_param
     working_directory: C:\repo
     steps:
       # Commands are run in a Windows VM environment
       - attach_workspace:
           at: C:\repo
 
-      # Update node to LTS
-      - update_node:
-          os: windows
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: false
 
       # Set up the plugin
       - install_local_tarball:
@@ -450,3 +493,39 @@ workflows:
             - windows-rc-test
           filters:
             <<: *publishing_filters
+  # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
+  # Triggered by: Nothing. Runs automatically on a weekly cadence.
+  weekly-smoke-test:
+    triggers:
+      - schedule:
+          # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
+          # values can be specified with a comma-separated list. All times are UTC.
+          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
+          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
+          cron: "30 13 * * 1"
+          filters:
+            branches:
+              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
+              only: "dev"
+    jobs:
+      # Step 1: Run the setup task to create the testing environment.
+      - setup
+      # Step 2: Create matrices for the tarball jobs to run with both LTS and Current node.
+      - linux-tarball-test:
+          requires:
+            - setup
+          matrix:
+            # The values of the parameters will be appended to the jobs they create.
+            # So we'll get "linux-tarball-test-lts" and "linux-tarball-test-current"
+            parameters:
+              node-version: [lts, current]
+      - windows-tarball-test:
+          requires:
+            - setup
+          matrix:
+            parameters:
+              # The values of the parameters will be appended to the jobs they create.
+              # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
+              node-version: [lts, current]
+
+
