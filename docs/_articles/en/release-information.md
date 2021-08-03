@@ -5,6 +5,27 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.10.1000](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.1000) (08-03-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.10.0...v2.10.1000)
+
+### Release Summary
+
+* No new features or bug fixes
+* Only operational changes to release management
+
+**Merged pull requests:**
+
+- @W-9544986@: updated npm-release-management orb to v4, and automated promotion job. [\#495](https://github.com/forcedotcom/sfdx-scanner/pull/495)
+- @W-9531479@: Added weekly smoke-test job, and parameterized the node … [\#493](https://github.com/forcedotcom/sfdx-scanner/pull/493)
+- @W-9625690@: Added some documentation to explain how cron syntax works. [\#491](https://github.com/forcedotcom/sfdx-scanner/pull/491)
+- @W-9668161@: Added tarball tests to CircleCI, refactored and renamed … [\#489](https://github.com/forcedotcom/sfdx-scanner/pull/489)
+- @W-9531823@: Replaced packaged-sanity job with windows-rc-test and li… [\#484](https://github.com/forcedotcom/sfdx-scanner/pull/484)
+- @W-9625690@: Bumping package.json and removing publishing mechanisms. [\#483](https://github.com/forcedotcom/sfdx-scanner/pull/483)
+- @W-9625690@: Enabling PagerDuty alerts for heartbeat action. [\#481](https://github.com/forcedotcom/sfdx-scanner/pull/481)
+- @W-9625690@: Added github action to run heartbeat script against production plugin. [\#478](https://github.com/forcedotcom/sfdx-scanner/pull/478)
+- @W-9603774@ Update release-information.md to reflect correct 'Closed Issues' for 2.9.2 [\#458](https://github.com/forcedotcom/sfdx-scanner/pull/458)
+
 ## [v2.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.0) (07-21-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.2...v2.10.0)
@@ -21,6 +42,7 @@ lang: en
 - Engine for scanner is not working if I specify pmd for Apex classes [\#442](https://github.com/forcedotcom/sfdx-scanner/issues/442)
 - @W-8241107@ Specifying "--engine pmd" finds zero violations [\#260](https://github.com/forcedotcom/sfdx-scanner/issues/260)
 - @W-8063535@ Define PMD min severity [\#308](https://github.com/forcedotcom/sfdx-scanner/issues/308)
+- \[Feature\] Allow scanner:run to fail automated builds \#171 [\#374](https://github.com/forcedotcom/sfdx-scanner/issues/374)
 
 **Merged pull requests:**
 
