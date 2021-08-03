@@ -239,6 +239,9 @@ jobs:
     <<: *defaults
     parameters:
       node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+        # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
+        # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
+        # ending in "-true".
         type: enum
         enum:
           - lts
@@ -249,7 +252,8 @@ jobs:
       - attach_workspace:
           at: ~/repo
 
-      # Install the appropriate version of node
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
       - when:
           condition:
             equal:
@@ -298,7 +302,8 @@ jobs:
       - attach_workspace:
           at: C:\repo
 
-      # Install the appropriate version of node
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
       - when:
           condition:
             equal:
