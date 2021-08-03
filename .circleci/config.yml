@@ -468,7 +468,6 @@ workflows:
       - release-management/release-package:
           requires:
             - validate-release-tag
-          github-release: true
           sign: true
           tag: latest-rc
           filters:
