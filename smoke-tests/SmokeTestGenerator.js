@@ -51,6 +51,9 @@ function generateScriptBody(isBash, delim) {
 
 	// Declare an array with all of the commands we intend to execute.
 	const commands = [
+		`echo "====== STARTING SMOKE TEST ======"`,
+		`echo "==== Make results directory ===="`,
+		isBash ? `mkdir -p smoke-test-results` : `if not exist smoke-test-results mkdir smoke-test-results || exit /b 1`,
 		`echo "==== List all rules w/out filters ===="`,
 		`${exeName} scanner:rule:list`,
 		`echo "==== Filter rules by engine ===="`,
@@ -79,10 +82,10 @@ function generateScriptBody(isBash, delim) {
 		`${exeName} scanner:rule:list`
 	];
 
-	// In a cmd script, you need to prepend everything with "call" in order to make sure that the script continues,
+	// In a cmd script, you need to prepend plugin commands with "call" in order to make sure that the script continues,
 	// and you need to postfix it with another snippet to make it actually exit when an error is encountered.
 	if (!isBash) {
-		for (let i = 1; i < commands.length; i += 2) {
+		for (let i = 4; i < commands.length; i += 2) {
 			commands[i] = "call " + commands[i] + " || exit /b 1";
 		}
 	}
