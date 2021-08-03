@@ -419,14 +419,6 @@ jobs:
                exit 1
             fi
 
-  # Purpose: Promote the version tagged `latest-rc` to `latest`.
-  promote-release-candidate:
-    <<: *defaults
-    steps:
-      - release-management/promote-package:
-          candidate: latest-rc
-          target: latest
-
 workflows:
   version: 2.1
   # Purpose: Run unit tests and smoke tests against a branch.
@@ -475,7 +467,7 @@ workflows:
       # Step 3: Publish the tag as a release candidate.
       - release-management/release-package:
           requires:
-            - setup
+            - validate-release-tag
           github-release: true
           sign: true
           tag: latest-rc
