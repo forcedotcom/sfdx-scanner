@@ -22,7 +22,7 @@ commands:
       - add_ssh_keys:
           fingerprints:
             # CircleCI deploy key, allows CircleCI to checkout code from Github.
-            - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
+            - "0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5"
       - checkout
 
   # Purpose: Update node to either LTS or Current version.
