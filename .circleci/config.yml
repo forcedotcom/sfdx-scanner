@@ -396,14 +396,14 @@ jobs:
 workflows:
   version: 2.1
   # Purpose: Run unit tests and smoke tests against a branch.
-  # Triggered by: Pull requests from any branch whose name is NOT `vX.Y.Z` where X, Y, and Z are numbers.
+  # Triggered by: Pull requests from any branch whose name is NOT `vX-Y-Z` where X, Y, and Z are numbers.
   test:
     jobs:
       # Step 1: Set up the test environment.
       - setup:
           filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /^v\d+\.\d+\.\d+/
+              ignore: /^v\d+-\d+-\d+/
       # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
       # step in Linux.
       - linux-unit-tests:
@@ -432,14 +432,14 @@ workflows:
           requires:
             - setup
   # Purpose: Publish a release based off of the specified branch.
-  # Triggered by: Pushes to branches that match the format `vX.Y.Z`, where X, Y, and Z are numbers.
+  # Triggered by: Pushes to branches that match the format `vX-Y-Z`, where X, Y, and Z are numbers.
   publish:
     jobs:
       # Step 1: Set up the publishing environment.
       - setup:
           filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              only: /^v\d+\.\d+\.\d+/
+              only: /^v\d+-\d+-\d+/
       # Step 2: Publish the branch as a release candidate.
       - release-management/release-package:
           requires:
