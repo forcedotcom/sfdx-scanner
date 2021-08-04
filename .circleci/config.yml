@@ -21,7 +21,7 @@ commands:
     steps:
       - add_ssh_keys:
           fingerprints:
-            # CircleCI deploy key, allows CircleCI to checkout code from Github.
+            # CircleCI deploy key (read/write), allows CircleCI to checkout code from Github.
             - "0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5"
       - checkout
 
@@ -527,5 +527,4 @@ workflows:
               # The values of the parameters will be appended to the jobs they create.
               # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
               node-version: [lts, current]
-
 
