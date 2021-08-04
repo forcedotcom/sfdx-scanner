@@ -21,8 +21,8 @@ commands:
     steps:
       - add_ssh_keys:
           fingerprints:
-            # CircleCI deploy key, allows CircleCI to checkout code from Github.
-            - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
+            # CircleCI deploy key (read/write), allows CircleCI to checkout code from Github.
+            - "0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5"
       - checkout
 
   # Purpose: Update node to either LTS or Current version.
@@ -393,8 +393,8 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
-  # Purpose: Verify that the tag about to be published was generated from the right base branch.
-  validate-release-tag:
+  # Purpose: Verify that the tag about to be published was generated from the right base branch (i.e. `release`).
+  verify-branch-of-origin:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -457,9 +457,9 @@ workflows:
               ignore: /.*/ # Ignore all branches.
             tags:
               only:
-                /^v.*/ # Include any tags starting with 'v'.
-      # Step 2: Verify that the tag to be released came from the correct branch.
-      - validate-release-tag:
+                /^v\d+\.\d+\.\d+-rc/ # Include any tags of the format `vX.Y.Z-rc`, where X, Y, and Z are numbers.
+      # Step 2: Verify that the tag we're about to publish was created from the correct branch (i.e. `release`).
+      - verify-branch-of-origin:
           requires:
             - setup
           filters:
@@ -467,8 +467,9 @@ workflows:
       # Step 3: Publish the tag as a release candidate.
       - release-management/release-package:
           requires:
-            - validate-release-tag
+            - verify-branch-of-origin
           sign: true
+          github-release: true
           tag: latest-rc
           filters:
             <<: *publishing_filters
@@ -526,5 +527,4 @@ workflows:
               # The values of the parameters will be appended to the jobs they create.
               # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
               node-version: [lts, current]
-
 
