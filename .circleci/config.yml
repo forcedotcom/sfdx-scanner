@@ -372,15 +372,14 @@ jobs:
     executor:
       name: win/default # executor type
       size: "medium"
+    working_directory: C:\repo
 
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            # CircleCI deploy key (read only), allows CircleCI to checkout code from Github.
-            # Workaround to ssh issue with windows-rc-test
-            - "35:eb:d0:d5:c2:7a:0a:7f:5d:c2:26:fa:5b:3c:ab:83"
-
-      - checkout
+      - run:
+          # The read/write ssh key is not recognized by windows. Use https clone to avoid this issue
+          name: checkout-branch
+          shell: bash.exe
+          command: git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" .
 
       # We want to run against the LTS version of node
       - update_node:
