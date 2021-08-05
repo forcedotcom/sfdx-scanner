@@ -5,6 +5,38 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.10.1005](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.1005) (08-05-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.10.0...v2.10.1005)
+
+### Release Summary
+
+* No new features or bug fixes
+* Only operational changes to release management
+
+**Merged pull requests:**
+
+- @W-9544986@: Releases now key off of branches instead of tags. [\#505](https://github.com/forcedotcom/sfdx-scanner/pull/505)
+- @W-9544986@: 2.10.1000, dev to release [\#504](https://github.com/forcedotcom/sfdx-scanner/pull/504)
+- @W-9544986@ Updating fingerprint for CircleCI [\#503](https://github.com/forcedotcom/sfdx-scanner/pull/503)
+- @W-9544986@: Renamed tasks, changed tag trigger regex. [\#502](https://github.com/forcedotcom/sfdx-scanner/pull/502)
+- @W-9544986@: 2.10.1000, dev to release [\#501](https://github.com/forcedotcom/sfdx-scanner/pull/501)
+- @W-9544986@: Removed github release creation from publishing job. [\#500](https://github.com/forcedotcom/sfdx-scanner/pull/500)
+- @W-9544986@: 2.10.1000, dev to release [\#499](https://github.com/forcedotcom/sfdx-scanner/pull/499)
+- @W-9698990@ Removing post install script from package.json [\#498](https://github.com/forcedotcom/sfdx-scanner/pull/498)
+- @W-9544986@: 2.10.1000, merging dev to release [\#497](https://github.com/forcedotcom/sfdx-scanner/pull/497)
+- @W-9544986@ Release Information for 2.10.1000 [\#496](https://github.com/forcedotcom/sfdx-scanner/pull/496)
+- @W-9544986@: updated npm-release-management orb to v4, and automated promotion job. [\#495](https://github.com/forcedotcom/sfdx-scanner/pull/495)
+- @W-9531479@: Added weekly smoke-test job, and parameterized the node … [\#493](https://github.com/forcedotcom/sfdx-scanner/pull/493)
+- @W-9625690@: Added some documentation to explain how cron syntax works. [\#491](https://github.com/forcedotcom/sfdx-scanner/pull/491)
+- @W-9668161@: Added tarball tests to CircleCI, refactored and renamed … [\#489](https://github.com/forcedotcom/sfdx-scanner/pull/489)
+- @W-9531823@: Replaced packaged-sanity job with windows-rc-test and li… [\#484](https://github.com/forcedotcom/sfdx-scanner/pull/484)
+- @W-9625690@: Bumping package.json and removing publishing mechanisms. [\#483](https://github.com/forcedotcom/sfdx-scanner/pull/483)
+- @W-9625690@: Enabling PagerDuty alerts for heartbeat action. [\#481](https://github.com/forcedotcom/sfdx-scanner/pull/481)
+- @W-9625690@: Added github action to run heartbeat script against production plugin. [\#478](https://github.com/forcedotcom/sfdx-scanner/pull/478)
+- @W-9603774@ Update release-information.md to reflect correct 'Closed Issues' for 2.9.2 [\#458](https://github.com/forcedotcom/sfdx-scanner/pull/458)
+
+
 ## [v2.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.0) (07-21-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.9.2...v2.10.0)
@@ -21,6 +53,7 @@ lang: en
 - Engine for scanner is not working if I specify pmd for Apex classes [\#442](https://github.com/forcedotcom/sfdx-scanner/issues/442)
 - @W-8241107@ Specifying "--engine pmd" finds zero violations [\#260](https://github.com/forcedotcom/sfdx-scanner/issues/260)
 - @W-8063535@ Define PMD min severity [\#308](https://github.com/forcedotcom/sfdx-scanner/issues/308)
+- \[Feature\] Allow scanner:run to fail automated builds \#171 [\#374](https://github.com/forcedotcom/sfdx-scanner/issues/374)
 
 **Merged pull requests:**
 

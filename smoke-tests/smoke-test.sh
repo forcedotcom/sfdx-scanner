@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-generated on Fri Jul 16 2021
+# Auto-generated on Thu Jul 29 2021
 # This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
 # of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
 # the plugin is approximately stable.
@@ -7,6 +7,9 @@
 # FROM THE PROJECT ROOT!
 set -e
 EXE_NAME=$1
+echo "====== STARTING SMOKE TEST ======"
+echo "==== Make results directory ===="
+mkdir -p smoke-test-results
 echo "==== List all rules w/out filters ===="
 $EXE_NAME scanner:rule:list
 echo "==== Filter rules by engine ===="

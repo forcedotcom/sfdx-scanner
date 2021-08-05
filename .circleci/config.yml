@@ -10,39 +10,125 @@ defaults: &defaults
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
-  release-management: salesforce/npm-release-management@3.5.1
   gradle: circleci/gradle@2.2.0
   node: circleci/node@4.5.1
+  release-management: salesforce/npm-release-management@4
 
 
 commands:
+  # Purpose: Checkout the code from github
   auth_and_checkout:
     steps:
       - add_ssh_keys:
           fingerprints:
-            # CircleCI deploy key, allows CircleCI to checkout code from Github.
-            - "63:74:04:09:64:97:7e:c6:9b:45:c0:5e:d3:7e:40:ed"
+            # CircleCI deploy key (read/write), allows CircleCI to checkout code from Github.
+            - "0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5"
       - checkout
-  windows_install_yarn:
+
+  # Purpose: Update node to either LTS or Current version.
+  update_node:
+    parameters:
+      os:
+        default: linux
+        description: The OS being tested against
+        enum:
+          - linux
+          - windows
+        type: enum
+      lts:
+        description: Should the LTS version of node be installed. If false, Current will be installed instead.
+        type: boolean
+        default: true
+    steps:
+      # For Linux, we can just use the node orb.
+      - when:
+          condition:
+            equal:
+              - linux
+              - << parameters.os >>
+          steps:
+            - node/install:
+                install-npm: false
+                lts: << parameters.lts >>
+      # For Windows, we need to use a custom bash script.
+      - when:
+          condition:
+            equal:
+              - windows
+              - << parameters.os >>
+          steps:
+            - run:
+                name: "Install node"
+                # This script must explicitly be run in bash.
+                shell: bash.exe
+                command: |
+                  NODE_ALIAS=$(if << parameters.lts >>; then echo lts; else echo current; fi)
+                  .circleci/windows-node-upgrade.sh ${NODE_ALIAS}
+
+            # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
+            - run:
+                name: "Install Yarn"
+                shell: bash.exe
+                command: npm install -g yarn
+      # Regardless of OS, we want to log the version of Node we're using post-upgrade.
+      - run: node -v
+
+  # Purpose: Performs all of the follow-up actions after unit tests are executed. E.g., storing results and artifacts.
+  process_unit_test_results:
+    steps:
+      # Store test results and artifacts
+      - gradle/collect_test_results:
+          reports_path: pmd-cataloger/build/reports/
+          test_results_path: pmd-cataloger/build/test-results/
+      - store_test_results:
+          path: test-results
+      - store_artifacts: # upload test coverage as artifact.
+          path: test-coverage
+
+  # Purpose: Install SFDX, and the locally-built tarball of the plugin.
+  install_local_tarball:
+    parameters:
+      shell:
+        description: The shell executable to use
+        type: string
+      dir-uri:
+        description: The directory for the local install
+        type: string
     steps:
       - run:
-          name: "Install yarn"
-          shell: bash.exe
-          command: npm install -g yarn
+          name: "Install SFDX and tarball"
+          shell: << parameters.shell >>
+          command: |
+            npm install -g sfdx-cli
+            # We need to determine the name of the tarball
+            SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+            # We also ought to determine where we are, using the parameter
+            DIR=<< parameters.dir-uri >>
+            # Pipe in a 'y' to simulate agreeing to isntall an unsigned plugin. Use a URI of the file's full path.
+            echo y | sfdx plugins:install "file://${DIR}/${SFDC_TARBALL}"
+
+  # Purpose: Install SFDX, and the release candidate version of the plugin.
+  install_release_candidate:
+    steps:
+      - run:
+          name: "Install SFDX cli"
+          command: npm install -g sfdx-cli
+
+      - run:
+          name: "Install release candidate"
+          command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
 
 jobs:
-  build:
+  # Purpose: Performs all of the necessary setup for subsequent jobs to work. In general, all workflows should probably
+  # start with this job.
+  setup:
     <<: *defaults
     steps:
       - auth_and_checkout
 
-      # We want our unit tests to run with the lts version of node.
-      - node/install:
-          install-npm: false
-          lts: true
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: linux
 
       # Download and cache dependencies
       - restore_cache:
@@ -51,8 +137,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # Do the necessary build steps for running unit tests
       - run: yarn --ignore-scripts
       - run: yarn build
+
+      # Do the necessary build steps for running tarball tests
+      - run: npm pack
 
       - save_cache:
           paths:
@@ -63,82 +153,66 @@ jobs:
           root: ~/repo
           paths: .
 
-      # UNIT TESTS
+  # Purpose: Runs the unit tests in a Linux environment.
+  linux-unit-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: linux
+
+      # Unit tests
       - run:
           name: test
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
-      # For now, smoke tests are run here against the raw code. When we add tarball testing, we can remove this.
-      - run:
-          name: "smoke tests"
-          command: |
-            mkdir smoke-test-results
-            smoke-tests/smoke-test.sh bin/run
-
+      # Linting
       - run:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
           when: always
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
+      - process_unit_test_results
 
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
-
-      - store_artifacts:
-          path: smoke-test-results
-  windows-build:
+  # Purpose: Runs the unit tests in a Windows environment.
+  windows-unit-tests:
     executor:
       name: win/default # executor type
       size: "medium"
-      # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
       shell: bash.exe
     working_directory: C:\repo
     steps:
       - attach_workspace:
           at: C:\repo
 
-      - run:
-          name: "Upgrade node to LTS"
-          # The script has to be run in bash.
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
+      # We'll want to use the LTS version of node.
+      - update_node:
+          os: windows
 
       - run: mkdir test-results
 
-      # UNIT TESTS
+      # Unit tests
       - run:
           name: test
+          # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+          shell: bash.exe
           command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
           when: always
 
+      # Linting
       - run:
           name: eslint
           command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          shell: bash.exe
           when: always
 
-      - gradle/collect_test_results:
-          reports_path: pmd-cataloger/build/reports/
-          test_results_path: pmd-cataloger/build/test-results/
+      - process_unit_test_results
 
-      - store_test_results:
-          path: test-results
-
-      - store_artifacts: # upload test coverage as artifact.
-          path: test-coverage
-
+  # Purpose: Runs the plugin against itself, to make sure we're following our own rules.
   self-evaluation:
     <<: *defaults
     steps:
@@ -146,10 +220,6 @@ jobs:
           at: ~/repo
 
       - run: mkdir test-results
-
-      - run:
-          name: "list rules"
-          command: bin/run scanner:rule:list
 
       - run:
           name: "self-evaluate"
@@ -164,72 +234,163 @@ jobs:
       - store_artifacts:
           path: test-results
 
-  unpackaged-sanity:
+  # Purpose: In a Linux environment, install the locally-built tarball and run the smoke test script against it.
+  # This helps ensure the overall stability of the plugin prior to publishing.
+  linux-tarball-test:
+    <<: *defaults
+    parameters:
+      node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+        # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
+        # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
+        # ending in "-true".
+        type: enum
+        enum:
+          - lts
+          - current
+        default: lts
+        description: Which version of node should be used.
+    steps:
+      - attach_workspace:
+          at: ~/repo
+
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
+
+      # Set up the plugin
+      - install_local_tarball:
+          dir-uri: "$(pwd)"
+          # This is the default Linux bash shell.
+          shell: "#/bin/bash -eo pipefail"
+
+      # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
+      - run:
+          name: "smoke test"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
+      - store_artifacts:
+          path: smoke-test-results
+
+  # Purpose: In a Windows environment, install the locally-built tarball and run the smoke test script against it.
+  # This helps ensure the overall stability of the plugin prior to publishing.
+  windows-tarball-test:
+    executor:
+      name: win/default # executor type
+      size: "medium"
+    parameters:
+      node-version: *node_version_param
+    working_directory: C:\repo
+    steps:
+      # Commands are run in a Windows VM environment
+      - attach_workspace:
+          at: C:\repo
+
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: false
+
+      # Set up the plugin
+      - install_local_tarball:
+          # Note that the URI we provide does NOT start with `C:`.
+          dir-uri: "/repo"
+          # This script needs to be run with bash, or it won't work.
+          shell: bash.exe
+
+      # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
+      - run:
+          name: "smoke test"
+          command: smoke-tests\smoke-test.cmd sfdx
+
+      # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
+      - store_artifacts:
+          path: smoke-test-results
+
+  # Purpose: In a Linux environment, install the published version of the plugin whose tag is `latest-rc`, then run the
+  # smoke test script against it. This helps ensure the overall stability of a release candidate, so we can confidently
+  # promote it to an actual release.
+  linux-rc-test:
+    <<: *defaults
+    steps:
+      - auth_and_checkout
+
+      # We want our unit tests to run with the lts version of node.
+      - update_node:
+          os: linux
+
+      # Prepare the release candidate for running.
+      - install_release_candidate
+
+      - run:
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
+          name: "Packaged sanity test"
+          command: smoke-tests/smoke-test.sh sfdx
+
+      # Upload an artifact for the results, so they're visible without failing the tests
+      - store_artifacts:
+          path: smoke-test-results
+
+  # Purpose: In a Windows environment, install the published version of the plugin whose tag is `latest-rc`, then run the
+  # smoke test script against it. This helps ensure the overall stability of a release candidate, so we can confidently
+  # promote it to an actual release.
+  windows-rc-test:
     executor:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
 
     steps:
-      # Commands are run in a Windows virtual machine environment
-      - attach_workspace:
-          at: C:\repo
-
       - run:
-          name: "Upgrade node to LTS"
+          # The read/write ssh key is not recognized by windows. Use https clone to avoid this issue
+          name: checkout-branch
           shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
+          command: git clone "https://github.com/forcedotcom/sfdx-scanner.git" --branch "$CIRCLE_BRANCH" .
 
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
+      # We want to run against the LTS version of node
+      - update_node:
+          os: windows
 
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
-
-      - run: md smoke-test-results
-
-      - run:
-          # Run through our sanity test script against a local build of the plugin (using `bin\run.cmd`). If all of these
-          # operations succeed, then we can reasonably assume that the plugin is stable.
-          name: "Unpackaged sanity test"
-          command: smoke-tests\smoke-test.cmd bin\run.cmd
-
-      # Upload an artifact for the results, so they're visible without failing the test.
-      - store_artifacts:
-          path: smoke-test-results
-
-  packaged-sanity:
-    executor:
-      name: win/default # executor type
-      size: "medium"
-
-    steps:
-      - auth_and_checkout
+      # Prepare the release candidate for running.
+      - install_release_candidate
 
       - run:
-          name: "Upgrade node to LTS"
-          shell: bash.exe
-          command: .circleci/windows-node-upgrade.sh lts
-
-      # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
-      - windows_install_yarn
-
-      # Log the version of node we're using after the upgrade.
-      - run: node -v
-
-      - run:
-          name: "Install sfdx cli"
-          shell: cmd.exe
-          command: npm install -g sfdx-cli
-
-      - run:
-          name: "Install plugin"
-          shell: cmd.exe
-          command: echo y | sfdx plugins:install --force @salesforce/sfdx-scanner
-
-      - run:
-          # Run through our sanity test script against the published version of the plugin, which we installed in the
-          # previous step. If all of these pass, we can assume the plugin is stable.
+          # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
+          # assume that the plugin is stable.
           name: "Packaged sanity test"
           command: smoke-tests\smoke-test.cmd sfdx
 
@@ -237,101 +398,114 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
-  auto-merge-release:
-    <<: *defaults
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e2:99:c9:bf:d6:40:04:d6:56:48:05:eb:1a:41:f6:a4"
-      - auth_and_checkout
-      - run:
-          name: "Merge release"
-          command: |
-            git config user.email "isv.swat@salesforce.com"
-            git config user.name "$CIRCLE_USERNAME"
-            git checkout dev
-            git pull origin dev
-            git merge release --commit --no-edit -m "Automerge release to dev"
-            git push origin dev
-  publish-latest:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/repo
-
-      - run:
-          name: Verify branch of origin
-          command: |
-            if [ -z "$CIRCLE_TAG" ]
-            then
-               # If we're not actually working from a tag, then just exit. We only want to deploy tags.
-               exit 1
-            fi
-            # For these two exports, the git command is logging out every local and remote branch that contains the tag.
-            # That gets piped into a grep command so we can look for specific branches in the results.
-            export CONTAINED_IN_RELEASE=$(git branch -a --contains tags/$CIRCLE_TAG|grep release)
-            export CONTAINED_IN_MASTER=$(git branch -a --contains tags/$CIRCLE_TAG|grep master)
-            # Our typical flow is feature branch -> dev -> release -> master. We want to publish tags based on release.
-            # So we'll abort if the tag isn't present in release, or if it's present in master.
-            if [ -z "$CONTAINED_IN_RELEASE" ] || [ -n "$CONTAINED_IN_MASTER" ]
-            then
-               exit 1
-            fi
-
-      - run:
-          command: npm run prepack
-      # Update the path so that node modules installed by the release-management orb are found
-      # See https://discuss.circleci.com/t/how-to-add-a-path-to-path-in-circle-2-0/11554
-      - run: echo 'export PATH=$HOME/.config/yarn/global/node_modules/.bin:$PATH' >> $BASH_ENV
-      - release-management/sign:
-          # Fingerprint for sfdx-trust developer.salesforce.com
-          fingerprint: "C3:62:4A:98:74:67:F1:33:E9:F3:B9:74:55:C5:63:FE:49:E4:67:E8"
-      - release-management/publish:
-          access: public
-          tag: latest-rc
-          use_tarfile: true
-      - release-management/create-github-release
-
 workflows:
   version: 2.1
-  test-publish:
+  # Purpose: Run unit tests and smoke tests against a branch.
+  # Triggered by: Pull requests from any branch whose name is NOT `vX-Y-Z` where X, Y, and Z are numbers.
+  test:
     jobs:
-      - build:
+      # Step 1: Set up the test environment.
+      - setup:
+          filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
+            branches:
+              ignore: /^v\d+-\d+-\d+/
+      # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
+      # step in Linux.
+      - linux-unit-tests:
           filters:
-            # We want this to run against all tags and branches. Branches are inclusive by default, so we don't need to
-            # specify anything. But tags are exclusive by default, so we need to specify that all tags should be included.
-            tags:
-              only: /.*/
-      - windows-build:
+            <<: *testing_filters
           requires:
-            - build
-      - unpackaged-sanity:
+            - setup
+      - windows-unit-tests:
+          filters:
+            <<: *testing_filters
           requires:
-            - windows-build
+            - setup
+      - linux-tarball-test:
+          filters:
+            <<: *testing_filters
+          requires:
+            - setup
+      - windows-tarball-test:
+          filters:
+            <<: *testing_filters
+          requires:
+            - setup
       - self-evaluation:
-          requires:
-            - windows-build
-      - publish-latest:
-          # This job should only run after 'build' or 'self-evaluation' finishes successfully.
-          requires:
-            - build
-            - self-evaluation
           filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
-            branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
-      - packaged-sanity:
+            <<: *testing_filters
           requires:
-            - publish-latest
-          filters:
-            # We never want to publish branches, so we need to explicitly ignore all of them.
+            - setup
+  # Purpose: Publish a release based off of the specified branch.
+  # Triggered by: Pushes to branches that match the format `vX-Y-Z`, where X, Y, and Z are numbers.
+  publish:
+    jobs:
+      # Step 1: Set up the publishing environment.
+      - setup:
+          filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /.*/
-            # We want to publish any tags that are formatted vXXXX, since that's our semantic versioning syntax.
-            tags:
-              only:
-                /^v.*/
+              only: /^v\d+-\d+-\d+/
+      # Step 2: Publish the branch as a release candidate.
+      - release-management/release-package:
+          requires:
+            - setup
+          sign: true
+          github-release: true
+          tag: latest-rc
+          filters:
+            <<: *publishing_filters
+      # Step 3: Smoke test the release candidate on both Linux and Windows.
+      - linux-rc-test:
+          requires:
+            - release-management/release-package
+          filters:
+            <<: *publishing_filters
+      - windows-rc-test:
+          requires:
+            - release-management/release-package
+          filters:
+            <<: *publishing_filters
+      # Step 4: Promote the release candidate to a full release.
+      - release-management/promote-package:
+          candidate: latest-rc
+          target: latest
+          requires:
+            - linux-rc-test
+            - windows-rc-test
+          filters:
+            <<: *publishing_filters
+  # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
+  # Triggered by: Nothing. Runs automatically on a weekly cadence.
+  weekly-smoke-test:
+    triggers:
+      - schedule:
+          # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
+          # values can be specified with a comma-separated list. All times are UTC.
+          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
+          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
+          cron: "30 13 * * 1"
+          filters:
+            branches:
+              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
+              only: "dev"
+    jobs:
+      # Step 1: Run the setup task to create the testing environment.
+      - setup
+      # Step 2: Create matrices for the tarball jobs to run with both LTS and Current node.
+      - linux-tarball-test:
+          requires:
+            - setup
+          matrix:
+            # The values of the parameters will be appended to the jobs they create.
+            # So we'll get "linux-tarball-test-lts" and "linux-tarball-test-current"
+            parameters:
+              node-version: [lts, current]
+      - windows-tarball-test:
+          requires:
+            - setup
+          matrix:
+            parameters:
+              # The values of the parameters will be appended to the jobs they create.
+              # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
+              node-version: [lts, current]
+
