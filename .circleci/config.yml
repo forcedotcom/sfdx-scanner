@@ -374,7 +374,13 @@ jobs:
       size: "medium"
 
     steps:
-      - auth_and_checkout
+      - add_ssh_keys:
+          fingerprints:
+            # CircleCI deploy key (read only), allows CircleCI to checkout code from Github.
+            # Workaround to ssh issue with windows-rc-test
+            - "35:eb:d0:d5:c2:7a:0a:7f:5d:c2:26:fa:5b:3c:ab:83"
+
+      - checkout
 
       # We want to run against the LTS version of node
       - update_node:
