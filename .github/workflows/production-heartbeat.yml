@@ -33,6 +33,10 @@ jobs:
         id: scanner_install
         run: sfdx plugins:install @salesforce/sfdx-scanner
 
+      # === Log the installed plugins for easier debugging ===
+      - name: Log plugins
+        run: sfdx plugins
+
       # === Attempt to execute the smoke tests ===
       - name: Run smoke tests
         id: smoke_tests
