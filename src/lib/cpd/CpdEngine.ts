@@ -7,30 +7,61 @@ import {Config} from '../util/Config';
 import {ENGINE, LANGUAGE, Severity} from '../../Constants';
 import * as engineUtils from '../util/CommonEngineUtils';
 import CpdWrapper from './CpdWrapper';
-import {FILE_EXTS_TO_LANGUAGE} from '../../Constants';
 import {uxEvents} from '../ScannerEvents';
 import crypto = require('crypto');
+import * as EnvVariable from '../util/EnvironmentVariable';
 
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CpdEngine');
+const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
+
+//  CPD supported languages: [apex, java, vf, xml]
+const FileExtToLanguage: Map<string, LANGUAGE> = new Map([
+	// apex
+	['cls', LANGUAGE.APEX],
+	['trigger', LANGUAGE.APEX],
+	// java
+	['java', LANGUAGE.JAVA],
+	// vf
+	['component', LANGUAGE.VISUALFORCE],
+	['page', LANGUAGE.VISUALFORCE],
+	// xml
+	['xml', LANGUAGE.XML],
+]);
+
+
+// exported for visibility in tests
+export const CpdRuleName = 'copy-paste-detected';
+export const CpdRuleDescription = 'Identify duplicate code blocks.';
+export const CpdRuleCategory = 'Copy/Paste Detected';
+export const CpdInfoUrl = 'https://pmd.github.io/latest/pmd_userdocs_cpd.html#refactoring-duplicates';
+export const CpdViolationSeverity = Severity.LOW;
+export const CpdLanguagesSupported: LANGUAGE[] = [...new Set (FileExtToLanguage.values())];
 
 export class CpdEngine extends AbstractRuleEngine {
 
-	public readonly ENGINE_ENUM: ENGINE = ENGINE.CPD;
-	public readonly ENGINE_NAME: string = ENGINE.CPD.valueOf();
+	private readonly ENGINE_ENUM: ENGINE = ENGINE.CPD;
+	private readonly ENGINE_NAME: string = ENGINE.CPD.valueOf();
+
 
 	private minimumTokens: number;
 	private logger: Logger;
 	private config: Config;
-	private initialized: boolean;
-	private cpdCatalog: Catalog;
-	private validCPDLanguages: LANGUAGE[];
-	
-
+	private initialized = false;
 
 	public getName(): string {
 		return this.ENGINE_NAME;
+	}
+
+	public async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+		this.logger = await Logger.child(this.getName());
+		this.config = await Controller.getConfig();
+		this.minimumTokens = EnvVariable.getEnvVariableAsNumber(this.ENGINE_ENUM, EnvVariable.CONFIG_NAME.MINIMUM_TOKENS) || ( await this.config.getMinimumTokens(this.ENGINE_ENUM) );
+		this.initialized = true;
 	}
 
 	public getTargetPatterns(): Promise<TargetPattern[]> {
@@ -38,7 +69,25 @@ export class CpdEngine extends AbstractRuleEngine {
 	}
 
 	public getCatalog(): Promise<Catalog>{
-		return Promise.resolve(this.cpdCatalog);
+		const cpdCatalog = {
+			rules: [{
+				engine: this.ENGINE_NAME,
+				sourcepackage: this.ENGINE_NAME,
+				name: CpdRuleName,
+				description: CpdRuleDescription,
+				categories: [CpdRuleCategory],
+				rulesets: [],
+				languages: CpdLanguagesSupported,
+				defaultEnabled: true
+			}],
+			categories: [{
+				engine: this.ENGINE_NAME,
+				name: CpdRuleCategory,
+				paths: []
+			}],
+			rulesets: []
+		};
+		return Promise.resolve(cpdCatalog);
 	}
 
 	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
@@ -72,34 +121,47 @@ export class CpdEngine extends AbstractRuleEngine {
 		return results;
 	}
 
-	private sortPaths(targets: RuleTarget[]): Map<LANGUAGE, string[]> {
-		const languageToPaths = new Map();
 
+	private sortPaths(targets: RuleTarget[]): Map<LANGUAGE, string[]> {
+		const languageToPaths = new Map<LANGUAGE, string[]>();
+		const unmatchedPaths: string[] = [];
 		for (const target of targets) {
 			for (const path of target.paths) {
-				const i = path.lastIndexOf(".");
-				if (i === -1) {
-					uxEvents.emit('warning-always', `Target: '${path}' was not processed by CPD, no file extension found.`);
-					continue;
-				}
-				const ext = path.substr(i).toLowerCase();
-				if (FILE_EXTS_TO_LANGUAGE.has(ext)) {
-					if (this.validCPDLanguages.includes(FILE_EXTS_TO_LANGUAGE.get(ext))) {
-						const language = FILE_EXTS_TO_LANGUAGE.get(ext);
-						if (languageToPaths.has(language)) {
-							languageToPaths.get(language).push(path);	
-						} else {
-							languageToPaths.set(language, [path]);
-						}
-					} else {
-						uxEvents.emit('warning-always', `Target: '${path}' was not processed by CPD, language '${FILE_EXTS_TO_LANGUAGE.get(ext)}' not supported.`);
-					}	
-				} else {
-					uxEvents.emit('warning-always', `Target: '${path}' was not processed by CPD, file extension '${ext}' not supported.`);
+				if (!this.matchPathToLanguage(path, languageToPaths)) {
+					// If language could not be identified, note down the path
+					unmatchedPaths.push(path);
 				}
 			}
 		}
+
+		// Let user know about file paths that could not be matched
+		if (unmatchedPaths.length > 0) {
+			uxEvents.emit('info-verbose', eventMessages.getMessage('info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
+		}
+
 		return languageToPaths;
+	}
+
+	/**
+	 * Identify the language of a file using the file extension
+	 * @param path to be examined
+	 * @param languageToPaths map with entries of language to paths matched so far
+	 * @returns true if the language was identifed and false if not
+	 */
+	private matchPathToLanguage(path: string, languageToPaths: Map<LANGUAGE, string[]>): boolean {
+		const ext = path.slice(path.lastIndexOf(".") + 1);
+		if (ext) {
+			const language = FileExtToLanguage.get(ext.toLowerCase());
+			if (language && CpdLanguagesSupported.includes(language)) {
+				if (languageToPaths.has(language)) {
+					languageToPaths.get(language).push(path);
+				} else {
+					languageToPaths.set(language, [path]);
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private runLanguage(language: string, targetPaths: string[]): Promise<string>{
@@ -116,7 +178,7 @@ export class CpdEngine extends AbstractRuleEngine {
 
 
 	protected processStdOut(stdout: string): RuleResult[] {
-		let violations: RuleResult[] = [];
+		let ruleResults: RuleResult[] = [];
 
 		this.logger.trace(`Output received from CPD: ${stdout}`);
 
@@ -129,15 +191,15 @@ export class CpdEngine extends AbstractRuleEngine {
 
 			const duplications =  cpdJson.elements[0].elements;
 			if (duplications) {
-				violations = this.jsonToRuleResults(duplications);
+				ruleResults = this.jsonToRuleResults(duplications);
 			}
 		}
 
-		if (violations.length > 0) {
+		if (ruleResults.length > 0) {
 			this.logger.trace('Found rule violations.');
 		}
 
-		return violations;
+		return ruleResults;
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -160,11 +222,11 @@ export class CpdEngine extends AbstractRuleEngine {
 					column: occ.attributes.column,
 					endLine: occ.attributes.endline,
 					endColumn: occ.attributes.endcolumn,
-					ruleName: this.cpdCatalog.rules[0].name,
-					severity: Severity.LOW,
+					ruleName: CpdRuleName,
+					severity: CpdViolationSeverity,
 					message: messages.getMessage("CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
-					category: this.cpdCatalog.categories[0].name,
-					url: 'https://pmd.github.io/latest/pmd_userdocs_cpd.html#refactoring-duplicates',
+					category: CpdRuleCategory,
+					url: CpdInfoUrl
 				};
 				occCount++;
 
@@ -186,52 +248,6 @@ export class CpdEngine extends AbstractRuleEngine {
 		return ruleResults;
 	}
 
-	
-	public async init(): Promise<void> {
-		if (this.initialized) {
-			return;
-		}
-		this.logger = await Logger.child(this.getName());
-		this.config = await Controller.getConfig();
-		this.initialized = true;
-		this.logger = await Logger.child(this.getName())
-
-		this.cpdCatalog = {
-			rules: [{
-				engine: this.ENGINE_ENUM.valueOf(),
-				sourcepackage: this.ENGINE_ENUM.valueOf(),
-				name: 'copy-paste-detected',
-				description: 'Identify duplicate code blocks.',
-				categories: ['Copy/Paste Detected'],
-				rulesets: [],
-				languages: await this.getLanguages(),
-				defaultEnabled: true
-			}],
-			categories: [{
-				engine: this.ENGINE_ENUM.valueOf(),
-				name: 'Copy/Paste Detected',
-				paths: []
-			}],
-			rulesets: []
-		};
-
-		this.minimumTokens = await this.config.getMinimumTokens(this.ENGINE_ENUM);
-		this.initialized = true;
-		this.validCPDLanguages = [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.ECMASCRIPT, LANGUAGE.VISUALFORCE, LANGUAGE.XML];
-	}
-
-	private async getLanguages(): Promise<string[]> {
-		const languages: Set<string> = new Set();
-		for (const pattern of await this.config.getTargetPatterns(this.ENGINE_ENUM)){
-			const ext = pattern.substr(pattern.lastIndexOf(".")).toLowerCase();
-			if (FILE_EXTS_TO_LANGUAGE.has(ext)) {
-				languages.add(FILE_EXTS_TO_LANGUAGE.get(ext));
-			}
-		}
-		return Array.from(languages);
-	}
-
-
 	public matchPath(path: string): boolean {
 		this.logger.trace(`Engine CPD does not support custom rules: ${path}`);
 		return false;
@@ -250,7 +266,5 @@ export class CpdEngine extends AbstractRuleEngine {
 	public getNormalizedSeverity(severity: number): Severity{
 		return severity;
 	}
-
-
 
 }

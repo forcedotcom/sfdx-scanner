@@ -32,8 +32,8 @@ export default class CpdWrapper extends CommandLineSupport {
 		this.initialized = true;
 	}
 
-	protected async buildClasspath(): Promise<string[]> {
-		return [`${PMD_LIB}/*`];
+	protected buildClasspath(): Promise<string[]> {
+		return Promise.resolve([`${PMD_LIB}/*`]);
 	}
 
 	protected async buildCommandArray(): Promise<[string, string[]]> {
