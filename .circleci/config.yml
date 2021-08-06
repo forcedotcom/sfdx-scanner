@@ -458,7 +458,7 @@ workflows:
       # Step 2: Publish the branch as a release candidate.
       - release-management/release-package:
           requires:
-            - setup
+            - validate-candidate-branch
           sign: true
           github-release: true
           tag: latest-rc
