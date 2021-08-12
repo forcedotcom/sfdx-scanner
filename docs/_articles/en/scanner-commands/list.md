@@ -9,18 +9,36 @@ Lists all the rules available in the catalog. You can filter the output to view 
 ## Usage
 
 ```bash
-$ sfdx scanner:rule:list [-c <array>] [-r <array>] [-l <array>] [--verbose] [--json] 
+  $ sfdx scanner:rule:list [-c <array>] [-r <array>] [-l <array>] [-e <array>] 
+  [--verbose] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 ```
   
 ## Options
 
 ```bash
-  -c, --category=category 	Select rules by category. Enter multiple values as a comma-separated list.
-  -l, --language=language 	Select rules by language. Enter multiple values as a comma-separated list.
-  -r, --ruleset=ruleset 	[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.
-  --json 			Format output as json
-  --verbose 			Emit additional command output to stdout
+OPTIONS
+  -c, --category=category
+      categories to filter list by
 
+  -e, --engine=engine
+      engine(s) to filter list by
+
+  -l, --language=language
+      language(s) to filter list by
+
+  -r, --ruleset=ruleset
+      [deprecated] ruleset(s) to filter list by
+
+  --json
+      format output as json
+
+  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATA
+  L)
+      [default: warn] logging level for this command invocation
+
+  --verbose
+      emit additional command output to stdout
 ```
   
 ## Additional Notes
