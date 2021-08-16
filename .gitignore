@@ -82,6 +82,10 @@ typings/
 # Output of 'npm pack'
 *.tgz
 
+# Recommended by npm-release-management orb
+*.sig
+package.json.bak
+
 # Yarn Integrity file
 .yarn-integrity
 
