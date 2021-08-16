@@ -67,7 +67,8 @@ const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: ENGINE.CPD,
 			targetPatterns: [
-				"**/*.cls","**/*.page","**/*.component","**/*.trigger"
+				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
+				"!**/node_modules/**","!**/*-meta.xml"
 			],
 			disabled: true,
 			minimumTokens: 100

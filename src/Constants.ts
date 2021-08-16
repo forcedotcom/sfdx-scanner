@@ -89,21 +89,5 @@ export enum Severity {
 	HIGH = 1
 }
 
-//  CPD supported languages: [apex, ecmascript, java, vf, xml]
-export const FILE_EXTS_TO_LANGUAGE: Map<string, LANGUAGE> = new Map([
-	// apex
-	['.cls', LANGUAGE.APEX],
-	['.trigger', LANGUAGE.APEX],
-	// java
-	['.java', LANGUAGE.JAVA],
-	// ecmascript
-	['.js', LANGUAGE.ECMASCRIPT],
-	// vf
-	['.component', LANGUAGE.VISUALFORCE],
-	['.page', LANGUAGE.VISUALFORCE],
-	// xml
-	['.xml', LANGUAGE.XML],
-]);
-
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src
 export const PMD_LIB = path.join(__dirname, '..', 'dist', 'pmd', 'lib');
