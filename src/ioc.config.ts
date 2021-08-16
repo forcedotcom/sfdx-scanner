@@ -12,6 +12,7 @@ import {CustomPmdEngine, PmdEngine} from './lib/pmd/PmdEngine';
 import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
 import {ProdOverrides, Services} from './Constants';
+import {CpdEngine} from "./lib/cpd/CpdEngine";
 
 function setupProd(): void {
 	// This method may be called more than once in unit test scenarios where
@@ -37,6 +38,7 @@ export function registerAll(): void {
 		container.registerSingleton(Services.RuleEngine, TypescriptEslintEngine);
 		container.registerSingleton(Services.RuleEngine, CustomEslintEngine);
 		container.registerSingleton(Services.RuleEngine, RetireJsEngine);
+		container.registerSingleton(Services.RuleEngine, CpdEngine);
 		container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 		container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
 	}
