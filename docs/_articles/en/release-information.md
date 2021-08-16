@@ -5,6 +5,28 @@ lang: en
 
 ### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
 
+## [v2.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.11.0) (08-18-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.10.1005...v2.11.0)
+
+### Release Summary
+
+* Support for PMD Copy Paste Detector engine
+
+**Closed issues:**
+
+- CPD Scan [\#378](https://github.com/forcedotcom/sfdx-scanner/issues/378)
+
+**Merged pull requests:**
+
+- @W-9106321@, @W-9729358@, Implementing CPD Engine for CLI Scanner [\#524](https://github.com/forcedotcom/sfdx-scanner/pull/524)
+- @W-9729358@  Documentation for CPD Engine [\#523](https://github.com/forcedotcom/sfdx-scanner/pull/523)
+- @W-9729358@ Make CPD engine production ready [\#522](https://github.com/forcedotcom/sfdx-scanner/pull/522)
+- @W-9750680@ Bump path-parse from 1.0.6 to 1.0.7 [\#521](https://github.com/forcedotcom/sfdx-scanner/pull/521)
+- @W-9710226@: Added better guardrails for publishing, more informative heartbeat, and more comprehensive gitignore. [\#520](https://github.com/forcedotcom/sfdx-scanner/pull/520)
+- @W-9717770@: Added manual trigger option for heartbeat action. [\#519](https://github.com/forcedotcom/sfdx-scanner/pull/519)
+
+
 ## [v2.10.1005](https://github.com/forcedotcom/sfdx-scanner/tree/v2.10.1005) (08-05-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.10.0...v2.10.1005)
