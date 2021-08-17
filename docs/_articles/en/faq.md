@@ -87,16 +87,5 @@ A: Execute CLI Scanner for CPD with `--verbose` option. Files that were not hand
 #### Q: I have a file pattern for one of the supported languages that doesn’t get picked up by CPD. How do I add the file pattern?
 A: As a first step, add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/Config.json`. If rerunning with the CPD engine option still doesn’t include the file, please create an issue for us and we’ll address it.
 
-#### Q: I’m seeing `java.lang.OutOfMemoryError: Java heap space` error with using the CPD engine. Is there a workaround?
-A: According to PMD’s help documentation, the CPD engine is known to be memory-hungry. Here are the steps they recommend to give more memory to Java.
-In OSx/Linux:
-```
-$ export PMD_JAVA_OPTS=-Xmx512m
-```
-In order to change the heap size under Windows, you’ll need to edit the batch file `cpd.bat` or set the environment variable `PMD_JAVA_OPTS` prior to invoking CPD engine with CLI Scanner:
-```
-> set PMD_JAVA_OPTS=-Xmx512m
-```
-
 #### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made the same group?
 A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD. We’ll address this with an internal fix in the future releases.

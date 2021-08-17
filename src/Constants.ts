@@ -56,7 +56,7 @@ export enum LANGUAGE {
 	JAVA = 'java',
 	JAVASCRIPT = 'javascript',
 	TYPESCRIPT = 'typescript',
-	VISUALFORCE = 'vf',
+	VISUALFORCE = 'visualforce',
 	ECMASCRIPT = 'ecmascript',
 	XML = 'xml'
 }
