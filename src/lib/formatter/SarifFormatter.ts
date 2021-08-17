@@ -214,6 +214,29 @@ class PMDSarifFormatter extends SarifFormatter {
 	}
 }
 
+
+ class CPDSarifFormatter extends SarifFormatter {
+	constructor(engine: string) {
+		super(engine,
+			{
+				tool: {
+					driver: {
+						name: ENGINE.CPD,
+						version: PMD_VERSION, /*CPD would use the same PMD version*/
+						informationUri: 'https://pmd.github.io/latest/pmd_userdocs_cpd.html',
+						rules: []
+					}
+				}
+			}
+		);
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	protected getLevel(ignored: RuleViolation): string {
+		return WARNING;
+	}
+}
+
 /**
  * Generates a run object for retire-js
  */
@@ -254,6 +277,8 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
 		return new PMDSarifFormatter(ENGINE.PMD);
 	} else if (engine === ENGINE.RETIRE_JS) {
 		return new RetireJsSarifFormatter(engine);
+	} else if (engine === ENGINE.CPD) {
+		return new CPDSarifFormatter(engine);
 	} else {
 		throw new Error(`Developer error. Unknown engine '${engine}'`);
 	}

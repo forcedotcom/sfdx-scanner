@@ -115,7 +115,7 @@ describe('LocalCatalog', () => {
 				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(2);
 				const mappedRuleGroups = mapRuleGroups(ruleGroups);
 				validatePmdRuleset(mappedRuleGroups, 'Braces', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdRuleset(mappedRuleGroups, 'Security', [LANGUAGE.APEX, LANGUAGE.VISUALFORCE]);
+				validatePmdRuleset(mappedRuleGroups, 'Security', ['apex', 'vf']);
 			});
 		});
 
