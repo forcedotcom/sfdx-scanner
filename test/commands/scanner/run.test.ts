@@ -766,7 +766,10 @@ describe('scanner:run', function () {
 				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 				const implicitMessages = violations[0].match(regex);
-				expect(implicitMessages || []).to.have.lengthOf(34, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// if this test is not passing and the output seems very large, 
+				// it is because the test reruns and the output accumulates so it is not the true length of the output
+				expect(implicitMessages || []).to.have.lengthOf(35, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// TODO: revisit test, should be improved because of issue above
 			});
 	});
 });

@@ -63,6 +63,10 @@
     - title:
         en: ESLint
       url: /architecture/eslint-engine
+    - title:
+        en: CPD
+      url: /architecture/cpd-engine
+
 - title:
     en: FAQ
   url: /faq
