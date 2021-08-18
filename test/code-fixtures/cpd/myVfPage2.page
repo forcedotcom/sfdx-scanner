@@ -1,0 +1,39 @@
+<apex:page standardController="Contact">
+  <!-- Page Header -->
+  <apex:sectionHeader title="Contact Edit"/>
+  <!-- Begin Form -->
+  <apex:form >
+    <apex:pageBlock title="Adding a new contact" mode="edit">
+      <apex:outputPanel styleClass="rules">
+        Sample text goes here<br />
+      </apex:outputPanel>
+      <!-- Fields -->
+      <apex:pageBlockSection columns="3" showHeader="true" title="Contents">
+        <apex:inputField value="{!contact.Status__c}" required="true" />
+        <apex:inputField value="{!contact.FirstName}" required="true" />
+        <apex:inputField value="{!contact.LastName}"  required="true" />
+        <apex:inputField value="{!contact.Email}"     required="true" />
+      </apex:pageBlockSection>
+      <!-- Button Section -->
+      <apex:pageBlockButtons location="bottom">
+        <apex:commandButton value="Add" action="{!save}" />
+      </apex:pageBlockButtons>
+    </apex:pageBlock>
+  </apex:form>
+  <!-- CSS -->
+  <style>
+    .logo {
+      float: right;
+      width: 5px;
+      margin: -5px 10px 1 3;
+    }
+    .rules {
+      color: blue;
+      font-size: 20px;
+      font-family: Courier;      
+      margin: 13px 1 13px 56px;
+      float: left;
+      width: 80%;
+    }
+  </style>
+</apex:page>

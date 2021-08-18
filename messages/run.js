@@ -85,6 +85,10 @@ module.exports = {
 		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
 
+	Use --engine to invoke engines that are not enabled by default.
+		E.g, $ sfdx scanner:run --target "/some/dir" --engine cpd
+			Executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages.
+
 	To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
 		E.g, $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 

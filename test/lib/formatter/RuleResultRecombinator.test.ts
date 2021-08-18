@@ -6,7 +6,7 @@ import path = require('path');
 import * as csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { ENGINE, PMD_VERSION } from '../../../src/Constants';
+import { AllowedEngineFilters, ENGINE, PMD_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
@@ -516,6 +516,29 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
+
+			it('Handles all the engines', async () => {
+				
+				const allEngines = AllowedEngineFilters.map(engine => engine.valueOf());
+				for (const engine of allEngines) {
+					const ruleResults: RuleResult[] = [{
+						engine: engine,
+						fileName: sampleFile1,
+						violations: [{
+							"line": 2,
+							"column": 11,
+							"severity": 2,
+							"message": "A generic message",
+							"ruleName": "rule-name",
+							"category": "category-name",
+							"url": "https://some/url.org"
+						}]
+					}];
+					await RuleResultRecombinator.recombineAndReformatResults(ruleResults, OUTPUT_FORMAT.SARIF, new Set([engine]));
+					// should throw an error if the engine was not handled
+				}
+					
+			})
 
 			it ('Run with no violations returns engines that were run', async () => {
 				const results = await (await RuleResultRecombinator.recombineAndReformatResults([], OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']))).results;

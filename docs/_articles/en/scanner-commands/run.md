@@ -11,65 +11,62 @@ You can specify the format of the output as XML, Junit, CSV or table. You can pr
 ## Usage
 
 ```bash
-$ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f 
-  csv|html|json|junit|sarif|table|xml] [-o <string>] [--normalize-severity] [--severity-threshold] [--tsconfig <string>] 
-  [--eslintconfig <string>] [--pmdconfig <string>] [--env <string>] [-v | 
-  --json] [--verbose] [--loglevel 
-  trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
+sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f 
+ csv|html|json|junit|sarif|table|xml] [-o <string>] [--tsconfig <string>] [--eslintconfig <string>] [--pmdconfig <string>] [--env <string>] [-s <integer> | undefined | [-v | --json]] [--normalize-severity] [--verbose] [--loglevel trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL]
 ```
   
 ## Options
 
 ```bash
-  -c, --category=category
-      categor(ies) of rules to run
+-c, --category=_category_
+ categor(ies) of rules to run
 
-  -e, --engine=engine
-      engine(s) to run
+ -e, --engine=_engine_
+ engine(s) to run
 
-  -f, --format=(csv|html|json|junit|sarif|table|xml)
-      format of results
+ -f, --format=(csv|html|json|junit|sarif|table|xml)
+ format of results
 
-  -o, --outfile=outfile
-      location of output file
+ -o, --outfile=_outfile_
+ location of output file
 
-  -r, --ruleset=ruleset
-      [deprecated] ruleset(s) of rules to run
+ -r, --ruleset=_ruleset_
+ [deprecated] ruleset(s) of rules to run
 
-  -t, --target=target
-      (required) location of source code
+ -s, --severity-threshold=_severity-threshold_
+ throws an error when violations of specific severity (or more severe) are detected, invokes 
+ --normalize-severity
 
-  -v, --violations-cause-error
-      [deprecated] throws an error when violations are detected
-      
-  -s, --severity-threshold
-      throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity
+ -t, --target=_target_
+ (required) location of source code
 
-  --normalize-severity
-  	  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity
+ -v, --violations-cause-error
+ [deprecated] throws an error when violations are detected
 
-  --env=env
-      JSON-formatted string, overrides ESLint's default environment variables
+ --env=_env_
+ JSON-formatted string, overrides ESLint's default environment variables
 
-  --eslintconfig=eslintconfig
-      location of eslintrc config to customize eslint engine
+ --eslintconfig=_eslintconfig_
+ location of eslintrc config to customize eslint engine
 
-  --json
-      format output as json
+ --json
+ format output as json
 
-  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATA
-  L)
-      [default: warn] logging level for this command invocation
+ --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
+ [default: warn] logging level for this command invocation
 
-  --pmdconfig=pmdconfig
-      location of PMD rule reference XML file to customize rule selection
+ --normalize-severity
+ A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine 
+ specific severity
 
-  --tsconfig=tsconfig
-      location of tsconfig.json file
+ --pmdconfig=_pmdconfig_
+ location of PMD rule reference XML file to customize rule selection
 
-  --verbose
-      emit additional command output to stdout
+ --tsconfig=_tsconfig_
+ location of tsconfig.json file
 
+ --verbose
+ emit additional command output to stdout
 
 ```
 
@@ -124,11 +121,18 @@ $ sfdx scanner:run --target "somefile.js" --violations-cause-error
 ```
 
 Use --engine to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
+
 In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
 ```bash
 $ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
 ```
 
+In another example, Scanner executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
+
+```bash
+$ sfdx scanner:run --target "/some/dir" --engine cpd
+ ```
+ 
 To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
 ```bash
 $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"

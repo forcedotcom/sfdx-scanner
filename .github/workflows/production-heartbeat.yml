@@ -1,5 +1,6 @@
 name: production-heartbeat
 on:
+  workflow_dispatch: # As per documentation, the colon is necessary even though no config is required.
   schedule:
     # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple values
     # can be specified with comma-separated lists. All times are UTC.
@@ -32,6 +33,10 @@ jobs:
       - name: Install Scanner Plugin
         id: scanner_install
         run: sfdx plugins:install @salesforce/sfdx-scanner
+
+      # === Log the installed plugins for easier debugging ===
+      - name: Log plugins
+        run: sfdx plugins
 
       # === Attempt to execute the smoke tests ===
       - name: Run smoke tests

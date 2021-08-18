@@ -76,3 +76,16 @@ A: Following table shows how the severity across all engines are normalized.
 | 2 (Moderate)        | 2       | 1      | 1          | 1                 | 2         |
 | 3 (Low)             | 3, 4, 5 |        |            |                   | 3
 
+## Questions about CPD Engine
+
+#### Q: What languages are supported by CPD in CLI Scanner?
+A: To begin with, CLI Scanner supports Apex, Java, Visualforce, and XML in CPD.
+
+#### Q: How do I know which files were not included by CPD execution?
+A: Execute CLI Scanner for CPD with `--verbose` option. Files that were not handled by CPD will be listed under this message: `Path extensions for the following files will not be processed by CPD` Note that files are first filtered by `targetPatterns` provided in `~/.sfdx-scanner/Config.json` file.
+
+#### Q: I have a file pattern for one of the supported languages that doesn’t get picked up by CPD. How do I add the file pattern?
+A: As a first step, add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/Config.json`. If rerunning with the CPD engine option still doesn’t include the file, please create an issue for us and we’ll address it.
+
+#### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made the same group?
+A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD. We’ll address this with an internal fix in the future releases.

@@ -118,6 +118,9 @@ commands:
           name: "Install release candidate"
           command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
 
+      - run:
+          name: "Log installed plugins"
+          command: sfdx plugins
 jobs:
   # Purpose: Performs all of the necessary setup for subsequent jobs to work. In general, all workflows should probably
   # start with this job.
@@ -340,6 +343,13 @@ jobs:
       - store_artifacts:
           path: smoke-test-results
 
+  # Purpose: Validate that this branch meets all of the criteria for an acceptable publishing candidate.
+  validate-candidate-branch:
+    <<: *defaults
+    steps:
+      - auth_and_checkout
+      - run: .circleci/validate-candidate-branch.sh ${CIRCLE_BRANCH}
+
   # Purpose: In a Linux environment, install the published version of the plugin whose tag is `latest-rc`, then run the
   # smoke test script against it. This helps ensure the overall stability of a release candidate, so we can confidently
   # promote it to an actual release.
@@ -408,7 +418,7 @@ workflows:
       - setup:
           filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /^v\d+-\d+-\d+/
+              ignore: /^v\d+-\d+-\d+$/
       # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
       # step in Linux.
       - linux-unit-tests:
@@ -440,15 +450,15 @@ workflows:
   # Triggered by: Pushes to branches that match the format `vX-Y-Z`, where X, Y, and Z are numbers.
   publish:
     jobs:
-      # Step 1: Set up the publishing environment.
-      - setup:
+      # Step 1: Validate that the branch is an acceptable candidate for publishing.
+      - validate-candidate-branch:
           filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              only: /^v\d+-\d+-\d+/
+              only: /^v\d+-\d+-\d+$/
       # Step 2: Publish the branch as a release candidate.
       - release-management/release-package:
           requires:
-            - setup
+            - validate-candidate-branch
           sign: true
           github-release: true
           tag: latest-rc
