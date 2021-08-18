@@ -19,6 +19,8 @@ lang: en
 
 **Merged pull requests:**
 
+- @W-9729358@ Fixing bugs detected in QA [\#526](https://github.com/forcedotcom/sfdx-scanner/pull/526)
+- @W-9764161@ 2.11 release notes [\#525](https://github.com/forcedotcom/sfdx-scanner/pull/525)
 - @W-9106321@, @W-9729358@, Implementing CPD Engine for CLI Scanner [\#524](https://github.com/forcedotcom/sfdx-scanner/pull/524)
 - @W-9729358@  Documentation for CPD Engine [\#523](https://github.com/forcedotcom/sfdx-scanner/pull/523)
 - @W-9729358@ Make CPD engine production ready [\#522](https://github.com/forcedotcom/sfdx-scanner/pull/522)
