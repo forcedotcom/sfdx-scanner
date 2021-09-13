@@ -7,7 +7,7 @@
 # FROM THE PROJECT ROOT!
 set -e
 EXE_NAME=$1
-echo "====== STARTING SMOKE TEST on FEATURE BRANCH NOT RELEASE======"
+echo "====== STARTING SMOKE TEST on OTHER FEATURE BRANCH NOT RELEASE======"
 echo "==== Make results directory ===="
 mkdir -p smoke-test-results
 echo "==== List all rules w/out filters ===="
