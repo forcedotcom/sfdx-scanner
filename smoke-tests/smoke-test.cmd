@@ -6,7 +6,7 @@ REM the plugin is approximately stable.
 REM DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/SmokeTestGenerator.js AND RERUN THAT SCRIPT
 REM FROM THE PROJECT ROOT!
 SET EXE_NAME=%1
-echo "====== STARTING SMOKE TEST ======"
+echo "====== STARTING SMOKE TEST ON FEATURE BRANCH NOT RELEASE======"
 echo "==== Make results directory ===="
 if not exist smoke-test-results mkdir smoke-test-results || exit /b 1
 echo "==== List all rules w/out filters ===="
