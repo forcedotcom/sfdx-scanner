@@ -19,6 +19,8 @@ jobs:
     steps:
       # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
       - uses: actions/checkout@v2
+        with:
+          ref: 'release'
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
