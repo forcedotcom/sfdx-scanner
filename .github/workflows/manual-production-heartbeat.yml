@@ -1,0 +1,58 @@
+name: manual-production-heartbeat
+on:
+  pull_request: # As per documentation, the colon is necessary even though no config is required.
+jobs:
+  manual-production-heartbeat:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately cancelled. This makes the jobs run to completion instead.
+      fail-fast: false
+      matrix:
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        node: ['lts/*']
+    runs-on: ${{ matrix.os.vm }}
+    steps:
+      # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
+      - uses: actions/checkout@v2
+        with:
+          ref: 'release'
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: mkdir smoke-test-results
+      # === Make three attempts to install sfdx through npm ===
+      - name: Install SFDX
+        id: sfdx_install
+        # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
+        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
+
+      # === Attempt to install the scanner plugin ===
+      - name: Install Scanner Plugin
+        id: scanner_install
+        run: sfdx plugins:install @salesforce/sfdx-scanner
+
+      # === Log the installed plugins for easier debugging ===
+      - name: Log plugins
+        run: sfdx plugins
+
+      # === Attempt to execute the smoke tests ===
+      - name: Run smoke tests
+        id: smoke_tests
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+
+      # === Upload the smoke-test-results folder as an artifact ===
+      - name: Upload smoke-test-results folder as artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: smoke-test-results-${{ runner.os }}
+          path: smoke-test-results
+
+      # === Report any failures ===
+      - name: Report failures
+        if: ${{ failure() }}
+        shell: bash
+        env:
+          # A link to this run
+          RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          echo THIS WAS A FAILURE
