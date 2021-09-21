@@ -40,6 +40,7 @@ jobs:
 
       - name: Install Scanner Plugin for Windows
         id: scanner_install_windows
+        timeout-minutes: 10
         if: matrix.os.vm == 'windows-2019'
         run: |
           $env:DEBUG='*'
