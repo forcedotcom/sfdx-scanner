@@ -30,13 +30,13 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
-        run: npm install -g sfdx-cli@7.117.0 || (sleep 60 && npm install -g sfdx-cli@7.117.0) || (sleep 300 && npm install -g sfdx-cli@7.117.0)
+        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
 
       # === Attempt to install the scanner plugin ===
       - name: Install Scanner Plugin for Ubuntu
         id: scanner_install_ubuntu
         if: matrix.os.vm == 'ubuntu-latest'
-        run: DEBUG=* sfdx plugins:install @salesforce/sfdx-scanner
+        run: DEBUG=* sfdx plugins:install @salesforce/analytics
 
       - name: Install Scanner Plugin for Windows
         id: scanner_install_windows
@@ -44,24 +44,24 @@ jobs:
         if: matrix.os.vm == 'windows-2019'
         run: |
           $env:DEBUG='*'
-          sfdx plugins:install @salesforce/sfdx-scanner
+          sfdx plugins:install @salesforce/analytics
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
         run: sfdx plugins
 
       # === Attempt to execute the smoke tests ===
-      - name: Run smoke tests
-        id: smoke_tests
-        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
-
-      # === Upload the smoke-test-results folder as an artifact ===
-      - name: Upload smoke-test-results folder as artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: smoke-test-results-${{ runner.os }}
-          path: smoke-test-results
+#      - name: Run smoke tests
+#        id: smoke_tests
+#        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+#
+#      # === Upload the smoke-test-results folder as an artifact ===
+#      - name: Upload smoke-test-results folder as artifact
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: smoke-test-results-${{ runner.os }}
+#          path: smoke-test-results
 
       # === Report any failures ===
       - name: Report failures
