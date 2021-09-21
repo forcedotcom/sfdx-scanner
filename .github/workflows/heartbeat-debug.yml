@@ -30,13 +30,13 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
-        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
+        run: npm install -g sfdx-cli@7.119.1 || (sleep 60 && npm install -g sfdx-cli@7.119.1) || (sleep 300 && npm install -g sfdx-cli@7.119.1)
 
       # === Attempt to install the scanner plugin ===
       - name: Install Scanner Plugin for Ubuntu
         id: scanner_install_ubuntu
         if: matrix.os.vm == 'ubuntu-latest'
-        run: DEBUG=* sfdx plugins:install @salesforce/analytics
+        run: DEBUG=* sfdx plugins:install @salesforce/sfdx-scanner
 
       - name: Install Scanner Plugin for Windows
         id: scanner_install_windows
@@ -44,7 +44,7 @@ jobs:
         if: matrix.os.vm == 'windows-2019'
         run: |
           $env:DEBUG='*'
-          sfdx plugins:install @salesforce/analytics
+          sfdx plugins:install @salesforce/sfdx-scanner
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
