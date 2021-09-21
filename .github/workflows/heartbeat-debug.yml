@@ -30,7 +30,7 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
-        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
+        run: npm install -g sfdx-cli@7.117.0 || (sleep 60 && npm install -g sfdx-cli@7.117.0) || (sleep 300 && npm install -g sfdx-cli@7.117.0)
 
       # === Attempt to install the scanner plugin ===
       - name: Install Scanner Plugin for Ubuntu
