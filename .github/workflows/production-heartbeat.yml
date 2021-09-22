@@ -67,7 +67,6 @@ jobs:
         run: |
           curl --request POST \
           --data '{"payload": {
-            "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
             "summary": "Production heartbeat script failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
@@ -78,6 +77,7 @@ jobs:
             "text": "Link to action execution"
           }],
           "event_action": "trigger",
+          "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
           "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
           }' \
           https://events.pagerduty.com/v2/enqueue
