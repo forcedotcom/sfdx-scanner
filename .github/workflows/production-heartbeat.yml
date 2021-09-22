@@ -6,7 +6,9 @@ on:
     # can be specified with comma-separated lists. All times are UTC.
     # So this expression means "run at 45 minutes past 1, 5, and 9 AM/PM UTC". The hours were chosen so employees on
     # US Central Time will start their day with results that are <2 hrs old.
-    - cron: '45 1,5,9,13,17,21 * * *'
+    #- cron: '45 1,5,9,13,17,21 * * *'
+    # NOTE: For testing purposes, we're using a different cron expression that means "run every 15 minutes"
+    - cron: '1,16,31,46 * * * *'
 jobs:
   production-heartbeat:
     strategy:
@@ -16,7 +18,8 @@ jobs:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
         node: ['lts/*']
     runs-on: ${{ matrix.os.vm }}
-    timeout-minutes: 60
+    # We're lowering the timeout to 10 minutes for testing purposes
+    timeout-minutes: 10
     steps:
       # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
       - uses: actions/checkout@v2
@@ -56,7 +59,7 @@ jobs:
 
       # === Report any failures ===
       - name: Report failures
-        if: ${{ failure() }}
+        if: ${{ failure() || cancelled() }}
         shell: bash
         env:
           # A link to this run
