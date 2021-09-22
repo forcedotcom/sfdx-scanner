@@ -67,6 +67,7 @@ jobs:
         run: |
           curl --request POST \
           --data '{"payload": {
+            "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
             "summary": "Production heartbeat script failed on ${{ runner.os }}",
             "source": "Github Actions",
             "severity": "critical",
