@@ -16,6 +16,7 @@ jobs:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
         node: ['lts/*']
     runs-on: ${{ matrix.os.vm }}
+    timeout-minutes: 60
     steps:
       # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
       - uses: actions/checkout@v2
