@@ -3,7 +3,29 @@ title: Release Information
 lang: en
 ---
 
-### To update the plugin, please follow the linked  [instructions](./en/getting-started/install/#upgrade-plug-in).
+### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
+
+## [v2.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.12.0) (09-29-2021)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.11.0...v2.12.0)
+
+### Release Summary
+
+* Updated PMD to 6.38.0
+
+**Merged pull requests:**
+
+- @W-9930749@: Reverting the heartbeat scheduling and timeout to the de… [\#546](https://github.com/forcedotcom/sfdx-scanner/pull/546)
+- @W-9930749@: Fixing error in dedup key. [\#545](https://github.com/forcedotcom/sfdx-scanner/pull/545)
+- @W-9930749@: Added dedup key to Github action. [\#544](https://github.com/forcedotcom/sfdx-scanner/pull/544)
+- @W-9930749@: Cancelled, i.e. timed-out, heartbeat should now cause pa… [\#543](https://github.com/forcedotcom/sfdx-scanner/pull/543)
+- @W-9930749@: Added a 60-minute timeout to the heartbeat action. [\#542](https://github.com/forcedotcom/sfdx-scanner/pull/542)
+- @W-9930749@: Added a 60-minute timeout to the heartbeat action. [\#540](https://github.com/forcedotcom/sfdx-scanner/pull/540)
+- @W-9846051@: Github Action heartbeat script now runs against release … [\#536](https://github.com/forcedotcom/sfdx-scanner/pull/536)
+- @W-9879038@: Updated PMD to 6.38.0. [\#534](https://github.com/forcedotcom/sfdx-scanner/pull/534)
+- @W-9791463@: Updated RetireJS to 2.2.5, and updated locally-stored vu… [\#533](https://github.com/forcedotcom/sfdx-scanner/pull/533)
+- @W-9879056@: Publishing can now only happen on branches named v2-X-Y,… [\#532](https://github.com/forcedotcom/sfdx-scanner/pull/532)
+
 
 ## [v2.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.11.0) (08-18-2021)
 
