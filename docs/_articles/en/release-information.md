@@ -11,7 +11,7 @@ lang: en
 
 ### Release Summary
 
-* Updated PMD to 6.38.0
+* Updated PMD to 6.38.0 and RetireJS to 2.2.5
 
 **Merged pull requests:**
 
