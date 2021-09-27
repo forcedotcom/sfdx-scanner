@@ -491,9 +491,9 @@ workflows:
       - schedule:
           # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
           # values can be specified with a comma-separated list. All times are UTC.
-          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
-          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
-          cron: "30 13 * * 1"
+          # So this expression means to run at 13:30 UTC every day. This time was chosen because it corresponds to
+          # 8:30AM CDT, meaning that any issues will be surfaced before start of business.
+          cron: "30 13 * * *"
           filters:
             branches:
               # Having this run against all branches would be bedlam, so we'll have it run just against dev.
