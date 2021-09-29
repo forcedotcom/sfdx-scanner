@@ -6,9 +6,9 @@ set -e
 SCANNER_BRANCH=$1
 
 # First, we need to make sure that the name of the branch matches the pattern we've established.
-# i.e., `vX-Y-Z`, where X, Y, and Z are numbers.
+# i.e., `v2-X-Y`, where X and Y are numbers.
 # Note: [[:digit:]] is the bash-equivalent of the \d special character.
-[[ ${SCANNER_BRANCH} =~ ^v[[:digit:]]+-[[:digit:]]+-[[:digit:]]+$ ]] || (echo "Branch must be of format 'vX-Y-Z', where X, Y, and Z are numbers" && exit 1)
+[[ ${SCANNER_BRANCH} =~ ^v2-[[:digit:]]+-[[:digit:]]+$ ]] || (echo "Branch must be of format 'v2-X-Y', where X and Y are numbers" && exit 1)
 
 # Next, we need to make sure that the branch's name matches the version defined in the package.json. Do that by...
 # - Logging the package.json with `cat`
