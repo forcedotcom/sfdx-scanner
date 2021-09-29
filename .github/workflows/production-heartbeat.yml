@@ -16,9 +16,12 @@ jobs:
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
         node: ['lts/*']
     runs-on: ${{ matrix.os.vm }}
+    timeout-minutes: 60
     steps:
       # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
       - uses: actions/checkout@v2
+        with:
+          ref: 'release'
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -53,7 +56,7 @@ jobs:
 
       # === Report any failures ===
       - name: Report failures
-        if: ${{ failure() }}
+        if: ${{ failure() || cancelled() }}
         shell: bash
         env:
           # A link to this run
@@ -71,6 +74,7 @@ jobs:
             "text": "Link to action execution"
           }],
           "event_action": "trigger",
+          "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
           "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
           }' \
           https://events.pagerduty.com/v2/enqueue
