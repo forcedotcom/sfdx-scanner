@@ -1,5 +1,5 @@
 import {Severity} from '../../Constants';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
+import {Catalog, EngineExecutionDescriptor, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
 
 export interface RuleEngine {
 
@@ -30,9 +30,11 @@ export interface RuleEngine {
 	shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean;
 
 	/**
-	 * @param engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
+	 * @param descriptor - An object containing the values necessary for executing the engine, including rules, groups,
+	 * 		targets, and engine options.
+	 * @param descriptor.engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */
-	runEngine(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>;
+	runEngine(descriptor: EngineExecutionDescriptor): Promise<RuleResult[]>;
 
 	/**
 	 * Invokes sync/async initialization required for the engine
@@ -40,7 +42,7 @@ export interface RuleEngine {
 	init(): Promise<void>;
 
 	/**
-	 * TODO: Not supported yet. Idea is to detect if a custom rule path 
+	 * TODO: Not supported yet. Idea is to detect if a custom rule path
 	 * is supported by the engine
 	 */
 	matchPath(path: string): boolean;
@@ -70,14 +72,14 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 	abstract getNormalizedSeverity(severity: number): Severity;
 
-    async runEngine(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>, normalizeSeverity: boolean): Promise<RuleResult[]>{
-        const results = await this.run(ruleGroups, rules, target, engineOptions);
-		if (normalizeSeverity) {
+	async runEngine(descriptor: EngineExecutionDescriptor): Promise<RuleResult[]>{
+        const results = await this.run(descriptor.ruleGroups, descriptor.rules, descriptor.target, descriptor.engineOptions);
+		if (descriptor.normalizeSeverity) {
 			this.normalizeSeverity(results);
 		}
         return results;
     }
-	
+
 	public normalizeSeverity(results: RuleResult[]): void{
 		for (const result of results) {
 			for (const violation of result.violations) {

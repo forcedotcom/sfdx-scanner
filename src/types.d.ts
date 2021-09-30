@@ -40,6 +40,14 @@ export type RuleResult = {
 	violations: RuleViolation[];
 };
 
+export type EngineExecutionDescriptor = {
+	ruleGroups: RuleGroup[];
+	rules: Rule[];
+	target: RuleTarget[];
+	engineOptions: Map<string,string>;
+	normalizeSeverity: boolean;
+};
+
 export type EngineExecutionSummary = {
 	fileCount: number;
 	violationCount: number;

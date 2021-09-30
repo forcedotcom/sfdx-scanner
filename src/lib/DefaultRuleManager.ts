@@ -2,7 +2,7 @@ import {Logger, Messages, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
+import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OutputOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
@@ -17,15 +17,6 @@ import {uxEvents} from './ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
-
-type EngineRunDescriptor = {
-	engine: RuleEngine;
-	ruleGroups: RuleGroup[];
-	rules: Rule[];
-	target: RuleTarget[];
-	engineOptions: Map<string,string>;
-	normalizeSeverity: boolean;
-};
 
 @injectable()
 export class DefaultRuleManager implements RuleManager {
@@ -80,7 +71,7 @@ export class DefaultRuleManager implements RuleManager {
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
-		const engineRunDescriptors: EngineRunDescriptor[] = [];
+		const runDescriptorList: {engine: RuleEngine; descriptor: EngineExecutionDescriptor}[] = [];
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
@@ -96,13 +87,15 @@ export class DefaultRuleManager implements RuleManager {
 				executedEngines.add(e.getName());
 				// Create a descriptor for this engine run, but do not actually run it just yet. This is because the run
 				// itself must begin inside of a try-catch.
-				engineRunDescriptors.push({
+				runDescriptorList.push({
 					engine: e,
-					ruleGroups: engineGroups,
-					rules: engineRules,
-					target: engineTargets,
-					engineOptions: engineOptions,
-					normalizeSeverity: outputOptions.normalizeSeverity
+					descriptor: {
+						ruleGroups: engineGroups,
+						rules: engineRules,
+						target: engineTargets,
+						engineOptions: engineOptions,
+						normalizeSeverity: outputOptions.normalizeSeverity
+					}
 				});
 			} else {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
@@ -122,9 +115,7 @@ export class DefaultRuleManager implements RuleManager {
 		// all of the results together from all engines into one report.
 		try {
 			// Now that we're inside of a try-catch, we can turn the run descriptors into actual executions.
-			const ps: Promise<RuleResult[]>[] = engineRunDescriptors.map(desc => {
-				return desc.engine.runEngine(desc.ruleGroups, desc.rules, desc.target, desc.engineOptions, desc.normalizeSeverity);
-			});
+			const ps: Promise<RuleResult[]>[] = runDescriptorList.map(({engine, descriptor}) => engine.runEngine(descriptor));
 			const psResults: RuleResult[][] = await Promise.all(ps);
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${results}`);
