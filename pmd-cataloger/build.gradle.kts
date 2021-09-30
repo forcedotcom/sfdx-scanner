@@ -1,6 +1,7 @@
 plugins {
   java
   application
+  jacoco
   id("de.undercouch.download") version "4.0.4"
 }
 
@@ -78,3 +79,20 @@ tasks.named("assemble") {
   dependsOn("installPmd")
 }
 
+tasks.test {
+  finalizedBy(tasks.jacocoTestReport) // Report is always generated after test runs.
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+}
+
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = "0.80".toBigDecimal()
+      }
+    }
+  }
+}
