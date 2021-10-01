@@ -32,7 +32,6 @@ export interface RuleEngine {
 	/**
 	 * @param descriptor - An object containing the values necessary for executing the engine, including rules, groups,
 	 * 		targets, and engine options.
-	 * @param descriptor.engineOptions - a mapping of keys to values for engineOptions. not all key/value pairs will apply to all engines.
 	 */
 	runEngine(descriptor: EngineExecutionDescriptor): Promise<RuleResult[]>;
 
