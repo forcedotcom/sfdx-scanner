@@ -524,8 +524,8 @@ workflows:
           filters:
             <<: *publishing_filters
   # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
-  # Triggered by: Nothing. Runs automatically on a weekly cadence.
-  weekly-smoke-test:
+  # Triggered by: Nothing. Runs automatically on a daily cadence.
+  daily-smoke-test:
     triggers:
       - schedule:
           # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
