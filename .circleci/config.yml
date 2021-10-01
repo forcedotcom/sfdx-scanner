@@ -523,7 +523,7 @@ workflows:
             - windows-rc-test
           filters:
             <<: *publishing_filters
-  # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
+  # Purpose: Run the tarball and unit tests on Linux and Windows, against the LTS and Current versions of node.
   # Triggered by: Nothing. Runs automatically on a daily cadence.
   daily-smoke-test:
     triggers:
