@@ -104,7 +104,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				return Severity.HIGH;
 			case 2:
 				return Severity.MODERATE;
-			case 3:
+			case 3: 
 			case 4:
 			case 5:
 				return Severity.LOW;
