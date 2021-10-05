@@ -29,6 +29,10 @@ repositories {
   google()
 }
 
+jacoco {
+  toolVersion = "0.8.7"
+}
+
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd") {
   src(pmdUrl)
   dest(buildDir)
