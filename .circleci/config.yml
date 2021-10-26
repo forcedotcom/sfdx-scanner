@@ -244,6 +244,12 @@ jobs:
                 os: windows
                 lts: false
 
+      # The `setup` job is in a Unix environment. Calling `yarn` in that context adds bash files to `node_modules/.bin`,
+      # but Windows also requires `.cmd` files. So we re-run `yarn` here before running our tests.
+      # NOTE: This is only required for the Windows unit tests, not the tarball test, because the latter already has
+      # everything it needs in the tarball.
+      - run: yarn --ignore-scripts
+
       - run: mkdir test-results
 
       # Unit tests
