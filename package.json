@@ -110,8 +110,8 @@
 		"build": "./gradlew build",
 		"prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
 		"postpack": "rm -f oclif.manifest.json",
-		"lint": "npx eslint ./src --ext .ts",
-		"test": "./gradlew test && npx --always-spawn nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
+		"lint": "eslint ./src --ext .ts",
+		"test": "./gradlew test && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"coverage": "nyc report --reporter text",
 		"version": "oclif-dev readme && git add README.md"
 	}
