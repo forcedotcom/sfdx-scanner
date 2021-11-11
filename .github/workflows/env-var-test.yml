@@ -26,8 +26,7 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         run: |
-          npm install -g @salesforce/cli-scanner
-          || (echo "CLI_INSTALL_RETRY_COUNT=1" && sleep 2 && npm install -g @salesforce/cli-scanner)
+          npm install -g @salesforce/cli-scanner || (echo "CLI_INSTALL_RETRY_COUNT=1" && sleep 2 && npm install -g @salesforce/cli-scanner)
 #        run: echo "CLI_INSTALL_RETRY_COUNT=1" >> $GITHUB_ENV
 
 
