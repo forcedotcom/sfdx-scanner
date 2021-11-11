@@ -25,7 +25,8 @@ jobs:
       # === Make three attempts to install sfdx through npm ===
       - name: Install SFDX
         id: sfdx_install
-        run: npm install -g @salesforce/cli-scanner || (echo "CLI_INSTALL_RETRY_COUNT=1" >> $GITHUB_ENV && sleep 2 && npm install -g @salesforce/cli-scanner)
+        #run: npm install -g @salesforce/cli-scanner || (echo "CLI_INSTALL_RETRY_COUNT=1" >> $GITHUB_ENV && sleep 2 && npm install -g @salesforce/cli-scanner)
+        run: echo "CLI_INSTALL_RETRY_COUNT=1" >> $GITHUB_ENV
 
 
       - name: finisher
