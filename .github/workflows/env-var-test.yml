@@ -56,10 +56,10 @@ jobs:
         if: ${{ always() }}
         shell: bash
         run: |
-          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ steps.no_retries.outputs.tries_until_success }}"
-          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ steps.one_retry.outputs.tries_until_success }}"
-          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.two_retries.outputs.tries_until_success }}"
-          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.total_failure.outputs.tries_until_success }}"
+          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ steps.no_retries.outputs.retry_count }}"
+          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ steps.one_retry.outputs.retry_count }}"
+          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.two_retries.outputs.retry_count }}"
+          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.total_failure.outputs.retry_count }}"
 
 #      # === Make three attempts to install sfdx through npm ===
 #      - name: Install SFDX
