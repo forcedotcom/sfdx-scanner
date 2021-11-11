@@ -26,15 +26,15 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         run: |
-          npm install -g @salesforce/cli-scanner ||
-          (echo "CLI_INSTALL_RETRY_COUNT=1" && sleep 2 && npm install -g @salesforce/cli-scanner)
-#        run: echo "CLI_INSTALL_RETRY_COUNT=1" >> $GITHUB_ENV
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::0) ||
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::1) ||
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::2)
 
 
       - name: finisher
         if: ${{ always() }}
         shell: bash
-        run: echo ${{ env.CLI_INSTALL_RETRY_COUNT }}
+        run: echo "retry count ${{ steps.sfdx_install.outputs.retry_count }}"
 
 # run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
 
