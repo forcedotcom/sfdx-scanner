@@ -30,7 +30,7 @@ jobs:
 
 
       - name: finisher
-        if: ${{ failure() || cancelled() }}
+        if: ${{ always() }}
         shell: bash
         run: echo ${{ env.CLI_INSTALL_RETRY_COUNT }}
 
