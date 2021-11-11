@@ -52,14 +52,28 @@ jobs:
           (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
 
-      - name: finisher
+      - name: This job is skipped
+        id: skipped_job
+        run: |
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
+
+      - name: pass_finisher
         if: ${{ always() }}
         shell: bash
+        env:
+          JOB1_RC: "${{ steps.no_retires.outputs.retry_count}}-na"
+          JOB2_RC: "${{ steps.one_retry.outputs.retry_count}}-na"
+          JOB3_RC: "${{ steps.two_retries.outputs.retry_count}}-na"
+          JOB4_RC: "${{ steps.total_failure.outputs.retry_count}}-na"
+          JOB5_RC: "${{ steps.skipped_job.outputs.retry_count}}-na"
         run: |
-          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ steps.no_retries.outputs.retry_count }}"
-          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ steps.one_retry.outputs.retry_count }}"
-          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.two_retries.outputs.retry_count }}"
-          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.total_failure.outputs.retry_count }}"
+          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ env.JOB1_RC }}"
+          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ env.JOB2_RC }}"
+          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
+          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB4_RC }}"
+          echo "Job 5 result: ${{ steps.skipped_job.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB5_RC }}"
 
 #      # === Make three attempts to install sfdx through npm ===
 #      - name: Install SFDX
