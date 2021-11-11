@@ -26,30 +26,30 @@ jobs:
       - name: Immediate Success
         id: immediate_success
         run: |
-          (npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::1") ||
-          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
-          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+          (npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
 
       - name: Success on retry
         id: one_retry
         run: |
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
-          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
-          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+          (npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
 
       - name: Success on second retry
         id: two_retries
         run: |
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
-          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
-          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+          (npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
 
       - name: Total failure
         id: total_failure
         run: |
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
-          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
-          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::3")
+          (npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm view -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::3")
 
       - name: finisher
         if: ${{ always() }}
