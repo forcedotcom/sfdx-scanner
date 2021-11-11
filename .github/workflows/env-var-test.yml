@@ -51,10 +51,6 @@ jobs:
           (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
           (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::3")
 
-
-      - name: Success on third try
-
-
       - name: finisher
         if: ${{ always() }}
         shell: bash
