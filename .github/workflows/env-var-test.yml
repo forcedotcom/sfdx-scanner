@@ -24,7 +24,7 @@ jobs:
       - run: mkdir smoke-test-results
       # === Make three attempts to install sfdx through npm ===
       - name: Immediate Success
-        id: immediate_success
+        id: no_retries
         run: |
           (npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::1") ||
           (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
