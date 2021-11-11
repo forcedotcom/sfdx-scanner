@@ -26,9 +26,10 @@ jobs:
       - name: Immediate Success
         id: no_retries
         run: |
-          (npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::1") ||
-          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
-          (sleep 5 && npm view -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner) ||
+
 
       - name: Success on retry
         id: one_retry
@@ -55,13 +56,17 @@ jobs:
         if: ${{ always() }}
         shell: bash
         run: |
-          echo "expected attempt count: 1, actual attempt count: ${{ steps.no_retries.outputs.tries_until_success }}"
-          echo "expected attempt count: 2, actual attempt count: ${{ steps.one_retry.outputs.tries_until_success }}"
-          echo "expected attempt count: 3, actual attempt count: ${{ steps.two_retries.outputs.tries_until_success }}"
-          echo "expected attempt count: null, actual attempt count: ${{ steps.total_failure.outputs.tries_until_success }}"
+          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ steps.no_retries.outputs.tries_until_success }}"
+          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ steps.one_retry.outputs.tries_until_success }}"
+          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.two_retries.outputs.tries_until_success }}"
+          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ steps.total_failure.outputs.tries_until_success }}"
 
-# run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
-
+#      # === Make three attempts to install sfdx through npm ===
+#      - name: Install SFDX
+#        id: sfdx_install
+#        # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
+#        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
+#
 #      # === Attempt to install the scanner plugin ===
 #      - name: Install Scanner Plugin
 #        id: scanner_install
@@ -85,7 +90,7 @@ jobs:
 #          path: smoke-test-results
 #
 #      # === Report any failures ===
-##      - name: Report failures
+#      - name: Report failures
 #        if: ${{ failure() || cancelled() }}
 #        shell: bash
 #        env:
@@ -108,4 +113,5 @@ jobs:
 #          "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
 #          }' \
 #          https://events.pagerduty.com/v2/enqueue
+#
 #
