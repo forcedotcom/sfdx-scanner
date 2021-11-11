@@ -69,7 +69,7 @@ jobs:
           JOB4_RC: ${{ steps.total_failure.outputs.retry_count || 'n/a' }}
           JOB5_RC: ${{ steps.skipped_job.outputs.retry_count || 'n/a' }}
         run: |
-          echo "combined retry counts ${{ join(steps.*.outputs.retry_count) != '0,1,1,2' }}"
+          echo "combined retry counts ${{ join(steps.*.outputs.retry_count) }}, matches expecation?: ${{ join(steps.*.outputs.retry_count) != '0,1,1,2' }}"
           echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ env.JOB1_RC }}"
           echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ env.JOB2_RC }}"
           echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
