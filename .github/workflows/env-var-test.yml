@@ -23,18 +23,46 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: mkdir smoke-test-results
       # === Make three attempts to install sfdx through npm ===
-      - name: Install SFDX
-        id: sfdx_install
+      - name: Immediate Success
+        id: immediate_success
         run: |
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::0) ||
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::1) ||
-          (npm install -g @salesforce/cli-scanner && echo "::set-output name=retry_count::2)
+          (npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+
+      - name: Success on retry
+        id: one_retry
+        run: |
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+
+      - name: Success on second retry
+        id: two_retries
+        run: |
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm install -g @salesforce/sfdx-scanner && echo "::set-output name=tries_until_success::3")
+
+      - name: Total failure
+        id: total_failure
+        run: |
+          (npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::1") ||
+          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::2") ||
+          (sleep 5 && npm install -g @salesforce/cli-scanner && echo "::set-output name=tries_until_success::3")
+
+
+      - name: Success on third try
 
 
       - name: finisher
         if: ${{ always() }}
         shell: bash
-        run: echo "retry count ${{ steps.sfdx_install.outputs.retry_count }}"
+        run: |
+          echo "expected attempt count: 1, actual attempt count: ${{ steps.no_retries.outputs.tries_until_success }}"
+          echo "expected attempt count: 2, actual attempt count: ${{ steps.one_retry.outputs.tries_until_success }}"
+          echo "expected attempt count: 3, actual attempt count: ${{ steps.two_retries.outputs.tries_until_success }}"
+          echo "expected attempt count: null, actual attempt count: ${{ steps.total_failure.outputs.tries_until_success }}"
 
 # run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
 
