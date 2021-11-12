@@ -98,7 +98,7 @@ jobs:
           }
           EOF
           }
-          echo "$(generate_post_data)"
+          curl --request POST --data "$(generate_post_data)" https://events.pagerduty.com/v2/enqueue
 
 #      # === Make three attempts to install sfdx through npm ===
 #
