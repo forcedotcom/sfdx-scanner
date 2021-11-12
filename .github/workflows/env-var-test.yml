@@ -72,11 +72,11 @@ jobs:
         run: |
           echo "combined retry counts ${{ join(steps.*.outputs.retry_count) }}"
           echo "combined outcomes ${{ join(steps.*.outcome) }}"
-          echo "${{ JOB1_STATE }}"
-          echo "${{ JOB2_STATE }}"
-          echo "${{ JOB3_STATE }}"
-          echo "${{ JOB4_STATE }}"
-          echo "${{ JOB5_STATE }}"
+          echo "${{ env.JOB1_STATE }}"
+          echo "${{ env.JOB2_STATE }}"
+          echo "${{ env.JOB3_STATE }}"
+          echo "${{ env.JOB4_STATE }}"
+          echo "${{ env.JOB5_STATE }}"
           echo "Is failure critical? ${{ env.IS_CRITICAL }}"
           ALERT_SEV="INFO" && [[ ${{ env.IS_CRITICAL }} == true ]] && ALERT_SEV="CRITICAL"
           echo $ALERT_SEV
