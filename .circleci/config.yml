@@ -82,8 +82,10 @@ commands:
           test_results_path: pmd-cataloger/build/test-results/
       - store_test_results:
           path: test-results
-      - store_artifacts: # upload test coverage as artifact.
+      - store_artifacts: # upload nyc test coverage as artifact.
           path: test-coverage
+      - store_artifacts: # upload jacoco coverage of pmd-cataloger as artifact
+          path: pmd-cataloger/build/reports/jacoco/test
 
   # Purpose: Install SFDX, and the locally-built tarball of the plugin.
   install_local_tarball:

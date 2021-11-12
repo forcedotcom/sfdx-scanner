@@ -105,13 +105,19 @@
 			"init": "./lib/lib/hooks/init"
 		}
 	},
+	"nyc": {
+		"branches": "80",
+		"lines": "90",
+		"functions": "90",
+		"statements": "90"
+	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
 		"build": "./gradlew build",
 		"prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
 		"postpack": "rm -f oclif.manifest.json",
 		"lint": "eslint ./src --ext .ts",
-		"test": "./gradlew test && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
+		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"coverage": "nyc report --reporter text",
 		"version": "oclif-dev readme && git add README.md"
 	}

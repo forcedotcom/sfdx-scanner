@@ -1,6 +1,7 @@
 plugins {
   java
   application
+  jacoco
   id("de.undercouch.download") version "4.0.4"
 }
 
@@ -26,6 +27,10 @@ val skippableJarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
 repositories {
   mavenCentral()
   google()
+}
+
+jacoco {
+  toolVersion = "0.8.7"
 }
 
 tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd") {
@@ -78,3 +83,20 @@ tasks.named("assemble") {
   dependsOn("installPmd")
 }
 
+tasks.test {
+  finalizedBy(tasks.jacocoTestReport) // Report is always generated after test runs.
+}
+
+tasks.jacocoTestReport {
+  dependsOn(tasks.test)
+}
+
+tasks.jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      limit {
+        minimum = "0.80".toBigDecimal()
+      }
+    }
+  }
+}
