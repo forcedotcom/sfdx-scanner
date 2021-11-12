@@ -78,6 +78,8 @@ jobs:
           echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB4_RC }}"
           echo "Job 5 result: ${{ steps.skipped_job.outcome }}. Expected retry count: n/a. Actual retry count: ${{ env.JOB5_RC }}"
           echo "Is failure critical? ${{ env.IS_CRITICAL }}"
+          ALERT_SEV=${{ env.IS_CRITICAL }}?"CRITICAL":"INFO"
+          echo $ALERT_SEV
 
 #      # === Make three attempts to install sfdx through npm ===
 #      - name: Install SFDX
