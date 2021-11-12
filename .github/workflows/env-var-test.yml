@@ -34,33 +34,33 @@ jobs:
       - name: Success on retry
         id: one_retry
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: Success on second retry
         id: two_retries
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: Total failure
         id: total_failure
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: This job is skipped
         id: skipped_job
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
 
       - name: pass_finisher
-        if: ${{ failure() || cancelled() || (join(steps.*.outputs.retry_count) != '0,0,0,0') }}
+        if: ${{ failure() || cancelled() || (join(steps.*.outputs.retry_count) != '0,0,0,0,0') }}
         shell: bash
         env:
           JOB1_RC: ${{ steps.no_retries.outputs.retry_count || 'n/a' }}
@@ -69,7 +69,7 @@ jobs:
           JOB4_RC: ${{ steps.total_failure.outputs.retry_count || 'n/a' }}
           JOB5_RC: ${{ steps.skipped_job.outputs.retry_count || 'n/a' }}
         run: |
-          echo "combined retry counts ${{ join(steps.*.outputs.retry_count) }}, matches expecation?: ${{ join(steps.*.outputs.retry_count) != '0,1,2,2' }}"
+          echo "combined retry counts ${{ join(steps.*.outputs.retry_count) }}"
           echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ env.JOB1_RC }}"
           echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ env.JOB2_RC }}"
           echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
