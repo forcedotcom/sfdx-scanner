@@ -34,23 +34,23 @@ jobs:
       - name: Success on retry
         id: one_retry
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: Success on second retry
         id: two_retries
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: Total failure
         id: total_failure
         run: |
-          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/sfdx-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/sfdx-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
+          (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
+          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
 
       - name: This job is skipped
         id: skipped_job
