@@ -73,10 +73,10 @@ jobs:
         run: |
           if [[ ${{ env.IS_CRITICAL }} == true ]]; then
             ALERT_SEV="critical"
-            ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
+            ALERT_SUMMARY="Josh's custom heartbeat script failed on ${{ runner.os }}"
           else
             ALERT_SEV="info"
-            ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
+            ALERT_SUMMARY="Josh's custom heartbeat script succeeded with retries on ${{ runner.os }}"
           fi
           generate_post_data() {
           # This is known as a HereDocument, and it lets us declare a multi-line input that ends when the limit character,
