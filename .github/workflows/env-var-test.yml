@@ -78,8 +78,10 @@ jobs:
           echo "${{ env.JOB4_STATE }}"
           echo "${{ env.JOB5_STATE }}"
           echo "Is failure critical? ${{ env.IS_CRITICAL }}"
-          ALERT_SEV="INFO" && [[ ${{ env.IS_CRITICAL }} == true ]] && ALERT_SEV="CRITICAL"
+          ALERT_SEV=\"INFO\" && [[ ${{ env.IS_CRITICAL }} == true ]] && ALERT_SEV=\"CRITICAL\"
           echo $ALERT_SEV
+          echo "ALERT_SEV=${ALERT_SEV}" >> $GITHUB_ENV
+          echo "GH EV is ${{ env.ALERT_SEV }}"
 
 #      # === Make three attempts to install sfdx through npm ===
 #      - name: Install SFDX
