@@ -75,6 +75,8 @@ jobs:
           echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
           echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB4_RC }}"
           echo "Job 5 result: ${{ steps.skipped_job.outcome }}. Expected retry count: n/a. Actual retry count: ${{ env.JOB5_RC }}"
+          JOBSTATUS=${{ failure() || cancelled() }}?"CRITICAL":"INFO"
+          echo ${JOBSTATUS}
 
 #      # === Make three attempts to install sfdx through npm ===
 #      - name: Install SFDX
