@@ -63,6 +63,7 @@ jobs:
         if: ${{ failure() || cancelled() || (join(steps.*.outputs.retry_count) != '0,0,0,0,0') }}
         shell: bash
         env:
+          IS_CRITICAL: ${{ failure() || cancelled() }}
           JOB1_RC: ${{ steps.no_retries.outputs.retry_count || 'n/a' }}
           JOB2_RC: ${{ steps.one_retry.outputs.retry_count || 'n/a' }}
           JOB3_RC: ${{ steps.two_retries.outputs.retry_count || 'n/a' }}
@@ -75,7 +76,7 @@ jobs:
           echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
           echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB4_RC }}"
           echo "Job 5 result: ${{ steps.skipped_job.outcome }}. Expected retry count: n/a. Actual retry count: ${{ env.JOB5_RC }}"
-          JOBSTATUS=${{ failure() || cancelled() }}?"CRITICAL":"INFO"
+          JOBSTATUS=${{ env.IS_CRITICAL }}?"CRITICAL":"INFO"
           echo ${JOBSTATUS}
 
 #      # === Make three attempts to install sfdx through npm ===
