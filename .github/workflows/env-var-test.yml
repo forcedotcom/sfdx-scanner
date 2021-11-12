@@ -50,7 +50,7 @@ jobs:
         run: |
           (echo "::set-output name=retry_count::0" && npm view -g @salesforce/cli-scanner) ||
           (sleep 2 && echo "::set-output name=retry_count::1" && npm view -g @salesforce/cli-scanner) ||
-          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/cli-scanner)
+          (sleep 2 && echo "::set-output name=retry_count::2" && npm view -g @salesforce/sfdx-scanner)
 
       - name: This job is skipped
         id: skipped_job
