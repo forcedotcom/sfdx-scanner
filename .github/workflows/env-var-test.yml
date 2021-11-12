@@ -64,19 +64,19 @@ jobs:
         shell: bash
         env:
           IS_CRITICAL: ${{ contains(join(steps.*.outcome), 'failure') || contains(join(steps.*.outcome), 'skipped') }}
-          JOB1_RC: ${{ steps.no_retries.outputs.retry_count || 'n/a' }}
-          JOB2_RC: ${{ steps.one_retry.outputs.retry_count || 'n/a' }}
-          JOB3_RC: ${{ steps.two_retries.outputs.retry_count || 'n/a' }}
-          JOB4_RC: ${{ steps.total_failure.outputs.retry_count || 'n/a' }}
-          JOB5_RC: ${{ steps.skipped_job.outputs.retry_count || 'n/a' }}
+          JOB1_STATE: ${{ steps.no_retries.outcome }} after ${{ steps.no_retries.outputs.retry_count || 'n/a' }} attempts
+          JOB2_STATE: ${{ steps.one_retry.outcome }} after ${{ steps.one_retry.outputs.retry_count || 'n/a' }} attempts
+          JOB3_STATE: ${{ steps.two_retries.outcome }} after ${{ steps.two_retries.outputs.retry_count || 'n/a' }} attempts
+          JOB4_STATE: ${{ steps.total_failure.outcome }} after ${{ steps.total_failure.outputs.retry_count || 'n/a' }} attempts
+          JOB5_STATE: ${{ steps.skipped_job.outcome }} after ${{ steps.skipped_job.outputs.retry_count || 'n/a' }} attempts
         run: |
           echo "combined retry counts ${{ join(steps.*.outputs.retry_count) }}"
           echo "combined outcomes ${{ join(steps.*.outcome) }}"
-          echo "Job 1 result: ${{ steps.no_retries.outcome }}. Expected retry count: 0. Actual retry count: ${{ env.JOB1_RC }}"
-          echo "Job 2 result: ${{ steps.one_retry.outcome }}. Expected retry count: 1. Actual retry count: ${{ env.JOB2_RC }}"
-          echo "Job 3 result: ${{ steps.two_retries.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB3_RC }}"
-          echo "Job 4 result: ${{ steps.total_failure.outcome }}. Expected retry count: 2. Actual retry count: ${{ env.JOB4_RC }}"
-          echo "Job 5 result: ${{ steps.skipped_job.outcome }}. Expected retry count: n/a. Actual retry count: ${{ env.JOB5_RC }}"
+          echo "${{ JOB1_STATE }}"
+          echo "${{ JOB2_STATE }}"
+          echo "${{ JOB3_STATE }}"
+          echo "${{ JOB4_STATE }}"
+          echo "${{ JOB5_STATE }}"
           echo "Is failure critical? ${{ env.IS_CRITICAL }}"
           ALERT_SEV="INFO" && [[ ${{ env.IS_CRITICAL }} == true ]] && ALERT_SEV="CRITICAL"
           echo $ALERT_SEV
