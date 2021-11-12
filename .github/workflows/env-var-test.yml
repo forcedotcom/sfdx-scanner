@@ -94,7 +94,7 @@ jobs:
           }],
           "event_action": "trigger",
           "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
-          "routing_key": ${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
+          "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
           }
           EOF
           }
