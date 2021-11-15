@@ -30,12 +30,21 @@ jobs:
       - name: Install SFDX
         id: sfdx_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
-        run: npm install -g sfdx-cli || (sleep 60 && npm install -g sfdx-cli) || (sleep 300 && npm install -g sfdx-cli)
+        # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
+        run: |
+          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g sfdx-cli) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g sfdx-cli)
 
-      # === Attempt to install the scanner plugin ===
+      # === Make three attempts to install the scanner plugin through sfdx ===
       - name: Install Scanner Plugin
         id: scanner_install
-        run: sfdx plugins:install @salesforce/sfdx-scanner
+        # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
+        # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
+        run: |
+          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && sfdx plugins:install @salesforce/sfdx-scanner) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && sfdx plugins:install @salesforce/sfdx-scanner)
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
@@ -54,20 +63,45 @@ jobs:
           name: smoke-test-results-${{ runner.os }}
           path: smoke-test-results
 
-      # === Report any failures ===
-      - name: Report failures
-        if: ${{ failure() || cancelled() }}
+      # === Report any problems ===
+      - name: Report problems
+        # There are problems if any step failed or was skipped, or if any step that can make retry attempts was forced to
+        # do so.
+        # Note that the `join()` call omits null values, so if any steps were skipped, they won't have a corresponding
+        # value in the string.
+        if: ${{ failure() || cancelled() || (join(steps.*.outputs.retry_count) != '0,0') }}
         shell: bash
         env:
-          # A link to this run
+          # If we're here because steps failed or were skipped, then that's a critical problem. Otherwise it's a normal one.
+          # We can't use the `failure()` or `cancelled()` convenience methods outside of the `if` condition, hence the
+          # `contains()` calls.
+          IS_CRITICAL: ${{ contains(join(steps.*.outcome), 'failure') || contains(join(steps.*.outcome), 'skipped') }}
+          # Build the status strings for each step as environment variables to save space later. Null retry_count values
+          # will be replaced with `n/a` to maintain readability in the alert.
+          CLI_INSTALL_STATUS: ${{ steps.sfdx_install.outcome }} after ${{ steps.sfdx_install.outputs.retry_count || 'n/a' }} retries
+          SCANNER_INSTALL_STATUS: ${{ steps.scanner_install.outcome }} after ${{ steps.scanner_install.outputs.retry_count || 'n/a' }} retries
+          SMOKE_TESTS_STATUS: ${{ steps.smoke_tests.outcome }}
+          # A link to this run, so the PagerDuty assignee can quickly get here.
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          curl --request POST \
-          --data '{"payload": {
-            "summary": "Production heartbeat script failed on ${{ runner.os }}",
+          # GHA env-vars don't have robust conditional logic, so we'll use this if-else to define some bash env-vars.
+          if [[ ${{ env.IS_CRITICAL }} == true ]]; then
+            ALERT_SEV="critical"
+            ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
+          else
+            ALERT_SEV="info"
+            ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
+          fi
+          # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
+          generate_post_data() {
+          # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
+          # in this case EOF, is encoutered.
+          cat <<EOF
+          {"payload": {
+            "summary: "${ALERT_SUMMARY}",
             "source": "Github Actions",
-            "severity": "critical",
-            "custom_details": "SFDX install: ${{ steps.sfdx_install.outcome }}. Scanner install: ${{ steps.scanner_install.outcome }}. Smoke tests: ${{ steps.smoke_tests.outcome }}"
+            "severity": "${ALERT_SEV}",
+            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }}."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
@@ -76,5 +110,8 @@ jobs:
           "event_action": "trigger",
           "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
           "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
-          }' \
-          https://events.pagerduty.com/v2/enqueue
+          }
+          EOF
+          }
+          # Make our POST request
+          curl --request POST --data "$(generate_post_data)" https://events.pagerduty.com/v2/enqueue
