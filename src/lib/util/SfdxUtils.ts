@@ -4,6 +4,10 @@ import childProcess = require('child_process');
  * A variable to store SFDX's version number, so we don't have to keep running `sfdx -v`.
  */
 let SFDX_VERSION: string;
+
+/**
+ * Returns the current version of SFDX installed on the machine, or `unknown` if the version cannot be determined.
+ */
 export async function getSfdxVersion(): Promise<string> {
 	// If we already have a cached value, we can just return that instead of doing everything else.
 	if (SFDX_VERSION !== undefined) {
