@@ -13,6 +13,12 @@ export type Rule = {
 	url?: string;
 }
 
+export type TelemetryData = {
+	eventName: string;
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	[key: string]: any;
+}
+
 export type LooseObject = {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	[key: string]: any;

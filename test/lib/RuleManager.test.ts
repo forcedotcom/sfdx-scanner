@@ -2,6 +2,8 @@ import {expect} from 'chai';
 import path = require('path');
 import Sinon = require('sinon');
 
+import {Lifecycle} from '@salesforce/core';
+
 import {Controller} from '../../src/Controller';
 import {Rule, RuleGroup, RuleTarget} from '../../src/types';
 
@@ -25,10 +27,12 @@ const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 describe('RuleManager', () => {
 	let uxSpy;
+	let telemetrySpy;
 
 	beforeEach(() => {
 		Sinon.createSandbox();
 		uxSpy = Sinon.spy(uxEvents, 'emit');
+		telemetrySpy = Sinon.spy(Lifecycle.getInstance(), 'emitTelemetry');
 	});
 
 	afterEach(() => {
@@ -194,6 +198,7 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('TS project files', async () => {
@@ -210,6 +215,7 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('App project files', async () => {
@@ -226,6 +232,7 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('All targets match', async () => {
@@ -242,6 +249,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
+					Sinon.assert.callCount(telemetrySpy, 1);
 					Sinon.assert.callCount(uxSpy, 0);
 				});
 
@@ -254,6 +262,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
 
@@ -279,6 +288,7 @@ describe('RuleManager', () => {
 							expect(violation.category).to.equal(category);
 						}
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Filtering by multiple categories runs any rule in either category', async () => {
@@ -299,6 +309,7 @@ describe('RuleManager', () => {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 						expect(res.violations[0].category).to.be.oneOf(categories);
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
 
@@ -310,6 +321,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
 					expect(results).to.equal('', `Output ${results} should have been an empty string`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Single target file does not match', async () => {
@@ -323,6 +335,7 @@ describe('RuleManager', () => {
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 
@@ -337,6 +350,7 @@ describe('RuleManager', () => {
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Multiple targets do not match', async () => {
@@ -350,6 +364,7 @@ describe('RuleManager', () => {
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Some targets do not match', async () => {
@@ -369,6 +384,7 @@ describe('RuleManager', () => {
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, 'warning-always', `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
 		});

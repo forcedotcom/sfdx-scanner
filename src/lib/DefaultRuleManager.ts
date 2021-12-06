@@ -1,8 +1,8 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfdxError, Lifecycle} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
+import {TelemetryData, EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OutputOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
@@ -10,6 +10,7 @@ import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
+import * as SfdxUtils from './util/SfdxUtils';
 import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
@@ -17,6 +18,11 @@ import {uxEvents} from './ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
+
+type ExtendedRunDescriptor = {
+	engine: RuleEngine;
+	descriptor: EngineExecutionDescriptor;
+}
 
 @injectable()
 export class DefaultRuleManager implements RuleManager {
@@ -71,7 +77,7 @@ export class DefaultRuleManager implements RuleManager {
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
-		const runDescriptorList: {engine: RuleEngine; descriptor: EngineExecutionDescriptor}[] = [];
+		const runDescriptorList: ExtendedRunDescriptor[] = [];
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
@@ -115,6 +121,7 @@ export class DefaultRuleManager implements RuleManager {
 		// all of the results together from all engines into one report.
 		try {
 			// Now that we're inside of a try-catch, we can turn the run descriptors into actual executions.
+			await this.emitRunTelemetry(runDescriptorList);
 			const ps: Promise<RuleResult[]>[] = runDescriptorList.map(({engine, descriptor}) => engine.runEngine(descriptor));
 			const psResults: RuleResult[][] = await Promise.all(ps);
 			psResults.forEach(r => results = results.concat(r));
@@ -124,6 +131,28 @@ export class DefaultRuleManager implements RuleManager {
 		} catch (e) {
 			throw new SfdxError(e.message || e);
 		}
+	}
+
+	protected async emitRunTelemetry(runDescriptorList: ExtendedRunDescriptor[]): Promise<void> {
+		// Telemetry data always specifies an event name.
+		const runTelemetryObject: TelemetryData = {
+			eventName: "ENGINE_EXECUTION"
+		};
+
+		// For engine execution, the telemetry data should include information about which engines ran and which engines
+		// didn't.
+		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(descriptor => descriptor.engine.getName().toLowerCase()));
+		const allEngines: RuleEngine[] = await Controller.getAllEngines();
+		for (const engine of allEngines) {
+			const engineName = engine.getName().toLowerCase();
+			runTelemetryObject[engineName] = executedEngineNames.has(engineName);
+		}
+
+		// The telemetry data also needs to have the SFDX version.
+		runTelemetryObject['sfdxVersion'] = await SfdxUtils.getSfdxVersion();
+
+		// We can use the Lifecycle convenience method to send off our telemetry data.
+		await Lifecycle.getInstance().emitTelemetry(runTelemetryObject);
 	}
 
 	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
