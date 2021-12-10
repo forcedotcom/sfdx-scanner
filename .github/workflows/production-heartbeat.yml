@@ -98,7 +98,7 @@ jobs:
           # in this case EOF, is encoutered.
           cat <<EOF
           {"payload": {
-            "summary: "${ALERT_SUMMARY}",
+            "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
             "severity": "${ALERT_SEV}",
             "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }}."
