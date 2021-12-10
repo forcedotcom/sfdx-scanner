@@ -101,7 +101,7 @@ commands:
           name: "Install SFDX and tarball"
           shell: << parameters.shell >>
           command: |
-            npm install -g sfdx-cli
+            npm install -g sfdx-cli@7.27.0
             # We need to determine the name of the tarball
             SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
             # We also ought to determine where we are, using the parameter
@@ -114,7 +114,7 @@ commands:
     steps:
       - run:
           name: "Install SFDX cli"
-          command: npm install -g sfdx-cli
+          command: npm install -g sfdx-cli@7.27.0
 
       - run:
           name: "Install release candidate"
