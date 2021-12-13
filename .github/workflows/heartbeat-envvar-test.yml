@@ -128,9 +128,9 @@ jobs:
             ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
           fi
           if [[ ${{ env.FAIL_SMOKE_TESTS }} == true ]]; then
-            SMOKE_TEST_STATUS="Force failed through use of FAIL_SMOKE_TESTS environment variable"
+            SMOKE_TESTS_STATUS="${{ env.SMOKE_TESTS_STATUS }}, with use of FAIL_SMOKE_TESTS environment variable"
           else
-            SMOKE_TEST_STATUS=${{ env.SMOKE_TESTS_STATUS }}
+            SMOKE_TESTS_STATUS=${{ env.SMOKE_TESTS_STATUS }}
           # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
           # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
