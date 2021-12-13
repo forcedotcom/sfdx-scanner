@@ -119,7 +119,7 @@ jobs:
           # A link to this run, so the PagerDuty assignee can quickly get here.
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          # GHA env-vars don't have robust conditional logic, so we'll use this if-else to define some bash env-vars.
+          # GHA env-vars don't have robust conditional logic, so we'll use these if-else branches to define some bash env-vars.
           if [[ ${{ env.IS_CRITICAL }} == true ]]; then
             ALERT_SEV="critical"
             ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
@@ -127,6 +127,10 @@ jobs:
             ALERT_SEV="info"
             ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
           fi
+          if [[ ${{ env.FAIL_SMOKE_TESTS }} == true ]]; then
+            SMOKE_TEST_STATUS="Force failed through use of FAIL_SMOKE_TESTS environment variable"
+          else
+            SMOKE_TEST_STATUS=${{ env.SMOKE_TESTS_STATUS }}
           # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
           # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
@@ -136,7 +140,7 @@ jobs:
             "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
             "severity": "${ALERT_SEV}",
-            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }}."
+            "custom_details": "SFDX install: target version ${{ env.CLI_VERSION }}; ${{ env.CLI_INSTALL_STATUS }}. Scanner install: target version ${{ env.SCANNER_VERSION }}; ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${SMOKE_TESTS_STATUS}."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
