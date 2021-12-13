@@ -63,8 +63,8 @@ jobs:
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
           (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g sfdx-cli@${{ env.CLI_VERSION }})
+          (echo "::set-output name=retry_count::1" && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && npm install -g sfdx-cli@${{ env.CLI_VERSION }})
 
       # === Make three attempts to install the scanner plugin through sfdx ===
       - name: Install Scanner Plugin
@@ -73,8 +73,8 @@ jobs:
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
           (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }})
+          (echo "::set-output name=retry_count::1" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }})
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
