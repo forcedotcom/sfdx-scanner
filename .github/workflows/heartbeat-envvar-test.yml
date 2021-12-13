@@ -48,3 +48,33 @@ jobs:
           echo "Desired cli version: ${{ env.CLI_VERSION }}"
           echo "Desired scanner version: ${{ env.SCANNER_VERSION }}"
           echo "Should tests force fail: ${{ env.FORCE_SMOKE_TEST_FAIL }}"
+
+
+      - name: Fire PagerDuty Alert
+        id: fire_alert
+        shell: bash
+        env:
+          RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          generate_post_data() {
+          # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
+          # in this case EOF, is encoutered.
+          cat <<EOF
+          {"payload": {
+            "summary": "Artifically induced failure. Do not panic",
+            "source": "Github Actions",
+            "severity": "critical",
+            "custom_details": "Desired CLI: ${{ env.CLI_VERSION }}. Desired scanner: ${{ env.SCANNER_VERSION }}. Should tests fail: ${{ env.FORCE_SMOKE_TEST_FAIL }}."
+          },
+          "links": [{
+            "href": "${{ env.RUN_LINK }}",
+            "text": "Link to action execution"
+          }],
+          "event_action": "trigger",
+          "dedup_key": "GH-HB-${{ matrix.os.vm }}-${{ matrix.node }}",
+          "routing_key": "${{ secrets.PAGERDUTY_HEARTBEAT_KEY }}"
+          }
+          EOF
+          }
+          # Make our POST request
+          curl --request POST --data "$(generate_post_data)" https://events.pagerduty.com/v2/enqueue
