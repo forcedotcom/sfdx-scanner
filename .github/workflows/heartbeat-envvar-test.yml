@@ -46,13 +46,15 @@ jobs:
           else
             echo "SCANNER_VERSION=${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
           fi
-          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should use 'true' here. Otherwise, we should use
-          # 'false'.
-          # Note: This serves no purpose beyond providing a way to intentionally fail the smoke tests.
+          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should use 'true' and spoof a command that will
+          # forcibly fail the smoke tests. Otherwise, we should use false and a safe command.
+          # Note: This serves no purpose aside from providing a way to simulate a smoke test failure.
           if [[ -z "${{ secrets.FAIL_SMOKE_TESTS }}" ]]; then
             echo "FAIL_SMOKE_TESTS=false" >> $GITHUB_ENV
+            echo "PRE_SMOKE_COMMAND=echo Proceeding As Normal" >> $GITHUB_ENV
           else
             echo "FAIL_SMOKE_TESTS=true" >> $GITHUB_ENV
+            echo "PRE_SMOKE_COMMAND=exit 1" >> $GITHUB_ENV
           fi
 
 
@@ -80,15 +82,13 @@ jobs:
       - name: Log plugins
         run: sfdx plugins
 
-      # === Simulate a smoke-test failure if requested ===
-      - name: Simulate smoke-test fail
-        if: ${{ env.FAIL_SMOKE_TESTS }}
-        run: exit 1
-
       # === Attempt to execute the smoke tests ===
       - name: Run smoke tests
         id: smoke_tests
-        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+        run: |
+          # Run the pre-smoke-command, which will either be an echo indicating that it's fine to proceed, or an early exit.
+          ${{ env.PRE_SMOKE_COMMAND }}
+          smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
 
       # === Upload the smoke-test-results folder as an artifact ===
       - name: Upload smoke-test-results folder as artifact
