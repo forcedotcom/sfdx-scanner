@@ -1,0 +1,32 @@
+name: heartbeat-envvar-test
+on:
+  pull_request: # As per documentation, the colon is necessary even though no config is required.
+jobs:
+  heartbeat-envvar-test:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately cancelled. This makes the jobs run to completion instead.
+      fail-fast: false
+      matrix:
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        node: ['lts/*']
+    runs-on: ${{ matrix.os.vm }}
+    timeout-minutes: 60
+    steps:
+      # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
+      - uses: actions/checkout@v2
+        with:
+          ref: 'release'
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: mkdir smoke-test-results
+
+      - name: Set environment variables
+        id: envvar_setup
+        shell: bash
+        run: |
+          if [[ -z ${{ secrets.CLI_VERSION }} ]]; then
+            echo "beep"
+          else
+            echo "boop"
+          fi
