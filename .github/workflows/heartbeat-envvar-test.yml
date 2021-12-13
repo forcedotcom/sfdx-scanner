@@ -25,7 +25,7 @@ jobs:
         id: envvar_setup
         shell: bash
         run: |
-          if [[ -z ${{ secrets.CLI_VERSION }} ]]; then
+          if [[ -z "${{ secrets.CLI_VERSION }}" ]]; then
             echo "beep"
           else
             echo "boop"
