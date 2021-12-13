@@ -21,50 +21,122 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: mkdir smoke-test-results
 
+      # === Set our environment variables, either using default values or the repo's secrets ===
       - name: Set environment variables
-        id: envvar_setup
+        id: env_var_setup
+        # We'll want to use bash for this, to avoid any cross-platform shenanigans
         shell: bash
         run: |
+          # In the following script, the use of the `echo "name=value" >> $GITHUB_ENV` structure is used to set/update
+          # environment variables. Such updates are visible to all subsequent steps.
+          #
+          # If the CLI_VERSION repo secret is set, we want to install that version of sfdx-cli, otherwise we should
+          # default to latest.
+          # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
           if [[ -z "${{ secrets.CLI_VERSION }}" ]]; then
             echo "CLI_VERSION=latest" >> $GITHUB_ENV
           else
             echo "CLI_VERSION=${{ secrets.CLI_VERSION }}" >> $GITHUB_ENV
           fi
+          # If the SCANNER_VERSION repo secret is set, we want to install that version of sfdx-scanner, otherwise we should
+          # default to latest.
+          # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
           if [[ -z "${{ secrets.SCANNER_VERSION }}" ]]; then
             echo "SCANNER_VERSION=latest" >> $GITHUB_ENV
           else
             echo "SCANNER_VERSION=${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
           fi
-          if [[ -z "${{ secrets.FORCE_SMOKE_TEST_FAIL }}" ]]; then
-            echo "FORCE_SMOKE_TEST_FAIL=false" >> $GITHUB_ENV
+          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should use 'true' here. Otherwise, we should use
+          # 'false'.
+          # Note: This serves no purpose beyond providing a way to intentionally fail the smoke tests.
+          if [[ -z "${{ secrets.FAIL_SMOKE_TESTS }}" ]]; then
+            echo "FAIL_SMOKE_TESTS=false" >> $GITHUB_ENV
           else
-            echo "FORCE_SMOKE_TEST_FAIL=${{ secrets.FORCE_SMOKE_TEST_FAIL }}" >> $GITHUB_ENV
+            echo "FAIL_SMOKE_TESTS=true" >> $GITHUB_ENV
           fi
 
-      - name: Read environment variables
-        id: envvar_read
-        shell: bash
+
+      # === Make three attempts to install sfdx through npm ===
+      - name: Install SFDX
+        id: sfdx_install
+        # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
+        # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          echo "Desired cli version: ${{ env.CLI_VERSION }}"
-          echo "Desired scanner version: ${{ env.SCANNER_VERSION }}"
-          echo "Should tests force fail: ${{ env.FORCE_SMOKE_TEST_FAIL }}"
+          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g sfdx-cli@${{ env.CLI_VERSION }})
 
+      # === Make three attempts to install the scanner plugin through sfdx ===
+      - name: Install Scanner Plugin
+        id: scanner_install
+        # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
+        # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
+        run: |
+          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }})
 
-      - name: Fire PagerDuty Alert
-        id: fire_alert
+      # === Log the installed plugins for easier debugging ===
+      - name: Log plugins
+        run: sfdx plugins
+
+      # === Simulate a smoke-test failure if requested ===
+      - name: Simulate smoke-test fail
+        if: ${{ env.FAIL_SMOKE_TESTS }}
+        run: exit 1
+
+      # === Attempt to execute the smoke tests ===
+      - name: Run smoke tests
+        id: smoke_tests
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+
+      # === Upload the smoke-test-results folder as an artifact ===
+      - name: Upload smoke-test-results folder as artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: smoke-test-results-${{ runner.os }}
+          path: smoke-test-results
+
+      # === Report any problems ===
+      - name: Report problems
+        # There are problems if any step failed or was skipped, or if any step that can make retry attempts was forced to
+        # do so.
+        # Note that the `join()` call omits null values, so if any steps were skipped, they won't have a corresponding
+        # value in the string.
+        if: ${{ failure() || cancelled() || (join(steps.*.outputs.retry_count) != '0,0') }}
         shell: bash
         env:
+          # If we're here because steps failed or were skipped, then that's a critical problem. Otherwise it's a normal one.
+          # We can't use the `failure()` or `cancelled()` convenience methods outside of the `if` condition, hence the
+          # `contains()` calls.
+          IS_CRITICAL: ${{ contains(join(steps.*.outcome), 'failure') || contains(join(steps.*.outcome), 'skipped') }}
+          # Build the status strings for each step as environment variables to save space later. Null retry_count values
+          # will be replaced with `n/a` to maintain readability in the alert.
+          CLI_INSTALL_STATUS: ${{ steps.sfdx_install.outcome }} after ${{ steps.sfdx_install.outputs.retry_count || 'n/a' }} retries
+          SCANNER_INSTALL_STATUS: ${{ steps.scanner_install.outcome }} after ${{ steps.scanner_install.outputs.retry_count || 'n/a' }} retries
+          SMOKE_TESTS_STATUS: ${{ steps.smoke_tests.outcome }}
+          # A link to this run, so the PagerDuty assignee can quickly get here.
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
+          # GHA env-vars don't have robust conditional logic, so we'll use this if-else to define some bash env-vars.
+          if [[ ${{ env.IS_CRITICAL }} == true ]]; then
+            ALERT_SEV="critical"
+            ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
+          else
+            ALERT_SEV="info"
+            ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
+          fi
+          # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
           # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
           # in this case EOF, is encoutered.
           cat <<EOF
           {"payload": {
-            "summary": "Artifically induced failure. Do not panic",
+            "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
-            "severity": "critical",
-            "custom_details": "Desired CLI: ${{ env.CLI_VERSION }}. Desired scanner: ${{ env.SCANNER_VERSION }}. Should tests fail: ${{ env.FORCE_SMOKE_TEST_FAIL }}."
+            "severity": "${ALERT_SEV}",
+            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }}."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
