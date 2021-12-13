@@ -26,7 +26,25 @@ jobs:
         shell: bash
         run: |
           if [[ -z "${{ secrets.CLI_VERSION }}" ]]; then
-            echo "beep"
+            echo "CLI_VERSION=latest" >> $GITHUB_ENV
           else
-            echo "boop"
+            echo "CLI_VERSION=${{ secrets.CLI_VERSION }}" >> $GITHUB_ENV
           fi
+          if [[ -z "${{ secrets.SCANNER_VERSION }}" ]]; then
+            echo "SCANNER_VERSION=latest" >> $GITHUB_ENV
+          else
+            echo "SCANNER_VERSION=${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
+          fi
+          if [[ -z "${{ secrets.FORCE_SMOKE_TEST_FAIL }}" ]]; then
+            echo "FORCE_SMOKE_TEST_FAIL=false" >> $GITHUB_ENV
+          else
+            echo "FORCE_SMOKE_TEST_FAIL=${{ secrets.FORCE_SMOKE_TEST_FAIL }}" >> $GITHUB_ENV
+          fi
+
+      - name: Read environment variables
+        id: envvar_read
+        shell: bash
+        run: |
+          echo "Desired cli version: ${{ env.CLI_VERSION }}"
+          echo "Desired scanner version: ${{ env.SCANNER_VERSION }}"
+          echo "Should tests force fail: ${{ env.FORCE_SMOKE_TEST_FAIL }}"
