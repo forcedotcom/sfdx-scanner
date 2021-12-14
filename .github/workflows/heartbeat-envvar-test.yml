@@ -1,6 +1,6 @@
 name: heartbeat-envvar-test
 on:
-  workflow_dispatch: # As per documentation, the colon is necessary even though no config is required.
+  pull_request: # As per documentation, the colon is necessary even though no config is required.
 jobs:
   heartbeat-envvar-test:
     strategy:
