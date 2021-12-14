@@ -1,6 +1,6 @@
 name: heartbeat-envvar-test
 on:
-  pull_request: # As per documentation, the colon is necessary even though no config is required.
+  workflow_dispatch: # As per documentation, the colon is necessary even though no config is required.
 jobs:
   heartbeat-envvar-test:
     strategy:
@@ -30,21 +30,17 @@ jobs:
           # In the following script, the use of the `echo "name=value" >> $GITHUB_ENV` structure is used to set/update
           # environment variables. Such updates are visible to all subsequent steps.
           #
-          # If the CLI_VERSION repo secret is set, we want to install that version of sfdx-cli, otherwise we should
-          # default to latest.
+          # If the CLI_VERSION repo secret is set, we want to install that version of sfdx-cli, so we set an environment
+          # variable. Otherwise, we leave the environment variable unset, so it implicitly defaults to `latest`.
           # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
-          if [[ -z "${{ secrets.CLI_VERSION }}" ]]; then
-            echo "CLI_VERSION=latest" >> $GITHUB_ENV
-          else
-            echo "CLI_VERSION=${{ secrets.CLI_VERSION }}" >> $GITHUB_ENV
+          if [[ -n "${{ secrets.CLI_VERSION }}" ]]; then
+            echo "CLI_VERSION=@${{ secrets.CLI_VERSION}}" >> $GITHUB_ENV
           fi
-          # If the SCANNER_VERSION repo secret is set, we want to install that version of sfdx-scanner, otherwise we should
-          # default to latest.
+          # If the SCANNER_VERSION repo secret is set, we want to install that version of sfdx-scanner, so we set an
+          # environment variable. Otherwise, we leave the environment variable unset, so it implicitly defaults to `latest`.
           # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
-          if [[ -z "${{ secrets.SCANNER_VERSION }}" ]]; then
-            echo "SCANNER_VERSION=latest" >> $GITHUB_ENV
-          else
-            echo "SCANNER_VERSION=${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
+          if [[ -n "${{ secrets.SCANNER_VERSION }}" ]]; then
+            echo "SCANNER_VERSION=@${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
           fi
           # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should use 'true' and spoof a command that will
           # forcibly fail the smoke tests. Otherwise, we should use false and a safe command.
@@ -64,9 +60,9 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && npm install -g sfdx-cli@${{ env.CLI_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && npm install -g sfdx-cli@${{ env.CLI_VERSION }})
+          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && npm install -g sfdx-cli${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && npm install -g sfdx-cli${{ env.CLI_VERSION }})
 
       # === Make three attempts to install the scanner plugin through sfdx ===
       - name: Install Scanner Plugin
@@ -74,9 +70,9 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
-          (echo "::set-output name=retry_count::1" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }}) ||
-          (echo "::set-output name=retry_count::2" && sfdx plugins:install @salesforce/sfdx-scanner@${{ env.SCANNER_VERSION }})
+          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }})
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
@@ -132,6 +128,16 @@ jobs:
           else
             SMOKE_TESTS_STATUS=${{ env.SMOKE_TESTS_STATUS }}
           fi
+          if [[ -n "${{ env.CLI_VERSION }}" ]]; then
+            CLI_VERSION="explicitly ${{ env.CLI_VERSION }}"
+          else
+            CLI_VERSION="implicitly latest"
+          fi
+          if [[ -n "${{ env.SCANNER_VERSION }}" ]]; then
+            SCANNER_VERSION="explicitly ${{ env.SCANNER_VERSION }}"
+          else
+            SCANNER_VERSION="implicitly latest"
+          fi
           # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
           # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
@@ -141,7 +147,7 @@ jobs:
             "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
             "severity": "${ALERT_SEV}",
-            "custom_details": "SFDX install: target version ${{ env.CLI_VERSION }}; ${{ env.CLI_INSTALL_STATUS }}. Scanner install: target version ${{ env.SCANNER_VERSION }}; ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${SMOKE_TESTS_STATUS}."
+            "custom_details": "SFDX install: target version ${CLI_VERSION}; ${{ env.CLI_INSTALL_STATUS }}. Scanner install: target version ${SCANNER_VERSION}; ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${SMOKE_TESTS_STATUS}."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
