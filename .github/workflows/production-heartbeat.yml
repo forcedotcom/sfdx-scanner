@@ -48,15 +48,12 @@ jobs:
           if [[ -n "${{ secrets.SCANNER_VERSION }}" ]]; then
             echo "SCANNER_VERSION=@${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
           fi
-          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should use 'true' and spoof a command that will
-          # forcibly fail the smoke tests. Otherwise, we should use false and a safe command.
+          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should respond by deleting the `test/test-jars`
+          # folder. The smoke tests expect this folder's contents to exist, so an invocation of `scanner:rule:add` should
+          # fail, thereby failing the smoke tests as a whole.
           # Note: This serves no purpose aside from providing a way to simulate a smoke test failure.
-          if [[ -z "${{ secrets.FAIL_SMOKE_TESTS }}" ]]; then
-            echo "FAIL_SMOKE_TESTS=false" >> $GITHUB_ENV
-            echo "PRE_SMOKE_COMMAND=echo Proceeding As Normal" >> $GITHUB_ENV
-          else
-            echo "FAIL_SMOKE_TESTS=true" >> $GITHUB_ENV
-            echo "PRE_SMOKE_COMMAND=exit 1" >> $GITHUB_ENV
+          if [[ -n "${{ secrets.FAIL_SMOKE_TESTS }}" ]]; then
+            rm -rf ./test/test-jars
           fi
 
 
@@ -88,8 +85,6 @@ jobs:
       - name: Run smoke tests
         id: smoke_tests
         run: |
-          # Run the pre-smoke-command, which will either be an echo indicating that it's fine to proceed, or an early exit.
-          ${{ env.PRE_SMOKE_COMMAND }}
           smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
 
       # === Upload the smoke-test-results folder as an artifact ===
@@ -129,21 +124,6 @@ jobs:
             ALERT_SEV="info"
             ALERT_SUMMARY="Production heartbeat script succeeded with retries on ${{ runner.os }}"
           fi
-          if [[ ${{ env.FAIL_SMOKE_TESTS }} == true ]]; then
-            SMOKE_TESTS_STATUS="${{ env.SMOKE_TESTS_STATUS }}, with use of FAIL_SMOKE_TESTS environment variable"
-          else
-            SMOKE_TESTS_STATUS=${{ env.SMOKE_TESTS_STATUS }}
-          fi
-          if [[ -n "${{ env.CLI_VERSION }}" ]]; then
-            CLI_VERSION="explicitly ${{ env.CLI_VERSION }}"
-          else
-            CLI_VERSION="implicitly latest"
-          fi
-          if [[ -n "${{ env.SCANNER_VERSION }}" ]]; then
-            SCANNER_VERSION="explicitly ${{ env.SCANNER_VERSION }}"
-          else
-            SCANNER_VERSION="implicitly latest"
-          fi
           # Define a helper function to create our POST request's data, to sidestep issues with nested quotations.
           generate_post_data() {
           # This is known as a HereDoc, and it lets us declare multi-line input ending when the specified limit string,
@@ -153,7 +133,7 @@ jobs:
             "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
             "severity": "${ALERT_SEV}",
-            "custom_details": "SFDX install: target version ${CLI_VERSION}; ${{ env.CLI_INSTALL_STATUS }}. Scanner install: target version ${SCANNER_VERSION}; ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${SMOKE_TESTS_STATUS}."
+            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }} ."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
