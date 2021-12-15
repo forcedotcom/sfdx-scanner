@@ -84,8 +84,7 @@ jobs:
       # === Attempt to execute the smoke tests ===
       - name: Run smoke tests
         id: smoke_tests
-        run: |
-          smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+        run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
 
       # === Upload the smoke-test-results folder as an artifact ===
       - name: Upload smoke-test-results folder as artifact
@@ -116,7 +115,7 @@ jobs:
           # A link to this run, so the PagerDuty assignee can quickly get here.
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          # GHA env-vars don't have robust conditional logic, so we'll use these if-else branches to define some bash env-vars.
+          # GHA env-vars don't have robust conditional logic, so we'll use this if-else branch to define some bash env-vars.
           if [[ ${{ env.IS_CRITICAL }} == true ]]; then
             ALERT_SEV="critical"
             ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
@@ -133,7 +132,7 @@ jobs:
             "summary": "${ALERT_SUMMARY}",
             "source": "Github Actions",
             "severity": "${ALERT_SEV}",
-            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }} ."
+            "custom_details": "SFDX install: ${{ env.CLI_INSTALL_STATUS }}. Scanner install: ${{ env.SCANNER_INSTALL_STATUS }}. Smoke tests: ${{ env.SMOKE_TESTS_STATUS }}."
           },
           "links": [{
             "href": "${{ env.RUN_LINK }}",
