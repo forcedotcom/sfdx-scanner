@@ -26,15 +26,46 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: mkdir smoke-test-results
+
+      # === Set our environment variables, either using default values or the repo's secrets ===
+      - name: Set environment variables
+        id: env_var_setup
+        # We'll want to use bash for this, to avoid any cross-platform shenanigans
+        shell: bash
+        run: |
+          # In the following script, the use of the `echo "name=value" >> $GITHUB_ENV` structure is used to set/update
+          # environment variables. Such updates are visible to all subsequent steps.
+          #
+          # If the CLI_VERSION repo secret is set, we want to install that version of sfdx-cli, so we set an environment
+          # variable. Otherwise, we leave the environment variable unset, so it implicitly defaults to `latest`.
+          # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
+          if [[ -n "${{ secrets.CLI_VERSION }}" ]]; then
+            echo "CLI_VERSION=@${{ secrets.CLI_VERSION}}" >> $GITHUB_ENV
+          fi
+          # If the SCANNER_VERSION repo secret is set, we want to install that version of sfdx-scanner, so we set an
+          # environment variable. Otherwise, we leave the environment variable unset, so it implicitly defaults to `latest`.
+          # Note: This can be used to intentionally fail the GHA by providing an invalid version number.
+          if [[ -n "${{ secrets.SCANNER_VERSION }}" ]]; then
+            echo "SCANNER_VERSION=@${{ secrets.SCANNER_VERSION }}" >> $GITHUB_ENV
+          fi
+          # If the FAIL_SMOKE_TESTS repo secret is set to ANY value, we should respond by deleting the `test/test-jars`
+          # folder. The smoke tests expect this folder's contents to exist, so an invocation of `scanner:rule:add` should
+          # fail, thereby failing the smoke tests as a whole.
+          # Note: This serves no purpose aside from providing a way to simulate a smoke test failure.
+          if [[ -n "${{ secrets.FAIL_SMOKE_TESTS }}" ]]; then
+            rm -rf ./test/test-jars
+          fi
+
+
       # === Make three attempts to install sfdx through npm ===
       - name: Install SFDX
         id: sfdx_install
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g sfdx-cli) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g sfdx-cli)
+          (echo "::set-output name=retry_count::0" && npm install -g sfdx-cli${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && npm install -g sfdx-cli${{ env.CLI_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && npm install -g sfdx-cli${{ env.CLI_VERSION }})
 
       # === Make three attempts to install the scanner plugin through sfdx ===
       - name: Install Scanner Plugin
@@ -42,9 +73,9 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner) ||
-          (echo "::set-output name=retry_count::1" && sleep 60 && sfdx plugins:install @salesforce/sfdx-scanner) ||
-          (echo "::set-output name=retry_count::2" && sleep 300 && sfdx plugins:install @salesforce/sfdx-scanner)
+          (echo "::set-output name=retry_count::0" && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::1" && sleep 60 && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "::set-output name=retry_count::2" && sleep 300 && sfdx plugins:install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }})
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
@@ -84,7 +115,7 @@ jobs:
           # A link to this run, so the PagerDuty assignee can quickly get here.
           RUN_LINK: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          # GHA env-vars don't have robust conditional logic, so we'll use this if-else to define some bash env-vars.
+          # GHA env-vars don't have robust conditional logic, so we'll use this if-else branch to define some bash env-vars.
           if [[ ${{ env.IS_CRITICAL }} == true ]]; then
             ALERT_SEV="critical"
             ALERT_SUMMARY="Production heartbeat script failed on ${{ runner.os }}"
