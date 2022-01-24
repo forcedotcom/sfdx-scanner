@@ -14,7 +14,6 @@ orbs:
   node: circleci/node@4.5.1
   release-management: salesforce/npm-release-management@4
 
-
 commands:
   # Purpose: Checkout the code from github
   auth_and_checkout:
@@ -22,7 +21,7 @@ commands:
       - add_ssh_keys:
           fingerprints:
             # CircleCI deploy key (read/write), allows CircleCI to checkout code from Github.
-            - "0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5"
+            - '0e:88:a5:7f:1c:d7:87:50:e2:69:65:77:94:c9:7f:e5'
       - checkout
 
   # Purpose: Update node to either LTS or Current version.
@@ -58,7 +57,7 @@ commands:
               - << parameters.os >>
           steps:
             - run:
-                name: "Install node"
+                name: 'Install node'
                 # This script must explicitly be run in bash.
                 shell: bash.exe
                 command: |
@@ -67,7 +66,7 @@ commands:
 
             # After upgrading the node version in a Windows executor, we have to manually reinstall Yarn if we want to use it.
             - run:
-                name: "Install Yarn"
+                name: 'Install Yarn'
                 shell: bash.exe
                 command: npm install -g yarn
       # Regardless of OS, we want to log the version of Node we're using post-upgrade.
@@ -98,7 +97,7 @@ commands:
         type: string
     steps:
       - run:
-          name: "Install SFDX and tarball"
+          name: 'Install SFDX and tarball'
           shell: << parameters.shell >>
           command: |
             npm install -g sfdx-cli
@@ -113,15 +112,15 @@ commands:
   install_release_candidate:
     steps:
       - run:
-          name: "Install SFDX cli"
+          name: 'Install SFDX cli'
           command: npm install -g sfdx-cli
 
       - run:
-          name: "Install release candidate"
+          name: 'Install release candidate'
           command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
 
       - run:
-          name: "Log installed plugins"
+          name: 'Log installed plugins'
           command: sfdx plugins
 jobs:
   # Purpose: Performs all of the necessary setup for subsequent jobs to work. In general, all workflows should probably
@@ -162,7 +161,8 @@ jobs:
   linux-unit-tests:
     <<: *defaults
     parameters:
-      node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+      node-version: &node_version_param
+        # Define an anchor here, since we'll want to use this parameter again elsewhere.
         # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
         # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
         # ending in "-true".
@@ -197,7 +197,6 @@ jobs:
                 os: linux
                 lts: false
 
-
       # Unit tests
       - run:
           name: test
@@ -216,7 +215,7 @@ jobs:
   windows-unit-tests:
     executor:
       name: win/default # executor type
-      size: "medium"
+      size: 'medium'
       shell: bash.exe
     parameters:
       node-version: *node_version_param
@@ -281,7 +280,7 @@ jobs:
       - run: mkdir test-results
 
       - run:
-          name: "self-evaluate"
+          name: 'self-evaluate'
           command: |
             bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
           # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
@@ -326,13 +325,13 @@ jobs:
 
       # Set up the plugin
       - install_local_tarball:
-          dir-uri: "$(pwd)"
+          dir-uri: '$(pwd)'
           # This is the default Linux bash shell.
-          shell: "#/bin/bash -eo pipefail"
+          shell: '#/bin/bash -eo pipefail'
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
-          name: "smoke test"
+          name: 'smoke test'
           command: smoke-tests/smoke-test.sh sfdx
 
       # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
@@ -344,7 +343,7 @@ jobs:
   windows-tarball-test:
     executor:
       name: win/default # executor type
-      size: "medium"
+      size: 'medium'
     parameters:
       node-version: *node_version_param
     working_directory: C:\repo
@@ -377,13 +376,13 @@ jobs:
       # Set up the plugin
       - install_local_tarball:
           # Note that the URI we provide does NOT start with `C:`.
-          dir-uri: "/repo"
+          dir-uri: '/repo'
           # This script needs to be run with bash, or it won't work.
           shell: bash.exe
 
       # Run through the smoke test script. If everything passes, we can assume that the plugin is stable.
       - run:
-          name: "smoke test"
+          name: 'smoke test'
           command: smoke-tests\smoke-test.cmd sfdx
 
       # Since the results are expected to be non-null, upload them as an artifact to avoid tanking the tests.
@@ -415,7 +414,7 @@ jobs:
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
           # assume that the plugin is stable.
-          name: "Packaged sanity test"
+          name: 'Packaged sanity test'
           command: smoke-tests/smoke-test.sh sfdx
 
       # Upload an artifact for the results, so they're visible without failing the tests
@@ -428,7 +427,7 @@ jobs:
   windows-rc-test:
     executor:
       name: win/default # executor type
-      size: "medium"
+      size: 'medium'
     working_directory: C:\repo
 
     steps:
@@ -448,7 +447,7 @@ jobs:
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
           # assume that the plugin is stable.
-          name: "Packaged sanity test"
+          name: 'Packaged sanity test'
           command: smoke-tests\smoke-test.cmd sfdx
 
       # Upload an artifact for the results, so they're visible without failing the tests
@@ -463,7 +462,8 @@ workflows:
     jobs:
       # Step 1: Set up the test environment.
       - setup:
-          filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
+          filters:
+            &testing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
               ignore: /^v2-\d+-\d+$/
       # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
@@ -499,7 +499,8 @@ workflows:
     jobs:
       # Step 1: Validate that the branch is an acceptable candidate for publishing.
       - validate-candidate-branch:
-          filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
+          filters:
+            &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
               only: /^v2-\d+-\d+$/
       # Step 2: Publish the branch as a release candidate.
@@ -511,6 +512,7 @@ workflows:
           tag: latest-rc
           filters:
             <<: *publishing_filters
+          context: AWS
       # Step 3: Smoke test the release candidate on both Linux and Windows.
       - linux-rc-test:
           requires:
@@ -540,11 +542,11 @@ workflows:
           # values can be specified with a comma-separated list. All times are UTC.
           # So this expression means to run at 13:30 UTC every day. This time was chosen because it corresponds to
           # 8:30AM CDT, meaning that any issues will be surfaced before start of business.
-          cron: "30 13 * * *"
+          cron: '30 13 * * *'
           filters:
             branches:
               # Having this run against all branches would be bedlam, so we'll have it run just against dev.
-              only: "dev"
+              only: 'dev'
     jobs:
       # Step 1: Run the setup task to create the testing environment.
       - setup
@@ -581,4 +583,3 @@ workflows:
               # The values of the parameters will be appended to the jobs they create.
               # So we'll get "windows-tarball-test-lts" and "windows-tarball-test-current"
               node-version: [lts, current]
-
