@@ -511,6 +511,7 @@ workflows:
           tag: latest-rc
           filters:
             <<: *publishing_filters
+          context: AWS
       # Step 3: Smoke test the release candidate on both Linux and Windows.
       - linux-rc-test:
           requires:
