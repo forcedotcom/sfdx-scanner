@@ -13,7 +13,7 @@ import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
-import {uxEvents} from './ScannerEvents';
+import {uxEvents, EVENTS} from './ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -108,7 +108,7 @@ export class DefaultRuleManager implements RuleManager {
 
 		if (unmatchedTargets.length > 0) {
 			const warningKey = unmatchedTargets.length === 1 ? 'warning.targetSkipped' : 'warning.targetsSkipped';
-			uxEvents.emit('warning-always', messages.getMessage(warningKey, [`${unmatchedTargets.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage(warningKey, [`${unmatchedTargets.join(', ')}`]));
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate

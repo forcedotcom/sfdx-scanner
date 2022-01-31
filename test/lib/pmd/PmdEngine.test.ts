@@ -1,11 +1,12 @@
 import 'reflect-metadata';
 import {Messages} from '@salesforce/core';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
+import {RuleResult, RuleViolation} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
 import Sinon = require('sinon');
 import {PmdEngine}  from '../../../src/lib/pmd/PmdEngine'
-import {uxEvents} from '../../../src/lib/ScannerEvents';
+import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
@@ -28,12 +29,12 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 		[CUSTOM_CONFIG.EslintConfig, configFilePath]
 	]);
 
-	before(async () => {
+	beforeEach(async () => {
 		Sinon.createSandbox();
 
 		await testPmdEngine.init();
 	});
-	after(() => {
+	afterEach(() => {
 		Sinon.restore();
 	});
 	describe('processStdOut()', () => {
@@ -95,11 +96,100 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 
 			await (testPmdEngine as any).processStdOut(xml);
 			Sinon.assert.callCount(uxSpy, 3);
-			Sinon.assert.calledWith(uxSpy, 'warning-always', expectedConfigError);
-			Sinon.assert.calledWith(uxSpy, 'warning-always', expectedError);
-			Sinon.assert.calledWith(uxSpy, 'warning-always', expectedSuppressedViolation);
+			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, expectedConfigError);
+			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, expectedError);
+			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, expectedSuppressedViolation);
 		});
 	});
+
+	describe('#filterSkippedRulesFromResults()', () => {
+		function getResultTemplate(resultCount: number, violationsPerResult: number): RuleResult[] {
+			const results: RuleResult[] = [];
+			for (let i = 0; i < resultCount; i++) {
+				const violations: RuleViolation[] = [];
+				for (let j = 0; j < violationsPerResult; j++) {
+					violations.push({
+						line: 1,
+						column: 1,
+						severity: 1,
+						ruleName: `DummyRule${j}`,
+						category: 'DummyCategory',
+						url: '',
+						message: 'Some dummy message here'
+					});
+				}
+				results.push({
+					fileName: `DummyFile${i}`,
+					engine: 'PMD',
+					violations: violations
+				});
+			}
+			return results;
+		}
+
+		it('Only the specified rules are filtered', () => {
+			// Verify that at least one rule is being skipped.
+			expect((testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.size).to.not.equal(0);
+
+			// Instantiate our test results with 2 violations in one file.
+			const spoofedResults: RuleResult[] = getResultTemplate(1, 2);
+			// Set the second violation's rule name to one of the rules being skipped.
+			spoofedResults[0].violations[1].ruleName = (testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.keys().next().value;
+
+			// Send the results through filtering.
+			const filteredResults = (testPmdEngine as any).filterSkippedRulesFromResults(spoofedResults);
+
+			// We expect the filtered rule to have been removed, and the other violation to be preserved.
+			expect(filteredResults.length).to.equal(1);
+			expect(filteredResults[0].violations.length).to.equal(1);
+			expect(filteredResults[0].violations[0].ruleName).to.equal(`DummyRule0`);
+		});
+
+		it('If all violations are filtered, the result in question is dropped', () => {
+			// Verify that at least one rule is being skipped.
+			expect((testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.size).to.not.equal(0);
+
+			// Instantiate our test results with two files each having two violations.
+			const spoofedResults: RuleResult[] = getResultTemplate(2, 2);
+			// Set each violation in the first result to one of the skipped rules.
+			const skippedRule = (testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.keys().next().value;
+			spoofedResults[0].violations.forEach(v => v.ruleName = skippedRule);
+
+			// Send the results through filtering.
+			const filteredResults = (testPmdEngine as any).filterSkippedRulesFromResults(spoofedResults);
+
+			// We expect the result with only filtered rules to have been dropped altogether.
+			expect(filteredResults.length).to.equal(1);
+			expect(filteredResults[0].fileName).to.equal('DummyFile1');
+			expect(filteredResults[0].violations.length).to.equal(2);
+			expect(filteredResults[0].violations[0].ruleName).to.equal(`DummyRule0`);
+			expect(filteredResults[0].violations[1].ruleName).to.equal(`DummyRule1`);
+		});
+
+		it('The first time a rule is skipped, a warning should be logged', () => {
+			// Verify that at least one rule is being skipped.
+			expect((testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.size).to.not.equal(0);
+
+			// Instantiate our test results with 3 violations in one file.
+			const spoofedResults: RuleResult[] = getResultTemplate(1, 3);
+			// Set each of the three violations to use the filtered rule.
+			const skippedRule = (testPmdEngine as any).SKIPPED_RULES_TO_REASON_MAP.keys().next().value;
+			spoofedResults[0].violations.forEach(v => v.ruleName = skippedRule);
+
+			// Set up a spy on the uxEvents, so we can see whether any events are being fired.
+			const uxSpy = Sinon.spy(uxEvents, 'emit');
+
+			// Send the results through the filter.
+			const filteredResults = (testPmdEngine as any).filterSkippedRulesFromResults(spoofedResults);
+
+			// We expect an empty list, since all violations should have been dropped.
+			expect(filteredResults.length).to.equal(0);
+			// We also expect the uxEvent to have fired exactly once.
+			Sinon.assert.callCount(uxSpy, 1);
+			Sinon.assert.calledWith(uxSpy, 'info-verbose');
+		});
+
+	})
 
 	describe('processStdout unusual cases', () => {
 		it('Empty stdout', async () => {
