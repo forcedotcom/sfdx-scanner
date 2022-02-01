@@ -7,7 +7,7 @@ import {Config} from '../util/Config';
 import {ENGINE, LANGUAGE, Severity} from '../../Constants';
 import * as engineUtils from '../util/CommonEngineUtils';
 import CpdWrapper from './CpdWrapper';
-import {uxEvents} from '../ScannerEvents';
+import {uxEvents, EVENTS} from '../ScannerEvents';
 import crypto = require('crypto');
 import * as EnvVariable from '../util/EnvironmentVariable';
 
@@ -94,7 +94,7 @@ export class CpdEngine extends AbstractRuleEngine {
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean {
 		return true;
 	}
-	
+
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
@@ -105,12 +105,12 @@ export class CpdEngine extends AbstractRuleEngine {
 			this.logger.trace(`No matching cpd target files found. Nothing to execute.`);
 			return [];
 		}
-		
+
 		const ps: Promise<string>[] = [];
 		// cpd only allows one language to be speificed at a time, so we must run it for each
 		for (const language of Array.from(languageToPaths.keys())) {
 			ps.push(this.runLanguage(language, languageToPaths.get(language)));
-		}   
+		}
 
 		const runLanguageResults = await Promise.all(ps);
 		for (const stdout of runLanguageResults) {
@@ -136,7 +136,7 @@ export class CpdEngine extends AbstractRuleEngine {
 
 		// Let user know about file paths that could not be matched
 		if (unmatchedPaths.length > 0) {
-			uxEvents.emit('info-verbose', eventMessages.getMessage('info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
+			uxEvents.emit(EVENTS.INFO_VERBOSE, eventMessages.getMessage('info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
 		}
 
 		return languageToPaths;
@@ -187,7 +187,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		const xmlEnd = stdout.lastIndexOf(cpdEnd);
 		if (xmlStart != -1 && xmlEnd != -1) {
 			const cpdXml = stdout.slice(xmlStart, xmlEnd + cpdEnd.length);
-			const cpdJson = xml2js(cpdXml, {compact: false, ignoreDeclaration: true}); 
+			const cpdJson = xml2js(cpdXml, {compact: false, ignoreDeclaration: true});
 
 			const duplications =  cpdJson.elements[0].elements;
 			if (duplications) {
@@ -203,11 +203,11 @@ export class CpdEngine extends AbstractRuleEngine {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private jsonToRuleResults(duplications: any): RuleResult[] {   
+	private jsonToRuleResults(duplications: any): RuleResult[] {
 		const ruleResults: RuleResult[] = [];
 
 		for (const duplication of duplications) {
-		
+
 			const parts = duplication.elements;
 			const codeFragment = parts.find(part => {return part.name === 'codefragment'}).elements[0].cdata;
 			const occurences = parts.filter(part => {return part.name === 'file'});

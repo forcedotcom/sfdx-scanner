@@ -1,13 +1,13 @@
 import {Logger, Messages, SfdxError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
+import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
-import {uxEvents} from "../ScannerEvents";
+import {uxEvents, EVENTS} from "../ScannerEvents";
 import {FileHandler} from '../util/FileHandler';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
@@ -71,6 +71,13 @@ const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 
 
 abstract class BasePmdEngine extends AbstractRuleEngine {
+	/**
+	 * As per our internal policies, we want to avoid significantly changing output in minor releases, except for
+	 * high-severity security rules.
+	 * This Map is a temporary solution allowing us to silence new rules until they can be properly integrated.
+	 * @private
+	 */
+	private SKIPPED_RULES_TO_REASON_MAP: Map<string,string> = new Map([['eagerlyloadeddescribesobjectresult', 'Semantic version incompatible']]);
 
 	protected logger: Logger;
 	protected config: Config;
@@ -104,7 +111,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				return Severity.HIGH;
 			case 2:
 				return Severity.MODERATE;
-			case 3: 
+			case 3:
 			case 4:
 			case 5:
 				return Severity.LOW;
@@ -157,7 +164,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	 * and 'suppressedviolation' nodes are emitted as warnings from the CLI.
 	 */
 	protected processStdOut(stdout: string): RuleResult[] {
-		let violations: RuleResult[] = [];
+		let results: RuleResult[] = [];
 
 		this.logger.trace(`Output received from PMD: ${stdout}`);
 
@@ -172,15 +179,20 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			const elements =  pmdJson.elements[0].elements;
 			if (elements) {
 				this.emitErrorsAndWarnings(elements);
-				violations = this.xmlToRuleResults(elements);
+				results = this.xmlToRuleResults(elements);
 			}
 		}
 
-		if (violations.length > 0) {
+		// For now, we're handling filtering by running all rules, and then removing results for the skipped rules post-facto.
+		// This is acceptable currently, since we're only skipping rules that are functional but incompatible with our
+		// versioning schema.
+		results = this.filterSkippedRulesFromResults(results);
+
+		if (results.length > 0) {
 			this.logger.trace('Found rule violations.');
 		}
 
-		return violations;
+		return results;
 	}
 
 	/**
@@ -251,7 +263,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 					// by logging a verbose warning about the node type to the user, and writing the actual node itself
 					// to the internal logs.
 					uxEvents.emit(
-						"warning-verbose",
+						EVENTS.WARNING_VERBOSE,
 						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
 							node.name
 						])
@@ -304,6 +316,40 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		};
 	}
 
+	private filterSkippedRulesFromResults(unfilteredResults: RuleResult[]): RuleResult[] {
+		const filteredResults: RuleResult[] = [];
+		const alreadySkippedRules: Set<string> = new Set();
+		for (const result of unfilteredResults) {
+			const filteredViolations: RuleViolation[] = [];
+			for (const violation of result.violations) {
+				const ruleKey = violation.ruleName.toLowerCase();
+				// If the violation isn't for a skipped rule, add it to the filtered list.
+				if (!this.SKIPPED_RULES_TO_REASON_MAP.has(ruleKey)) {
+					filteredViolations.push(violation);
+				} else if (!alreadySkippedRules.has(ruleKey)) {
+					// If this is the first time we're skipping a violation for this particular rule, throw a verbose-only
+					// info-log about it.
+					uxEvents.emit(
+						EVENTS.INFO_VERBOSE,
+						eventMessages.getMessage("info.pmdRuleSkipped", [
+							violation.ruleName, this.SKIPPED_RULES_TO_REASON_MAP.get(ruleKey)
+						])
+					);
+					alreadySkippedRules.add(ruleKey);
+				}
+			}
+			// If there are still any violations after filtering, then create a new result and add it to the filtered list.
+			if (filteredViolations.length > 0) {
+				filteredResults.push({
+					engine: result.engine,
+					fileName: result.fileName,
+					violations: filteredViolations
+				});
+			}
+		}
+		return filteredResults;
+	}
+
 	/**
 	 * The PMD report contains a mix of violations and other issues. This method converts
 	 * these other issues intoto ux events.
@@ -320,7 +366,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			switch (node.name) {
 				case "error":
 					uxEvents.emit(
-						"warning-always",
+						EVENTS.WARNING_ALWAYS,
 						eventMessages.getMessage("warning.pmdSkippedFile", [
 							attributes.filename,
 							attributes.msg
@@ -330,7 +376,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 				case "suppressedviolation":
 					uxEvents.emit(
-						"warning-always",
+						EVENTS.WARNING_ALWAYS,
 						eventMessages.getMessage("warning.pmdSuppressedViolation", [
 							attributes.filename,
 							attributes.msg,
@@ -342,7 +388,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 				case "configerror":
 					uxEvents.emit(
-						"warning-always",
+						EVENTS.WARNING_ALWAYS,
 						eventMessages.getMessage("warning.pmdConfigError", [
 							attributes.rule,
 							attributes.msg
@@ -352,7 +398,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 				default:
 					uxEvents.emit(
-						"warning-verbose",
+						EVENTS.WARNING_VERBOSE,
 						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
 							node.name
 						])

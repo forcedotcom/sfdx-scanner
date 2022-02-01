@@ -1,6 +1,6 @@
 import {SfdxCommand} from '@salesforce/command';
 import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
-import {uxEvents} from './ScannerEvents';
+import {uxEvents, EVENTS} from './ScannerEvents';
 
 export abstract class ScannerCommand extends SfdxCommand {
 
@@ -57,11 +57,11 @@ export abstract class ScannerCommand extends SfdxCommand {
 	}
 
 	protected buildEventListeners(): void {
-		uxEvents.on('info-always', msg => this.displayInfo(msg, false));
-		uxEvents.on('info-verbose', msg => this.displayInfo(msg, true));
-		uxEvents.on('warning-always', msg => this.displayWarning(msg, false));
-		uxEvents.on('warning-verbose', msg => this.displayWarning(msg, true));
-		uxEvents.on('error-always', msg => this.displayError(msg));
-		uxEvents.on('error-verbose', msg => this.displayError(msg));
+		uxEvents.on(EVENTS.INFO_ALWAYS, msg => this.displayInfo(msg, false));
+		uxEvents.on(EVENTS.INFO_VERBOSE, msg => this.displayInfo(msg, true));
+		uxEvents.on(EVENTS.WARNING_ALWAYS, msg => this.displayWarning(msg, false));
+		uxEvents.on(EVENTS.WARNING_VERBOSE, msg => this.displayWarning(msg, true));
+		uxEvents.on(EVENTS.ERROR_ALWAYS, msg => this.displayError(msg));
+		uxEvents.on(EVENTS.ERROR_VERBOSE, msg => this.displayError(msg));
 	}
 }
