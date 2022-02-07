@@ -9,7 +9,7 @@ group = "sfdx"
 version = "1.0"
 
 val distDir = "$buildDir/../../dist"
-val pmdVersion = "6.38.0"
+val pmdVersion = "6.42.0"
 val pmdFile = "pmd-bin-$pmdVersion.zip"
 val pmdUrl = "https://github.com/pmd/pmd/releases/download/pmd_releases%2F${pmdVersion}/${pmdFile}"
 val skippableJarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
