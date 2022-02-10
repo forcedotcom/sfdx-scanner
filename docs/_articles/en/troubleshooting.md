@@ -58,7 +58,11 @@ property, and add `!**/bower_components/**` to exclude Bower dependencies.
 * Check that the compilation CLASSPATH contains the correct version of the PMD binary.
 
 
-### I successfully created the JAR file and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn't display my custom rules.
+### I successfully created my rule XML and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn't display my custom rules.
+- Double-check that the rules in your XML are exclusively XPath-based. If any of the rules use custom Java, then a JAR is required.
+- Ensure that the XML's path includes `category` as a directory.
+
+### I successfully created my JAR file and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn't display my custom rules.
 
 * Check that the XML Rule Definition file is included in the JAR. Run `jar tf /your/jar/file.JAR` to list the files in your JAR. 
 * Make sure your XML file is in a PATH that includes `category` as a directory. 

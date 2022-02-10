@@ -37,7 +37,7 @@ If the language is not already supported, please log an Issue as per
 ["How do I get support for additional languages?"](./en/faq/#q-how-do-i-get-support-for-additional-languages).
 
 #### Q: How do I add new rules for Language X?
-A: Currently, you can add custom rules for only __PMD__. Bundle these rules into a JAR, then add the JAR to the rule registry with the [`scanner:rule:add`](./en/scanner-commands/add/#example) command.
+A: Currently, you can add custom rules for only __PMD__. XPath-based rules may be referenced as standalone XML files. Java-based rules must be bundled into a JAR. The JAR/XML can then be added to the rule registry with the ```scanner:rule:add``` command.
 
 If the language is not already supported, follow the steps in "How do I add a new supported language to `Salesforce CLI Scanner`?"
 
