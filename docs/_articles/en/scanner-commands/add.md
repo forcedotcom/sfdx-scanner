@@ -28,7 +28,7 @@ XPath-only custom PMD rules may be added as standalone XML files. Java-based rul
 
 See the [PMD documentation](https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html) for information about writing rules. 
   
-This example shows how to specify two rule files directly.
+This example shows how to specify two files directly.
 ```bash
 $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml"
          Successfully added rules for apex.

@@ -15,14 +15,13 @@ PMD and Eslint's custom rules work very differently. This causes Scanner plugin 
 
 ### Writing PMD Custom Rules
 
-Here are the [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) on how to write PMD Custom Rules.
-
 Here are the [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) on how to write PMD Custom Rules. PMD Rules may be either XPath-based or Java-based, and these rule types must be authored differently.
 <br>
 To be compatible with the Salesforce CLI Scanner, PMD custom rules must also meet the following criteria:
 - Rules must  be __defined__ in XML files whose path matches the format ```<some base dir>/category/<language>/<filename>.xml```.
 - XPath-based rules can be contained in standalone XML files.
 - Java-based rules must be compiled, and bundled into a JAR.
+- Custom rulesets consisting of references to other rules may be contain
 
 ### Compiling Java-Based PMD Custom Rules
 When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config.json```.  
