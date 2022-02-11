@@ -21,7 +21,7 @@ To be compatible with the Salesforce CLI Scanner, PMD custom rules must also mee
 - Rules must  be __defined__ in XML files whose path matches the format ```<some base dir>/category/<language>/<filename>.xml```.
 - XPath-based rules can be contained in standalone XML files.
 - Java-based rules must be compiled, and bundled into a JAR.
-- Custom rulesets consisting of references to other rules may be contain
+- Custom rulesets consisting of references to existing rules may be contained in standalone XML files whose path matches the format ```<some base dir>/rulesets/<language>/<filename>.xml```
 
 ### Compiling Java-Based PMD Custom Rules
 When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config.json```.  
