@@ -54,7 +54,9 @@ tasks.register<Copy>("installPmd") {
 }
 
 dependencies {
-  implementation ("com.googlecode.json-simple:json-simple:1.1.1")
+  implementation ("com.googlecode.json-simple:json-simple:1.1.1") {
+    exclude("junit")
+  }
   implementation("com.google.code.gson:gson:2.3")
   implementation("com.google.guava:guava:28.0-jre")
   testImplementation("org.mockito:mockito-core:1.+")
