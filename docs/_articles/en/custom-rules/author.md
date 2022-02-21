@@ -15,9 +15,15 @@ PMD and Eslint's custom rules work very differently. This causes Scanner plugin 
 
 ### Writing PMD Custom Rules
 
-Here are the [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) on how to write PMD Custom Rules.
+Here are the [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) on how to write PMD Custom Rules. PMD Rules may be either XPath-based or Java-based, and these rule types must be authored differently.
+<br>
+To be compatible with the Salesforce CLI Scanner, PMD custom rules must also meet the following criteria:
+- Rules must  be __defined__ in XML files whose path matches the format ```<some base dir>/category/<language>/<filename>.xml```.
+- XPath-based rules can be contained in standalone XML files.
+- Java-based rules must be compiled, and bundled into a JAR.
+- Custom rulesets consisting of references to existing rules may be contained in standalone XML files whose path matches the format ```<some base dir>/rulesets/<language>/<filename>.xml```
 
-### Compiling PMD Custom Rules
+### Compiling Java-Based PMD Custom Rules
 When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config.json```.  
 
 If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To compile from the command line, use the ```javac``` command. For example:
@@ -26,7 +32,7 @@ If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To comp
 
 Use only [version {{ site.data.versions.pmd }}](https://github.com/pmd/pmd/releases/download/pmd_releases%2F{{ site.data.versions.pmd }}/pmd-bin-{{ site.data.versions.pmd }}.zip) of PMD for writing the custom rules. 
 
-### Bundling PMD Custom Rules
+### Bundling Java-Based PMD Custom Rules
 If you haven't already, create the XML rule [definition file](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) for your new rule(s). Add them to a directory structure like this: 
 ```<some base dir>/category/<language>/yourRuleDefinition.xml```
 
