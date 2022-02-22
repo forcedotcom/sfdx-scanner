@@ -5,6 +5,47 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
+## [v2.13.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.0) (02-23-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.12.0...v2.13.0)
+
+### Release Summary
+
+* Updated PMD to 6.42.0
+	* Note: EagerlyLoadedSObjectDescribeResult rule is skipped
+* Upgrades to local RetireJS Vulnerability Repository
+
+
+**Closed issues:**
+
+- \[BUG\] Cannot find Config.json after installing sfdx-scanner in an Ubuntu machine [\#581](https://github.com/forcedotcom/sfdx-scanner/issues/581)
+- \[BUG\] JavaScript heap out of memory while invoking RetireJS engine [\#570](https://github.com/forcedotcom/sfdx-scanner/issues/570)
+- \[BUG\] [\#569](https://github.com/forcedotcom/sfdx-scanner/issues/569)
+- \[RESOLVED\] Salesforce Scanner CLI Plugin - Heap Out of Memory Issue [\#564](https://github.com/forcedotcom/sfdx-scanner/issues/564)
+- \[Feature Request\] Compatibility with lint-staged [\#551](https://github.com/forcedotcom/sfdx-scanner/issues/551)
+- Windows install results in "Invalid Character" Windows Host Script error [\#539](https://github.com/forcedotcom/sfdx-scanner/issues/539)
+- \[BUG\] Unable to install sfdx-scanner: FailedDigitalSignatureVerification [\#453](https://github.com/forcedotcom/sfdx-scanner/issues/453)
+
+**Merged pull requests:**
+
+- @W-10731711@: Updated RetireJS to latest version. [\#583](https://github.com/forcedotcom/sfdx-scanner/pull/583)
+- @W-8885529@ Excluding transitive dependency on junit and hamcrest [\#582](https://github.com/forcedotcom/sfdx-scanner/pull/582)
+- @W-10477402@ Recreate symlinks to work around nvm issue [\#580](https://github.com/forcedotcom/sfdx-scanner/pull/580)
+- @W-10667880@: Updated documentation to include information about standalone XML files. [\#578](https://github.com/forcedotcom/sfdx-scanner/pull/578)
+- @W-10530556@: Updated locally-stored RetireJS vulnerability catalog. [\#577](https://github.com/forcedotcom/sfdx-scanner/pull/577)
+- @W-10488971@: Upgrading PMD from 6.38.0 to 6.42.0. [\#576](https://github.com/forcedotcom/sfdx-scanner/pull/576)
+- @W-10488954@: Implemented hardcoded rule skipping mechanism. [\#574](https://github.com/forcedotcom/sfdx-scanner/pull/574)
+- @W-10477617@: Switched to a circleci context for publishing and signing. [\#573](https://github.com/forcedotcom/sfdx-scanner/pull/573)
+- @W-10302014@: Updated heartbeat GHA with support for env-vars to auto-fail script [\#568](https://github.com/forcedotcom/sfdx-scanner/pull/568)
+- @W-10294218@: Fixed malformed JSON in PagerDuty alert creation code. [\#566](https://github.com/forcedotcom/sfdx-scanner/pull/566)
+- @W-10165627@: Added retry logic to heartbeat script, and more nuance to alert severity. [\#562](https://github.com/forcedotcom/sfdx-scanner/pull/562)
+- @W-10079694@: Remove dependency on NPX, thereby fixing failing tests [\#559](https://github.com/forcedotcom/sfdx-scanner/pull/559)
+- @W-9971168@: Added coverage enforcement in both nyc and gradle. Cover… [\#557](https://github.com/forcedotcom/sfdx-scanner/pull/557)
+- @W-9954706@: Parameterized unit test jobs, and added them to the dail… [\#556](https://github.com/forcedotcom/sfdx-scanner/pull/556)
+- @W-9296556@: Moved engine execution to the inside of a try-catch, to … [\#554](https://github.com/forcedotcom/sfdx-scanner/pull/554)
+- @W-9954706@: Changed smoke tests to daily run instead of weekly. [\#548](https://github.com/forcedotcom/sfdx-scanner/pull/548)
+
+
 ## [v2.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.12.0) (09-29-2021)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.11.0...v2.12.0)
