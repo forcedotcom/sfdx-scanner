@@ -19,19 +19,20 @@ module.exports = {
 		"readCustomRulePathFileFailed": "Failed to read custom rule path file: %s",
 		"writeCustomRulePathFileFailed": "Failed to write to custom rule path file: %s"
 	},
-	"examples": `PMD: Custom PMD rules should be in JARs. Adhere to PMD conventions, including defining rules in XMLs under a /category directory.
-Refer to PMD's documentation for information on writing rules: https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html
+	"examples": `PMD: XPath-based rules may be added as standalone XMLs. Java-based rules must be contained in JARs. Adhere
+to PMD conventions, including defining rules in XMLs contained in a /category directory.
+Refer to PMD's documentation for more information on writing rules: https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html
 
-	You may specify one or more JARs directly.
-		E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
+	You may specify one or more files directly.
+		E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml"
 			Successfully added rules for apex.
 			2 path(s) added:
-			/Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
+			/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml
 
-	You may also specify a directory containing one or more JARs, all of which will be added.
+	You may also specify a directory containing one or more JARs/XMLs, all of which will be added.
 		E.g., $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
 			Successfully added rules for apex.
 			2 path(s) added:
-			/Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar
+			/Users/me/rules/SomeJar.jar,/Users/me/rules/AnotherJar.jar,/Users/me/rules/category/apex/MyRules.xml
 	`
 };

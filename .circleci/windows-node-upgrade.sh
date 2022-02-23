@@ -35,3 +35,33 @@ WANTED_VERSION=`echo ${WANTED_VERSION}| sed 's/ *$//g'`
 # Install and switch to the desired version
 nvm install ${WANTED_VERSION}
 nvm use ${WANTED_VERSION}
+
+# The Windows orb contains nvm-windows 1.1.7, this has a known bug with npm 8.3.1.
+# Workaround the issue by recreating the symlinks as described here https://github.com/npm/cli/issues/4340#issuecomment-1025833090
+cd "C:\ProgramData\nvm\v${WANTED_VERSION}\node_modules\npm\node_modules\@npmcli"
+rm arborist
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/arborist" .
+
+cd "C:\ProgramData\nvm\v${WANTED_VERSION}\node_modules\npm\node_modules"
+rm libnpmversion
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmversion" .
+rm libnpmteam
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmteam" .
+rm libnpmsearch
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmsearch" .
+rm libnpmpublish
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmpublish" .
+rm libnpmpack
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmpack" .
+rm libnpmorg
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmorg" .
+rm libnpmhook
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmhook" .
+rm libnpmfund
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmfund" .
+rm libnpmexec
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmexec" .
+rm libnpmdiff
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmdiff" .
+rm libnpmaccess
+ln -s "/c/Program Files/nodejs/node_modules/npm/workspaces/libnpmaccess" .

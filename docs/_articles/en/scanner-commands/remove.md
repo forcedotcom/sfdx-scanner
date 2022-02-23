@@ -28,10 +28,10 @@ Run the command with no parameters to see a list of all currently registered cus
 $ sfdx scanner:rule:remove
 ```
 
-Use the ```-p|--path``` parameter to specify the path or paths you want to remove from the registry. This example removes the rules defined in ```somerules.jar``` and all JARs contained in the ```rules``` folder.
+Use the ```-p|--path``` parameter to specify the path or paths you want to remove from the registry. This example removes the rules defined in ```somerules.jar``` and ```myrules.xml```, and all JARs/XMLs contained in the ```rules``` folder.
   
 ```bash
-$ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
+$ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/category/apex/myrules.xml,~/path/to/folder/containing/rules"
 ```  
   		
 By default, this command lists the rules that will be removed and prompts you for confirmation. Use the ```-f|--force``` flag to bypass that confirmation. 

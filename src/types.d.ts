@@ -40,6 +40,22 @@ export type RuleResult = {
 	violations: RuleViolation[];
 };
 
+/**
+ * A descriptor provided to a rule engine's `runEngine()` method, providing all information needed to run the engine.
+ * @property ruleGroups - Groups of rules that should be run
+ * @property rules - Individual rules that should be run
+ * @property target - An array of targets for the rules to run against
+ * @property engineOptions - A mapping of string keys to string values. Not all key-value pairs will apply to all engines.
+ * @property normalizeSeverity - If true, the severity will be normalized to our global standard instead of engine-specific
+ */
+export type EngineExecutionDescriptor = {
+	ruleGroups: RuleGroup[];
+	rules: Rule[];
+	target: RuleTarget[];
+	engineOptions: Map<string,string>;
+	normalizeSeverity: boolean;
+};
+
 export type EngineExecutionSummary = {
 	fileCount: number;
 	violationCount: number;
