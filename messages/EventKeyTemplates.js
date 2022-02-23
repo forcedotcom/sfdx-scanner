@@ -1,11 +1,12 @@
 module.exports = {
-	 "info": {
+	"info": {
 		"categoryImplicitlyRun": "Implicitly including %s rules from category '%s'",
 		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s",
 		"usingEngineConfigFile": "Using engine configuration file at %s",
 		"generalInternalLog": "Log from Java: %s",
 		"customEslintHeadsUp": "About to run Eslint with custom config in %s. Please make sure your current directory has all the required NPM dependencies.",
 		"customPmdHeadsUp": "About to run PMD with custom config in %s. Please make sure that any custom rule references have already been added to the plugin through scanner:rule:add command.",
+		"pmdRuleSkipped": "Omitting results for PMD rule \"%s\". Reason: %s.",
 		"unmatchedPathExtensionCpd": "Path extensions for the following files will not be processed by CPD: %s"
 	},
 	"warning": {

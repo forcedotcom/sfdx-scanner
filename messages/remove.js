@@ -31,7 +31,7 @@ specify one or more paths to remove, or omit it to receive a list of all valid c
 
 You may use the --path parameter to specify one or more paths to remove.
 	E.g., $ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
-		Deregisters the rules defined in somerules.jar and any JARs contained in the rules folder.
+		Deregisters the rules defined in somerules.jar and any JARs/XMLs contained in the rules folder.
 
 By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed.
 The --force flag may be used to bypass that confirmation.

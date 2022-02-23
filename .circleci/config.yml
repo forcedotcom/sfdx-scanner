@@ -82,8 +82,10 @@ commands:
           test_results_path: pmd-cataloger/build/test-results/
       - store_test_results:
           path: test-results
-      - store_artifacts: # upload test coverage as artifact.
+      - store_artifacts: # upload nyc test coverage as artifact.
           path: test-coverage
+      - store_artifacts: # upload jacoco coverage of pmd-cataloger as artifact
+          path: pmd-cataloger/build/reports/jacoco/test
 
   # Purpose: Install SFDX, and the locally-built tarball of the plugin.
   install_local_tarball:
@@ -159,13 +161,42 @@ jobs:
   # Purpose: Runs the unit tests in a Linux environment.
   linux-unit-tests:
     <<: *defaults
+    parameters:
+      node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+        # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
+        # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
+        # ending in "-true".
+        type: enum
+        enum:
+          - lts
+          - current
+        default: lts
+        description: Which version of node should be used.
     steps:
       - attach_workspace:
           at: ~/repo
 
-      # We'll want to use the LTS version of node.
-      - update_node:
-          os: linux
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
+
 
       # Unit tests
       - run:
@@ -187,14 +218,39 @@ jobs:
       name: win/default # executor type
       size: "medium"
       shell: bash.exe
+    parameters:
+      node-version: *node_version_param
     working_directory: C:\repo
     steps:
       - attach_workspace:
           at: C:\repo
 
-      # We'll want to use the LTS version of node.
-      - update_node:
-          os: windows
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: windows
+                lts: false
+
+      # The `setup` job is in a Unix environment. Calling `yarn` in that context adds bash files to `node_modules/.bin`,
+      # but Windows also requires `.cmd` files. So we re-run `yarn` here before running our tests.
+      # NOTE: This is only required for the Windows unit tests, not the tarball test, because the latter already has
+      # everything it needs in the tarball.
+      - run: yarn --ignore-scripts
 
       - run: mkdir test-results
 
@@ -242,16 +298,7 @@ jobs:
   linux-tarball-test:
     <<: *defaults
     parameters:
-      node-version: &node_version_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
-        # While we could technically use a boolean here, we're using an enum instead. We do this because the value of
-        # the parameter is appended to jobs created by a matrix, and a job ending in "-lts" is more meaningful than a job
-        # ending in "-true".
-        type: enum
-        enum:
-          - lts
-          - current
-        default: lts
-        description: Which version of node should be used.
+      node-version: *node_version_param
     steps:
       - attach_workspace:
           at: ~/repo
@@ -464,6 +511,7 @@ workflows:
           tag: latest-rc
           filters:
             <<: *publishing_filters
+          context: AWS
       # Step 3: Smoke test the release candidate on both Linux and Windows.
       - linux-rc-test:
           requires:
@@ -484,16 +532,16 @@ workflows:
             - windows-rc-test
           filters:
             <<: *publishing_filters
-  # Purpose: Run the tarball tests on Linux and Windows, against the LTS and Current versions of node.
-  # Triggered by: Nothing. Runs automatically on a weekly cadence.
-  weekly-smoke-test:
+  # Purpose: Run the tarball and unit tests on Linux and Windows, against the LTS and Current versions of node.
+  # Triggered by: Nothing. Runs automatically on a daily cadence.
+  daily-smoke-test:
     triggers:
       - schedule:
           # Cron syntax is "minute[0-59] hour[0-23] date[1-31] month[1-12] day[0-6]". '*' is 'any value', and multiple
           # values can be specified with a comma-separated list. All times are UTC.
-          # So this expression means to run at 13:30 UTC every Monday. This time was chosen because it corresponds to
-          # 8:30AM CDT, meaning that any issues will be surfaced before start of business on Monday morning.
-          cron: "30 13 * * 1"
+          # So this expression means to run at 13:30 UTC every day. This time was chosen because it corresponds to
+          # 8:30AM CDT, meaning that any issues will be surfaced before start of business.
+          cron: "30 13 * * *"
           filters:
             branches:
               # Having this run against all branches would be bedlam, so we'll have it run just against dev.
@@ -501,7 +549,23 @@ workflows:
     jobs:
       # Step 1: Run the setup task to create the testing environment.
       - setup
-      # Step 2: Create matrices for the tarball jobs to run with both LTS and Current node.
+      # Step 2: Create matrices for the unit test and tarball jobs to run with both LTS and Current node.
+      - linux-unit-tests:
+          requires:
+            - setup
+          matrix:
+            # The values of the parameters will be appended to the jobs they create.
+            # So we'll get "linux-unit-tests-lts" and "linux-unit-tests-current"
+            parameters:
+              node-version: [lts, current]
+      - windows-unit-tests:
+          requires:
+            - setup
+          matrix:
+            # The values of the parameters will be appended to the jobs they create.
+            # So we'll get "windows-unit-tests-lts" and "windows-unit-tests-current"
+            parameters:
+              node-version: [lts, current]
       - linux-tarball-test:
           requires:
             - setup

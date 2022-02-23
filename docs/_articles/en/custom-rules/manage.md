@@ -15,6 +15,8 @@ To manage rules, an important distinction is that while PMD custom rules can be 
 ### Adding Rule(s)
 Use the ```scanner:rule:add``` [command](./en/scanner-commands/add/) to add a custom rule to the Salesforce CLI Scanner plug-in. Use the ```-p|--path``` parameter to specify the JAR file that contains your custom rule definitions. You can specify multiple JAR files to add multiple custom rules for a single language. You can also use the parameter to specify a directory that contains multiple JAR files. 
 
+Use the ```scanner:rule:add``` [command](./en/scanner-commands/add/) to add a custom rule to the Salesforce CLI Scanner plug-in. Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the parameter to specify a directory that contains multiple JAR/XML files.
+
 To add one or more custom rules to multiple languages, use a separate ```scanner:rule:add``` for each language. 
 
 For example, to add a single JAR file for the Apex language:
@@ -24,13 +26,13 @@ sfdx scanner:rule:add --language apex --path "path/to/your/File.jar"
 sfdx scanner:rule:add -l apex -p "path/to/your/File.jar"
 ```
 
-To add a directory path that contains multiple JAR files for the same language:
+To add a directory path that contains multiple JAR/XML files for the same language:
 ```bash
 sfdx scanner:rule:add --language apex --path "path/to/your/files"
 (OR)
 sfdx scanner:rule:add -l apex -p "path/to/your/files"
 ```
-To add multiple paths to JARs that are in different locations for the same language:
+To add multiple paths to files that are in different locations for the same language:
 ```bash
 sfdx scanner:rule:add --language apex --path "path/to/your/files,/another/path/Custom.jar,/yet/another/jar/lib"
 (OR)
@@ -49,7 +51,7 @@ You can now run your custom rules just like you [run](./en/scanner-commands/run/
 
 ### Removing Rule(s)
 
-Remove custom rules from the catalog with the ```scanner:rule:remove``` [command](./en/scanner-commands/remove/). The rules defined in the JAR file you specify with the ```-p|--path``` parameter are removed from the catalog. 
+Remove custom rules from the catalog with the ```scanner:rule:remove``` [command](./en/scanner-commands/remove/). The rules defined in the JAR/XML file you specify with the ```-p|--path``` parameter are removed from the catalog. 
 
 Use the ``` --force ``` parameter to bypass confirmation of the removal.
 

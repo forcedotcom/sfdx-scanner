@@ -9,7 +9,7 @@ import * as PmdLanguageManager from './PmdLanguageManager';
 import {PmdSupport} from './PmdSupport';
 import { PMD_LIB } from '../../Constants';
 import path = require('path');
-import {uxEvents} from '../ScannerEvents';
+import {uxEvents, EVENTS} from '../ScannerEvents';
 import { Controller } from '../../Controller';
 import { PMD_CATALOG_FILE, PMD_VERSION } from '../../Constants';
 
@@ -122,7 +122,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 						pathSet.add(value);
 					} else {
 						// The catalog file may have been deleted or moved. Show the user a warning.
-						uxEvents.emit('warning-always', messages.getMessage('warning.customRuleFileNotFound', [value, lang]));
+						uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.customRuleFileNotFound', [value, lang]));
 					}
 				}
 			}

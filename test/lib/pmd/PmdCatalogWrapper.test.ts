@@ -7,7 +7,7 @@ import Sinon = require('sinon');
 import path = require('path');
 import {ENGINE,LANGUAGE,PMD_VERSION} from '../../../src/Constants';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
-import {uxEvents} from '../../../src/lib/ScannerEvents';
+import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import { after } from 'mocha';
 
 // In order to get access to PmdCatalogWrapper's protected methods, we're going to extend it with a test class here.
@@ -175,7 +175,7 @@ describe('PmdCatalogWrapper', () => {
 
 					// A warning should be displayed
 					Sinon.assert.calledOnce(uxSpy);
-					Sinon.assert.calledWith(uxSpy, 'warning-always', `Custom rule file path [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Custom rule file path [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
 				});
 			});
 		});
