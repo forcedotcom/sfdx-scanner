@@ -19,6 +19,7 @@ function run(): void {
 
 		// Examine the title for the expected patterns
 		const title = pullRequest.title;
+		console.log(`${JSON.stringify(pullRequest)}`);
 		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title)) {
 			console.log(`PR Title '${title}' accepted.`);
 		} else {
