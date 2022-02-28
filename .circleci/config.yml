@@ -544,8 +544,11 @@ workflows:
           cron: "30 13 * * *"
           filters:
             branches:
-              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
-              only: "dev"
+              # Having this run against all branches would be bedlam, so we'll have it run just against dev, and dev-3,
+              # the branch we're using for our pilot features.
+              only:
+                - "dev"
+                - "dev-3"
     jobs:
       # Step 1: Run the setup task to create the testing environment.
       - setup
