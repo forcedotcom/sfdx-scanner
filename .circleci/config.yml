@@ -465,7 +465,7 @@ workflows:
       - setup:
           filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /^v2-\d+-\d+$/
+              ignore: /^v[23]-\d+-\d+$/
       # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
       # step in Linux.
       - linux-unit-tests:
@@ -544,8 +544,11 @@ workflows:
           cron: "30 13 * * *"
           filters:
             branches:
-              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
-              only: "dev"
+              # Having this run against all branches would be bedlam, so we'll have it run just against dev, and dev-pilot,
+              # the branch we're using for our pilot features.
+              only:
+                - "dev"
+                - "dev-pilot"
     jobs:
       # Step 1: Run the setup task to create the testing environment.
       - setup
