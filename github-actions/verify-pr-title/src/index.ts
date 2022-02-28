@@ -21,7 +21,7 @@ function run(): void {
 		const title = pullRequest.title;
 		console.log(`${JSON.stringify(pullRequest)}`);
 		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title)) {
-			console.log(`PR Title '${title}' accepted.`);
+			console.log(`PR Title '${title}' accepted. beep`);
 		} else {
 			core.setFailed(
 				`PR Title '${title}' is missing a valid GUS work item OR it starts with d/ or r/`
