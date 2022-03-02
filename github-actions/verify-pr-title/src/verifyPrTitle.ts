@@ -26,10 +26,11 @@ export function verifyPRTitleForBadTitle(title: string): boolean {
 
 
 export function verifyPRTitleForBaseBranch(title: string, baseBranch: string): boolean {
-	// If the base branch isn't `dev`, then there's no validation concerns here.
-	if (baseBranch !== 'dev') {
-		return true;
+	// If the base branch is `dev`, we need to make sure that the version indicator string is present.
+	if (baseBranch === 'dev') {
+		return reVersion.test(title);
+	} else {
+		// Otherwise, we need to make sure the version indicator is absent.
+		return !reVersion.test(title);
 	}
-	// For `dev`, we need to make sure that the version indicator is present in the title.
-	return reVersion.test(title);
 }

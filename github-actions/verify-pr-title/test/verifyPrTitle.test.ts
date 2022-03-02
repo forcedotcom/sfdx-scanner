@@ -36,10 +36,6 @@ describe("Positive Tests", () => {
 		expect(verifyPRTitleForBaseBranch("this title has the version indicator [2.x]", "dev")).to.equal(true);
 	});
 
-	it("Branch is not dev and title has version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has version indicator [2.x]", "release")).to.equal(true);
-	});
-
 	it("Branch is not dev and title lacks version indicator", () => {
 		expect(verifyPRTitleForBaseBranch("this title has version indicator [3.x]", "release")).to.equal(true);
 	});
@@ -76,5 +72,9 @@ describe("Negative Tests", () => {
 
 	it("Branch is dev and title lacks version indicator", () => {
 		expect(verifyPRTitleForBaseBranch("no version indicator here", "dev")).to.equal(false);
+	});
+
+	it("Branch is not dev and title has version indicator", () => {
+		expect(verifyPRTitleForBaseBranch("this title has version indicator [2.x]", "release")).to.equal(false);
 	});
 });
