@@ -5,7 +5,7 @@ lang: en
 
 ## What are Custom Rules?
 
-Let's say your codebase has specific and repetitive coding issues that you want to address and clean up. Ideally you'd use the built-in rules of the Salesforce CLI Scanner to find these rule violations. But sometimes the problems exist only in the context of your codebase, and the built-in rules may not catch them. In this case, create your own _custom rules_ to highlight these issues as rule violations when you scan your code.
+Let's say your codebase has specific and repetitive coding issues that you want to address and clean up. Ideally you'd use the built-in rules of the Salesforce Code Analyzer to find these rule violations. But sometimes the problems exist only in the context of your codebase, and the built-in rules may not catch them. In this case, create your own _custom rules_ to highlight these issues as rule violations when you scan your code.
 
 PMD and Eslint's custom rules work very differently. This causes Scanner plugin to deal with both types in distinctly different ways. Please note that information related to PMD Custom Rules does NOT apply to Eslint Custom Rules.
 
@@ -17,7 +17,7 @@ PMD and Eslint's custom rules work very differently. This causes Scanner plugin 
 
 Here are the [instructions](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html) on how to write PMD Custom Rules. PMD Rules may be either XPath-based or Java-based, and these rule types must be authored differently.
 <br>
-To be compatible with the Salesforce CLI Scanner, PMD custom rules must also meet the following criteria:
+To be compatible with the Salesforce Code Analyzer, PMD custom rules must also meet the following criteria:
 - Rules must  be __defined__ in XML files whose path matches the format ```<some base dir>/category/<language>/<filename>.xml```.
 - XPath-based rules can be contained in standalone XML files.
 - Java-based rules must be compiled, and bundled into a JAR.

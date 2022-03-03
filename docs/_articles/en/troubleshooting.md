@@ -3,7 +3,7 @@ title: Troubleshooting Common Issues
 lang: en
 ---
 
-Here are some troubleshooting tips to fix common issues when you use the Salesforce CLI Scanner plug-in.
+Here are some troubleshooting tips to fix common issues when you use the Salesforce Code Analyzer plug-in.
 
 ## Using `scanner:run` command
 
@@ -72,7 +72,7 @@ property, and add `!**/bower_components/**` to exclude Bower dependencies.
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
 
-One possible reason is that the Java version you used to build your code is different from the version the Salesforce CLI Scanner plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
+One possible reason is that the Java version you used to build your code is different from the version the Salesforce Code Analyzer plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
 
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
@@ -93,7 +93,7 @@ In the directory where you execute the `scanner:run` command, install the requir
 
 ### Commands display `Javascript is not currently supported by the PMD engine`.
 
-Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
+Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce Code Analyzer plug-in. We plan to restore this feature in a future version.
 
 Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
 

@@ -7,8 +7,8 @@ lang: en
 dependencies and identifies those that have known security vulnerabilities. It has a lively and responsive community,
 and its database of vulnerable libraries is updated frequently.
 
-## How does Salesforce CLI Scanner use RetireJS?
-Salesforce CLI Scanner uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.
+## How does Salesforce Code Analyzer use RetireJS?
+Salesforce Code Analyzer uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.
 
 Files representing vulnerable dependencies are detected by their name *or* by examining their content, and the scanner
 can even examine the contents of a ZIP to find vulnerabilities within.

@@ -1,11 +1,11 @@
 ---
-title: Install Salesforce Scanner CLI Plugin
+title: Install Salesforce Code Analyzer Plugin
 lang: en
 ---
 
 ## Install the plug-in
 
-Like all the Salesforce CLI plug-ins, you install the Scanner CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in.
+Like all the Salesforce CLI plug-ins, you install the Analyzer CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in.
 
 
 ```bash
@@ -14,7 +14,7 @@ Installing plugin @salesforce/sfdx-scanner...
 installed v{{ site.data.versions.scanner }} 
 ```
 
-#### Check that the scanner plug-in is installed
+#### Check that the Analyzer plug-in is installed
 ```bash
 $ sfdx plugins
 @salesforce/sfdx-scanner {{ site.data.versions.scanner }}
@@ -26,7 +26,7 @@ Installing plugin @salesforce/sfdx-scanner...
 installed v{{ site.data.versions.scanner }}
 ```
 
-#### Display the usage and help for the scanner commands
+#### Display the usage and help for the Analyzer commands
 ```bash
 $ sfdx scanner --help
 Scan code to detect code quality issues and security vulnerabilities.
@@ -45,7 +45,7 @@ TOPICS
 ```
 
 ## Upgrade plug-in
-To update the scanner plug-in to the latest version, you can follow the next step.
+To update the Analyzer plug-in to the latest version, you can follow the next step.
 
 ```bash
 $ sfdx plugins:update

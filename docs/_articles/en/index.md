@@ -1,5 +1,5 @@
 ---
-title: Salesforce CLI Scanner Plug-In
+title: Salesforce Code Analyzer Plug-In
 permalink: /
 lang: en
 ---
@@ -10,14 +10,14 @@ lang: en
 </div>
 <br>
 
-## Salesforce CLI Scanner Plug-in
+## Salesforce Code Analyzer Plug-in
 
-The Salesforce CLI Scanner plug-in is a unified tool for static analysis of source code, in multiple languages
+The Salesforce Code Analyzer plug-in is a unified tool for static analysis of source code, in multiple languages
 (including Apex), with a consistent command-line interface and report output. We currently support the
 [PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/).
 We may add support for more rule engines in the future.
 
-The Salesforce CLI Scanner Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code. 
+The Salesforce Code Analyzer Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code. 
 
 You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
 
