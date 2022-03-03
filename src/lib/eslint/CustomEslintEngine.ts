@@ -28,9 +28,9 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
-			case 1: 
+			case 1:
 				return Severity.MODERATE;
-			case 2: 
+			case 2:
 				return Severity.HIGH;
 			default:
 				return Severity.MODERATE;
@@ -91,13 +91,13 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			// Map results to supported format
 			this.helper.addRuleResultsFromReport(this.getName(), results, report, cli.getRules(), this.processRuleViolation());
 		}
-		
+
 		return results;
 	}
-	
+
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private async extractConfig(configFile: string): Promise<Record<string, any>> {
-		
+
 		const fileHandler = this.dependencies.getFileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'ConfigFileDoesNotExist', [configFile]);
@@ -115,7 +115,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		} catch (error) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'InvalidJson', [configFile, error.message]);
 		}
-		
+
 		return config;
 	}
 

@@ -280,7 +280,7 @@ describe('Tests for BaseEslintEngine', () => {
 		before(async () => {
 			engine = await createDummyEngine(mockStrategy);
 		});
-		
+
 
 		it ('should decide to run if custom config, rules and target are correct', () => {
 
@@ -365,7 +365,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return false when custom config is not present but filter does not contain engine name', () => {
@@ -373,7 +373,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return false when custom config is not present and filter starts with "eslint"', () => {
@@ -381,7 +381,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return true when only PMD custom config is present and filter contains engine name', () => {
@@ -397,7 +397,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.true;	
+			expect(isEngineRequested).to.be.true;
 		});
 
 		it('should return false when custom eslint config is present and filter is empty', () => {
@@ -405,7 +405,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 	});
 });

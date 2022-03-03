@@ -222,7 +222,7 @@ function mockFileHandlerToReturnContentForFile(configFilePath: string, invalidJs
 }
 
 function mockCliEngine(
-	paths: string[] = DataGenerator.getDummyTarget().paths, 
+	paths: string[] = DataGenerator.getDummyTarget().paths,
 	report: ESReport = DataGenerator.getDummyEsReport()) {
 
 		const esRuleMap = new Map<string, ESRule>();
