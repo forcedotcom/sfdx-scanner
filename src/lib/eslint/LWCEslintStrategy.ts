@@ -74,12 +74,12 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return (fileName: string, ruleViolation: RuleViolation): void => {
 			const url: string = ruleViolation.url || '';
 			const repoName = 'eslint-plugin-lwc';
-	
+
 			if (url.includes(repoName)) {
 				// The meta.docs.url parameter for eslint-lwc is incorrect. It contains '.git' in the command line and is missing the 'v' for version
 				// https://github.com/salesforce/eslint-plugin-lwc.git/blob/0.10.0/docs/rules/no-unknown-wire-adapters.md to
 				// https://github.com/salesforce/eslint-plugin-lwc/blob/v0.10.0/docs/rules/no-unknown-wire-adapters.md
-	
+
 				// Remove the .git
 				let newUrl = url.replace(/eslint-plugin-lwc\.git/, repoName);
 				// Convert the append 'v' to the version if it is missing
@@ -92,6 +92,5 @@ export class LWCEslintStrategy implements EslintStrategy {
 				ruleViolation.message = ruleViolation.message.split('\n')[0];
 			}
 		}
-		
 	}
 }
