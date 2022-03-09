@@ -17,7 +17,7 @@ The Salesforce Code Analyzer plug-in is a unified tool for static analysis of so
 [PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/).
 We may add support for more rule engines in the future.
 
-The Salesforce Code Analyzer Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code. 
+The Salesforce Code Analyzer Plug-in creates "Rule Violations" when the it identifies issues. Developers use this information as feedback to fix their code. 
 
 You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
 
@@ -33,6 +33,6 @@ You can integrate this plug-in into your CI/CD solution to enforce the rules and
 
 ## Bugs and Feedback
 
-To report issues with Salesforce Scanner, open a [bug on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Bug_report.md). If you want to suggest a feature, create a [feature request on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Feature_request.md).
+To report issues with Salesforce Code Analyzer, open a [bug on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Bug_report.md). If you want to suggest a feature, create a [feature request on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Feature_request.md).
 
 

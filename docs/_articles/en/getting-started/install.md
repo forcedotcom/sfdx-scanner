@@ -5,7 +5,7 @@ lang: en
 
 ## Install the plug-in
 
-Like all the Salesforce CLI plug-ins, you install the Analyzer CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in.
+Like all the Salesforce CLI plug-ins, you install the Salesforce Code Analyzer CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in.
 
 
 ```bash

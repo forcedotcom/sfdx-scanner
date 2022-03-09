@@ -9,7 +9,7 @@ A: `Salesforce Code Analyzer` is a [Salesforce CLI](https://developer.salesforce
 secure code.
 
 The plug-in uses multiple code analysis engines, including PMD, ESLint, and RetireJS to inspect your code. It identifies potential problems, from inconsistent naming to security vulnerabilities, and conveys these problems with easy-to-understand results.
-You can run the scanner on-command in the CLI, or integrate it into your CI/CD framework so you can run it against every code change.
+You can run the code analyzer on-command in the CLI, or integrate it into your CI/CD framework so you can run it against every code change.
 
 #### Q: Is `Salesforce Code Analyzer` part of the App Exchange security review process?
 A: `Salesforce Code Analyzer` is separate from the App Exchange security review process, but it enforces many of the same rules. Because it can be executed at-will and provides results in minutes, it lets you find and fix problems faster. As a result, you
@@ -61,11 +61,11 @@ A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD.
 
 ## Questions about Severity Threshold and Normalization
 
-#### Q: How to set a Severity Threshold for a scanner run?
-A: When user runs the scanner with the `-s` or `--severity-threshold` flag and a threshold value, the scanner throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the severity of the most severe violation(s). Using this flag also implicitly invokes the --normalize-severity flag.
+#### Q: How to set a Severity Threshold for a code analyzer run?
+A: When user runs the code analyzer with the `-s` or `--severity-threshold` flag and a threshold value, the code analyzer throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the severity of the most severe violation(s). Using this flag also implicitly invokes the --normalize-severity flag.
 
 #### Q: How to get normalized severity?
-A: PMD, ESLint & RetireJS all have different scales for reporting the Severity of the violations. When the user runs the scanner with the `--normalize-severity` flag, the `Salesforce Code Analyzer` will normalize the severity of violations across all invoked engines.  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html output format, the normalized severity is displayed instead of the engine severity	
+A: PMD, ESLint & RetireJS all have different scales for reporting the Severity of the violations. When the user runs the code analyzer with the `--normalize-severity` flag, the `Salesforce Code Analyzer` will normalize the severity of violations across all invoked engines.  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html output format, the normalized severity is displayed instead of the engine severity	
 
 #### Q: How is the Severity normalized across all the engines?
 A: Following table shows how the severity across all engines are normalized. 
