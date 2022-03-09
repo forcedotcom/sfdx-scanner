@@ -13,7 +13,7 @@ This is working as designed. Some rules are default-enabled by eslint while some
 
 ### The `scanner:run` command results in the error `JavaScript heap out of memory`.
 
-The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
+The Code Analyzer's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the Code Analyzer.
 
 ```bash
 $ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
@@ -42,7 +42,7 @@ Update your tsconfig's `include` attribute to include `<file_name>`
 The most likely cause is that you're scanning TypeScript files without realizing it.
 
 If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
-being ignored by the scanner, since dependent modules may have TypeScript files that you don't know about.
+being ignored by the Code Analyzer, since dependent modules may have TypeScript files that you don't know about.
 
 Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
 used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`

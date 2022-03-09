@@ -6,7 +6,7 @@ lang: en
 
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	A new version (v{{ site.data.versions.scanner }}) of the Scanner Plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+  	A new version (v{{ site.data.versions.scanner }}) of the Code Analyzer Plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
 </div>
 <br>
 
