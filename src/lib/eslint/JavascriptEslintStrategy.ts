@@ -7,13 +7,15 @@ import path = require('path');
 
 const ES_CONFIG = {
 	"baseConfig": {},
-	"parserOptions": {
-		"sourceType": "module",
-		"ecmaVersion": 2018,
+	"overrideConfig": {
+		"parserOptions": {
+			"sourceType": "module",
+			"ecmaVersion": 2018,
+		},
+		"ignorePatterns": [
+			"node_modules/!**"
+		]
 	},
-	"ignorePatterns": [
-		"node_modules/!**"
-	],
 	"useEslintrc": false // Will not use an external config
 };
 
@@ -44,11 +46,6 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	getCatalogConfig(): Record<string,any> {
-		return ES_CONFIG;
-	}
-
 	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
 	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
 		return ES_CONFIG;
@@ -73,6 +70,9 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return EslintStrategyHelper.filterDisallowedRules(rulesByName);
 	}
 
+	getRuleMap(): Map<string, ESRule> {
+		return EslintStrategyHelper.filterDisallowedRules(EslintStrategyHelper.getBaseEslintRules());
+	}
 
 	processRuleViolation(): ProcessRuleViolationType {
 		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */

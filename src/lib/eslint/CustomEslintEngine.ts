@@ -1,4 +1,4 @@
-import {Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport, TargetPattern} from '../../types';
+import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESResult, TargetPattern, ESRuleMetadata } from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase, Severity} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
@@ -82,14 +82,18 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
 
-		const cli = this.dependencies.createCLIEngine(config);
+		const eslint = this.dependencies.createESLint(config);
 
 		const results: RuleResult[] = [];
 		for (const target of targets) {
-			const report: ESReport = cli.executeOnFiles(target.paths);
+			const esResults: ESResult[] = await eslint.lintFiles(target.paths);
+
+			const rulesMeta = eslint.getRulesMetaForResults(esResults);
+			const rulesMap: Map<string,ESRuleMetadata> = new Map();
+			Object.keys(rulesMeta).forEach(key => rulesMap.set(key, rulesMeta[key]));
 
 			// Map results to supported format
-			this.helper.addRuleResultsFromReport(this.getName(), results, report, cli.getRules(), this.processRuleViolation());
+			this.helper.addRuleResultsFromReport(this.getName(), results, esResults, rulesMap, this.processRuleViolation());
 		}
 
 		return results;

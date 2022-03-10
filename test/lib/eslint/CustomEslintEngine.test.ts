@@ -6,8 +6,8 @@ import Mockito = require('ts-mockito');
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import { StaticDependencies } from '../../../src/lib/eslint/EslintCommons';
 import { Messages } from '@salesforce/core';
-import { CLIEngine } from 'eslint';
-import { ESReport, ESRule } from '../../../src/types';
+import { ESLint } from 'eslint';
+import { ESResult } from '../../../src/types';
 import { ENGINE } from '../../../src/Constants';
 
 Messages.importMessagesDirectory(__dirname);
@@ -192,12 +192,11 @@ describe("Tests for CustomEslintEngine", () => {
 
 		it('Invokes Eslint when config can be fetched', async () => {
 			const target = DataGenerator.getDummyTarget();
-			const report = DataGenerator.getDummyEsReport();
 			const invalidJsonContent = '{"someProperty": "someValue"}';
 			const fileHandlerMock = mockFileHandlerToReturnContentForFile(configFilePath, invalidJsonContent);
-			const cliEngineMock = mockCliEngine(target.paths, report);
+			const eslintMock = mockEslint(target.paths, [DataGenerator.getDummyEsResult()]);
 
-			const customEslintEngine = await getCustomEslintEngine(fileHandlerMock, cliEngineMock);
+			const customEslintEngine = await getCustomEslintEngine(fileHandlerMock, eslintMock);
 
 			const results = await customEslintEngine.run(
 								[],
@@ -221,26 +220,20 @@ function mockFileHandlerToReturnContentForFile(configFilePath: string, invalidJs
 	return fileHandlerMock;
 }
 
-function mockCliEngine(
-	paths: string[] = DataGenerator.getDummyTarget().paths,
-	report: ESReport = DataGenerator.getDummyEsReport()) {
-
-		const esRuleMap = new Map<string, ESRule>();
-	const CLIEngineMock: typeof CLIEngine = Mockito.mock(CLIEngine);
-
-	Mockito.when(CLIEngineMock.executeOnFiles(Mockito.anything())).thenReturn(report);
-	Mockito.when(CLIEngineMock.getRules()).thenReturn(esRuleMap);
-
-	return CLIEngineMock;
+function mockEslint(paths: string[] = DataGenerator.getDummyTarget().paths, results: ESResult[] = [DataGenerator.getDummyEsResult()]) {
+	const ESLintMock: typeof ESLint = Mockito.mock(ESLint);
+	Mockito.when(ESLintMock.lintFiles(Mockito.anything())).thenReturn(Promise.resolve(results));
+	Mockito.when(ESLintMock.getRulesMetaForResults(Mockito.anything())).thenReturn({});
+	return ESLintMock;
 }
 
 async function getCustomEslintEngine(
 	fileHandlerMock: FileHandler = Mockito.mock(FileHandler),
-	cliEngineMock: typeof CLIEngine = Mockito.mock(typeof CLIEngine)) {
+	eslintMock: typeof ESLint = Mockito.mock(typeof ESLint)) {
 
 	const staticDependenciesMock = Mockito.mock(StaticDependencies);
 	Mockito.when(staticDependenciesMock.getFileHandler()).thenReturn(Mockito.instance(fileHandlerMock));
-	Mockito.when(staticDependenciesMock.createCLIEngine(Mockito.anything())).thenReturn(Mockito.instance(cliEngineMock));
+	Mockito.when(staticDependenciesMock.createESLint(Mockito.anything())).thenReturn(Mockito.instance(eslintMock));
 
 	const customEslintEngine = new CustomEslintEngine();
 	await customEslintEngine.init(Mockito.instance(staticDependenciesMock));

@@ -14,6 +14,8 @@ const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js')
 const sampleFile3 = path.join('Users', 'SomeUser', 'samples', 'sample-file3.java');
 const sampleFile4 = path.join('Users', 'SomeUser', 'samples', 'file-with-&.js');
 
+const ESLINT_VERSION = '8.10.0';
+
 const edgeCaseResults: RuleResult[] = [
 	{
 		engine: 'eslint',
@@ -356,7 +358,7 @@ describe('RuleResultRecombinator', () => {
 			function validateEslintSarif(run: unknown, normalizeSeverity: boolean): void {
 				const driver = run['tool']['driver'];
 				expect(driver.name).to.equal('eslint');
-				expect(driver.version).to.equal('6.8.0');
+				expect(driver.version).to.equal(ESLINT_VERSION);
 				expect(driver.informationUri).to.equal('https://eslint.org');
 
 				// tool.driver.rules
@@ -518,7 +520,6 @@ describe('RuleResultRecombinator', () => {
 			});
 
 			it('Handles all the engines', async () => {
-				
 				const allEngines = AllowedEngineFilters.map(engine => engine.valueOf());
 				for (const engine of allEngines) {
 					const ruleResults: RuleResult[] = [{
@@ -537,8 +538,7 @@ describe('RuleResultRecombinator', () => {
 					await RuleResultRecombinator.recombineAndReformatResults(ruleResults, OUTPUT_FORMAT.SARIF, new Set([engine]));
 					// should throw an error if the engine was not handled
 				}
-					
-			})
+			});
 
 			it ('Run with no violations returns engines that were run', async () => {
 				const results = await (await RuleResultRecombinator.recombineAndReformatResults([], OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']))).results;

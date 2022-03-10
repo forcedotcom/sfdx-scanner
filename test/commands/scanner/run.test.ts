@@ -733,8 +733,10 @@ describe('scanner:run', function () {
 				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 				const implicitMessages = violations[0].match(regex);
-				// if this test is not passing and the output seems very large,
-				// it is because the test reruns and the output accumulates so it is not the true length of the output
+				// if this test is not passing and the output seems very large, that's because the test reruns on failures,
+				// and the output accumulates each time, so the output on failure is not the true length of the output
+				// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
+				// there are five retries in addition to the initial run.
 				expect(implicitMessages || []).to.have.lengthOf(35, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});

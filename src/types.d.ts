@@ -97,35 +97,26 @@ export type RuleEvent = {
 	internalLog?: string;
 }
 
+export type ESRuleMetadata = {
+	deprecated?: boolean;
+	// This is optional because ESLint-LWC rules don't have a type parameter set. We'll be defaulting to 'problem' in that case.
+	type?: string;
+	docs: {
+		description: string;
+		recommended: boolean|string;
+		extendsBaseRule?: boolean|string;
+		url: string;
+	};
+	/* eslint-disable @typescript-eslint/no-explicit-any */
+	schema: Record<string, any>[];
+}
+
 /**
  * Type mapping to rules returned from eslint
  */
 export type ESRule = {
-	meta: {
-		deprecated?: boolean;
-		docs: {
-			description: string;
-			category: string;
-			recommended: boolean;
-			extendsBaseRule?: boolean|string;
-			url: string;
-		};
-		/* eslint-disable @typescript-eslint/no-explicit-any */
-		schema: Record<string, any>[];
-	};
+	meta: ESRuleMetadata;
 	create: Function;
-}
-
-/**
- * Type mapping to report output by eslint
- */
-export type ESReport = {
-	results: ESResult[];
-	errorCount: number;
-	warningCount: number;
-	fixableErrorCount: number;
-	fixableWarningCount: number;
-	usedDeprecatedRules: string[];
 }
 
 /**

@@ -5,7 +5,8 @@ import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
-import {deepCopy} from '../../lib/util/Utils';
+import {deepCopy} from '../util/Utils';
+import { rules } from '@typescript-eslint/eslint-plugin';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 
 Messages.importMessagesDirectory(__dirname);
@@ -17,25 +18,28 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 }
 
 const ES_PLUS_TS_CONFIG = {
-	"parser": "@typescript-eslint/parser",
 	"baseConfig": {},
-	"parserOptions": {
-		"sourceType": "module",
-		"ecmaVersion": 2018,
+	"overrideConfig": {
+		"parser": "@typescript-eslint/parser",
+		"parserOptions": {
+			"sourceType": "module",
+			"ecmaVersion": 2018,
+		},
+		"plugins": [
+			"@typescript-eslint"
+		],
+		"ignorePatterns": [
+			"lib/**",
+			"node_modules/**"
+		]
 	},
-	"plugins": [
-		"@typescript-eslint"
-	],
-	"ignorePatterns": [
-		"lib/**",
-		"node_modules/**"
-	],
 	"useEslintrc": false, // Will not use external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
 
 const TS_CONFIG = 'tsconfig.json';
+const RULE_PREFIX = '@typescript-eslint';
 
 export class TypescriptEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.TYPESCRIPT];
@@ -62,26 +66,21 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 		const pathToExtendedBaseConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
-		this.extendedEslintConfig = require(pathToExtendedBaseConfig).default.overrides[0];
+		this.extendedEslintConfig = require(pathToExtendedBaseConfig).overrides[0];
 
 		const pathToUntypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
-			.replace('index.js', path.join('configs', 'recommended.json'));
-		this.untypedConfig = JSON.parse(await this.fileHandler.readFile(pathToUntypedRecommendedConfig));
+			.replace('index.js', path.join('configs', 'recommended.js'));
+		this.untypedConfig = require(pathToUntypedRecommendedConfig);
 
 		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
-			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.json'));
-		this.typedConfig = JSON.parse(await this.fileHandler.readFile(pathToTypedRecommendedConfig));
+			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.js'));
+		this.typedConfig = require(pathToTypedRecommendedConfig);
 
 		this.initialized = true;
 	}
 
 	getEngine(): ENGINE {
 		return ENGINE.ESLINT_TYPESCRIPT;
-	}
-
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	getCatalogConfig(): Record<string, any> {
-		return ES_PLUS_TS_CONFIG;
 	}
 
 	getLanguages(): string[] {
@@ -158,7 +157,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		Object.assign(config, deepCopy(ES_PLUS_TS_CONFIG));
 
 		// Enable typescript by registering its project config file
-		config["parserOptions"].project = tsconfigPath;
+		config["overrideConfig"]["parserOptions"].project = tsconfigPath;
 
 		this.logger.trace(`Using config for run: ${JSON.stringify(config)}`);
 
@@ -235,6 +234,24 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return null;
 	}
 
+	private static isCompatibleRuleMeta(rule): rule is ESRule {
+		return rule.meta.docs != null;
+	}
+
+	getRuleMap(): Map<string, ESRule> {
+		// Start with the basic ESLint rules.
+		const unfilteredRules: Map<string,ESRule> = EslintStrategyHelper.getBaseEslintRules();
+
+		// Add all TS-specific rules to the map.
+		for (const [key, value] of Object.entries(rules)) {
+			if (TypescriptEslintStrategy.isCompatibleRuleMeta(value)) {
+				unfilteredRules.set(`${RULE_PREFIX}/${key}`, value);
+			}
+		}
+
+		return this.filterDisallowedRules(unfilteredRules);
+	}
+
 	/**
 	 * Return the path of a tsconfig.json file if it exists in the current working directory, or null if it doesn't.
 	 */
@@ -250,4 +267,3 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 }
-

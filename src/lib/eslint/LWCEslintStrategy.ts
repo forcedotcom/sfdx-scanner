@@ -3,18 +3,31 @@ import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
+import { rules } from '@lwc/eslint-plugin-lwc';
 
 const ES_CONFIG = {
-	"parser": "babel-eslint",
-	"plugins": ["@lwc/eslint-plugin-lwc"],
 	"baseConfig": {},
-	"ignorePatterns": [
-		"node_modules/!**"
-	],
+	"overrideConfig": {
+		"parser": "@babel/eslint-parser",
+		"parserOptions": {
+			"requireConfigFile": false,
+			"babelOptions": {
+				"parserOpts": {
+					"plugins": ["classProperties", ["decorators", {"decoratorsBeforeExport": false}]]
+				}
+			}
+		},
+		"plugins": ["@lwc/eslint-plugin-lwc"],
+		"ignorePatterns": [
+			"node_modules/!**"
+		]
+	},
 	"useEslintrc": false, // Will not use an external config
 	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
 	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
+
+const RULE_PREFIX = "@lwc/lwc";
 
 export class LWCEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
@@ -42,11 +55,6 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_LWC;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	getCatalogConfig(): Record<string,any> {
-		return ES_CONFIG;
-	}
-
 	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
 	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
 		return ES_CONFIG;
@@ -67,6 +75,20 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	getDefaultConfig(ruleName: string): ESRuleConfig {
 		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
+	}
+
+	getRuleMap(): Map<string, ESRule> {
+		const unfilteredRules: Map<string,ESRule> = EslintStrategyHelper.getBaseEslintRules();
+
+		// Add all LWC-specific rules to the map.
+		for (const key of Object.keys(rules)) {
+			// NOTE: LWC rules have no `type` attribute by default. We're going to default them to `problem` for now.
+			const typedRule = {...rules[key]};
+			typedRule.meta.type = 'problem';
+			unfilteredRules.set(`${RULE_PREFIX}/${key}`, typedRule);
+		}
+
+		return this.filterDisallowedRules(unfilteredRules);
 	}
 
 	// TODO: Submit PR against elsint-plugin-lwc
