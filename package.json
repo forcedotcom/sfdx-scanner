@@ -7,7 +7,7 @@
 	"dependencies": {
 		"@babel/core": "^7.11.0",
 		"@babel/eslint-parser": "^7",
-		"@lwc/eslint-plugin-lwc": "^1.1.2",
+		"@lwc/eslint-plugin-lwc": "~1.1.2",
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
 		"@oclif/errors": "^1",
