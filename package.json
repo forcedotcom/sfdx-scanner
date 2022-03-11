@@ -33,6 +33,7 @@
 		"reflect-metadata": "^0.1.13",
 		"retire": "^2.2.5",
 		"semver": "^7.3.4",
+		"tmp": "^0.1.0",
 		"ts-node": "^10",
 		"tslib": "^2",
 		"tsyringe": "^4.1.0",
