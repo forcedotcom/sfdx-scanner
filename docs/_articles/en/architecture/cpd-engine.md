@@ -5,14 +5,14 @@ lang: en
 ## What is CPD?
 [CPD](https://pmd.github.io/latest/pmd_userdocs_cpd.html) is a copy/paste detector shipped with PMD. It helps identify blocks of duplication across files. [Here](https://pmd.github.io/latest/pmd_userdocs_cpd.html#why-should-you-care-about-duplicates) are some reasons to avoid code duplication in general.
 
-## How can you use CPD through Salesforce CLI Scanner?
+## How can you use CPD through Salesforce Code Analyzer?
 
 By default, CPD engine is not enabled and is not run with a generic `scanner:run` command. To specifically invoke CPD, you can use the `--engine` option like this:
 
 `sfdx scanner:run --target "/some/path" --engine cpd`
 
 ## Understanding the violation message
-Since CPD returns duplicated code fragments, a meaningful output contains more than one file as a part of the grouping. CLI Scanner represents each group by a short checksum of the corresponding code fragment. Every violation message contains this checksum, the number of tokens in the checksum, the total number of occurrences of this duplicated code, and the index of the current occurrence. This information can help understand the impact of the duplication.
+Since CPD returns duplicated code fragments, a meaningful output contains more than one file as a part of the grouping. Code Analyzer represents each group by a short checksum of the corresponding code fragment. Every violation message contains this checksum, the number of tokens in the checksum, the total number of occurrences of this duplicated code, and the index of the current occurrence. This information can help understand the impact of the duplication.
 
 For example, consider this sample violation thrown from CPD engine:
 ```

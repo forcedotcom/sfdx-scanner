@@ -3,7 +3,7 @@ title: Troubleshooting Common Issues
 lang: en
 ---
 
-Here are some troubleshooting tips to fix common issues when you use the Salesforce CLI Scanner plug-in.
+Here are some troubleshooting tips to fix common issues when you use the Salesforce Code Analyzer plug-in.
 
 ## Using `scanner:run` command
 
@@ -13,7 +13,7 @@ This is working as designed. Some rules are default-enabled by eslint while some
 
 ### The `scanner:run` command results in the error `JavaScript heap out of memory`.
 
-The scanner's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the scanner.
+The Code Analyzer's node process runs with a default limit of 2GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory will depend on the files included in the `--target` parameter. The following example increases the memory value to 4GB for a single invocation of the Code Analyzer.
 
 ```bash
 $ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
@@ -42,7 +42,7 @@ Update your tsconfig's `include` attribute to include `<file_name>`
 The most likely cause is that you're scanning TypeScript files without realizing it.
 
 If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
-being ignored by the scanner, since dependent modules may have TypeScript files that you don't know about.
+being ignored by the Code Analyzer, since dependent modules may have TypeScript files that you don't know about.
 
 Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
 used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
@@ -72,7 +72,7 @@ property, and add `!**/bower_components/**` to exclude Bower dependencies.
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
 
-One possible reason is that the Java version you used to build your code is different from the version the Salesforce CLI Scanner plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
+One possible reason is that the Java version you used to build your code is different from the version the Salesforce Code Analyzer plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
 
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
@@ -93,7 +93,7 @@ In the directory where you execute the `scanner:run` command, install the requir
 
 ### Commands display `Javascript is not currently supported by the PMD engine`.
 
-Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce CLI Scanner plug-in. We plan to restore this feature in a future version.
+Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce Code Analyzer plug-in. We plan to restore this feature in a future version.
 
 Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
 
