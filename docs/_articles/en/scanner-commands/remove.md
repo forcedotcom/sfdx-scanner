@@ -1,5 +1,5 @@
 ---
-title: Salesforce CLI Scanner Plug-In Command Reference
+title: Salesforce Code Analyzer Plug-In Command Reference
 lang: en
 ---
 
