@@ -10,9 +10,6 @@ module.exports = {
 		"categoryDescriptionLong": "Select rules by category. Enter multiple values as a comma-separated list. E.g., 'Best Practices',Performance ",
 		"rulesetDescription": "[deprecated] ruleset(s) to filter list by",
 		"rulesetDescriptionLong": "[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.",
-		"severityDescription": "[description of 'severity' parameter]", // Change this when we implement the flag.
-		"standardDescription": "[description of 'standard' parameter]", // Change this when we implement the flag.
-		"customDescription": "[description of 'custom' parameter]",      // Change this when we implement the flag.
 		'engineDescription': "engine(s) to filter list by",
 		'engineDescriptionLong': "Filters the list based on the specified engines. Specify multiple engines as a comma-separated list."
 	},

@@ -58,26 +58,8 @@ export default class List extends ScannerCommand {
 			description: messages.getMessage('flags.engineDescription'),
 			longDescription: messages.getMessage('flags.engineDescriptionLong'),
 			options: [...AllowedEngineFilters]
-		}),
-		// END: Flags consumed by ScannerCommand#buildRuleFilters
-		// TODO: After implementing this flag, unhide it.
-		severity: flags.string({
-			char: 's',
-			description: messages.getMessage('flags.severityDescription'),
-			hidden: true
-		}),
-		// TODO: After implementing this flag, unhide it.
-		standard: flags.boolean({
-			description: messages.getMessage('flags.standardDescription'),
-			exclusive: ['custom'],
-			hidden: true
-		}),
-		// TODO: After implementing this flag, unhide it.
-		custom: flags.boolean({
-			description: messages.getMessage('flags.customDescription'),
-			exclusive: ['standard'],
-			hidden: true
 		})
+		// END: Flags consumed by ScannerCommand#buildRuleFilters
 	};
 
 	public async run(): Promise<Rule[]> {
