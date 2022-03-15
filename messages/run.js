@@ -17,7 +17,7 @@ module.exports = {
 		"outfileDescriptionLong": "Write output to a file.",
 		"envDescription": "JSON-formatted string, overrides ESLint's default environment variables",
 		"envDescriptionLong": "JSON-formatted string. Overrides ESLint's default environmental variables.",
-		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
+		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in a future release.",
 		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
 		"stDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
