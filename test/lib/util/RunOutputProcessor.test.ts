@@ -132,8 +132,7 @@ describe('RunOutputProcessor', () => {
 		describe('Writing to console', () => {
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
-					format: OUTPUT_FORMAT.TABLE,
-					violationsCauseException: false
+					format: OUTPUT_FORMAT.TABLE
 				};
 				const rop = new RunOutputProcessor(opts, testUx);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
@@ -157,8 +156,7 @@ describe('RunOutputProcessor', () => {
 
 				it('Table-type output should be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.TABLE,
-						violationsCauseException: false
+						format: OUTPUT_FORMAT.TABLE
 					};
 					const rop = new RunOutputProcessor(opts, testUx);
 
@@ -176,34 +174,10 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 					expect(output).to.deep.equal(FAKE_TABLE_OUTPUT.rows, 'Should have returned the rows');
 				});
 
-				it('Throws exception on request when violations are found', async () => {
-					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.TABLE,
-						violationsCauseException: true
-					};
-					const rop = new RunOutputProcessor(opts, testUx);
-
-					// THIS IS THE PART BEING TESTED.
-					try {
-						const output: AnyJson = rop.processRunOutput(fakeTableResults);
-						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
-					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 1);
-						Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
-						Sinon.assert.callCount(logSpy, 0);
-						const expectedTableSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToConsole')}`;
-						expect(e.message).to.equal(expectedTableSummary, 'Exception message incorrectly formed');
-					}
-				});
-
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.TABLE,
-						severityForError: 1,
-						violationsCauseException: false
+						severityForError: 1
 					};
 					const rop = new RunOutputProcessor(opts, testUx);
 
@@ -232,8 +206,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				// need to change.
 				it('CSV-type output should NOT be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
-						violationsCauseException: false
+						format: OUTPUT_FORMAT.CSV
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -250,8 +223,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.CSV,
-						severityForError: 2,
-						violationsCauseException: false
+						severityForError: 2
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -268,26 +240,6 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 					}
 				});
 
-				it('Throws exception on request when violations are found', async () => {
-					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
-						violationsCauseException: true
-					};
-
-					const rop = new RunOutputProcessor(opts, testUx);
-
-					// THIS IS THE PART BEING TESTED.
-					try {
-						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
-						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
-					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 1);
-						Sinon.assert.calledWith(logSpy, FAKE_CSV_OUTPUT);
-						expect(e.message).to.equal(runMessages.getMessage('output.sevDetectionSummary', [1]), 'Exception message incorrectly formed');
-					}
-				});
-
 			});
 
 			describe('Test Case: JSON', () => {
@@ -298,8 +250,7 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				// need to change.
 				it('JSON-type output should NOT be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.JSON,
-						violationsCauseException: false
+						format: OUTPUT_FORMAT.JSON
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -313,31 +264,10 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 					expect(output).to.deep.equal(JSON.parse(FAKE_JSON_OUTPUT), 'JSON should be returned as a parsed object');
 				});
 
-				it('Throws exception on request when violations are found', async () => {
-					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.JSON,
-						violationsCauseException: true
-					};
-
-					const rop = new RunOutputProcessor(opts, testUx);
-
-					// THIS IS THE PART BEING TESTED
-					try {
-						const output: AnyJson = rop.processRunOutput(fakeJsonResults);
-						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
-					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 1);
-						Sinon.assert.calledWith(logSpy, FAKE_JSON_OUTPUT);
-						expect(e.message).to.equal(runMessages.getMessage('output.sevDetectionSummary', [1]), 'Exception message incorrectly formed');
-					}
-				});
-
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.JSON,
-						severityForError: 1,
-						violationsCauseException: false
+						severityForError: 1
 					};
 
 					const rop = new RunOutputProcessor(opts, testUx);
@@ -361,7 +291,6 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
 					format: OUTPUT_FORMAT.CSV,
-					violationsCauseException: false,
 					outfile: fakeFilePath
 				};
 				const rop = new RunOutputProcessor(opts, testUx);
@@ -388,7 +317,6 @@ ${runMessages.getMessage('output.writtenToConsole')}`;
 				it('Results are properly written to file', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.CSV,
-						violationsCauseException: false,
 						outfile: fakeFilePath
 					};
 
@@ -408,37 +336,10 @@ ${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 					expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
 				});
 
-				it('Throws exception on request when violations are found', async () => {
-					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
-						violationsCauseException: true,
-						outfile: fakeFilePath
-					};
-
-					const rop = new RunOutputProcessor(opts, testUx);
-
-					// THIS IS THE PART BEING TESTED.
-					try {
-						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
-						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
-					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 0);
-						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
-						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
-						const expectedCsvSummary = `${runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${runMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${runMessages.getMessage('output.sevDetectionSummary', [1])}
-${runMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
-						expect(e.message).to.equal(expectedCsvSummary, 'Summary was wrong');
-					}
-				});
-
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.CSV,
 						severityForError: 1,
-						violationsCauseException: false,
 						outfile: fakeFilePath
 					};
 

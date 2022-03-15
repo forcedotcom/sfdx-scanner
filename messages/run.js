@@ -20,9 +20,6 @@ module.exports = {
 		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in 3.0.0.",
 		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
-		"vceDescription": "[deprecated] throws an error when violations are detected",
-		"vceDescriptionLong": "[Deprecated] Throws an error when violations are detected. Exit code is the most severe violation.",
-		"vceParamDeprecationWarning": "--violations-cause-error parameter is being deprecated, use --severity-threshold instead.",
 		"stDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
         "stDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
 		"nsDescription": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity",
@@ -46,7 +43,6 @@ module.exports = {
 		"engineSummaryTemplate": "Executed %s, found %s violation(s) across %s file(s).",
 		"writtenToOutFile": "Rule violations have been written to %s.",
 		"writtenToConsole": "Rule violations logged to console above.",
-		"sevDetectionSummary": "Detected rule violations of severity %s or lower.",
 		"sevThresholdSummary": "Detected rule violations of severity %s or more severe.",
 		"pleaseSeeAbove": "Please see the logs above.",
 		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
@@ -77,10 +73,6 @@ module.exports = {
 		E.g., $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 			Evaluates rules against somefile.js, including Jasmine in the environment variables.
 
-	Use --violations-cause-error to throw exit with a non-zero code when violations are found.
-		E.g., $ sfdx scanner:run --target "somefile.js" --violations-cause-error
-			Evaluates rules against somefile.js. If any rules are violated, the exit code will be the severity of the most severe violation.
-
 	Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
@@ -98,7 +90,7 @@ module.exports = {
 	Use --normalize-severity to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown).
 		E.g., $ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
 
-	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
+	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
 		E.g., $ sfdx scanner:run --target "/some-project/" --severity-threshold 2
 	`
 };

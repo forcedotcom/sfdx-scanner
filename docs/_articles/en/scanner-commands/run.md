@@ -40,9 +40,6 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
  -t, --target=_target_
  (required) location of source code
 
- -v, --violations-cause-error
- [deprecated] throws an error when violations are detected
-
  --env=_env_
  JSON-formatted string, overrides ESLint's default environment variables
 
@@ -73,7 +70,6 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 ## Additional Notes
 
 - `--ruleset` option is deprecated and will be removed soon. Please use --category instead.
-- `-v/--violations-cause-error` flag is deprecated. Please use `-s/--severity-threshold` instead. 
   
 ## Example
 
@@ -114,12 +110,6 @@ Use --env to override the default ESLint environment variables to add frameworks
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 ```
 
-Use --violations-cause-error to throw a non-zero exit code when rule violations are found.
-In this example, if any rules are violated, the exit code will be equal to the severity of the most severe violation.
-```bash
-$ sfdx scanner:run --target "somefile.js" --violations-cause-error
-```
-
 Use --engine to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
 
 In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
@@ -148,7 +138,7 @@ Use `--normalize-severity` to output a normalized (across all engines) severity 
 $ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
 ```
 
-Use `--severity-threshold` to throw a non-zero exit code when rule violations of a specific severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation
+Use `--severity-threshold` to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation
 ```bash
 $ sfdx scanner:run --target "/some-project/" --severity-threshold 2
 ```

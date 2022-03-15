@@ -545,39 +545,6 @@ describe('scanner:run', function () {
 				});
 		});
 
-		describe('--violations-cause-error flag', () => {
-
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'xml',
-					'--violations-cause-error'
-				])
-				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
-					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Error should not be present');
-				});
-
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'table',
-					'--violations-cause-error'
-				])
-				.it('When violations are found, an error is thrown', ctx => {
-					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
-					// That will leave us with just the rows.
-					const rows = ctx.stdout.trim().split('\n');
-
-					// Assert rows have the right error on the right line.
-					expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
-					expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
-					expect(ctx.stderr).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Error should be present');
-				});
-		});
-
 		// TODO: this test has become more of an integration test, than just testing the run command. break it up to make it more manageable, maybe based on engine or flags.
 
 		describe('--engine flag', () => {
@@ -766,7 +733,7 @@ describe('scanner:run', function () {
 				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 				const implicitMessages = violations[0].match(regex);
-				// if this test is not passing and the output seems very large, 
+				// if this test is not passing and the output seems very large,
 				// it is because the test reruns and the output accumulates so it is not the true length of the output
 				expect(implicitMessages || []).to.have.lengthOf(35, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above

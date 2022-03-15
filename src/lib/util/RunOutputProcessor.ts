@@ -5,15 +5,14 @@ import fs = require('fs');
 
 import {RecombinedRuleResults} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
-import {INTERNAL_ERROR_CODE} from '../../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const INTERNAL_ERROR_CODE = 1;
 
 export type RunOutputOptions = {
 	format: OUTPUT_FORMAT;
-	violationsCauseException: boolean;
 	severityForError?: number;
 	outfile?: string;
 }
@@ -51,10 +50,8 @@ export class RunOutputProcessor {
 		// the user.
 		msgComponents = msgComponents.filter(cmp => cmp && cmp.length > 0);
 		const msg = msgComponents.join('\n');
-		if (minSev > 0 && this.opts.violationsCauseException) {
-			throw new SfdxError(msg, null, null, minSev);
-		} else if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
-			// We want to throw an error when the highest severity (smallest num) is 
+		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
+			// We want to throw an error when the highest severity (smallest num) is
 			// equal to or more severe (equal to or less than number-wise) than the inputted number
 			throw new SfdxError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
@@ -77,11 +74,7 @@ export class RunOutputProcessor {
 		}
 	}
 
-	private getInternalErrorCode(): number {
-		return this.opts.violationsCauseException ? INTERNAL_ERROR_CODE : 1;
-	}
-
-	// determines if -s flag should cause an error 
+	// determines if -s flag should cause an error
 	private shouldErrorForSeverity(minSev: number, severityForError): boolean {
 		if (severityForError === undefined) {
 			return false; // flag not used
@@ -89,9 +82,9 @@ export class RunOutputProcessor {
 		if (minSev === 0) {
 			return false;
 		}
-		
+
 		if (minSev <= this.opts.severityForError) {
-			return true; 
+			return true;
 		}
 		return false;
 	}
@@ -110,11 +103,6 @@ export class RunOutputProcessor {
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
-		// Handles deprecated flag --violations-cause-error
-		if (minSev > 0 && this.opts.violationsCauseException) {
-			msgParts.push(runMessages.getMessage('output.sevDetectionSummary', [minSev]));
-		}
-
 		// Summary to print with --severity-threshold flag
 		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
 			msgParts.push(runMessages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
@@ -128,7 +116,7 @@ export class RunOutputProcessor {
 			fs.writeFileSync(this.opts.outfile, results);
 		} catch (e) {
 			// Rethrow any errors as SfdxErrors.
-			throw new SfdxError(e.message || e, null, null, this.getInternalErrorCode());
+			throw new SfdxError(e.message || e, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
 		return runMessages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
@@ -148,7 +136,7 @@ export class RunOutputProcessor {
 			case OUTPUT_FORMAT.XML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
-					throw new SfdxError(msg, null, null, this.getInternalErrorCode());
+					throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
 				// We can just dump those giant strings to the console without anything special.
 				this.ux.log(results);
@@ -156,12 +144,12 @@ export class RunOutputProcessor {
 			case OUTPUT_FORMAT.TABLE:
 				// This format should be a JSON with a `columns` property and a `rows` property, i.e. NOT a string.
 				if (typeof results === 'string') {
-					throw new SfdxError(msg, null, null, this.getInternalErrorCode());
+					throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
 				this.ux.table(results.rows, results.columns);
 				break;
 			default:
-				throw new SfdxError(msg, null, null, this.getInternalErrorCode());
+				throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
