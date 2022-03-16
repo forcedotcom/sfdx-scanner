@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import {ESLint} from 'eslint';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import {RuleResultRecombinator} from '../../../src/lib/formatter/RuleResultRecombinator';
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
@@ -14,7 +15,7 @@ const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js')
 const sampleFile3 = path.join('Users', 'SomeUser', 'samples', 'sample-file3.java');
 const sampleFile4 = path.join('Users', 'SomeUser', 'samples', 'file-with-&.js');
 
-const ESLINT_VERSION = '8.10.0';
+const ESLINT_VERSION = ESLint.version;
 
 const edgeCaseResults: RuleResult[] = [
 	{
