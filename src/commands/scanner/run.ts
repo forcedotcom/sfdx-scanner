@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {AllowedEngineFilters, INTERNAL_ERROR_CODE} from '../../Constants';
+import {AllowedEngineFilters} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
@@ -18,6 +18,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const INTERNAL_ERROR_CODE = 1;
 
 export default class Run extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -95,20 +96,11 @@ export default class Run extends ScannerCommand {
 				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
-		"violations-cause-error": flags.boolean({
-			char: 'v',
-			description: messages.getMessage('flags.vceDescription'),
-			longDescription: messages.getMessage('flags.vceDescriptionLong'),
-			exclusive: ['json'],
-			deprecated: {
-				messageOverride: messages.getMessage('flags.vceParamDeprecationWarning')
-			}
-		}),
 		'severity-threshold': flags.integer({
             char: 's',
             description: messages.getMessage('flags.stDescription'),
             longDescription: messages.getMessage('flags.stDescriptionLong'),
-			exclusive: ['json', 'violations-cause-error'],
+			exclusive: ['json'],
 			min: 1,
 			max: 3
         }),
@@ -139,17 +131,16 @@ export default class Run extends ScannerCommand {
 		const target = this.flags.target || [];
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
-		
+
 		let output: RecombinedRuleResults = null;
 		try {
 			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions);
 		} catch (e) {
 			// Rethrow any errors as SFDX errors.
-			throw new SfdxError(e.message || e, null, null, this.getInternalErrorCode());
+			throw new SfdxError(e.message || e, null, null, INTERNAL_ERROR_CODE);
 		}
 		return new RunOutputProcessor({
 			format: outputOptions.format,
-			violationsCauseException: this.flags['violations-cause-error'],
 			severityForError: this.flags['severity-threshold'],
 			outfile: this.flags.outfile
 		}, this.ux)
@@ -173,7 +164,7 @@ export default class Run extends ScannerCommand {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env);
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, this.getInternalErrorCode());
+				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 
@@ -231,7 +222,7 @@ export default class Run extends ScannerCommand {
 		const outfile = this.flags.outfile;
 		const lastPeriod = outfile.lastIndexOf('.');
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, this.getInternalErrorCode());
+			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 		} else {
 			const fileExtension = outfile.slice(lastPeriod + 1);
 			switch (fileExtension) {
@@ -242,12 +233,8 @@ export default class Run extends ScannerCommand {
 				case OUTPUT_FORMAT.XML:
 					return fileExtension;
 				default:
-					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, this.getInternalErrorCode());
+					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
-	}
-
-	private getInternalErrorCode(): number {
-		return this.flags['violations-cause-error'] ? INTERNAL_ERROR_CODE : 1;
 	}
 }
