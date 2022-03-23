@@ -11,7 +11,7 @@ lang: en
 
 ### Release Summary
 
-* Updated PMD to 6.42.0
+* Updated PMD to 6.43.0
 * Upgrades to local RetireJS Vulnerability Repository
 
 
