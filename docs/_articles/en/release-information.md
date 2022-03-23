@@ -5,6 +5,32 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
+## [v2.13.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.1) (03-23-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.0...v2.13.1)
+
+### Release Summary
+
+* Updated PMD to 6.43.0
+* Upgrades to local RetireJS Vulnerability Repository
+
+
+**Closed issues:**
+
+- update to use PMD v6.40 or higher? [\#575](https://github.com/forcedotcom/sfdx-scanner/issues/575)
+- Allow plug-in to leverage xml metadata rules [\#571](https://github.com/forcedotcom/sfdx-scanner/issues/571)
+
+**Merged pull requests:**
+
+- @W-10857132@: \[2.x\] Updating PMD to v6.43.0. [\#607](https://github.com/forcedotcom/sfdx-scanner/pull/607)
+- @W-10771486@: \[2.x\] Updated retirejs vulnerability catalog to capture Feb-Mar 2022 changes. [\#603](https://github.com/forcedotcom/sfdx-scanner/pull/603)
+- @W-10793013@ \[2.x\] Changing the name of the plugin [\#599](https://github.com/forcedotcom/sfdx-scanner/pull/599)
+- @W-10459699@: \[2.x\] PR verification github action now expects a version indicator for PRs intended to be merged to dev. [\#594](https://github.com/forcedotcom/sfdx-scanner/pull/594)
+- @W-10459699@: Added smoke test execution against dev-3 pilot branch [\#589](https://github.com/forcedotcom/sfdx-scanner/pull/589)
+- @W-10777806@: \[2.x\] Bump nokogiri from 1.12.5 to 1.13.3 in /docs [\#588](https://github.com/forcedotcom/sfdx-scanner/pull/588)
+- @W-10743341@ Bump pathval from 1.1.0 to 1.1.1 [\#579](https://github.com/forcedotcom/sfdx-scanner/pull/579)
+
+
 ## [v2.13.0](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.0) (02-23-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.12.0...v2.13.0)
