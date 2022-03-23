@@ -135,24 +135,12 @@ jobs:
       - update_node:
           os: linux
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
       # Do the necessary build steps for running unit tests
       - run: yarn --ignore-scripts
       - run: yarn build
 
       # Do the necessary build steps for running tarball tests
       - run: npm pack
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
 
       - persist_to_workspace:
           root: ~/repo
