@@ -135,24 +135,12 @@ jobs:
       - update_node:
           os: linux
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
       # Do the necessary build steps for running unit tests
       - run: yarn --ignore-scripts
       - run: yarn build
 
       # Do the necessary build steps for running tarball tests
       - run: npm pack
-
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
 
       - persist_to_workspace:
           root: ~/repo
@@ -544,8 +532,11 @@ workflows:
           cron: "30 13 * * *"
           filters:
             branches:
-              # Having this run against all branches would be bedlam, so we'll have it run just against dev.
-              only: "dev"
+              # Having this run against all branches would be bedlam, so we'll have it run just against dev, and dev-3,
+              # the branch we're using for our pilot features.
+              only:
+                - "dev"
+                - "dev-3"
     jobs:
       # Step 1: Run the setup task to create the testing environment.
       - setup

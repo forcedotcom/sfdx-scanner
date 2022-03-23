@@ -1,5 +1,5 @@
 ---
-title: Salesforce CLI Scanner Plug-In Command Reference
+title: Salesforce Code Analyzer Plug-In Command Reference
 lang: en
 ---
 
@@ -127,7 +127,7 @@ In this example, ESLint and RetireJS will run even if they're disabled, and no o
 $ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
 ```
 
-In another example, Scanner executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
+In another example, Analyzer executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
 
 ```bash
 $ sfdx scanner:run --target "/some/dir" --engine cpd

@@ -4,6 +4,8 @@ const reBugId = /@W-\d{4,8}@/;
 // Matches r/ R/ d/ D/
 const reBranch = /^[rdRD]\//;
 
+// Matches [2.x]
+const reVersion = /\[2\.x]/;
 
 /**
  * Verifies title conforms to the pattern required by git2gus.
@@ -20,4 +22,14 @@ export function verifyPRTitleForBugId(title: string): boolean {
  */
 export function verifyPRTitleForBadTitle(title: string): boolean {
 	return !reBranch.test(title);
+}
+
+
+export function verifyPRTitleForBaseBranch(title: string, baseBranch: string): boolean {
+	// If the base branch isn't `dev`, then there's no validation concerns here.
+	if (baseBranch !== 'dev') {
+		return true;
+	}
+	// For `dev`, we need to make sure that the version indicator is present in the title.
+	return reVersion.test(title);
 }

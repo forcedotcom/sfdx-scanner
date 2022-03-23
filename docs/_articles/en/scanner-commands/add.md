@@ -1,10 +1,10 @@
 ---
-title: Salesforce CLI Scanner Plug-In Command Reference
+title: Salesforce Code Analyzer Plug-In Command Reference
 lang: en
 ---
 
 ## sfdx scanner:rule:add
-Add custom rules to the Salesforce CLI Scanner plug-in's registry so you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
+Add custom rules to the Salesforce Code Analyzer plug-in's registry so you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
 
 See [Authoring Custom Rules](./en/custom-rules/author/) for more information.
 

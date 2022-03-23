@@ -3446,9 +3446,9 @@ path-type@^4.0.0:
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
 pathval@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.0.tgz#b942e6d4bde653005ef6b71361def8727d0645e0"
-  integrity sha1-uULm1L3mUwBe9rcTYd74cn0GReA=
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.1.tgz#8534e77a77ce7ac5a2512ea21e0fdb8fcf6c3d8d"
+  integrity sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==
 
 performance-now@^2.1.0:
   version "2.1.0"
@@ -3743,10 +3743,10 @@ restore-cursor@^3.1.0:
     onetime "^5.1.0"
     signal-exit "^3.0.2"
 
-retire@^2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/retire/-/retire-2.2.4.tgz#4b131355ad8a7c903069a5dc65985bf21d0c228c"
-  integrity sha512-VA6/9UALdC+AQapO1RaHCpjYIzGRKt66Xb54oQu1x/7fgE0IG0/3eqNbDvVqR9lMR3od4eu6f6t4/ZEN5TQZXg==
+retire@^2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/retire/-/retire-2.2.5.tgz#a5d095d1803f31a0d73be5f6ebb59c3236349fa8"
+  integrity sha512-j4xoxGz/rse6ZZS5KKYwSXw/jB0bwgp4IFAkgqbMq+/G34EAxx2ttYJS5h3Uuzm/z4mGGMDJlFaR+CdwRv0w9A==
   dependencies:
     colors "^1.1.2"
     commander "2.5.x"
