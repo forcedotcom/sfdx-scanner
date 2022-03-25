@@ -4,7 +4,7 @@ import { Rule, RuleResult, RuleViolation } from '../../types';
 import * as url from 'url';
 import { RuleCatalog } from '../services/RuleCatalog';
 import { Controller } from '../../Controller';
-import { CLIEngine } from 'eslint';
+import { ESLint } from 'eslint';
 import * as retire from 'retire';
 
 const ERROR = 'error';
@@ -176,7 +176,7 @@ class ESLintSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: engine,
-						version: CLIEngine.version,
+						version: ESLint.version,
 						informationUri: 'https://eslint.org',
 						rules: []
 					}

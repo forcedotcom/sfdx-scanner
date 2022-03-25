@@ -1,4 +1,4 @@
-import {Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESReport, TargetPattern} from '../../types';
+import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESResult, TargetPattern, ESRuleMetadata } from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase, Severity} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
@@ -28,9 +28,9 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
-			case 1: 
+			case 1:
 				return Severity.MODERATE;
-			case 2: 
+			case 2:
 				return Severity.HIGH;
 			default:
 				return Severity.MODERATE;
@@ -82,22 +82,26 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
 
-		const cli = this.dependencies.createCLIEngine(config);
+		const eslint = this.dependencies.createESLint(config);
 
 		const results: RuleResult[] = [];
 		for (const target of targets) {
-			const report: ESReport = cli.executeOnFiles(target.paths);
+			const esResults: ESResult[] = await eslint.lintFiles(target.paths);
+
+			const rulesMeta = eslint.getRulesMetaForResults(esResults);
+			const rulesMap: Map<string,ESRuleMetadata> = new Map();
+			Object.keys(rulesMeta).forEach(key => rulesMap.set(key, rulesMeta[key]));
 
 			// Map results to supported format
-			this.helper.addRuleResultsFromReport(this.getName(), results, report, cli.getRules(), this.processRuleViolation());
+			this.helper.addRuleResultsFromReport(this.getName(), results, esResults, rulesMap, this.processRuleViolation());
 		}
-		
+
 		return results;
 	}
-	
+
 	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private async extractConfig(configFile: string): Promise<Record<string, any>> {
-		
+
 		const fileHandler = this.dependencies.getFileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'ConfigFileDoesNotExist', [configFile]);
@@ -115,7 +119,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		} catch (error) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'InvalidJson', [configFile, error.message]);
 		}
-		
+
 		return config;
 	}
 

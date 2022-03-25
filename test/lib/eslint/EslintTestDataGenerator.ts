@@ -1,4 +1,4 @@
-import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage, ESReport } from '../../../src/types';
+import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage } from '../../../src/types';
 
 const engineName = 'TestHarnessEngine'; // TODO: crude code. revisit
 
@@ -19,7 +19,7 @@ export function getDummyRule(myEngineName = engineName): Rule {
 	}
 }
 
-export function getDummyTarget(isDir: boolean = true): RuleTarget {
+export function getDummyTarget(isDir = true): RuleTarget {
 	return {
 		target: "/some/target",
 		isDirectory: isDir,
@@ -27,18 +27,18 @@ export function getDummyTarget(isDir: boolean = true): RuleTarget {
 	}
 }
 
-export function getDummyEsRuleMap(ruleId: string = 'ruleId', category: string = 'myCategory', description: string = 'my description'): Map<string, ESRule> {
+export function getDummyEsRuleMap(ruleId = 'ruleId', category = 'myCategory', description = 'my description'): Map<string, ESRule> {
 	const map = new Map<string, ESRule>();
 	map.set(ruleId, getDummyEsRule(category, description));
 	return map;
 }
 
-export function getDummyEsRule(category: string = 'myCategory', description: string = 'my description'): ESRule {
+export function getDummyEsRule(category = 'problem', description = 'my description'): ESRule {
 	return {
 		meta: {
+			type: category,
 			docs: {
 				description: description,
-				category: category,
 				recommended: true,
 				url: 'someURL'
 			},
@@ -46,6 +46,7 @@ export function getDummyEsRule(category: string = 'myCategory', description: str
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	}
 }
@@ -54,9 +55,9 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 	const dummyMap: Map<string, ESRule> = new Map();
 	dummyMap.set('fake-active', {
 		meta: {
+			type: "problem",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				url: 'someURL'
 			},
@@ -64,14 +65,15 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 	dummyMap.set('fake-deprecated', {
 		meta: {
 			deprecated: true,
+			type: "suggestion",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				url: 'someURL'
 			},
@@ -79,13 +81,14 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 	dummyMap.set('fake-extended-a', {
 		meta: {
+			type: "layout",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				url: 'someURL'
 			},
@@ -93,13 +96,14 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 	dummyMap.set('fake-extended-b', {
 		meta: {
+			type: "problem",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				url: 'someURL'
 			},
@@ -107,13 +111,14 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 	dummyMap.set('@typescript-eslint/fake-extended-a', {
 		meta: {
+			type: "layout",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				extendsBaseRule: true,
 				url: 'someURL'
@@ -122,13 +127,14 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 	dummyMap.set('@typescript-eslint/renamed-b-extension', {
 		meta: {
+			type: "problem",
 			docs: {
 				description: 'Lorem Ipsum',
-				category: 'Praise the Sun',
 				recommended: true,
 				extendsBaseRule: 'fake-extended-b',
 				url: 'someURL'
@@ -137,21 +143,11 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
+		/* eslint-disable @typescript-eslint/no-empty-function */
 		create: () => { }
 	});
 
 	return dummyMap;
-}
-
-export function getDummyEsReport(results: ESResult[] = [getDummyEsResult()]): ESReport {
-	return {
-		results: results,
-		errorCount: 0,
-		warningCount: 0,
-		fixableErrorCount: 0,
-		fixableWarningCount: 0,
-		usedDeprecatedRules: []
-	}
 }
 
 export function getDummyEsResult(messages: ESMessage[] = [getDummyEsMessage()]): ESResult {
@@ -161,7 +157,7 @@ export function getDummyEsResult(messages: ESMessage[] = [getDummyEsMessage()]):
 	};
 }
 
-export function getDummyEsMessage(ruleId: string = 'rule', message: string = 'message'): ESMessage {
+export function getDummyEsMessage(ruleId = 'rule', message = 'message'): ESMessage {
 	return {
 		fatal: true,
 		ruleId: ruleId,

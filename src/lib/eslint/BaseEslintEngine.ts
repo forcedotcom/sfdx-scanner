@@ -1,11 +1,11 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern} from '../../types';
+import { Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata, ESResult } from '../../types';
 import {ENGINE, Severity} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
-import {deepCopy} from '../../lib/util/Utils';
+import {deepCopy} from '../util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
 
@@ -35,10 +35,6 @@ export interface EslintStrategy {
 	/** Get engine that strategy supports */
 	getEngine(): ENGINE;
 
-	/** Get eslint config that can be used to get catalog */
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	getCatalogConfig(): Record<string, any>;
-
 	/** Get eslint engine to use for scanning. */
 	getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>>;
 
@@ -65,6 +61,9 @@ export interface EslintStrategy {
 	 * @returns {ESRuleConfig} The rule's default recommended configuration.
 	 */
 	getDefaultConfig(ruleName: string): ESRuleConfig;
+
+	/** Returns all rules available for this engine */
+	getRuleMap(): Map<string, ESRule>;
 
 	/** Allow the strategy to convert the RuleViolation */
 	processRuleViolation(): ProcessRuleViolationType;
@@ -118,24 +117,23 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 			const rules: Rule[] = [];
 
 			// Get all rules supported by eslint
-			const cli = this.baseDependencies.createCLIEngine(this.strategy.getCatalogConfig());
-			const allRules = this.strategy.filterDisallowedRules(cli.getRules());
+			const allRules = this.strategy.getRuleMap();
 
 			// Add eslint rules to catalog
 			allRules.forEach((esRule: ESRule, key: string) => {
-				const docs = esRule.meta.docs;
+				const meta = esRule.meta;
 
-				const rule = this.processRule(key, docs);
+				const rule = this.processRule(key, meta);
 				if (rule) {
 					// Add only rules supported by the engine implementation
 					rules.push(rule);
-					const categoryName = docs.category;
+					const categoryName = meta.type;
 					let category = categoryMap.get(categoryName);
 					if (!category) {
 						category = { name: categoryName, engine: this.getName(), paths: [] };
 						categoryMap.set(categoryName, category);
 					}
-					category.paths.push(docs.url);
+					category.paths.push(meta.docs.url);
 				}
 			});
 
@@ -151,20 +149,19 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private processRule(key: string, docs: any): Rule {
+	private processRule(key: string, meta: ESRuleMetadata): Rule {
 		// Massage eslint rule into Catalog rule format
 		const rule = {
 			engine: this.getName(),
 			sourcepackage: this.getName(),
 			name: key,
-			description: docs.description,
-			categories: [docs.category],
-			rulesets: [docs.category],
+			description: meta.docs.description,
+			categories: [meta.type],
+			rulesets: [meta.type],
 			languages: [...this.strategy.getLanguages()],
 			defaultEnabled: this.strategy.ruleDefaultEnabled(key),
 			defaultConfig: this.strategy.getDefaultConfig(key),
-			url: docs.url
+			url: meta.docs.url
 		};
 		return rule;
 	}
@@ -205,8 +202,6 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
 				const config = {cwd};
 
-				config["rules"] = configuredRules;
-
 				target.paths = this.strategy.filterUnsupportedPaths(target.paths);
 
 				if (target.paths.length === 0) {
@@ -217,6 +212,10 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 				// get run-config for the engine and add to config
 				Object.assign(config, deepCopy(await this.strategy.getRunConfig(engineOptions)));
+				// At this point, the inner `overrideConfig` property should exist. If it doesn't, we'll set it to an
+				// empty object to avoid NPEs.
+				config["overrideConfig"] = config["overrideConfig"] || {};
+				config["overrideConfig"]["rules"] = configuredRules;
 
 				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
 				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
@@ -235,14 +234,15 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 				// ==== This is the end of the sup-optimal solution to W-7791882.
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
-
-				const cli = this.baseDependencies.createCLIEngine(config);
-
-				const report = cli.executeOnFiles(target.paths);
+				const eslint = this.baseDependencies.createESLint(config);
+				const esResults: ESResult[] = await eslint.lintFiles(target.paths);
 				this.logger.trace(`Finished running ${this.getName()}`);
 
+				const rulesMeta = eslint.getRulesMetaForResults(esResults);
+				const rulesMap: Map<string,ESRuleMetadata> = new Map();
+				Object.keys(rulesMeta).forEach(key => rulesMap.set(key, rulesMeta[key]));
 				// Map results to supported format
-				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, report, cli.getRules(), this.strategy.processRuleViolation());
+				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, esResults, rulesMap, this.strategy.processRuleViolation());
 			}
 
 			return results;

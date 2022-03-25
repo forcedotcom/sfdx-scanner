@@ -1,7 +1,7 @@
-import { CLIEngine } from 'eslint';
+import { Linter, ESLint } from 'eslint';
 import * as path from 'path';
 import { CUSTOM_CONFIG } from '../../Constants';
-import { LooseObject, RuleResult, RuleViolation, ESMessage, ESRule, ESRuleConfig, ESReport } from '../../types';
+import { LooseObject, RuleResult, RuleViolation, ESMessage, ESResult, ESRule, ESRuleMetadata, ESRuleConfig } from '../../types';
 import { FileHandler } from '../util/FileHandler';
 import * as engineUtils from '../util/CommonEngineUtils';
 
@@ -18,8 +18,8 @@ export enum RuleDefaultStatus {
 
 export class StaticDependencies {
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	createCLIEngine(config: Record<string, any>): CLIEngine {
-		return new CLIEngine(config);
+	createESLint(config: Record<string, any>): ESLint {
+		return new ESLint(config);
 	}
 
 	resolveTargetPath(target: string): string {
@@ -36,6 +36,13 @@ export class StaticDependencies {
 }
 
 export class EslintStrategyHelper {
+	/**
+	 * Get the rules available in vanilla ESLint, mapped by name.
+	 */
+	static getBaseEslintRules(): Map<string,ESRule> {
+		return new Linter().getRules();
+	}
+
 	static filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule> {
 		const filteredRules: Map<string,ESRule> = new Map();
 		for (const [name, rule] of rulesByName.entries()) {
@@ -84,31 +91,30 @@ export class EslintProcessHelper {
 	addRuleResultsFromReport(
 		engineName: string,
 		results: RuleResult[],
-		report: ESReport,
-		ruleMap: Map<string, ESRule>,
+		esResults: ESResult[],
+		ruleMap: Map<string,ESRuleMetadata>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): void {
-			for (const r of report.results) {
-			// Only add report entries that have actual violations to report.
+		esResults.forEach(r => {
 			if (r.messages && r.messages.length > 0) {
 				results.push(this.toRuleResult(engineName, r.filePath, r.messages, ruleMap, processRuleViolation));
 			}
-		}
+		});
 	}
 
 	toRuleResult(
 		engineName: string,
 		fileName: string,
 		messages: ESMessage[],
-		ruleMap: Map<string, ESRule>,
+		ruleMap: Map<string, ESRuleMetadata>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): RuleResult {
 		return {
 			engine: engineName,
 			fileName,
 			violations: messages.map(
-				(v): RuleViolation => {
-					const rule = ruleMap.get(v.ruleId);
-					const category = rule ? rule.meta.docs.category : "";
-					const url = rule ? rule.meta.docs.url : "";
+				(v: ESMessage): RuleViolation => {
+					const ruleMeta = ruleMap.get(v.ruleId);
+					const category = ruleMeta ? ruleMeta.type : "problem";
+					const url = ruleMeta ? ruleMeta.docs.url : "";
 					const violation: RuleViolation = {
 						line: v.line,
 						column: v.column,
@@ -124,7 +130,7 @@ export class EslintProcessHelper {
 					return violation;
 				}
 			)
-		};
+		}
 	}
 
 }

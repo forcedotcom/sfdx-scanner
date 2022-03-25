@@ -1,8 +1,8 @@
 import { BaseEslintEngine, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
 import {StaticDependencies} from "../../../src/lib/eslint/EslintCommons";
-import { RuleTarget, ESRule, ESReport, RuleViolation } from '../../../src/types';
+import { RuleTarget, ESResult, ESRule, RuleViolation } from '../../../src/types';
 import { expect } from 'chai';
-import { CLIEngine } from 'eslint';
+import { ESLint } from 'eslint';
 import {CUSTOM_CONFIG} from '../../../src/Constants';
 import Mockito = require('ts-mockito');
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
@@ -118,7 +118,7 @@ describe('Tests for BaseEslintEngine', () => {
 				const isDir = true;
 				const target = DataGenerator.getDummyTarget(isDir);
 
-				const StaticDependenciesMock = mockStaticDependencies(target, getDummyCliEngine());
+				const StaticDependenciesMock = mockStaticDependencies(target, getDummyESLint());
 
 				// instantiate abstract engine
 				const engine = await createAbstractEngine(target, StaticDependenciesMock);
@@ -133,7 +133,7 @@ describe('Tests for BaseEslintEngine', () => {
 				Mockito.verify(StaticDependenciesMock.resolveTargetPath(target.target)).called();
 
 				// verify config
-				const capturedConfig = Mockito.capture(StaticDependenciesMock.createCLIEngine).first();
+				const capturedConfig = Mockito.capture(StaticDependenciesMock.createESLint).first();
 				expect(capturedConfig[0]).instanceOf(Object);
 				const config = <Object>capturedConfig[0];
 				expect(config['cwd']).equals(target.target);
@@ -176,10 +176,10 @@ describe('Tests for BaseEslintEngine', () => {
 					const description = 'rule description';
 					const message = 'this is a message';
 					const esRuleMap = DataGenerator.getDummyEsRuleMap(ruleId, category, description);
-					const esReport = DataGenerator.getDummyEsReport([DataGenerator.getDummyEsResult([DataGenerator.getDummyEsMessage(ruleId, message)])]);
+					const esResults = [DataGenerator.getDummyEsResult([DataGenerator.getDummyEsMessage(ruleId, message)])];
 
-					const cliEngineMock = getDummyCliEngine(esRuleMap, esReport);
-					const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
+					const eslintMock = getDummyESLint(esRuleMap, esResults);
+					const StaticDependenciesMock = mockStaticDependencies(target, eslintMock);
 					const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
 					const results = await engine.run(
@@ -194,7 +194,7 @@ describe('Tests for BaseEslintEngine', () => {
 					const result = results[0];
 
 					// TODO: verify engineName - right now, unless we use a real ENGINE enum type, this won't work
-					expect(result.fileName).equals(esReport.results[0].filePath);
+					expect(result.fileName).equals(esResults[0].filePath);
 					expect(result.violations.length).greaterThan(0);
 					const violation = result.violations[0];
 					expect(violation.ruleName).equals(ruleId);
@@ -221,8 +221,8 @@ describe('Tests for BaseEslintEngine', () => {
 				const description = 'some lengthy description';
 
 				const esRuleMap = DataGenerator.getDummyEsRuleMap(ruleId, category, description);
-				const cliEngineMock = getDummyCliEngine(esRuleMap);
-				const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
+				const eslintMock = getDummyESLint(esRuleMap);
+				const StaticDependenciesMock = mockStaticDependencies(target, eslintMock);
 				const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
 				// execute
@@ -255,8 +255,8 @@ describe('Tests for BaseEslintEngine', () => {
 				const esRule2 = DataGenerator.getDummyEsRule(category, description2);
 				esRuleMap.set(ruleId2, esRule2);
 
-				const cliEngineMock = getDummyCliEngine(esRuleMap);
-				const StaticDependenciesMock = mockStaticDependencies(target, cliEngineMock);
+				const eslintMock = getDummyESLint(esRuleMap);
+				const StaticDependenciesMock = mockStaticDependencies(target, eslintMock);
 				const engine = await createAbstractEngine(target, StaticDependenciesMock);
 
 				// execute
@@ -280,7 +280,7 @@ describe('Tests for BaseEslintEngine', () => {
 		before(async () => {
 			engine = await createDummyEngine(mockStrategy);
 		});
-		
+
 
 		it ('should decide to run if custom config, rules and target are correct', () => {
 
@@ -365,7 +365,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return false when custom config is not present but filter does not contain engine name', () => {
@@ -373,7 +373,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return false when custom config is not present and filter starts with "eslint"', () => {
@@ -381,7 +381,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 
 		it('should return true when only PMD custom config is present and filter contains engine name', () => {
@@ -397,7 +397,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
-			expect(isEngineRequested).to.be.true;	
+			expect(isEngineRequested).to.be.true;
 		});
 
 		it('should return false when custom eslint config is present and filter is empty', () => {
@@ -405,7 +405,7 @@ describe('Tests for BaseEslintEngine', () => {
 
 			const isEngineRequested = engine.isEngineRequested(filteredNames, engineOptionsWithEslintCustom);
 
-			expect(isEngineRequested).to.be.false;	
+			expect(isEngineRequested).to.be.false;
 		});
 	});
 });
@@ -415,10 +415,10 @@ describe('Tests for BaseEslintEngine', () => {
 
 
 
-function mockStaticDependencies(target: RuleTarget, cliEngineMock: any) {
+function mockStaticDependencies(target: RuleTarget, eslintMock: any) {
 	const StaticDependenciesMock = Mockito.mock(StaticDependencies);
 	Mockito.when(StaticDependenciesMock.resolveTargetPath(target.target)).thenReturn(target.target);
-	Mockito.when(StaticDependenciesMock.createCLIEngine(Mockito.anything())).thenReturn(cliEngineMock);
+	Mockito.when(StaticDependenciesMock.createESLint(Mockito.anything())).thenReturn(eslintMock);
 	return StaticDependenciesMock;
 }
 
@@ -439,13 +439,16 @@ async function createDummyEngine(strategy: EslintStrategy, baseDependencies = ne
 	return engine;
 }
 
-function getDummyCliEngine(esRuleMap: Map<string, ESRule> = DataGenerator.getDummyEsRuleMap(), esReport: ESReport = DataGenerator.getDummyEsReport()): typeof CLIEngine {
-	const CLIEngineMock: typeof CLIEngine = Mockito.mock(CLIEngine);
+function getDummyESLint(esRuleMap: Map<string, ESRule> = DataGenerator.getDummyEsRuleMap(), esResults: ESResult[] = [DataGenerator.getDummyEsResult()]): typeof ESLint {
+	const ESLintMock: typeof ESLint = Mockito.mock(ESLint);
 
-	Mockito.when(CLIEngineMock.getRules()).thenReturn(esRuleMap);
-	Mockito.when(MockStrategy.filterDisallowedRules(esRuleMap)).thenReturn(esRuleMap);
-	Mockito.when(CLIEngineMock.executeOnFiles(Mockito.anything())).thenReturn(esReport);
-
-	return Mockito.instance(CLIEngineMock);
+	Mockito.when(MockStrategy.getRuleMap()).thenReturn(esRuleMap);
+	// Use .thenReturn(Promise.resolve()), because there's apparently a bug in .thenResolve().
+	Mockito.when(ESLintMock.lintFiles(Mockito.anything())).thenReturn(Promise.resolve(esResults));
+	const ruleObject = {};
+	for (const [key, rule] of esRuleMap.entries()) {
+		ruleObject[key] = rule.meta;
+	}
+	Mockito.when(ESLintMock.getRulesMetaForResults(Mockito.anything())).thenReturn(ruleObject);
+	return Mockito.instance(ESLintMock);
 }
-
