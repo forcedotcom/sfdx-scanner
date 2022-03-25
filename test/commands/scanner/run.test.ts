@@ -737,7 +737,7 @@ describe('scanner:run', function () {
 				// and the output accumulates each time, so the output on failure is not the true length of the output
 				// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
 				// there are five retries in addition to the initial run.
-				expect(implicitMessages || []).to.have.lengthOf(35, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				expect(implicitMessages || []).to.have.lengthOf(22, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});
 	});
