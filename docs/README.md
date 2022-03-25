@@ -32,6 +32,34 @@ bundle exec jekyll serve
 
 Navigate to: http://127.0.0.1:4000/sfdx-scanner/
 
+## Troubleshooting Install Issues
+
+1. Compatibility between `listen` and `ruby` version. Example error message:
+```
+listen-3.2.1 requires ruby version >= 2.2.7, ~> 2.2, which is incompatible with the current version, ruby 3.1.1p18
+```
+a. Update bundle by running: 
+```
+bundle update
+```
+b. Start server again: 
+```
+bundle exec jekyll serve
+```
+
+2. Server start fails with `Cannot load such file` error. Example error message:
+```
+/usr/local/lib/ruby/gems/3.1.0/gems/jekyll-4.0.1/lib/jekyll/commands/serve/servlet.rb:3:in `require': cannot load such file -- webrick (LoadError)
+```
+a. Try adding missing dependency to bundle. For example:
+```
+bundle add webrick
+```
+b. Start server again: 
+```
+bundle exec jekyll serve
+```
+
 
 ## Relative URLs
 
