@@ -71,8 +71,8 @@
         en: CPD
       url: /v3.x/architecture/cpd-engine
     - title:
-        en: Salesforce Graph Engine
-      url: /v3.x/architecture/sfg-engine
+        en: Placeholder
+      url: /v3.x/architecture/placeholder-page
       new: true
 
 - title:
