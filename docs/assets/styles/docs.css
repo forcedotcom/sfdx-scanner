@@ -3646,9 +3646,8 @@ blockquote {
 }
 
 .new-menu-item {
-  font-size: x-small;
+  font-size: xx-small;
   font-weight: bold;
   align-self: start;
-  background-color: #f9bf2e;
   color:#bf1d00;
 }

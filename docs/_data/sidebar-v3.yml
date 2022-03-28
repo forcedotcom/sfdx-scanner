@@ -70,10 +70,6 @@
     - title:
         en: CPD
       url: /v3.x/architecture/cpd-engine
-    - title:
-        en: Placeholder
-      url: /v3.x/architecture/placeholder-page
-      new: true
 - title:
     en: FAQ
   url: /v3.x/faq
