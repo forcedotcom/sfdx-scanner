@@ -34,7 +34,7 @@ A: That depends on the engine in question.
 `~/.sfdx-scanner/Config.json`.
 <br/>
 If the language is not already supported, please log an Issue as per
-["How do I get support for additional languages?"](./en/faq/#q-how-do-i-get-support-for-additional-languages).
+["How do I get support for additional languages?"](./en/v3.x/faq/#q-how-do-i-get-support-for-additional-languages).
 
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Ruleset files, and Category files defining only XPath-based rules, may be referenced as standalone XML files. Java-based rules must be bundled into a JAR. The JAR/XML can then be added to the rule registry with the ```scanner:rule:add``` command.
@@ -50,7 +50,7 @@ A: You must:
 
 #### Q: How do I update the Salesforce Code Analyzer?
 A: You must:
-- Update the plugin to the latest version by following the instructions listed [here](./en/getting-started/install/#upgrade-plug-in)
+- Update the plugin to the latest version by following the instructions listed [here](./en/v3.x/getting-started/install/#upgrade-plug-in)
 - To update to a specific version of the plugin, here is the example `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v3.scanner }}`
 
 #### Q: How can I use `Salesforce Code Analyzer` in my CI/CD?

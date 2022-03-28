@@ -3,7 +3,7 @@ title: Release Information
 lang: en
 ---
 
-### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
+### To update the plugin, please follow the linked [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in)
 
 ## [v2.13.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.1) (03-23-2022)
 
