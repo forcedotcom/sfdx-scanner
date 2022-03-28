@@ -11,19 +11,19 @@ Like all the Salesforce CLI plug-ins, you install the Salesforce Code Analyzer C
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner
 Installing plugin @salesforce/sfdx-scanner...
-installed v{{ site.data.versions.scanner }} 
+installed v{{ site.data.versions-v3.scanner }} 
 ```
 
 #### Check that the Analyzer plug-in is installed
 ```bash
 $ sfdx plugins
-@salesforce/sfdx-scanner {{ site.data.versions.scanner }}
+@salesforce/sfdx-scanner {{ site.data.-v3.scanner }}
 ```
 #### Install or upgrade to a specific version using the following command
 ```bash
-$ sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}
+$ sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v3.scanner }}
 Installing plugin @salesforce/sfdx-scanner... 
-installed v{{ site.data.versions.scanner }}
+installed v{{ site.data.versions-v3.scanner }}
 ```
 
 #### Display the usage and help for the Analyzer commands

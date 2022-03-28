@@ -53,7 +53,7 @@ property, and add `!**/bower_components/**` to exclude Bower dependencies.
 ## Using Custom Rules
 
 ### My custom rule Java file doesn’t compile.
-* Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
+* Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions-v3.pmd }}.
 * Check that you're using correct syntax. 
 * Check that the compilation CLASSPATH contains the correct version of the PMD binary.
 
@@ -77,7 +77,7 @@ One possible reason is that the Java version you used to build your code is diff
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
 
-One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version {{ site.data.versions.pmd }}. Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions.pmd }}.
+One possible reason is that you referenced a class in your custom rule Java code from the PMD library that's not available in version {{ site.data.versions-v3.pmd }}. Make sure that you reference only PMD features and classes that are available in version {{ site.data.versions-v3.pmd }}.
 
 ---
 

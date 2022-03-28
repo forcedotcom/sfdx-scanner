@@ -1,4 +1,8 @@
 - title:
+    en: What's new in v3?
+  url: /v3.x/whats-new-v3
+  new: true
+- title:
     en: Get Started
   baseUrl: /v3.x/getting-started/
   children:
@@ -69,6 +73,7 @@
     - title:
         en: Salesforce Graph Engine
       url: /v3.x/architecture/sfg-engine
+      new: true
 
 - title:
     en: FAQ
