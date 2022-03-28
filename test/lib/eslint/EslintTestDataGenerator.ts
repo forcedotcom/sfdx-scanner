@@ -46,8 +46,8 @@ export function getDummyEsRule(category = 'problem', description = 'my descripti
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	}
 }
 
@@ -65,8 +65,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 	dummyMap.set('fake-deprecated', {
 		meta: {
@@ -81,8 +81,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 	dummyMap.set('fake-extended-a', {
 		meta: {
@@ -96,8 +96,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 	dummyMap.set('fake-extended-b', {
 		meta: {
@@ -111,8 +111,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 	dummyMap.set('@typescript-eslint/fake-extended-a', {
 		meta: {
@@ -127,8 +127,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 	dummyMap.set('@typescript-eslint/renamed-b-extension', {
 		meta: {
@@ -143,8 +143,8 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 				element: 'value'
 			}]
 		},
-		/* eslint-disable @typescript-eslint/no-empty-function */
-		create: () => { }
+		/* eslint-disable @typescript-eslint/no-unused-vars */
+		create: (context) => {return {};}
 	});
 
 	return dummyMap;

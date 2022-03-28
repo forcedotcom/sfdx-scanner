@@ -116,7 +116,7 @@ export type ESRuleMetadata = {
  */
 export type ESRule = {
 	meta: ESRuleMetadata;
-	create: Function;
+	create: (LooseObject) => LooseObject;
 }
 
 /**
