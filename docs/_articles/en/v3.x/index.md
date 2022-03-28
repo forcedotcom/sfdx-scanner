@@ -1,20 +1,26 @@
 ---
 title: Salesforce Code Analyzer Plug-In
-permalink: /
+permalink: /en/v3.x/
 lang: en
 ---
+
+<!-- temporary comment until v3.x becomes the new norm -->
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
-  	New pilot version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
+  	New version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
 	&nbsp;&nbsp;
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
+
+<!-- uncomment this once v3 becomes latest -->
+<!--
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	A new version (v{{ site.data.versions.scanner }}) of the plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+  	A new version (v{{ site.data.versions-v3.scanner }}) of the Code Analyzer Plug-in was released on {{ site.data.versions-v3.releasedon }} &nbsp;&nbsp;<a href="./en/v3.x/release-information/">Release Information</a>
 </div>
 <br>
+-->
 
 ## Salesforce Code Analyzer Plug-in
 
@@ -26,6 +32,7 @@ We may add support for more rule engines in the future.
 The Salesforce Code Analyzer Plug-in creates "Rule Violations" when the it identifies issues. Developers use this information as feedback to fix their code. 
 
 You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
+
 
 ## Additional Resources
 
