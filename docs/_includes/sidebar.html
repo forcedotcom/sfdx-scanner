@@ -2,14 +2,50 @@
   <div class="site-banner">
   	<br/>
     <div class="site-logo">
-      {% assign rootLink = site.baseurl | append: '/' %} {% if page.lang != 'en'
-      %} {% assign rootLink = site.baseurl | append: '/' | append: page.lang %}
-      {% endif %}
+       
+      {% assign rootLink = site.baseurl | append: '/' %}
+
       <a href="{{ rootLink }}" class="slds-m-vertical--x-small D(b)">
       	<span class="site-logo__graphic"><img src="./assets/images/sfdx_scanner_logo.png"/>
         </span>
         </a>
   </div><br/><br/><br/>
+
+  <div class="language-picker">
+
+    {% if page.url == '' %} 
+      {% assign ver3url = page.url | append: '/en/v3.x/' %} 
+      {% assign ver2url = page.url | append: '/' %} 
+    {% elsif page.url == '/' %} 
+      {% assign ver3url = page.url | append: 'en/v3.x/' %} 
+      {% assign ver2url = page.url %} 
+    {% else %}
+      {% assign ver3url = '/en/v3.x' %}
+      {% assign ver2url = '/' %}
+    {% endif %}
+
+    <a
+        class="{% unless page.path contains 'v3.x' %}is-selected{% endunless %}"
+        href="{{ ver2url | prepend: site.baseurl }}"
+        translate="no"
+        >v2.x</a
+      >
+      |
+      <a
+        class="{% if page.path contains 'v3.x' %}is-selected{% endif %}"
+        href="{{ ver3url | prepend: site.baseurl }}"
+        translate="no"
+        >v3.x</a
+      >
+  </div>
+
+  <!-- when we are ready to make v3 the default, swap this out -->
+  {% assign sidebar = site.data.sidebar-v2 %}
+
+  {% if page.path contains 'v3.x' %}
+    {% assign sidebar = site.data.sidebar-v3 %}
+  {% endif %}
+  
   <div
     id="site-navigation"
     class="site site-navigation site-navigation--has-search"
@@ -21,7 +57,7 @@
       aria-label="Main navigation"
     >
       <ul class="slds-list_vertical slds-has-block-links">
-        {% for item in site.data.sidebar %} {% if page.url contains item.baseUrl
+        {% for item in sidebar %} {% if page.url contains item.baseUrl
         %}
         <li class="list__item slds-is-open slds-is-selected">
           <button class="slds-button_reset" aria-expanded="true">
