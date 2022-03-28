@@ -3644,3 +3644,11 @@ blockquote {
 .version-picker a.is-selected {
   font-weight: bold;
 }
+
+.new-menu-item {
+  font-size: x-small;
+  font-weight: bold;
+  align-self: start;
+  background-color: #f9bf2e;
+  color:#bf1d00;
+}

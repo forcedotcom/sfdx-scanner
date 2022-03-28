@@ -1,5 +1,5 @@
 - title:
-    en: What's new in v3?
+    en: What's new in v3.x?
   url: /v3.x/whats-new-v3
   new: true
 - title:
@@ -74,7 +74,6 @@
         en: Placeholder
       url: /v3.x/architecture/placeholder-page
       new: true
-
 - title:
     en: FAQ
   url: /v3.x/faq
@@ -82,5 +81,5 @@
     en: Troubleshooting
   url: /v3.x/troubleshooting
 - title:
-    en: Release Information
+    en: Release Information for v3.x
   url: /v3.x/release-information/

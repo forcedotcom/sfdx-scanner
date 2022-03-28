@@ -17,7 +17,7 @@ installed v{{ site.data.versions-v3.scanner }}
 #### Check that the Analyzer plug-in is installed
 ```bash
 $ sfdx plugins
-@salesforce/sfdx-scanner {{ site.data.-v3.scanner }}
+@salesforce/sfdx-scanner {{ site.data.versions-v3.scanner }}
 ```
 #### Install or upgrade to a specific version using the following command
 ```bash

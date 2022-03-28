@@ -4,13 +4,12 @@ permalink: /en/v3.x/
 lang: en
 ---
 
-<!-- temporary comment until 3.x becomes the new norm -->
-<!-- TODO: align left-->
+<!-- temporary comment until v3.x becomes the new norm -->
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
-  	New major version 3 of the Code Analyzer Plug-in has been released on {{ site.data.versions-v3.releasedon }}!
-	  <br>
-	  Read more about it <a href="./en/v3.x/whats-new-v3/">here</a>
+  	New version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
+	&nbsp;&nbsp;
+	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
 
