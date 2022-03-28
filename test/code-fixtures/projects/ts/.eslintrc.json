@@ -15,5 +15,6 @@
 	"ignorePatterns": [
 		"lib/**",
 		"node_modules/**"
-	]
+	],
+	"root": true
 }

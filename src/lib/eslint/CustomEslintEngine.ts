@@ -81,8 +81,8 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		if (rules.length > 0) {
 			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
-
-		const eslint = this.dependencies.createESLint(config);
+		// The config we loaded from the file should be treated as an override for whatever default configs exist.
+		const eslint = this.dependencies.createESLint({overrideConfig: config});
 
 		const results: RuleResult[] = [];
 		for (const target of targets) {

@@ -1,22 +1,18 @@
 {
-	"overrideConfig": {
-		"root": true,
-		"parser": "@typescript-eslint/parser",
-		"parserOptions": {
-			"project": "test/code-fixtures/projects/tsconfig.json",
-			"sourceType": "module",
-			"ecmaVersion": 2018
-		},
-		"plugins": [
-			"@typescript-eslint"
-		],
-		"rules": {
-		}
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"project": "test/code-fixtures/projects/tsconfig.json",
+		"sourceType": "module",
+		"ecmaVersion": 2018
 	},
-	"baseConfig": {
-		"extends": [
-			"plugin:@typescript-eslint/recommended",
-			"plugin:@typescript-eslint/eslint-recommended"
-		]
-	}
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"rules": {
+	},
+	"extends": [
+		"plugin:@typescript-eslint/recommended",
+		"plugin:@typescript-eslint/eslint-recommended"
+	]
 }
