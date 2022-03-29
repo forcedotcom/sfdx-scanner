@@ -3,7 +3,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import {Messages, SfdxError} from '@salesforce/core';
 import fs = require('fs');
 
-import {RecombinedRuleResults} from '../../types';
+import {RecombinedRuleResults, RecombinedData} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
 
 Messages.importMessagesDirectory(__dirname);
@@ -66,7 +66,7 @@ export class RunOutputProcessor {
 		} else if (typeof results === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OUTPUT_FORMAT.JSON ? JSON.parse(results) : results;
+			return this.opts.format === OUTPUT_FORMAT.JSON ? JSON.parse(results) as AnyJson : results;
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
@@ -116,13 +116,14 @@ export class RunOutputProcessor {
 			fs.writeFileSync(this.opts.outfile, results);
 		} catch (e) {
 			// Rethrow any errors as SfdxErrors.
-			throw new SfdxError(e.message || e, null, null, INTERNAL_ERROR_CODE);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
 		return runMessages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
 	}
 
-	private writeToConsole(results: string | {columns; rows}): string {
+	private writeToConsole(results: RecombinedData): string {
 		// Figure out what format we need.
 		const format: OUTPUT_FORMAT = this.opts.format;
 		// Prepare the format mismatch message in case we need it later.

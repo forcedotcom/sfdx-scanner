@@ -61,9 +61,11 @@ export type EngineExecutionSummary = {
 	violationCount: number;
 };
 
+export type RecombinedData = string | {columns: string[]; rows: {[key: string]: string|number}[]};
+
 export type RecombinedRuleResults = {
 	minSev: number;
-	results: string | {columns; rows};
+	results: RecombinedData;
 	summaryMap: Map<string,EngineExecutionSummary>;
 };
 

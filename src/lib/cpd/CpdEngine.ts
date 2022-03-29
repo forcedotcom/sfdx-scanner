@@ -1,5 +1,5 @@
 import {Logger, Messages, SfdxError} from '@salesforce/core';
-import {xml2js} from 'xml-js';
+import {xml2js, Element} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
@@ -99,7 +99,7 @@ export class CpdEngine extends AbstractRuleEngine {
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		const languageToPaths = this.sortPaths(targets);
-		const results = [];
+		const results: RuleResult[] = [];
 
 		if (languageToPaths.size === 0) {
 			this.logger.trace(`No matching cpd target files found. Nothing to execute.`);
@@ -171,8 +171,9 @@ export class CpdEngine extends AbstractRuleEngine {
 			const stdout = CpdWrapper.execute(selectedTargets, language, this.minimumTokens);
 			return stdout;
 		} catch (e) {
-			this.logger.trace(`Cpd (${language}) evaluation failed: ` + (e.message || e));
-			throw new SfdxError(e.message || e);
+			const message: string = e instanceof Error ? e.message : e as string;
+			this.logger.trace(`Cpd (${language}) evaluation failed: ` + message || e);
+			throw new SfdxError(message);
 		}
 	}
 
@@ -187,7 +188,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		const xmlEnd = stdout.lastIndexOf(cpdEnd);
 		if (xmlStart != -1 && xmlEnd != -1) {
 			const cpdXml = stdout.slice(xmlStart, xmlEnd + cpdEnd.length);
-			const cpdJson = xml2js(cpdXml, {compact: false, ignoreDeclaration: true});
+			const cpdJson: Element = xml2js(cpdXml, {compact: false, ignoreDeclaration: true}) as Element;
 
 			const duplications =  cpdJson.elements[0].elements;
 			if (duplications) {
@@ -202,8 +203,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		return ruleResults;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private jsonToRuleResults(duplications: any): RuleResult[] {
+	private jsonToRuleResults(duplications: Element[]): RuleResult[] {
 		const ruleResults: RuleResult[] = [];
 
 		for (const duplication of duplications) {
@@ -218,10 +218,10 @@ export class CpdEngine extends AbstractRuleEngine {
 			for (const occ of occurences) {
 				// create a violation for each occurence of the code fragment
 				const violation: RuleViolation = {
-					line: occ.attributes.line,
-					column: occ.attributes.column,
-					endLine: occ.attributes.endline,
-					endColumn: occ.attributes.endcolumn,
+					line: occ.attributes.line as number,
+					column: occ.attributes.column as number,
+					endLine: occ.attributes.endline as number,
+					endColumn: occ.attributes.endcolumn as number,
 					ruleName: CpdRuleName,
 					severity: CpdViolationSeverity,
 					message: messages.getMessage("CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
@@ -238,7 +238,7 @@ export class CpdEngine extends AbstractRuleEngine {
 					ruleResults.push(
 						{
 							engine: this.ENGINE_NAME,
-							fileName: occ.attributes.path,
+							fileName: occ.attributes.path as string,
 							violations: [violation]
 						}
 					);

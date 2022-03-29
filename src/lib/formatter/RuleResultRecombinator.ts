@@ -1,12 +1,12 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
-import {EngineExecutionSummary, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
+import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
 import * as Mustache from 'mustache';
 import htmlEscaper = require('html-escaper');
-import * as csvStringify from 'csv-stringify';
+import { stringify } from 'csv-stringify';
 import { constructSarif } from './SarifFormatter'
 
 export class RuleResultRecombinator {
@@ -31,7 +31,7 @@ export class RuleResultRecombinator {
 				formattedResults = await constructSarif(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.TABLE:
-				formattedResults = this.constructTable(results); 
+				formattedResults = this.constructTable(results);
 				break;
 			case OUTPUT_FORMAT.XML:
 				formattedResults = this.constructXml(results);
@@ -47,8 +47,8 @@ export class RuleResultRecombinator {
 		if (!results || results.length === 0) {
 			return 0;
 		}
-		let minSev = null;
-		
+		let minSev: number = null;
+
 		// if -n or -s flag used, minSev is calculated with normal value
 		for (const res of results) {
 			for (const violation of res.violations) {
@@ -58,7 +58,7 @@ export class RuleResultRecombinator {
 				}
 			}
 		}
-		
+
 		// After iterating through all of the results, return the minimum severity we found (or 0 if we still have a null value).
 		return minSev || 0;
 	}
@@ -199,7 +199,7 @@ URL: ${url}
 </testcase>`;
 	}
 
-	private static constructTable(results: RuleResult[]): { columns; rows } | string {
+	private static constructTable(results: RuleResult[]): RecombinedData {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
@@ -295,7 +295,7 @@ URL: ${url}
 
 		const csvRows = [];
 
-		const columns: string[] = ['Problem', 'File', 'Severity']; 
+		const columns: string[] = ['Problem', 'File', 'Severity'];
         if (normalizeSeverity) {
            columns.push('Normalized Severity')
         }
@@ -320,11 +320,10 @@ URL: ${url}
 		// Force all cells to have quotes
 		const csvOptions = {
 			quoted: true,
-			// eslint-disable-next-line @typescript-eslint/camelcase
 			quoted_empty: true
 		};
 		return new Promise((resolve, reject) => {
-			csvStringify(csvRows, csvOptions,  (err, output) => {
+			stringify(csvRows, csvOptions,  (err, output) => {
 				if (err) {
 					reject(err);
 				}

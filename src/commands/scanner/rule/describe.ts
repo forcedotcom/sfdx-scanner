@@ -48,10 +48,10 @@ export default class Describe extends ScannerCommand {
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
-			this.ux.warn(messages.getMessage('output.noMatchingRules', [this.flags.rulename]));
+			this.ux.warn(messages.getMessage('output.noMatchingRules', [this.flags.rulename as string]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.flags.rulename]);
+			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.flags.rulename as string]);
 			this.ux.warn(msg);
 			rules.forEach((rule, idx) => {
 				this.ux.styledHeader(`Rule #${idx + 1}`);
@@ -62,7 +62,7 @@ export default class Describe extends ScannerCommand {
 			this.logStyledRule(rules[0]);
 		}
 		// We need to return something for when the --json flag is used, so we'll just return the list of rules.
-		return JSON.parse(JSON.stringify(rules));
+		return JSON.parse(JSON.stringify(rules)) as AnyJson;
 	}
 
 	private async styleRules(rules: Rule[]): Promise<DescribeStyledRule[]> {
