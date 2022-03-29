@@ -19,7 +19,7 @@ export default class CpdWrapper extends CommandLineSupport {
 	path: string;
 	language: string;
 	minimumTokens: number;
-	logger: Logger; 
+	logger: Logger;
 	private initialized: boolean;
 
 	protected async init(): Promise<void> {
@@ -27,7 +27,7 @@ export default class CpdWrapper extends CommandLineSupport {
 		if (this.initialized) {
 			return;
 		}
-		super.init();
+		await super.init();
 		this.logger = await Logger.child('CpdWrapper');
 		this.initialized = true;
 	}
@@ -49,7 +49,7 @@ export default class CpdWrapper extends CommandLineSupport {
 		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '--filelist', tmpPath,
 			'--format', 'xml', '--minimum-tokens', String(this.minimumTokens), '--language', this.language];
 
-		this.logger.trace(`Preparing to execute CPD with command: "${command}", args: "${args}"`);
+		this.logger.trace(`Preparing to execute CPD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 

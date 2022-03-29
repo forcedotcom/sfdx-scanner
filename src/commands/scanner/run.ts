@@ -114,8 +114,8 @@ export default class Run extends ScannerCommand {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
 
-		// if severty-for-error flag is used, we want to make sure the severities are normalized
-		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-threshold'];
+		// if severity-threshold flag is used, we want to make sure the severities are normalized
+		const normalizeSeverity: boolean = (this.flags['normalize-severity'] || this.flags['severity-threshold']) as boolean;
 
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
@@ -128,7 +128,7 @@ export default class Run extends ScannerCommand {
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
-		const target = this.flags.target || [];
+		const target = (this.flags.target || []) as string[];
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
 
@@ -137,12 +137,13 @@ export default class Run extends ScannerCommand {
 			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions);
 		} catch (e) {
 			// Rethrow any errors as SFDX errors.
-			throw new SfdxError(e.message || e, null, null, INTERNAL_ERROR_CODE);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		return new RunOutputProcessor({
 			format: outputOptions.format,
-			severityForError: this.flags['severity-threshold'],
-			outfile: this.flags.outfile
+			severityForError: this.flags['severity-threshold'] as number,
+			outfile: this.flags.outfile as string
 		}, this.ux)
 			.processRunOutput(output);
 	}
@@ -151,9 +152,9 @@ export default class Run extends ScannerCommand {
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 */
 	private gatherEngineOptions(): Map<string, string> {
-		const options = new Map();
+		const options: Map<string,string> = new Map();
 		if (this.flags.tsconfig) {
-			const tsconfig = normalize(untildify(this.flags.tsconfig));
+			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
 			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
 		}
 
@@ -161,7 +162,7 @@ export default class Run extends ScannerCommand {
 		//  engine-specific flags. Replace it in 3.0.
 		if (this.flags.env) {
 			try {
-				const parsedEnv: LooseObject = JSON.parse(this.flags.env);
+				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
 				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
@@ -170,13 +171,13 @@ export default class Run extends ScannerCommand {
 
 		// Capturing eslintconfig value, if provided
 		if (this.flags.eslintconfig) {
-			const eslintConfig = normalize(untildify(this.flags.eslintconfig));
+			const eslintConfig = normalize(untildify(this.flags.eslintconfig as string));
 			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
 		}
 
 		// Capturing pmdconfig value, if provided
 		if (this.flags.pmdconfig) {
-			const pmdConfig = normalize(untildify(this.flags.pmdconfig));
+			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
 			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
 		return options;
@@ -195,9 +196,9 @@ export default class Run extends ScannerCommand {
 		if (this.flags.format && this.flags.outfile) {
 			const derivedFormat = this.deriveFormatFromOutfile();
 			// For validation purposes, treat junit as xml.
-			const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format;
+			const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format as string;
 			if (derivedFormat !== chosenFormat) {
-				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format, derivedFormat]));
+				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, derivedFormat]));
 			}
 		}
 	}
@@ -205,7 +206,7 @@ export default class Run extends ScannerCommand {
 	private determineOutputFormat(): OUTPUT_FORMAT {
 		// If an output format is explicitly specified, use that.
 		if (this.flags.format) {
-			return this.flags.format;
+			return this.flags.format as OUTPUT_FORMAT;
 		} else if (this.flags.outfile) {
 			// Else If an outfile is explicitly specified, infer the format from its extension.
 			return this.deriveFormatFromOutfile();
@@ -219,7 +220,7 @@ export default class Run extends ScannerCommand {
 	}
 
 	private deriveFormatFromOutfile(): OUTPUT_FORMAT {
-		const outfile = this.flags.outfile;
+		const outfile = this.flags.outfile as string;
 		const lastPeriod = outfile.lastIndexOf('.');
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
 			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);

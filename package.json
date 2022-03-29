@@ -61,6 +61,7 @@
 		"@types/mocha": "^7.0.2",
 		"@types/mustache": "^4.0.1",
 		"@types/node": "^13.11.1",
+		"@types/normalize-path": "^3.0.0",
 		"chai": "^4",
 		"eslint": "^8.10.0",
 		"mocha": "^8.1.1",

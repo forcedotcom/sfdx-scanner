@@ -6,4 +6,11 @@ const deepCopy = (obj: any): any => {
 	return JSON.parse(JSON.stringify(obj));
 }
 
-export { deepCopy };
+const stringArrayTypeGuard = (object): object is string[] => {
+	if (object == null || !Array.isArray(object)) {
+		return false;
+	}
+	return !object.some(entry => typeof entry !== 'string');
+}
+
+export { deepCopy, stringArrayTypeGuard };

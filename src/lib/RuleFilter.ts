@@ -89,7 +89,7 @@ export abstract class RuleFilter {
 	}
 
 	public prettyPrint(): string {
-		return `RuleFilter[filterType=${this.constructor.name}, filterValues=${this.filterValues}, negated=${this.negated}]`;
+		return `RuleFilter[filterType=${this.constructor.name}, filterValues=${this.filterValues.toString()}, negated=${this.negated.toString()}]`;
 	}
 
 	/**
