@@ -196,7 +196,7 @@ export default class Run extends ScannerCommand {
 		if (this.flags.format && this.flags.outfile) {
 			const derivedFormat = this.deriveFormatFromOutfile();
 			// For validation purposes, treat junit as xml.
-			const chosenFormat = this.flags.format as string == 'junit' ? 'xml' : this.flags.format as string;
+			const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format as string;
 			if (derivedFormat !== chosenFormat) {
 				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, derivedFormat]));
 			}

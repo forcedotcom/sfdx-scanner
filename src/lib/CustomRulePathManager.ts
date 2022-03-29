@@ -65,7 +65,7 @@ export class CustomRulePathManager implements RulePathManager {
 		}
 
 		// Now that we've got the file contents, let's turn it into a JSON.
-		const json: RulePathJson = JSON.parse(data) as RulePathJson;
+		const json = JSON.parse(data) as RulePathJson;
 		this.pathsByLanguageByEngine = CustomRulePathManager.convertJsonDataToMap(json);
 		this.logger.trace(`Initialized CustomRulePathManager. pathsByLanguageByEngine: ${PrettyPrinter.stringifyMapOfMaps(this.pathsByLanguageByEngine)}`);
 
