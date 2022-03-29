@@ -81,7 +81,7 @@ export default class List extends ScannerCommand {
 		const rulesetTruncatedRules = this.truncateRulesetValues(rules);
 
 		// Transform column names to match display
-		const transformedRules = [];
+		const transformedRules: Record<string, any>[] = [];
 		rulesetTruncatedRules.forEach(rule => transformedRules.push(this.transformKeysToMatchColumns(rule)));
 
 		return transformedRules;
@@ -101,7 +101,7 @@ export default class List extends ScannerCommand {
 
 	private truncateRulesetValues(rules: Rule[]): Rule[] {
 		return rules.map(rule => {
-			const clonedRule = JSON.parse(JSON.stringify(rule));
+			const clonedRule = JSON.parse(JSON.stringify(rule)) as Rule;
 
 			// If any of the rule's rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
 			// so it doesn't overflow horizontally.

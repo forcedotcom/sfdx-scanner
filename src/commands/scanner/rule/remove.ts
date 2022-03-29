@@ -7,6 +7,7 @@ import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
+import { stringArrayTypeGuard } from '../../../lib/util/Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -48,7 +49,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 2: Pull out and process our flag.
 		const paths = this.flags.path ? this.resolvePaths() : null;
-		this.logger.trace(`Rule path: ${paths}`);
+		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
 
 		// Step 3: Get all rule entries matching the criteria they provided.
 		const crpm = await Controller.createRulePathManager();
@@ -104,7 +105,7 @@ export default class Remove extends ScannerCommand {
 
 	private validateFlags(): void {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.flags.path && (!this.flags.path.length || this.flags.path.includes(''))) {
+		if (this.flags.path && stringArrayTypeGuard(this.flags.path) && (!this.flags.path.length || this.flags.path.includes(''))) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.pathCannotBeEmpty', []);
 		}
 	}
@@ -112,7 +113,7 @@ export default class Remove extends ScannerCommand {
 	private resolvePaths(): string[] {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.
-		return this.flags.path.map(p => path.resolve(untildify(p)));
+		return (this.flags.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 
 	private generateConfirmationPrompt(rules: Rule[]): string {
