@@ -5,7 +5,7 @@ lang: en
 ## What is RetireJS?
 [RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project's third-party JavaScript
 dependencies and identifies those that have known security vulnerabilities. It has a lively and responsive community,
-and its database of vulnerable libraries is updated frequently.
+and its database of vulnerable libraries is updated frequently. Starting v3.x, RetireJS is included in the default set of engines.
 
 ## How does Salesforce Code Analyzer use RetireJS?
 Salesforce Code Analyzer uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.

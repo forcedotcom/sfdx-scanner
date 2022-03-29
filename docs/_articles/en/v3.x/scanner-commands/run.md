@@ -35,13 +35,11 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 
  -s, --severity-threshold=_severity-threshold_
  throws an error when violations of specific severity (or more severe) are detected, invokes 
+
  --normalize-severity
 
  -t, --target=_target_
  (required) location of source code
-
- -v, --violations-cause-error
- [deprecated] throws an error when violations are detected
 
  --env=_env_
  JSON-formatted string, overrides ESLint's default environment variables
@@ -73,7 +71,6 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 ## Additional Notes
 
 - `--ruleset` option is deprecated and will be removed soon. Please use --category instead.
-- `-v/--violations-cause-error` flag is deprecated. Please use `-s/--severity-threshold` instead. 
   
 ## Example
 
@@ -112,12 +109,6 @@ $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconf
 Use --env to override the default ESLint environment variables to add frameworks.
 ```bash
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
-```
-
-Use --violations-cause-error to throw a non-zero exit code when rule violations are found.
-In this example, if any rules are violated, the exit code will be equal to the severity of the most severe violation.
-```bash
-$ sfdx scanner:run --target "somefile.js" --violations-cause-error
 ```
 
 Use --engine to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
