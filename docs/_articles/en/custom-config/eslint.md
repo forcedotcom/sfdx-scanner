@@ -5,12 +5,12 @@ lang: en
 
 ## Introduction
 
-If you are a Scanner plugin user who is already experienced with Eslint, you may feel restricted by the default Eslint flavors that Scanner plugin offer. Now you can use your own customized `.eslintrc.json` file with the Scanner plugin to bring in the power of any eslint capabilities that are not supported by default. This gives your the flexibility to use different parsers, plugins and defining your custom set of rules. You can find more information about Eslint's configuration [here](https://eslint.org/docs/user-guide/configuring).
+If you are a Scanner plugin user who is already experienced with Eslint, you may feel restricted by the default Eslint flavors that Scanner plugin offer. Now you can use your own customized `.eslintrc.json` file with the Scanner plugin to bring in the power of any eslint capabilities that are not supported by default. This gives you the flexibility to use different parsers or plugins, and lets you define your custom set of rules. You can find more information about Eslint's configuration [here](https://eslint.org/docs/user-guide/configuring).
 
 To invoke this feature, pass in the file path to your config file as a value to `--eslintconfig` flag in `scanner:run` command.
 
 ```bash
-$ sfdx scanner:run —target "/path/to/your/target" —eslintconfig "/path/to/.eslintrc.json"
+$ sfdx scanner:run --target "/path/to/your/target" --eslintconfig "/path/to/.eslintrc.json"
 ```
 
 However, while giving you the power, the Scanner also offloads some responsibilities to you. Please read the following sections fully before attempting to use custom configuration with Eslint through the Scanner.
