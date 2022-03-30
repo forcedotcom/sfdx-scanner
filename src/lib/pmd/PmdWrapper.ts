@@ -28,7 +28,7 @@ export default class PmdWrapper extends PmdSupport {
 		if (this.initialized) {
 			return;
 		}
-		super.init();
+		await super.init();
 		this.logger = await Logger.child('PmdWrapper');
 		this.initialized = true;
 	}
@@ -80,7 +80,7 @@ export default class PmdWrapper extends PmdSupport {
 			args.push('-reportfile', this.reportFile);
 		}
 
-		this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${args}"`);
+		this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 

@@ -91,14 +91,14 @@ export class OutputProcessor extends AsyncCreatable {
 		} else {
 			regexMatch.forEach(item => {
 				const jsonStr = item.substring(headerLength, item.length - tailLength);
-				events.push(...JSON.parse(jsonStr));
+				events.push(...JSON.parse(jsonStr) as RuleEvent[]);
 			});
 		}
 		return events;
 	}
 
 	private logEvent(event: RuleEvent): void {
-		const message = `Event: messageKey = ${event.messageKey}, args = ${event.args}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose}, time = ${event.time}, internalLog = ${event.internalLog}`;
+		const message = `Event: messageKey = ${event.messageKey}, args = ${event.args.toString()}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose.toString()}, time = ${event.time}, internalLog = ${event.internalLog}`;
 		this.messageLogger.info(message);
 	}
 

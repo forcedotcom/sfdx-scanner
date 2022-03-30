@@ -80,7 +80,8 @@ export default class LocalCatalog implements RuleCatalog {
 			this.logger.trace(`Rules that match the criteria: ${PrettyPrinter.stringifyRules(rulesThatMatchCriteria)}`);
 			return rulesThatMatchCriteria;
 		} catch (e) {
-			throw new SfdxError(e.message || e);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(message);
 		}
 	}
 
@@ -116,7 +117,7 @@ export default class LocalCatalog implements RuleCatalog {
 
 	private async readCatalogJson(): Promise<Catalog> {
 		const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
-		return JSON.parse(rawCatalog);
+		return JSON.parse(rawCatalog) as Catalog;
 	}
 
 	private async writeCatalogJson(content: Catalog): Promise<void> {

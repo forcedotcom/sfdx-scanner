@@ -49,7 +49,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 
 	private async readCatalogFromFile(): Promise<Catalog> {
 		const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
-		return JSON.parse(rawCatalog);
+		return JSON.parse(rawCatalog) as Catalog;
 	}
 
 	protected async buildCommandArray(): Promise<[string, string[]]> {
@@ -61,7 +61,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		const [classpathEntries, parameters] = await Promise.all([this.buildClasspath(), this.buildCatalogerParameters()]);
 		const args = [`-DcatalogHome=${this.sfdxScannerPath}`, `-DcatalogName=${PMD_CATALOG_FILE}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
-		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${args}"`);
+		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 
@@ -74,7 +74,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 
 	private async buildCatalogerParameters(): Promise<string[]> {
 		const pathSetMap = await this.getRulePathEntries();
-		const parameters = [];
+		const parameters: string[] = [];
 		const divider = '=';
 		const joiner = ',';
 
@@ -89,7 +89,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 			}
 		});
 
-		this.logger.trace(`Cataloger parameters have been built: ${parameters}`);
+		this.logger.trace(`Cataloger parameters have been built: ${JSON.stringify(parameters)}`);
 		return parameters;
 	}
 

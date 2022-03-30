@@ -34,28 +34,24 @@ type HardcodedRuleDetail = {
 		name: string;
 		category: string;
 	};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	nodeIdentifier: (node: any) => boolean;
+	nodeIdentifier: (node: Element) => boolean;
 	severity: number;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	msgFormatter: (node: any) => string;
+	msgFormatter: (node: Element) => string;
 };
 
 const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 	{
 		base: HARDCODED_RULES.FILES_MUST_COMPILE,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		nodeIdentifier: (node: any): boolean => {
-			return node.name === 'error' && node.attributes.msg.toLowerCase().startsWith('pmdexception: error while parsing');
+		nodeIdentifier: (node: Element): boolean => {
+			return node.name === 'error' && (node.attributes.msg as string).toLowerCase().startsWith('pmdexception: error while parsing');
 		},
 		severity: 1,
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		msgFormatter: (node: any): string => {
+		msgFormatter: (node: Element): string => {
 			// We'll construct an array of strings and then join them together into a formatted message at the end.
 			const msgComponents: string[] = [];
 
 			// We want the message property that the node already has, since that's the one that directly described what happened.
-			msgComponents.push(node.attributes.msg);
+			msgComponents.push(node.attributes.msg as string);
 			// In general, the top-level exception will have exceptions below it that provide more information about lines,
 			// columns, etc. Look for that.
 			const causationStart = node.elements[0].cdata.indexOf('Caused by: ');
@@ -152,8 +148,9 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			this.logger.trace(`Found ${results.length} for PMD`);
 			return results;
 		} catch (e) {
-			this.logger.trace('Pmd evaluation failed: ' + (e.message || e));
-			throw new SfdxError(this.processStdErr(e.message || e));
+			const message: string = e instanceof Error ? e.message : e as string;
+			this.logger.trace(`Pmd evaluation failed: ${message}`);
+			throw new SfdxError(this.processStdErr(message));
 		}
 	}
 
@@ -174,7 +171,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		const xmlEnd = stdout.lastIndexOf(pmdEnd);
 		if (xmlStart != -1 && xmlEnd != -1) {
 			const pmdXml = stdout.slice(xmlStart, xmlEnd + pmdEnd.length);
-			const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true});
+			const pmdJson = xml2js(pmdXml, {compact: false, ignoreDeclaration: true}) as Element;
 
 			const elements =  pmdJson.elements[0].elements;
 			if (elements) {
@@ -236,8 +233,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	 * @returns {boolean} true if the node represents rule violations in the scanner's opinion.
 	 * @private
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private nodeRepresentsViolations = (node: any): boolean => {
+	private nodeRepresentsViolations = (node: Element): boolean => {
 		// `file` nodes always contain violations.
 		if (node.name === 'file') {
 			return true;
@@ -247,8 +243,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		return HARDCODED_RULE_DETAILS.some((detail: HardcodedRuleDetail): boolean => detail.nodeIdentifier(node));
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	protected xmlToRuleResults(elements: any): RuleResult[] {
+	protected xmlToRuleResults(elements: Element[]): RuleResult[] {
 		// Provide results for nodes that are files.
 		const violationNodes = elements.filter(this.nodeRepresentsViolations);
 
@@ -274,11 +269,10 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		}).filter((rr: RuleResult): boolean => rr != null);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private fileNodeToRuleResult(element: any): RuleResult {
+	private fileNodeToRuleResult(element: Element): RuleResult {
 		return {
 			engine: this.getName(),
-			fileName: element.attributes['name'],
+			fileName: element.attributes['name'] as string,
 			violations: element.elements.map(
 				(v: PmdViolation) => {
 					return {
@@ -297,13 +291,12 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		};
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private errorNodeToRuleResult(element: any): RuleResult {
+	private errorNodeToRuleResult(element: Element): RuleResult {
 		const hardcodedDetails = HARDCODED_RULE_DETAILS.find(details => details.nodeIdentifier(element));
 
 		return {
 			engine: this.getName(),
-			fileName: element.attributes.filename,
+			fileName: element.attributes.filename as string,
 			violations: [{
 				line: 1,
 				column: 1,
@@ -354,8 +347,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	 * The PMD report contains a mix of violations and other issues. This method converts
 	 * these other issues intoto ux events.
 	 */
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private emitErrorsAndWarnings(elements: any): void {
+	private emitErrorsAndWarnings(elements: Element[]): void {
 		// Provide results for nodes that aren't files.
 		const nodes = elements.filter(e => !this.nodeRepresentsViolations(e));
 
@@ -504,7 +496,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.PMD, filterValues);
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	public async run(
 		ruleGroups: RuleGroup[],
 		rules: Rule[],

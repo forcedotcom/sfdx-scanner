@@ -247,7 +247,8 @@ export class RetireJsEngine extends AbstractRuleEngine {
 				}
 			} catch (e) {
 				// We can swallow errors here, since they just mean this output isn't actually a JSON.
-				this.logger.warn(`Failed to convert output into object: ${e.message || e}`);
+				const message: string = e instanceof Error ? e.message : e as string;
+				this.logger.warn(`Failed to convert output into object: ${message}`);
 			}
 		}
 		// If we're outside of the loop, then neither stdout nor stderr were a JSON. So we should just return stderr
@@ -297,7 +298,8 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			return Array.from(ruleResultsByFile.values());
 		} catch (e) {
 			// Rethrow any errors as Sfdx errors.
-			throw new SfdxError(e.message || e);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(message);
 		}
 	}
 
@@ -318,9 +320,11 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		// Theoretically, the output is at least a valid JSON.
 		let outputJson = null;
 		try {
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			outputJson = JSON.parse(output);
 		} catch (e) {
-			throw new SfdxError(`Could not parse RetireJS output: ${e.message || e}`);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(`Could not parse RetireJS output: ${message}`);
 		}
 		// If we were able to parse the object, we should then verify that it's actually a RetireJsOutput instance.
 		if (this.validateRetireJsOutput(outputJson)) {
@@ -399,7 +403,8 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			await this.duplicateJsFiles();
 		} catch (e) {
 			// Catch any error and give it a slightly more informative header.
-			throw new SfdxError(`RetireJS: ${e.message || e}`);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(`RetireJS: ${message}`);
 		}
 		// Finally, we can handle all of the ZIP files.
 		await this.extractZips();
