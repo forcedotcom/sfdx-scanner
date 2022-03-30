@@ -98,7 +98,7 @@ export class OutputProcessor extends AsyncCreatable {
 	}
 
 	private logEvent(event: RuleEvent): void {
-		const message = `Event: messageKey = ${event.messageKey}, args = ${event.args.toString()}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose.toString()}, time = ${event.time}, internalLog = ${event.internalLog}`;
+		const message = `Event: messageKey = ${event.messageKey}, args = ${JSON.stringify(event.args)}, type = ${event.type}, handler = ${event.handler}, verbose = ${event.verbose.toString()}, time = ${event.time}, internalLog = ${event.internalLog}`;
 		this.messageLogger.info(message);
 	}
 
