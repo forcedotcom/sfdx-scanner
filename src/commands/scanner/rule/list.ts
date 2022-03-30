@@ -4,6 +4,7 @@ import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {AllowedEngineFilters} from '../../../Constants';
+import {deepCopy} from '../../../lib/util/Utils';
 
 
 // Initialize Messages with the current plugin directory
@@ -101,7 +102,7 @@ export default class List extends ScannerCommand {
 
 	private truncateRulesetValues(rules: Rule[]): Rule[] {
 		return rules.map(rule => {
-			const clonedRule = JSON.parse(JSON.stringify(rule)) as Rule;
+			const clonedRule = deepCopy(rule);
 
 			// If any of the rule's rulesets have a name longer than 20 characters, we'll truncate it to 15 and append ellipses,
 			// so it doesn't overflow horizontally.

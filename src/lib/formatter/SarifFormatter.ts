@@ -6,6 +6,7 @@ import { RuleCatalog } from '../services/RuleCatalog';
 import { Controller } from '../../Controller';
 import { ESLint } from 'eslint';
 import * as retire from 'retire';
+import {Location, Log, Notification, Region, Run, ReportingDescriptor} from 'sarif';
 
 const ERROR = 'error';
 const WARNING = 'warning';
@@ -27,12 +28,12 @@ abstract class SarifFormatter {
 	 * The initial json object that contains basic information such as the engine name.
 	 * This object will be added to as the violations are processed.
 	 */
-	private readonly jsonTemplate: unknown;
+	private readonly jsonTemplate: Run;
 	protected readonly engine: string;
 
-	constructor(engine: string, toolJson: unknown) {
+	protected constructor(engine: string, runJson: Run) {
 		this.engine = engine;
-		this.jsonTemplate = deepCopy(toolJson);
+		this.jsonTemplate = deepCopy(runJson);
 		this.jsonTemplate['results'] = [];
 		this.jsonTemplate['invocations'] = [];
 		this.ruleMap = new Map<string, number>();
@@ -42,16 +43,16 @@ abstract class SarifFormatter {
 	 * Converts the rule violation to either "warning" or "error"
 	 * See https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127839
 	 */
-	protected abstract getLevel(violation: RuleViolation): string;
+	protected abstract getLevel(violation: RuleViolation): Notification.level;
 
 	/**
 	 * Return a location that is used by violations and errors
 	 */
-	private getLocation(r: RuleResult): unknown {
+	private static getLocation(r: RuleResult): Location {
 		return {
 			physicalLocation: {
 				artifactLocation: {
-					uri: url.pathToFileURL(r.fileName)
+					uri: url.pathToFileURL(r.fileName).toString()
 				}
 			}
 		};
@@ -61,8 +62,8 @@ abstract class SarifFormatter {
 	 * Find all unique rules and add them to ruleMap
 	 * @return the array that is appended to tool.driver.rules for the given run
 	 */
-	private populateRuleMap(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown[] {
-		const rules = [];
+	private populateRuleMap(catalog: RuleCatalog, ruleResults: RuleResult[]): ReportingDescriptor[] {
+		const rules: ReportingDescriptor[] = [];
 		const normalizeSeverity: boolean = ruleResults.length > 0 && ruleResults[0].violations.length > 0 && !(ruleResults[0].violations[0].normalizedSeverity === undefined);
 		for (const r of ruleResults) {
 			for (const v of r.violations) {
@@ -104,9 +105,8 @@ abstract class SarifFormatter {
 	 * Multiple RuleResult objects will be consolidated into a single run object.
 	 * https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html#_Toc10127675
 	 */
-	public format(catalog: RuleCatalog, ruleResults: RuleResult[]): unknown {
+	public format(catalog: RuleCatalog, ruleResults: RuleResult[]): Run {
 		const runJson = deepCopy(this.jsonTemplate);
-		const results = runJson.results;
 		const invocation = {
 			executionSuccessful: true,
 			toolExecutionNotifications: []
@@ -117,7 +117,7 @@ abstract class SarifFormatter {
 		for (const r of ruleResults) {
 			for (const v of r.violations) {
 				// Create a new location for each violation, it may contain region specific information
-				const location = this.getLocation(r);
+				const location = SarifFormatter.getLocation(r);
 
 				// Violations that are exceptions are placed in the invocation.toolExecutionNotifications array
 				if (v.exception) {
@@ -131,18 +131,19 @@ abstract class SarifFormatter {
 				} else {
 					// Regular violations are placed in the results array
 					// W-8881776: line and column are sometimes strings, but the schema requires them to be numbers
-					const region = {
+					const region: Region = {
 						startLine: parseInt(`${v.line}`),
 						startColumn: parseInt(`${v.column}`)
 					};
 
-					for (const k of ['endLine', 'endColumn']) {
-						if (v[k]) {
-							region[k] = parseInt(v[k]);
-						}
+					if (v.endLine != null) {
+						region.endLine = parseInt(`${v.endLine}`);
+					}
+					if (v.endColumn != null) {
+						region.endColumn = parseInt(`${v.endColumn}`);
 					}
 
-					location['physicalLocation']['region'] = region;
+					location.physicalLocation.region = region;
 
 					const result = {
 						level: this.getLevel(v),
@@ -154,7 +155,7 @@ abstract class SarifFormatter {
 						locations: [location]
 					};
 
-					results.push(result);
+					runJson.results.push(result);
 				}
 			}
 		}
@@ -176,7 +177,8 @@ class ESLintSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: engine,
-						version: ESLint.version,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+						version: ESLint.version as string,
 						informationUri: 'https://eslint.org',
 						rules: []
 					}
@@ -185,7 +187,7 @@ class ESLintSarifFormatter extends SarifFormatter {
 		);
 	}
 
-	protected getLevel(ruleViolation: RuleViolation): string {
+	protected getLevel(ruleViolation: RuleViolation): Notification.level {
 		return ruleViolation.severity === 2 ? ERROR : WARNING;
 	}
 }
@@ -209,7 +211,7 @@ class PMDSarifFormatter extends SarifFormatter {
 		);
 	}
 
-	protected getLevel(ruleViolation: RuleViolation): string {
+	protected getLevel(ruleViolation: RuleViolation): Notification.level {
 		return ruleViolation.severity === 1 ? ERROR : WARNING;
 	}
 }
@@ -232,7 +234,7 @@ class PMDSarifFormatter extends SarifFormatter {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected getLevel(ignored: RuleViolation): string {
+	protected getLevel(ignored: RuleViolation): Notification.level {
 		return WARNING;
 	}
 }
@@ -247,7 +249,8 @@ class RetireJsSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: 'Retire.js',
-						version: retire.version,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+						version: retire.version as string,
 						informationUri: 'https://retirejs.github.io/retire.js',
 						rules: []
 					}
@@ -257,7 +260,7 @@ class RetireJsSarifFormatter extends SarifFormatter {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	protected getLevel(ignored: RuleViolation): string {
+	protected getLevel(ignored: RuleViolation): Notification.level {
 		// All violations are errors
 		return ERROR;
 	}
@@ -292,7 +295,7 @@ const constructSarif = async (results: RuleResult[], executedEngines: Set<string
 	// Obtain the catalog and pass it in, this avoids multiple initializations
 	// when waiting for promises in parallel
 	const catalog: RuleCatalog = await Controller.getCatalog();
-	const sarif = {
+	const sarif: Log = {
 		version: '2.1.0',
 		$schema: 'http://json.schemastore.org/sarif-2.1.0',
 		runs: [

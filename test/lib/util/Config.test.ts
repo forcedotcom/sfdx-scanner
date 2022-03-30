@@ -314,7 +314,7 @@ describe('Config.ts', () => {
 					await config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('OnlyStringAllowedInStringArray',
+					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue',
 						['targetPatterns', 'eslint-typescript', String([1, 2, 3])]));
 				}
 			});

@@ -4,6 +4,7 @@ import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
+import {deepCopy} from '../../../lib/util/Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -62,7 +63,7 @@ export default class Describe extends ScannerCommand {
 			this.logStyledRule(rules[0]);
 		}
 		// We need to return something for when the --json flag is used, so we'll just return the list of rules.
-		return JSON.parse(JSON.stringify(rules)) as AnyJson;
+		return deepCopy(rules);
 	}
 
 	private async styleRules(rules: Rule[]): Promise<DescribeStyledRule[]> {
