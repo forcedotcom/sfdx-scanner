@@ -65,7 +65,7 @@ export class EslintStrategyHelper {
 			// If the rule is absent from the config, its status can be inherited from other configs. To represent this
 			// ambiguous state, return null.
 			return null;
-		} else if (typeof recommendation == 'string') {
+		} else if (typeof recommendation === 'string') {
 			// If the recommendation is a string, it could be "off", in which case the rule is disabled. Otherwise, it's enabled.
 			return recommendation === 'off' ? RuleDefaultStatus.DISABLED : RuleDefaultStatus.ENABLED;
 		} else if (stringArrayTypeGuard(recommendation) && recommendation.length === 1) {
