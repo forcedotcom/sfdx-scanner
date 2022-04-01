@@ -3,14 +3,14 @@
  */
 
 export function isValueInFilter(value: string, filterValues: string[]): boolean {
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	return filterValues.some((myValue, index, array) => {
 		return myValue === value;
 	});
 }
 
 export function anyFilterValueStartsWith(startsWith: string, filterValues: string[]): boolean {
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	return filterValues.some((value, index, array) => {
 		return value.startsWith(startsWith);
 	})
