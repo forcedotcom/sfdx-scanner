@@ -274,9 +274,32 @@ jobs:
   # Purpose: Runs the plugin against itself, to make sure we're following our own rules.
   self-evaluation:
     <<: *defaults
+    parameters:
+      node-version: *node_version_param
     steps:
       - attach_workspace:
           at: ~/repo
+
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
 
       - run: mkdir test-results
       - run:
