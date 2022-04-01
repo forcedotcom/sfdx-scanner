@@ -4,6 +4,7 @@ import {Messages} from '@salesforce/core';
 import {ConfigContent, EngineConfigContent} from './Config';
 import {ENGINE} from '../../Constants';
 import {RetireJsEngine} from '../retire-js/RetireJsEngine';
+import {deepCopy} from './Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -54,6 +55,9 @@ export class VersionUpgradeManager {
 	private upgradeScriptsByVersion: Map<string,VersionUpgradeScript>;
 
 	constructor() {
+		// It's typically bad practice to use `require` instead of `import`, but the former is much more straightforward
+		// in this case.
+		// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
 		this.currentVersion = require('../../../package.json').version;
 		this.upgradeScriptsByVersion = upgradeScriptsByVersion;
 	}
@@ -81,13 +85,14 @@ export class VersionUpgradeManager {
 		// Handle each upgrade script in sequence.
 		for (const version of versions) {
 			// Store the config as it currently exists.
-			const existingConfig: ConfigContent = JSON.parse(JSON.stringify(config));
+			const existingConfig = deepCopy(config);
 			try {
 				await this.upgradeScriptsByVersion.get(version)(config);
 			} catch (e) {
 				// If the script failed, prefix the error so it's clear where it came from, then throw a new error with
 				// the prefixed message and the last safe configuration.
-				throw new VersionUpgradeError(messages.getMessage('upgradeFailed', [version, e.message || e]), existingConfig);
+				const message: string = e instanceof Error ? e.message : e as string;
+				throw new VersionUpgradeError(messages.getMessage('upgradeFailed', [version, message]), existingConfig);
 			}
 			// If we're here, we're considered to have successfully upgraded to this version. So we'll update the config
 			// to reflect that.
