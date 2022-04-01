@@ -177,8 +177,7 @@ class ESLintSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: engine,
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-						version: ESLint.version as string,
+						version: ESLint.version,
 						informationUri: 'https://eslint.org',
 						rules: []
 					}

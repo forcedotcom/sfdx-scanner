@@ -1,6 +1,6 @@
 import { BaseEslintEngine, EslintStrategy } from "../../../src/lib/eslint/BaseEslintEngine";
 import {StaticDependencies} from "../../../src/lib/eslint/EslintCommons";
-import { RuleTarget, ESResult, ESRule, RuleViolation } from '../../../src/types';
+import { RuleTarget, ESRule, RuleViolation } from '../../../src/types';
 import { expect } from 'chai';
 import { ESLint } from 'eslint';
 import {CUSTOM_CONFIG} from '../../../src/Constants';
@@ -439,8 +439,8 @@ async function createDummyEngine(strategy: EslintStrategy, baseDependencies = ne
 	return engine;
 }
 
-function getDummyESLint(esRuleMap: Map<string, ESRule> = DataGenerator.getDummyEsRuleMap(), esResults: ESResult[] = [DataGenerator.getDummyEsResult()]): typeof ESLint {
-	const ESLintMock: typeof ESLint = Mockito.mock(ESLint);
+function getDummyESLint(esRuleMap: Map<string, ESRule> = DataGenerator.getDummyEsRuleMap(), esResults: ESLint.LintResult[] = [DataGenerator.getDummyEsResult()]): ESLint {
+	const ESLintMock: ESLint = Mockito.mock(ESLint);
 
 	Mockito.when(MockStrategy.getRuleMap()).thenReturn(esRuleMap);
 	// Use .thenReturn(Promise.resolve()), because there's apparently a bug in .thenResolve().

@@ -1,11 +1,12 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
-import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
+import {ESRule, ESRuleConfigValue, ESRuleConfig, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import path = require('path');
+import {ESLint} from 'eslint';
 
-const ES_CONFIG = {
+const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
 		"parserOptions": {
@@ -23,7 +24,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	private static LANGUAGES = [LANGUAGE.JAVASCRIPT];
 
 	private initialized: boolean;
-	private recommendedConfig: LooseObject;
+	private recommendedConfig: ESRuleConfig;
 	protected logger: Logger;
 
 	async init(): Promise<void> {
@@ -34,7 +35,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		// When we're building our catalog, we'll want to get any bonus configuration straight from the horse's mouth.
 		// This lets us do that.
 		const pathToRecommendedConfig = require.resolve('eslint').replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
-		this.recommendedConfig = require(pathToRecommendedConfig);
+		this.recommendedConfig = (await import(pathToRecommendedConfig)) as ESRuleConfig;
 		this.initialized = true;
 	}
 
@@ -46,8 +47,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
-	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
+	async getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options> {
 		return ES_CONFIG;
 	}
 
@@ -62,7 +63,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name) === RuleDefaultStatus.ENABLED;
 	}
 
-	getDefaultConfig(ruleName: string): ESRuleConfig {
+	getDefaultConfig(ruleName: string): ESRuleConfigValue {
 		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
@@ -75,7 +76,7 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 	}
 
 	processRuleViolation(): ProcessRuleViolationType {
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 		return (fileName: string, ruleViolation: RuleViolation): void => {
 			if (ruleViolation.message.startsWith('Parsing error:')) {
 				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;

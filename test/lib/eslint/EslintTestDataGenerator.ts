@@ -1,4 +1,5 @@
-import { Rule, RuleGroup, RuleTarget, ESRule, ESResult, ESMessage } from '../../../src/types';
+import { Rule, RuleGroup, RuleTarget, ESRule } from '../../../src/types';
+import {ESLint, Linter} from 'eslint';
 
 const engineName = 'TestHarnessEngine'; // TODO: crude code. revisit
 
@@ -150,14 +151,20 @@ export function getDummyTypescriptRuleMap(): Map<string,ESRule> {
 	return dummyMap;
 }
 
-export function getDummyEsResult(messages: ESMessage[] = [getDummyEsMessage()]): ESResult {
+export function getDummyEsResult(messages: Linter.LintMessage[] = [getDummyEsMessage()]): ESLint.LintResult{
 	return {
 		filePath: "filePath",
-		messages: messages
+		messages: messages,
+		errorCount: 1,
+		fatalErrorCount: 1,
+		warningCount: 0,
+		fixableErrorCount: 0,
+		fixableWarningCount: 0,
+		usedDeprecatedRules: []
 	};
 }
 
-export function getDummyEsMessage(ruleId = 'rule', message = 'message'): ESMessage {
+export function getDummyEsMessage(ruleId = 'rule', message = 'message'): Linter.LintMessage {
 	return {
 		fatal: true,
 		ruleId: ruleId,

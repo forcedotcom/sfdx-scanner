@@ -2,12 +2,13 @@ import * as path from 'path';
 import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
-import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
+import {ESRule, ESRuleConfigValue, ESRuleConfig, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
 import { OutputProcessor } from '../pmd/OutputProcessor';
 import {deepCopy} from '../util/Utils';
 import { rules } from '@typescript-eslint/eslint-plugin';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
+import {ESLint} from 'eslint';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -17,7 +18,7 @@ export enum TYPESCRIPT_ENGINE_OPTIONS {
 	TSCONFIG = 'tsconfig'
 }
 
-const ES_PLUS_TS_CONFIG = {
+const ES_PLUS_TS_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
 		"parser": "@typescript-eslint/parser",
@@ -48,10 +49,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	private logger: Logger;
 	private fileHandler: FileHandler;
 	private outputProcessor: OutputProcessor;
-	private baseEslintConfig: LooseObject;
-	private extendedEslintConfig: LooseObject;
-	private untypedConfig: LooseObject;
-	private typedConfig: LooseObject;
+	private baseEslintConfig: ESRuleConfig;
+	private extendedEslintConfig: ESRuleConfig;
+	private untypedConfig: ESRuleConfig;
+	private typedConfig: ESRuleConfig;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -62,19 +63,22 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.outputProcessor = await OutputProcessor.create({});
 		const pathToBaseConfig = require.resolve('eslint')
 			.replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
-		this.baseEslintConfig = require(pathToBaseConfig);
+		this.baseEslintConfig = (await import(pathToBaseConfig)) as ESRuleConfig;
 
 		const pathToExtendedBaseConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
-		this.extendedEslintConfig = require(pathToExtendedBaseConfig).overrides[0];
+		// The extended base config has an `overrides` property which is a singleton array of the rule configs object
+		// we actually want.
+		const rawExtendedConfig = (await import(pathToExtendedBaseConfig)) as {overrides: ESRuleConfig[]};
+		this.extendedEslintConfig = rawExtendedConfig.overrides[0];
 
 		const pathToUntypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended.js'));
-		this.untypedConfig = require(pathToUntypedRecommendedConfig);
+		this.untypedConfig = (await import(pathToUntypedRecommendedConfig)) as ESRuleConfig;
 
 		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.js'));
-		this.typedConfig = require(pathToTypedRecommendedConfig);
+		this.typedConfig = (await import(pathToTypedRecommendedConfig)) as ESRuleConfig;
 
 		this.initialized = true;
 	}
@@ -89,11 +93,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 	filterUnsupportedPaths(paths: string[]): string[] {
 		const filteredPaths = paths.filter(p => p.endsWith(".ts"));
-		this.logger.trace(`Input paths: ${paths}, Filtered paths: ${filteredPaths}`);
+		this.logger.trace(`Input paths: ${JSON.stringify(paths)}, Filtered paths: ${JSON.stringify(filteredPaths)}`);
 		return filteredPaths;
 	}
 
-	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+	private filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
 		// We want to identify rules that are deprecated, and rules that are extended by other rules, so we can manually
 		// filter them out.
 		const extendedRules: Set<string> = new Set();
@@ -137,7 +141,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return status === RuleDefaultStatus.ENABLED;
 	}
 
-	getDefaultConfig(ruleName: string): ESRuleConfig {
+	getDefaultConfig(ruleName: string): ESRuleConfigValue {
 		// Get the highest-priority configuration we can find.
 		return EslintStrategyHelper.getDefaultConfig(this.typedConfig, ruleName)
 			|| EslintStrategyHelper.getDefaultConfig(this.untypedConfig, ruleName)
@@ -145,14 +149,13 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			|| EslintStrategyHelper.getDefaultConfig(this.baseEslintConfig, ruleName);
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
+	async getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options> {
 		const tsconfigPath = await this.findTsconfig(engineOptions);
 
 		// Alert the user we found a config file, if --verbose
 		this.alertUser(tsconfigPath);
 
-		const config = {};
+		const config: ESLint.Options = {};
 
 		Object.assign(config, deepCopy(ES_PLUS_TS_CONFIG));
 
@@ -235,7 +238,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	}
 
 	private static isCompatibleRuleMeta(rule): rule is ESRule {
-		return rule.meta.docs != null;
+		return 'meta' in rule && 'docs' in (rule as {meta}).meta;
 	}
 
 	getRuleMap(): Map<string, ESRule> {

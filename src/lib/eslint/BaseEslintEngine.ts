@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import { Catalog, ESRuleConfig, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata, ESResult } from '../../types';
+import { Catalog, ESRuleConfig, ESRuleConfigValue, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata } from '../../types';
 import {ENGINE, Severity} from '../../Constants';
 import {OutputProcessor} from '../pmd/OutputProcessor';
 import {AbstractRuleEngine} from '../services/RuleEngine';
@@ -8,6 +8,7 @@ import {Controller} from '../../Controller';
 import {deepCopy} from '../util/Utils';
 import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {ESLint} from 'eslint';
 
 // TODO: DEFAULT_ENV_VARS is part of a fix for W-7791882 that was known from the beginning to be a sub-optimal solution.
 //       During the 3.0 release cycle, an alternate fix should be implemented that doesn't leak the abstraction. If this
@@ -24,8 +25,11 @@ const DEFAULT_ENV_VARS: LooseObject = {
 	mocha: true				// `describe' and 'it' global vars
 };
 
+type EslintEnv = {
+	[key: string]: boolean;
+};
+
 const ENV = 'env';
-const BASECONFIG = 'baseConfig';
 
 export interface EslintStrategy {
 
@@ -35,17 +39,14 @@ export interface EslintStrategy {
 	/** Get engine that strategy supports */
 	getEngine(): ENGINE;
 
-	/** Get eslint engine to use for scanning. */
-	getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>>;
+	/** Get config options for eslint engine to use for scanning. */
+	getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options>;
 
 	/** Get languages supported by engine */
 	getLanguages(): string[];
 
 	/** After applying target patterns, last chance to filter any unsupported files */
 	filterUnsupportedPaths(paths: string[]): string[];
-
-	/** Filters out any rules that should be excluded from the catalog */
-	filterDisallowedRules(rulesByName: Map<string,ESRule>): Map<string,ESRule>;
 
 	/**
 	 * Indicates whether the rule with the specified name should be treated as enabled by default (i.e., run in the
@@ -58,9 +59,9 @@ export interface EslintStrategy {
 	/**
 	 * Returns the default configuration associated with the specified rule, as per the corresponding "recommended" ruleset.
 	 * @param {string} ruleName - The name of a rule in this engine.
-	 * @returns {ESRuleConfig} The rule's default recommended configuration.
+	 * @returns {ESRuleConfigValue} The rule's default recommended configuration.
 	 */
-	getDefaultConfig(ruleName: string): ESRuleConfig;
+	getDefaultConfig(ruleName: string): ESRuleConfigValue;
 
 	/** Returns all rules available for this engine */
 	getRuleMap(): Map<string, ESRule>;
@@ -185,7 +186,7 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		// Get sublist of rules supported by the engine
-		const configuredRules = this.configureRules(rules);
+		const configuredRules = this.configureRules(rules).rules;
 		if (Object.keys(configuredRules).length === 0) {
 			// No rules to run
 			this.logger.trace('No matching rules to run. Nothing to execute.');
@@ -200,22 +201,22 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 				// TODO: Will this break the typescript parser cwd setting?
 				const cwd = target.isDirectory ? this.baseDependencies.resolveTargetPath(target.target) : this.baseDependencies.getCurrentWorkingDirectory();
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
-				const config = {cwd};
+				const config: ESLint.Options = {cwd};
 
 				target.paths = this.strategy.filterUnsupportedPaths(target.paths);
 
 				if (target.paths.length === 0) {
 					// No target files to analyze
-					this.logger.trace(`No target files to analyze from ${target.paths}`);
+					this.logger.trace(`No target files to analyze from ${JSON.stringify(target.paths)}`);
 					continue; // to the next target
 				}
 
 				// get run-config for the engine and add to config
-				Object.assign(config, deepCopy(await this.strategy.getRunConfig(engineOptions)));
+				Object.assign(config, deepCopy(await this.strategy.getRunOptions(engineOptions)));
 				// At this point, the inner `overrideConfig` property should exist. If it doesn't, we'll set it to an
 				// empty object to avoid NPEs.
-				config["overrideConfig"] = config["overrideConfig"] || {};
-				config["overrideConfig"]["rules"] = configuredRules;
+				config.overrideConfig = config.overrideConfig || {};
+				config.overrideConfig.rules = configuredRules;
 
 				// TODO: This whole code block is part of a fix to W-7791882, which was known from the start to be sub-optimal.
 				//       It requires too much leaking of the abstraction. So during the 3.0 cycle, we should replace it with
@@ -224,18 +225,19 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 				// options.baseConfig. Configuration object, extended by all configurations used with this instance.
 				// You can use this option to define the default settings that will be used if your configuration files don't configure it.
 				// If they don't already have a baseConfig property, we'll need to instantiate one.
-				config[BASECONFIG] = config[BASECONFIG] || {[ENV]: {}};
+				config.baseConfig = config.baseConfig || {env: {}};
 				// We'll also need to potentially modify the provided config's environment variables. We can merge two objects
 				// by using the spread syntax (...x). Later parameters override earlier ones in a conflict, so we want
 				// the default values to be overridden by whatever was already in the env property, and we want the manual
 				// override to trump both of those things.
-				const envOverride = engineOptions.has(ENV) ? JSON.parse(engineOptions.get(ENV)) : {};
-				config[BASECONFIG][ENV] = {...DEFAULT_ENV_VARS, ...config[BASECONFIG][ENV], ...envOverride};
+				const envOverride = engineOptions.has(ENV) ? JSON.parse(engineOptions.get(ENV)) as LooseObject : {};
+				BaseEslintEngine.validateEnv(envOverride);
+				config.baseConfig.env = {...DEFAULT_ENV_VARS, ...config.baseConfig.env, ...envOverride};
 				// ==== This is the end of the sup-optimal solution to W-7791882.
 
 				this.logger.trace(`About to run ${this.getName()}. targets: ${target.paths.length}`);
 				const eslint = this.baseDependencies.createESLint(config);
-				const esResults: ESResult[] = await eslint.lintFiles(target.paths);
+				const esResults: ESLint.LintResult[] = await eslint.lintFiles(target.paths);
 				this.logger.trace(`Finished running ${this.getName()}`);
 
 				const rulesMeta = eslint.getRulesMetaForResults(esResults);
@@ -247,7 +249,8 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 			return results;
 		} catch (e) {
-			throw new SfdxError(e.message || e);
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfdxError(message);
 		}
 	}
 
@@ -265,16 +268,32 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 	/**
 	 * Uses a list of rules to generate an object suitable for use as the "rules" property of an ESLint configuration.
 	 * @param {Rule[]} rules - A list of rules that we want to run
-	 * @returns {[key: string]: ESRuleConfig} A mapping from rule names to the configuration at which they should run.
+	 * @returns {ESRuleConfig} A mapping from rule names to the configuration at which they should run.
 	 * @private
 	 */
-	private configureRules(rules: Rule[]): {[key: string]: ESRuleConfig} {
-		const configuredRules: LooseObject = {};
+	private configureRules(rules: Rule[]): ESRuleConfig {
+		const configuredRules: ESRuleConfig = {rules: {}};
 		rules.forEach(rule => {
 			// If the rule has a default configuration associated with it, we use it. Otherwise, we default to "error".
-			configuredRules[rule.name] = rule.defaultConfig || 'error';
+			configuredRules.rules[rule.name] = rule.defaultConfig || 'error';
 		});
 		return configuredRules;
 	}
 
+	private static validateEnv(env: unknown): env is EslintEnv {
+		if (env == null) {
+			// Null/undefined count as valid for our purposes.
+			return true;
+		}
+		// For a non-null value, iterate through the keys and make sure each one corresponds to a boolean.
+		for (const key of Object.keys(env)) {
+			if (typeof env[key] !== 'boolean') {
+				// A typical typeguard function would return false here. But in our case, there's no point continuing at all
+				// if the env isn't valid. So we should just throw an exception instead.
+				throw new Error(`Provided ESLint env ${JSON.stringify(env)} must have exclusively boolean properties`);
+			}
+		}
+		// If all the keys are booleans, we're good.
+		return true;
+	}
 }

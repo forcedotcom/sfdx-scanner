@@ -1,9 +1,10 @@
 import { Linter, ESLint } from 'eslint';
 import * as path from 'path';
 import { CUSTOM_CONFIG } from '../../Constants';
-import { LooseObject, RuleResult, RuleViolation, ESMessage, ESResult, ESRule, ESRuleMetadata, ESRuleConfig } from '../../types';
+import { RuleResult, RuleViolation, ESRule, ESRuleMetadata, ESRuleConfig, ESRuleConfigValue } from '../../types';
 import { FileHandler } from '../util/FileHandler';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {stringArrayTypeGuard} from '../util/Utils';
 
 
 // Defining a function signature that will be returned by EslintStrategy.processRuleViolation()
@@ -54,27 +55,37 @@ export class EslintStrategyHelper {
 		return filteredRules;
 	}
 
-	static getDefaultStatus(recommendedConfig: LooseObject, ruleName: string): RuleDefaultStatus {
+	static getDefaultStatus(recommendedConfig: ESRuleConfig, ruleName: string): RuleDefaultStatus {
 		// If a rule is absent from the "recommended" configuration, then its status could be inherited from another config.
 		// To represent the unknown state, we'll just return null.
 
 		// See if this configuration has an entry for the rule in question.
-		const recommendation: ESRuleConfig = recommendedConfig.rules[ruleName];
+		const recommendation: ESRuleConfigValue = recommendedConfig.rules[ruleName];
 		if (!recommendation) {
 			// If the rule is absent from the config, its status can be inherited from other configs. To represent this
 			// ambiguous state, return null.
 			return null;
+		} else if (typeof recommendation == 'string') {
+			// If the recommendation is a string, it could be "off", in which case the rule is disabled. Otherwise, it's enabled.
+			return recommendation === 'off' ? RuleDefaultStatus.DISABLED : RuleDefaultStatus.ENABLED;
+		} else if (stringArrayTypeGuard(recommendation) && recommendation.length === 1) {
+			// If the recommendation is a length-1 string array, check whether that value is "off".
+			return recommendation[0] === 'off' ? RuleDefaultStatus.DISABLED : RuleDefaultStatus.ENABLED;
+		} else {
+			// For any other case, the rule is some kind of enabled.
+			return RuleDefaultStatus.ENABLED;
 		}
-		// If there's a recommendation, then we'll treat the rule as default-enabled unless the recommended severity is
-		// "off".
-		return recommendation.indexOf('off') === 0 ? RuleDefaultStatus.DISABLED : RuleDefaultStatus.ENABLED;
 	}
 
-	static getDefaultConfig(recommendedConfig: LooseObject, ruleName: string): ESRuleConfig {
-		const recommendation: ESRuleConfig = recommendedConfig.rules[ruleName];
+	static getDefaultConfig(recommendedConfig: ESRuleConfig, ruleName: string): ESRuleConfigValue {
+		const recommendation: ESRuleConfigValue = recommendedConfig.rules[ruleName];
+		// If there's no recommended config, then return null.
+		if (!recommendation) {
+			return null;
+		}
 		// BASE ASSUMPTION: If the config specifies a rule as "off", it is unlikely to also specify a meaningful default
 		// config for that rule. So we can return null for any rules set to "off".
-		if (!recommendation || recommendation.indexOf('off') === 0) {
+		if ((typeof recommendation === 'string' && recommendation === 'off') || (Array.isArray(recommendation) && recommendation.indexOf('off') === 0)) {
 			return null;
 		} else {
 			return recommendation;
@@ -91,7 +102,7 @@ export class EslintProcessHelper {
 	addRuleResultsFromReport(
 		engineName: string,
 		results: RuleResult[],
-		esResults: ESResult[],
+		esResults: ESLint.LintResult[],
 		ruleMap: Map<string,ESRuleMetadata>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): void {
 		esResults.forEach(r => {
@@ -104,14 +115,14 @@ export class EslintProcessHelper {
 	toRuleResult(
 		engineName: string,
 		fileName: string,
-		messages: ESMessage[],
+		messages: Linter.LintMessage[],
 		ruleMap: Map<string, ESRuleMetadata>,
 		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): RuleResult {
 		return {
 			engine: engineName,
 			fileName,
 			violations: messages.map(
-				(v: ESMessage): RuleViolation => {
+				(v: Linter.LintMessage): RuleViolation => {
 					const ruleMeta = ruleMap.get(v.ruleId);
 					const category = ruleMeta ? ruleMeta.type : "problem";
 					const url = ruleMeta ? ruleMeta.docs.url : "";
