@@ -113,7 +113,9 @@ export class RunOutputProcessor {
 
 	private writeToOutfile(results: string | {columns; rows}): string {
 		try {
-			fs.writeFileSync(this.opts.outfile, results);
+			// At this point, we can cast `results` to a string, since it being an object would indicate that the format
+			// is `table`, and we already have validations preventing tables from being written to files.
+			fs.writeFileSync(this.opts.outfile, results as string);
 		} catch (e) {
 			// Rethrow any errors as SfdxErrors.
 			const message: string = e instanceof Error ? e.message : e as string;

@@ -192,13 +192,20 @@ export default class Run extends ScannerCommand {
 			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
 
-		// Be liberal with the user, but do log an info message if they choose a file extension that does not match their format.
+		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
 		if (this.flags.format && this.flags.outfile) {
-			const derivedFormat = this.deriveFormatFromOutfile();
-			// For validation purposes, treat junit as xml.
-			const chosenFormat = this.flags.format == 'junit' ? 'xml' : this.flags.format as string;
-			if (derivedFormat !== chosenFormat) {
-				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, derivedFormat]));
+			const inferredOutfileFormat = this.inferFormatFromOutfile();
+			// For the purposes of this validation, we treat junit as xml.
+			const chosenFormat = this.flags.format === 'junit' ? 'xml' : this.flags.format as string;
+			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
+			// of TABLE to a file.
+			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.cannotWriteTableToFile', []);
+			}
+			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
+			// just log a message saying so.
+			if (chosenFormat !== inferredOutfileFormat) {
+				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, inferredOutfileFormat]));
 			}
 		}
 	}
@@ -209,7 +216,7 @@ export default class Run extends ScannerCommand {
 			return this.flags.format as OUTPUT_FORMAT;
 		} else if (this.flags.outfile) {
 			// Else If an outfile is explicitly specified, infer the format from its extension.
-			return this.deriveFormatFromOutfile();
+			return this.inferFormatFromOutfile();
 		} else if (this.flags.json) {
 			// Else If the --json flag is present, then we'll default to JSON format.
 			return OUTPUT_FORMAT.JSON;
@@ -219,12 +226,14 @@ export default class Run extends ScannerCommand {
 		}
 	}
 
-	private deriveFormatFromOutfile(): OUTPUT_FORMAT {
+	private inferFormatFromOutfile(): OUTPUT_FORMAT {
 		const outfile = this.flags.outfile as string;
 		const lastPeriod = outfile.lastIndexOf('.');
+		// If the outfile is malformed, we're already hosed.
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
 			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 		} else {
+			// Look at the file extension, and infer a corresponding output format.
 			const fileExtension = outfile.slice(lastPeriod + 1);
 			switch (fileExtension) {
 				case OUTPUT_FORMAT.CSV:
