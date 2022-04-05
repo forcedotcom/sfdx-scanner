@@ -1,3 +1,6 @@
+import {JSONSchema4} from 'json-schema';
+import {Linter} from 'eslint';
+
 export type Rule = {
 	engine: string;
 	sourcepackage: string;
@@ -9,7 +12,7 @@ export type Rule = {
 	defaultEnabled: boolean;
 	// The expectation is that default configurations for other engines will be defined as their own types, which will
 	// be OR'd together in this property.
-	defaultConfig?: ESRuleConfig;
+	defaultConfig?: ESRuleConfigValue;
 	url?: string;
 }
 
@@ -18,10 +21,18 @@ export type LooseObject = {
 	[key: string]: any;
 }
 
-// This is a DESCRIPTIVE definition based on observation of ESLint and a few of its derivatives, NOT a proscriptive one
-// to which all other ESLint-like engines are expected to adhere. If rules are discovered that violate this definition,
-// changing the definition should be considered a viable option.
-export type ESRuleConfig = string|Array<string|LooseObject>;
+/**
+ * Alias for ESLint's{@link Linter.RuleEntry} type. Exported here to minimize the need to import directly from ESLint.
+ */
+export type ESRuleConfigValue = Linter.RuleEntry;
+
+/**
+ * ESLint-like config files (e.g, ESLint's `recommended.js` file) will typically either be of this format, or contain
+ * an object of this format.
+ */
+export type ESRuleConfig = {
+	rules: Linter.RulesRecord
+};
 
 export type RuleGroup = {
 	engine: string;
@@ -99,50 +110,32 @@ export type RuleEvent = {
 	internalLog?: string;
 }
 
+/**
+ * All ESLint-like rules are defined such that ESLint can run them, but the engines have _exactly_ enough difference in
+ * their type definitions that the TS compiler complains if you try to cast one to another. So we use this and {@link ESRule}
+ * as super-types that we can use for our purposes, without worrying about a rule's true engine-specific type.
+ */
 export type ESRuleMetadata = {
 	deprecated?: boolean;
 	// This is optional because ESLint-LWC rules don't have a type parameter set. We'll be defaulting to 'problem' in that case.
 	type?: string;
-	docs: {
-		description: string;
-		recommended: boolean|string;
+	docs?: {
+		description?: string;
+		recommended?: boolean|string;
 		extendsBaseRule?: boolean|string;
-		url: string;
+		url?: string;
 	};
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	schema: Record<string, any>[];
+	schema?: JSONSchema4|JSONSchema4[];
 }
 
 /**
- * Type mapping to rules returned from eslint
+ * All ESLint-like rules are defined such that ESLint can run them, but the engines have _exactly_ enough difference in
+ * their type definitions that the TS compiler complains if you try to cast one to another. So we use this and {@link ESRuleMetadata}
+ * as super-types that we can use for our purposes, without worrying about a rule's true engine-specific type.
  */
 export type ESRule = {
-	meta: ESRuleMetadata;
+	meta?: ESRuleMetadata;
 	create: (LooseObject) => LooseObject;
-}
-
-/**
- * Type mapping for eslint's results within a report
- */
-export type ESResult = {
-	filePath: string;
-	messages: ESMessage[];
-}
-
-/**
- * Type mapping to report messages output by eslint
- */
-export type ESMessage = {
-	fatal: boolean;
-	ruleId: string;
-	severity: number;
-	line: number;
-	column: number;
-	message: string;
-	fix: {
-		range: [number, number];
-		text: string;
-	};
 }
 
 export type TargetPattern = BasicTargetPattern|AdvancedTargetPattern;

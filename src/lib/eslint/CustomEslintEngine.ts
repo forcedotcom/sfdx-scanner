@@ -1,10 +1,11 @@
-import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, ESResult, TargetPattern, ESRuleMetadata } from '../../types';
+import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, TargetPattern, ESRuleMetadata } from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase, Severity} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, SfdxError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
+import {ESLint, Linter} from 'eslint';
 
 export class CustomEslintEngine extends AbstractRuleEngine {
 
@@ -86,7 +87,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 		const results: RuleResult[] = [];
 		for (const target of targets) {
-			const esResults: ESResult[] = await eslint.lintFiles(target.paths);
+			const esResults: ESLint.LintResult[] = await eslint.lintFiles(target.paths);
 
 			const rulesMeta = eslint.getRulesMetaForResults(esResults);
 			const rulesMap: Map<string,ESRuleMetadata> = new Map();
@@ -100,7 +101,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 	}
 
 	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private async extractConfig(configFile: string): Promise<Record<string, any>> {
+	private async extractConfig(configFile: string): Promise<Linter.Config> {
 
 		const fileHandler = this.dependencies.getFileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
@@ -112,12 +113,13 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		const configContent = await fileHandler.readFile(configFile);
 
 		// TODO: skim out comments in the file
-		let config;
+		let config: Linter.Config;
 
 		try {
-			config = JSON.parse(configContent);
+			config = JSON.parse(configContent) as Linter.Config;
 		} catch (error) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'InvalidJson', [configFile, error.message]);
+			const message: string = error instanceof Error ? error.message : error as string;
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'CustomEslintEngine', 'InvalidJson', [configFile, message]);
 		}
 
 		return config;

@@ -87,8 +87,8 @@ describe('TypescriptEslint Strategy', () => {
 			const tsStrategy = new TestTypescriptEslintStrategy();
 			await tsStrategy.init();
 
-			// THIS IS THE PART BEING TESTED
-			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+			// THIS IS THE PART BEING TESTED. (Note, `filterDisallowedRules()` is private, hence the `any` cast.)
+			const filteredRules = (tsStrategy as any).filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
 
 			expect(filteredRules.has('fake-deprecated')).to.equal(false, 'Deprecated rule should be removed');
 		});
@@ -97,8 +97,8 @@ describe('TypescriptEslint Strategy', () => {
 			const tsStrategy = new TestTypescriptEslintStrategy();
 			await tsStrategy.init();
 
-			// THIS IS THE PART BEING TESTED
-			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+			// THIS IS THE PART BEING TESTED. (Note, `filterDisallowedRules()` is private, hence the `any` cast.)
+			const filteredRules = (tsStrategy as any).filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
 
 			expect(filteredRules.has('fake-extended-a')).to.equal(false, 'Extended rule should be removed');
 			expect(filteredRules.has('fake-extended-b')).to.equal(false, 'Extended rule should be removed');
@@ -108,8 +108,8 @@ describe('TypescriptEslint Strategy', () => {
 			const tsStrategy = new TestTypescriptEslintStrategy();
 			await tsStrategy.init();
 
-			// THIS IS THE PART BEING TESTED
-			const filteredRules = tsStrategy.filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
+			// THIS IS THE PART BEING TESTED. (Note, `filterDisallowedRules()` is private, hence the `any` cast.)
+			const filteredRules = (tsStrategy as any).filterDisallowedRules(DataGenerator.getDummyTypescriptRuleMap());
 
 			expect(filteredRules.has('fake-active')).to.equal(true, 'Active rule should be kept');
 		});

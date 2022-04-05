@@ -1,11 +1,14 @@
 import { EslintStrategy } from './BaseEslintEngine';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
-import {ESRule, ESRuleConfig, LooseObject, RuleViolation} from '../../types';
+import { ESRuleConfig, ESRuleConfigValue, ESRule, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import { rules } from '@lwc/eslint-plugin-lwc';
+import {ESLint} from 'eslint';
 
-const ES_CONFIG = {
+const LWC_RULES = rules as {[ruleName: string]: ESRule};
+
+const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
 		"parser": "@babel/eslint-parser",
@@ -34,7 +37,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	private initialized: boolean;
 	protected logger: Logger;
-	private recommendedConfig: LooseObject;
+	private recommendedConfig: ESRuleConfig;
 
 	async init(): Promise<void> {
 		if (this.initialized) {
@@ -43,7 +46,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		const pathToRecommendedConfig = require.resolve('@salesforce/eslint-config-lwc')
 			.replace('index.js', 'base.js');
-		this.recommendedConfig = require(pathToRecommendedConfig);
+		this.recommendedConfig = (await import(pathToRecommendedConfig)) as ESRuleConfig
 		this.initialized = true;
 	}
 
@@ -55,8 +58,8 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT_LWC;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
-	async getRunConfig(engineOptions: Map<string, string>): Promise<Record<string, any>> {
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
+	async getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options> {
 		return ES_CONFIG;
 	}
 
@@ -65,7 +68,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return paths;
 	}
 
-	filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
+	private filterDisallowedRules(rulesByName: Map<string, ESRule>): Map<string, ESRule> {
 		return EslintStrategyHelper.filterDisallowedRules(rulesByName);
 	}
 
@@ -73,7 +76,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 		return EslintStrategyHelper.getDefaultStatus(this.recommendedConfig, name) === RuleDefaultStatus.ENABLED;
 	}
 
-	getDefaultConfig(ruleName: string): ESRuleConfig {
+	getDefaultConfig(ruleName: string): ESRuleConfigValue {
 		return EslintStrategyHelper.getDefaultConfig(this.recommendedConfig, ruleName);
 	}
 
@@ -81,17 +84,16 @@ export class LWCEslintStrategy implements EslintStrategy {
 		const unfilteredRules: Map<string,ESRule> = EslintStrategyHelper.getBaseEslintRules();
 
 		// Add all LWC-specific rules to the map.
-		for (const key of Object.keys(rules)) {
+		for (const [ruleName, typedRule] of Object.entries(LWC_RULES)) {
 			// NOTE: LWC rules have no `type` attribute by default. We're going to default them to `problem` for now.
-			const typedRule = {...rules[key]};
 			typedRule.meta.type = 'problem';
-			unfilteredRules.set(`${RULE_PREFIX}/${key}`, typedRule);
+			unfilteredRules.set(`${RULE_PREFIX}/${ruleName}`, typedRule);
 		}
 
 		return this.filterDisallowedRules(unfilteredRules);
 	}
 
-	// TODO: Submit PR against elsint-plugin-lwc
+	// TODO: Submit PR against eslint-plugin-lwc
 	processRuleViolation(): ProcessRuleViolationType {
 		return (fileName: string, ruleViolation: RuleViolation): void => {
 			const url: string = ruleViolation.url || '';
