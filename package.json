@@ -54,8 +54,8 @@
 	"devDependencies": {
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
 		"@oclif/dev-cli": "^1",
-		"@oclif/plugin-help": "^3",
-		"@oclif/test": "^1",
+		"@oclif/plugin-help": "^5",
+		"@oclif/test": "^2",
 		"@salesforce/dev-config": "^3",
 		"@salesforce/ts-sinon": "^1.1.2",
 		"@types/chai": "^4",
