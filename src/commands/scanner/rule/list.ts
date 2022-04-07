@@ -69,29 +69,27 @@ export default class List extends ScannerCommand {
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
-		const formattedRules = this.formatRulesForDisplay(rules);
+		const formattedRules = List.formatRulesForDisplay(rules);
 		this.ux.table(formattedRules, columns);
 		// If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
 		// just return the filtered list instead of the formatted list.
 		return rules;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private formatRulesForDisplay(rules: Rule[]): Record<string, any>[] {
+	private static formatRulesForDisplay(rules: Rule[]): Record<string, string|string[]>[] {
 		// Truncate ruleset values
-		const rulesetTruncatedRules = this.truncateRulesetValues(rules);
+		const rulesetTruncatedRules = List.truncateRulesetValues(rules);
 
 		// Transform column names to match display
-		const transformedRules: Record<string, any>[] = [];
-		rulesetTruncatedRules.forEach(rule => transformedRules.push(this.transformKeysToMatchColumns(rule)));
+		const transformedRules: Record<string, string|string[]>[] = [];
+		rulesetTruncatedRules.forEach(rule => transformedRules.push(List.transformKeysToMatchColumns(rule)));
 
 		return transformedRules;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	private transformKeysToMatchColumns(rule: Rule): Record<string, any> {
+	private static transformKeysToMatchColumns(rule: Rule): Record<string, string|string[]> {
 		// Map rule fields to the matching column
-		const transformedRule = {};
+		const transformedRule: Record<string, string|string[]> = {};
 		transformedRule[columns[0]] = rule.name;
 		transformedRule[columns[1]] = rule.languages;
 		transformedRule[columns[2]] = rule.categories;
@@ -100,7 +98,7 @@ export default class List extends ScannerCommand {
 		return transformedRule;
 	}
 
-	private truncateRulesetValues(rules: Rule[]): Rule[] {
+	private static truncateRulesetValues(rules: Rule[]): Rule[] {
 		return rules.map(rule => {
 			const clonedRule = deepCopy(rule);
 

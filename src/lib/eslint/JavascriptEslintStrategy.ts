@@ -47,9 +47,9 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		return ENGINE.ESLINT;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await */
-	async getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options> {
-		return ES_CONFIG;
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+	getRunOptions(engineOptions: Map<string, string>): Promise<ESLint.Options> {
+		return Promise.resolve(ES_CONFIG);
 	}
 
 	filterUnsupportedPaths(paths: string[]): string[] {

@@ -18,8 +18,7 @@ export enum RuleDefaultStatus {
 
 
 export class StaticDependencies {
-	/* eslint-disable @typescript-eslint/no-explicit-any */
-	createESLint(config: Record<string, any>): ESLint {
+	createESLint(config: ESLint.Options): ESLint {
 		return new ESLint(config);
 	}
 

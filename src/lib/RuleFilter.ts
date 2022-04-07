@@ -41,16 +41,14 @@ export interface EngineFilterInterface {
 /**
  * Return true if object implements the RuleGroupFilter interface
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isRuleGroupFilter(object: any): object is RuleGroupFilter {
+export function isRuleGroupFilter(object): object is RuleGroupFilter {
     return 'getRuleGroups' in object;
 }
 
 /**
  * Return true if object implements the EngineFilterInterface interface
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isEngineFilter(object: any): object is EngineFilterInterface {
+export function isEngineFilter(object): object is EngineFilterInterface {
     return 'getEngines' in object;
 }
 
@@ -105,7 +103,7 @@ export abstract class RuleFilter {
 	protected static processForPosAndNegFilterValues(filterValues: string[]): {positive: string[]; negative: string[]} {
 		filterValues = filterValues.map(v => v.trim());
 		const positive = filterValues.filter(v => !v.startsWith(NEGATION_CHAR));
-		const negative = filterValues.filter(v => v.startsWith(NEGATION_CHAR)).map(v => v.substr(1));
+		const negative = filterValues.filter(v => v.startsWith(NEGATION_CHAR)).map(v => v.slice(1));
 		return {positive: positive, negative: negative};
 	}
 }
@@ -114,7 +112,7 @@ export abstract class RuleFilter {
  * This class will throw an exception if any of the filter values are negated
  */
 abstract class PositiveRuleFilter extends RuleFilter {
-    constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
+    protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
 		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 		if (mapped.negative.length > 0) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'Exceptions', 'RuleFilter.PositiveOnly', [filterDisplayName]);
@@ -127,7 +125,7 @@ abstract class PositiveRuleFilter extends RuleFilter {
  * This class will parse filter values for positive and negative filters. Mixed types will throw an exception.
  */
 abstract class NegateableRuleFilter extends RuleFilter {
-    constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
+    protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
 		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 
 		// Throw an exception if there are mixed types

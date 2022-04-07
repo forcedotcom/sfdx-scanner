@@ -134,13 +134,13 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return Promise.resolve(retireJsCatalog);
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean {
 		// If the engine was not filtered out, no reason to not run it
 		return true;
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return engineUtils.isValueInFilter(this.getName(), filterValues);
 	}
@@ -159,7 +159,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await, no-unused-vars
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/require-await
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
 		// we were given into a directory that we can pass into RetireJS.
@@ -320,8 +320,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		// Theoretically, the output is at least a valid JSON.
 		let outputJson = null;
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-			outputJson = JSON.parse(output);
+			outputJson = JSON.parse(output) as unknown;
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(`Could not parse RetireJS output: ${message}`);
@@ -334,8 +333,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		}
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	private static validateRetireJsOutput(parsedOutput: any): parsedOutput is RetireJsOutput {
+	private static validateRetireJsOutput(parsedOutput: unknown): parsedOutput is RetireJsOutput {
 		const castParsedOutput = parsedOutput as RetireJsOutput;
 		return castParsedOutput.version != undefined && castParsedOutput.data != undefined;
 	}

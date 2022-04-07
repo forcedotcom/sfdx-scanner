@@ -447,7 +447,7 @@ export class PmdEngine extends BasePmdEngine {
 	 * a list of rules.  Ideally we could pass in rules, like with other engines, filtered ahead of time by
 	 * the catalog.  If that ever happens, we can remove the ruleGroups argument and use the rules directly.
 	 */
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);

@@ -90,7 +90,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		return Promise.resolve(cpdCatalog);
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean {
 		return true;
 	}

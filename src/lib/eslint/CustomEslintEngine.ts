@@ -100,7 +100,6 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		return results;
 	}
 
-	/* eslint-disable @typescript-eslint/no-explicit-any */
 	private async extractConfig(configFile: string): Promise<Linter.Config> {
 
 		const fileHandler = this.dependencies.getFileHandler();
@@ -126,15 +125,14 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 	}
 
 	processRuleViolation(): ProcessRuleViolationType {
-		/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
+		/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 		return (fileName: string, ruleViolation: RuleViolation): void => {
 			// do nothing - revisit when we have situations that need processing
 		}
 	}
 
-	/* eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars */
 	matchPath(path: string): boolean {
-		throw new Error('matchPath() - Method not implemented.');
+		throw new Error(`matchPath() - Method not implemented. Method mistakenly called with input ${path}`);
 	}
 
 	async isEnabled(): Promise<boolean> {

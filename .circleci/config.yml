@@ -205,11 +205,10 @@ jobs:
           when: always
 
       # Linting
-      # NOTE: This step is temporarily disabled, until we can upgrade the versions of eslint and its plugins that we use.
-#      - run:
-#          name: eslint
-#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-#          when: always
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          when: always
 
       - process_unit_test_results
 
@@ -264,36 +263,57 @@ jobs:
           when: always
 
       # Linting
-      # NOTE: This step is temporarily disabled, until we can upgrade the versions of eslint and its plugins that we use.
-#      - run:
-#          name: eslint
-#          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-#          shell: bash.exe
-#          when: always
+      - run:
+          name: eslint
+          command: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+          shell: bash.exe
+          when: always
 
       - process_unit_test_results
 
   # Purpose: Runs the plugin against itself, to make sure we're following our own rules.
   self-evaluation:
     <<: *defaults
+    parameters:
+      node-version: *node_version_param
     steps:
       - attach_workspace:
           at: ~/repo
 
+      # Install the appropriate version of node. This job's parameter was an enum, and the command accepts a boolean.
+      # Therefore, these complementary `when` clauses are needed.
+      - when:
+          condition:
+            equal:
+              - lts
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: true
+      - when:
+          condition:
+            equal:
+              - current
+              - << parameters.node-version >>
+          steps:
+            - update_node:
+                os: linux
+                lts: false
+
       - run: mkdir test-results
-      # NOTE: These steps are temporarily disabled, until we can upgrade the versions of eslint and its plugins that we use.
-#      - run:
-#          name: "self-evaluate"
-#          command: |
-#            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
-#          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
-#          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
-#
-#      - store_test_results:
-#          path: test-results
-#
-#      - store_artifacts:
-#          path: test-results
+      - run:
+          name: "self-evaluate"
+          command: |
+            bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --violations-cause-error
+          # TODO: We'll also need to make it scan the pmd-cataloger folder once we have an easy way of making it target Java.
+          # bin/run scanner:run --target ./pmd-cataloger --format junit --outfile ./test-results/pmd-cataloger.xml --violations-cause-error
+
+      - store_test_results:
+          path: test-results
+
+      - store_artifacts:
+          path: test-results
 
   # Purpose: In a Linux environment, install the locally-built tarball and run the smoke test script against it.
   # This helps ensure the overall stability of the plugin prior to publishing.
