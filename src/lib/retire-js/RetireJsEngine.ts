@@ -221,7 +221,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 				} else if (code === 13) {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
-					res(this.processOutput(stderr, invocation.rule));
+					res(this.processOutput(stdout, invocation.rule));
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. The error could be
 					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
