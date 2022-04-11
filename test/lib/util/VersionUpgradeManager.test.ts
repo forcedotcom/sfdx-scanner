@@ -186,5 +186,43 @@ describe('VersionUpgradeManager', () => {
 				expect(spoofedConfig.engines[1].targetPatterns.length).to.equal(1, 'Wrong engine was changed');
 			});
 		});
+
+		describe('v3.0.0', () => {
+			// Spoof two configs that look like they predate v3.0.0.
+			// The first has a null `currentVersion`, and undefined `disabled` for RetireJS.
+			const spoofedConfigWithNull: ConfigContent = {
+				currentVersion: null,
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns: ['**/beep/*.js']
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.apex']
+				}]
+			};
+			// The second has non-null `currentVersion` and `disabled` for RetireJS.
+			const spoofedConfigWithNonNull: ConfigContent = {
+				currentVersion: '2.13.1',
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns: ['**/beep/*.js'],
+					disabled: true
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.apex'],
+					disabled: true
+				}]
+			};
+
+			const testManagerAsAny = new VersionUpgradeManager() as any;
+			it('RetireJS is enabled by default', async () => {
+				await testManagerAsAny.upgrade(spoofedConfigWithNull, 'v2.13.1', 'v3.0.0');
+				await testManagerAsAny.upgrade(spoofedConfigWithNonNull, 'v2.13.1', 'v3.0.0');
+				expect(spoofedConfigWithNull.engines[0].disabled).to.equal(false, 'undefined RetireJS disabled value should have been turned to false');
+				expect(spoofedConfigWithNull.engines[1].disabled).to.be.undefined; // Undefined PMD disabled value should be left alone.
+				expect(spoofedConfigWithNonNull.engines[0].disabled).to.equal(false, 'true RetireJS disabled value should have been turned to false');
+				expect(spoofedConfigWithNonNull.engines[1].disabled).to.equal(true, 'true PMD disabled value should be left alone');
+			});
+		})
 	})
 });
