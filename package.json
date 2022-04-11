@@ -32,7 +32,7 @@
 		"normalize-path": "^3.0.0",
 		"picomatch": "^2.2.2",
 		"reflect-metadata": "^0.1.13",
-		"retire": "^2.2.5",
+		"retire": "^3",
 		"semver": "^7.3.4",
 		"tmp": "^0.2.0",
 		"ts-node": "^10",
