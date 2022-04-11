@@ -34,7 +34,8 @@ module.exports = {
 	"validations": {
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
-		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are .xml and .csv.",
+		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are: .csv; .xml; .json; .html; .sarif.",
+		"cannotWriteTableToFile": "Format 'table' cannot be written to a file. Please specify a different format.",
 		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {
