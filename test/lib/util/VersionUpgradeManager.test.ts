@@ -69,20 +69,27 @@ describe('VersionUpgradeManager', () => {
 
 		// ============ TESTS ==================
 		describe('#getVersionsBetween()', () => {
+			// v2.6.1 and v4.3.2 have no upgrade scripts associated with them in this manager.
 			const strictBetween: string[] = successfulManagerAsAny.getVersionsBetween(v2_6_1, v4_3_2);
+			// v2.6.0 and v19.9.9 both have upgrade scripts in this manager.
 			const onBoundaries: string[] = successfulManagerAsAny.getVersionsBetween(v2_6_0, v19_9_9);
+			// v2.7.8 has an upgrade script in this manager.
 			const nullFrom: string[] = successfulManagerAsAny.getVersionsBetween(null, v2_7_8);
 
 			it('fromVersion param is exclusive lower bound', () => {
+				// Since v2.6.1 has no script, the next-lowest value of 2.7.0 should be used.
 				expect(strictBetween[0]).to.equal(v2_7_0, `Lower bound of ${v2_6_1} not respected`);
+				// v2.6.0 has a script, but the lower bound is exclusive, so it should use the next-lowest value of 2.7.0.
 				expect(onBoundaries[0]).to.equal(v2_7_0, `Lower bound of ${v2_6_0} not properly exclusive`);
 			});
 
 			it('toVersion param is inclusive upper bound', () => {
 				expect(strictBetween.length).to.equal(2, 'Wrong number of versions returned');
+				// v4.3.2 has no script, so the next-highest value of v2.7.8 should be used.
 				expect(strictBetween[1]).to.equal(v2_7_8, `Upper bound of ${v4_3_2} not respected`);
 
 				expect(onBoundaries.length).to.equal(3, 'Wrong number of versions returned');
+				// v19.9.9 has a script, so that value should be used.
 				expect(onBoundaries[2]).to.equal(v19_9_9, `Upper bound of ${v19_9_9} not properly inclusive`);
 			});
 
