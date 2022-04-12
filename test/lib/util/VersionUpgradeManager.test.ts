@@ -69,20 +69,27 @@ describe('VersionUpgradeManager', () => {
 
 		// ============ TESTS ==================
 		describe('#getVersionsBetween()', () => {
+			// v2.6.1 and v4.3.2 have no upgrade scripts associated with them in this manager.
 			const strictBetween: string[] = successfulManagerAsAny.getVersionsBetween(v2_6_1, v4_3_2);
+			// v2.6.0 and v19.9.9 both have upgrade scripts in this manager.
 			const onBoundaries: string[] = successfulManagerAsAny.getVersionsBetween(v2_6_0, v19_9_9);
+			// v2.7.8 has an upgrade script in this manager.
 			const nullFrom: string[] = successfulManagerAsAny.getVersionsBetween(null, v2_7_8);
 
 			it('fromVersion param is exclusive lower bound', () => {
+				// Since v2.6.1 has no script, the next-lowest value of 2.7.0 should be used.
 				expect(strictBetween[0]).to.equal(v2_7_0, `Lower bound of ${v2_6_1} not respected`);
+				// v2.6.0 has a script, but the lower bound is exclusive, so it should use the next-lowest value of 2.7.0.
 				expect(onBoundaries[0]).to.equal(v2_7_0, `Lower bound of ${v2_6_0} not properly exclusive`);
 			});
 
 			it('toVersion param is inclusive upper bound', () => {
 				expect(strictBetween.length).to.equal(2, 'Wrong number of versions returned');
+				// v4.3.2 has no script, so the next-highest value of v2.7.8 should be used.
 				expect(strictBetween[1]).to.equal(v2_7_8, `Upper bound of ${v4_3_2} not respected`);
 
 				expect(onBoundaries.length).to.equal(3, 'Wrong number of versions returned');
+				// v19.9.9 has a script, so that value should be used.
 				expect(onBoundaries[2]).to.equal(v19_9_9, `Upper bound of ${v19_9_9} not properly inclusive`);
 			});
 
@@ -186,5 +193,43 @@ describe('VersionUpgradeManager', () => {
 				expect(spoofedConfig.engines[1].targetPatterns.length).to.equal(1, 'Wrong engine was changed');
 			});
 		});
+
+		describe('v3.0.0', () => {
+			// Spoof two configs that look like they predate v3.0.0.
+			// The first has a null `currentVersion`, and undefined `disabled` for RetireJS.
+			const spoofedConfigWithNull: ConfigContent = {
+				currentVersion: null,
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns: ['**/beep/*.js']
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.apex']
+				}]
+			};
+			// The second has non-null `currentVersion` and `disabled` for RetireJS.
+			const spoofedConfigWithNonNull: ConfigContent = {
+				currentVersion: '2.13.1',
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns: ['**/beep/*.js'],
+					disabled: true
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.apex'],
+					disabled: true
+				}]
+			};
+
+			const testManagerAsAny = new VersionUpgradeManager() as any;
+			it('RetireJS is enabled by default', async () => {
+				await testManagerAsAny.upgrade(spoofedConfigWithNull, 'v2.13.1', 'v3.0.0');
+				await testManagerAsAny.upgrade(spoofedConfigWithNonNull, 'v2.13.1', 'v3.0.0');
+				expect(spoofedConfigWithNull.engines[0].disabled).to.equal(false, 'undefined RetireJS disabled value should have been turned to false');
+				expect(spoofedConfigWithNull.engines[1].disabled).to.be.undefined; // Undefined PMD disabled value should be left alone.
+				expect(spoofedConfigWithNonNull.engines[0].disabled).to.equal(false, 'true RetireJS disabled value should have been turned to false');
+				expect(spoofedConfigWithNonNull.engines[1].disabled).to.equal(true, 'true PMD disabled value should be left alone');
+			});
+		})
 	})
 });

@@ -68,7 +68,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 		{
 			name: ENGINE.RETIRE_JS,
 			targetPatterns: [],
-			disabled: true
+			disabled: false
 		},
 		{
 			name: ENGINE.CPD,
