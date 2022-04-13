@@ -13,7 +13,6 @@ To manage rules, an important distinction is that while PMD custom rules can be 
 
 ## PMD Custom Rules
 ### Adding Rule(s)
-Use the ```scanner:rule:add``` [command](./en/scanner-commands/add/) to add a custom rule to the Salesforce Code Analyzer plug-in. Use the ```-p|--path``` parameter to specify the JAR file that contains your custom rule definitions. You can specify multiple JAR files to add multiple custom rules for a single language. You can also use the parameter to specify a directory that contains multiple JAR files. 
 
 Use the ```scanner:rule:add``` [command](./en/scanner-commands/add/) to add a custom rule to the Salesforce Code Analyzer plug-in. Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the parameter to specify a directory that contains multiple JAR/XML files.
 
