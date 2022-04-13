@@ -19,7 +19,7 @@ However, while giving you the power, the Scanner also offloads some responsibili
 
 1. **IMPORTANT:** Make sure that you have all the NPM dependencies installed (including Eslint) in the directory where you run the `scanner:run` command.
 
-2. **IMPORTANT:** Your custom configuration will [cascade into other configurations in the project](https://eslint.org/docs/user-guide/configuring#configuration-cascading-and-hierarchy), as though you had run Eslint directly with the [`-c/--config` flag](https://eslint.org/docs/user-guide/configuring#using-configuration-files-1). Please make sure your custom configuration performs the necessary overrides.
+2. **IMPORTANT:** Your custom configuration will [cascade into other configurations in the project](https://eslint.org/docs/user-guide/configuring/configuration-files#cascading-and-hierarchy), as though you had run Eslint directly with the [`-c/--config` flag](https://eslint.org/docs/user-guide/configuring#using-configuration-files-1). Please make sure your custom configuration performs the necessary overrides.
 
 3. Ensure correctness of `.eslintrc.json`. Only JSON format of `.eslintrc` is supported today. However, there are no restrictions on the filename.
 

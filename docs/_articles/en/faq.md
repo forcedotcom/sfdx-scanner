@@ -61,10 +61,10 @@ A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD.
 
 ## Questions about Severity Threshold and Normalization
 
-#### Q: How to set a Severity Threshold for a code analyzer run?
+#### Q: How do I set a Severity Threshold for a code analyzer run?
 A: When user runs the code analyzer with the `-s` or `--severity-threshold` flag and a threshold value, the code analyzer throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the severity of the most severe violation(s). Using this flag also implicitly invokes the --normalize-severity flag.
 
-#### Q: How to get normalized severity?
+#### Q: How do I get normalized severity?
 A: PMD, ESLint & RetireJS all have different scales for reporting the Severity of the violations. When the user runs the code analyzer with the `--normalize-severity` flag, the `Salesforce Code Analyzer` will normalize the severity of violations across all invoked engines.  A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html output format, the normalized severity is displayed instead of the engine severity	
 
 #### Q: How is the Severity normalized across all the engines?
