@@ -4,7 +4,8 @@ import path = require('path');
 export const PMD_VERSION = '6.44.0';
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
-export const CONFIG_FILE = 'Config.json';
+export const CONFIG_FILE = 'Config-v3.json';
+export const LEGACY_CONFIG_FILE = 'Config.json';
 export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 export const INTERNAL_ERROR_CODE = 500;
 

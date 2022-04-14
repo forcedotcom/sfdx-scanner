@@ -1,6 +1,6 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
-import {ENGINE, CONFIG_FILE} from '../../Constants';
+import {ENGINE, CONFIG_FILE, LEGACY_CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
@@ -89,6 +89,7 @@ export class Config {
 	versionUpgradeManager!: VersionUpgradeManager;
 	private sfdxScannerPath: string;
 	private configFilePath: string;
+	private legacyConfigFilePath: string;
 	private logger!: Logger;
 	private initialized: boolean;
 
@@ -102,6 +103,7 @@ export class Config {
 		this.versionUpgradeManager = new VersionUpgradeManager();
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 		this.configFilePath = path.join(this.sfdxScannerPath, CONFIG_FILE);
+		this.legacyConfigFilePath = path.join(this.sfdxScannerPath, LEGACY_CONFIG_FILE);
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
 
@@ -264,26 +266,35 @@ export class Config {
 	}
 
 	private async initializeConfig(): Promise<void> {
+		// TODO: This method's current functionality is because we need to support v2 and v3 at the same time.
+		//  Once we no longer need to support v2, we can change this method to, for example, not use a separate config file
+		//  for v3.
 		this.logger.trace(`Initializing Config`);
-		if (!await this.fileHandler.exists(this.configFilePath)) {
-			await this.createNewConfigFile(DEFAULT_CONFIG);
+		// If there's no v2-based config, we need to create one, so the customer can safely downgrade to v2 if they want.
+		// NOTE: When v3 becomes the primary version, we may want to delete this, and possibly rework the config files
+		// in general.
+		if (!await this.fileHandler.exists(this.legacyConfigFilePath)) {
+			this.logger.trace(`No v2 config file exists. Creating one from defaults.`);
+			await this.createNewConfigFile(DEFAULT_CONFIG, this.legacyConfigFilePath);
 		}
+		// If there's no v3-based config, create one by directly copying the v2 config.
+		if (!await this.fileHandler.exists(this.configFilePath)) {
+			this.logger.trace(`No v3 config file exists. Creating one by copying v2`);
+			const v2ContentString = await this.fileHandler.readFile(this.legacyConfigFilePath);
+			const v2Content = JSON.parse(v2ContentString) as ConfigContent;
+			await this.createNewConfigFile(v2Content, this.configFilePath);
+		}
+
+		// Read the v3 config file and use that as our config.
 		const fileContent = await this.fileHandler.readFile(this.configFilePath);
 		this.logger.trace(`Config content to be set as ${fileContent}`);
 		this.configContent = JSON.parse(fileContent) as ConfigContent;
-
-		// TODO remove this logic before GA, as it is only necessary for short term migrations from old format.
-		if (!this.configContent['engines'] && this.configContent['javaHome']) {
-			// Prior version.  Migrate.
-			await this.createNewConfigFile(Object.assign({javaHome: this.configContent['java-home']}, deepCopy(DEFAULT_CONFIG)) );
-		}
 	}
 
-	private async createNewConfigFile(configContent: ConfigContent): Promise<void> {
+	private async createNewConfigFile(configContent: ConfigContent, configFilePath: string): Promise<void> {
 		this.logger.trace(`Creating a new Config file`);
 		await this.fileHandler.mkdirIfNotExists(this.sfdxScannerPath);
-		await this.fileHandler.writeFile(this.configFilePath, JSON.stringify(configContent, null, 2));
-		this.configContent = configContent;
+		await this.fileHandler.writeFile(configFilePath, JSON.stringify(configContent, null, 2));
 	}
 }
 

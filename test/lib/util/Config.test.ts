@@ -5,10 +5,11 @@ import Sinon = require('sinon');
 import path = require('path');
 import { fail } from 'assert';
 import {Config, ConfigContent} from '../../../src/lib/util/Config';
-import {CONFIG_FILE, ENGINE} from '../../../src/Constants'
+import {CONFIG_FILE, LEGACY_CONFIG_FILE, ENGINE} from '../../../src/Constants'
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {VersionUpgradeManager, VersionUpgradeError} from '../../../src/lib/util/VersionUpgradeManager';
 import { Controller } from '../../../src/Controller';
+import {deepCopy} from '../../../src/lib/util/Utils';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 // Initialize Messages with the current plugin directory
@@ -29,8 +30,82 @@ type StubsCollection = {
 
 // =============== CONSTANTS ======================
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
+const LEGACY_CONFIG_PATH = path.join(SFDX_SCANNER_PATH, LEGACY_CONFIG_FILE);
+const CONFIG_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
+const PACKAGE_VERSION = require('../../../package.json').version;
 const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
+const BASE_LEGACY_TEST_CONFIG = {
+	"engines": [{
+		"name": ENGINE.PMD,
+		"targetPatterns": [
+			"pattern1",
+			"pattern2"
+		]
+	}, {
+		"name": ENGINE.ESLINT_TYPESCRIPT,
+		"targetPatterns": []
+	}, {
+		"name": ENGINE.RETIRE_JS,
+		"targetPatterns": [],
+		"disabled": false
+	}],
+	"javaHome": "/my/test/java/home",
+	"currentVersion": '2.13.1'
+};
+const BASE_TEST_CONFIG = {
+	"engines": [{
+		"name": ENGINE.PMD,
+		"targetPatterns": [
+			"pattern1",
+			"pattern2"
+		]
+	}, {
+		"name": ENGINE.ESLINT_TYPESCRIPT,
+		"targetPatterns": []
+	}, {
+		"name": ENGINE.RETIRE_JS,
+		"targetPatterns": [],
+		"disabled": false
+	}],
+	"javaHome": "/my/test/java/home",
+	"currentVersion": PACKAGE_VERSION
+};
 const SINON_SETUP_FUNCTIONS = {
+	NO_EXISTING_CONFIGS: (): StubsCollection => {
+		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
+		// testing if they return different objects.
+		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
+		readFileStub.withArgs(LEGACY_CONFIG_PATH).resolves(JSON.stringify(BASE_LEGACY_TEST_CONFIG));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_TEST_CONFIG));
+		return {
+			// No matter what the file is, the stub should say it doesn't exist.
+			existsStub: Sinon.stub(FileHandler.prototype, 'exists').resolves(false),
+			// The mkdir stub should just resolve, as though it created a directory without problems.
+			mkDirStub: Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves(),
+			readFileStub,
+			// The writeFile stub should just resolve, as though the file was written without issue.
+			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
+		};
+	},
+	LEGACY_CONFIG_ONLY: (): StubsCollection => {
+		// The existsStub should say the legacy config exists and the modern config doesn't.
+		const existsStub = Sinon.stub(FileHandler.prototype, 'exists');
+		existsStub.withArgs(LEGACY_CONFIG_PATH).resolves(true);
+		existsStub.withArgs(CONFIG_PATH).resolves(false);
+		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
+		// testing if they return different objects.
+		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
+		readFileStub.withArgs(LEGACY_CONFIG_PATH).resolves(JSON.stringify(BASE_LEGACY_TEST_CONFIG));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_TEST_CONFIG));
+		return {
+			existsStub,
+			// The mkdir stub should just resolve, as though it created a directory without problems.
+			mkDirStub: Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves(),
+			readFileStub,
+			// The writeFile stub should just resolve, as though the file was written without issue.
+			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
+		};
+	},
 	DEFAULT_CONFIG: (): StubsCollection => {
 		return {
 			// If the config doesn't exist, then the default should be used instead.
@@ -41,8 +116,11 @@ const SINON_SETUP_FUNCTIONS = {
 	},
 	OVERRIDE_CONFIG: (testConfig: ConfigContent): StubsCollection => {
 		return {
+			// All configs should be considered to exist.
 			existsStub: Sinon.stub(FileHandler.prototype, 'exists').resolves(true),
+			// Reading any config should return the provided test config.
 			readFileStub: Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(testConfig)),
+			// Writing a config should just resolve immediately.
 			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
 		};
 	},
@@ -73,24 +151,7 @@ describe('Config.ts', () => {
 
 	beforeEach(() => {
 		// Before each test, reset the testConfig to a known good state.
-		testConfig = {
-			"engines": [{
-				"name": ENGINE.PMD,
-				"targetPatterns": [
-					"pattern1",
-					"pattern2"
-				]
-			}, {
-				"name": ENGINE.ESLINT_TYPESCRIPT,
-				"targetPatterns": []
-			}, {
-				"name": ENGINE.RETIRE_JS,
-				"targetPatterns": [],
-				"disabled": false
-			}],
-			"javaHome": "/my/test/java/home",
-			"currentVersion": require('../../../package.json').version
-		};
+		testConfig = deepCopy(BASE_TEST_CONFIG);
 	});
 
 	// Most (if not all) of these tests will be creating some number of Sinon stubs. After each test, the stubs should
@@ -100,18 +161,36 @@ describe('Config.ts', () => {
 	});
 	describe('Methods', () => {
 		describe('#init()', () => {
-			it('Creates new config file if Config.json does not exist', async () => {
-				// SETUP
-				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.DEFAULT_CONFIG();
+			it('When config file and legacy config do not exist, both are created', async () => {
+				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.NO_EXISTING_CONFIGS();
 				const config = new Config();
 
 				// INVOCATION OF TESTED METHOD
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(configFilePath)).to.equal(true, 'No existence check for Config.json occurred');
+				expect(existsStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(configFilePath)).to.equal(true, 'Config.json file should have been created');
+				expect(writeFileStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config should have been created');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config should have been created');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
+			});
+
+			it('When only legacy config exists, new config file is copied from that', async () => {
+				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.LEGACY_CONFIG_ONLY();
+				const config = new Config();
+
+				// INVOCATION OF TESTED METHOD
+				await config.init();
+
+				// ASSERTIONS
+				expect(existsStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config existence check unexpectedly skipped');
+				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
+				expect(writeFileStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(false, 'Legacy config should not have been written to');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config should have been created');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
 			});
 
 			it('Initializes using existing config file if available', async () => {
@@ -157,7 +236,7 @@ describe('Config.ts', () => {
 				expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 				expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'Results of upgrade should be persisted');
 				expect(writeFileStub.callCount).to.equal(1, 'Only one file should be written');
-				expect(writeFileStub.getCall(0).args[0]).to.match(/Config\.json$/g, 'Should have written to the config');
+				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_PATH, 'Should have written to the config');
 			});
 
 			it('Persists partial upgrades', async () => {
@@ -177,8 +256,8 @@ describe('Config.ts', () => {
 					expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 					expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'File persistence should be attempted');
 					expect(writeFileStub.callCount).to.equal(2, 'Two file writes should be attempted');
-					expect(writeFileStub.getCall(0).args[0]).to.match(/\.bak$/g, 'Should have written a backup file first');
-					expect(writeFileStub.getCall(1).args[0]).to.match(/Config\.json$/g, 'Should have written partial upgrade second');
+					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
+					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_PATH, 'Should have written partial upgrade second');
 				}
 			});
 
@@ -335,28 +414,6 @@ describe('Config.ts', () => {
 				expect(targetPatterns).to.deep.equal(expectedConfig.targetPatterns, 'Should use default targetPatterns');
 				expect(updatedConfig).to.deep.equal(expectedConfig, 'Default config should replace missing engine config');
 				expect(writeFileStub.calledWith(configFilePath)).to.equal(true, 'Changed config should be persisted');
-			});
-		});
-
-		// TODO: IT'S POSSIBLE THAT THIS TEST BLOCK CAN BE REMOVED, AS PER A TODO IN Config.init().
-		describe('Backwards compatibility', () => {
-			it('Config files predating the `engines` property should be replaced with default', async () => {
-				// SETUP
-				const fakeOldConfig = {
-					"javaHome": "/my/test/java/home"
-				};
-				SINON_SETUP_FUNCTIONS.OVERRIDE_CONFIG(fakeOldConfig);
-				const config = new Config();
-
-				// INVOCATION OF TESTED METHOD
-				await config.init();
-
-				// ASSERTIONS
-				// Initialization should automatically add the default `engines` array. Make sure that happened,
-				// using the default PMD config.
-				const expectedPatterns = (config as any).getDefaultConfig().engines.find(ecc => ecc.name === ENGINE.PMD).targetPatterns;
-				const actualPatterns = await config.getTargetPatterns(ENGINE.PMD);
-				expect(actualPatterns).to.deep.equal(expectedPatterns, 'Old config should have been updated.');
 			});
 		});
 	});
