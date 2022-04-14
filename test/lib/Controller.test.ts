@@ -32,10 +32,11 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(3);
+		expect(engines.length).to.equal(4);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD);
+		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM when engineOptions contains pmdconfig', async () => {
@@ -46,10 +47,11 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(3);
+		expect(engines.length).to.equal(4);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
+		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getEnabledEngines returns ESLINT_CUSTOM when engineOptions contains eslintconfig', async () => {
@@ -60,9 +62,10 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(2);
+		expect(engines.length).to.equal(3);
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD);
+		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM, ESLINT_CUSTOM when engineOptions contains pmdconfig and eslintconfig', async () => {
@@ -74,9 +77,10 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(2);
+		expect(engines.length).to.equal(3);
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
+		expect(names).to.contain(ENGINE.RETIRE_JS);
 	});
 
 	it('getFilteredEngines filters and includes disabled', async() => {
@@ -92,7 +96,7 @@ describe('Controller.ts tests', () => {
 	it('getFilteredEngines uses custom config information to choose the correct instance', async() => {
 		const engineOptionsWithPmdCustom = new Map<string, string>([
 			[CUSTOM_CONFIG.PmdConfig, '/some/path/to/config']
-		]);		
+		]);
 		const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.PMD], engineOptionsWithPmdCustom);
 		const names: string[] = engines.map(e => e.getName());
 

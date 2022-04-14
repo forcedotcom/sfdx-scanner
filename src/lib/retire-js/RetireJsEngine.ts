@@ -142,7 +142,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
-		return engineUtils.isValueInFilter(this.getName(), filterValues);
+		return engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
 	getNormalizedSeverity(severity: number): Severity {
