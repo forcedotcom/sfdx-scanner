@@ -10,7 +10,7 @@ const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 describe('scanner:run', function () {
 
 	describe('E2E', () => {
-		
+
 		describe('--severity-threshold flag', () => {
 
 			setupCommandTest
@@ -20,7 +20,7 @@ describe('scanner:run', function () {
 					'--severity-threshold', '3'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 
@@ -41,7 +41,7 @@ describe('scanner:run', function () {
                     }
 
                     expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.sevThresholdSummary', ['1']));
-                
+
 				});
 
 			setupCommandTest
@@ -108,7 +108,7 @@ describe('scanner:run', function () {
 								} else if (output[i].violations[j].severity == 4) {
 									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
 								} else if (output[i].violations[j].severity == 5) {
-									expect(output[i].violations[j].normalizedSeverity).to.equal(3);	
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
 								}
 							} else if (output[i].engine.includes("eslint")) {
 								if (output[i].violations[j].severity == 1) {
@@ -117,7 +117,7 @@ describe('scanner:run', function () {
 									expect(output[i].violations[j].normalizedSeverity).to.equal(1);
 								}
 							}
-													
+
                         }
                     }
 				});
@@ -132,11 +132,11 @@ describe('scanner:run', function () {
 
 					for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
-							expect(output[i].violations[j].normalizedSeverity).to.equal(undefined);													
+							expect(output[i].violations[j].normalizedSeverity).to.equal(undefined);
                         }
                     }
 				});
-			
+
 		});
 
 	});

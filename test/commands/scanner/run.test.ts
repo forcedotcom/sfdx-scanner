@@ -56,7 +56,7 @@ describe('scanner:run', function () {
 						'--format', 'xml'
 					])
 					.it('When the file contains no violations, a message is logged to the console', ctx => {
-						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					});
 			});
 
@@ -249,7 +249,7 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -265,7 +265,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
 					expect(fs.existsSync('testout.csv')).to.be.false;
 				});
@@ -329,7 +329,7 @@ describe('scanner:run', function () {
 					'--format', 'html'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -345,7 +345,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
 					expect(fs.existsSync(outputFile)).to.be.false;
 				});
@@ -405,7 +405,7 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -421,7 +421,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
 					expect(fs.existsSync('testout.json')).to.be.false;
 				});
@@ -453,7 +453,7 @@ describe('scanner:run', function () {
 					'--format', 'table'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 		});
 
@@ -541,7 +541,7 @@ describe('scanner:run', function () {
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd']));
+					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 		});
 
