@@ -270,25 +270,26 @@ export class Config {
 		//  Once we no longer need to support v2, we can change this method to, for example, not use a separate config file
 		//  for v3.
 		this.logger.trace(`Initializing Config`);
-		// If there's no v2-based config, we need to create one, so the customer can safely downgrade to v2 if they want.
-		// NOTE: When v3 becomes the primary version, we may want to delete this, and possibly rework the config files
-		// in general.
-		if (!await this.fileHandler.exists(this.configFilePath)) {
-			this.logger.trace(`No v2 config file exists. Creating one from defaults.`);
-			await this.createNewConfigFile(DEFAULT_CONFIG, this.configFilePath);
-		}
-		// If there's no v3-based config, create one by directly copying the v2 config.
+		// If there's no v3 config, we need to instantiate one.
 		if (!await this.fileHandler.exists(this.configV3FilePath)) {
-			this.logger.trace(`No v3 config file exists. Creating one by copying v2`);
-			const v2ContentString = await this.fileHandler.readFile(this.configFilePath);
-			const v2Content = JSON.parse(v2ContentString) as ConfigContent;
-			await this.createNewConfigFile(v2Content, this.configV3FilePath);
+			// If there's a v2 config, we should copy that to create the v3 config.
+			this.logger.trace(`No v3 config exists. Creating one now`);
+			let baseConfig: ConfigContent = null;
+			if (await this.fileHandler.exists(this.configFilePath)) {
+				this.logger.trace(`Creating v3 config by copying v2 config`);
+				const v2ContentString = await this.fileHandler.readFile(this.configFilePath);
+				baseConfig = JSON.parse(v2ContentString) as ConfigContent;
+			} else {
+				this.logger.trace(`Creating v3 config from defaults`);
+				baseConfig = DEFAULT_CONFIG;
+			}
+			await this.createNewConfigFile(baseConfig, this.configV3FilePath);
 		}
 
 		// Read the v3 config file and use that as our config.
-		const fileContent = await this.fileHandler.readFile(this.configV3FilePath);
-		this.logger.trace(`Config content to be set as ${fileContent}`);
-		this.configContent = JSON.parse(fileContent) as ConfigContent;
+		const v3FileContent = await this.fileHandler.readFile(this.configV3FilePath);
+		this.logger.trace(`Config content to be set as ${v3FileContent}`);
+		this.configContent = JSON.parse(v3FileContent) as ConfigContent;
 	}
 
 	private async createNewConfigFile(configContent: ConfigContent, configV3FilePath: string): Promise<void> {

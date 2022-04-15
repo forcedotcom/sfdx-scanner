@@ -169,10 +169,10 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
 				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config should have been created');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'v2 config should not have been created');
 				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
 				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
 			});
@@ -185,8 +185,8 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
 				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
 				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'v2 config should not have been written to');
 				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
@@ -195,13 +195,16 @@ describe('Config.ts', () => {
 
 			it('Initializes using existing config file if available', async () => {
 				// SETUP
-				SINON_SETUP_FUNCTIONS.OVERRIDE_CONFIG(testConfig);
+				const {existsStub, writeFileStub} = SINON_SETUP_FUNCTIONS.OVERRIDE_CONFIG(testConfig);
 				const config = new Config();
 
 				// INVOCATION OF TESTED METHOD
 				await config.init();
 
 				// ASSERTIONS
+				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(false, 'since v3 config exists, v2 existence check should not have occurred');
+				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(false, 'Since v3 config exists, it should not have been modified during initialization');
 				const javaHome = config.getJavaHome();
 				expect(javaHome).to.equal(testConfig.javaHome, 'Should have used spoofed config');
 			});
@@ -292,6 +295,7 @@ describe('Config.ts', () => {
 				// INVOCATION OF TESTED METHODS
 				expect(await config.isEngineEnabled(ENGINE.PMD)).to.equal(true, `Engine ${ENGINE.PMD} should be enabled by default`);
 				expect(await config.isEngineEnabled(ENGINE.ESLINT)).to.equal(true, `Engine ${ENGINE.ESLINT} should be enabled by default`);
+				expect(await config.isEngineEnabled(ENGINE.RETIRE_JS)).to.equal(true, `Engine ${ENGINE.RETIRE_JS} should be enabled by default`);
 				expect(await config.isEngineEnabled(ENGINE.ESLINT_LWC)).to.equal(false, `Engine ${ENGINE.ESLINT_LWC} should be disabled by default`);
 				expect(await config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT)).to.equal(true, `Engine ${ENGINE.ESLINT_TYPESCRIPT} should be enabled by default`);
 			});
