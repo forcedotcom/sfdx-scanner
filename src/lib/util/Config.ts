@@ -1,6 +1,6 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
-import {ENGINE, CONFIG_V3_FILE, CONFIG_FILE} from '../../Constants';
+import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
@@ -88,7 +88,7 @@ export class Config {
 	fileHandler!: FileHandler;
 	versionUpgradeManager!: VersionUpgradeManager;
 	private sfdxScannerPath: string;
-	private configV3FilePath: string;
+	private configPilotFilePath: string;
 	private configFilePath: string;
 	private logger!: Logger;
 	private initialized: boolean;
@@ -102,7 +102,7 @@ export class Config {
 		this.fileHandler = new FileHandler();
 		this.versionUpgradeManager = new VersionUpgradeManager();
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
-		this.configV3FilePath = path.join(this.sfdxScannerPath, CONFIG_V3_FILE);
+		this.configPilotFilePath = path.join(this.sfdxScannerPath, CONFIG_PILOT_FILE);
 		this.configFilePath = path.join(this.sfdxScannerPath, CONFIG_FILE);
 		this.logger.setLevel(LoggerLevel.TRACE);
 		await this.initializeConfig();
@@ -117,7 +117,7 @@ export class Config {
 			// Start by creating a copy of the existing config, so we have it if we need it to create a backup file.
 			// Also determine where such a file would go.
 			const existingConfig = deepCopy(this.configContent);
-			const backupFileName = `${CONFIG_V3_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
+			const backupFileName = `${CONFIG_PILOT_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
 
 			let upgradeErrorMessage: string = null;
 			let persistConfig = true;
@@ -148,7 +148,7 @@ export class Config {
 				throw SfdxError.create('@salesforce/sfdx-scanner',
 					'Config',
 					'UpgradeFailureTroubleshooting',
-					[upgradeErrorMessage, backupFileName, this.configV3FilePath]
+					[upgradeErrorMessage, backupFileName, this.configPilotFilePath]
 				);
 			}
 		}
@@ -262,40 +262,39 @@ export class Config {
 	private async writeConfig(): Promise<void> {
 		const jsonString = JSON.stringify(this.configContent, null, 4);
 		this.logger.trace(`Writing Config file with content: ${jsonString}`);
-		await this.fileHandler.writeFile(this.configV3FilePath, jsonString);
+		await this.fileHandler.writeFile(this.configPilotFilePath, jsonString);
 	}
 
 	private async initializeConfig(): Promise<void> {
-		// TODO: This method's current functionality is because we need to support v2 and v3 at the same time.
-		//  Once we no longer need to support v2, we can change this method to, for example, not use a separate config file
-		//  for v3.
+		// TODO: This method's current functionality is because we need to support a GA version and a pilot version at the same time.
+		//  Once the pilot version goes GA, we can change this method to, for example, not use separate config files for pilot and GA.
 		this.logger.trace(`Initializing Config`);
-		// If there's no v3 config, we need to instantiate one.
-		if (!await this.fileHandler.exists(this.configV3FilePath)) {
-			// If there's a v2 config, we should copy that to create the v3 config.
-			this.logger.trace(`No v3 config exists. Creating one now`);
+		// If there's no pilot config, we need to instantiate one.
+		if (!await this.fileHandler.exists(this.configPilotFilePath)) {
+			// If there's a GA config, we should copy that to create the pilot config.
+			this.logger.trace(`No pilot config exists. Creating one now`);
 			let baseConfig: ConfigContent = null;
 			if (await this.fileHandler.exists(this.configFilePath)) {
-				this.logger.trace(`Creating v3 config by copying v2 config`);
-				const v2ContentString = await this.fileHandler.readFile(this.configFilePath);
-				baseConfig = JSON.parse(v2ContentString) as ConfigContent;
+				this.logger.trace(`Creating pilot config by copying GA config`);
+				const gaContentString = await this.fileHandler.readFile(this.configFilePath);
+				baseConfig = JSON.parse(gaContentString) as ConfigContent;
 			} else {
-				this.logger.trace(`Creating v3 config from defaults`);
+				this.logger.trace(`Creating pilot config from defaults`);
 				baseConfig = DEFAULT_CONFIG;
 			}
-			await this.createNewConfigFile(baseConfig, this.configV3FilePath);
+			await this.createNewConfigFile(baseConfig, this.configPilotFilePath);
 		}
 
-		// Read the v3 config file and use that as our config.
-		const v3FileContent = await this.fileHandler.readFile(this.configV3FilePath);
-		this.logger.trace(`Config content to be set as ${v3FileContent}`);
-		this.configContent = JSON.parse(v3FileContent) as ConfigContent;
+		// Read the pilot config file and use that as our config.
+		const pilotFileContent = await this.fileHandler.readFile(this.configPilotFilePath);
+		this.logger.trace(`Config content to be set as ${pilotFileContent}`);
+		this.configContent = JSON.parse(pilotFileContent) as ConfigContent;
 	}
 
-	private async createNewConfigFile(configContent: ConfigContent, configV3FilePath: string): Promise<void> {
+	private async createNewConfigFile(configContent: ConfigContent, configFilePath: string): Promise<void> {
 		this.logger.trace(`Creating a new Config file`);
 		await this.fileHandler.mkdirIfNotExists(this.sfdxScannerPath);
-		await this.fileHandler.writeFile(configV3FilePath, JSON.stringify(configContent, null, 2));
+		await this.fileHandler.writeFile(configFilePath, JSON.stringify(configContent, null, 2));
 	}
 }
 

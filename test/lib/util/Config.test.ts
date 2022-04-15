@@ -5,7 +5,7 @@ import Sinon = require('sinon');
 import path = require('path');
 import { fail } from 'assert';
 import {Config, ConfigContent} from '../../../src/lib/util/Config';
-import {CONFIG_V3_FILE, CONFIG_FILE, ENGINE} from '../../../src/Constants'
+import {CONFIG_PILOT_FILE, CONFIG_FILE, ENGINE} from '../../../src/Constants'
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {VersionUpgradeManager, VersionUpgradeError} from '../../../src/lib/util/VersionUpgradeManager';
 import { Controller } from '../../../src/Controller';
@@ -31,10 +31,10 @@ type StubsCollection = {
 // =============== CONSTANTS ======================
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 const CONFIG_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
-const CONFIG_V3_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_V3_FILE);
+const CONFIG_PILOT_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_PILOT_FILE);
 const PACKAGE_VERSION = require('../../../package.json').version;
 const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
-const BASE_CONFIG_V2 = {
+const BASE_CONFIG_GA = {
 	"engines": [{
 		"name": ENGINE.PMD,
 		"targetPatterns": [
@@ -52,7 +52,7 @@ const BASE_CONFIG_V2 = {
 	"javaHome": "/my/test/java/home",
 	"currentVersion": '2.13.1'
 };
-const BASE_CONFIG_V3 = {
+const BASE_CONFIG_PILOT = {
 	"engines": [{
 		"name": ENGINE.PMD,
 		"targetPatterns": [
@@ -75,8 +75,8 @@ const SINON_SETUP_FUNCTIONS = {
 		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
 		// testing if they return different objects.
 		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
-		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_V2));
-		readFileStub.withArgs(CONFIG_V3_PATH).resolves(JSON.stringify(BASE_CONFIG_V3));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_GA));
+		readFileStub.withArgs(CONFIG_PILOT_PATH).resolves(JSON.stringify(BASE_CONFIG_PILOT));
 		return {
 			// No matter what the file is, the stub should say it doesn't exist.
 			existsStub: Sinon.stub(FileHandler.prototype, 'exists').resolves(false),
@@ -87,16 +87,16 @@ const SINON_SETUP_FUNCTIONS = {
 			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
 		};
 	},
-	V2_CONFIG_ONLY: (): StubsCollection => {
-		// The existsStub should say the v2 config exists and the v3 config doesn't.
+	GA_CONFIG_ONLY: (): StubsCollection => {
+		// The existsStub should say the GA config exists and the pilot config doesn't.
 		const existsStub = Sinon.stub(FileHandler.prototype, 'exists');
 		existsStub.withArgs(CONFIG_PATH).resolves(true);
-		existsStub.withArgs(CONFIG_V3_PATH).resolves(false);
+		existsStub.withArgs(CONFIG_PILOT_PATH).resolves(false);
 		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
 		// testing if they return different objects.
 		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
-		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_V2));
-		readFileStub.withArgs(CONFIG_V3_PATH).resolves(JSON.stringify(BASE_CONFIG_V3));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_GA));
+		readFileStub.withArgs(CONFIG_PILOT_PATH).resolves(JSON.stringify(BASE_CONFIG_PILOT));
 		return {
 			existsStub,
 			// The mkdir stub should just resolve, as though it created a directory without problems.
@@ -146,12 +146,12 @@ const SINON_SETUP_FUNCTIONS = {
 
 
 describe('Config.ts', () => {
-	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_V3_FILE);
+	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_PILOT_FILE);
 	let testConfig: ConfigContent = null;
 
 	beforeEach(() => {
 		// Before each test, reset the testConfig to a known good state.
-		testConfig = deepCopy(BASE_CONFIG_V3);
+		testConfig = deepCopy(BASE_CONFIG_PILOT);
 	});
 
 	// Most (if not all) of these tests will be creating some number of Sinon stubs. After each test, the stubs should
@@ -161,7 +161,7 @@ describe('Config.ts', () => {
 	});
 	describe('Methods', () => {
 		describe('#init()', () => {
-			it('When neither v2 nor v3 configs exist, both are created', async () => {
+			it('When neither GA nor pilot configs exist, both are created', async () => {
 				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.NO_EXISTING_CONFIGS();
 				const config = new Config();
 
@@ -169,28 +169,28 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'v2 config should not have been created');
-				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
-				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'GA config should not have been created');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config should have been created');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be pilot version');
 			});
 
-			it('When only v2 config exists, v3 config file is copied from that', async () => {
-				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.V2_CONFIG_ONLY();
+			it('When only GA config exists, pilot config file is copied from that', async () => {
+				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.GA_CONFIG_ONLY();
 				const config = new Config();
 
 				// INVOCATION OF TESTED METHOD
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'v2 config should not have been written to');
-				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
-				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'GA config should not have been written to');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config should have been created');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be pilot version');
 			});
 
 			it('Initializes using existing config file if available', async () => {
@@ -202,9 +202,9 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(false, 'since v3 config exists, v2 existence check should not have occurred');
-				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(false, 'Since v3 config exists, it should not have been modified during initialization');
+				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(false, 'since pilot config exists, GA existence check should not have occurred');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Since pilot config exists, it should not have been modified during initialization');
 				const javaHome = config.getJavaHome();
 				expect(javaHome).to.equal(testConfig.javaHome, 'Should have used spoofed config');
 			});
@@ -239,7 +239,7 @@ describe('Config.ts', () => {
 				expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 				expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'Results of upgrade should be persisted');
 				expect(writeFileStub.callCount).to.equal(1, 'Only one file should be written');
-				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_V3_PATH, 'Should have written to the config');
+				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_PILOT_PATH, 'Should have written to the config');
 			});
 
 			it('Persists partial upgrades', async () => {
@@ -259,8 +259,8 @@ describe('Config.ts', () => {
 					expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 					expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'File persistence should be attempted');
 					expect(writeFileStub.callCount).to.equal(2, 'Two file writes should be attempted');
-					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_V3_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
-					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_V3_PATH, 'Should have written partial upgrade second');
+					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_PILOT_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
+					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_PILOT_PATH, 'Should have written partial upgrade second');
 				}
 			});
 
