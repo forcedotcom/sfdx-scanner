@@ -17,4 +17,4 @@ Additionally, ESLint is highly configurable through plugins, and Salesforce Code
 to evaluate any targeted TypeScript (`.ts`) files.
 - [ESLint-LWC](https://github.com/salesforce/eslint-plugin-lwc), the official ESLint rules for Salesforce Lightning Web
 Components. These rules are not enabled by default, and can be enabled on a per-run basis with the
-`--engine "eslint-lwc"` flag, or on a permanent basis by modifying the `Config.json` file directly.
+`--engine "eslint-lwc"` flag, or on a permanent basis by modifying the `Config-pilot.json` file directly.

@@ -44,7 +44,7 @@ The most likely cause is that you're scanning TypeScript files without realizing
 If you're using a dependency management framework like Yarn, Bower, or NPM, you should make sure that those folders are
 being ignored by the Code Analyzer, since dependent modules may have TypeScript files that you don't know about.
 
-Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config.json` both exclude the folder
+Make sure that the entries for eslint and eslint-typescript in `${HOME}/.sfdx-scanner/Config-pilot.json` both exclude the folder
 used by your framework. For example, to exclude Yarn/NPM dependencies, add `!**/node_modules/**` to the `targetPatterns`
 property, and add `!**/bower_components/**` to exclude Bower dependencies.
 
@@ -72,7 +72,7 @@ property, and add `!**/bower_components/**` to exclude Bower dependencies.
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
 
-One possible reason is that the Java version you used to build your code is different from the version the Salesforce Code Analyzer plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
+One possible reason is that the Java version you used to build your code is different from the version the Salesforce Code Analyzer plug-in uses to invoke PMD. Make sure you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config-pilot.json`.
 
 
 ### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
@@ -95,7 +95,7 @@ In the directory where you execute the `scanner:run` command, install the requir
 
 Version 6.x of PMD has a [Known Issue](https://github.com/pmd/pmd/issues/2081) that causes a Java OutOfMemoryError when scanning some Javascript files. Scanning Javascript with PMD has been removed from the current version of the Salesforce Code Analyzer plug-in. We plan to restore this feature in a future version.
 
-Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config.json` file to resolve this error.
+Make the following changes to the PMD engine node in your `${HOME}/.sfdx-scanner/Config-pilot.json` file to resolve this error.
 
 1. Remove the `**/*.js` element from the PMD engine's `targetpatterns` array
 2. Remove the `javascript` element from PMD engine's `supportedLanguages` array
@@ -138,4 +138,4 @@ We have removed the PMD support for all languages except the following:
 
 If this would present you hardship, please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
 Otherwise, remove any languages besides those listed above from the PMD engine's `supportedLanguages` array in your
-`${HOME}/.sfdx-scanner/Config.json` file.
+`${HOME}/.sfdx-scanner/Config-pilot.json` file.
