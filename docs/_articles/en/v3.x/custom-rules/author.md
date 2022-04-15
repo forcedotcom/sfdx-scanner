@@ -24,7 +24,7 @@ To be compatible with the Salesforce Code Analyzer, PMD custom rules must also m
 - Custom rulesets consisting of references to existing rules may be contained in standalone XML files whose path matches the format ```<some base dir>/rulesets/<language>/<filename>.xml```
 
 ### Compiling Java-Based PMD Custom Rules
-When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/Config-pilot.json```.  
+When you compile your new rule(s), make sure ```$PMD_BIN_HOME/lib/*``` is in your CLASSPATH. Also make sure that your Java setup reflects the java-home path in ```<HOME_DIR>/.sfdx-scanner/{{ site.data.versions-v3.configfile }}```.  
 
 If you are using an IDE, add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To compile from the command line, use the ```javac``` command. For example:
 

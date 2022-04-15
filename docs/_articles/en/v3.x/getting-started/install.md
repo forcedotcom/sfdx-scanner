@@ -61,7 +61,7 @@ TOPICS
 Automatic steps don't apply here since this is a pilot version. Follow steps from above to uninstall and install directly again.
 
 Note: By default, the first time you execute a ```v3``` command, the ```<HOME_DIR>/.sfdx-scanner/Config.json``` from your
-old ```v2``` install will be copied to create the ```v3```-specific ```<HOME_DIR>/.sfdx-scanner/Config-pilot.json```.
+old ```v2``` install will be copied to create the ```v3```-specific ```<HOME_DIR>/.sfdx-scanner/{{ site.data.versions-v3.configfile }}```.
 We recommend that you preserve the existing ```Config.json``` file, as it may prove useful should you wish to downgrade to the GA version.
 
 #### Reverting to GA version
@@ -69,6 +69,6 @@ Uninstall existing plugin and follow installation steps [here](./en/getting-star
 
 Note: If you've previously had ```v2``` installed, then your old ```<HOME_DIR>/.sfdx-scanner/Config.json``` file still exists
 in the same state it was in prior to installing ```v3```. Otherwise, the ```Config.json``` file will be automatically
-created the first time you execute a ```v2``` command. If you made any manual changes to the ```Config-pilot.json``` file,
+created the first time you execute a ```v2``` command. If you made any manual changes to the ```{{ site.data.versions-v3.configfile }}``` file,
 and you wish for those changes to apply in ```v2```, you'll need to replicate them in the ```Config.json``` file after
 reverting.

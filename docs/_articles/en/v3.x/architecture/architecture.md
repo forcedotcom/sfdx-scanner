@@ -29,7 +29,7 @@ Each rule engine has a different set of rules and different formats for represen
 
 ### Rule Engine Bridge
 
-By unifying the representation of the rules into a rule catalog, Salesforce Code Analyzer can take a uniform set of input parameters. The bridge then detects the selected engines using the rules selected for input. It also determines the target files based on the file types defined in ```~/.sfdx-scanner/Config-pilot.json```. From the selected rules and target files, it tailors the input for each relevant rule engine and hands off the input to the rule engine for the actual scan.
+By unifying the representation of the rules into a rule catalog, Salesforce Code Analyzer can take a uniform set of input parameters. The bridge then detects the selected engines using the rules selected for input. It also determines the target files based on the file types defined in ```~/.sfdx-scanner/{{ site.data.versions-v3.configfile }}```. From the selected rules and target files, it tailors the input for each relevant rule engine and hands off the input to the rule engine for the actual scan.
 
 After the scan completes and the rule engine provides the results, the bridge surfaces the results in a normalized format.
 
