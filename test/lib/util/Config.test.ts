@@ -5,7 +5,7 @@ import Sinon = require('sinon');
 import path = require('path');
 import { fail } from 'assert';
 import {Config, ConfigContent} from '../../../src/lib/util/Config';
-import {CONFIG_FILE, LEGACY_CONFIG_FILE, ENGINE} from '../../../src/Constants'
+import {CONFIG_V3_FILE, CONFIG_FILE, ENGINE} from '../../../src/Constants'
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {VersionUpgradeManager, VersionUpgradeError} from '../../../src/lib/util/VersionUpgradeManager';
 import { Controller } from '../../../src/Controller';
@@ -30,11 +30,11 @@ type StubsCollection = {
 
 // =============== CONSTANTS ======================
 const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
-const LEGACY_CONFIG_PATH = path.join(SFDX_SCANNER_PATH, LEGACY_CONFIG_FILE);
 const CONFIG_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
+const CONFIG_V3_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_V3_FILE);
 const PACKAGE_VERSION = require('../../../package.json').version;
 const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
-const BASE_LEGACY_TEST_CONFIG = {
+const BASE_CONFIG_V2 = {
 	"engines": [{
 		"name": ENGINE.PMD,
 		"targetPatterns": [
@@ -52,7 +52,7 @@ const BASE_LEGACY_TEST_CONFIG = {
 	"javaHome": "/my/test/java/home",
 	"currentVersion": '2.13.1'
 };
-const BASE_TEST_CONFIG = {
+const BASE_CONFIG_V3 = {
 	"engines": [{
 		"name": ENGINE.PMD,
 		"targetPatterns": [
@@ -75,8 +75,8 @@ const SINON_SETUP_FUNCTIONS = {
 		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
 		// testing if they return different objects.
 		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
-		readFileStub.withArgs(LEGACY_CONFIG_PATH).resolves(JSON.stringify(BASE_LEGACY_TEST_CONFIG));
-		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_TEST_CONFIG));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_V2));
+		readFileStub.withArgs(CONFIG_V3_PATH).resolves(JSON.stringify(BASE_CONFIG_V3));
 		return {
 			// No matter what the file is, the stub should say it doesn't exist.
 			existsStub: Sinon.stub(FileHandler.prototype, 'exists').resolves(false),
@@ -87,16 +87,16 @@ const SINON_SETUP_FUNCTIONS = {
 			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
 		};
 	},
-	LEGACY_CONFIG_ONLY: (): StubsCollection => {
-		// The existsStub should say the legacy config exists and the modern config doesn't.
+	V2_CONFIG_ONLY: (): StubsCollection => {
+		// The existsStub should say the v2 config exists and the v3 config doesn't.
 		const existsStub = Sinon.stub(FileHandler.prototype, 'exists');
-		existsStub.withArgs(LEGACY_CONFIG_PATH).resolves(true);
-		existsStub.withArgs(CONFIG_PATH).resolves(false);
+		existsStub.withArgs(CONFIG_PATH).resolves(true);
+		existsStub.withArgs(CONFIG_V3_PATH).resolves(false);
 		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
 		// testing if they return different objects.
 		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
-		readFileStub.withArgs(LEGACY_CONFIG_PATH).resolves(JSON.stringify(BASE_LEGACY_TEST_CONFIG));
-		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_TEST_CONFIG));
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_V2));
+		readFileStub.withArgs(CONFIG_V3_PATH).resolves(JSON.stringify(BASE_CONFIG_V3));
 		return {
 			existsStub,
 			// The mkdir stub should just resolve, as though it created a directory without problems.
@@ -146,12 +146,12 @@ const SINON_SETUP_FUNCTIONS = {
 
 
 describe('Config.ts', () => {
-	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_FILE);
+	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_V3_FILE);
 	let testConfig: ConfigContent = null;
 
 	beforeEach(() => {
 		// Before each test, reset the testConfig to a known good state.
-		testConfig = deepCopy(BASE_TEST_CONFIG);
+		testConfig = deepCopy(BASE_CONFIG_V3);
 	});
 
 	// Most (if not all) of these tests will be creating some number of Sinon stubs. After each test, the stubs should
@@ -161,7 +161,7 @@ describe('Config.ts', () => {
 	});
 	describe('Methods', () => {
 		describe('#init()', () => {
-			it('When config file and legacy config do not exist, both are created', async () => {
+			it('When neither v2 nor v3 configs exist, both are created', async () => {
 				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.NO_EXISTING_CONFIGS();
 				const config = new Config();
 
@@ -169,27 +169,27 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config should have been created');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config should have been created');
+				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
 				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
 			});
 
-			it('When only legacy config exists, new config file is copied from that', async () => {
-				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.LEGACY_CONFIG_ONLY();
+			it('When only v2 config exists, v3 config file is copied from that', async () => {
+				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.V2_CONFIG_ONLY();
 				const config = new Config();
 
 				// INVOCATION OF TESTED METHOD
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(true, 'Legacy config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'v2 config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(LEGACY_CONFIG_PATH)).to.equal(false, 'Legacy config should not have been written to');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'Config should have been created');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'v2 config should not have been written to');
+				expect(writeFileStub.calledWith(CONFIG_V3_PATH)).to.equal(true, 'v3 config should have been created');
 				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be v3 version');
 			});
 
@@ -236,7 +236,7 @@ describe('Config.ts', () => {
 				expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 				expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'Results of upgrade should be persisted');
 				expect(writeFileStub.callCount).to.equal(1, 'Only one file should be written');
-				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_PATH, 'Should have written to the config');
+				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_V3_PATH, 'Should have written to the config');
 			});
 
 			it('Persists partial upgrades', async () => {
@@ -256,8 +256,8 @@ describe('Config.ts', () => {
 					expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 					expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'File persistence should be attempted');
 					expect(writeFileStub.callCount).to.equal(2, 'Two file writes should be attempted');
-					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
-					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_PATH, 'Should have written partial upgrade second');
+					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_V3_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
+					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_V3_PATH, 'Should have written partial upgrade second');
 				}
 			});
 
