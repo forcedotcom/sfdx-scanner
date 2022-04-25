@@ -89,5 +89,6 @@ export enum Severity {
 	HIGH = 1
 }
 
+
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src
 export const PMD_LIB = path.join(__dirname, '..', 'dist', 'pmd', 'lib');
