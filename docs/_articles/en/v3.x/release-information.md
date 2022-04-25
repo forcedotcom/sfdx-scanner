@@ -7,7 +7,7 @@ lang: en
 
 ## [v3.0.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.0.0) (04-26-2022)
 
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.0.0...v2.13.1)
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.1...v3.0.0)
 
 ### Release Summary
 
