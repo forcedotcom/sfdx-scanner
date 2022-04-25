@@ -11,6 +11,8 @@ lang: en
 
 ### Release Summary
 
+* RetireJS is now included with the default engines
+* Removed deprecated flag `--violations-cause-error` on `scanner:run`
 * Updated PMD to 6.44.0
 * Updated Eslint to 6.8.0
 * Updated RetireJS to 2.2.5
