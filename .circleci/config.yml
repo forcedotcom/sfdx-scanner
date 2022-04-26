@@ -111,6 +111,10 @@ commands:
 
   # Purpose: Install SFDX, and the release candidate version of the plugin.
   install_release_candidate:
+    parameters:
+      rc-tag: &rc_tag_param # Define an anchor here, since we'll want to use this parameter again elsewhere.
+        description: The tag pointing to the release candidate
+        type: string
     steps:
       - run:
           name: "Install SFDX cli"
@@ -118,7 +122,7 @@ commands:
 
       - run:
           name: "Install release candidate"
-          command: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
+          command: sfdx plugins:install @salesforce/sfdx-scanner@<< parameters.rc-tag >>
 
       - run:
           name: "Log installed plugins"
@@ -424,6 +428,8 @@ jobs:
   # promote it to an actual release.
   linux-rc-test:
     <<: *defaults
+    parameters:
+      rc-tag: *rc_tag_param
     steps:
       - auth_and_checkout
 
@@ -432,7 +438,8 @@ jobs:
           os: linux
 
       # Prepare the release candidate for running.
-      - install_release_candidate
+      - install_release_candidate:
+          rc-tag: << parameters.rc-tag >>
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
@@ -452,6 +459,8 @@ jobs:
       name: win/default # executor type
       size: "medium"
     working_directory: C:\repo
+    parameters:
+      rc-tag: *rc_tag_param
 
     steps:
       - run:
@@ -465,7 +474,8 @@ jobs:
           os: windows
 
       # Prepare the release candidate for running.
-      - install_release_candidate
+      - install_release_candidate:
+          rc-tag: << parameters.rc-tag >>
 
       - run:
           # Run through our sanity test script against the installed version of the plugin. If all of these pass, we can
@@ -480,14 +490,14 @@ jobs:
 workflows:
   version: 2.1
   # Purpose: Run unit tests and smoke tests against a branch.
-  # Triggered by: Pull requests from any branch whose name is NOT `v2-X-Y` where X and Y are numbers.
+  # Triggered by: Pull requests from any branch whose name is NOT `v3-X-Y` where X and Y are numbers.
   test:
     jobs:
       # Step 1: Set up the test environment.
       - setup:
           filters: &testing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              ignore: /^v2-\d+-\d+$/
+              ignore: /^v3-\d+-\d+$/
       # Step 2: Run the tests. Linux and Windows each have unit tests and a tarball test, and we also do a self-evaluation
       # step in Linux.
       - linux-unit-tests:
@@ -516,21 +526,21 @@ workflows:
           requires:
             - setup
   # Purpose: Publish a release based off of the specified branch.
-  # Triggered by: Pushes to branches that match the format `v2-X-Y` where X and Y are numbers.
+  # Triggered by: Pushes to branches that match the format `v3-X-Y` where X and Y are numbers.
   publish:
     jobs:
       # Step 1: Validate that the branch is an acceptable candidate for publishing.
       - validate-candidate-branch:
           filters: &publishing_filters # Declare these filters as an anchor so we can reuse them.
             branches:
-              only: /^v2-\d+-\d+$/
+              only: /^v3-\d+-\d+$/
       # Step 2: Publish the branch as a release candidate.
       - release-management/release-package:
           requires:
             - validate-candidate-branch
           sign: true
           github-release: true
-          tag: latest-rc
+          tag: latest-pilot-rc
           filters:
             <<: *publishing_filters
           context: 
@@ -542,15 +552,17 @@ workflows:
             - release-management/release-package
           filters:
             <<: *publishing_filters
+          rc-tag: latest-pilot-rc
       - windows-rc-test:
           requires:
             - release-management/release-package
           filters:
             <<: *publishing_filters
+          rc-tag: latest-pilot-rc
       # Step 4: Promote the release candidate to a full release.
       - release-management/promote-package:
-          candidate: latest-rc
-          target: latest
+          candidate: latest-pilot-rc
+          target: latest-pilot
           requires:
             - linux-rc-test
             - windows-rc-test
