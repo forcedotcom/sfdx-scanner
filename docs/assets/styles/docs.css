@@ -3631,16 +3631,23 @@ blockquote {
   text-decoration: none;
 }
 
-.language-picker {
+.version-picker {
   padding: 0 1rem;
   margin-left: 1rem;
 }
 
-.language-picker a {
+.version-picker a {
   display: inline;
   padding: 0;
 }
 
-.language-picker a.is-selected {
+.version-picker a.is-selected {
   font-weight: bold;
+}
+
+.new-menu-item {
+  font-size: xx-small;
+  font-weight: bold;
+  align-self: start;
+  color:#bf1d00;
 }

@@ -1,0 +1,81 @@
+- title:
+    en: What's new in v3.x?
+  url: /v3.x/whats-new-v3
+  new: true
+- title:
+    en: Get Started
+  baseUrl: /v3.x/getting-started/
+  children:
+    - title:
+        en: Prerequisites
+      url: /v3.x/getting-started/prerequisites
+    - title:
+        en: Installation
+      url: /v3.x/getting-started/install
+- title:
+    en: How to use the Plugin
+  baseUrl: /v3.x/scanner-commands/
+  children:
+    - title:
+        en: scanner:run
+      url: /v3.x/scanner-commands/run
+    - title:
+        en: scanner:rule:list
+      url: /v3.x/scanner-commands/list
+    - title:
+        en: scanner:rule:describe
+      url: /v3.x/scanner-commands/describe
+    - title:
+        en: scanner:rule:add
+      url: /v3.x/scanner-commands/add
+    - title:
+        en: scanner:rule:remove
+      url: /v3.x/scanner-commands/remove
+- title:
+    en: Custom Configuration
+  baseUrl: /v3.x/custom-config/
+  children:
+    - title:
+        en: PMD Configuration
+      url: /v3.x/custom-config/pmd
+    - title:
+        en: ESLint Configuration
+      url: /v3.x/custom-config/eslint
+- title:
+    en: Custom Rules
+  baseUrl: /v3.x/custom-rules/
+  children:
+    - title:
+        en: Authoring Custom Rules
+      url: /v3.x/custom-rules/author
+    - title:
+        en: Managing Custom Rules
+      url: /v3.x/custom-rules/manage
+- title:
+    en: Architecture
+  baseUrl: /v3.x/architecture/
+  children:
+    - title:
+        en: Design
+      url: /v3.x/architecture/architecture
+    - title:
+        en: RetireJS
+      url: /v3.x/architecture/retire-js-engine
+    - title:
+        en: PMD
+      url: /v3.x/architecture/pmd-engine
+    - title:
+        en: ESLint
+      url: /v3.x/architecture/eslint-engine
+    - title:
+        en: CPD
+      url: /v3.x/architecture/cpd-engine
+- title:
+    en: FAQ
+  url: /v3.x/faq
+- title:
+    en: Troubleshooting
+  url: /v3.x/troubleshooting
+- title:
+    en: Release Information for v3.x
+  url: /v3.x/release-information/

@@ -31,10 +31,10 @@ Please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-
 #### Q: How do I enable Engine X's default rules for Language Y?
 A: That depends on the engine in question.
 - __PMD__: Add the language's name to the PMD's `supportedLanguages` array in
-`~/.sfdx-scanner/Config.json`.
+`~/.sfdx-scanner/{{ site.data.versions-v3.configfile }}`.
 <br/>
 If the language is not already supported, please log an Issue as per
-["How do I get support for additional languages?"](./en/faq/#q-how-do-i-get-support-for-additional-languages).
+["How do I get support for additional languages?"](./en/v3.x/faq/#q-how-do-i-get-support-for-additional-languages).
 
 #### Q: How do I add new rules for Language X?
 A: Currently, you can add custom rules for only __PMD__. Ruleset files, and Category files defining only XPath-based rules, may be referenced as standalone XML files. Java-based rules must be bundled into a JAR. The JAR/XML can then be added to the rule registry with the ```scanner:rule:add``` command.
@@ -50,14 +50,13 @@ A: You must:
 
 #### Q: How do I update the Salesforce Code Analyzer?
 A: You must:
-- Update the plugin to the latest version by following the instructions listed [here](./en/getting-started/install/#upgrade-plug-in)
-- To update to a specific version of the plugin, here is the example `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}`
+- Update the plugin to the latest version by following the instructions listed [here](./en/v3.x/getting-started/install/#upgrade-plug-in)
+- To update to a specific version of the plugin, here is the example `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v3.scanner }}`
 
 #### Q: How can I use `Salesforce Code Analyzer` in my CI/CD?
 A: You can use the `sfdx scanner:run` command in any scripts used by your CI/CD. You'll also probably want to do the following:
 - Use the `-o/--outfile` flag to write your results to a file, so you'll have an artifact of the results.
 - Use the -s/--severity-threshold flag to cause a non-zero exit code if any violations meet or exceed the provided value, since many CI/CD frameworks care about such things.
-- `-v/--violations-cause-error` flag is deprecated please use `-s/--severity-threshold`. 
 
 ## Questions about Severity Threshold and Normalization
 
@@ -82,10 +81,10 @@ A: Following table shows how the severity across all engines are normalized.
 A: To begin with, Code Analyzer supports Apex, Java, Visualforce, and XML in CPD.
 
 #### Q: How do I know which files were not included by CPD execution?
-A: Execute Code Analyzer for CPD with `--verbose` option. Files that were not handled by CPD will be listed under this message: `Path extensions for the following files will not be processed by CPD` Note that files are first filtered by `targetPatterns` provided in `~/.sfdx-scanner/Config.json` file.
+A: Execute Code Analyzer for CPD with `--verbose` option. Files that were not handled by CPD will be listed under this message: `Path extensions for the following files will not be processed by CPD` Note that files are first filtered by `targetPatterns` provided in `~/.sfdx-scanner/{{ site.data.versions-v3.configfile }}` file.
 
 #### Q: I have a file pattern for one of the supported languages that doesn’t get picked up by CPD. How do I add the file pattern?
-A: As a first step, add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/Config.json`. If rerunning with the CPD engine option still doesn’t include the file, please create an issue for us and we’ll address it.
+A: As a first step, add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/{{ site.data.versions-v3.configfile }}`. If rerunning with the CPD engine option still doesn’t include the file, please create an issue for us and we’ll address it.
 
 #### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made the same group?
 A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD. We’ll address this with an internal fix in the future releases.
