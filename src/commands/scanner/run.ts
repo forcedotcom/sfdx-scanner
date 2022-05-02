@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {AllowedEngineFilters, INTERNAL_ERROR_CODE} from '../../Constants';
+import {AllowedEngineFilters, INTERNAL_ERROR_CODE, PILOT_AVAILABILITY_BANNER} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
@@ -121,6 +121,7 @@ export default class Run extends ScannerCommand {
 	public async run(): Promise<AnyJson> {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
+		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 
 		// if severty-for-error flag is used, we want to make sure the severities are normalized
 		const normalizeSeverity: boolean = this.flags['normalize-severity'] || this.flags['severity-threshold'];
@@ -139,7 +140,7 @@ export default class Run extends ScannerCommand {
 		const target = this.flags.target || [];
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 		const engineOptions = this.gatherEngineOptions();
-		
+
 		let output: RecombinedRuleResults = null;
 		try {
 			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions);

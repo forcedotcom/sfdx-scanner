@@ -2,6 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
+import {PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 import {RuleFilter, SourcePackageFilter} from '../../../lib/RuleFilter';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
@@ -43,6 +44,7 @@ export default class Remove extends ScannerCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
+		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		// Step 1: Validate our input.
 		this.validateFlags();
 
