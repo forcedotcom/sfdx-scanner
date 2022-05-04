@@ -8,6 +8,11 @@ export const CONFIG_FILE = 'Config.json';
 export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 export const INTERNAL_ERROR_CODE = 500;
 
+export const PILOT_AVAILABILITY_BANNER= `As of April 27, 2022, v3.x of the Salesforce Code Analyzer is available as an open pilot.
+         To update to v3.x and try out our pilot features, run these commands:
+         > sfdx plugins:uninstall @salesforce/sfdx-scanner
+         > sfdx plugins:install @salesforce/sfdx-scanner@latest-pilot`;
+
 export interface EnvOverridable {
 	getSfdxScannerPath(): string;
 }

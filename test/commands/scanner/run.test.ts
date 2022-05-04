@@ -673,7 +673,6 @@ describe('scanner:run', function () {
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
 				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
-					expect(ctx.stderr, ctx.stdout).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{"), ctx.stdout.lastIndexOf("}]") + 2));
 					// Look through all of the results and gather a set of unique engines
 					const uniqueEngines = new Set(results.map(r => { return r.engine }));
@@ -766,7 +765,7 @@ describe('scanner:run', function () {
 				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
 				const implicitMessages = violations[0].match(regex);
-				// if this test is not passing and the output seems very large, 
+				// if this test is not passing and the output seems very large,
 				// it is because the test reruns and the output accumulates so it is not the true length of the output
 				expect(implicitMessages || []).to.have.lengthOf(35, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
