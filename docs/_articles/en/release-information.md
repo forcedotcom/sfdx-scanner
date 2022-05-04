@@ -5,6 +5,23 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
+## [v2.13.2](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.3) (05-04-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.1...v2.13.2)
+
+### Release Summary
+* Updates to local RetireJS Vulnerability Repository
+* Banner requesting users to use the Pilot version of the plugin
+
+**Merged pull requests:**
+
+- @W-11056765@: \[2.x\] Updated retire-js vulnerabilities. [\#657](https://github.com/forcedotcom/sfdx-scanner/pull/657)
+- @W-10459705@: \[2.x\] Changed banner text as per code review. [\#656](https://github.com/forcedotcom/sfdx-scanner/pull/656)
+- @W-10459705@: \[2.x\] Added banner indicating to users that pilot 3.x release is available. [\#655](https://github.com/forcedotcom/sfdx-scanner/pull/655)
+- @W-11056765@: \[2.x\] Updated RetireJS vulnerability catalog. [\#653](https://github.com/forcedotcom/sfdx-scanner/pull/653)
+- @W-11032595@ \[2.x\] Added salesforce-cli context to release pipeline [\#640](https://github.com/forcedotcom/sfdx-scanner/pull/640)
+
+
 ## [v2.13.1](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.1) (03-23-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.0...v2.13.1)
