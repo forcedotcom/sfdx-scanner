@@ -13,12 +13,18 @@ import static sfdc.sfdx.scanner.TestConstants.XML_FILE;
 
 import java.util.List;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import sfdc.sfdx.scanner.messaging.EventKey;
 
 /**
  * Unit tests for {@link XmlFileFinder}
  */
 public class XmlFileFinderTest {
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 	@Test
 	public void testAllJarsInDiretory() {
 		XmlFileFinder xmlFileFinder = new XmlFileFinder();
@@ -34,7 +40,7 @@ public class XmlFileFinderTest {
 		assertEquals("category/joshapex/somecat4.xml", getSingleFile(xmlContainers, "testjar4.jar"));
 		assertEquals("category/joshapex/somecat.xml", getSingleFile(xmlContainers, "collision-test-1.jar"));
 		assertEquals("category/joshapex/somecat.xml", getSingleFile(xmlContainers, "collision-test-2.jar"));
-		
+
 		XmlFileFinder.XmlContainer xmlContainer = findXmlContainer(xmlContainers, "testjar-categories-and-rulesets-1.jar");
 		assertThat(xmlContainer.containedFilePaths, hasSize(equalTo(2)));
 		assertThat(xmlContainer.containedFilePaths, hasItems("category/apex/cat1.xml", "rulesets/apex/rules1.xml"));
@@ -80,20 +86,28 @@ public class XmlFileFinderTest {
 		assertThat(xmlContainer.containedFilePaths, contains(XML_FILE.toAbsolutePath().toString()));
 	}
 
-	private XmlFileFinder.XmlContainer findXmlContainer(List<XmlFileFinder.XmlContainer> xmlContainers, String jarName) { 
+	private XmlFileFinder.XmlContainer findXmlContainer(List<XmlFileFinder.XmlContainer> xmlContainers, String jarName) {
 		for (XmlFileFinder.XmlContainer xmlContainer : xmlContainers) {
 			if (xmlContainer.filePath.endsWith(jarName)) {
 				return xmlContainer;
 			}
 		}
-		
-		throw new RuntimeException("Uanble to find " + jarName); 
+
+		throw new RuntimeException("Uanble to find " + jarName);
 	}
-	
+
 	private String getSingleFile(List<XmlFileFinder.XmlContainer> xmlContainers, String jarName) {
 		XmlFileFinder.XmlContainer xmlContainer = findXmlContainer(xmlContainers, jarName);
 		assertThat(xmlContainer.containedFilePaths, hasSize(equalTo(1)));
 
 		return xmlContainer.containedFilePaths.get(0);
+	}
+
+	@Test
+	public void testFindingNonExistentFile_ExpectError() {
+		XmlFileFinder xmlFileFinder = new XmlFileFinder();
+		thrown.expect(new SfdxScannerExceptionMatcher(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{"nonexistentfile.xml"}));
+
+		List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder.findXmlFilesInPath("nonexistentfile.xml");
 	}
 }
