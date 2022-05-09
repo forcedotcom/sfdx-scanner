@@ -25,7 +25,7 @@ $EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/ts/src
 echo "==== Run RetireJS against a folder ===="
 $EXE_NAME scanner:run --format junit --engine retire-js --target test/code-fixtures/projects/dep-test-app/folder-a --outfile smoke-test-results/run3.xml
 echo "=== Run SFGE against a folder ==="
-$EXE_NAME scanner:run:dfa --format junit --target test/code-fixtures/projects/sfca-smoke-app/src --projectdir test/code-fixtures/projects/sfca-smoke-app/src --outfile smoke-test-results/run4.xml
+$EXE_NAME scanner:run:dfa --format junit --target test/code-fixtures/projects/sfge-smoke-app/src --projectdir test/code-fixtures/projects/sfge-smoke-app/src --outfile smoke-test-results/run4.xml
 echo "==== Add a JAR of custom rules ===="
 $EXE_NAME scanner:rule:add --language apex --path test/test-jars/apex/testjar1.jar
 echo "==== List the rules, including the custom ones ===="
