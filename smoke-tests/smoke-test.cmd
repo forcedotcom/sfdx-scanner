@@ -1,5 +1,5 @@
 @echo off
-REM Auto-generated on Wed Apr 27 2022
+REM Auto-generated on Mon May 09 2022
 REM This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
 REM of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
 REM the plugin is approximately stable.
@@ -24,7 +24,7 @@ call %EXE_NAME% scanner:run --format junit --target test\code-fixtures\projects\
 echo "==== Run RetireJS against a folder ===="
 call %EXE_NAME% scanner:run --format junit --engine retire-js --target test\code-fixtures\projects\dep-test-app\folder-a --outfile smoke-test-results\run3.xml || exit /b 1
 echo "=== Run SFGE against a folder ==="
-call %EXE_NAME% scanner:run:dfa --format junit --target test\code-fixtures\projects\sfca-smoke-app\src --projectdir test\code-fixtures\projects\sfca-smoke-app\src --outfile smoke-test-results\run4.xml || exit /b 1
+call %EXE_NAME% scanner:run:dfa --format junit --target test\code-fixtures\projects\sfge-smoke-app\src --projectdir test\code-fixtures\projects\sfge-smoke-app\src --outfile smoke-test-results\run4.xml || exit /b 1
 echo "==== Add a JAR of custom rules ===="
 call %EXE_NAME% scanner:rule:add --language apex --path test\test-jars\apex\testjar1.jar || exit /b 1
 echo "==== List the rules, including the custom ones ===="

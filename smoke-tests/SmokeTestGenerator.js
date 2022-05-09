@@ -69,7 +69,7 @@ function generateScriptBody(isBash, delim) {
 		`echo "==== Run RetireJS against a folder ===="`,
 		`${exeName} scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'run3.xml'], delim)}`,
 		`echo "=== Run SFGE against a folder ==="`,
-		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfca-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfca-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}`,
+		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}`,
 		`echo "==== Add a JAR of custom rules ===="`,
 		`${exeName} scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}`,
 		`echo "==== List the rules, including the custom ones ===="`,
