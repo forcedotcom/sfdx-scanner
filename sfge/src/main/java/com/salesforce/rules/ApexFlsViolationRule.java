@@ -1,0 +1,91 @@
+package com.salesforce.rules;
+
+import com.google.common.collect.ImmutableList;
+import com.salesforce.exception.UnexpectedException;
+import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.vertex.BaseSFVertex;
+import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+
+/**
+ * FLS Violation rule that uses forward-path approach to detect missing FLS checks on CRUD
+ * operations.
+ */
+public final class ApexFlsViolationRule extends AbstractPathBasedRule {
+    private static final Logger LOGGER = LogManager.getLogger(ApexFlsViolationRule.class);
+
+    private static final String DESCRIPTION =
+            "Identifies data read/write operations that may not have CRUD/FLS";
+    private final List<FlsRuleHandler> ruleHandlers;
+
+    private ApexFlsViolationRule() {
+        ruleHandlers =
+                ImmutableList.of(
+                        ApexFlsReadRuleHandler.getInstance(),
+                        ApexFlsWriteRuleHandler.getInstance());
+    }
+
+    protected int getSeverity() {
+        return SEVERITY.HIGH.code;
+    }
+
+    protected String getDescription() {
+        return DESCRIPTION;
+    }
+
+    protected String getCategory() {
+        return CATEGORY.SECURITY.name;
+    }
+
+    @Override
+    protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
+        final HashSet<FlsViolationInfo> flsViolationInfos = new HashSet<>();
+
+        ruleHandlers.forEach(
+                ruleHandler -> {
+                    if (ruleHandler.test(vertex)) {
+                        flsViolationInfos.addAll(ruleHandler.detectViolations(g, path, vertex));
+                    }
+                });
+
+        flsViolationInfos.forEach(
+                violation -> {
+                    violation.setSourceVertex(path.getMethodVertex().orElse(null));
+                    violation.setRule(this);
+                });
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                    "Results. "
+                            + "source="
+                            + path.getMethodVertex()
+                                    .orElseThrow(() -> new UnexpectedException(path))
+                                    .toSimpleString()
+                            + ", sink="
+                            + vertex
+                            + ", results="
+                            + flsViolationInfos);
+        }
+        return new ArrayList<>(flsViolationInfos);
+    }
+
+    @Override
+    public boolean test(BaseSFVertex vertex) {
+        // Return true when any rule handler is interested in this vertex
+        return ruleHandlers.stream().anyMatch(ruleHandler -> ruleHandler.test(vertex));
+    }
+
+    public static ApexFlsViolationRule getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+    private static final class LazyHolder {
+        // Postpone initialization until first use
+        private static final ApexFlsViolationRule INSTANCE = new ApexFlsViolationRule();
+    }
+}

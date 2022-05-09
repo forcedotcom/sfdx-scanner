@@ -27,6 +27,10 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		&& engineUtils.isFilterEmptyOrFilterValueStartsWith(EngineBase.ESLINT, filterValues);
 	}
 
+	isDfaEngine(): boolean {
+		return false;
+	}
+
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
 			case 1:

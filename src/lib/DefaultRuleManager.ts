@@ -18,6 +18,11 @@ import {uxEvents, EVENTS} from './ScannerEvents';
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
 
+type RunDescriptor = {
+	engine: RuleEngine;
+	descriptor: EngineExecutionDescriptor;
+};
+
 @injectable()
 export class DefaultRuleManager implements RuleManager {
 	private logger: Logger;
@@ -62,7 +67,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>, runDfa = false): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];
@@ -71,7 +76,7 @@ export class DefaultRuleManager implements RuleManager {
 		// Derives rules from our filters to feed the engines.
 		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
-		const runDescriptorList: {engine: RuleEngine; descriptor: EngineExecutionDescriptor}[] = [];
+		const runDescriptorList: RunDescriptor[] = [];
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 		for (const e of engines) {
@@ -82,7 +87,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 
-			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
+			if ((e.isDfaEngine() === runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
 				// Create a descriptor for this engine run, but do not actually run it just yet. This is because the run
@@ -102,6 +107,8 @@ export class DefaultRuleManager implements RuleManager {
 			}
 
 		}
+
+		this.validateRunDescriptors(runDescriptorList);
 
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
@@ -124,6 +131,15 @@ export class DefaultRuleManager implements RuleManager {
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(message);
+		}
+	}
+
+	protected validateRunDescriptors(runDescriptorList: RunDescriptor[]): void {
+		// If any engine is DFA, then all of them have to be DFA.
+		const dfaEngines = runDescriptorList.filter(descriptor => descriptor.engine.isDfaEngine()).map(descriptor => descriptor.engine.getName());
+		const pathlessEngines = runDescriptorList.filter(descriptor => !(descriptor.engine.isDfaEngine())).map(descriptor => descriptor.engine.getName());
+		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
+			throw new SfdxError(messages.getMessage(`Pathless engines ${JSON.stringify(pathlessEngines)} cannot be run concurrently with DFA engines ${JSON.stringify(dfaEngines)}`));
 		}
 	}
 

@@ -358,6 +358,10 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return await this.config.isEngineEnabled(RetireJsEngine.ENGINE_ENUM);
 	}
 
+	public isDfaEngine(): boolean {
+		return false;
+	}
+
 	private getNextDirAlias(): string {
 		return `TMPDIR_${RetireJsEngine.NEXT_TMPDIR_IDX++}`;
 	}

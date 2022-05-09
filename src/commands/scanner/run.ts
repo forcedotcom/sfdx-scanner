@@ -1,14 +1,11 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
-import {AnyJson} from '@salesforce/ts-types';
-import {LooseObject, RecombinedRuleResults} from '../../types';
-import {AllowedEngineFilters} from '../../Constants';
-import {Controller} from '../../Controller';
+import {LooseObject} from '../../types';
+import {PathlessEngineFilters} from '../../Constants';
 import {CUSTOM_CONFIG} from '../../Constants';
-import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
-import {ScannerCommand} from '../../lib/ScannerCommand';
+import {OUTPUT_FORMAT} from '../../lib/RuleManager';
+import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
-import {RunOutputProcessor} from '../../lib/util/RunOutputProcessor';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
 
@@ -18,9 +15,8 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
-const INTERNAL_ERROR_CODE = 1;
 
-export default class Run extends ScannerCommand {
+export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
 	public static description = messages.getMessage('commandDescription');
 	public static longDescription = messages.getMessage('commandDescriptionLong');
@@ -53,7 +49,7 @@ export default class Run extends ScannerCommand {
 			char: 'e',
 			description: messages.getMessage('flags.engineDescription'),
 			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [...AllowedEngineFilters]
+			options: [...PathlessEngineFilters]
 		}),
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// These flags are how you choose which files you're targeting.
@@ -110,48 +106,21 @@ export default class Run extends ScannerCommand {
 		}),
 	};
 
-	public async run(): Promise<AnyJson> {
-		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
-		this.validateFlags();
-
-		// if severity-threshold flag is used, we want to make sure the severities are normalized
-		const normalizeSeverity: boolean = (this.flags['normalize-severity'] || this.flags['severity-threshold']) as boolean;
-
-		// Next, we need to build our input.
-		const filters = this.buildRuleFilters();
-
-		// We need to derive the output format, either from information that was explicitly provided or from default values.
-		// We can't use the defaultValue property for the flag, because there needs to be a difference between defaulting
-		// to a value and having the user explicitly select it.
-		const outputOptions: OutputOptions = {format: this.determineOutputFormat(), normalizeSeverity: normalizeSeverity};
-		const ruleManager = await Controller.createRuleManager();
-
-		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
-		// sometimes shells are stupid and will leave them in there.
-		const target = (this.flags.target || []) as string[];
-		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
-		const engineOptions = this.gatherEngineOptions();
-
-		let output: RecombinedRuleResults = null;
-		try {
-			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions);
-		} catch (e) {
-			// Rethrow any errors as SFDX errors.
-			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
+	protected validateCommandFlags(): Promise<void> {
+		if (this.flags.tsconfig && this.flags.eslintconfig) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
 		}
-		return new RunOutputProcessor({
-			format: outputOptions.format,
-			severityForError: this.flags['severity-threshold'] as number,
-			outfile: this.flags.outfile as string
-		}, this.ux)
-			.processRunOutput(output);
+
+		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
+			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
+		}
+		return Promise.resolve();
 	}
 
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 */
-	private gatherEngineOptions(): Map<string, string> {
+	protected gatherEngineOptions(): Map<string, string> {
 		const options: Map<string,string> = new Map();
 		if (this.flags.tsconfig) {
 			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
@@ -183,68 +152,7 @@ export default class Run extends ScannerCommand {
 		return options;
 	}
 
-	private validateFlags(): void {
-		if (this.flags.tsconfig && this.flags.eslintconfig) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
-		}
-
-		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
-		}
-
-		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
-		if (this.flags.format && this.flags.outfile) {
-			const inferredOutfileFormat = this.inferFormatFromOutfile();
-			// For the purposes of this validation, we treat junit as xml.
-			const chosenFormat = this.flags.format === 'junit' ? 'xml' : this.flags.format as string;
-			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
-			// of TABLE to a file.
-			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.cannotWriteTableToFile', []);
-			}
-			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
-			// just log a message saying so.
-			if (chosenFormat !== inferredOutfileFormat) {
-				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, inferredOutfileFormat]));
-			}
-		}
-	}
-
-	private determineOutputFormat(): OUTPUT_FORMAT {
-		// If an output format is explicitly specified, use that.
-		if (this.flags.format) {
-			return this.flags.format as OUTPUT_FORMAT;
-		} else if (this.flags.outfile) {
-			// Else If an outfile is explicitly specified, infer the format from its extension.
-			return this.inferFormatFromOutfile();
-		} else if (this.flags.json) {
-			// Else If the --json flag is present, then we'll default to JSON format.
-			return OUTPUT_FORMAT.JSON;
-		} else {
-			// Otherwise, we'll default to the Table format.
-			return OUTPUT_FORMAT.TABLE;
-		}
-	}
-
-	private inferFormatFromOutfile(): OUTPUT_FORMAT {
-		const outfile = this.flags.outfile as string;
-		const lastPeriod = outfile.lastIndexOf('.');
-		// If the outfile is malformed, we're already hosed.
-		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
-		} else {
-			// Look at the file extension, and infer a corresponding output format.
-			const fileExtension = outfile.slice(lastPeriod + 1);
-			switch (fileExtension) {
-				case OUTPUT_FORMAT.CSV:
-				case OUTPUT_FORMAT.HTML:
-				case OUTPUT_FORMAT.JSON:
-				case OUTPUT_FORMAT.SARIF:
-				case OUTPUT_FORMAT.XML:
-					return fileExtension;
-				default:
-					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
-			}
-		}
+	protected pathBasedEngines(): boolean {
+		return false;
 	}
 }

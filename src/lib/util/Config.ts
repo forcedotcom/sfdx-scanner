@@ -78,6 +78,14 @@ const DEFAULT_CONFIG: ConfigContent = {
 			],
 			disabled: true,
 			minimumTokens: 100
+		},
+		{
+			name: ENGINE.SFGE,
+			targetPatterns: [
+				"**/*.cls",
+				"**/*.trigger"
+			],
+			disabled: false
 		}
 	]
 };

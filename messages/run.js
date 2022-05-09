@@ -1,6 +1,6 @@
 module.exports = {
-	"commandDescription": "evaluate a selection of rules against a codebase",
-	"commandDescriptionLong": `Scan codebase with all rules by default
+	"commandDescription": "evaluate a selection of pathless rules against a codebase",
+	"commandDescriptionLong": `Scan codebase with all pathless rules by default
 	or with a chosen set of rules if using rulename/category/ruleset filters.
 	You can choose the format of output and decide between printing the results directly
 	or as contents of a file that you provide with --outfile flag.`,

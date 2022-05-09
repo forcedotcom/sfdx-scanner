@@ -2,6 +2,7 @@ import { Logger } from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {ChildProcessWithoutNullStreams} from 'child_process';
 import cspawn = require('cross-spawn');
+import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
 
 export abstract class CommandLineSupport extends AsyncCreatable {
 
@@ -21,6 +22,16 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	protected abstract buildClasspath(): Promise<string[]>;
 
 	/**
+	 * Returns a {@link SpinnerManager} implementation to be used while waiting for the child process to complete. This
+	 * default implementation returns a {@link NoOpSpinnerManager}, but subclasses may override to return another object
+	 * if needed.
+	 * @protected
+	 */
+	protected getSpinnerManager(): SpinnerManager {
+		return new NoOpSpinnerManager();
+	}
+
+	/**
 	 * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject functions.
 	 * Resolves/rejects the Promise once the child process finishes.
 	 * @param cp
@@ -30,6 +41,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void {
 		let stdout = '';
 		let stderr = '';
+		this.getSpinnerManager().startSpinner();
 
 		// When data is passed back up to us, pop it onto the appropriate string.
 		cp.stdout.on('data', data => {
@@ -41,17 +53,19 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 		cp.on('exit', code => {
 			this.parentLogger.trace(`monitorChildProcess has received exit code ${code}`);
-			if (code === 0 || code === 4) {
-				// If the exit code is 0, then no rule violations were found. If the exit code is 4, then it means that at least
-				// one violation was found. In either case, CPD ran successfully, so we'll resolve the Promise.
+			if (this.isSuccessfulExitCode(code)) {
+				this.getSpinnerManager().stopSpinner(true);
 				res(stdout);
 			} else {
-				// If we got any other error, it means something actually went wrong. We'll just reject with stderr for the ease
-				// of upstream error handling.
+				// If we got any other error, it means something actually went wrong. We'll just reject with stderr for
+				// the ease of upstream error handling.
+				this.getSpinnerManager().stopSpinner(false);
 				rej(stderr);
 			}
 		});
 	}
+
+	protected abstract isSuccessfulExitCode(code: number): boolean;
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
 

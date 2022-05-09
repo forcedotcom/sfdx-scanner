@@ -1,0 +1,6 @@
+<!--
+asdfaswefr
+awelikawjl;3e4j;lfaj;djfajksdlaw;e
+-->
+<apex:page controller="PageWithMultilineCommentsCtrl_expectIncluded">
+</apex:page>

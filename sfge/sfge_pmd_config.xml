@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+
+<ruleset name="SFGE code cleanup ruleset"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Custom set of PMD rules to execute for SFGE
+    </description>
+
+    <rule ref="category/java/security.xml"/>
+
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops"/>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="NullAssignment"/> <!-- worth revisiting in future to see if we can refactor a few things -->
+
+        <!-- would we ever serialize? could this affect us later? -->
+        <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="MissingSerialVersionUID"/>
+
+    </rule>
+
+    <!--<rule ref="category/java/errorprone.xml/AvoidLiteralsInIfCondition">
+        <properties>
+            <property name="ignoreMagicNumbers" value="-1,0,1" />
+        </properties>
+    </rule>-->
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="LooseCoupling"/>
+    </rule>
+
+</ruleset>

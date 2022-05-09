@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto-generated on Thu Jul 29 2021
+# Auto-generated on Wed Apr 27 2022
 # This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
 # of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
 # the plugin is approximately stable.
@@ -24,6 +24,8 @@ echo "==== Run rules against a typescript file, which should run ESLint-Typescri
 $EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/ts/src/simpleYetWrong.ts --tsconfig test/code-fixtures/projects/tsconfig.json --outfile smoke-test-results/run2.xml
 echo "==== Run RetireJS against a folder ===="
 $EXE_NAME scanner:run --format junit --engine retire-js --target test/code-fixtures/projects/dep-test-app/folder-a --outfile smoke-test-results/run3.xml
+echo "=== Run SFGE against a folder ==="
+$EXE_NAME scanner:run:dfa --format junit --target test/code-fixtures/projects/sfca-smoke-app/src --projectdir test/code-fixtures/projects/sfca-smoke-app/src --outfile smoke-test-results/run4.xml
 echo "==== Add a JAR of custom rules ===="
 $EXE_NAME scanner:rule:add --language apex --path test/test-jars/apex/testjar1.jar
 echo "==== List the rules, including the custom ones ===="
@@ -31,7 +33,7 @@ $EXE_NAME scanner:rule:list --engine pmd
 echo "==== Describe a custom rule ===="
 $EXE_NAME scanner:rule:describe -n fakerule1
 echo "==== Run a custom rule ===="
-$EXE_NAME scanner:run --format junit --category SomeCat1,Security --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/run4.xml
+$EXE_NAME scanner:run --format junit --category SomeCat1,Security --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/run5.xml
 echo "==== Remove a custom rule ===="
 $EXE_NAME scanner:rule:remove --path test/test-jars/apex/testjar1.jar --force
 echo "==== List the rules a final time, to make sure nothing broke ===="

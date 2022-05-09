@@ -1,3 +1,5 @@
+import {RuleViolation, PathlessRuleViolation} from '../../types';
+
 /**
  * Create a deep copy of an object by converting it to a JSON string and then parsing it.
  */
@@ -20,4 +22,8 @@ const numberTypeGuard = (object): object is number => {
 	return typeof object === 'number';
 }
 
-export { booleanTypeGuard, deepCopy, numberTypeGuard, stringArrayTypeGuard };
+const isPathlessViolation = (v: RuleViolation): v is PathlessRuleViolation => {
+	return 'line' in v;
+}
+
+export { booleanTypeGuard, deepCopy, numberTypeGuard, stringArrayTypeGuard, isPathlessViolation };
