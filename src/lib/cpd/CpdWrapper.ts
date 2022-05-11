@@ -3,7 +3,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
 import { PMD_LIB } from '../../Constants';
-import { CommandLineSupport } from '../pmd/CommandLineSupport';
+import { CommandLineSupport } from '../services/CommandLineSupport';
 
 const MAIN_CLASS = 'net.sourceforge.pmd.cpd.CPD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -51,6 +51,12 @@ export default class CpdWrapper extends CommandLineSupport {
 
 		this.logger.trace(`Preparing to execute CPD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
+	}
+
+	protected isSuccessfulExitCode(code: number): boolean {
+		// CPD's convention is that an exit code of 0 indicates a successful run with no violations, and an exit code of
+		// 4 indicates a successful run with at least one violation.
+		return code === 0 || code === 4;
 	}
 
 	public static async execute(path: string, language: string, minimumTokens: number): Promise<string> {

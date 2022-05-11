@@ -56,6 +56,11 @@ export interface RuleEngine {
 	 * based on the values provided in the --engine filter and Engine Options
 	 */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+
+	/**
+	 * Indicates whether the violations returned by this engine are DFA violations, as opposed to Pathless violations.
+	 */
+	isDfaEngine(): boolean;
 }
 
 export abstract class AbstractRuleEngine implements RuleEngine {
@@ -69,6 +74,7 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract matchPath(path: string): boolean;
 	abstract isEnabled(): Promise<boolean>;
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
+	abstract isDfaEngine(): boolean;
 	abstract getNormalizedSeverity(severity: number): Severity;
 
 	async runEngine(descriptor: EngineExecutionDescriptor): Promise<RuleResult[]>{

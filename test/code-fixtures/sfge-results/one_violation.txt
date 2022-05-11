@@ -1,0 +1,18 @@
+Targeting /Users/jfeingold/Code/code-for-tests/SomeInterface.cls
+2021-03-16 13:28:03 INFO  BasicBlockGraphBuilder:100 - Removing empty blocks. size=0
+VIOLATIONS_START[{
+"sinkFileName":"/Some/path/to/a/file.cls",
+"sinkLineNumber":121,
+"sinkLineNumber":121,
+"sinkColumnNumber":26,
+"message":"FLS validation is missing for [READ] operation on [Some_Object__c] with field(s) [Some_Field__c,name]",
+"sourceFileName":"/Some/path/to/another/file.cls",
+"sourceType":"SomeClass",
+"sourceVertexName":"someMethodName",
+"sourceLineNumber":118,
+"sourceColumnNumber":23,
+"ruleName":"ApexFlsViolationRule",
+"severity":1,
+"description":"Identifies data read/write operations that may not have CRUD/FLS",
+"category":"Security"
+}]VIOLATIONS_END

@@ -2,12 +2,12 @@ import os = require('os');
 import path = require('path');
 
 export const PMD_VERSION = '6.45.0';
+export const SFGE_VERSION = '1.0.1-pilot';
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_PILOT_FILE = 'Config-pilot.json';
 export const CONFIG_FILE = 'Config.json';
 export const PMD_CATALOG_FILE = 'PmdCatalog.json';
-export const INTERNAL_ERROR_CODE = 500;
 
 export interface EnvOverridable {
 	getSfdxScannerPath(): string;
@@ -27,7 +27,8 @@ export enum ENGINE {
 	ESLINT_TYPESCRIPT = 'eslint-typescript',
 	ESLINT_CUSTOM = 'eslint-custom',
 	RETIRE_JS = 'retire-js',
-	CPD = 'cpd'
+	CPD = 'cpd',
+	SFGE = 'sfge'
 }
 
 /**
@@ -39,8 +40,8 @@ export const EngineBase = {
 }
 
 /**
- * These are the filter values that Users can filter by when using
- * --engine flag
+ * These are the filter values that can be used with the --engine flag in contexts where all engines are available.
+ * (e.g., `scanner:rule:list`).
  */
 export const AllowedEngineFilters = [
 	ENGINE.ESLINT,
@@ -48,7 +49,26 @@ export const AllowedEngineFilters = [
 	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS,
+	ENGINE.CPD,
+	ENGINE.SFGE
+]
+
+/**
+ * These are the filter values that can be used with the --engine flag in contexts where only non-path engines should be
+ * available.
+ * (e.g., `scanner:run`).
+ */
+export const PathlessEngineFilters = [
+	ENGINE.ESLINT,
+	ENGINE.ESLINT_LWC,
+	ENGINE.ESLINT_TYPESCRIPT,
+	ENGINE.PMD,
+	ENGINE.RETIRE_JS,
 	ENGINE.CPD
+]
+
+export const DfaEngineFilters = [
+	ENGINE.SFGE
 ]
 
 
@@ -73,7 +93,8 @@ export const Services = {
 
 export enum CUSTOM_CONFIG {
 	EslintConfig = "EslintConfig",
-	PmdConfig = "PmdConfig"
+	PmdConfig = "PmdConfig",
+	SfgeConfig = "SfgeConfig"
 }
 
 export const HARDCODED_RULES = {

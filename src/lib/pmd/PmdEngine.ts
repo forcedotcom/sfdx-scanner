@@ -101,6 +101,10 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 
 	public abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 
+	public isDfaEngine(): boolean {
+		return false;
+	}
+
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
 			case 1:

@@ -80,19 +80,34 @@ export type RecombinedRuleResults = {
 	summaryMap: Map<string,EngineExecutionSummary>;
 };
 
-export type RuleViolation = {
+type BaseViolation = {
+	ruleName: string;
+	message: string;
+	severity: number;
+	normalizedSeverity?: number;
+	category: string;
+	url?: string;
+	exception?: boolean;
+}
+
+export type PathlessRuleViolation = BaseViolation & {
 	line: number;
 	column: number;
 	endLine?: number;
 	endColumn?: number;
-	ruleName: string;
-	severity: number;
-	normalizedSeverity?: number;
-	message: string;
-	category: string;
-	url?: string;
-	exception?: boolean;
 };
+
+export type DfaRuleViolation = BaseViolation & {
+	sourceLine: number;
+	sourceColumn: number;
+	sourceType: string;
+	sourceMethodName: string;
+	sinkLine: number;
+	sinkColumn: number;
+	sinkFileName: string;
+};
+
+export type RuleViolation = PathlessRuleViolation | DfaRuleViolation;
 
 export type Catalog = {
 	rules: Rule[];
@@ -148,3 +163,10 @@ export type AdvancedTargetPattern = {
 export type TargetMatchingFunction = (t: string) => Promise<boolean>;
 
 export type BasicTargetPattern = string;
+
+export type SfgeConfig = {
+	projectDirs: string[];
+	ruleThreadCount?: number;
+	ruleThreadTimeout?: number;
+	ignoreParseErrors?: boolean;
+};

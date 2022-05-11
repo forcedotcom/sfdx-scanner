@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {ESLint} from 'eslint';
+import {isPathlessViolation} from '../../../src/lib/util/Utils';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import {RuleResultRecombinator} from '../../../src/lib/formatter/RuleResultRecombinator';
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
@@ -7,13 +8,14 @@ import path = require('path');
 import * as csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { AllowedEngineFilters, ENGINE, PMD_VERSION } from '../../../src/Constants';
+import { PathlessEngineFilters, ENGINE, PMD_VERSION, SFGE_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
 const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js');
 const sampleFile3 = path.join('Users', 'SomeUser', 'samples', 'sample-file3.java');
 const sampleFile4 = path.join('Users', 'SomeUser', 'samples', 'file-with-&.js');
+const sampleFile5 = path.join('Users', 'SomeUser', 'samples', 'sample-apex-file.cls');
 
 const ESLINT_VERSION = ESLint.version;
 
@@ -69,7 +71,7 @@ const edgeCaseResults: RuleResult[] = [
 	}
 ];
 
-const allFakeRuleResults: RuleResult[] = [
+const allFakePathlessRuleResults: RuleResult[] = [
 	{
 		engine: 'eslint',
 		fileName: sampleFile1,
@@ -142,7 +144,7 @@ const allFakeRuleResults: RuleResult[] = [
 	}
 ];
 
-const allFakeRuleResultsNormalized: RuleResult[] = [
+const allFakePathlessRuleResultsNormalized: RuleResult[] = [
 	{
 		engine: 'eslint',
 		fileName: sampleFile1,
@@ -221,6 +223,49 @@ const allFakeRuleResultsNormalized: RuleResult[] = [
 	}
 ];
 
+const allFakeDfaRuleResults: RuleResult[] = [
+	{
+		engine: 'sfge',
+		fileName: sampleFile5,
+		violations: [{
+			"sourceLine": 15,
+			"sourceColumn": 8,
+			"sourceType": "BearController",
+			"sourceMethodName": "getAllBears",
+			"sinkFileName": '/Users/path/to/offendingFile.cls',
+			"sinkLine": 3,
+			"sinkColumn": 8,
+			"ruleName": "ApexFlsViolationRule",
+			"severity": 1,
+			"message": "FLS validation is missing for [READ] operation on [Bear__c] with field(s) [Age__c,Height__c]",
+			"url": "https://thisurldoesnotmatter.com",
+			"category": "Security"
+		}]
+	}
+];
+
+const allFakeDfaRuleResultsNormalized: RuleResult[] = [
+	{
+		engine: 'sfge',
+		fileName: sampleFile5,
+		violations: [{
+			"sourceLine": 15,
+			"sourceColumn": 8,
+			"sourceType": "BearController",
+			"sourceMethodName": "getAllBears",
+			"sinkFileName": '/Users/path/to/offendingFile.cls',
+			"sinkLine": 3,
+			"sinkColumn": 8,
+			"ruleName": "ApexFlsViolationRule",
+			"normalizedSeverity": 1,
+			"severity": 1,
+			"message": "FLS validation is missing for [READ] operation on [Bear__c] with field(s) [Age__c,Height__c]",
+			"url": "https://thisurldoesnotmatter.com",
+			"category": "Security"
+		}]
+	}
+];
+
 function isString(x: string | {columns; rows}): x is string {
 	return typeof x === 'string';
 }
@@ -237,13 +282,21 @@ function validateJson(ruleResult: RuleResult, expectedResults: RuleResult[], exp
 	} else {
 		expect(violation.normalizedSeverity).to.equal(undefined);
 	}
-	expect(violation.line).to.equal(expectedViolation.line, 'Line');
-	expect(violation.column).to.equal(expectedViolation.column, 'Column');
 	expect(violation.ruleName).to.equal(expectedViolation.ruleName, 'Rule Name');
 	const expectedMessage = trimMessage ? expectedViolation.message.trim() : expectedViolation.message;
 	expect(violation.message).to.equal(expectedMessage);
 	expect(violation.url).to.equal(expectedViolation.url, 'Url');
 	expect(violation.category).to.equal(expectedViolation.category, 'Category');
+	const isActuallyPathless = isPathlessViolation(violation);
+	const isExpectedPathless = isPathlessViolation(expectedViolation);
+	expect(isActuallyPathless).to.equal(isExpectedPathless, 'Wrong violation type');
+	if (isActuallyPathless && isExpectedPathless) {
+		expect(violation.line).to.equal(expectedViolation.line, 'Line');
+		expect(violation.column).to.equal(expectedViolation.column, 'Column');
+	} else if (!isActuallyPathless && !isExpectedPathless) {
+		expect(violation.sourceLine).to.equal(expectedViolation.sourceLine, 'Line');
+		expect(violation.sourceColumn).to.equal(expectedViolation.sourceColumn, 'Column');
+	}
 }
 
 describe('RuleResultRecombinator', () => {
@@ -302,7 +355,7 @@ describe('RuleResultRecombinator', () => {
 
 			it('Properly handles one file with one violation', async () => {
 				// Create a subset of the fake results containing only one file and one violation.
-				const someFakeResults = [allFakeRuleResults[0]];
+				const someFakeResults = [allFakePathlessRuleResults[0]];
 
 				// Create our reformatted results.
 				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
@@ -321,7 +374,7 @@ describe('RuleResultRecombinator', () => {
 
 			it('Properly handles one file with multiple violations', async () => {
 				// Create a subset of the fake results containing one file with multiple violations.
-				const someFakeResults = [allFakeRuleResults[1]];
+				const someFakeResults = [allFakePathlessRuleResults[1]];
 
 				// Create our reformatted results.
 				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(someFakeResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
@@ -340,7 +393,7 @@ describe('RuleResultRecombinator', () => {
 
 			it('Properly handles multiple files with multiple violations', async () => {
 				// Create our reformatted results from the entire sample.
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResults, OUTPUT_FORMAT.JUNIT, new Set(['eslint', 'pmd']));
 				// Split the results by newline character so we can make some interesting assertions.
 				if (!isString(results)) {
 					expect(false).to.equal(true, 'Results should have been string');
@@ -472,8 +525,38 @@ describe('RuleResultRecombinator', () => {
 				expect(invocation.toolExecutionNotifications).to.have.lengthOf(0, 'Tool Execution');
 			}
 
-			it ('Happy Path', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
+			function validateSfgeSarif(run: unknown, normalizeSeverity: boolean): void {
+				const driver = run['tool']['driver'];
+				expect(driver.name).to.equal(ENGINE.SFGE);
+				expect(driver.version).to.equal(SFGE_VERSION);
+				// TODO: The informationuri value hasn't been decided. Fill it in once we pick something.
+				expect(driver.informationUri).to.equal('???');
+
+				// tool.driver.rules
+				expect(driver['rules']).to.have.lengthOf(1, 'Incorrect rule count');
+				expect(driver['rules'][0].id).to.equal('ApexFlsViolationRule');
+				if (normalizeSeverity) {
+					expect(driver['rules'][0].properties.normalizedSeverity).to.equal(1);
+				} else {
+					expect(driver['rules'][0].properties.normalizedSeverity).to.equal(undefined);
+				}
+
+				// Deep validation of results and rules is skipped. The only thing distinguishing SFCA violations from
+				// other engines is that path-based rules should also have a `relatedLocations` node.
+				expect(run['results']).to.have.lengthOf(1, 'Incorrect result count');
+				const results = run['results'];
+				expect(results[0].ruleIndex).to.equal(0);
+				expect(results[0].relatedLocations).to.exist;
+
+				// Invocations
+				expect(run['invocations']).to.have.lengthOf(1, 'Invocations');
+				const invocation = run['invocations'][0];
+				expect(invocation.executionSuccessful).to.be.true;
+				expect(invocation.toolExecutionNotifications).to.have.lengthOf(0, 'Tool execution');
+			}
+
+			it ('Happy Path - pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResults, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
 				const sarifResults: unknown[] = JSON.parse(results as string);
 				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
 				const runs = sarifResults['runs'];
@@ -496,8 +579,8 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
-			it ('Happy Path - normalized', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
+			it ('Happy Path - normalized pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']));
 				const sarifResults: unknown[] = JSON.parse(results as string);
 				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
 				const runs = sarifResults['runs'];
@@ -520,8 +603,50 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
-			it('Handles all the engines', async () => {
-				const allEngines = AllowedEngineFilters.map(engine => engine.valueOf());
+			it ('Happy Path - DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i=0; i<runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.SFGE) {
+						validateSfgeSarif(run, false);
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+			});
+
+			it ('Happy Path - Normalized DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i=0; i<runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.SFGE) {
+						validateSfgeSarif(run, true);
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+			});
+
+			it('Handles all pathless engines', async () => {
+				const allEngines = PathlessEngineFilters.map(engine => engine.valueOf());
 				for (const engine of allEngines) {
 					const ruleResults: RuleResult[] = [{
 						engine: engine,
@@ -566,17 +691,17 @@ describe('RuleResultRecombinator', () => {
 
 		describe('Output Format: JSON', () => {
 			const messageIsTrimmed = false;
-			it ('Happy Path', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
+			it ('Happy Path - pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResults, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
 				// Validate each of the problem rows
 				let rrIndex = 0;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						validateJson(ruleResults[rrIndex], allFakePathlessRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
 						vIndex++;
 					});
 					rrIndex++
@@ -592,17 +717,17 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
-			it ('Happy Path - normalized', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
+			it ('Happy Path - normalized pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
 				// Validate each of the problem rows
 				let rrIndex = 0;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
+						validateJson(ruleResults[rrIndex], allFakePathlessRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
 						vIndex++;
 					});
 					rrIndex++
@@ -616,6 +741,54 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
 				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy path - DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.JSON, new Set(['sfge']));
+				const ruleResults: RuleResult[] = JSON.parse(results as string);
+				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeDfaRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeDfaRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(rrIndex).to.equal(1, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+			});
+
+			it ('Happy path - normalized DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['sfge']));
+				const ruleResults: RuleResult[] = JSON.parse(results as string);
+				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeDfaRuleResultsNormalized.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeDfaRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(rrIndex).to.equal(1, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
@@ -658,18 +831,30 @@ describe('RuleResultRecombinator', () => {
 					const violations = [];
 
 					record['violation'].forEach(v => {
-						violations.push({
-							severity: parseInt(v['$']['severity']),
-							normalizedSeverity: (normalizeSeverity ? parseInt(v['$']['normalizedSeverity']) : undefined),
-							line: parseInt(v['$']['line']),
-							column: parseInt(v['$']['column']),
-							ruleName: v['$']['rule'],
-							message: v['_'],
-							url: v['$']['url'],
-							category: v['$']['category']
-						})
+						if (v.$.line != null) {
+							violations.push({
+								severity: parseInt(v['$']['severity']),
+								normalizedSeverity: (normalizeSeverity ? parseInt(v['$']['normalizedSeverity']) : undefined),
+								line: parseInt(v['$']['line']),
+								column: parseInt(v['$']['column']),
+								ruleName: v['$']['rule'],
+								message: v['_'],
+								url: v['$']['url'],
+								category: v['$']['category']
+							});
+						} else {
+							violations.push({
+								severity: parseInt(v['$']['severity']),
+								normalizedSeverity: (normalizeSeverity ? parseInt(v['$']['normalizedSeverity']) : undefined),
+								sourceLine: parseInt(v['$']['sourceLine']),
+								sourceColumn: parseInt(v['$']['sourceColumn']),
+								ruleName: v['$']['rule'],
+								message: v['_'],
+								url: v['$']['url'],
+								category: v['$']['category']
+							})
+						}
 					});
-
 					const ruleResult: RuleResult = {
 						engine: record['$']['engine'],
 						fileName: record['$']['file'],
@@ -677,21 +862,20 @@ describe('RuleResultRecombinator', () => {
 					};
 					ruleResults.push(ruleResult);
 				});
-
 				return ruleResults;
 			}
 
-			it ('Happy Path', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
+			it ('Happy Path - pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResults, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, false);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
 				// Validate each of the problem rows
 				let rrIndex = 0;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						validateJson(ruleResults[rrIndex], allFakePathlessRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
 						vIndex++;
 					});
 					rrIndex++
@@ -707,17 +891,17 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
-			it ('Happy Path - normalized', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
+			it ('Happy Path - normalized pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['eslint', 'pmd']));
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, true);
 				expect(ruleResults).to.have.lengthOf(3, 'Rule Results');
 
 				// Validate each of the problem rows
 				let rrIndex = 0;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateJson(ruleResults[rrIndex], allFakeRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
+						validateJson(ruleResults[rrIndex], allFakePathlessRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
 						vIndex++;
 					});
 					rrIndex++
@@ -731,6 +915,54 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
 				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it('Happy path - DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.XML, new Set(['sfge']));
+				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, false);
+				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeDfaRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeDfaRuleResults, rrIndex, vIndex, messageIsTrimmed, false);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(rrIndex).to.equal(1, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+			});
+
+			it('Happy path - normalized DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['sfge']));
+				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, true);
+				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				allFakeDfaRuleResultsNormalized.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateJson(ruleResults[rrIndex], allFakeDfaRuleResultsNormalized, rrIndex, vIndex, messageIsTrimmed, true);
+						vIndex++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(rrIndex).to.equal(1, 'Rule Result Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
@@ -763,33 +995,41 @@ describe('RuleResultRecombinator', () => {
 			function validateCsvRow(violation, expectedResults: RuleResult[], expectedRuleResultIndex: number, expectedViolationIndex: number, expectedProblemNumber: number, normalizeSeverity: boolean): void {
 				const expectedRuleResult = expectedResults[expectedRuleResultIndex];
 				const expectedViolation = expectedRuleResult.violations[expectedViolationIndex];
-				expect(violation[0]).to.equal(`${expectedProblemNumber}`, 'Problem number');
-				expect(violation[1]).to.equal(expectedRuleResult.fileName, 'Filename');
-				expect(violation[2]).to.equal(`${expectedViolation.severity}`, 'Severity');
-				if (normalizeSeverity){
-					expect(violation[3]).to.equal(`${expectedViolation.normalizedSeverity}`, 'Normalized Severity');
-					expect(violation[4]).to.equal(`${expectedViolation.line}`, 'Line');
-					expect(violation[5]).to.equal(`${expectedViolation.column}`, 'Column');
-					expect(violation[6]).to.equal(expectedViolation.ruleName, 'Rule Name');
-					// The message is trimmed before converting to CSV
-					expect(violation[7]).to.equal(expectedViolation.message.trim(), 'Message');
-					expect(violation[8]).to.equal(expectedViolation.url, 'Url');
-					expect(violation[9]).to.equal(expectedViolation.category, 'Category');
-					expect(violation[10]).to.equal(expectedRuleResult.engine, 'Engine');
+				const expectationArray: {expectation: any; message: string}[] = [
+					{expectation: `${expectedProblemNumber}`, message: 'Problem number'},
+					{expectation: `${expectedViolation.severity}`, message: 'Severity'}
+				];
+				if (normalizeSeverity) {
+					expectationArray.push({expectation: `${expectedViolation.normalizedSeverity}`, message: 'Normalized severity'});
+				}
+				const expectedPathless = isPathlessViolation(expectedViolation);
+				if (expectedPathless) {
+					expectationArray.push({expectation: expectedRuleResult.fileName, message: 'File'});
+					expectationArray.push({expectation: `${expectedViolation.line}`, message: 'Line'});
+					expectationArray.push({expectation: `${expectedViolation.column}`, message: 'Column'});
 				} else {
-					expect(violation[3]).to.equal(`${expectedViolation.line}`, 'Line');
-					expect(violation[4]).to.equal(`${expectedViolation.column}`, 'Column');
-					expect(violation[5]).to.equal(expectedViolation.ruleName, 'Rule Name');
-					// The message is trimmed before converting to CSV
-					expect(violation[6]).to.equal(expectedViolation.message.trim(), 'Message');
-					expect(violation[7]).to.equal(expectedViolation.url, 'Url');
-					expect(violation[8]).to.equal(expectedViolation.category, 'Category');
-					expect(violation[9]).to.equal(expectedRuleResult.engine, 'Engine');
+					expectationArray.push({expectation: expectedRuleResult.fileName, message: 'Source File'});
+					expectationArray.push({expectation: `${expectedViolation.sourceLine}`, message: 'Source Line'});
+					expectationArray.push({expectation: `${expectedViolation.sourceColumn}`, message: 'Source Column'});
+					expectationArray.push({expectation: expectedViolation.sourceType, message: 'Source Type'});
+					expectationArray.push({expectation: expectedViolation.sourceMethodName, message: 'Source Method'});
+					expectationArray.push({expectation: expectedViolation.sinkFileName, message: 'Sink File'});
+					expectationArray.push({expectation: `${expectedViolation.sinkLine}`, message: 'Sink Line'});
+					expectationArray.push({expectation: `${expectedViolation.sinkColumn}`, message: 'Sink Column'});
+				}
+				expectationArray.push({expectation: expectedViolation.ruleName, message: 'Rule'});
+				// The message is trimmed before converting to CSV.
+				expectationArray.push({expectation: expectedViolation.message.trim(), message: 'Description'});
+				expectationArray.push({expectation: expectedViolation.url || '', message: 'URL'});
+				expectationArray.push({expectation: expectedViolation.category, message: 'Category'});
+				expectationArray.push({expectation: expectedRuleResult.engine, message: 'Engine'});
+				for (let i = 0; i < expectationArray.length; i++) {
+					expect(violation[i]).to.equal(expectationArray[i].expectation, expectationArray[i].message);
 				}
 			}
 
-			it ('Happy Path', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResults, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
+			it ('Happy Path - pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResults, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {
@@ -798,7 +1038,7 @@ describe('RuleResultRecombinator', () => {
 						resolve(output);
 					});
 				});
-				expect(records).to.have.lengthOf(7, 'Expected allFakeRuleResults violations plus the header');
+				expect(records).to.have.lengthOf(7, 'Expected allFakePathlessRuleResults violations plus the header');
 
 				// Validate the header
 				const header = records[0];
@@ -808,10 +1048,10 @@ describe('RuleResultRecombinator', () => {
 				// Validate each of the problem rows
 				let rrIndex = 0;
 				let problemNumber = 1;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateCsvRow(records[problemNumber], allFakeRuleResults, rrIndex, vIndex, problemNumber, false);
+						validateCsvRow(records[problemNumber], allFakePathlessRuleResults, rrIndex, vIndex, problemNumber, false);
 						vIndex++;
 						problemNumber++;
 					});
@@ -828,8 +1068,8 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
 			});
 
-			it ('Happy Path - normalized', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
+			it ('Happy Path - normalized pathless rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakePathlessRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['eslint', 'pmd']));
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {
@@ -838,7 +1078,7 @@ describe('RuleResultRecombinator', () => {
 						resolve(output);
 					});
 				});
-				expect(records).to.have.lengthOf(7, 'Expected allFakeRuleResults violations plus the header');
+				expect(records).to.have.lengthOf(7, 'Expected allFakePathlessRuleResults violations plus the header');
 
 				// Validate the header
 				const header = records[0];
@@ -848,10 +1088,10 @@ describe('RuleResultRecombinator', () => {
 				// Validate each of the problem rows
 				let rrIndex = 0;
 				let problemNumber = 1;
-				allFakeRuleResults.forEach(rr => {
+				allFakePathlessRuleResults.forEach(rr => {
 					let vIndex = 0;
 					rr.violations.forEach(() => {
-						validateCsvRow(records[problemNumber], allFakeRuleResultsNormalized, rrIndex, vIndex, problemNumber, true);
+						validateCsvRow(records[problemNumber], allFakePathlessRuleResultsNormalized, rrIndex, vIndex, problemNumber, true);
 						vIndex++;
 						problemNumber++;
 					});
@@ -866,6 +1106,82 @@ describe('RuleResultRecombinator', () => {
 				expect(summaryMap.size).to.equal(2, 'Each supposedly executed engine needs a summary');
 				expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 1, violationCount: 3}, 'PMD summary should be correct');
 				expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 2, violationCount: 3}, 'ESLint summary should be correct');
+			});
+
+			it ('Happy path - DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.CSV, new Set(['sfge']));
+				const records = await new Promise((resolve, reject) => {
+					csvParse(results as string, (err, output) => {
+						if (err) {
+							reject(err);
+						}
+						resolve(output);
+					});
+				});
+				expect(records).to.have.lengthOf(2, 'Expected allFakeDfaRuleResults violations plus the header');
+
+				// Validate the header
+				const header = records[0];
+				// TODO: More validation
+				expect(header[0]).to.equal('Problem');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				let problemNumber = 1;
+				allFakeDfaRuleResults.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateCsvRow(records[problemNumber], allFakeDfaRuleResults, rrIndex, vIndex, problemNumber, false);
+						vIndex++;
+						problemNumber++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(problemNumber).to.equal(2, 'Problem Number Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+			});
+
+			it('Happy path - Normalized DFA rules', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['sfge']));
+				const records = await new Promise((resolve, reject) => {
+					csvParse(results as string, (err, output) => {
+						if (err) {
+							reject(err);
+						}
+						resolve(output);
+					});
+				});
+				expect(records).to.have.lengthOf(2, 'Expected allFakeDfaRuleResultsNormalized violations plus the header');
+
+				// Validate the header
+				const header = records[0];
+				// TODO: More validation
+				expect(header[0]).to.equal('Problem');
+
+				// Validate each of the problem rows
+				let rrIndex = 0;
+				let problemNumber = 1;
+				allFakeDfaRuleResultsNormalized.forEach(rr => {
+					let vIndex = 0;
+					rr.violations.forEach(() => {
+						validateCsvRow(records[problemNumber], allFakeDfaRuleResultsNormalized, rrIndex, vIndex, problemNumber, true);
+						vIndex++;
+						problemNumber++;
+					});
+					rrIndex++
+				});
+
+				// Make sure we have iterated through all of the results.
+				expect(problemNumber).to.equal(2, 'Problem Number Index');
+
+				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {

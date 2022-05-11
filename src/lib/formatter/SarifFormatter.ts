@@ -1,15 +1,17 @@
 import { deepCopy } from '../util/Utils';
-import { ENGINE, PMD_VERSION } from '../../Constants';
-import { Rule, RuleResult, RuleViolation } from '../../types';
+import { ENGINE, PMD_VERSION, SFGE_VERSION } from '../../Constants';
+import {Rule, RuleResult, RuleViolation} from '../../types';
 import * as url from 'url';
 import { RuleCatalog } from '../services/RuleCatalog';
 import { Controller } from '../../Controller';
+import {isPathlessViolation} from '../util/Utils';
 import { ESLint } from 'eslint';
 import * as retire from 'retire';
-import {Location, Log, Notification, Region, Run, ReportingDescriptor} from 'sarif';
+import {Location, Log, Notification, Region, Result, Run, ReportingDescriptor} from 'sarif';
 
 const ERROR = 'error';
 const WARNING = 'warning';
+const SINK_VERTEX_MESSAGE = "Sink vertex found here.";
 
 /**
  * Formatter based on https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html
@@ -48,11 +50,11 @@ abstract class SarifFormatter {
 	/**
 	 * Return a location that is used by violations and errors
 	 */
-	private static getLocation(r: RuleResult): Location {
+	private static getLocation(fileName: string): Location {
 		return {
 			physicalLocation: {
 				artifactLocation: {
-					uri: url.pathToFileURL(r.fileName).toString()
+					uri: url.pathToFileURL(fileName).toString()
 				}
 			}
 		};
@@ -117,7 +119,7 @@ abstract class SarifFormatter {
 		for (const r of ruleResults) {
 			for (const v of r.violations) {
 				// Create a new location for each violation, it may contain region specific information
-				const location = SarifFormatter.getLocation(r);
+				const location = SarifFormatter.getLocation(r.fileName);
 
 				// Violations that are exceptions are placed in the invocation.toolExecutionNotifications array
 				if (v.exception) {
@@ -129,31 +131,46 @@ abstract class SarifFormatter {
 						}
 					});
 				} else {
-					// Regular violations are placed in the results array
-					// W-8881776: line and column are sometimes strings, but the schema requires them to be numbers
-					const region: Region = {
-						startLine: parseInt(`${v.line}`),
-						startColumn: parseInt(`${v.column}`)
-					};
-
-					if (v.endLine != null) {
-						region.endLine = parseInt(`${v.endLine}`);
-					}
-					if (v.endColumn != null) {
-						region.endColumn = parseInt(`${v.endColumn}`);
-					}
-
-					location.physicalLocation.region = region;
-
-					const result = {
+					// Regular violations are placed in the results array.
+					// Start with a basic result, and we'll fill in the other attributes gradually.
+					const result: Result = {
 						level: this.getLevel(v),
 						ruleId: v.ruleName,
 						ruleIndex: this.ruleMap.get(v.ruleName),
 						message: {
 							text: v.message.replace(/\n/g, '')
-						},
-						locations: [location]
+						}
 					};
+					// The location-based attributes depend on whether the violation is for a pathless or DFA rule.
+					const isPathless = isPathlessViolation(v);
+					// W-8881776: line and column are sometimes strings, but the schema requires them to be numbers
+					const region: Region = {
+						startLine: parseInt(`${isPathless ? v.line : v.sourceLine}`),
+						startColumn: parseInt(`${isPathless ? v.column : v.sourceColumn}`)
+					};
+
+					if (isPathless && v.endLine != null) {
+						region.endLine = parseInt(`${v.endLine}`);
+					}
+					if (isPathless && v.endColumn != null) {
+						region.endColumn = parseInt(`${v.endColumn}`);
+					}
+
+					location.physicalLocation.region = region;
+					result.locations = [location];
+
+					// If the violation is DFA, we'll want to create a secondary location for the sink vertex.
+					if (!isPathless) {
+						const secondaryLocation = SarifFormatter.getLocation(v.sinkFileName);
+						secondaryLocation.message = {
+							text: SINK_VERTEX_MESSAGE
+						};
+						secondaryLocation.physicalLocation.region = {
+							startLine: parseInt(`${v.sinkLine}`),
+							startColumn: parseInt(`${v.sinkColumn}`)
+						};
+						result.relatedLocations = [secondaryLocation];
+					}
 
 					runJson.results.push(result);
 				}
@@ -265,6 +282,26 @@ class RetireJsSarifFormatter extends SarifFormatter {
 	}
 }
 
+
+class SfgeSarifFormatter extends SarifFormatter {
+	constructor(engine: string) {
+		super(engine, {
+			tool: {
+				driver: {
+					name: ENGINE.SFGE,
+					version: SFGE_VERSION,
+					informationUri: '???', // TODO: What should this value be?
+					rules: []
+				}
+			}
+		});
+	}
+
+	protected getLevel(ruleViolation: RuleViolation): Notification.level {
+		return ruleViolation.severity === 1 ? ERROR : WARNING;
+	}
+}
+
 const getSarifFormatter = (engine: string): SarifFormatter => {
 	if (engine === ENGINE.ESLINT_CUSTOM) {
 		// Expose the eslint-custom engine as eslint, the users don't need to know it
@@ -281,6 +318,8 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
 		return new RetireJsSarifFormatter(engine);
 	} else if (engine === ENGINE.CPD) {
 		return new CPDSarifFormatter(engine);
+	} else if (engine === ENGINE.SFGE) {
+		return new SfgeSarifFormatter(engine);
 	} else {
 		throw new Error(`Developer error. Unknown engine '${engine}'`);
 	}

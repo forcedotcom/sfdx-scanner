@@ -8,3 +8,4 @@
 rootProject.name = "sfdx-scanner"
 
 include("pmd-cataloger")
+include("sfge")
