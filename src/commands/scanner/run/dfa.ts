@@ -46,7 +46,7 @@ export default class Dfa extends ScannerRunCommand {
 			description: messages.getMessage('flags.projectdirDescription'),
 			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			map: d => path.resolve(normalize(untildify(d))),
+			map: d => normalize(untildify(d)),
 			required: true
 		}),
 		// END: Flags for targeting files.
@@ -115,7 +115,7 @@ export default class Dfa extends ScannerRunCommand {
 	protected gatherEngineOptions(): Map<string,string> {
 		const options: Map<string,string> = new Map();
 		const sfgeConfig: SfgeConfig = {
-			projectDirs: this.flags.projectdir as string[]
+			projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
 		};
 
 		if (this.flags['rule-thread-count'] != null) {
