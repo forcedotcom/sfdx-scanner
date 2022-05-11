@@ -20,6 +20,10 @@
         en: scanner:run
       url: /v3.x/scanner-commands/run
     - title:
+        en: scanner:run:dfa
+      url: /v3.x/scanner-commands/dfa
+      new: true
+    - title:
         en: scanner:rule:list
       url: /v3.x/scanner-commands/list
     - title:
@@ -59,17 +63,21 @@
         en: Design
       url: /v3.x/architecture/architecture
     - title:
-        en: RetireJS
-      url: /v3.x/architecture/retire-js-engine
-    - title:
-        en: PMD
-      url: /v3.x/architecture/pmd-engine
+        en: CPD
+      url: /v3.x/architecture/cpd-engine
     - title:
         en: ESLint
       url: /v3.x/architecture/eslint-engine
     - title:
-        en: CPD
-      url: /v3.x/architecture/cpd-engine
+        en: PMD
+      url: /v3.x/architecture/pmd-engine
+    - title:
+        en: RetireJS
+      url: /v3.x/architecture/retire-js-engine
+    - title:
+        en: Salesforce Graph Engine
+      url: /v3.x/architecture/salesforce-graph-engine
+      new: true
 - title:
     en: FAQ
   url: /v3.x/faq
