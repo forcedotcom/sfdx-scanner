@@ -5,7 +5,7 @@ lang: en
 
 ## Install v3.x
 
-Like all the Salesforce CLI plug-ins, you install the Salesforce Code Analyzer CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](.v3.x/getting-started/prerequisites/) before you install this plug-in.
+Like all the Salesforce CLI plug-ins, you install the Salesforce Code Analyzer CLI plug-in with one simple step. NOTE: Be sure you've completed the [prerequisites](./en/v3.x/getting-started/prerequisites/) before you install this plug-in.
 
 
 By default, `latest` tag gets installed and as of today, it still points to {{ site.data.versions.scanner }}. You can install the pilot version by pointing to the `latest-pilot` tag. Also, note that automatic plugin upgrades don't work here.
