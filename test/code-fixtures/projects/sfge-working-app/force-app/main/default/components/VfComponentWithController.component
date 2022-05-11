@@ -1,0 +1,2 @@
+<apex:component controller="VfControllerFls" layout="none">
+</apex:component>
