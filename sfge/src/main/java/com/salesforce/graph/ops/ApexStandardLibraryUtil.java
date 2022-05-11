@@ -30,7 +30,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
@@ -213,11 +212,9 @@ public final class ApexStandardLibraryUtil {
         // Path relative to src/main/resources
         private static final String DIRECTORY = "sObjects";
         private static final String S_OBJECT_CRUD_LIST_FILENAME =
-                Paths.get(DIRECTORY, "sObjectCrudList.txt").toString();
-        private static final String S_OBJECT_FLS_LIST_FILENAME =
-                Paths.get(DIRECTORY, "sObjectFlsList.txt").toString();
-        private static final String S_OBJECT_LIST_FILENAME =
-                Paths.get(DIRECTORY, "sObjectList.txt").toString();
+                DIRECTORY + "/sObjectCrudList.txt";
+        private static final String S_OBJECT_FLS_LIST_FILENAME = DIRECTORY + "/sObjectFlsList.txt";
+        private static final String S_OBJECT_LIST_FILENAME = DIRECTORY + "/sObjectList.txt";
 
         private SObjectListReader() {}
 
