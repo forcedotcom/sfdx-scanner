@@ -90,8 +90,8 @@ public with sharing class AuraEnabledFls {
 
 	public static Account flsInNonAuraMethod(String name, String phone) {
 		Account a = new Account(Name = name, Phone = phone);
-		// This method is not aura-enabled, so the analyzer does not consider it a valid entrypoint. Therefore no violation
-		// will be thrown, even though this method is not itself secure.
+		// This method is not aura-enabled, nor is it called by any other aura-enabled methods, so the analyzer does not
+		// consider it a valid entrypoint. Therefore no violation will be thrown, even though this method is not itself secure.
 		insert a;
 		return a;
 	}
