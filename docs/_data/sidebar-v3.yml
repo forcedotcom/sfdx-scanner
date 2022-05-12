@@ -79,6 +79,23 @@
       url: /v3.x/architecture/sfg-engine
       new: true
 - title:
+    en: Salesforce Graph Engine
+  baseUrl: /v3.x/salesforce-graph-engine/
+  new: true
+  children:
+    - title:
+        en: Introduction
+      url: /v3.x/salesforce-graph-engine/introduction
+    - title:
+        en: Insight into Results
+      url: /v3.x/salesforce-graph-engine/insight-into-results
+    - title:
+        en: Rules
+      url: /v3.x/salesforce-graph-engine/rules
+    - title:
+        en: Try it yourself
+      url: /v3.x/salesforce-graph-engine/try-it-yourself       
+- title:
     en: FAQ
   url: /v3.x/faq
 - title:

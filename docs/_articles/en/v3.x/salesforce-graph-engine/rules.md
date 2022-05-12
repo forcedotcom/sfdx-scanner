@@ -1,0 +1,39 @@
+---
+title: 'Rules'
+lang: en
+---
+
+## DFA Rules
+Read [here](./en/v3.x/salesforce-graph-engine/insight-into-results#data-flow-based-analysis) about how Data-flow-analysis based rules work in SFGE.
+
+### ApexFlsViolationRule
+ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
+
+The following are its source, sink, and sanitizer definitions:
+
+*Source*
+
+1. @AuraEnabled methods
+2. Public methods on Visualforce Controllers
+
+*Sink*
+
+1. All DML operations and their Database.method() counterparts:
+    1. delete
+    2. insert
+    3. merge
+    4. undelete
+    5. update
+    6. upsert
+2. SOQL queries and Database.query counterpart
+
+*Sanitizer*
+
+1. Access check performed using [Schema.DescribeSObjectResult](https://developer.salesforce.com/docs/atlas.en-us.234.0.apexref.meta/apexref/apex_methods_system_sobject_describe.htm)
+    1. Acceptable only for operations that require CRUD-level checks such as DELETE, UNDELETE, and MERGE.
+2. Access check performed using [Schema.DescribeFieldResult](https://developer.salesforce.com/docs/atlas.en-us.234.0.apexref.meta/apexref/apex_methods_system_fields_describe.htm)
+    1. Acceptable for operations that require FLS-level checks. Includes READ, INSERT, UPDATE, UPSERT for Standard data objects and Custom Objects
+3. SOQL queries that use [WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm#apex_classes_with_security_enforced)
+4. Lists filtered by [Security.stripInaccessible](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
+
+Have a look at some [common faq](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results) about the results generated.
