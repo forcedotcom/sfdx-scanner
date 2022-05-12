@@ -19,11 +19,11 @@ A code path must have a sanitizer in between the source and the sink. When the s
 A source could lead to multiple sinks. Also, a sink can be reached through multiple sources. In fact, we could have multiple paths between the same source and sink. We want to ensure that each path created from any source to any sink is sanitized.
 
 ## Invoke SFGE through Code Analyzer
-<TODO: invocation steps>
+You can invoke data-flow-based rules through Code Analyzer using the newly added `scanner:run:dfa` [command](./en/v3.x/scanner-commands/dfa/).
 
 ## Interpret Your Results
 
-No matter which format you choose, the individual rows in the results represents violations. Each violation contains Sink information, Source information, and the actual violation message. Here’s the breakdown by column name to explain the data it represents:
+The individual rows in the results represents violations. Each violation contains Sink information, Source information, and the actual violation message. Here’s the breakdown by column name to explain the data it represents:
 
 1. Severity. The severity of the violation. By default, all security violations are marked as severity 1.
 2. Sink File, Sink Line, Sink Column. The location where in your source code that the data interaction happens

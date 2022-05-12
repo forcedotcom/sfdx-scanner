@@ -152,4 +152,4 @@ To get specific results, you can also reduce the number of file sent as --target
 ### `scanner:run:dfa` execution ran into an OutOfMemory issue.
 
 This is related to code complexity as well. We are working on improving the experience. In the meantime, please run for more specific targets to get completed results.
-(TODO: is there anything else they can try?)
+

@@ -46,4 +46,4 @@ Have a look at some [common faq](./en/v3.x/faq/#questions-about-interpreting-ape
 
 ## Roadmap
 
-TODO: we plan to add more rules in future. Please let us know if you have suggestions
+We are working on adding more rules in the future. In the meantime, please let us know if you have requests or suggestions.
