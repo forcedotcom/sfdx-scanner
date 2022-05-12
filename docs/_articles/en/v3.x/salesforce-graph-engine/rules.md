@@ -13,8 +13,9 @@ The following are its source, sink, and sanitizer definitions:
 
 *Source*
 
-1. @AuraEnabled methods
-2. Public methods on Visualforce Controllers
+1. `@AuraEnabled`-annotated methods
+2. Any method returning a `PageReference` object
+3. `public`/`global`-scoped methods on Visualforce Controllers
 
 *Sink*
 
