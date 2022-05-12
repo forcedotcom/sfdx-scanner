@@ -3,30 +3,44 @@ title: 'Try it yourself'
 lang: en
 ---
 
-## SFGE Example Executions
 
-### Before you get started
+## Before you get started
 SFGE works a bit differently from other analyzers with which you might be familiar. As such, we strongly encourage you
-to read the [Introduction](./en/v3.x/salesforce-graph-engine/introduction) and [Features](./en/v3.x/salesforce-graph-engine/features)
-pages before you read much deeper into this page.
+to read about [the engine](./en/v3.x/salesforce-graph-engine/introduction) and [its capabilities](./en/v3.x/salesforce-graph-engine/working-with-sfge) before proceeding.
 
 Also, so you can try these examples yourself, please install the pilot version of the analyzer as per [these instructions](./en/v3.x/getting-started/install).
 
-Once you've done all that, continue reading here to see some basic SFGE operations, so you can get a sense of how it all works.
+Once you've done all that, continue reading here to see some basic SFGE operations, so you can get a sense of how it all works together.
 
-### See the rules
+## See the rules
 First thing's first. Let's see the rules that exist in SFGE. Run the following command.
-```
+
+```bash
 sfdx scanner:rule:list --engine sfge
 ```
+
 Note that there's just the one rule. As outlined in the [Rules](./en/v3.x/salesforce-graph-engine/rules) page, this rule
-identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more  rules will likely be added, but for now there's
+identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more rules will likely be added, but for now there's
 just that rule. As such, all of the examples will focus on CRUD/FLS.
 
-### Let's look at the sample project
+## Let's look at the sample project
 All of our examples will be using the [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
-Please clone the repo if you haven't already done so, and run `git checkout dev-3` to get the branch containing the
-sample app.
+
+To begin:
+
+```bash
+// clone the `dev-3` branch of repo:
+
+git clone --branch dev-3 https://github.com/forcedotcom/sfdx-scanner.git
+
+```
+
+```bash
+// open sample app directory:
+
+cd sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default
+```
+
 
 Before we start running our rules, let's take a look at the sample app and take note of a few things.
 
@@ -38,7 +52,7 @@ The following files are noteworthy:
 
 It may be advantageous for you to skim those files now.
 
-### Basic Run
+## Basic Run
 Let's start with a basic evaluation of all files. `cd` into `test/code-fixtures/projects/sfge-working-app`, then run the
 following command:
 ```
@@ -71,7 +85,7 @@ This method does not meet the criteria for an entry-point as outlined in the [Ru
 page, nor is it in the call-stack of any entry-points. As such, the analyzer skipped this method even though it is technically
 insecure.
 
-### Running against a single file
+## Running against a single file
 As you fix the problems in this file, you'll probably want to run the analyzer against this file specifically rather than
 the entire codebase. You can do that by running the following command:
 ```
@@ -84,7 +98,7 @@ Please note the following, as they may save you some grief in the future.
 Note that the analyzer ran faster than it did last time, because it was analyzing a smaller number of paths. And note that
 the results are only those whose source vertex is in the targeted file.
 
-### Fixing violations
+## Fixing violations
 Let's start by picking one of the violations in the file to fix. To fix `flsInIfBranchOnly()`, you can do one of a number
 of things.
 - You could move the CRUD/FLS check out of the `if` branch, so it's always run.
@@ -96,10 +110,10 @@ violations in the file should be decreased by one.
 
 The remaining violations in the working app have been left as exercises for you to complete.
 
-### Skipping a violation
+## Skipping a violation
 Suppose that one of these violations was a false positive (they're not, but let's pretend). Or alternatively, suppose that
 you have a good reason for why a CRUD/FLS check is actually unnecessary (e.g., the code is only executed from an admin-only page).
-If you're really, truly certain that you want to skip that violation, you can use engine directives to do so.
+If you're really, truly certain that you want to skip that violation, you can use [engine directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to do so.
 
 For example, if you add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`
 and rerun the command, the violation in that method will be suppressed.

@@ -87,8 +87,8 @@
         en: Introduction
       url: /v3.x/salesforce-graph-engine/introduction
     - title:
-        en: Features
-      url: /v3.x/salesforce-graph-engine/features
+        en: Working with SFGE
+      url: /v3.x/salesforce-graph-engine/working-with-sfge
     - title:
         en: Rules
       url: /v3.x/salesforce-graph-engine/rules

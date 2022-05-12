@@ -6,7 +6,7 @@ lang: en
 ## What’s new in v3.x?
 
 ### Access to Salesforce Graph Engine
-We've now added our quickly evolving [Salesforce Graph Engine](./en/v3.x/architecture/sfg-engine/) as one of the backend engines of SFCA. Preview its features using the newly added [`scanner:run:dfa`](./en/v3.x/scanner-commands/dfa/) command. You can also [try it out on our example app](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
+We've now added our quickly evolving [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) as one of the backend engines of SFCA. Preview its features using the newly added [`scanner:run:dfa`](./en/v3.x/scanner-commands/dfa/) command. You can also [try it out on our example app](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
 
 ### Upgraded major versions
 As a starting point, we have upgraded major versions of the eslint family of engines:

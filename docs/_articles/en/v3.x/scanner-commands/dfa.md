@@ -53,6 +53,17 @@ Execute dataflow-analysis-based rules on a target codebase. This command runs fo
       emit additional command output to stdout
 ```
 
+## Environment-variable-based Controls
+
+### *SFGE-RULE-THREAD-COUNT*
+Default value is 4. Modify this variable to adjust the number of threads that will each execute DFA-based rules. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-count`.
+
+### *SFGE-RULE-THREAD-TIMEOUT*
+Default value is 900,000ms (15 minutes). Modify this variable to adjust how long DFA-based rules can execute before timing out. You can use this to allow SFGE to run for longer to analyze more complex code. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-timeout`.
+
+### *SFGE-IGNORE-PARSE-ERRORS*
+By default, this value is true. Set this variable to false to force SFGE to ignore parse errors. This is not recommended since the analysis results will be incorrect. Equivalent flag on `scanner:run:dfa` command is `--ignore-parse-errors`.
+
 ## Example
   The paths specified for `--projectdir` must cumulatively contain all files specified through `--target`.
 

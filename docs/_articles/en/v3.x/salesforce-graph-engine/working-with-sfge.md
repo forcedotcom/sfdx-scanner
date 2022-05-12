@@ -1,11 +1,10 @@
 ---
-title: 'Features'
+title: 'Working with SFGE'
 lang: en
 ---
 
-## Data-flow-based Analysis
 
-### Background
+## Background
 
 Any data-flow-based rule contains three parts.
 
@@ -19,7 +18,10 @@ A code path must have a sanitizer in between the source and the sink. When the s
 
 A source could lead to multiple sinks. Also, a sink can be reached through multiple sources. In fact, we could have multiple paths between the same source and sink. We want to ensure that each path created from any source to any sink is sanitized.
 
-### Interpret Your Results
+## Invoke SFGE through Code Analyzer
+<TODO: invocation steps>
+
+## Interpret Your Results
 
 No matter which format you choose, the individual rows in the results represents violations. Each violation contains Sink information, Source information, and the actual violation message. Here’s the breakdown by column name to explain the data it represents:
 

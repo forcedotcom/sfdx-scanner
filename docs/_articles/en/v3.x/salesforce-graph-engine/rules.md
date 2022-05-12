@@ -3,10 +3,7 @@ title: 'Rules'
 lang: en
 ---
 
-## DFA Rules
-Read [here](./en/v3.x/salesforce-graph-engine/features#data-flow-based-analysis) about how data-flow-based rules work in SFGE.
-
-### ApexFlsViolationRule
+## ApexFlsViolationRule
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
 
 The following are its source, sink, and sanitizer definitions:
@@ -46,3 +43,7 @@ Have a look at some [common faq](./en/v3.x/faq/#questions-about-interpreting-ape
 [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
 
 [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
+
+## Roadmap
+
+TODO: we plan to add more rules in future. Please let us know if you have suggestions
