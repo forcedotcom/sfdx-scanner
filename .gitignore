@@ -144,3 +144,4 @@ build
 
 pmd-cataloger/bin
 
+sfge/sfge-junit-*.log.gz
