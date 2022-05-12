@@ -98,7 +98,7 @@ Salesforce Graph Engine needs to build up a context of the source code in its en
 
 #### Q: My code is guarded through a different way than an Apex CRUD/FLS check. Is there a way to suppress violations on it?
 
-Please read about [Engine Directives](./en/v3.x/salesforce-graph-engine/insight-into-results/#add-engine-directives) to see how this can be done.
+Please read about [Engine Directives](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to see how this can be done.
 
 
 ## Questions about interpreting ApexFlsViolationRule results
@@ -127,7 +127,7 @@ Parameter explanation:
 
 >_Validation_Type_ validation is missing for _CRUD_Operation_ operation on _Object_Type_ with field(s) _Comma_Separated_Fields_ - SFCA may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: _Unknown_Segments_
 
-Same as the common scenario, but this additionally means Salesforce Graph Engine is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/insight-into-results/#add-engine-directives) to let Salesforce Graph Engine know that it doesn’t have to create a violation.
+Same as the common scenario, but this additionally means Salesforce Graph Engine is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let Salesforce Graph Engine know that it doesn’t have to create a violation.
 
 *stripInaccessible warning*
 
@@ -153,7 +153,7 @@ If you add a sanitizer to the source/sink path, the issues gets fixed. You can r
 
 After you make the changes, rerun the same entry point to ensure that the violation has disappeared.
 
-If you determine that the CRUD operation in question is protected by a sanitizer that Salesforce Graph Engine doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/insight-into-results/#add-engine-directives) to let Salesforce Graph Engine know that the CRUD operation _is_ in fact safe.
+If you determine that the CRUD operation in question is protected by a sanitizer that Salesforce Graph Engine doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let Salesforce Graph Engine know that the CRUD operation _is_ in fact safe.
 
 #### Q: I didn’t get any violations. Does this mean my code is secure?
 

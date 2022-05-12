@@ -5,7 +5,7 @@ lang: en
 ## What is the Salesforce Graph Engine?
 [Salesforce Graph Engine (SFGE)](./en/v3.x/salesforce-graph-engine/introduction/) is an open-source Salesforce project that can perform complex analysis on Apex language to identify security vulnerabilities and code issues.
 
-The engine is currently under active development. It is available as an open pilot only through the Salesforce Code Analyzer plugin. Please be aware of its [limitations](./en/v3.x/salesforce-graph-engine/insight-into-results/#limitations-of-salesforce-graph-engine).
+The engine is currently under active development. It is available as an open pilot only through the Salesforce Code Analyzer plugin. Please be aware of its [limitations](./en/v3.x/salesforce-graph-engine/features/#limitations-of-salesforce-graph-engine), but do try it out and send us your feedback.
 
 ## How does Salesforce Code Analyzer use SFGE?
 [`scanner:run:dfa`](./../scanner-commands/dfa.md) command invokes the data-flow-analysis-based rules in SFGE. Please note that these rules require longer time to finish execution. Also, the analysis time depends on the complexity of conditionals and method invocations of the target code.

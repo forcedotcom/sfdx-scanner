@@ -1,5 +1,5 @@
 ---
-title: 'Insight into Results'
+title: 'Features'
 lang: en
 ---
 

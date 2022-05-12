@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## DFA Rules
-Read [here](./en/v3.x/salesforce-graph-engine/insight-into-results#data-flow-based-analysis) about how Data-flow-analysis based rules work in SFGE.
+Read [here](./en/v3.x/salesforce-graph-engine/features#data-flow-based-analysis) about how data-flow-based rules work in SFGE.
 
 ### ApexFlsViolationRule
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
