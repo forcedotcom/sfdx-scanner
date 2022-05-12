@@ -5,7 +5,7 @@ lang: en
 
 ## Introduction
 
-If you are a Scanner plugin user who is already experienced with Eslint, you may feel restricted by the default Eslint flavors that Scanner plugin offer. Now you can use your own customized `.eslintrc.json` file with the Scanner plugin to bring in the power of any eslint capabilities that are not supported by default. This gives you the flexibility to use different parsers or plugins, and lets you define your custom set of rules. You can find more information about Eslint's configuration [here](https://eslint.org/docs/user-guide/configuring).
+If you are a Scanner plugin user who is already experienced with Eslint, you may feel restricted by the default Eslint flavors that Scanner plugin offer. Now you can use your own customized `.eslintrc.json` file with the Code Analyzer to bring in the power of any eslint capabilities that are not supported by default. This gives you the flexibility to use different parsers or plugins, and lets you define your custom set of rules. You can find more information about Eslint's configuration [here](https://eslint.org/docs/user-guide/configuring).
 
 To invoke this feature, pass in the file path to your config file as a value to `--eslintconfig` flag in `scanner:run` command.
 
@@ -41,7 +41,7 @@ However, while giving you the power, the Scanner also offloads some responsibili
 
 ## Restrictions with Scanner Plugin
 
-1. When `--eslintconfig` is provided, none of the other default Eslint engines with the Scanner plugin will be run.
+1. When `--eslintconfig` is provided, none of the other default Eslint engines with the Code Analyzer will be run.
 
 2. Rule filters such as `--category` and `--ruleset` will not be evaluated on rules selected from custom configuration.
 
