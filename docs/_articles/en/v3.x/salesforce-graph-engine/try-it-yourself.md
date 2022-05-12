@@ -5,36 +5,23 @@ lang: en
 
 ## SFGE Example Executions
 
-### Intro to SFGE
-SFGE works a bit differently from other analyzers with which you might be familiar. Most static analyzers can identify
-problems that occur in a single location. For example, identifying dead code, unnecessary variables, poorly-named
-variables, and the like.
-SFGE uses path-based analysis. At a high level, path-based analysis consists of the following steps:
-1. Every file in the project is consumed, and used to construct a graph describing the project.
-2. Path entry-points are identified. Any of the following can be considered a path entry-point.
-   1. Any method with the `@AuraEnabled` annotation.
-   2. Any method that returns a `PageReference` object.
-   3. Any `public`/`global` method on a Visualforce Controller class.
-3. All paths flowing out of each entry-point are computed.
-   1. Each path is a potential execution flow starting at the entry-point. For example, a method with an `if-else` branch
-has two paths, and a method with an `if-elseif-else` branch has three.
-4. Paths are walked, and rules are evaluated against nodes of interest.
-5. For paths that violate rules, violations are generated.
+### Before you get started
+SFGE works a bit differently from other analyzers with which you might be familiar. As such, we strongly encourage you
+to read the [Introduction](./en/v3.x/salesforce-graph-engine/introduction) and [Features](./en/v3.x/salesforce-graph-engine/features)
+pages before you read much deeper into this page.
 
-Unlike the violations thrown by traditional static analyzers, which have a single location, SFGE violations have both a
-Source Vertex (the path entry-point) and a Sink Vertex (the vertex where the unacceptable action occurs).
+Also, so you can try these examples yourself, please install the pilot version of the scanner as per [these instructions](./en/v3.x/getting-started/install).
 
-So, let's do some basic operations with SFGE to get a sense of how it all works.
-
-If you haven't already done so, please install the pilot version of the scanner as per [these instructions](./en/v3.x/getting-started/install).
+Once you've done all that, continue reading here to see some basic SFGE operations, so you can get a sense of how it all works.
 
 ### See the rules
 First thing's first. Let's see the rules that exist in SFGE. Run the following command.
 ```
 sfdx scanner:rule:list --engine sfge
 ```
-Note that there's just the one rule. This rule identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more
-rules will likely be added, but for now there's just that rule. As such, all of the examples will focus on CRUD/FLS.
+Note that there's just the one rule. As outlined in the [Rules](./en/v3.x/salesforce-graph-engine/rules) page, this rule
+identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more  rules will likely be added, but for now there's
+just that rule. As such, all of the examples will focus on CRUD/FLS.
 
 ### Let's look at the sample project
 All of our examples will be using the [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
@@ -75,8 +62,14 @@ Next, let's look at a slightly more complicated example, [`flsInIfBranchOnly()`]
 This method has an `if` statement, and therefore has two paths: one that goes through the `if`, and one that doesn't. Since
 CRUD/FLS only occurs in one of those paths, a violation is thrown.
 
-Finally, let's look at a method that didn't throw a violation: [`flsDoneCorrectly()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L76).
-Note that all of the fields being inserted are first being checked with the `FlsHelperClass` instance.
+Additionally, let's look at a method that didn't throw a violation: [`flsDoneCorrectly()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L76).
+Note that all of the fields being inserted are first being checked with the `FlsHelperClass` instance. As such, the method
+is secure, and no violation was thrown.
+
+Finally, one more method that didn't throw a violation: [`flsInNonAuraMethod()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L91).
+This method does not meet the criteria for an entry-point as outlined in the [Rules](./en/v3.x/salesforce-graph-engine/rules)
+page, nor is it in the call-stack of any entry-points. As such, the analyzer skipped this method even though it is technically
+insecure.
 
 ### Running against a single file
 As you fix the problems in this file, you'll probably want to run the analyzer against this file specifically rather than
@@ -111,4 +104,4 @@ If you're really, truly certain that you want to skip that violation, you can us
 For example, if you add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`
 and rerun the command, the violation in that method will be suppressed.
 
-You can also suppress all violations in a file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
+You can also suppress all violations in an entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
