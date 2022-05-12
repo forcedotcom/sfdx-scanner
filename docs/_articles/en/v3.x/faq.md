@@ -89,9 +89,9 @@ A: As a first step, add your file pattern to the CPD engine’s `targetPatterns`
 #### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made the same group?
 A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD. We’ll address this with an internal fix in the future releases.
 
-## Questions about SFGE
+## Questions about Salesforce Graph Engine
 
-#### Q: Analyzing my code using Salesforce Graph Engine takes much longer than all the other engines put together. Why is this?
+#### Q: Analyzing my code using `scanner:run:dfa` command takes much longer than all the other engines put together. Why is this?
 
 Salesforce Graph Engine needs to build up a context of the source code in its entirety before applying rules to capture violations. Depending on the complexity of code, such as number of conditionals, classes to instantiate, method invocations, etc, some projects may take longer to process than others. You can control the number of threads or the timeout using [SFGE's environment variables](./en/v3.x/architecture/sfg-engine/#how-does-salesforce-code-analyzer-use-sfge).
 
@@ -109,58 +109,48 @@ Match your violation message with the different message formats described below 
 
 *Common Scenario*
 
->_Validation_Type_ validation is missing for _Operation_Name_ operation on _Object_Type_ with field(s) _Comma_Separated_Fields_
+>_Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_
 
 Parameter explanation:
 
-* Validation_Type: Type of validation to be added. CRUD requires object-level checks. FLS requires field-level checks.
+* _Validation-Type_: Type of validation to be added. CRUD requires object-level checks. FLS requires field-level checks.
 
-* Operation_Name: Data operation that needs to be sanitized.
+* _Operation-Name_: Data operation that needs to be sanitized.
 
-* Object_Type: Object on which the CRUD operations happen. If Salesforce Graph Engine couldn’t guess the object type, you might see the variable name sometimes, and SFCA_Unresolved_Argument at other times.
+* _Object-Type_: Object on which the data operations happen. If SFGE couldn’t guess the object type, you might see the variable name sometimes, and *SFGE_Unresolved_Argument* at other times.
 
-* Comma_Separated_Fields: Fields on which the CRUD operation works. If you see Unknown as the only field or as one of the fields, this means Salesforce Graph Engine did not have all the information to guess the fields, and trusts you to determine the unlisted fields.
+* _Comma-Separated-Fields_: Fields on which the data operation works. If you see _Unknown_ as the only field or as one of the fields, this means SFGE did not have all the information to guess the fields, and trusts you to determine the unlisted fields.
 
 
 *Additional Clause*
 
 
->_Validation_Type_ validation is missing for _CRUD_Operation_ operation on _Object_Type_ with field(s) _Comma_Separated_Fields_ - SFCA may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: _Unknown_Segments_
+> _Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_ - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: _Unknown-Segments_
 
-Same as the common scenario, but this additionally means Salesforce Graph Engine is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let Salesforce Graph Engine know that it doesn’t have to create a violation.
+Same as the common scenario, but this additionally means SFGE is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let SFGE know that it doesn’t have to create a violation.
 
 *stripInaccessible warning*
 
-For stripInaccessible checks on READ operation, SFCA does not have the capability to verify that only sanitized data is used after the check. Please ensure that unsanitized data is discarded for <Object_Type>
+For stripInaccessible checks on READ operation, SFCA does not have the capability to verify that only sanitized data is used after the check. Please ensure that unsanitized data is discarded for _Object-Type_
 
-This is thrown for all stripInaccessible checks on READ access type. This is because Salesforce Graph Engine has no way to ensure that the sanitized value returned by SecurityDecision is indeed the value used in the code that follows the check. Once you’ve confirmed this, you can add an engine directive to ask Salesforce Graph Engine to ignore this in the next run.
+This is thrown for all stripInaccessible checks on READ access type. This is because SFGE has no way to ensure that the sanitized value returned by SecurityDecision is indeed the value used in the code that follows the check. Once you’ve confirmed this, you can add an engine directive to ask SFGE to ignore this in the next run.
 
 *Internal error*
 
 Internal error. Work in progress. Please ignore.
 
-This indicates that Salesforce Graph Engine ran into an error while assessing the source/sink path mentioned in the violation. While we continue to work on fixing these errors, please make sure that the path in question is sanitized anyway.
+This indicates that SFGE ran into an error while assessing the source/sink path mentioned in the violation. While we continue to work on fixing these errors, please make sure that the path in question is sanitized anyway.
 
-#### Q: How do I fix the issue?
+#### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
-If you add a sanitizer to the source/sink path, the issues gets fixed. You can refer to Salesforce’s documentation for more information:
-
-[Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
-
-[Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
-
-[Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
-
-After you make the changes, rerun the same entry point to ensure that the violation has disappeared.
-
-If you determine that the CRUD operation in question is protected by a sanitizer that Salesforce Graph Engine doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let Salesforce Graph Engine know that the CRUD operation _is_ in fact safe.
+If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/features/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
 
 #### Q: I didn’t get any violations. Does this mean my code is secure?
 
 If you didn’t get any violations, one these is a possibility:
 
-1. Salesforce Graph Engine did not identify any entry points
-2. Salesforce Graph Engine ran into errors for all the entry points identified
+1. SFGE did not identify any entry points
+2. SFGE ran into errors for all the entry points identified
 3. Your code is actually secure
 
 Since #1 and #2 exist, you may still want to manually make sure your code is secure.
