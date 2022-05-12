@@ -10,7 +10,7 @@ SFGE works a bit differently from other analyzers with which you might be famili
 to read the [Introduction](./en/v3.x/salesforce-graph-engine/introduction) and [Features](./en/v3.x/salesforce-graph-engine/features)
 pages before you read much deeper into this page.
 
-Also, so you can try these examples yourself, please install the pilot version of the scanner as per [these instructions](./en/v3.x/getting-started/install).
+Also, so you can try these examples yourself, please install the pilot version of the analyzer as per [these instructions](./en/v3.x/getting-started/install).
 
 Once you've done all that, continue reading here to see some basic SFGE operations, so you can get a sense of how it all works.
 
