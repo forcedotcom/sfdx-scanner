@@ -82,7 +82,7 @@ Please note the following, as they may save you some grief in the future.
 - The `projectdir` must still be the entire project, so that paths can be properly built.
 
 Note that the analyzer ran faster than it did last time, because it was analyzing a smaller number of paths. And note that
-the results are only those in the targeted file.
+the results are only those whose source vertex is in the targeted file.
 
 ### Fixing violations
 Let's start by picking one of the violations in the file to fix. To fix `flsInIfBranchOnly()`, you can do one of a number
