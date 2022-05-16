@@ -35,6 +35,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
     protected int severity;
     protected String description;
     protected String category;
+    protected String url;
 
     /**
      * @param message - The value to be inserted into the violation's {@link #message} attribute.
@@ -182,6 +183,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             severity = rule.getSeverity();
             description = rule.getDescription();
             category = rule.getCategory();
+            url = rule.getUrl();
         }
     }
 

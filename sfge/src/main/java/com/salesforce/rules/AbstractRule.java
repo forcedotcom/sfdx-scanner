@@ -48,15 +48,24 @@ public abstract class AbstractRule {
     //  probably un-abstract this method.
     protected abstract String getCategory();
 
+    /**
+     * Unless the rule has a predetermined URL, we'll return a link to information about the engine.
+     */
+    protected String getUrl() {
+        return "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/";
+    }
+
     public static class Descriptor {
         private final String name;
         private final String description;
         private final String category;
+        private final String url;
 
         private Descriptor(AbstractRule rule) {
             this.name = rule.getClass().getSimpleName();
             this.description = rule.getDescription();
             this.category = rule.getCategory();
+            this.url = rule.getUrl();
         }
 
         public String getName() {
@@ -69,6 +78,10 @@ public abstract class AbstractRule {
 
         public String getCategory() {
             return category;
+        }
+
+        public String getUrl() {
+            return url;
         }
     }
 }
