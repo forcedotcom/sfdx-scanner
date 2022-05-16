@@ -6,6 +6,9 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public abstract class Violation implements Comparable<Violation>, RuleThrowable {
+    private static final String INTERNAL_ERROR_RULENAME = "InternalExecutionError";
+    private static final String INTERNAL_ERROR_CATEGORY = "InternalExecutionError";
+
     /** The simple violation message that will be conveyed to users of the plugin. */
     protected final String message;
 
@@ -323,8 +326,8 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             // Internal error violations don't have a rule associated with them, so we should set
             // the rule-related properties
             // to non-null values now, to avoid NPEs during sorting.
-            this.ruleName = "";
-            this.category = "";
+            this.ruleName = INTERNAL_ERROR_RULENAME;
+            this.category = INTERNAL_ERROR_CATEGORY;
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
         }
@@ -404,8 +407,8 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             // Timeout violations don't have an actual rule associated with them, so we should set
             // the rule-related properties
             // to non-null values now, to avoid NPEs during sorting.
-            this.ruleName = "";
-            this.category = "";
+            this.ruleName = INTERNAL_ERROR_RULENAME;
+            this.category = INTERNAL_ERROR_CATEGORY;
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
         }

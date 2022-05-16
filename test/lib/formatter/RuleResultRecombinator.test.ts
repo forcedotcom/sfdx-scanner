@@ -244,6 +244,28 @@ const allFakeDfaRuleResults: RuleResult[] = [
 	}
 ];
 
+const fakeDfaWithError: RuleResult[] = [
+	{
+		engine: 'sfge',
+		fileName: sampleFile5,
+		violations: [{
+			"sourceLine": 15,
+			"sourceColumn": 8,
+			"sourceType": "BearController",
+			"sourceMethodName": "getAllBears",
+			"sinkFileName": null,
+			"sinkLine": null,
+			"sinkColumn": null,
+			"ruleName": "InternalExecutionError",
+			"severity": 3,
+			"message": "Path evaluation timed out after 40 ms",
+			"url": "https://thisurldoesnotmatter.com",
+			"category": "InternalExecutionError"
+		}]
+	}
+]
+
+
 const allFakeDfaRuleResultsNormalized: RuleResult[] = [
 	{
 		engine: 'sfge',
@@ -525,7 +547,7 @@ describe('RuleResultRecombinator', () => {
 				expect(invocation.toolExecutionNotifications).to.have.lengthOf(0, 'Tool Execution');
 			}
 
-			function validateSfgeSarif(run: unknown, normalizeSeverity: boolean): void {
+			function validateSfgeSarif(run: unknown, normalizeSeverity: boolean, expectingErrors: boolean): void {
 				const driver = run['tool']['driver'];
 				expect(driver.name).to.equal(ENGINE.SFGE);
 				expect(driver.version).to.equal(SFGE_VERSION);
@@ -534,7 +556,11 @@ describe('RuleResultRecombinator', () => {
 
 				// tool.driver.rules
 				expect(driver['rules']).to.have.lengthOf(1, 'Incorrect rule count');
-				expect(driver['rules'][0].id).to.equal('ApexFlsViolationRule');
+				if (expectingErrors) {
+					expect(driver['rules'][0].id).to.equal('InternalExecutionError');
+				} else {
+					expect(driver['rules'][0].id).to.equal('ApexFlsViolationRule');
+				}
 				if (normalizeSeverity) {
 					expect(driver['rules'][0].properties.normalizedSeverity).to.equal(1);
 				} else {
@@ -546,7 +572,11 @@ describe('RuleResultRecombinator', () => {
 				expect(run['results']).to.have.lengthOf(1, 'Incorrect result count');
 				const results = run['results'];
 				expect(results[0].ruleIndex).to.equal(0);
-				expect(results[0].relatedLocations).to.exist;
+				if (expectingErrors) {
+					expect(results[0].relatedLocations).to.not.exist;
+				} else {
+					expect(results[0].relatedLocations).to.exist;
+				}
 
 				// Invocations
 				expect(run['invocations']).to.have.lengthOf(1, 'Invocations');
@@ -613,7 +643,7 @@ describe('RuleResultRecombinator', () => {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
 					if (engine === ENGINE.SFGE) {
-						validateSfgeSarif(run, false);
+						validateSfgeSarif(run, false, false);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
 					}
@@ -634,13 +664,34 @@ describe('RuleResultRecombinator', () => {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
 					if (engine === ENGINE.SFGE) {
-						validateSfgeSarif(run, true);
+						validateSfgeSarif(run, true, false);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
 					}
 				}
 
 				expect(minSev).to.equal(1, 'Most severe problem');
+				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
+				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+			});
+
+			it ('DFA with timeout error', async () => {
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(fakeDfaWithError, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const sarifResults: unknown[] = JSON.parse(results as string);
+				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
+				const runs = sarifResults['runs'];
+
+				for (let i = 0; i < runs.length; i++) {
+					const run = runs[i];
+					const engine = run['tool']['driver']['name'];
+					if (engine === ENGINE.SFGE) {
+						validateSfgeSarif(run, false, true);
+					} else {
+						fail(`Unexpected engine: ${engine}`);
+					}
+				}
+
+				expect(minSev).to.equal(3, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
 				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
 			});

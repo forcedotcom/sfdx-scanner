@@ -30,9 +30,9 @@ type DfaTableRow = BaseTableRow & {
 	"Source Location": string;
 	"Source Line": number;
 	"Source Column": number;
-	"Sink Location": string;
-	"Sink Line": number;
-	"Sink Column": number;
+	"Sink Location": string|null;
+	"Sink Line": number|null;
+	"Sink Column": number|null;
 };
 
 export class RuleResultRecombinator {
@@ -307,12 +307,25 @@ URL: ${url}`;
 					Severity: violation.severity,
 					Engine: result.engine
 				};
+				// A pathless violation can be trivially converted into a row.
 				if (isPathlessViolation(violation)) {
 					rows.push({
 						...baseRow,
 						Location: `${relativeFile}:${violation.line}`,
 						Line: violation.line,
 						Column: violation.column
+					});
+				} else if (violation.sinkFileName == null) {
+					// If the violation is path-based but has no sink file, then the violation indicates an error of some
+					// kind. So use the source information we were given, but use null for everything else.
+					rows.push({
+						...baseRow,
+						"Source Location": `${relativeFile}:${violation.sourceLine}`,
+						"Source Line": violation.sourceLine,
+						"Source Column": violation.sourceColumn,
+						"Sink Location": null,
+						"Sink Line": null,
+						"Sink Column": null
 					});
 				} else {
 					const relativeSinkFile = path.relative(process.cwd(), violation.sinkFileName);

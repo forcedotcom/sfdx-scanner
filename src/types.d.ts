@@ -102,9 +102,9 @@ export type DfaRuleViolation = BaseViolation & {
 	sourceColumn: number;
 	sourceType: string;
 	sourceMethodName: string;
-	sinkLine: number;
-	sinkColumn: number;
-	sinkFileName: string;
+	sinkLine: number|null;
+	sinkColumn: number|null;
+	sinkFileName: string|null;
 };
 
 export type RuleViolation = PathlessRuleViolation | DfaRuleViolation;
