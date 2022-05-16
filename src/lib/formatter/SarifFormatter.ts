@@ -290,7 +290,7 @@ class SfgeSarifFormatter extends SarifFormatter {
 				driver: {
 					name: ENGINE.SFGE,
 					version: SFGE_VERSION,
-					informationUri: '???', // TODO: What should this value be?
+					informationUri: 'https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/',
 					rules: []
 				}
 			}

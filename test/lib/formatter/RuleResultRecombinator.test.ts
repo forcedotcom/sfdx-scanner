@@ -551,8 +551,7 @@ describe('RuleResultRecombinator', () => {
 				const driver = run['tool']['driver'];
 				expect(driver.name).to.equal(ENGINE.SFGE);
 				expect(driver.version).to.equal(SFGE_VERSION);
-				// TODO: The informationuri value hasn't been decided. Fill it in once we pick something.
-				expect(driver.informationUri).to.equal('???');
+				expect(driver.informationUri).to.equal('https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/');
 
 				// tool.driver.rules
 				expect(driver['rules']).to.have.lengthOf(1, 'Incorrect rule count');

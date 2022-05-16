@@ -21,6 +21,7 @@ type SfgeViolation = {
 	message: string;
 	severity: number;
 	category: string;
+	url: string;
 	sourceLineNumber: number;
 	sourceColumnNumber: number;
 	sourceFileName: string;
@@ -243,6 +244,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 				severity: sfgeViolation.severity,
 				message: sfgeViolation.message,
 				category: sfgeViolation.category,
+				url: sfgeViolation.url,
 				sinkLine: sfgeViolation.sinkLineNumber || null,
 				sinkColumn: sfgeViolation.sinkColumnNumber || null,
 				sinkFileName: sfgeViolation.sinkFileName || "",
