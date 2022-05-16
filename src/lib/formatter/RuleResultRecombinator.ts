@@ -315,7 +315,7 @@ URL: ${url}`;
 						Line: violation.line,
 						Column: violation.column
 					});
-				} else if (violation.sinkFileName == null) {
+				} else if (!(violation.sinkFileName)) {
 					// If the violation is path-based but has no sink file, then the violation indicates an error of some
 					// kind. So use the source information we were given, but use null for everything else.
 					rows.push({
@@ -323,7 +323,7 @@ URL: ${url}`;
 						"Source Location": `${relativeFile}:${violation.sourceLine}`,
 						"Source Line": violation.sourceLine,
 						"Source Column": violation.sourceColumn,
-						"Sink Location": null,
+						"Sink Location": "",
 						"Sink Line": null,
 						"Sink Column": null
 					});

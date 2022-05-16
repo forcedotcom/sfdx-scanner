@@ -253,7 +253,7 @@ const fakeDfaWithError: RuleResult[] = [
 			"sourceColumn": 8,
 			"sourceType": "BearController",
 			"sourceMethodName": "getAllBears",
-			"sinkFileName": null,
+			"sinkFileName": "",
 			"sinkLine": null,
 			"sinkColumn": null,
 			"ruleName": "InternalExecutionError",
