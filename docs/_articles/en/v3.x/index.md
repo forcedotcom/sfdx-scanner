@@ -4,6 +4,12 @@ permalink: /en/v3.x/
 lang: en
 ---
 
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
+  <span class="slds-assistive-text">warning</span>
+  	Salesforce Graph Engine is available for you to try it out &nbsp;&nbsp;&nbsp;<a href="./en/v3.x/salesforce-graph-engine/introduction/">Read more</a>
+</div>
+<br>
+
 <!-- temporary comment until v3.x becomes the new norm -->
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>

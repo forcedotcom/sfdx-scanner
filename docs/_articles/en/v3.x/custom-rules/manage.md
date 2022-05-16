@@ -7,7 +7,7 @@ lang: en
 
 Since PMD and Eslint are different engines, they require dissimilar handling of custom rules. The [author section](./en/v3.x/custom-rules/author/) explains the different ways to construct PMD and Eslint rules.
 
-To manage rules, an important distinction is that while PMD custom rules can be integrated and executed as part of the default rule set, Eslint's custom rules cannot be mixed with the Scanner plugin's default rules. Read on for more specific instructions.
+To manage rules, an important distinction is that while PMD custom rules can be integrated and executed as part of the default rule set, Eslint's custom rules cannot be mixed with the Code Analyzer's default rules. Read on for more specific instructions.
 
 ---
 
@@ -58,7 +58,7 @@ Use the ``` --force ``` parameter to bypass confirmation of the removal.
 
 ## Eslint Custom Rules
 
-Custom Rules on Eslint are handled through the Scanner plugin's [Custom Config capabilities](./en/v3.x/custom-config/eslint/).
+Custom Rules on Eslint are handled through the Code Analyzer's [Custom Config capabilities](./en/v3.x/custom-config/eslint/).
 
 ### Adding Rule(s)
 

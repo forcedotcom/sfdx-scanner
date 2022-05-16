@@ -88,3 +88,69 @@ A: As a first step, add your file pattern to the CPD engine’s `targetPatterns`
 
 #### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made the same group?
 A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD. We’ll address this with an internal fix in the future releases.
+
+## Questions about Salesforce Graph Engine
+
+#### Q: Analyzing my code using `scanner:run:dfa` command takes much longer than all the other engines put together. Why is this?
+
+Salesforce Graph Engine needs to build up a context of the source code in its entirety before applying rules to capture violations. Depending on the complexity of code, such as number of conditionals, classes to instantiate, method invocations, etc, some projects may take longer to process than others. You can control the number of threads or the timeout using [SFGE's environment variables](./en/v3.x/scanner-commands/dfa/#environment-variable-based-controls).
+
+
+#### Q: My code is guarded through a different way than an Apex CRUD/FLS check. Is there a way to suppress violations on it?
+
+Please read about [Engine Directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to see how this can be done.
+
+
+## Questions about interpreting ApexFlsViolationRule results
+
+#### Q: What do the violation messages mean?
+
+Match your violation message with the different message formats described below to understand what it implies.
+
+*Common Scenario*
+
+>_Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_
+
+Parameter explanation:
+
+* _Validation-Type_: Type of validation to be added. CRUD requires object-level checks. FLS requires field-level checks.
+
+* _Operation-Name_: Data operation that needs to be sanitized.
+
+* _Object-Type_: Object on which the data operations happen. If SFGE couldn’t guess the object type, you might see the variable name sometimes, and *SFGE_Unresolved_Argument* at other times.
+
+* _Comma-Separated-Fields_: Fields on which the data operation works. If you see _Unknown_ as the only field or as one of the fields, this means SFGE did not have all the information to guess the fields, and trusts you to determine the unlisted fields.
+
+
+*Additional Clause*
+
+
+> _Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_ - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: _Unknown-Segments_
+
+Same as the common scenario, but this additionally means SFGE is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that it doesn’t have to create a violation.
+
+*stripInaccessible warning*
+
+For stripInaccessible checks on READ operation, SFCA does not have the capability to verify that only sanitized data is used after the check. Please ensure that unsanitized data is discarded for _Object-Type_
+
+This is thrown for all stripInaccessible checks on READ access type. This is because SFGE has no way to ensure that the sanitized value returned by SecurityDecision is indeed the value used in the code that follows the check. Once you’ve confirmed this, you can add an engine directive to ask SFGE to ignore this in the next run.
+
+*Internal error*
+
+Internal error. Work in progress. Please ignore.
+
+This indicates that SFGE ran into an error while assessing the source/sink path mentioned in the violation. While we continue to work on fixing these errors, please make sure that the path in question is sanitized anyway.
+
+#### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
+
+If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
+
+#### Q: I didn’t get any violations. Does this mean my code is secure?
+
+If you didn’t get any violations, one these is a possibility:
+
+1. SFGE did not identify any entry points
+2. SFGE ran into errors for all the entry points identified
+3. Your code is actually secure
+
+Since #1 and #2 exist, you may still want to manually make sure your code is secure.
