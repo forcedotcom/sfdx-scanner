@@ -12,7 +12,7 @@ module.exports = {
 		"normalizesevDescriptionLong": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity",
 		"outfileDescription": "location of output file",
 		"outfileDescriptionLong": "Write output to a file.",
-		"projectdirDescription": "project's root directory, or the directory where the target location resides along with the remaining class files it references",
+		"projectdirDescription": "root directory of project",
 		"projectdirDescriptionLong": "Root project directory. Must be paths, not globs. Multiple values can be specified as a comma-separated list",
 		"rulethreadcountDescription": "number of threads evaluating dfa rules (default: 4). Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`",
 		"rulethreadcountDescriptionLong": "Specify number of rule evaluation threads, i.e. how many entrypoints can be evaluated concurrently. Default is 4. Inherits value from SFGE_RULE_THREAD_COUNT env-var if set.",
