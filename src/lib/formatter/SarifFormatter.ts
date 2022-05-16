@@ -160,7 +160,7 @@ abstract class SarifFormatter {
 					result.locations = [location];
 
 					// If the violation is DFA, we'll want to create a secondary location for the sink vertex.
-					if (!isPathless) {
+					if (!isPathless && v.sinkFileName) {
 						const secondaryLocation = SarifFormatter.getLocation(v.sinkFileName);
 						secondaryLocation.message = {
 							text: SINK_VERTEX_MESSAGE
