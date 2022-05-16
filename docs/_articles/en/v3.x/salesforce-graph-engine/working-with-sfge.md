@@ -30,7 +30,7 @@ The individual rows in the results represents violations. Each violation contain
 3. Source File,Source Line, Source Column. The location where the path begins
 4. SourceType, SourceMethod. Additional information to help identify the path entry
 5. Rule. The rule that was run which led to the violation.
-6. Description. The violation message. For more info on SFGE violation messages, read our [FAQ](../faq.md).
+6. Description. The violation message. For more info on SFGE violation messages, read our [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results).
 
 ## Add Engine Directives
 

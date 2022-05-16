@@ -34,7 +34,7 @@ The following are its source, sink, and sanitizer definitions:
 3. SOQL queries that use [WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm#apex_classes_with_security_enforced)
 4. Lists filtered by [Security.stripInaccessible](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
 
-Have a look at some [common faq](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results) about the results generated.
+Have a look at related [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results) to understand the results generated.
 
 #### References
 

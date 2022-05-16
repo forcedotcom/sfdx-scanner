@@ -19,7 +19,7 @@ First thing's first. Let's see the rules that exist in SFGE. Run the following c
 sfdx scanner:rule:list --engine sfge
 ```
 
-Note that there's just the one rule. As outlined in the [Rules](./en/v3.x/salesforce-graph-engine/rules) page, this rule
+Note that there's just the one rule. [ApexFlsViolationRule](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule)
 identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more rules will likely be added, but for now there's
 just that rule. As such, all of the examples will focus on CRUD/FLS.
 
@@ -67,7 +67,7 @@ Let's pick a few of those violations and look a little bit closer at them.
 
 Several methods in `AuraEnabledFls.cls` threw violations.
 
-Let's start with [`flsHelperGivenIncorrectObjctType()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L4).
+Let's start with [`flsHelperGivenIncorrectObjectType()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L4).
 Note that this method has no branches. Instead, it's just a single path all the way through. Also note that we're performing
 CRUD/FLS on the wrong object type, hence the violation. The source vertex is the line where the method is declared, and
 the sink vertex is the line where the account is inserted.
@@ -81,9 +81,7 @@ Note that all of the fields being inserted are first being checked with the `Fls
 is secure, and no violation was thrown.
 
 Finally, one more method that didn't throw a violation: [`flsInNonAuraMethod()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L91).
-This method does not meet the criteria for an entry-point as outlined in the [Rules](./en/v3.x/salesforce-graph-engine/rules)
-page, nor is it in the call-stack of any entry-points. As such, the analyzer skipped this method even though it is technically
-insecure.
+This method is neither a recognized [entry-point/source](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule), nor is it in the call-stack of any entry-points. As such, the analyzer skipped this method even though it is technically insecure.
 
 ## Running against a single file
 As you fix the problems in this file, you'll probably want to run the analyzer against this file specifically rather than

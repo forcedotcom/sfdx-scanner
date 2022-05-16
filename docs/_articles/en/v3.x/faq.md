@@ -93,7 +93,7 @@ A: This is currently a [known issue](https://github.com/pmd/pmd/issues/2438) in 
 
 #### Q: Analyzing my code using `scanner:run:dfa` command takes much longer than all the other engines put together. Why is this?
 
-Salesforce Graph Engine needs to build up a context of the source code in its entirety before applying rules to capture violations. Depending on the complexity of code, such as number of conditionals, classes to instantiate, method invocations, etc, some projects may take longer to process than others. You can control the number of threads or the timeout using [SFGE's environment variables](./en/v3.x/architecture/sfg-engine/#how-does-salesforce-code-analyzer-use-sfge).
+Salesforce Graph Engine needs to build up a context of the source code in its entirety before applying rules to capture violations. Depending on the complexity of code, such as number of conditionals, classes to instantiate, method invocations, etc, some projects may take longer to process than others. You can control the number of threads or the timeout using [SFGE's environment variables](./en/v3.x/scanner-commands/dfa/#environment-variable-based-controls).
 
 
 #### Q: My code is guarded through a different way than an Apex CRUD/FLS check. Is there a way to suppress violations on it?
