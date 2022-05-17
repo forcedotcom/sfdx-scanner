@@ -403,8 +403,8 @@ URL: ${url}`;
 		const fileHandler = new FileHandler();
 		const templateName = isDfa ? 'dfa-simple.mustache' : 'simple.mustache';
 		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', '..', 'html-templates', templateName));
-		const args = ['sfdx'];
-		for (const arg of process.argv.slice(2)) {
+		const args = ['sfdx', process.argv[2]];
+		for (const arg of process.argv.slice(3)) {
 			if (arg.startsWith('-')) {
 				// Pass flags as-is
 				args.push(arg);
