@@ -38,7 +38,7 @@ git clone --branch dev-3 https://github.com/forcedotcom/sfdx-scanner.git
 ```bash
 // open sample app directory:
 
-cd sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default
+cd sfdx-scanner/test/code-fixtures/projects/sfge-working-app/
 ```
 
 
@@ -53,8 +53,8 @@ The following files are noteworthy:
 It may be advantageous for you to skim those files now.
 
 ## Basic Run
-Let's start with a basic evaluation of all files. `cd` into `test/code-fixtures/projects/sfge-working-app`, then run the
-following command:
+Let's start with a basic evaluation of all files. From the root folder of the sample app (i.e., `test/code-fixtures/projects/sfge-working-app`),
+run following command:
 ```
 sfdx scanner:run:dfa --target './force-app/main/default/classes' --projectdir './force-app/main/default' --format csv
 ```
