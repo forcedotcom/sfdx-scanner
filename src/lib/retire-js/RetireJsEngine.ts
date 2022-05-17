@@ -72,10 +72,14 @@ type RetireJsOutput = {
 export class RetireJsEngine extends AbstractRuleEngine {
 	public static ENGINE_ENUM: ENGINE = ENGINE.RETIRE_JS;
 	public static ENGINE_NAME: string = ENGINE.RETIRE_JS.valueOf();
-	// RetireJS isn't really built to be invoked programmatically, so we'll need to invoke it as a CLI command. However, we
-	// can't assume that they have the module installed globally. So what we're doing here is identifying the path to the
-	// locally-scoped `retire` module, and then using that to derive a path to the CLI-executable JS script.
+	// RetireJS isn't really built to be invoked programmatically, so we need to invoke it as a CLI command. However, we
+	// can't assume that the user has `retire` globally installed. So we identify the path to the locally-scoped `retire`
+	// module, and then use that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
+	// We also can't assume that the user actually has Node globally installed on their machine. So we need to figure out
+	// the version of node that's being executed right now (which may or may not be the version bundled with SFDX), so we
+	// can use that.
+	private static NODE_EXEC_PATH: string = process.execPath;
 	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
 	// local path instead.
 	private static VULN_JSON_PATH: string = require.resolve(path.join('..', '..', '..', 'retire-js', 'RetireJsVulns.json'));
@@ -184,7 +188,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
 					// We also hardcode a locally-stored vulnerability repo instead of allowing use of the default one.
 					invocationArray.push({
-						args: ['--js', '--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
+						args: [RetireJsEngine.RETIRE_JS_PATH, '--js', '--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
 						rule: rule.name
 					});
 					break;
@@ -197,7 +201,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 	private async executeRetireJs(invocation: RetireJsInvocation): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
-			const cp = cspawn(RetireJsEngine.RETIRE_JS_PATH, invocation.args);
+			const cp = cspawn(RetireJsEngine.NODE_EXEC_PATH, invocation.args);
 
 			// Initialize both stdout and stderr as empty strings to which we can append data as we receive it.
 			let stdout = '';
