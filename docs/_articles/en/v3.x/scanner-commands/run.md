@@ -42,7 +42,7 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
  (required) location of source code
 
  --env=_env_
- JSON-formatted string, overrides ESLint's default environment variables
+ JSON-formatted string, overrides ESLint\'s default environment variables
 
  --eslintconfig=_eslintconfig_
  location of eslintrc config to customize eslint engine
