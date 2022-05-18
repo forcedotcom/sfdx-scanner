@@ -52,6 +52,18 @@ export abstract class ScannerCommand extends SfdxCommand {
 		this.ux.error(msg);
 	}
 
+	protected startSpinner(msg: string, status="Please Wait"): void {
+		this.ux.startSpinner(msg, status);
+	}
+
+	protected updateSpinner(msg: string): void {
+		this.ux.setSpinnerStatus(msg);
+	}
+
+	protected stopSpinner(msg: string): void {
+		this.ux.stopSpinner(msg);
+	}
+
 	protected async init(): Promise<void> {
 		await super.init();
 		this.buildEventListeners();
@@ -64,5 +76,8 @@ export abstract class ScannerCommand extends SfdxCommand {
 		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => this.displayWarning(msg, true));
 		uxEvents.on(EVENTS.ERROR_ALWAYS, (msg: string) => this.displayError(msg));
 		uxEvents.on(EVENTS.ERROR_VERBOSE, (msg: string) => this.displayError(msg));
+		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => this.startSpinner(msg, status));
+		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => this.updateSpinner(msg));
+		uxEvents.on(EVENTS.STOP_SPINNER, (msg: string) => this.stopSpinner(msg));
 	}
 }

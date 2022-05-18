@@ -183,6 +183,10 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 		&& engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
+	public isDfaEngine(): boolean {
+		return false;
+	}
+
 	async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		// Get sublist of rules supported by the engine

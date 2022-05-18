@@ -1,6 +1,6 @@
 import {Controller} from '../../Controller';
 import {PmdEngine} from './PmdEngine';
-import { CommandLineSupport } from './CommandLineSupport';
+import { CommandLineSupport } from '../services/CommandLineSupport';
 import { PMD_LIB } from '../../Constants';
 
 /**
@@ -26,6 +26,12 @@ export abstract class PmdSupport extends CommandLineSupport {
 		});
 
 		return classpathEntries;
+	}
+
+	protected isSuccessfulExitCode(code: number): boolean {
+		// PMD's convention is that an exit code of 0 indicates a successful run with no violations, and an exit code of
+		// 4 indicates a successful run with at least one violation.
+		return code === 0 || code === 4;
 	}
 
 

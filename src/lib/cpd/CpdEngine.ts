@@ -262,6 +262,9 @@ export class CpdEngine extends AbstractRuleEngine {
 		return engineUtils.isValueInFilter(this.getName(), filterValues);
 	}
 
+	public isDfaEngine(): boolean {
+		return false;
+	}
 
 	public getNormalizedSeverity(severity: number): Severity{
 		return severity;

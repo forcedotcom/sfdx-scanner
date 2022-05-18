@@ -1576,6 +1576,19 @@
         "info": [
           "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
+      },
+      {
+        "below": "1.17.0",
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "CVE": [
+            "CVE-2021-23450"
+          ]
+        },
+        "info": [
+          "https://github.com/dojo/dojo/pull/418"
+        ]
       }
     ],
     "extractors": {
@@ -2431,6 +2444,19 @@
           "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-18214",
           "https://github.com/moment/moment/issues/4163"
         ]
+      },
+      {
+        "below": "2.29.2",
+        "severity": "medium",
+        "identifiers": {
+          "summary": "This vulnerability impacts npm (server) users of moment.js, especially if user provided locale string, eg fr is directly used to switch moment locale.",
+          "CVE": [
+            "CVE-2022-24785"
+          ]
+        },
+        "info": [
+          "https://github.com/moment/moment/security/advisories/GHSA-8hfj-j24r-96c4"
+        ]
       }
     ],
     "extractors": {
@@ -2762,6 +2788,19 @@
           "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-pvmx-g8h5-cprj",
           "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-7h26-63m7-qhf2"
         ]
+      },
+      {
+        "below": "4.18.0",
+        "identifiers": {
+          "summary": "Inject malformed URL to bypass content sanitization for XSS",
+          "CVE": [
+            "CVE-2022-24728"
+          ]
+        },
+        "severity": "low",
+        "info": [
+          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-f6rf-9m92-x2hh"
+        ]
       }
     ],
     "extractors": {
@@ -2774,6 +2813,62 @@
       "filecontent": [
         "ckeditor..js.{4,20}=\\{timestamp:\"[^\"]+\",version:\"(§§version§§)",
         "window.CKEDITOR=function\\(\\)\\{var [a-z]=\\{timestamp:\"[^\"]+\",version:\"(§§version§§)"
+      ],
+      "hashes": {}
+    }
+  },
+  "ckeditor5": {
+    "vulnerabilities": [
+      {
+        "below": "10.0.1",
+        "identifiers": {
+          "summary": "XSS in the link package",
+          "CVE": [
+            "CVE-2018-11093"
+          ]
+        },
+        "severity": "low",
+        "info": [
+          "https://ckeditor.com/blog/CKEditor-5-v10.0.1-released/"
+        ]
+      },
+      {
+        "below": "25.0.0",
+        "identifiers": {
+          "summary": "ReDos in several packages",
+          "CVE": [
+            "CVE-2021-21254"
+          ]
+        },
+        "severity": "low",
+        "info": [
+          "https://github.com/ckeditor/ckeditor5/security/advisories/GHSA-hgmg-hhc8-g5wr"
+        ]
+      },
+      {
+        "below": "27.0.0",
+        "identifiers": {
+          "summary": "ReDos in several packages",
+          "CVE": [
+            "CVE-2021-21391"
+          ]
+        },
+        "severity": "low",
+        "info": [
+          "https://github.com/ckeditor/ckeditor5/security/advisories/GHSA-3rh3-wfr4-76mj"
+        ]
+      }
+    ],
+    "extractors": {
+      "uri": [
+        "/(§§version§§)/ckeditor5(\\.min)?\\.js"
+      ],
+      "filename": [
+        "ckeditor5-(§§version§§)(\\.min)?\\.js"
+      ],
+      "filecontent": [
+        "const .=\"(§§version§§)\";.{0,140}?\\.CKEDITOR_VERSION=.;",
+        "CKEDITOR_VERSION=\"(§§version§§)\""
       ],
       "hashes": {}
     }
@@ -2886,6 +2981,71 @@
       ],
       "filecontent": [
         "/*!\n * Ext JS Library (§§version§§)"
+      ]
+    }
+  },
+  "svelte": {
+    "vulnerabilities": [],
+    "extractors": {
+      "uri": [],
+      "filename": [],
+      "filecontent": []
+    }
+  },
+  "axois": {
+    "vulnerabilities": [
+      {
+        "below": "0.21.3",
+        "severity": "high",
+        "identifiers": {
+          "summary": "Axios is vulnerable to Inefficient Regular Expression Complexity",
+          "CVE": [
+            "CVE-2021-3749"
+          ]
+        },
+        "info": [
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1579269",
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3749"
+        ]
+      },
+      {
+        "below": "0.21.1",
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Axios NPM package 0.21.0 contains a Server-Side Request Forgery (SSRF) vulnerability",
+          "CVE": [
+            "CVE-2020-28168"
+          ]
+        },
+        "info": [
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1038255",
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28168"
+        ]
+      },
+      {
+        "below": "0.18.1",
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Axios up to and including 0.18.0 allows attackers to cause a denial of service (application crash) by continuing to accepting content after maxContentLength is exceeded",
+          "CVE": [
+            "CVE-2019-10742"
+          ]
+        },
+        "info": [
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-174505",
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-10742"
+        ]
+      }
+    ],
+    "extractors": {
+      "uri": [
+        "/axois/(§§version§§)/.*\\.js"
+      ],
+      "filename": [
+        "axios-(§§version§§)(\\.min)?\\.js"
+      ],
+      "filecontent": [
+        "/\\* *axios v(§§version§§) "
       ]
     }
   },

@@ -34,5 +34,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>, runDfa?: boolean): Promise<RecombinedRuleResults>;
 }

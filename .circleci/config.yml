@@ -6,7 +6,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: circleci/openjdk:11.0.2-jdk-node
+    - image: cimg/openjdk:8.0-node
 
 orbs:
   win: circleci/windows@2.2.0 # The Windows orb give you everything you need to start using the Windows executor.
@@ -543,7 +543,7 @@ workflows:
           tag: latest-pilot-rc
           filters:
             <<: *publishing_filters
-          context: 
+          context:
             - AWS
             - salesforce-cli
       # Step 3: Smoke test the release candidate on both Linux and Windows.
