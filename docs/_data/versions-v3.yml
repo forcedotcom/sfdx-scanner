@@ -1,6 +1,6 @@
 scanner: '3.0.3'
 releasedon: '04-27-2022'
-pmd: '6.44.0'
+pmd: '6.45.0'
 eslint: '8.x'
 retirejs: '3.x'
 configfile: 'Config-pilot.json'
