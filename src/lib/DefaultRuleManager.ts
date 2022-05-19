@@ -1,8 +1,8 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfdxError, Lifecycle} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
+import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {OutputOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
@@ -10,6 +10,7 @@ import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
+import * as SfdxUtils from './util/SfdxUtils';
 import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
@@ -109,7 +110,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 
 		this.validateRunDescriptors(runDescriptorList);
-
+		await this.emitRunTelemetry(runDescriptorList);
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
 
@@ -141,6 +142,31 @@ export class DefaultRuleManager implements RuleManager {
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
 			throw new SfdxError(messages.getMessage(`Pathless engines ${JSON.stringify(pathlessEngines)} cannot be run concurrently with DFA engines ${JSON.stringify(dfaEngines)}`));
 		}
+	}
+
+	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[]): Promise<void> {
+		const runTelemetryObject: TelemetryData = {
+			eventName: 'ENGINE_EXECUTION'
+		};
+
+		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
+
+		const allEngines: RuleEngine[] = await Controller.getAllEngines();
+		for (const engine of allEngines) {
+			const engineName = engine.getName().toLowerCase();
+			// Instead of concatenating the engines into a string, we assign each engine to a boolean value based on
+			// whether it's being executed. Theoretically, that will be more useful for gathering meaningful metrics.
+			runTelemetryObject[engineName] = executedEngineNames.has(engineName);
+		}
+
+		// We also need to capture the SFDX version.
+		runTelemetryObject['sfdxVersion'] = await SfdxUtils.getSfdxVersion();
+		// NOTE: In addition to the information that we added here, the following useful information is always captured
+		// by default:
+		// - node version
+		// - plugin version
+		// - executed command (e.g., `scanner:run`)
+		await Lifecycle.getInstance().emitTelemetry(runTelemetryObject);
 	}
 
 	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
