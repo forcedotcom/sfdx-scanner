@@ -2994,7 +2994,7 @@
       "filecontent": []
     }
   },
-  "axois": {
+  "axios": {
     "vulnerabilities": [
       {
         "below": "0.21.3",
@@ -3041,7 +3041,7 @@
     ],
     "extractors": {
       "uri": [
-        "/axois/(§§version§§)/.*\\.js"
+        "/axios/(§§version§§)/.*\\.js"
       ],
       "filename": [
         "axios-(§§version§§)(\\.min)?\\.js"
