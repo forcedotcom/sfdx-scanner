@@ -145,21 +145,28 @@ export class DefaultRuleManager implements RuleManager {
 	}
 
 	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[]): Promise<void> {
-		const runTelemetryObject: TelemetryData = {
-			eventName: 'ENGINE_EXECUTION'
-		};
-
+		// Get the name of every engine being executed.
 		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
+		// Build the base telemetry data.
+		const runTelemetryObject: TelemetryData = {
+			// This property is a requirement for the object.
+			eventName: 'ENGINE_EXECUTION',
+			// Knowing how many engines are run with each execution is valuable data.
+			executedEnginesCount: executedEngineNames.size,
+			// Creating a string of all the executed engines would yield data useful for metrics.
+			// Note: Calling `.sort()` without an argument causes a simple less-than to be used.
+			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort())
+		};
 
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
 		for (const engine of allEngines) {
 			const engineName = engine.getName().toLowerCase();
-			// Instead of concatenating the engines into a string, we assign each engine to a boolean value based on
-			// whether it's being executed. Theoretically, that will be more useful for gathering meaningful metrics.
+			// In addition to the string, assign each engine a boolean indicating whether it was executed. This will allow
+			// us to perform other kinds of analytics than the string.
 			runTelemetryObject[engineName] = executedEngineNames.has(engineName);
 		}
 
-		// We also need to capture the SFDX version.
+		// Finally, we also need to capture the SFDX version.
 		runTelemetryObject['sfdxVersion'] = await SfdxUtils.getSfdxVersion();
 		// NOTE: In addition to the information that we added here, the following useful information is always captured
 		// by default:

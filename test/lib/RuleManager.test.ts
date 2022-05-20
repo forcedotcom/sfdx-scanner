@@ -1,16 +1,15 @@
 import {expect} from 'chai';
-import path = require('path');
-import Sinon = require('sinon');
 
 import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
-import {Rule, RuleGroup, RuleTarget} from '../../src/types';
+import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
+import {ENGINE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
 import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
-import {uxEvents, EVENTS} from '../../src/lib/ScannerEvents';
+import {EVENTS, uxEvents} from '../../src/lib/ScannerEvents';
 
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
@@ -19,6 +18,8 @@ import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
+import path = require('path');
+import Sinon = require('sinon');
 
 TestOverrides.initializeTestSetup();
 
@@ -312,6 +313,39 @@ describe('RuleManager', () => {
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
+
+			describe('Test Case: Run by engine', () => {
+				it('Filtering by engine works as expected', async () => {
+					const engines = [ENGINE.RETIRE_JS, ENGINE.ESLINT];
+					const filters = [new EngineFilter(engines)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== 'string') {
+						expect(false, `Invalid output: ${results}`);
+					} else {
+						parsedRes = JSON.parse(results);
+					}
+					// This result indicates that not all executed engines found violations, which is what we expected. That's fine.
+					expect(parsedRes).to.be.an('array').that.has.length(1, 'Wrong number of engines returned violations');
+					expect(parsedRes[0].engine).to.equal('eslint', 'Wrong engine returned results');
+					expect(parsedRes[0].violations.length).to.equal(1, 'Wrong number of violations found');
+					Sinon.assert.callCount(telemetrySpy, 1);
+					const telemetryArg: TelemetryData = telemetrySpy.args[0][0];
+					expect(telemetryArg.eventName).to.equal('ENGINE_EXECUTION');
+					expect(telemetryArg.executedEnginesCount).to.equal(2);
+					expect(telemetryArg.executedEnginesString).to.equal(JSON.stringify(['eslint', 'retire-js']));
+					expect(telemetryArg['pmd']).to.equal(false);
+					expect(telemetryArg['pmd-custom']).to.equal(false);
+					expect(telemetryArg['eslint']).to.equal(true);
+					expect(telemetryArg['eslint-lwc']).to.equal(false);
+					expect(telemetryArg['eslint-typescript']).to.equal(false);
+					expect(telemetryArg['eslint-custom']).to.equal(false);
+					expect(telemetryArg['retire-js']).to.equal(true);
+					expect(telemetryArg['cpd']).to.equal(false);
+					expect(telemetryArg['sfge']).to.equal(false);
+				});
+			})
 
 			describe('Edge Cases', () => {
 				it('When no rules match the given criteria, an empty string is returned', async () => {

@@ -18,6 +18,8 @@ export type Rule = {
 
 export type TelemetryData = {
 	eventName: string;
+	executedEnginesCount: number;
+	executedEnginesString: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;
 }
