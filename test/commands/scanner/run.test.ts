@@ -272,7 +272,7 @@ describe('scanner:run', function () {
 		});
 
 		describe('Output Type: HTML', () => {
-			const outputFile = 'testout.html';
+			const outputFile = 'testout.hTmL';
 			function validateHtmlOutput(html: string): void {
 				const result = html.match(/const violations = (\[.*);/);
 				expect(result).to.be.not.null;
