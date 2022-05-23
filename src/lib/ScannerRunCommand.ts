@@ -126,7 +126,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 		} else {
 			// Look at the file extension, and infer a corresponding output format.
-			const fileExtension = outfile.slice(lastPeriod + 1);
+			const fileExtension = outfile.slice(lastPeriod + 1).toLowerCase();
 			switch (fileExtension) {
 				case OUTPUT_FORMAT.CSV:
 				case OUTPUT_FORMAT.HTML:
