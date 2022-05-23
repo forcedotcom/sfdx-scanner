@@ -4,13 +4,12 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {OutputOptions, RuleManager} from './RuleManager';
+import {RunOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
-import * as SfdxUtils from './util/SfdxUtils';
 import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
@@ -68,7 +67,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>, runDfa = false): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];
@@ -88,7 +87,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 
-			if ((e.isDfaEngine() === runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
+			if ((e.isDfaEngine() === runOptions.runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
 				// Create a descriptor for this engine run, but do not actually run it just yet. This is because the run
@@ -100,7 +99,7 @@ export class DefaultRuleManager implements RuleManager {
 						rules: engineRules,
 						target: engineTargets,
 						engineOptions: engineOptions,
-						normalizeSeverity: outputOptions.normalizeSeverity
+						normalizeSeverity: runOptions.normalizeSeverity
 					}
 				});
 			} else {
@@ -110,7 +109,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 
 		this.validateRunDescriptors(runDescriptorList);
-		await this.emitRunTelemetry(runDescriptorList);
+		await this.emitRunTelemetry(runDescriptorList, runOptions.sfdxVersion);
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
 
@@ -127,8 +126,8 @@ export class DefaultRuleManager implements RuleManager {
 			const psResults: RuleResult[][] = await Promise.all(ps);
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${JSON.stringify(results)}`);
-			this.logger.trace(`Recombining results into requested format ${outputOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, outputOptions.format, executedEngines);
+			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines);
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(message);
@@ -144,7 +143,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 	}
 
-	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[]): Promise<void> {
+	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfdxVersion: string): Promise<void> {
 		// Get the name of every engine being executed.
 		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
 		// Build the base telemetry data.
@@ -155,7 +154,8 @@ export class DefaultRuleManager implements RuleManager {
 			executedEnginesCount: executedEngineNames.size,
 			// Creating a string of all the executed engines would yield data useful for metrics.
 			// Note: Calling `.sort()` without an argument causes a simple less-than to be used.
-			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort())
+			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort()),
+			sfdxVersion
 		};
 
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
@@ -165,9 +165,6 @@ export class DefaultRuleManager implements RuleManager {
 			// us to perform other kinds of analytics than the string.
 			runTelemetryObject[engineName] = executedEngineNames.has(engineName);
 		}
-
-		// Finally, we also need to capture the SFDX version.
-		runTelemetryObject['sfdxVersion'] = await SfdxUtils.getSfdxVersion();
 		// NOTE: In addition to the information that we added here, the following useful information is always captured
 		// by default:
 		// - node version

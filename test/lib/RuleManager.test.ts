@@ -8,7 +8,7 @@ import {ENGINE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
+import {OUTPUT_FORMAT, RuleManager, RunOptions} from '../../src/lib/RuleManager';
 import {EVENTS, uxEvents} from '../../src/lib/ScannerEvents';
 
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
@@ -184,10 +184,16 @@ describe('RuleManager', () => {
 			after(() => {
 				process.chdir("../../..");
 			});
+			const runOptions: RunOptions = {
+				format: OUTPUT_FORMAT.JSON,
+				normalizeSeverity: false,
+				runDfa: false,
+				sfdxVersion: 'test'
+			};
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -204,7 +210,7 @@ describe('RuleManager', () => {
 
 				it('TS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -222,7 +228,7 @@ describe('RuleManager', () => {
 				it('App project files', async () => {
 
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -242,7 +248,7 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -259,7 +265,7 @@ describe('RuleManager', () => {
 					// No filters
 					const filters = [];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
@@ -274,7 +280,7 @@ describe('RuleManager', () => {
 					const filters = [
 						new CategoryFilter([category])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -297,7 +303,7 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -319,7 +325,7 @@ describe('RuleManager', () => {
 					const engines = [ENGINE.RETIRE_JS, ENGINE.ESLINT];
 					const filters = [new EngineFilter(engines)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== 'string') {
 						expect(false, `Invalid output: ${results}`);
@@ -352,7 +358,7 @@ describe('RuleManager', () => {
 					// Define our preposterous filter array.
 					const filters = [new CategoryFilter(['beebleborp'])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
 					expect(results).to.equal('', `Output ${results} should have been an empty string`);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -364,7 +370,7 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
@@ -379,7 +385,7 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
@@ -393,7 +399,7 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
@@ -408,7 +414,7 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
