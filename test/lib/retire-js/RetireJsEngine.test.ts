@@ -484,13 +484,16 @@ describe('RetireJsEngine', () => {
 			expect(invocations.length).to.equal(1, 'Should be one invocation');
 			const invocation = invocations[0];
 			expect(invocation.rule).to.equal('insecure-bundled-dependencies', 'Invocation is for incorrect rule');
-			expect(invocation.args[0]).to.equal('--js');
-			expect(invocation.args[1]).to.equal('--jspath');
-			expect(invocation.args[2]).to.equal(target);
-			expect(invocation.args[3]).to.equal('--outputformat');
-			expect(invocation.args[4]).to.equal('json');
-			expect(invocation.args[5]).to.equal('--jsrepo');
-			expect(invocation.args[6]).to.equal((RetireJsEngine as any).VULN_JSON_PATH);
+			expect(invocation.args.length).to.equal(8, 'Wrong number of args provided');
+			// The first argument should be a node executable.
+			expect(invocation.args[0]).to.include('node', 'Node executable');
+			expect(invocation.args[1]).to.equal('--js');
+			expect(invocation.args[2]).to.equal('--jspath');
+			expect(invocation.args[3]).to.equal(target);
+			expect(invocation.args[4]).to.equal('--outputformat');
+			expect(invocation.args[5]).to.equal('json');
+			expect(invocation.args[6]).to.equal('--jsrepo');
+			expect(invocation.args[7]).to.equal((RetireJsEngine as any).VULN_JSON_PATH);
 		});
 	});
 });
