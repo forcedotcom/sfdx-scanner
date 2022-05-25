@@ -5,6 +5,23 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
+## [v2.13.3](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.3) (05-25-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.1...v2.13.3)
+
+### Release Summary
+* Updates to local RetireJS Vulnerability Repository
+* Updating PMD version to 6.45.0
+
+**Merged pull requests:**
+
+- @W-10977766@ PMD upgrade to 6.44 in \[2.x\] [\#664](https://github.com/forcedotcom/sfdx-scanner/pull/664)
+- @W-11100262@: \[2.x\] Fixing failing smoke tests. [\#666](https://github.com/forcedotcom/sfdx-scanner/pull/666)
+- @W-11103167@: \[2.x\] Updating PMD to 6.45.0. [\#669](https://github.com/forcedotcom/sfdx-scanner/pull/669)
+- @W-11163145@ \[2.x\] Updating Gem.lock file on dev branch to keep up with dependabot [\#685](https://github.com/forcedotcom/sfdx-scanner/pull/685)
+- @W-11179316@ \[2.x\] Updating retirejs json with latest [\#697](https://github.com/forcedotcom/sfdx-scanner/pull/697)
+
+
 ## [v2.13.2](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.3) (05-04-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.1...v2.13.2)
