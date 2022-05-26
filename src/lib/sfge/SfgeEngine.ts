@@ -135,18 +135,26 @@ export class SfgeEngine extends AbstractRuleEngine {
 	 * @param engineOptions - A mapping of keys to values for engineOptions. Not all key/value pairs will apply to all engines.
 	 */
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string,string>): Promise<RuleResult[]> {
-		// Pull all targeted paths out of our target descriptors.
-		const targetPaths: string[] = targets.reduce((accumulator: string[], target: RuleTarget) => {return [...accumulator, ...target.paths]}, []);
+		// Make sure we have actual targets to run against.
+		let targetCount = 0;
+		targets.forEach((t) => {
+			if (t.methods.length > 0) {
+				// If we're targeting individual methods, then each method is counted as a separate target for this purpose.
+				targetCount += t.methods.length;
+			} else {
+				targetCount += t.paths.length;
+			}
+		});
 
-		if (targetPaths.length === 0) {
-			this.logger.trace(`No targets for ${SfgeEngine.ENGINE_NAME} found. Nothing to execute. Returning early.`);
+		if (targetCount === 0) {
+			this.logger.trace(`No targets from ${SfgeEngine.ENGINE_NAME} found. Nothing to execute. Returning early.`);
 			return [];
 		}
 
-		this.logger.trace(`About to run ${SfgeEngine.ENGINE_NAME} rules. Targets: ${targetPaths.length}, Selected rules: ${JSON.stringify(rules)}`);
+		this.logger.trace(`About to run ${SfgeEngine.ENGINE_NAME} rules. Targets: ${targetCount} files and/or methods, Selecfted rules: ${JSON.stringify(rules)}`);
 
 		try {
-			const output = await SfgeWrapper.runSfge(targetPaths, rules, JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig);
+			const output = await SfgeWrapper.runSfge(targets, rules, JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig);
 
 			// TODO: There should be some kind of method-call here to pull logs and warnings from the output.
 			const results = this.processStdout(output);

@@ -99,8 +99,8 @@ export default class Dfa extends ScannerRunCommand {
 	};
 
 	protected async validateCommandFlags(): Promise<void> {
-		// Entries in the projectdir array must be non-glob paths to existing directories.
 		const fh = new FileHandler();
+		// Entries in the projectdir array must be non-glob paths to existing directories.
 		for (const dir of (this.flags.projectdir as string[])) {
 			if (globby.hasMagic(dir)) {
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirCannotBeGlob', []);
@@ -108,6 +108,19 @@ export default class Dfa extends ScannerRunCommand {
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustExist', []);
 			} else if (!(await fh.stats(dir)).isDirectory()) {
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustBeDir', []);
+			}
+		}
+		// Entries in the target array may specify methods, but only if the entry is neither a glob nor a directory.
+		for (const target of (this.flags.target as string[])) {
+			// The target specifies a method if it includes the `#` syntax.
+			if (target.indexOf('#') > -1) {
+				if (globby.hasMagic(target)) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.methodLevelTargetCannotBeGlob', []);
+				}
+				const potentialFilePath = target.split('#')[0];
+				if (!(await fh.isFile(potentialFilePath))) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]);
+				}
 			}
 		}
 	}

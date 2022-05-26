@@ -24,9 +24,11 @@ module.exports = {
 		"targetDescriptionLong": "Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list"
 	},
 	"validations": {
+		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
+		"methodLevelTargetMustBeRealFile": "Method-level target %s must be an existing file",
 		"projectdirCannotBeGlob": "--projectdir cannot specify globs",
 		"projectdirMustBeDir": "--projectdir must specify directories",
-		"projectdirMustExist": "--projectdir must specify existing paths"
+		"projectdirMustExist": "--projectdir must specify existing paths",
 	},
 	"examples": `The paths specified for --projectdir must cumulatively contain all files specified through --target.
 		Good: $ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"

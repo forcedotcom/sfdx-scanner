@@ -206,46 +206,57 @@ export class DefaultRuleManager implements RuleManager {
 		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
 		for (const target of positivePatterns) {
 			// Used to detect if the target resulted in a match
-			const startLength: number = ruleTargets.length;
-			if (globby.hasMagic(target)) {
+			const ruleTargetsInitialLength: number = ruleTargets.length;
+			// Positive patterns might use method-level targeting. We only want to do path evaluation against the part
+			// that's actually a path.
+			const targetPortions = target.split('#');
+			// The array always has at least one entry.
+			const targetPath = targetPortions[0];
+			if (globby.hasMagic(targetPath)) {
 				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
 				// our pattern matcher.
-				const matchingTargets = await globby(target);
+				const matchingTargets = await globby(targetPath);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				// Filter the targets based on our target patterns.
 				const filteredTargets = await pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
-					target,
-					paths: filteredTargets
+					target: targetPath,
+					paths: filteredTargets,
+					methods: []
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
 				}
-			} else if (await this.fileHandler.exists(target)) {
-				const stats: Stats = await this.fileHandler.stats(target);
+			} else if (await this.fileHandler.exists(targetPath)) {
+				const stats: Stats = await this.fileHandler.stats(targetPath);
 				if (stats.isDirectory()) {
 					// If the target is a directory, we should get everything in it, convert relative paths to absolute
 					// paths, and then filter based our matcher.
-					const relativePaths = await globby(target);
+					const relativePaths = await globby(targetPath);
 					const ruleTarget = {
-						target,
+						target: targetPath,
 						isDirectory: true,
-						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
+						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t))),
+						methods: []
 					};
 					if (ruleTarget.paths.length > 0) {
 						ruleTargets.push(ruleTarget);
 					}
 				} else {
 					// The target is just a file. Validate it against our matcher, and add it if eligible.
-					const absolutePath = path.resolve(target);
+					const absolutePath = path.resolve(targetPath);
 					if (await pm.pathMatchesPatterns(absolutePath)) {
-						ruleTargets.push({target, paths: [absolutePath]});
+						ruleTargets.push({
+							target: targetPath,
+							paths: [absolutePath],
+							methods: targetPortions.length === 1 ? [] : targetPortions[1].split(';')
+						});
 					}
 				}
 			}
 
-			if (startLength !== ruleTargets.length) {
+			if (ruleTargetsInitialLength !== ruleTargets.length) {
 				matchedTargets.add(target);
 			}
 		}

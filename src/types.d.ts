@@ -44,6 +44,7 @@ export type RuleTarget = {
 	target: string;
 	isDirectory?: boolean;
 	paths: string[];
+	methods?: string[]
 }
 export type RuleResult = {
 	engine: string;

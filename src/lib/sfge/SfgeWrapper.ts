@@ -4,7 +4,7 @@ import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
-import {Rule, SfgeConfig} from '../../types';
+import {Rule, SfgeConfig, RuleTarget} from '../../types';
 import {CommandLineSupport} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
@@ -27,7 +27,7 @@ const EXIT_NO_VIOLATIONS = 0;
 const EXIT_WITH_VIOLATIONS = 4;
 
 interface SfgeWrapperOptions {
-	targetFiles: string[];
+	targets: RuleTarget[];
 	projectDirs: string[];
 	command: string;
 	rules: Rule[];
@@ -76,7 +76,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	private logger: Logger;
 	private initialized: boolean;
 	private fh: FileHandler;
-	private targetFiles: string[];
+	private targets: RuleTarget[];
 	private projectDirs: string[];
 	private command: string;
 	private rules: Rule[];
@@ -88,7 +88,7 @@ export class SfgeWrapper extends CommandLineSupport {
 
 	constructor(options: SfgeWrapperOptions) {
 		super(options);
-		this.targetFiles = options.targetFiles;
+		this.targets = options.targets;
 		this.projectDirs = options.projectDirs;
 		this.command = options.command;
 		this.rules = options.rules;
@@ -142,7 +142,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		const sourceListFile = await this.createInputFile(this.projectDirs);
 		const rulesToRun = this.rules.map(rule => rule.name).join(',');
 
-		this.logger.trace(`Stored the names of ${this.targetFiles.length} targeted files in ${targetListFile}`);
+		this.logger.trace(`Stored the names of ${this.targets.length} targeted files in ${targetListFile}`);
 		this.logger.trace(`Stored the names of ${this.projectDirs.length} source directories in ${sourceListFile}`);
 		this.logger.trace(`Rules to be executed: ${rulesToRun}`);
 
@@ -168,7 +168,7 @@ export class SfgeWrapper extends CommandLineSupport {
 
 	public static async getCatalog() {
 		const wrapper = await SfgeWrapper.create({
-			targetFiles: [],
+			targets: [],
 			projectDirs: [],
 			command: CATALOG_COMMAND,
 			rules: [],
@@ -179,20 +179,34 @@ export class SfgeWrapper extends CommandLineSupport {
 	}
 
 	private createTargetJsons(): string {
-		// TODO: For now, the target files can only be file-level instead of method-level. When that changes, this code
-		//  will change too.
-		const targetJsons: SfgeTarget[] = this.targetFiles.map(t => {
-			return {
-				targetFile: t,
-				targetMethods: []
-			};
+		const targetJsons: SfgeTarget[] = [];
+		this.targets.forEach(t => {
+			// If the target specifies individual methods in a file, then create one object encompasses the file and those
+			// methods.
+			// NOTE: This code assumes that method-level targets cannot have multiple files in the `paths` property. If
+			// this assumption is ever invalidated, then this code must change.
+			if (t.methods.length > 0) {
+				targetJsons.push({
+					targetFile: t.paths[0],
+					targetMethods: t.methods
+				});
+			} else {
+				// Otherwise, the target is a collection of paths encompassing whole files, and each such path should be
+				// its own object.
+				t.paths.forEach(p => {
+					targetJsons.push({
+						targetFile: p,
+						targetMethods: []
+					});
+				});
+			}
 		});
 		return JSON.stringify(targetJsons);
 	}
 
-	public static async runSfge(targetPaths: string[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
+	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
 		const wrapper = await SfgeWrapper.create({
-			targetFiles: targetPaths,
+			targets,
 			projectDirs: sfgeConfig.projectDirs,
 			command: EXEC_COMMAND,
 			rules: rules,
