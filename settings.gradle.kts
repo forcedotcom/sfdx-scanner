@@ -7,5 +7,6 @@
 
 rootProject.name = "sfdx-scanner"
 
+include("cli-messaging")
 include("pmd-cataloger")
 include("sfge")

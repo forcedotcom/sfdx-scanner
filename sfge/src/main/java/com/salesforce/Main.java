@@ -5,6 +5,7 @@ import com.salesforce.cli.OutputFormatter;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.graph.ops.GraphUtil;
+import com.salesforce.messaging.CliMessager;
 import com.salesforce.metainfo.MetaInfoCollector;
 import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRule;
@@ -147,6 +148,7 @@ public class Main {
                             allViolations.size()));
         }
         OutputFormatter formatter = new OutputFormatter();
+        System.out.println(CliMessager.getInstance().getAllMessagesWithFormatting());
         System.out.println(formatter.formatViolationJsons(allViolations));
         return allViolations.isEmpty() ? EXIT_NO_VIOLATIONS : EXIT_WITH_VIOLATIONS;
     }
