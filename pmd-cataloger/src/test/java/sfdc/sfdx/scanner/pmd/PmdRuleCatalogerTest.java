@@ -20,7 +20,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.EventKey;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 
 /**
@@ -34,21 +34,21 @@ public class PmdRuleCatalogerTest {
 	@Test
 	public void testAddJar() {
 		Map<String, List<String>> rulePathEntries = new Hashtable<>();
-		
+
 		rulePathEntries.put(APEX, Collections.singletonList(JAR_FILE_CATEGORIES_AND_RULESETS.toAbsolutePath().toString()));
 		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
 		PmdRuleCataloger pmdRuleCatalogerSpy = Mockito.spy(pmdRuleCataloger);
-		
+
 		ArgumentCaptor<PmdCatalogJson> pmdCatalogJsonCaptor = ArgumentCaptor.forClass(PmdCatalogJson.class);
 		Mockito.doNothing().when(pmdRuleCatalogerSpy).writeJsonToFile(pmdCatalogJsonCaptor.capture());
 		pmdRuleCatalogerSpy.catalogRules();
-		
+
 		PmdCatalogJson pmdCatalogJson = pmdCatalogJsonCaptor.getValue();
 		assertNotNull(pmdCatalogJson);
-		
+
 		JSONObject json = pmdCatalogJson.constructJson();
 		assertNotNull(json);
-		
+
 		List<Object> rulesets = (List<Object>)json.get(PmdCatalogJson.JSON_RULESETS);
 		assertNotNull(rulesets);
 		assertThat(rulesets, hasSize(equalTo(1)));
@@ -63,21 +63,21 @@ public class PmdRuleCatalogerTest {
 		assertNotNull(category);
 		assertThat((List<String>)category.get(PmdCatalogJson.JSON_PATHS), contains("category/apex/cat1.xml"));
     }
-    
+
     @SuppressWarnings("unchecked")
 	@Test
 	public void testAddXml() {
     	String path = XML_FILE.toAbsolutePath().toString();
 		Map<String, List<String>> rulePathEntries = new Hashtable<>();
-		
+
 		rulePathEntries.put(APEX, Collections.singletonList(path));
 		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
 		PmdRuleCataloger pmdRuleCatalogerSpy = Mockito.spy(pmdRuleCataloger);
-		
+
 		ArgumentCaptor<PmdCatalogJson> pmdCatalogJsonCaptor = ArgumentCaptor.forClass(PmdCatalogJson.class);
 		Mockito.doNothing().when(pmdRuleCatalogerSpy).writeJsonToFile(pmdCatalogJsonCaptor.capture());
 		pmdRuleCatalogerSpy.catalogRules();
-		
+
 		PmdCatalogJson pmdCatalogJson = pmdCatalogJsonCaptor.getValue();
 		assertNotNull(pmdCatalogJson);
 
@@ -91,16 +91,16 @@ public class PmdRuleCatalogerTest {
 		assertNotNull(category);
 		assertThat((List<String>)category.get(PmdCatalogJson.JSON_PATHS), contains(path));
     }
-    
+
     @Test
 	public void testExceptionIsThrownWhenCollisionOccurs() {
 		Map<String, List<String>> rulePathEntries = new Hashtable<>();
-		
+
 		rulePathEntries.put(APEX, Arrays.asList(COLLISION_JAR_1.toAbsolutePath().toString(),
 				COLLISION_JAR_2.toAbsolutePath().toString()));
 		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
-		
-		thrown.expect(new SfdxScannerExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
+
+		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
 				new String[] { "category/joshapex/somecat.xml", COLLISION_JAR_2.toAbsolutePath().toString(),
 						COLLISION_JAR_1.toAbsolutePath().toString() }));
 

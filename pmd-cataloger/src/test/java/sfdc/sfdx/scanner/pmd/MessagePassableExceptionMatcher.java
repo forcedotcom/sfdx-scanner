@@ -6,30 +6,30 @@ import java.util.Optional;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 
-import sfdc.sfdx.scanner.messaging.EventKey;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
 
 /**
  * Custom matcher that can be used with
  * {@link org.junit.rules.ExpectedException#expect(org.hamcrest.Matcher)}
- * 
+ *
  * <pre>
  * // Example Usage
- * thrown.expect(new SfdxScannerExceptionMatcher(EventKey.WARNING_INVALID_CAT_SKIPPED,
+ * thrown.expect(new MessagePassableExceptionMatcher(EventKey.WARNING_INVALID_CAT_SKIPPED,
  * 		new String[] { "InventoryName" }));
  * </pre>
  */
-public class SfdxScannerExceptionMatcher extends TypeSafeMatcher<SfdxScannerException> {
+public class MessagePassableExceptionMatcher extends TypeSafeMatcher<MessagePassableException> {
 	private final EventKey expectedEventKey;
 	private final String[] expectedArgs;
 
-	public SfdxScannerExceptionMatcher(EventKey expectedEventKey, String[] expectedArgs) {
+	public MessagePassableExceptionMatcher(EventKey expectedEventKey, String[] expectedArgs) {
 		this.expectedEventKey = expectedEventKey;
 		this.expectedArgs = nullToEmpty(expectedArgs);
 	}
-	
+
 	@Override
-	protected boolean matchesSafely(SfdxScannerException item) {
+	protected boolean matchesSafely(MessagePassableException item) {
 		String[] actualArgs = nullToEmpty(item.getArgs());
 		return expectedEventKey.equals(item.getEventKey()) &&
 				Arrays.equals(expectedArgs, actualArgs);
@@ -40,7 +40,7 @@ public class SfdxScannerExceptionMatcher extends TypeSafeMatcher<SfdxScannerExce
 		description.appendText("EventKey=").appendValue(expectedEventKey.name()).appendText(", Args=")
 				.appendValue(expectedArgs);
 	}
-	
+
 	/**
 	 * Convert a null array to empty array. The are equivalent for our purposes.
 	 */

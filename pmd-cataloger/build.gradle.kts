@@ -54,6 +54,7 @@ tasks.register<Copy>("installPmd") {
 }
 
 dependencies {
+  implementation(project(":cli-messaging"))
   implementation ("com.googlecode.json-simple:json-simple:1.1.1") {
     exclude("junit")
   }
@@ -97,7 +98,7 @@ tasks.jacocoTestCoverageVerification {
   violationRules {
     rule {
       limit {
-        minimum = "0.80".toBigDecimal()
+        minimum = "0.70".toBigDecimal()
       }
     }
   }

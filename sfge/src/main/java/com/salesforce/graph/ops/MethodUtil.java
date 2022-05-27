@@ -116,39 +116,40 @@ public final class MethodUtil {
                                                     .has(Schema.FILE_NAME, target.getTargetFile())
                                                     .count()
                                                     .is(P.eq(1))));
-			addMessagesForTarget(target, targetMethodVertices);
+            addMessagesForTarget(target, targetMethodVertices);
             methodVertices.addAll(targetMethodVertices);
         }
         return methodVertices;
     }
 
-	private static void addMessagesForTarget(RuleRunnerTarget target, List<MethodVertex> vertices) {
-		NonNullHashMap<String, Integer> methodCountByName = CollectionUtil.newNonNullHashMap();
-		// Map each vertex's method name to the number of vertices sharing that name.
-		for (MethodVertex methodVertex : vertices) {
-			String methodName = methodVertex.getName();
-			int priorCount = methodCountByName.getOrDefault(methodName, 0);
-			methodCountByName.put(methodName, priorCount + 1);
-		}
-		// For each of the methods we were instructed to target, see how many methods with that name were found.
-		for (String targetMethod : target.getTargetMethods()) {
-			Integer methodCount = methodCountByName.getOrDefault(targetMethod, 0);
-			if (methodCount == 0) {
-				CliMessager.getInstance()
-					.addMessage(
-						"Loading " + targetMethod + " vertices",
-						EventKey.WARNING_NO_METHOD_TARGET_MATCHES,
-						targetMethod);
-			} else if (methodCount > 1) {
-				CliMessager.getInstance()
-					.addMessage(
-						"Loading " + targetMethod + " vertices",
-						EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES,
-						targetMethod,
-						methodCount.toString());
-			}
-		}
-	}
+    private static void addMessagesForTarget(RuleRunnerTarget target, List<MethodVertex> vertices) {
+        NonNullHashMap<String, Integer> methodCountByName = CollectionUtil.newNonNullHashMap();
+        // Map each vertex's method name to the number of vertices sharing that name.
+        for (MethodVertex methodVertex : vertices) {
+            String methodName = methodVertex.getName();
+            int priorCount = methodCountByName.getOrDefault(methodName, 0);
+            methodCountByName.put(methodName, priorCount + 1);
+        }
+        // For each of the methods we were instructed to target, see how many methods with that name
+        // were found.
+        for (String targetMethod : target.getTargetMethods()) {
+            Integer methodCount = methodCountByName.getOrDefault(targetMethod, 0);
+            if (methodCount == 0) {
+                CliMessager.getInstance()
+                        .addMessage(
+                                "Loading " + targetMethod + " vertices",
+                                EventKey.WARNING_NO_METHOD_TARGET_MATCHES,
+                                targetMethod);
+            } else if (methodCount > 1) {
+                CliMessager.getInstance()
+                        .addMessage(
+                                "Loading " + targetMethod + " vertices",
+                                EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES,
+                                targetMethod,
+                                methodCount.toString());
+            }
+        }
+    }
 
     /**
      * Returns non-test methods in the target files with an @AuraEnabled annotation. An empty list

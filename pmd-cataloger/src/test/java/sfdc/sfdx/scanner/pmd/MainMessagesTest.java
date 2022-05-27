@@ -7,10 +7,10 @@ import com.google.gson.reflect.TypeToken;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import sfdc.sfdx.scanner.messaging.EventKey;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.Message;
-import sfdc.sfdx.scanner.messaging.SfdxMessager;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.Message;
+import com.salesforce.messaging.CliMessager;
 
 import java.util.List;
 
@@ -21,14 +21,14 @@ public class MainMessagesTest {
 	@Before
 	@After
 	public void clearMessages() {
-		SfdxMessager.getInstance().resetMessages();
+		CliMessager.getInstance().resetMessages();
 	}
 
 	@Test
 	public void verifySfdxScannerExceptionsToMessages() {
 		final EventKey expectedEventKey = EventKey.ERROR_INTERNAL_UNEXPECTED;
 		final String[] expectedArgs = {"dummy arg"};
-		final SfdxScannerException exception = new SfdxScannerException(expectedEventKey, expectedArgs);
+		final MessagePassableException exception = new MessagePassableException(expectedEventKey, expectedArgs);
 
 		// Setup mock
 		final Main.Dependencies dependencies = setupMockToThrowException(exception);
@@ -74,7 +74,7 @@ public class MainMessagesTest {
 	}
 
 	private List<Message> getMessages() {
-		final String messagesInJson = SfdxMessager.getInstance().getAllMessages();
+		final String messagesInJson = CliMessager.getInstance().getAllMessages();
 		assertNotNull(messagesInJson);
 
 		// Deserialize JSON to verify further

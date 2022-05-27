@@ -15,7 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.EventKey;
 
 /**
  * Unit test for {@link LanguageXmlFileMapping}
@@ -122,7 +122,7 @@ public class LanguageXmlFileMappingTest {
 
 		languageXmlFileMapping.addPathsForLanguage(Arrays.asList(xmlContainer1), APEX);
 
-		thrown.expect(new SfdxScannerExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
+		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
 				new String[] { collidingPath, jar2, jar1 }));
 
 		languageXmlFileMapping.addPathsForLanguage(Arrays.asList(xmlContainer2), APEX);

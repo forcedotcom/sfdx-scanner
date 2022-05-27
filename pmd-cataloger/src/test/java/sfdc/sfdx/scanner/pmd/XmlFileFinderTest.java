@@ -16,7 +16,7 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.EventKey;
 
 /**
  * Unit tests for {@link XmlFileFinder}
@@ -106,7 +106,7 @@ public class XmlFileFinderTest {
 	@Test
 	public void testFindingNonExistentFile_ExpectError() {
 		XmlFileFinder xmlFileFinder = new XmlFileFinder();
-		thrown.expect(new SfdxScannerExceptionMatcher(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{"nonexistentfile.xml"}));
+		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{"nonexistentfile.xml"}));
 
 		List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder.findXmlFilesInPath("nonexistentfile.xml");
 	}

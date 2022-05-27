@@ -8,16 +8,15 @@ import java.util.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.w3c.dom.*;
-import sfdc.sfdx.scanner.messaging.Message;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.SfdxMessager;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.EventKey;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRuleset;
 import sfdc.sfdx.scanner.xml.XmlReader;
 import sfdc.sfdx.scanner.paths.PathManipulator;
-import sfdc.sfdx.scanner.messaging.EventKey;
 
 class PmdRuleCataloger {
 	private Map<String, List<String>> rulePathEntries;
@@ -110,7 +109,7 @@ class PmdRuleCataloger {
 		// If the root node isn't of type 'ruleset', this isn't a valid category file, so we should just log something and skip it.
 		if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
 			String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-			SfdxMessager.getInstance().addMessage("Processing category file for language " + language + " at path " + path, EventKey.WARNING_INVALID_CAT_SKIPPED, fullPath);
+			CliMessager.getInstance().addMessage("Processing category file for language " + language + " at path " + path, EventKey.WARNING_INVALID_CAT_SKIPPED, fullPath);
 			return;
 		}
 
@@ -143,7 +142,7 @@ class PmdRuleCataloger {
 		// If the root node isn't of type 'ruleset', this isn't a valid ruleset file, so we should just log something and skip it.
 		if (!root.getTagName().equalsIgnoreCase("ruleset") || !root.getAttribute("xmlns").startsWith("http://pmd.sourceforge.net")) {
 			String fullPath = PathManipulator.getInstance().convertResourcePathToAbsolutePath(path);
-			SfdxMessager.getInstance().addMessage("Generating Ruleset representation for language " + language + " at path " + path, EventKey.WARNING_INVALID_RULESET_SKIPPED, fullPath);
+			CliMessager.getInstance().addMessage("Generating Ruleset representation for language " + language + " at path " + path, EventKey.WARNING_INVALID_RULESET_SKIPPED, fullPath);
 			return;
 		}
 
@@ -181,7 +180,7 @@ class PmdRuleCataloger {
 	void writeJsonToFile(PmdCatalogJson json) {
 		final String catalogHome = System.getProperty("catalogHome");
 		final String catalogName = System.getProperty("catalogName");
-		SfdxMessager.getInstance().addMessage(String.format("Received catalogHome as %s and catalogName as %s", catalogHome, catalogName), EventKey.INFO_GENERAL_INTERNAL_LOG, "PmdRuleCataloger.writeJsonToFile()");
+		CliMessager.getInstance().addMessage(String.format("Received catalogHome as %s and catalogName as %s", catalogHome, catalogName), EventKey.INFO_GENERAL_INTERNAL_LOG, "PmdRuleCataloger.writeJsonToFile()");
 		Path catDirPath = Paths.get(catalogHome);
 		File catDir = catDirPath.toFile();
 		catDir.mkdir();
@@ -191,7 +190,7 @@ class PmdRuleCataloger {
 			Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();
 			file.write(prettyGson.toJson(json.constructJson()));
 		} catch (IOException ioe) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, catalogName);
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_JSON_WRITE_FAILED, ioe, catalogName);
 		}
 	}
 }
