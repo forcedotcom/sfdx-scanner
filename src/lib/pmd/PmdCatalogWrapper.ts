@@ -1,10 +1,9 @@
 import {Logger, Messages} from '@salesforce/core';
-import {ChildProcessWithoutNullStreams} from "child_process";
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
 import * as JreSetupManager from './../JreSetupManager';
-import {OutputProcessor} from './OutputProcessor';
+import {ResultHandlerArgs} from '../services/CommandLineSupport';
 import * as PmdLanguageManager from './PmdLanguageManager';
 import {PmdSupport} from './PmdSupport';
 import { PMD_LIB } from '../../Constants';
@@ -21,7 +20,6 @@ const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-ca
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
 export class PmdCatalogWrapper extends PmdSupport {
-	private outputProcessor: OutputProcessor;
 	private logger: Logger; // TODO: add relevant trace logs
 	private initialized: boolean;
 	private sfdxScannerPath: string;
@@ -30,8 +28,8 @@ export class PmdCatalogWrapper extends PmdSupport {
 		if (this.initialized) {
 			return;
 		}
+		await super.init();
 		this.logger = await Logger.child('PmdCatalogWrapper');
-		this.outputProcessor = await OutputProcessor.create({});
 		this.sfdxScannerPath = Controller.getSfdxScannerPath();
 
 		this.initialized = true;
@@ -68,7 +66,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 
 	protected async buildClasspath(): Promise<string[]> {
 		const catalogerLibs = `${PMD_CATALOGER_LIB}/*`;
-		const classpathEntries = await super.buildClasspath();
+		const classpathEntries = await super.buildSharedClasspath();
 		classpathEntries.push(catalogerLibs);
 		return classpathEntries;
 	}
@@ -151,32 +149,20 @@ export class PmdCatalogWrapper extends PmdSupport {
 		return path.join(PMD_LIB, "pmd-" + language + "-" + PMD_VERSION + ".jar");
 	}
 
-	/**
-	 * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject function.
-	 * Resolves/rejects the Promise once the child process finishes.
-	 * @param cp
-	 * @param res
-	 * @param rej
-	 */
-	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void {
-		let stdout = '';
-
-		// When data is passed back up to us, pop it onto the appropriate string.
-		cp.stdout.on('data', data => {
-			stdout += data;
-		});
-
-		// When the child process exits, if it exited with a zero code we can resolve, otherwise we'll reject.
-		cp.on('exit', code => {
-			this.outputProcessor.processOutput(stdout);
-			this.logger.trace(`monitorChildProcess has received exit code ${code}`);
-			if (code === 0) {
-				res(stdout);
-			} else {
-				rej(messages.getMessage('error.external.errorMessageAbove'));
-			}
-		});
+	protected isSuccessfulExitCode(code: number): boolean {
+		// By internal convention, 0 indicates success and any non-0 code indicates failure.
+		return code === 0;
 	}
 
+	protected handleResults(args: ResultHandlerArgs): void {
+		if (this.isSuccessfulExitCode(args.code)) {
+			args.res(args.stdout);
+		} else {
+			// If the process errored out, then one of the Messages logged by the parent class already indicates that.
+			// So rather than returning stderr (which will be confusing and likely unhelpful, just return a hardcoded
+			// string indicating that the cause was logged elsewhere.
+			args.rej(messages.getMessage('error.external.errorMessageAbove'));
+		}
+	}
 
 }

@@ -4,7 +4,7 @@ import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfigValue, ESRuleConfig, RuleViolation} from '../../types';
 import { Logger, Messages, SfdxError } from '@salesforce/core';
-import { OutputProcessor } from '../pmd/OutputProcessor';
+import { OutputProcessor } from '../services/OutputProcessor';
 import {deepCopy} from '../util/Utils';
 import { rules } from '@typescript-eslint/eslint-plugin';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';

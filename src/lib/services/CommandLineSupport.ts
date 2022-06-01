@@ -1,13 +1,23 @@
 import { Logger } from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
-import {ChildProcessWithoutNullStreams} from 'child_process';
 import cspawn = require('cross-spawn');
+import {OutputProcessor} from './OutputProcessor';
 import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
+
+
+export type ResultHandlerArgs = {
+	code: number;
+	stdout: string;
+	stderr: string;
+	res: (string) => void;
+	rej: (string) => void;
+};
 
 export abstract class CommandLineSupport extends AsyncCreatable {
 
 	private parentLogger: Logger;
 	private parentInitialized: boolean;
+	private outputProcessor: OutputProcessor;
 
 	protected async init(): Promise<void> {
 
@@ -16,6 +26,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 		}
 
 		this.parentLogger = await Logger.child('CommandLineSupport');
+		this.outputProcessor = await OutputProcessor.create({});
 		this.parentInitialized = true;
 	}
 
@@ -32,37 +43,19 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	}
 
 	/**
-	 * Accepts a child process created by child_process.spawn(), and a Promise's resolve and reject functions.
-	 * Resolves/rejects the Promise once the child process finishes.
-	 * @param cp
-	 * @param res
-	 * @param rej
+	 * Perform any job-specific processing on the results of a child process execution, and either resolve or reject as
+	 * needed.
+	 * @param args
+	 * @protected
 	 */
-	protected monitorChildProcess(cp: ChildProcessWithoutNullStreams, res: (string) => void, rej: (string) => void): void {
-		let stdout = '';
-		let stderr = '';
-		this.getSpinnerManager().startSpinner();
+	protected abstract handleResults(args: ResultHandlerArgs): void;
 
-		// When data is passed back up to us, pop it onto the appropriate string.
-		cp.stdout.on('data', data => {
-			stdout += data;
-		});
-		cp.stderr.on('data', data => {
-			stderr += data;
-		});
-
-		cp.on('exit', code => {
-			this.parentLogger.trace(`monitorChildProcess has received exit code ${code}`);
-			if (this.isSuccessfulExitCode(code)) {
-				this.getSpinnerManager().stopSpinner(true);
-				res(stdout);
-			} else {
-				// If we got any other error, it means something actually went wrong. We'll just reject with stderr for
-				// the ease of upstream error handling.
-				this.getSpinnerManager().stopSpinner(false);
-				rej(stderr);
-			}
-		});
+	protected defaultResultHandler(args: ResultHandlerArgs): void {
+		if (this.isSuccessfulExitCode(args.code)) {
+			args.res(args.stdout);
+		} else {
+			args.rej(args.stderr);
+		}
 	}
 
 	protected abstract isSuccessfulExitCode(code: number): boolean;
@@ -74,7 +67,32 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 		return new Promise<string>((res, rej) => {
 			const cp = cspawn.spawn(command, args);
-			this.monitorChildProcess(cp, res, rej);
+
+			let stdout = '';
+			let stderr = '';
+			this.getSpinnerManager().startSpinner();
+
+			// When data is passed back up to us, pop it onto the appropriate string.
+			cp.stdout.on('data', data => {
+				stdout += data;
+			});
+			cp.stderr.on('data', data => {
+				stderr += data;
+			});
+
+			cp.on('exit', code => {
+				this.parentLogger.trace(`runCommand has received exit code ${code}`);
+				this.getSpinnerManager().stopSpinner(this.isSuccessfulExitCode(code));
+				// The output processor's input is always stdout.
+				this.outputProcessor.processOutput(stdout);
+				this.handleResults({
+					code,
+					stdout,
+					stderr,
+					res,
+					rej
+				});
+			});
 		});
 	}
 }

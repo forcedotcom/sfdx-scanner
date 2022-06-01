@@ -3,7 +3,7 @@ import * as path from 'path';
 import {injectable} from 'tsyringe';
 import {CATALOG_FILE} from '../../Constants';
 import {Catalog, Rule, RuleEvent, RuleGroup} from '../../types';
-import {OutputProcessor} from '../pmd/OutputProcessor';
+import {OutputProcessor} from './OutputProcessor';
 import {isRuleGroupFilter, RuleFilter} from '../RuleFilter';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
