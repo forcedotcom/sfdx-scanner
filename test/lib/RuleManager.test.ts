@@ -15,6 +15,7 @@ import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
 import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
+import {SfgeEngine} from '../../src/lib/sfge/SfgeEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
@@ -514,6 +515,35 @@ describe('RuleManager', () => {
 				expect(results[0].target).to.equal(targets[0], 'Wrong directory matched');
 				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+
+			it('Positive method-level targets are properly matched', async () => {
+				// All tests will use the SFGE engine, since method-level targeting is intended for that engine anyway.
+				const engine = new SfgeEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized Unix paths, some of which also specify individual methods.
+				const targetFile1 = 'test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls';
+				const targetMethods1 = ['flsNoEnforcementAttempted', 'flsDoneCorrectly'];
+				const targetFile2 = 'test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/VfControllerFls.cls';
+				const targetMethods2 = ['flsWrongPermissionChecked'];
+				const targets = [
+					`${targetFile1}#${targetMethods1.join(';')}`,
+					`${targetFile2}#${targetMethods2.join(';')}`
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targetFile1, 'Expected different first file');
+				expect(results[0].methods).to.deep.equal(targetMethods1, 'Expected different first methods');
+				expect(results[1].target).to.equal(targetFile2, 'Expected different second file');
+				expect(results[1].methods).to.deep.equal(targetMethods2, 'Expected different second methods');
 			});
 
 			it('Positive glob-type targets are properly matched', async () => {

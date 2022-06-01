@@ -10,6 +10,7 @@ repositories {
 }
 
 dependencies {
+	implementation(project(":cli-messaging"))
 	implementation("commons-cli:commons-cli:1.4")
 	implementation("org.apache.commons:commons-collections4:4.4")
 	implementation("org.apache.tinkerpop:tinkergraph-gremlin:3.5.1")

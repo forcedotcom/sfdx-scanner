@@ -8,6 +8,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.collections.NonNullHashMap;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
@@ -53,6 +54,8 @@ import com.salesforce.graph.vertex.UserClassVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
+import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.EventKey;
 import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.util.ArrayList;
@@ -99,7 +102,7 @@ public final class MethodUtil {
         // things, the performance
         // hit is negligible.
         for (RuleRunnerTarget target : targets) {
-            methodVertices.addAll(
+            List<MethodVertex> targetMethodVertices =
                     SFVertexFactory.loadVertices(
                             g,
                             g.V().where(
@@ -112,9 +115,48 @@ public final class MethodUtil {
                                                     .until(__.has(Schema.FILE_NAME))
                                                     .has(Schema.FILE_NAME, target.getTargetFile())
                                                     .count()
-                                                    .is(P.eq(1)))));
+                                                    .is(P.eq(1))));
+            addMessagesForTarget(target, targetMethodVertices);
+            methodVertices.addAll(targetMethodVertices);
         }
         return methodVertices;
+    }
+
+	/**
+	 * If any of the method names specified by the provided target returned multiple results or zero results, adds a
+	 * message to a {@link CliMessager} instance indicating such.
+	 * @param target - A target that specifies a file and methods within that file
+	 * @param vertices - The method vertices returned by the query created using the target
+	 */
+    private static void addMessagesForTarget(RuleRunnerTarget target, List<MethodVertex> vertices) {
+        NonNullHashMap<String, Integer> methodCountByName = CollectionUtil.newNonNullHashMap();
+        // Map each vertex's method name to the number of vertices sharing that name.
+        for (MethodVertex methodVertex : vertices) {
+            String methodName = methodVertex.getName();
+            int priorCount = methodCountByName.getOrDefault(methodName, 0);
+            methodCountByName.put(methodName, priorCount + 1);
+        }
+        // For each of the methods we were instructed to target, see how many methods with that name
+        // were found.
+        for (String targetMethod : target.getTargetMethods()) {
+            Integer methodCount = methodCountByName.getOrDefault(targetMethod, 0);
+            if (methodCount == 0) {
+                CliMessager.getInstance()
+                        .addMessage(
+                                "Loading " + targetMethod + " vertices",
+                                EventKey.WARNING_NO_METHOD_TARGET_MATCHES,
+                                target.getTargetFile(),
+                                targetMethod);
+            } else if (methodCount > 1) {
+                CliMessager.getInstance()
+                        .addMessage(
+                                "Loading " + targetMethod + " vertices",
+                                EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES,
+                                methodCount.toString(),
+                                target.getTargetFile(),
+                                targetMethod);
+            }
+        }
     }
 
     /**

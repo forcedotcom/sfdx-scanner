@@ -1,4 +1,4 @@
-import {OutputProcessor} from '../pmd/OutputProcessor';
+import {OutputProcessor} from '../services/OutputProcessor';
 import {AsyncCreatable} from '@salesforce/kit';
 
 export class EventCreator extends AsyncCreatable {
@@ -17,11 +17,11 @@ export class EventCreator extends AsyncCreatable {
 
 	public createUxInfoAlwaysMessage(eventTemplateKey: string, args: string[]): void {
 		const event = {
-			messageKey: eventTemplateKey, 
-			args: args, 
-			type: 'INFO', 
-			handler: 'UX', 
-			verbose: false, 
+			messageKey: eventTemplateKey,
+			args: args,
+			type: 'INFO',
+			handler: 'UX',
+			verbose: false,
 			time: Date.now()
 		};
 		this.outputProcessor.emitEvents([event]);
