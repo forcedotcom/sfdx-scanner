@@ -1,21 +1,30 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
+import com.salesforce.messaging.EventKey;
 import org.json.simple.JSONObject;
 
 import static org.junit.Assert.*;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.mockito.Mockito.*;
 
+import org.junit.rules.ExpectedException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import sfdc.sfdx.scanner.pmd.MessagePassableExceptionMatcher;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
 public class PmdCatalogRuleTest {
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	private static final String NAME = "Name";
 	private static final String MESSAGE = "Some message";
@@ -29,7 +38,7 @@ public class PmdCatalogRuleTest {
 	@Test
 	public void testCatalogRuleJsonConversion() {
 		// Setup mock
-		final Element elementMock = getElementMock(1, "description");
+		final Element elementMock = getElementMock(Collections.singletonList("description"));
 		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
 
@@ -55,11 +64,10 @@ public class PmdCatalogRuleTest {
 	@Test
 	public void testCatalogRuleNoDescription() {
 
-		final int descriptionNlCount = 0;
 		final String emptyDescription = "";
 
 		// Setup mock
-		final Element elementMock = getElementMock(descriptionNlCount, emptyDescription);
+		final Element elementMock = getElementMock(Collections.singletonList(""));
 		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
 		// Execute
@@ -71,11 +79,10 @@ public class PmdCatalogRuleTest {
 
 	@Test
 	public void testCatalogRuleJsonWithDescription() {
-		final int descriptionNlCount = 1;
 		final String description = "Some description";
 
 		// Setup mock
-		final Element elementMock = getElementMock(descriptionNlCount, description);
+		final Element elementMock = getElementMock(Collections.singletonList(description));
 		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
 
 		// Execute
@@ -85,18 +92,33 @@ public class PmdCatalogRuleTest {
 		assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION));
 	}
 
-	private Element getElementMock(int descriptionNlCount, String emptyDescription) {
+	@Test
+	public void testCatalogRuleJsonWithMultipleDescriptions_expectException() {
+		final String description1 = "Some Description";
+		final String description2 = "Some Other Description";
+
+		// Setup mock
+		final Element elementMock = getElementMock(Arrays.asList(description1, description2));
+		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC,
+			new String[]{CATEGORY.getPath() + "/" + NAME, "2"}
+		));
+		// Even initializing the object should be enough to trigger the expected exception.
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+	}
+
+	private Element getElementMock(List<String> descriptions) {
 		final Element elementMock = mock(Element.class);
 		doReturn(NAME).when(elementMock).getAttribute(PmdCatalogRule.ATTR_NAME);
 		doReturn(MESSAGE).when(elementMock).getAttribute(PmdCatalogRule.ATTR_MESSAGE);
 
-		final Element descElementMock = mock(Element.class);
-		doReturn(emptyDescription).when(descElementMock).getTextContent();
-
-		final NodeList nodeList = mock(NodeList.class);
-		doReturn(descriptionNlCount).when(nodeList).getLength();
-		doReturn(descElementMock).when(nodeList).item(0);
-		doReturn(nodeList).when(elementMock).getElementsByTagName(PmdCatalogRule.ATTR_DESCRIPTION);
+		final NodeList nodeListMock = mock(NodeList.class);
+		doReturn(descriptions.size()).when(nodeListMock).getLength();
+		for (int i = 0; i < descriptions.size(); i++) {
+			final Element descElementMock = mock(Element.class);
+			doReturn(descriptions.get(i)).when(descElementMock).getTextContent();
+			doReturn(descElementMock).when(nodeListMock).item(i);
+		}
+		doReturn(nodeListMock).when(elementMock).getElementsByTagName(PmdCatalogRule.ATTR_DESCRIPTION);
 
 		return elementMock;
 	}

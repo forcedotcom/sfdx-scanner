@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.xml;
 
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.EventKey;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -68,13 +68,13 @@ public class XmlReader {
 			DocumentBuilder db = dbf.newDocumentBuilder();
 			doc = db.parse(in);
 		} catch (FileNotFoundException fnf) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path);
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path);
 		} catch (IOException ioe) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_XML_NOT_READABLE, ioe, path, ioe.getMessage());
 		} catch (ParserConfigurationException | SAXException e) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_XML_NOT_PARSABLE, e, path, e.getMessage());
 		} catch (IllegalArgumentException iae) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH, iae, path);
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_XML_MISSING_IN_CLASSPATH, iae, path);
 		}
 		return doc;
 	}

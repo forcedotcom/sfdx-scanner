@@ -3,9 +3,9 @@ package sfdc.sfdx.scanner.pmd;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import sfdc.sfdx.scanner.messaging.EventKey;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.SfdxMessager;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.CliMessager;
 
 public class Main {
 
@@ -47,18 +47,18 @@ public class Main {
 			final Map<String, List<String>> rulePathEntries = parseArguments(args);
 			catalogRules(rulePathEntries);
 
-		} catch (SfdxScannerException se) {
+		} catch (MessagePassableException se) {
 			// Add all SfdxScannerExceptions as messages
-			SfdxMessager.getInstance().addMessage(se);
+			CliMessager.getInstance().addMessage(se);
 			exitGracefully = false;
 		} catch (Throwable throwable) {
 			// Catch and handle any exceptions that may have slipped through
-			final SfdxScannerException exception = new SfdxScannerException(EventKey.ERROR_INTERNAL_UNEXPECTED, throwable, throwable.getMessage());
-			SfdxMessager.getInstance().addMessage(exception);
+			final MessagePassableException exception = new MessagePassableException(EventKey.ERROR_INTERNAL_UNEXPECTED, throwable, throwable.getMessage());
+			CliMessager.getInstance().addMessage(exception);
 			exitGracefully = false;
 		} finally {
 			// Print all the messages we have collected in a parsable format
-			System.out.println(SfdxMessager.getInstance().getAllMessagesWithFormatting());
+			System.out.println(CliMessager.getInstance().getAllMessagesWithFormatting());
 		}
 
 		return exitGracefully;
@@ -71,7 +71,7 @@ public class Main {
 
 	Map<String, List<String>> parseArguments(String[] args) {
 		if (args == null || args.length < 1) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, NO_ARGUMENTS_FOUND);
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, NO_ARGUMENTS_FOUND);
 		}
 
 		final Map<String, List<String>> rulePathEntries = new HashMap<>();
@@ -87,19 +87,19 @@ public class Main {
 
 		// DIVIDER should split arg in language and path list. No less, no more
 		if (splitArg.length != 2) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(EXPECTED_DIVIDER, arg));
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(EXPECTED_DIVIDER, arg));
 		}
 		final String language = splitArg[0].trim();
 		final String paths = splitArg[1];
 
 		if ("".equals(language.trim()) || "".equals((paths.trim()))) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(MISSING_PARTS, arg));
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(MISSING_PARTS, arg));
 		}
 
 		final String[] pathArray = paths.split(COMMA);
 
 		if (pathArray.length < 1) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(NO_PATH_PROVIDED, language, arg));
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, String.format(NO_PATH_PROVIDED, language, arg));
 		}
 
 		// Stream path array to filter out empty path
