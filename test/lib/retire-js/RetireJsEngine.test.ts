@@ -301,7 +301,7 @@ describe('RetireJsEngine', () => {
 			};
 
 			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
-			const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+			const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies', false);
 
 			// Now we run our assertions.
 			expect(results.length).to.equal(2, 'Should be two result objects because of the two spoofed files.');
@@ -312,6 +312,61 @@ describe('RetireJsEngine', () => {
 			expect(results[1].violations.length).to.equal(2, 'Should be two violations in the second file');
 			expect(results[1].violations[0].severity).to.equal(1, 'Sev should be translated to 1');
 			expect(results[1].violations[1].severity).to.equal(3, 'Sev should be translated to 3');
+		});
+
+		it('Properly generates message for --verbose-violations', async () => {
+			// First, we need to seed the test engine with some fake aliases.
+			const firstOriginal = path.join('first', 'unimportant', 'path', 'jquery-3.1.0.js');
+			const firstAlias = path.join('first', 'unimportant', 'alias', 'jquery-3.1.0.js');
+			const secondOriginal = path.join('first', 'unimportant', 'path', 'angular-scenario.js');
+			const secondAlias = path.join('first', 'unimportant', 'alias', 'angular-scenario.js');
+
+			(testEngine as any).originalFilesByAlias.set(firstAlias, firstOriginal);
+			(testEngine as any).originalFilesByAlias.set(secondAlias, secondOriginal);
+
+			// Next, we want to spoof some output that looks like it came from RetireJS.
+			const fakeRetireResult = {
+						"version": "3.1.0",
+						"component": "jquery",
+						"vulnerabilities": [{
+							"below": "3.4.0",
+							"identifiers": {
+								"CVE": ["CVE-2019-11358"],
+								"summary": "summary one",
+								"random": "this could be anything"
+							},
+							"info": [
+								'https://blog.jquery.com/2019/04/10/jquery-3-4-0-released/',
+								'https://nvd.nist.gov/vuln/detail/CVE-2019-11358'
+							],
+							"severity": "medium"
+						}, {
+							"below": "3.5.0",
+							"identifiers": {
+								"summary": "summary two"
+							},
+							"info": [
+								'https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/'
+							],
+							"severity": "medium"
+						}, {
+							"below": "3.6.0",
+							"identifiers": {
+								"CVE": ["CVE-2020-11111"],
+							},
+							"info": [
+								'https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/'
+							],
+							"severity": "low"
+						}]
+					}
+
+			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
+			const message: string = (testEngine as any).generateVerboseMessage(fakeRetireResult, 'insecure-bundled-dependencies', true);
+
+			// Now we run our assertions.
+			expect(message).to.equal("jquery 3.1.0 has known vulnerabilities:\nseverity: medium; summary: summary one; CVE: CVE-2019-11358; random: this could be anything; https://blog.jquery.com/2019/04/10/jquery-3-4-0-released/ https://nvd.nist.gov/vuln/detail/CVE-2019-11358\nseverity: medium; summary: summary two; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/\nseverity: low; CVE: CVE-2020-11111; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/", 'Verbose message should contain correct information and format');
+
 		});
 
 		// Changes to the codebase make it unclear how this corner case would occur, but it's worth having the automation
@@ -377,7 +432,7 @@ describe('RetireJsEngine', () => {
 			};
 
 			// THIS IS THE ACTUAL METHOD BEING TESTED: Now we feed that fake result into the engine and see what we get back.
-			const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies');
+			const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(fakeRetireOutput), 'insecure-bundled-dependencies', false);
 
 			// Now we run our assertions.
 			expect(results.length).to.equal(1, 'Should be one result object, since both aliases correspond to the same original file');
@@ -393,7 +448,7 @@ describe('RetireJsEngine', () => {
 				const invalidJson = '{"beep": [';
 
 				try {
-					const results: RuleResult[] = (testEngine as any).processOutput(invalidJson, 'insecure-bundled-dependencies');
+					const results: RuleResult[] = (testEngine as any).processOutput(invalidJson, 'insecure-bundled-dependencies', false);
 					expect(true).to.equal(false, 'Exception should be thrown');
 					expect(results).to.equal(null, 'This assertion should never fire. It is needed to make the TS compiler stop complaining');
 				} catch (e) {
@@ -408,7 +463,7 @@ describe('RetireJsEngine', () => {
 				};
 
 				try {
-					const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(malformedJson), 'insecure-bundled-dependencies');
+					const results: RuleResult[] = (testEngine as any).processOutput(JSON.stringify(malformedJson), 'insecure-bundled-dependencies', false);
 					expect(true).to.equal(false, 'Exception should be thrown');
 					expect(results).to.equal(null, 'This assertion should never fire. It is needed to make the TS compiler stop complaining');
 				} catch (e) {

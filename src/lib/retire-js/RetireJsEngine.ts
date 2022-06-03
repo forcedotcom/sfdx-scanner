@@ -10,6 +10,8 @@ import * as engineUtils from '../util/CommonEngineUtils';
 import cspawn = require('cross-spawn');
 import path = require('path');
 import StreamZip = require('node-stream-zip');
+import {CUSTOM_CONFIG} from '../../Constants';
+
 
 
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
@@ -49,6 +51,8 @@ export type RetireJsInvocation = {
  */
 type RetireJsVulnerability = {
 	severity: string;
+	identifiers?: { [name: string]: string };
+	info?: string[];
 };
 
 type RetireJsResult = {
@@ -172,7 +176,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 		const retireJsPromises: Promise<RuleResult[]>[] = [];
 		for (const invocation of invocationArray) {
-			retireJsPromises.push(this.executeRetireJs(invocation));
+			retireJsPromises.push(this.executeRetireJs(invocation, engineOptions.has(CUSTOM_CONFIG.VerboseViolations)));
 		}
 
 		// We can combine the results into a single array using .reduce() instead of the more verbose for-loop.
@@ -199,7 +203,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return invocationArray;
 	}
 
-	private async executeRetireJs(invocation: RetireJsInvocation): Promise<RuleResult[]> {
+	private async executeRetireJs(invocation: RetireJsInvocation, verboseViolations: boolean): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
 			const cp = cspawn(RetireJsEngine.NODE_EXEC_PATH, invocation.args);
 
@@ -225,7 +229,8 @@ export class RetireJsEngine extends AbstractRuleEngine {
 				} else if (code === 13) {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
-					res(this.processOutput(stdout, invocation.rule));
+					res(this.processOutput(stdout, invocation.rule, verboseViolations));
+					
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. The error could be
 					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
@@ -261,7 +266,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return stderr;
 	}
 
-	private processOutput(cmdOutput: string, ruleName: string): RuleResult[] {
+	private processOutput(cmdOutput: string, ruleName: string, verboseViolations:boolean): RuleResult[] {
 		// The output should be a valid result JSON.
 		try {
 			const outputJson: RetireJsOutput = RetireJsEngine.convertStringToResultObj(cmdOutput);
@@ -282,6 +287,9 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 				// Each `result` entry generates one RuleViolation.
 				for (const result of data.results) {
+
+					const message: string = verboseViolations ? this.generateVerboseMessage(result) : `${result.component} v${result.version} is insecure. Please upgrade to latest version.`;
+
 					ruleResult.violations.push({
 						line: 1,
 						column: 1,
@@ -290,7 +298,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 						severity: result.vulnerabilities
 							.map(vuln => this.retireSevToScannerSev(vuln.severity))
 							.reduce((min, sev) => min > sev ? sev: min, 9000),
-						message: `${result.component} v${result.version} is insecure. Please upgrade to latest version.`,
+						message: message,
 						category: 'Insecure Dependencies'
 					});
 				}
@@ -305,6 +313,29 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(message);
 		}
+	}
+
+	private generateVerboseMessage(result: RetireJsResult): string {
+		const messageLines: string[] = [`${result.component} ${result.version} has known vulnerabilities:`];
+
+		// Each `vulnerability` generates a new line in the RuleViolation's message
+		for (const vuln of result.vulnerabilities) {
+
+			// Array of all identifiers with starting with severity and summary (if applicable)
+			const vulnMessageItems: string[] = [];
+
+			for (const identifier in vuln.identifiers) {
+				const text = `${identifier}: ${vuln.identifiers[identifier]}`;
+				identifier === "summary" ? vulnMessageItems.unshift(text) : vulnMessageItems.push(text);
+			}
+
+			vulnMessageItems.unshift(`severity: ${vuln.severity}`); // unshift after other identifiers so severity is first
+			vulnMessageItems.push(vuln.info.join(" ")); // list info elements separated by space
+			messageLines.push(`${vulnMessageItems.join("; ")}`)
+			
+		}
+
+		return messageLines.join("\n");
 	}
 
 	private retireSevToScannerSev(sev: string): number {
