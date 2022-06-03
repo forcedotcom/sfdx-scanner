@@ -94,7 +94,8 @@ export const Services = {
 export enum CUSTOM_CONFIG {
 	EslintConfig = "EslintConfig",
 	PmdConfig = "PmdConfig",
-	SfgeConfig = "SfgeConfig"
+	SfgeConfig = "SfgeConfig",
+	VerboseViolations = "VerboseViolations"
 }
 
 export const HARDCODED_RULES = {

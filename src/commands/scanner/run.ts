@@ -104,6 +104,10 @@ export default class Run extends ScannerRunCommand {
 			description: messages.getMessage('flags.nsDescription'),
 			longDescription: messages.getMessage('flags.nsDescriptionLong')
 		}),
+		"verbose-violations": flags.boolean({
+			description: messages.getMessage('flags.verboseViolationsDescription'),
+			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
+		}),
 	};
 
 	protected validateCommandFlags(): Promise<void> {
@@ -149,6 +153,13 @@ export default class Run extends ScannerRunCommand {
 			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
 			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
+		
+		// Capturing verbose-violations flag value (used for RetireJS output)
+		if (this.flags["verbose-violations"]) {
+			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
+		}
+		
+
 		return options;
 	}
 
