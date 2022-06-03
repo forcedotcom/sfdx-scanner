@@ -21,7 +21,7 @@ module.exports = {
 		"sevthresholdDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
 		"sevthresholdDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
 		"targetDescription": "location of source code",
-		"targetDescriptionLong": "Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list"
+		"targetDescriptionLong": "Source code location. May use glob patterns, or specify individual methods with #-syntax. Multiple values can be specified as a comma-separated list"
 	},
 	"validations": {
 		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
@@ -39,6 +39,9 @@ module.exports = {
 		Unix example:    $ sfdx scanner:run:dfa --target './**/*.cls,!./**/IgnoreMe.cls' ...
 		Windows example: > sfdx scanner:run:dfa --target ".\\**\\*.cls,!.\\**\\IgnoreMe.cls" ...
 			Evaluate rules against all .cls files below the current directory, except for IgnoreMe.cls.
+	Individual methods within a file may be targeted by suffixing the file's path with a hash (#), and a semi-colon-delimited list of method names. This syntax is incompatible with globs and directories.
+		E.g., $ sfdx scanner:run:dfa --target "./File1.cls#Method1;Method2,./File2.cls#Method3" ...
+			Evaluates rules against ALL methods named Method1 or Method2 in File1.cls, and ALL methods named Method3 in File2.cls.
 	Use --normalize-severity to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown).
 		E.g., $ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --format csv --normalize-severity
 	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
