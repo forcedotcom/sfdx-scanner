@@ -66,6 +66,9 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
  --verbose
  emit additional command output to stdout
 
+ --verbose-violations
+retire-js violation messages include more details
+
 ```
 
 ## Additional Notes
