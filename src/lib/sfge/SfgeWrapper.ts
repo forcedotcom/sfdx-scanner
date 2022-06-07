@@ -5,7 +5,7 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
+import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -124,7 +124,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	}
 
 	protected handleResults(args: ResultHandlerArgs) {
-		super.defaultResultHandler(args);
+		new CommandLineResultHandler().handleResults(args);
 	}
 
 	/**

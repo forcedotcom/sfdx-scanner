@@ -7,11 +7,22 @@ import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
 
 export type ResultHandlerArgs = {
 	code: number;
+	isSuccess: boolean;
 	stdout: string;
 	stderr: string;
 	res: (string) => void;
 	rej: (string) => void;
 };
+
+export class CommandLineResultHandler {
+	public handleResults(args: ResultHandlerArgs): void {
+		if (args.isSuccess) {
+			args.res(args.stdout);
+		} else {
+			args.rej(args.stderr);
+		}
+	}
+}
 
 export abstract class CommandLineSupport extends AsyncCreatable {
 
@@ -50,14 +61,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 */
 	protected abstract handleResults(args: ResultHandlerArgs): void;
 
-	protected defaultResultHandler(args: ResultHandlerArgs): void {
-		if (this.isSuccessfulExitCode(args.code)) {
-			args.res(args.stdout);
-		} else {
-			args.rej(args.stderr);
-		}
-	}
-
 	protected abstract isSuccessfulExitCode(code: number): boolean;
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
@@ -82,11 +85,13 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			cp.on('exit', code => {
 				this.parentLogger.trace(`runCommand has received exit code ${code}`);
-				this.getSpinnerManager().stopSpinner(this.isSuccessfulExitCode(code));
+				const isSuccess = this.isSuccessfulExitCode(code);
+				this.getSpinnerManager().stopSpinner(isSuccess);
 				// The output processor's input is always stdout.
 				this.outputProcessor.processOutput(stdout);
 				this.handleResults({
 					code,
+					isSuccess,
 					stdout,
 					stderr,
 					res,
