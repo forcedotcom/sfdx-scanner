@@ -31,8 +31,8 @@ public class MethodUtilTest {
     private static final String METHOD_WITH_INTERNAL_OVERLOADS = "methodWithInternalOverloads";
     private static final String METHOD_WITH_EXTERNAL_NAME_DUPLICATION =
             "methodWithExternalNameDuplication";
-	private static final String METHOD_WITH_INNER_CLASS_DUPLICATION =
-			"methodWithInnerClassDuplication";
+    private static final String METHOD_WITH_INNER_CLASS_DUPLICATION =
+            "methodWithInnerClassDuplication";
 
     private static final String SOURCE_FILE_1 =
             "public class Foo1 {\n"
@@ -88,22 +88,28 @@ public class MethodUtilTest {
                     + "	}\n"
                     + "}\n";
 
-	private static final String SOURCE_FILE_3 =
-			"public class Foo3 {\n"
-					+ "	public boolean " + METHOD_WITH_INNER_CLASS_DUPLICATION + "() {\n"
-					+ "		return true;\n"
-					+ "	}\n"
-					+ "	\n"
-					+ "	public class InnerFoo {\n"
-					+ "		public boolean " + METHOD_WITHOUT_OVERLOADS_3 + "() {\n"
-					+ "			return true;\n"
-					+ "		}\n"
-					+ "	\n"
-					+ "		public boolean " + METHOD_WITH_INNER_CLASS_DUPLICATION + "() {\n"
-					+ "			return true;\n"
-					+ "		}\n"
-					+ "	}\n"
-					+ "}\n";
+    private static final String SOURCE_FILE_3 =
+            "public class Foo3 {\n"
+                    + "	public boolean "
+                    + METHOD_WITH_INNER_CLASS_DUPLICATION
+                    + "() {\n"
+                    + "		return true;\n"
+                    + "	}\n"
+                    + "	\n"
+                    + "	public class InnerFoo {\n"
+                    + "		public boolean "
+                    + METHOD_WITHOUT_OVERLOADS_3
+                    + "() {\n"
+                    + "			return true;\n"
+                    + "		}\n"
+                    + "	\n"
+                    + "		public boolean "
+                    + METHOD_WITH_INNER_CLASS_DUPLICATION
+                    + "() {\n"
+                    + "			return true;\n"
+                    + "		}\n"
+                    + "	}\n"
+                    + "}\n";
 
     @BeforeEach
     public void setup() {
@@ -234,49 +240,54 @@ public class MethodUtilTest {
                 containsString(EventKey.WARNING_NO_METHOD_TARGET_MATCHES.getMessageKey()));
     }
 
-	@Test
-	public void getTargetMethods_targetMethodInInnerClass() {
-		TestUtil.Config config =
-			TestUtil.Config.Builder.get(g, new String[]{SOURCE_FILE_3}).build();
-		TestUtil.buildGraph(config);
-		// Create a rule target encompassing the method that exists only in the inner class.
-		List<RuleRunnerTarget> targets = new ArrayList<>();
-		targets.add(new RuleRunnerTarget("TestCode0", Collections.singletonList(METHOD_WITHOUT_OVERLOADS_3)));
+    @Test
+    public void getTargetMethods_targetMethodInInnerClass() {
+        TestUtil.Config config =
+                TestUtil.Config.Builder.get(g, new String[] {SOURCE_FILE_3}).build();
+        TestUtil.buildGraph(config);
+        // Create a rule target encompassing the method that exists only in the inner class.
+        List<RuleRunnerTarget> targets = new ArrayList<>();
+        targets.add(
+                new RuleRunnerTarget(
+                        "TestCode0", Collections.singletonList(METHOD_WITHOUT_OVERLOADS_3)));
 
-		List<MethodVertex> methodVertices = MethodUtil.getTargetedMethods(g, targets);
+        List<MethodVertex> methodVertices = MethodUtil.getTargetedMethods(g, targets);
 
-		MatcherAssert.assertThat(methodVertices, hasSize(equalTo(1)));
-	}
+        MatcherAssert.assertThat(methodVertices, hasSize(equalTo(1)));
+    }
 
-	@Test
-	public void getTargetMethods_targetMethodInInnerAndOuterClass() {
-		TestUtil.Config config =
-			TestUtil.Config.Builder.get(g, new String[]{SOURCE_FILE_3}).build();
-		TestUtil.buildGraph(config);
-		// Create a rule target encompassing the method that exists only in the inner class.
-		List<RuleRunnerTarget> targets = new ArrayList<>();
-		targets.add(new RuleRunnerTarget("TestCode0", Collections.singletonList(METHOD_WITH_INNER_CLASS_DUPLICATION)));
+    @Test
+    public void getTargetMethods_targetMethodInInnerAndOuterClass() {
+        TestUtil.Config config =
+                TestUtil.Config.Builder.get(g, new String[] {SOURCE_FILE_3}).build();
+        TestUtil.buildGraph(config);
+        // Create a rule target encompassing the method that exists only in the inner class.
+        List<RuleRunnerTarget> targets = new ArrayList<>();
+        targets.add(
+                new RuleRunnerTarget(
+                        "TestCode0",
+                        Collections.singletonList(METHOD_WITH_INNER_CLASS_DUPLICATION)));
 
-		List<MethodVertex> methodVertices = MethodUtil.getTargetedMethods(g, targets);
+        List<MethodVertex> methodVertices = MethodUtil.getTargetedMethods(g, targets);
 
-		MatcherAssert.assertThat(methodVertices, hasSize(equalTo(2)));
-		boolean line2Found = false;
-		boolean line11Found = false;
-		for (MethodVertex methodVertex : methodVertices) {
-			assertEquals(METHOD_WITH_INNER_CLASS_DUPLICATION, methodVertex.getName());
-			if (methodVertex.getBeginLine() == 2) {
-				line2Found = true;
-			} else if (methodVertex.getBeginLine() == 11) {
-				line11Found = true;
-			} else {
-				fail("Unexpected line number " + methodVertex.getBeginLine());
-			}
-		}
-		assertTrue(line2Found);
-		assertTrue(line11Found);
-		String messages = CliMessager.getInstance().getAllMessages();
-		MatcherAssert.assertThat(
-			messages,
-			containsString(EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES.getMessageKey()));
-	}
+        MatcherAssert.assertThat(methodVertices, hasSize(equalTo(2)));
+        boolean line2Found = false;
+        boolean line11Found = false;
+        for (MethodVertex methodVertex : methodVertices) {
+            assertEquals(METHOD_WITH_INNER_CLASS_DUPLICATION, methodVertex.getName());
+            if (methodVertex.getBeginLine() == 2) {
+                line2Found = true;
+            } else if (methodVertex.getBeginLine() == 11) {
+                line11Found = true;
+            } else {
+                fail("Unexpected line number " + methodVertex.getBeginLine());
+            }
+        }
+        assertTrue(line2Found);
+        assertTrue(line11Found);
+        String messages = CliMessager.getInstance().getAllMessages();
+        MatcherAssert.assertThat(
+                messages,
+                containsString(EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES.getMessageKey()));
+    }
 }

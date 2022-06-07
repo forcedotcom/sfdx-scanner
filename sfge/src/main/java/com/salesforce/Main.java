@@ -23,12 +23,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * The main class, invoked by sfdx-scanner. `catalog` flow lists all of the available rules in a
  * standardized format.
  *
- * <p>The `execute` flow accepts three parameters.
+ * <p>The `execute` flow accepts as a parameter the name of a file whose contents are a JSON with
+ * the following structure:
  *
  * <ol>
- *   <li>The name of a file whose * contents are directories from which the graph should be built.
- *   <li>The name of a file whose contents are individual files against which rules should be run.
- *   <li>A comma-separated list of rule names.
+ *   <li>rulesToRun: An array of rule names.
+ *   <li>projectDirs: An array of directories from which the graph should be built.
+ *   <li>targets: An array of objects with a `targetFile` property indicating the file to be
+ *       analyzed and a `targetMethods` property indicating individual methods.
  * </ol>
  *
  * <p>Exit codes:

@@ -40,7 +40,7 @@ public class CliArgParser {
     }
 
     public static class ExecuteArgParser {
-        private static int ARG_COUNT = 4;
+        private static int ARG_COUNT = 2;
 
         private final List<String> projectDirs;
         private final List<RuleRunnerTarget> targets;
@@ -63,9 +63,10 @@ public class CliArgParser {
                                 "Wrong number of arguments. Expected %d; received %d",
                                 ARG_COUNT, args.length));
             }
-            identifyTargetFiles(args[1]);
-            identifyProjectDirs(args[2]);
-            identifyRules(args[3]);
+            ExecuteInput input = readInputFile(args[1]);
+            targets.addAll(input.targets);
+            projectDirs.addAll(input.projectDirs);
+            identifyRules(input.rulesToRun);
         }
 
         public List<String> getProjectDirs() {
@@ -102,6 +103,17 @@ public class CliArgParser {
             }
         }
 
+        private ExecuteInput readInputFile(String fileName) {
+            try {
+                String inputJson = String.join("\n", readFile(fileName));
+                Gson gson = new Gson();
+                return gson.fromJson(inputJson, ExecuteInput.class);
+            } catch (IOException ex) {
+                throw new InvocationException(
+                        "Could not read input file " + fileName + ": " + ex.getMessage(), ex);
+            }
+        }
+
         private List<String> readFile(String fileName) throws IOException {
             final List<String> allLines = Files.readAllLines(Paths.get(fileName));
             final List<String> lines =
@@ -112,10 +124,9 @@ public class CliArgParser {
             return lines;
         }
 
-        private void identifyRules(String ruleString) {
-            String[] ruleNames = ruleString.split(",");
+        private void identifyRules(List<String> rulesToRun) {
             try {
-                for (String ruleName : ruleNames) {
+                for (String ruleName : rulesToRun) {
                     AbstractRule rule = RuleUtil.getRule(ruleName);
                     selectedRules.add(rule);
                 }
@@ -133,5 +144,11 @@ public class CliArgParser {
         InvocationException(String msg, Throwable cause) {
             super(msg, cause);
         }
+    }
+
+    public static class ExecuteInput {
+        private List<String> rulesToRun;
+        private List<String> projectDirs;
+        private List<RuleRunnerTarget> targets;
     }
 }

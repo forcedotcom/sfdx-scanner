@@ -122,12 +122,13 @@ public final class MethodUtil {
         return methodVertices;
     }
 
-	/**
-	 * If any of the method names specified by the provided target returned multiple results or zero results, adds a
-	 * message to a {@link CliMessager} instance indicating such.
-	 * @param target - A target that specifies a file and methods within that file
-	 * @param vertices - The method vertices returned by the query created using the target
-	 */
+    /**
+     * If any of the method names specified by the provided target returned multiple results or zero
+     * results, adds a message to a {@link CliMessager} instance indicating such.
+     *
+     * @param target - A target that specifies a file and methods within that file
+     * @param vertices - The method vertices returned by the query created using the target
+     */
     private static void addMessagesForTarget(RuleRunnerTarget target, List<MethodVertex> vertices) {
         NonNullHashMap<String, Integer> methodCountByName = CollectionUtil.newNonNullHashMap();
         // Map each vertex's method name to the number of vertices sharing that name.
