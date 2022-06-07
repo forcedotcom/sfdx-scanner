@@ -1,12 +1,12 @@
-package sfdc.sfdx.scanner.messaging;
-
-import com.google.gson.Gson;
+package com.salesforce.messaging;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SfdxMessager {
+import com.google.gson.Gson;
+
+public class CliMessager {
 	// The START string gives us something to scan for when we're processing output.
 	private static final String START = "SFDX-START";
 	// The END string lets us know when a message stops, which should prevent bugs involving multi-line output.
@@ -14,13 +14,8 @@ public class SfdxMessager {
 
 	private static final List<Message> MESSAGES = new ArrayList<>();
 
-	private static SfdxMessager INSTANCE = null;
-
-	public static SfdxMessager getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new SfdxMessager();
-		}
-		return INSTANCE;
+	public static CliMessager getInstance() {
+		return LazyHolder.INSTANCE;
 	}
 
 	/**
@@ -31,7 +26,7 @@ public class SfdxMessager {
 	 *
 	 * @param exception to send to Typescript layer
 	 */
-	public void addMessage(SfdxScannerException exception) {
+	public void addMessage(MessagePassableException exception) {
 		final EventKey eventKey = exception.getEventKey();
 		addMessage(
 			exception.getFullStacktrace(),
@@ -65,7 +60,12 @@ public class SfdxMessager {
 		MESSAGES.add(message);
 	}
 
-
+	/**
+	 * Convert all messages stored by the instance into a JSON-formatted string, enclosed in the start and end strings.
+	 * Java code can use this method to log the messages to console, and TypeScript code can seek the start and stop
+	 * strings to get an array of messages that can be deserialized.
+	 * @return
+	 */
 	public String getAllMessagesWithFormatting() {
 		final String messagesAsJson = getMessagesAsJson();
 		return START + messagesAsJson + END;
@@ -74,7 +74,6 @@ public class SfdxMessager {
 	private String getMessagesAsJson() {
 		return new Gson().toJson(MESSAGES);
 	}
-
 
 	/**
 	 * TO BE USED ONLY BY TESTS!
@@ -93,15 +92,8 @@ public class SfdxMessager {
 		MESSAGES.clear();
 	}
 
-	enum MessageHandler {
-		UX,
-		INTERNAL
-	}
-
-	enum MessageType {
-		INFO,
-		WARNING,
-		ERROR
+	private static final class LazyHolder {
+		// Postpone initialization until first use
+		private static final CliMessager INSTANCE = new CliMessager();
 	}
 }
-

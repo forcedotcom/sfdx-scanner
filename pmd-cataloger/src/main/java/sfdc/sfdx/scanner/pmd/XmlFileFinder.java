@@ -1,8 +1,8 @@
 package sfdc.sfdx.scanner.pmd;
 
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.EventKey;
-import sfdc.sfdx.scanner.messaging.SfdxMessager;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.CliMessager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -73,11 +73,11 @@ public class XmlFileFinder {
 
 		final Path path = Paths.get(pathString);
 
-		List<XmlContainer> xmlContainers = new ArrayList<>(); 
+		List<XmlContainer> xmlContainers = new ArrayList<>();
 
 		// Make sure that the path exists to begin with
 		if (!Files.exists(path)) {
-			throw new SfdxScannerException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
+			throw new MessagePassableException(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, path.getFileName().toString());
 		}
 
 		if (Files.isDirectory(path)) {
@@ -124,10 +124,10 @@ public class XmlFileFinder {
 				}
 			}
 
-			SfdxMessager.getInstance().addMessage("", EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
+			CliMessager.getInstance().addMessage("", EventKey.INFO_JAR_AND_XML_PROCESSED, jarPath, xmlFiles.toString());
 		} catch (Exception e) {
 			//TODO: add logging and print stacktrace for debugging
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_JAR_NOT_READABLE, e, jarPath);
 		}
 
 		return xmlFiles;
@@ -146,7 +146,7 @@ public class XmlFileFinder {
 			filesFound.addAll(walk.map(x -> x.toString())
 				.filter(f -> f.endsWith(fileType.suffix)).collect(Collectors.toList()));
 		} catch (IOException e) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, e, path.toString());
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_DIR_NOT_READABLE, e, path.toString());
 		}
 
 		return filesFound;

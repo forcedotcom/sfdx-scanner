@@ -4,8 +4,8 @@ import java.util.*;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.EventKey;
 
 import static sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson.*;
 
@@ -80,7 +80,7 @@ public class PmdCatalogRule {
 			default:
 				// If there was more than one description node, then something's gone crazy wrong and we should exit as gracefully
 				// as possible.
-				throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC, getFullName(), String.valueOf(nl.getLength()));
+				throw new MessagePassableException(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC, getFullName(), String.valueOf(nl.getLength()));
 		}
 		return res;
 	}

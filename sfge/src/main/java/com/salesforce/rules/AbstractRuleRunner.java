@@ -160,8 +160,13 @@ public abstract class AbstractRuleRunner {
     }
 
     public static final class RuleRunnerTarget {
-        private String targetFile;
-        private List<String> targetMethods;
+        private final String targetFile;
+        private final List<String> targetMethods;
+
+        public RuleRunnerTarget(String targetFile, List<String> targetMethods) {
+            this.targetFile = targetFile;
+            this.targetMethods = targetMethods;
+        }
 
         /** Get the name of the file that this target represents. */
         public String getTargetFile() {

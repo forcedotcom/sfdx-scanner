@@ -2,6 +2,7 @@ import {Logger} from '@salesforce/core';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
+import { CommandLineResultHandler, ResultHandlerArgs } from '../services/CommandLineSupport';
 import {FileHandler} from '../util/FileHandler';
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
@@ -33,6 +34,10 @@ export default class PmdWrapper extends PmdSupport {
 		this.initialized = true;
 	}
 
+	protected async buildClasspath(): Promise<string[]> {
+		return super.buildSharedClasspath();
+	}
+
 	public static async execute(path: string, rules: string, reportFormat?: Format, reportFile?: string): Promise<string> {
 		const myPmd = await PmdWrapper.create({
 			path: path,
@@ -62,7 +67,7 @@ export default class PmdWrapper extends PmdSupport {
 		// Start with the arguments we know we'll always need.
 		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
 		// is intended for child_process.spawn(), which freaks out if you do that.
-		const classpath = await super.buildClasspath();
+		const classpath = await this.buildClasspath();
 		// Operating systems impose limits on the maximum length of a command line invocation. This can be problematic
 		// when scannning a large number of files. Store the list of files to scan in a temp file. Pass the location
 		// of the temp file to PMD. The temp file is cleaned up when the process exits.
@@ -84,4 +89,13 @@ export default class PmdWrapper extends PmdSupport {
 		return [command, args];
 	}
 
+	protected isSuccessfulExitCode(code: number): boolean {
+		// PMD's convention is that an exit code of 0 indicates a successful run with no violations, and an exit code of
+		// 4 indicates a successful run with at least one violation.
+		return code === 0 || code === 4;
+	}
+
+	protected handleResults(args: ResultHandlerArgs): void {
+		new CommandLineResultHandler().handleResults(args);
+	}
 }

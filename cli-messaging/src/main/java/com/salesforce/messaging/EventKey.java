@@ -1,8 +1,8 @@
-package sfdc.sfdx.scanner.messaging;
-import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
+package com.salesforce.messaging;
+import static com.salesforce.messaging.Message.*;
 
 public enum EventKey {
-	// MAKE SURE messageKey OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
+	// MAKE SURE `messageKey` OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
 	INFO_GENERAL_INTERNAL_LOG("info.generalInternalLog", 1, MessageType.INFO, MessageHandler.INTERNAL, true),
 	WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
@@ -19,13 +19,15 @@ public enum EventKey {
 	ERROR_EXTERNAL_MULTIPLE_RULE_DESC("error.external.multipleRuleDesc", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_RECURSION_LIMIT("error.external.recursionLimitReached", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_READABLE("error.external.xmlNotReadable", 2, MessageType.ERROR, MessageHandler.UX, false),
-	ERROR_EXTERNAL_XML_NOT_PARSABLE("error.external.xmlNotParsable", 2, MessageType.ERROR, MessageHandler.UX, false);
+	ERROR_EXTERNAL_XML_NOT_PARSABLE("error.external.xmlNotParsable", 2, MessageType.ERROR, MessageHandler.UX, false),
+	WARNING_MULTIPLE_METHOD_TARGET_MATCHES("warning.multipleMethodTargetMatches", 3, MessageType.WARNING, MessageHandler.UX, true),
+	WARNING_NO_METHOD_TARGET_MATCHES("warning.noMethodTargetMatches", 2, MessageType.WARNING, MessageHandler.UX, false);
 
-	String messageKey;
-	int argCount;
-	MessageType messageType;
-	MessageHandler messageHandler;
-	boolean verbose;//true: only when verbose is true, false: ignores verbose flag and always prints
+	final String messageKey;
+	final int argCount;
+	final MessageType messageType;
+	final MessageHandler messageHandler;
+	final boolean verbose;//true: only when verbose is true, false: ignores verbose flag and always prints
 
 	EventKey(String messageKey, int argCount, MessageType messageType, MessageHandler messageHandler, boolean verbose) {
 		this.messageKey = messageKey;

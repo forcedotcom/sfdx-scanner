@@ -1,18 +1,16 @@
-package sfdc.sfdx.scanner.messaging;
+package com.salesforce.messaging;
 
-import com.google.gson.Gson;
-import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
 import java.time.Instant;
 import java.util.List;
 
 public class Message {
-	private String messageKey;
-	private List<String> args;
-	private String internalLog;
-	private MessageType type;
-	private MessageHandler handler;
-	private boolean verbose;
-	private long time;
+	final private String messageKey;
+	final private List<String> args;
+	final private String internalLog;
+	final private MessageType type;
+	final private MessageHandler handler;
+	final private boolean verbose;
+	final private long time;
 
 	Message(String messageKey, List<String> args, String internalLog, MessageType type, MessageHandler handler, boolean verbose) {
 		this.messageKey = messageKey;
@@ -20,12 +18,8 @@ public class Message {
 		this.internalLog = internalLog;
 		this.type = type;
 		this.handler = handler;
-		this.time = Instant.now().toEpochMilli();
 		this.verbose = verbose;
-	}
-
-	String toJson() {
-		return new Gson().toJson(this);
+		this.time = Instant.now().toEpochMilli();
 	}
 
 	public String getMessageKey() {
@@ -40,4 +34,14 @@ public class Message {
 		return internalLog;
 	}
 
+	enum MessageHandler {
+		UX,
+		INTERNAL
+	}
+
+	enum MessageType {
+		INFO,
+		WARNING,
+		ERROR
+	}
 }

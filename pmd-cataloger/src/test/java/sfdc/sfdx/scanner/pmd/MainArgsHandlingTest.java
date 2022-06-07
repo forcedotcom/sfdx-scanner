@@ -3,8 +3,8 @@ package sfdc.sfdx.scanner.pmd;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.EventKey;
 
 import java.util.List;
 import java.util.Map;
@@ -72,7 +72,7 @@ public class MainArgsHandlingTest {
 		try {
 			main.parseArguments(args);
 			fail(failureMessage);
-		} catch (SfdxScannerException e) {
+		} catch (MessagePassableException e) {
 			assertEquals("Unexpected eventKey on exception", EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, e.getEventKey());
 			assertEquals("Unexpected arg list on exception", expectedArgForMessage, e.getArgs()[0]);
 		}

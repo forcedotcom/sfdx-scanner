@@ -1,7 +1,7 @@
 import {Logger, SfdxError} from '@salesforce/core';
 import { Catalog, ESRuleConfig, ESRuleConfigValue, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata } from '../../types';
 import {ENGINE, Severity} from '../../Constants';
-import {OutputProcessor} from '../pmd/OutputProcessor';
+import {OutputProcessor} from '../services/OutputProcessor';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';

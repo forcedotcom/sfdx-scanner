@@ -1,8 +1,8 @@
 package sfdc.sfdx.scanner.pmd;
 
-import sfdc.sfdx.scanner.messaging.EventKey;
-import sfdc.sfdx.scanner.messaging.SfdxMessager;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.MessagePassableException;
 
 import java.util.*;
 
@@ -57,7 +57,7 @@ public class LanguageXmlFileMapping {
 				addCategoryPathForLanguage(path, language, sourceJar);
 				categoryToSourceJar.put(path, sourceJar);
 			} else {
-				SfdxMessager.getInstance().addMessage("Adding path " + path + " for language " + language, EventKey.WARNING_XML_DROPPED, path);
+				CliMessager.getInstance().addMessage("Adding path " + path + " for language " + language, EventKey.WARNING_XML_DROPPED, path);
 			}
 		}
 	}
@@ -81,7 +81,7 @@ public class LanguageXmlFileMapping {
 		}
 
 		if (jarWithConflict != null) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH, path, sourceJar, jarWithConflict);
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH, path, sourceJar, jarWithConflict);
 		}
 
 		if (pathsByLanguage.containsKey(language)) {

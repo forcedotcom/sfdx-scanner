@@ -54,6 +54,7 @@ tasks.register<Copy>("installPmd") {
 }
 
 dependencies {
+  implementation(project(":cli-messaging"))
   implementation ("com.googlecode.json-simple:json-simple:1.1.1") {
     exclude("junit")
   }
