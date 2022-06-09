@@ -130,4 +130,5 @@ If you're really, truly certain that you want to skip that violation, you can us
 For example, if you add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`
 and rerun the command, the violation in that method will be suppressed.
 
-You can also suppress all violations in an entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
+You can also suppress all violations in a method by adding `/* sfge-disable-stack ApexFlsViolationRule */` immediately above the method,
+or in the entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
