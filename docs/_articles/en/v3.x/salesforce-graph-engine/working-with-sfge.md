@@ -58,7 +58,7 @@ insert a;
 
 `/* sfge-disable-stack <rule_name> */`
 
-Use this when you want to disable all the sink operations that occur in this method (or any of its internal method calls).
+Use this when you want to disable all the sink operations in paths passing through this method.
 As with the other engine directives, make sure you add it in the line immediately before the method declaration.
 Example usage:
 
