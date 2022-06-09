@@ -99,6 +99,13 @@ Windows example:
 
 Evaluate rules against all .cls files below the current directory, except for IgnoreMe.cls.
 
+Individual methods within a file may be targeted by suffixing the file's path with a hash (#), and a semi-colon-delimited
+	list of method names. This syntax is incompatible with globs and directories. E.g.,
+		
+	$ sfdx scanner:run:dfa --target "./File1.cls#Method1;Method2,./File2.cls#Method3" ...
+
+Evaluates rules against ALL methods named `Method1` or `Method2` in `File1.cls`, and ALL methods named `Method3` in `File2.cls`.
+
 
 Use `--normalize-severity` to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in 
   addition to the engine specific severity (when shown).
