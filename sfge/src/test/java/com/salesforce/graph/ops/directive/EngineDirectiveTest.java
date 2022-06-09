@@ -3,6 +3,7 @@ package com.salesforce.graph.ops.directive;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 
 import com.salesforce.ArgumentsUtil;
 import com.salesforce.TestUtil;
@@ -510,6 +511,66 @@ public class EngineDirectiveTest {
         TestUtil.getApexPaths(config, expanderConfig, "doSomething");
 
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_STACK_1));
+    }
+
+	/**
+	 * This is a test for W-11120894, wherein the sfge-disable-stack engine directive wasn't working for methods with
+	 * exceptions inside nested forked method calls. The attempt to clone the annotation during path generation
+	 * was causing an exception, which was overriding the functionality of the annotation itself.
+	 * This test recreates such a scenario, then makes sure the associated with it were correctly generated and contain
+	 * the expected annotation.
+	 */
+    @MethodSource(value = "testDisableStackDirective")
+    @ParameterizedTest(name = "{displayName}: directive=({0})")
+    public void testDisableStackAnnotationWithForkedExceptionPaths(String directive) {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + directive
+                    + "\n"
+                    + "    public static void doSomething(boolean enterBranch, boolean throwException) {\n"
+					+ "        ExceptionThrower helper = new ExceptionThrower();\n"
+					+ "        if (enterBranch) {\n"
+					+ "            ExceptionThrower.throwExceptionIfAsked(throwException);\n"
+					+ "        }\n"
+					+ "        System.debug('hello');\n"
+					+ "    }\n"
+					+ "}",
+			"public class ExceptionThrower {\n"
+					+ "    public void throwExceptionIfAsked(boolean isAsked) {\n"
+					+ "        if (isAsked) {\n"
+					+ "            throw new MyException();\n"
+					+ "        }\n"
+					+ "    }\n"
+					+ "}"
+        };
+        List<EngineDirective> engineDirectives = new ArrayList<>();
+        VertexPredicate predicate =
+                new AbstractVisitingVertexPredicate() {
+                    @Override
+                    public boolean test(BaseSFVertex vertex) {
+                        if (vertex instanceof MethodCallExpressionVertex) {
+                            MethodCallExpressionVertex methodCallExpression =
+                                    (MethodCallExpressionVertex) vertex;
+                            if (methodCallExpression.getFullMethodName().equals("System.debug")) {
+                                engineDirectives.addAll(
+                                        ContextProviders.ENGINE_DIRECTIVE_CONTEXT
+                                                .get()
+                                                .getEngineDirectiveContext()
+                                                .getEngineDirectives());
+                            }
+                        }
+                        return true;
+                    }
+                };
+
+        TestUtil.Config config = TestUtil.Config.Builder.get(g, sourceCode).build();
+        ApexPathExpanderConfig expanderConfig =
+                ApexPathExpanderConfig.Builder.get()
+                        .expandMethodCalls(true)
+                        .withVertexPredicate(predicate)
+                        .build();
+        TestUtil.getApexPaths(config, expanderConfig, "doSomething");
+        MatcherAssert.assertThat(engineDirectives, hasItem(DISABLE_STACK_1));
     }
 
     @MethodSource(value = "testDisableStackDirective")
