@@ -63,6 +63,7 @@ As with the other engine directives, make sure you add it in the line immediatel
 Example usage:
 
 ```
+@AuraEnabled
 /* sfge-disable-stack ApexFlsViolationRule */
 public static boolean someMethodName() {
 ```
