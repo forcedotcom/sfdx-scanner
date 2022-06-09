@@ -514,9 +514,11 @@ public class EngineDirectiveTest {
     }
 
 	/**
-	 * This is a test for W-11120894, wherein the sfge-disable-stack annotation wasn't working for methods with exceptions
-	 * inside nested forked method calls. The attempt to clone the annotation was causing an exception, which overrode the
-	 * functionality of the annotation itself.
+	 * This is a test for W-11120894, wherein the sfge-disable-stack engine directive wasn't working for methods with
+	 * exceptions inside nested forked method calls. The attempt to clone the annotation during path generation
+	 * was causing an exception, which was overriding the functionality of the annotation itself.
+	 * This test recreates such a scenario, then makes sure the associated with it were correctly generated and contain
+	 * the expected annotation.
 	 */
     @MethodSource(value = "testDisableStackDirective")
     @ParameterizedTest(name = "{displayName}: directive=({0})")
