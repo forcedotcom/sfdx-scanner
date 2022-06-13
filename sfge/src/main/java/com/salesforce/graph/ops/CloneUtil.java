@@ -231,8 +231,8 @@ public final class CloneUtil {
             return (T) cloneTreeMap((TreeMap) item);
         } else if (item instanceof BaseSFVertex) {
             return item;
-		} else if (item instanceof EngineDirective) {
-			return item;
+        } else if (item instanceof EngineDirective) {
+            return item;
         } else if (item instanceof LinkedList) {
             return (T) cloneLinkedList((LinkedList) item);
         } else if (item instanceof Enum) {

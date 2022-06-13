@@ -8,7 +8,6 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.collections.NonNullHashMap;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
@@ -130,7 +129,7 @@ public final class MethodUtil {
      * @param vertices - The method vertices returned by the query created using the target
      */
     private static void addMessagesForTarget(RuleRunnerTarget target, List<MethodVertex> vertices) {
-        NonNullHashMap<String, Integer> methodCountByName = CollectionUtil.newNonNullHashMap();
+        TreeMap<String, Integer> methodCountByName = CollectionUtil.newTreeMap();
         // Map each vertex's method name to the number of vertices sharing that name.
         for (MethodVertex methodVertex : vertices) {
             String methodName = methodVertex.getName();

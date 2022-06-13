@@ -20,7 +20,7 @@ public enum EventKey {
 	ERROR_EXTERNAL_RECURSION_LIMIT("error.external.recursionLimitReached", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_READABLE("error.external.xmlNotReadable", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_PARSABLE("error.external.xmlNotParsable", 2, MessageType.ERROR, MessageHandler.UX, false),
-	WARNING_MULTIPLE_METHOD_TARGET_MATCHES("warning.multipleMethodTargetMatches", 3, MessageType.WARNING, MessageHandler.UX, true),
+	WARNING_MULTIPLE_METHOD_TARGET_MATCHES("warning.multipleMethodTargetMatches", 3, MessageType.WARNING, MessageHandler.UX, false),
 	WARNING_NO_METHOD_TARGET_MATCHES("warning.noMethodTargetMatches", 2, MessageType.WARNING, MessageHandler.UX, false);
 
 	final String messageKey;

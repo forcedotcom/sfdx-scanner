@@ -118,6 +118,12 @@ export default class Run extends ScannerRunCommand {
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
 			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
+		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
+		for (const target of (this.flags.target as string[])) {
+			if (target.indexOf('#') > -1) {
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.methodLevelTargetingDisallowed', [target]);
+			}
+		}
 		return Promise.resolve();
 	}
 
@@ -153,12 +159,12 @@ export default class Run extends ScannerRunCommand {
 			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
 			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
-		
+
 		// Capturing verbose-violations flag value (used for RetireJS output)
 		if (this.flags["verbose-violations"]) {
 			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
 		}
-		
+
 
 		return options;
 	}
