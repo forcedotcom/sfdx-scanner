@@ -513,13 +513,13 @@ public class EngineDirectiveTest {
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_STACK_1));
     }
 
-	/**
-	 * This is a test for W-11120894, wherein the sfge-disable-stack engine directive wasn't working for methods with
-	 * exceptions inside nested forked method calls. The attempt to clone the annotation during path generation
-	 * was causing an exception, which was overriding the functionality of the annotation itself.
-	 * This test recreates such a scenario, then makes sure the associated with it were correctly generated and contain
-	 * the expected annotation.
-	 */
+    /**
+     * This is a test for W-11120894, wherein the sfge-disable-stack engine directive wasn't working
+     * for methods with exceptions inside nested forked method calls. The attempt to clone the
+     * annotation during path generation was causing an exception, which was overriding the
+     * functionality of the annotation itself. This test recreates such a scenario, then makes sure
+     * the associated with it were correctly generated and contain the expected annotation.
+     */
     @MethodSource(value = "testDisableStackDirective")
     @ParameterizedTest(name = "{displayName}: directive=({0})")
     public void testDisableStackAnnotationWithForkedExceptionPaths(String directive) {
@@ -528,20 +528,20 @@ public class EngineDirectiveTest {
                     + directive
                     + "\n"
                     + "    public static void doSomething(boolean enterBranch, boolean throwException) {\n"
-					+ "        ExceptionThrower helper = new ExceptionThrower();\n"
-					+ "        if (enterBranch) {\n"
-					+ "            ExceptionThrower.throwExceptionIfAsked(throwException);\n"
-					+ "        }\n"
-					+ "        System.debug('hello');\n"
-					+ "    }\n"
-					+ "}",
-			"public class ExceptionThrower {\n"
-					+ "    public void throwExceptionIfAsked(boolean isAsked) {\n"
-					+ "        if (isAsked) {\n"
-					+ "            throw new MyException();\n"
-					+ "        }\n"
-					+ "    }\n"
-					+ "}"
+                    + "        ExceptionThrower helper = new ExceptionThrower();\n"
+                    + "        if (enterBranch) {\n"
+                    + "            ExceptionThrower.throwExceptionIfAsked(throwException);\n"
+                    + "        }\n"
+                    + "        System.debug('hello');\n"
+                    + "    }\n"
+                    + "}",
+            "public class ExceptionThrower {\n"
+                    + "    public void throwExceptionIfAsked(boolean isAsked) {\n"
+                    + "        if (isAsked) {\n"
+                    + "            throw new MyException();\n"
+                    + "        }\n"
+                    + "    }\n"
+                    + "}"
         };
         List<EngineDirective> engineDirectives = new ArrayList<>();
         VertexPredicate predicate =

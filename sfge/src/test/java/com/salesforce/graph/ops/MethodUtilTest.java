@@ -139,6 +139,28 @@ public class MethodUtilTest {
     }
 
     @Test
+    public void getTargetMethods_targetSingleMethodCaseInsensitive() {
+        TestUtil.Config config =
+                TestUtil.Config.Builder.get(g, new String[] {SOURCE_FILE_1, SOURCE_FILE_2}).build();
+        TestUtil.buildGraph(config);
+        // Create a rule target encompassing only the first non-overloaded method in the first file.
+        List<RuleRunnerTarget> targets = new ArrayList<>();
+        targets.add(
+                new RuleRunnerTarget(
+                        "TestCode0",
+                        Collections.singletonList(METHOD_WITHOUT_OVERLOADS_1.toLowerCase())));
+
+        List<MethodVertex> methodVertices = MethodUtil.getTargetedMethods(g, targets);
+
+        MatcherAssert.assertThat(methodVertices, hasSize(equalTo(1)));
+        MethodVertex firstVertex = methodVertices.get(0);
+        assertEquals(METHOD_WITHOUT_OVERLOADS_1, firstVertex.getName());
+
+        String messages = CliMessager.getInstance().getAllMessages();
+        assertEquals("[]", messages);
+    }
+
+    @Test
     public void getTargetMethods_targetMultipleMethods() {
         TestUtil.Config config =
                 TestUtil.Config.Builder.get(g, new String[] {SOURCE_FILE_1, SOURCE_FILE_2}).build();
