@@ -32,7 +32,7 @@ public final class GremlinUtil {
         if (children.isEmpty()) {
             return Optional.empty();
         } else if (children.size() > 1) {
-            throw new UnexpectedException(children);
+            throw new UnexpectedException("Did not expect more than one child node. Actual count: " + children.size());
         } else {
             return Optional.of(children.get(0));
         }
