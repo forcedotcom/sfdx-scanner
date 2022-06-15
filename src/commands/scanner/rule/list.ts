@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
-import {AllowedEngineFilters, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
+import {AllowedEngineFilters, END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 
 
 // Initialize Messages with the current plugin directory
@@ -81,6 +81,7 @@ export default class List extends ScannerCommand {
 	};
 
 	public async run(): Promise<Rule[]> {
+		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
