@@ -7,8 +7,8 @@ export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_FILE = 'Config.json';
 export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 export const INTERNAL_ERROR_CODE = 500;
-
-export const PILOT_AVAILABILITY_BANNER= `As of April 27, 2022, v3.x of the Salesforce Code Analyzer is available as an open pilot.
+export const END_OF_LIFE_BANNER = `This version of Salesforce Code Analyzer will reach its End of Life in September 2022.`;
+export const PILOT_AVAILABILITY_BANNER = `As of April 27, 2022, v3.x of the Salesforce Code Analyzer is available as an open pilot.
          To update to v3.x and try out our pilot features, run these commands:
          > sfdx plugins:uninstall @salesforce/sfdx-scanner
          > sfdx plugins:install @salesforce/sfdx-scanner@latest-pilot`;
