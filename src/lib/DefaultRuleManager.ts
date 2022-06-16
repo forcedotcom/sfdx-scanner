@@ -14,6 +14,7 @@ import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
 import {uxEvents, EVENTS} from './ScannerEvents';
+import {CUSTOM_CONFIG} from '../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -127,7 +128,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${JSON.stringify(results)}`);
 			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(message);

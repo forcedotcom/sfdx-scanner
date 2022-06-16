@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {DfaEngineFilters} from '../../Constants';
+import {DfaEngineFilters, ENGINE} from '../../Constants';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
@@ -37,7 +37,7 @@ type DfaTableRow = BaseTableRow & {
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>, verboseViolations = false): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
@@ -45,7 +45,7 @@ export class RuleResultRecombinator {
 				formattedResults = await this.constructCsv(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results, executedEngines);
+				formattedResults = await this.constructHtml(results, executedEngines, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JSON:
 				formattedResults = this.constructJson(results);
@@ -351,7 +351,7 @@ URL: ${url}`;
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
-	private static async constructHtml(results: RuleResult[], executedEngines: Set<string>): Promise<string> {
+	private static async constructHtml(results: RuleResult[], executedEngines: Set<string>, verboseViolations = false): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
@@ -373,7 +373,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: v.message,
+						message: verboseViolations && result.engine === ENGINE.RETIRE_JS ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.line,
 						column: v.column,
 						endLine: v.endLine || null,
