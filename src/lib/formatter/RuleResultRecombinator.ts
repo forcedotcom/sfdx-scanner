@@ -373,7 +373,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: verboseViolations ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
+						message: verboseViolations && result.engine === 'retire-js' ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.line,
 						column: v.column,
 						endLine: v.endLine || null,
@@ -387,7 +387,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: verboseViolations ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
+						message: verboseViolations && result.engine === 'retire-js' ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.sourceLine,
 						column: v.sourceColumn,
 						sinkFileName: v.sinkFileName,
