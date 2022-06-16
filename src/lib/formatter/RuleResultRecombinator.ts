@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {DfaEngineFilters} from '../../Constants';
+import {DfaEngineFilters, ENGINE} from '../../Constants';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
@@ -373,7 +373,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: verboseViolations && result.engine === 'retire-js' ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
+						message: verboseViolations && result.engine === ENGINE.RETIRE_JS ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.line,
 						column: v.column,
 						endLine: v.endLine || null,
@@ -387,7 +387,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: verboseViolations && result.engine === 'retire-js' ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
+						message: v.message,
 						line: v.sourceLine,
 						column: v.sourceColumn,
 						sinkFileName: v.sinkFileName,
