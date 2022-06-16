@@ -48,7 +48,7 @@ export class RuleResultRecombinator {
 				formattedResults = await this.constructHtml(results, executedEngines, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JSON:
-				formattedResults = this.constructJson(results);
+				formattedResults = this.constructJson(results, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JUNIT:
 				formattedResults = this.constructJunit(results);
@@ -344,10 +344,26 @@ URL: ${url}`;
 		return {columns, rows};
 	}
 
-	private static constructJson(results: RuleResult[]): string {
+	private static constructJson(results: RuleResult[], verboseViolations = false): string {
 		if (results.length === 0) {
 			return '';
 		}
+
+		if (verboseViolations) {
+			const resultsVerbose = JSON.parse(JSON.stringify(results)) as RuleResult[];
+			for (const result of resultsVerbose) {
+				if (result.engine === ENGINE.RETIRE_JS) {
+					for (const violation of result.violations) {
+						// in the json format we need to replace new lines in the message
+						// for the first line (ending with a colon) we will replace it with a space
+						// for following lines, we will replace it with a semicolon and a space
+						violation.message = violation.message.replace(/:\n/g, ': ').replace(/\n/g, '; ');
+					}
+				}
+			}
+			return JSON.stringify(resultsVerbose.filter(r => r.violations.length > 0));
+		}
+		
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
