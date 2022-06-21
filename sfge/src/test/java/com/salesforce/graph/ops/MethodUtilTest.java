@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.salesforce.TestUtil;
+import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
@@ -20,6 +23,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class MethodUtilTest {
     private GraphTraversalSource g;
@@ -328,5 +333,60 @@ public class MethodUtilTest {
         MatcherAssert.assertThat(
                 messages,
                 containsString(EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES.getMessageKey()));
+    }
+
+    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.NAMESPACE_ACCESSIBLE})
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testGetNamespaceAccessibleMethods(String annotation) {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "    @"
+                    + annotation
+                    + "\n"
+                    + "    public static void foo() {\n"
+                    + "    }\n"
+                    + "    @"
+                    + annotation
+                    + "\n"
+                    + "    public static testMethod void shouldBeExcludedByModifier() {\n"
+                    + "    }\n"
+                    + "    @"
+                    + annotation
+                    + "\n"
+                    + "    @isTest\n"
+                    + "    public static void shouldBeExcludedByAnnotation() {\n"
+                    + "    }\n"
+                    + "    public static void bar() {\n"
+                    + "    }\n"
+                    + "}\n",
+            "@isTest\n"
+                    + "public class MyTestClass {\n"
+                    + "    @"
+                    + annotation
+                    + "\n"
+                    + "    public static void foo() {\n"
+                    + "    }\n"
+                    + "}\n",
+        };
+
+        TestUtil.buildGraph(g, sourceCode);
+
+        List<MethodVertex> methods =
+                MethodUtil.getMethodsWithAnnotation(g, new ArrayList<>(), annotation);
+        MatcherAssert.assertThat(methods, hasSize(equalTo(1)));
+
+        MethodVertex method = methods.get(0);
+        MatcherAssert.assertThat(method.getName(), equalTo("foo"));
+        MatcherAssert.assertThat(method.isTest(), equalTo(false));
+
+        for (String excludedName :
+                new String[] {"shouldBeExcludedByModifier", "shouldBeExcludedByAnnotation"}) {
+            MethodVertex excludedMethod =
+                    SFVertexFactory.load(
+                            g,
+                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                                    .has(Schema.NAME, excludedName));
+            MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
+        }
     }
 }

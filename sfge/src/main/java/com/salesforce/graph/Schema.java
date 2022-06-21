@@ -44,6 +44,7 @@ public class Schema {
     public static final String MODIFIERS = "Modifiers";
     public static final String NAME = "Name";
     public static final String NAMES = "Names";
+    public static final String NAMESPACE_ACCESSIBLE = "NamespaceAccessible";
     public static final String OPERATOR = "Operator";
     public static final String REFERENCE_TYPE = "ReferenceType";
     public static final String RETURN_TYPE = "ReturnType";
