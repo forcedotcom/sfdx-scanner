@@ -5,6 +5,21 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
+
+## [v2.13.5](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.5) (06-22-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.4...v2.13.5)
+
+### Release Summary
+* New banner with 3.x transition information
+* Updates to local RetireJS Vulnerability Repository
+
+**Merged pull requests:**
+
+- @W-11294489@: \[2.x\] Added additional banner with more assertive language. [\#722](https://github.com/forcedotcom/sfdx-scanner/pull/722)
+- @W-11321290@ \[2.x\] RetireJs updates + package number to 2.13.5[\#726](https://github.com/forcedotcom/sfdx-scanner/pull/726)
+
+
 ## [v2.13.4](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.4) (05-25-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.1...v2.13.4)

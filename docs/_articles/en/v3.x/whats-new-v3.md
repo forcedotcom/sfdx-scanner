@@ -16,6 +16,7 @@ As a starting point, we have upgraded major versions of the eslint family of eng
 
 ### RetireJS is now a default engine
 Another change is that RetireJS will be included as a default engine along with PMD, Eslint, and Eslint-Typescript.
+We have also added to the `scanner:run` command a new `--verbose-violations` flag, which creates violations with more information from RetireJS.
 
 ### Cleaned up deprecated flags
 `-v/--violations-cause-error` flag on `scanner:run` has been replaced by `-s/--severity-threshold`. 
