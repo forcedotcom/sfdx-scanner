@@ -2,6 +2,9 @@ package com.salesforce.graph.symbols;
 
 import static com.salesforce.apex.jorje.ASTConstants.NodeType;
 
+import com.salesforce.Collectible;
+import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.DeepCloneable;
@@ -10,7 +13,9 @@ import com.salesforce.graph.ops.ClassUtil;
 import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.BaseSFVertex;
+import com.salesforce.graph.vertex.BlockStatementVertex;
 import com.salesforce.graph.vertex.FieldDeclarationVertex;
+import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserClassVertex;
 import java.util.ArrayList;
@@ -105,6 +110,35 @@ public final class ClassStaticScope extends AbstractClassScope
         return results;
     }
 
+	private static List<MethodVertex> getStaticBlocks(
+		GraphTraversalSource g, UserClassVertex userClass) {
+		List<MethodVertex> results = new ArrayList<>();
+
+		String superClassName = userClass.getSuperClassName().orElse(null);
+		if (superClassName != null) {
+			UserClassVertex superClass = ClassUtil.getUserClass(g, superClassName).orElse(null);
+			if (superClass != null) {
+				results.addAll(getStaticBlocks(g, superClass));
+			}
+		}
+
+		results.addAll(
+			SFVertexFactory.loadVertices(
+				g,
+				g.V(userClass.getId())
+					.out(Schema.CHILD)
+					.hasLabel(ASTConstants.NodeType.METHOD)
+					.has(Schema.IS_STATIC_BLOCK_METHOD, true)
+					.order(Scope.global)
+					.by(Schema.CHILD_INDEX, Order.asc)
+					/*.out(Schema.CHILD)
+					.hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
+					.order(Scope.global)
+					.by(Schema.CHILD_INDEX, Order.asc)*/));
+
+		return results;
+	}
+
     /**
      * Returns a path that represents the static properties defined by the class. The following
      * example would contain a path for 'MyClass' that contains the Field and FieldDeclarations for
@@ -122,11 +156,17 @@ public final class ClassStaticScope extends AbstractClassScope
             GraphTraversalSource g, String classname) {
         ClassStaticScope classStaticScope = ClassStaticScope.get(g, classname);
         List<BaseSFVertex> vertices = new ArrayList<>();
+		List<MethodVertex> methodVertices = new ArrayList<>();
         vertices.addAll(classStaticScope.getFields());
         vertices.addAll(getFieldDeclarations(g, classStaticScope.userClass));
-        if (vertices.isEmpty()) {
+		methodVertices.addAll(getStaticBlocks(g, classStaticScope.userClass));
+        if (vertices.isEmpty() && methodVertices.isEmpty()) {
             return Optional.empty();
         } else {
+			ArrayList<Collectible<ApexPath>> apexPaths = new ArrayList<>();
+			for (MethodVertex methodVertex : methodVertices) {
+				apexPaths.add(new ApexPath(methodVertex));
+			}
             ApexPath apexPath = new ApexPath(null);
             apexPath.addVertices(vertices);
             return Optional.of(apexPath);

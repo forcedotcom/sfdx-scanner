@@ -69,4 +69,7 @@ public class Schema {
     public static final String CHILD = "Child";
     public static final String PARENT = "Parent";
     public static final String NEXT_SIBLING = "NextSibling";
+
+	/** Indicates if a method is a synthetic static block method */
+	public static final String IS_STATIC_BLOCK_METHOD = "IsStaticBlockMethod";
 }

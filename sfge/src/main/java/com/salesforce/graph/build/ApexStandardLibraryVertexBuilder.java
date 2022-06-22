@@ -5,6 +5,7 @@ import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
@@ -72,8 +73,8 @@ public class ApexStandardLibraryVertexBuilder extends AbstractApexVertexBuilder
     }
 
     @Override
-    protected Map<String, Object> getAdditionalProperties(JorjeNode node) {
-        Map<String, Object> result = super.getAdditionalProperties(node);
+    protected Map<String, Object> getAdditionalProperties(JorjeNode node, HashMap<String, Object> overrides) {
+        Map<String, Object> result = super.getAdditionalProperties(node, overrides);
 
         // Mark all nodes as being from the Standard library
         // TODO: Reduce number of nodes where this is set

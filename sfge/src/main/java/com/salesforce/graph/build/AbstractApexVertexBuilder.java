@@ -6,10 +6,13 @@ import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
+import com.salesforce.graph.ops.MethodUtil;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
@@ -71,23 +74,20 @@ abstract class AbstractApexVertexBuilder {
             vNode.property(Schema.FILE_NAME, fileName);
         }
 
+		final boolean needsStaticBlockSplHandling = isClintMethod(node) && containsStaticBlock(node);
         Vertex vPreviousSibling = null;
-        for (JorjeNode child : node.getChildren()) {
-            Vertex vChild = g.addV(child.getLabel()).next();
-            addProperties(g, child, vChild);
-            // We are currently adding PARENT and CHILD, in theory the same edge could be navigated
-            // both ways, however
-            // the code looks messy when that is done.
-            // TODO: Determine if this causes performance or resource issues. Consider a single edge
-            g.addE(Schema.PARENT).from(vChild).to(vNode).iterate();
-            g.addE(Schema.CHILD).from(vNode).to(vChild).iterate();
-            if (vPreviousSibling != null) {
-                g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
-            }
-            vPreviousSibling = vChild;
-            // To save memory in the graph, don't pass the source name into recursive calls.
-            buildVertices(child, vChild, null);
-        }
+		final List<JorjeNode> children = node.getChildren();
+
+		for (int i = 0; i < children.size(); i++) {
+			final JorjeNode child = children.get(i);
+			if (needsStaticBlockSplHandling
+				&& ASTConstants.NodeType.BLOCK_STATEMENT.equals(child.getLabel())) {
+				// todo: add static blocks as new methods
+				vPreviousSibling = addStaticBlockAsNewMethod(vNode, vPreviousSibling, child, node, i);
+			} else {
+				vPreviousSibling = addChildNodeToGraph(vNode, vPreviousSibling, child);
+			}
+		}
         afterInsert(g, node, vNode);
         if (rootVNode != null) {
             // Only call this for the root node
@@ -95,13 +95,67 @@ abstract class AbstractApexVertexBuilder {
         }
     }
 
-    /**
+	private Vertex addChildNodeToGraph(Vertex vNode, Vertex vPreviousSibling, JorjeNode child) {
+		Vertex vChild = g.addV(child.getLabel()).next();
+		addProperties(g, child, vChild);
+		return addParentChildRelationship(vNode, vChild, child, vPreviousSibling);
+	}
+
+	private Vertex addParentChildRelationship(Vertex parentVertex, Vertex childVertex, JorjeNode child, Vertex vPreviousSibling) {
+		addParentChildRelationship(parentVertex, childVertex);
+		if (vPreviousSibling != null) {
+			g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(childVertex).iterate();
+		}
+		vPreviousSibling = childVertex;
+		// To save memory in the graph, don't pass the source name into recursive calls.
+		buildVertices(child, childVertex, null);
+		return vPreviousSibling;
+	}
+
+	private void addParentChildRelationship(Vertex parentVertex, Vertex childVertex) {
+		// We are currently adding PARENT and CHILD, in theory the same edge could be navigated
+		// both ways, however
+		// the code looks messy when that is done.
+		// TODO: Determine if this causes performance or resource issues. Consider a single edge
+		g.addE(Schema.PARENT).from(childVertex).to(parentVertex).iterate();
+		g.addE(Schema.CHILD).from(parentVertex).to(childVertex).iterate();
+	}
+
+	private Vertex addStaticBlockAsNewMethod(Vertex clintVertex, Vertex vPreviousSibling, JorjeNode child, JorjeNode clintNode, int staticBlockIndex) {
+		// Add properties of <clint>() to syntheticMethodVertex,
+		// override properties with a new name and an indicator to
+		// show this is a synthetic static block method
+		final Vertex syntheticMethodVertex = g.addV(ASTConstants.NodeType.METHOD).next();
+
+		final HashMap<String, Object> overrides = new HashMap<>();
+		overrides.put(Schema.NAME, String.format(MethodUtil.SYNTHETIC_STATIC_BLOCK_METHOD_NAME, staticBlockIndex));
+		addProperties(g, clintNode, syntheticMethodVertex, overrides);
+
+		// TODO: Add <clint> vertex's parent as Synthetic method vertex's parent
+		//  how do i get <clint>'s parent vertex?
+
+		final Optional<Vertex> grandParentVertex = GremlinUtil.getParent(g, clintVertex);
+		if (grandParentVertex.isEmpty()) {
+			throw new UnexpectedException("Did not expect <clint>() to not have a parent vertex. clintVertex=" + clintVertex);
+		}
+
+		addParentChildRelationship(grandParentVertex.get(), syntheticMethodVertex);
+
+		// Create a vertex for BlockStatement
+		final Vertex vChild = g.addV(child.getLabel()).next();
+		addProperties(g, child, vChild);
+
+		// add BlockStatement as child of SyntheticMethodVertex
+		return addParentChildRelationship(syntheticMethodVertex, vChild, child, vPreviousSibling);
+	}
+
+	/**
      * Adds edges to Method vertices after they are inserted. TODO: Replace this with a listener or
      * visitor pattern for more general purpose solutions
      */
     private final void afterInsert(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
         if (node.getLabel().equals(ASTConstants.NodeType.METHOD)) {
-            MethodPathBuilderVisitor.apply(g, vNode);
+				MethodPathBuilderVisitor.apply(g, vNode);
         }
     }
 
@@ -114,7 +168,11 @@ abstract class AbstractApexVertexBuilder {
         // Intentionally left blank
     }
 
-    protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
+	protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
+		addProperties(g, node, vNode, new HashMap<>());
+	}
+
+	protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode, HashMap<String, Object> overrides) {
         GraphTraversal<Vertex, Vertex> traversal = g.V(vNode.id());
 
         TreeSet<String> previouslyInsertedKeys = CollectionUtil.newTreeSet();
@@ -122,10 +180,14 @@ abstract class AbstractApexVertexBuilder {
             String key = entry.getKey();
             Object value = entry.getValue();
             value = adjustPropertyValue(node, key, value);
+			// Override value for key if requested
+			if (overrides.containsKey(key)) {
+				value = overrides.get(key);
+			}
             addProperty(previouslyInsertedKeys, traversal, key, value);
         }
 
-        for (Map.Entry<String, Object> entry : getAdditionalProperties(node).entrySet()) {
+        for (Map.Entry<String, Object> entry : getAdditionalProperties(node, overrides).entrySet()) {
             addProperty(previouslyInsertedKeys, traversal, entry.getKey(), entry.getValue());
         }
 
@@ -139,11 +201,37 @@ abstract class AbstractApexVertexBuilder {
     }
 
     /** Add additional properties to the node that aren't present in the orginal AST */
-    protected Map<String, Object> getAdditionalProperties(JorjeNode node) {
-        return new HashMap<>();
+    protected Map<String, Object> getAdditionalProperties(JorjeNode node, HashMap<String, Object> overrides) {
+		final HashMap<String, Object> returnMap = new HashMap<>();
+
+		// FIXME: very crude
+		if (!overrides.isEmpty()) {
+			returnMap.put(Schema.IS_STATIC_BLOCK_METHOD, Boolean.valueOf(true));
+		}
+		return returnMap;
     }
 
-    /** Add a property to the traversal, throwing an exception if any keys are duplicated. */
+	/**
+	 * @return true if given node represents <clint>()
+	 */
+	private boolean isClintMethod(JorjeNode node) {
+		return ASTConstants.NodeType.METHOD.equals(node.getLabel())
+			&& MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME.equals(node.getProperties().get(Schema.NAME));
+	}
+
+	/**
+	 * @return true if <clint>() node contains any static block definitions
+	 */
+	private boolean containsStaticBlock(JorjeNode node) {
+		for (JorjeNode childNode : node.getChildren()) {
+			if (ASTConstants.NodeType.BLOCK_STATEMENT.equals(childNode.getLabel())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Add a property to the traversal, throwing an exception if any keys are duplicated. */
     protected void addProperty(
             TreeSet<String> previouslyInsertedKeys,
             GraphTraversal<Vertex, Vertex> traversal,
