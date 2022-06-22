@@ -1,10 +1,10 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfdxError, Lifecycle} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget} from '../types';
+import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {OutputOptions, RuleManager} from './RuleManager';
+import {RunOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -14,6 +14,7 @@ import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
 import {uxEvents, EVENTS} from './ScannerEvents';
+import {CUSTOM_CONFIG} from '../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -67,7 +68,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], outputOptions: OutputOptions, engineOptions: Map<string, string>, runDfa = false): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];
@@ -87,7 +88,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 
-			if ((e.isDfaEngine() === runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
+			if ((e.isDfaEngine() === runOptions.runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
 				// Create a descriptor for this engine run, but do not actually run it just yet. This is because the run
@@ -99,7 +100,7 @@ export class DefaultRuleManager implements RuleManager {
 						rules: engineRules,
 						target: engineTargets,
 						engineOptions: engineOptions,
-						normalizeSeverity: outputOptions.normalizeSeverity
+						normalizeSeverity: runOptions.normalizeSeverity
 					}
 				});
 			} else {
@@ -109,7 +110,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 
 		this.validateRunDescriptors(runDescriptorList);
-
+		await this.emitRunTelemetry(runDescriptorList, runOptions.sfdxVersion);
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
 
@@ -126,8 +127,8 @@ export class DefaultRuleManager implements RuleManager {
 			const psResults: RuleResult[][] = await Promise.all(ps);
 			psResults.forEach(r => results = results.concat(r));
 			this.logger.trace(`Received rule violations: ${JSON.stringify(results)}`);
-			this.logger.trace(`Recombining results into requested format ${outputOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, outputOptions.format, executedEngines);
+			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
+			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfdxError(message);
@@ -141,6 +142,36 @@ export class DefaultRuleManager implements RuleManager {
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
 			throw new SfdxError(messages.getMessage(`Pathless engines ${JSON.stringify(pathlessEngines)} cannot be run concurrently with DFA engines ${JSON.stringify(dfaEngines)}`));
 		}
+	}
+
+	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfdxVersion: string): Promise<void> {
+		// Get the name of every engine being executed.
+		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
+		// Build the base telemetry data.
+		const runTelemetryObject: TelemetryData = {
+			// This property is a requirement for the object.
+			eventName: 'ENGINE_EXECUTION',
+			// Knowing how many engines are run with each execution is valuable data.
+			executedEnginesCount: executedEngineNames.size,
+			// Creating a string of all the executed engines would yield data useful for metrics.
+			// Note: Calling `.sort()` without an argument causes a simple less-than to be used.
+			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort()),
+			sfdxVersion
+		};
+
+		const allEngines: RuleEngine[] = await Controller.getAllEngines();
+		for (const engine of allEngines) {
+			const engineName = engine.getName().toLowerCase();
+			// In addition to the string, assign each engine a boolean indicating whether it was executed. This will allow
+			// us to perform other kinds of analytics than the string.
+			runTelemetryObject[engineName] = executedEngineNames.has(engineName);
+		}
+		// NOTE: In addition to the information that we added here, the following useful information is always captured
+		// by default:
+		// - node version
+		// - plugin version
+		// - executed command (e.g., `scanner:run`)
+		await Lifecycle.getInstance().emitTelemetry(runTelemetryObject);
 	}
 
 	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
@@ -206,46 +237,58 @@ export class DefaultRuleManager implements RuleManager {
 		const pm = new PathMatcher([...engineTargets, ...negativePatterns]);
 		for (const target of positivePatterns) {
 			// Used to detect if the target resulted in a match
-			const startLength: number = ruleTargets.length;
+			const ruleTargetsInitialLength: number = ruleTargets.length;
+			// Positive patterns might use method-level targeting. We only want to do path evaluation against the part
+			// that's actually a path.
+			const targetPortions = target.split('#');
+			// The array will always have at least one entry, since if there's no '#' then it will return a singleton array.
+			const targetPath = targetPortions[0];
 			if (globby.hasMagic(target)) {
 				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
 				// our pattern matcher.
-				const matchingTargets = await globby(target);
+				const matchingTargets = await globby(targetPath);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				// Filter the targets based on our target patterns.
 				const filteredTargets = await pm.filterPathsByPatterns(absoluteMatchingTargets);
 				const ruleTarget = {
-					target,
-					paths: filteredTargets
+					target: targetPath,
+					paths: filteredTargets,
+					methods: []
 				};
 				if (ruleTarget.paths.length > 0) {
 					ruleTargets.push(ruleTarget);
 				}
-			} else if (await this.fileHandler.exists(target)) {
-				const stats: Stats = await this.fileHandler.stats(target);
+			} else if (await this.fileHandler.exists(targetPath)) {
+				const stats: Stats = await this.fileHandler.stats(targetPath);
 				if (stats.isDirectory()) {
 					// If the target is a directory, we should get everything in it, convert relative paths to absolute
 					// paths, and then filter based our matcher.
-					const relativePaths = await globby(target);
+					const relativePaths = await globby(targetPath);
 					const ruleTarget = {
-						target,
+						target: targetPath,
 						isDirectory: true,
-						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t)))
+						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t))),
+						methods: []
 					};
 					if (ruleTarget.paths.length > 0) {
 						ruleTargets.push(ruleTarget);
 					}
 				} else {
 					// The target is just a file. Validate it against our matcher, and add it if eligible.
-					const absolutePath = path.resolve(target);
+					const absolutePath = path.resolve(targetPath);
 					if (await pm.pathMatchesPatterns(absolutePath)) {
-						ruleTargets.push({target, paths: [absolutePath]});
+						ruleTargets.push({
+							target: targetPath,
+							paths: [absolutePath],
+							// If the pattern has method-level targets, then they're delimited with a semi-colon.
+							methods: targetPortions.length === 1 ? [] : targetPortions[1].split(';')
+						});
 					}
 				}
 			}
 
-			if (startLength !== ruleTargets.length) {
+			if (ruleTargetsInitialLength !== ruleTargets.length) {
 				matchedTargets.add(target);
 			}
 		}

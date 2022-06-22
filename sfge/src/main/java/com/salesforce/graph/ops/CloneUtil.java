@@ -9,6 +9,7 @@ import com.salesforce.exception.SfgeInterruptedException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.DeepCloneable;
 import com.salesforce.graph.Immutable;
+import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.symbols.AbstractClassInstanceScope;
 import com.salesforce.graph.symbols.ClassInstanceScope;
 import com.salesforce.graph.symbols.DeserializedClassInstanceScope;
@@ -229,6 +230,8 @@ public final class CloneUtil {
         } else if (item instanceof TreeMap) {
             return (T) cloneTreeMap((TreeMap) item);
         } else if (item instanceof BaseSFVertex) {
+            return item;
+        } else if (item instanceof EngineDirective) {
             return item;
         } else if (item instanceof LinkedList) {
             return (T) cloneLinkedList((LinkedList) item);

@@ -29,9 +29,13 @@ module.exports = {
 		'eslintConfigDescription': 'location of eslintrc config to customize eslint engine',
 		'eslintConfigDescriptionLong': 'Location of eslintrc to customize eslint engine',
 		'pmdConfigDescription': 'location of PMD rule reference XML file to customize rule selection',
-		'pmdConfigDescriptionLong': 'Location of PMD rule reference XML file to customize rule selection'
+		'pmdConfigDescriptionLong': 'Location of PMD rule reference XML file to customize rule selection',
+		"verboseViolationsDescription": "retire-js violation messages include more details",
+        "verboseViolationsDescriptionLong": "retire-js violation messages contain details about each vulnerability (e.g. summary, CVE, urls, etc.)"
+
 	},
 	"validations": {
+		"methodLevelTargetingDisallowed": "Target '%s' is invalid, as this command does not support method-level targeting",
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
 		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are: .csv; .xml; .json; .html; .sarif.",

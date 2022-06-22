@@ -2,8 +2,8 @@ package sfdc.sfdx.scanner.pmd.catalog;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import sfdc.sfdx.scanner.messaging.SfdxScannerException;
-import sfdc.sfdx.scanner.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import com.salesforce.messaging.EventKey;
 
 import java.util.*;
 
@@ -98,7 +98,7 @@ public class PmdCatalogRuleset {
 		// for circular references, we're just going to forcibly exit if we go deeper than 10 layers of recursion, which is
 		// way more than anyone could possibly want or need.
 		if (recursionDepth > 10) {
-			throw new SfdxScannerException(EventKey.ERROR_EXTERNAL_RECURSION_LIMIT, caller.getPath(), rule.getFullName());
+			throw new MessagePassableException(EventKey.ERROR_EXTERNAL_RECURSION_LIMIT, caller.getPath(), rule.getFullName());
 		}
 		// Depending on whether this method was invoked by another ruleset, we'll either look for references to the rule's
 		// category or references to the ruleset that invoked this method.

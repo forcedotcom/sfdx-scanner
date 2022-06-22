@@ -14,7 +14,7 @@ export enum Format {
 
 export abstract class PmdSupport extends CommandLineSupport {
 
-	protected async buildClasspath(): Promise<string[]> {
+	protected async buildSharedClasspath(): Promise<string[]> {
 		// Include PMD libs into classpath
 		const pmdLibs = `${PMD_LIB}/*`;
 		const classpathEntries = [pmdLibs];
@@ -27,15 +27,6 @@ export abstract class PmdSupport extends CommandLineSupport {
 
 		return classpathEntries;
 	}
-
-	protected isSuccessfulExitCode(code: number): boolean {
-		// PMD's convention is that an exit code of 0 indicates a successful run with no violations, and an exit code of
-		// 4 indicates a successful run with at least one violation.
-		return code === 0 || code === 4;
-	}
-
-
-	protected abstract buildCommandArray(): Promise<[string, string[]]>;
 
 	protected async getCustomRulePathEntries(): Promise<Map<string, Set<string>>> {
 		const customRulePathManager = await Controller.createRulePathManager();

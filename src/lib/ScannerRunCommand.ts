@@ -4,7 +4,7 @@ import {ScannerCommand} from './ScannerCommand';
 import {RecombinedRuleResults} from '../types';
 import {RunOutputProcessor} from './util/RunOutputProcessor';
 import {Controller} from '../Controller';
-import {OUTPUT_FORMAT, OutputOptions} from './RuleManager';
+import {OUTPUT_FORMAT, RunOptions} from './RuleManager';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
 
@@ -32,9 +32,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		// We need to derive the output format, either from information that was explicitly provided or from default values.
 		// We can't use the defaultValue property for the flag, because there needs to be a behavioral differenec between
 		// defaulting to a value and having the user explicitly select it.
-		const outputOptions: OutputOptions = {
+		const runOptions: RunOptions = {
 			format: this.determineOutputFormat(),
-			normalizeSeverity: normalizeSeverity
+			normalizeSeverity: normalizeSeverity,
+			runDfa: this.pathBasedEngines(),
+			sfdxVersion: this.config.version
 		};
 
 		const ruleManager = await Controller.createRuleManager();
@@ -48,7 +50,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 
 		let output: RecombinedRuleResults = null;
 		try {
-			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, outputOptions, engineOptions, this.pathBasedEngines());
+			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 		} catch (e) {
 			// Rethrow any errors as SFDX errors.
 			const message: string = e instanceof Error ? e.message : e as string;
@@ -56,7 +58,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		}
 
 		return new RunOutputProcessor({
-			format: outputOptions.format,
+			format: runOptions.format,
 			severityForError: this.flags['severity-threshold'] as number,
 			outfile: this.flags.outfile as string
 		}, this.ux)

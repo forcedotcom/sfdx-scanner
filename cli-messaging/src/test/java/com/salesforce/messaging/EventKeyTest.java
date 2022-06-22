@@ -1,4 +1,4 @@
-package sfdc.sfdx.scanner.messaging;
+package com.salesforce.messaging;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import static sfdc.sfdx.scanner.messaging.SfdxMessager.*;
+import static com.salesforce.messaging.Message.*;
 
 import java.io.IOException;
 import java.nio.file.Files;

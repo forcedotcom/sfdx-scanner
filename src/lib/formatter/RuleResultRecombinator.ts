@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {DfaEngineFilters} from '../../Constants';
+import {DfaEngineFilters, ENGINE} from '../../Constants';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
@@ -37,7 +37,7 @@ type DfaTableRow = BaseTableRow & {
 
 export class RuleResultRecombinator {
 
-	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>): Promise<RecombinedRuleResults> {
+	public static async recombineAndReformatResults(results: RuleResult[], format: OUTPUT_FORMAT, executedEngines: Set<string>, verboseViolations = false): Promise<RecombinedRuleResults> {
 		// We need to change the results we were given into the desired final format.
 		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
@@ -45,10 +45,10 @@ export class RuleResultRecombinator {
 				formattedResults = await this.constructCsv(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results, executedEngines);
+				formattedResults = await this.constructHtml(results, executedEngines, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JSON:
-				formattedResults = this.constructJson(results);
+				formattedResults = this.constructJson(results, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JUNIT:
 				formattedResults = this.constructJunit(results);
@@ -344,14 +344,30 @@ URL: ${url}`;
 		return {columns, rows};
 	}
 
-	private static constructJson(results: RuleResult[]): string {
+	private static constructJson(results: RuleResult[], verboseViolations = false): string {
 		if (results.length === 0) {
 			return '';
 		}
+
+		if (verboseViolations) {
+			const resultsVerbose = JSON.parse(JSON.stringify(results)) as RuleResult[];
+			for (const result of resultsVerbose) {
+				if (result.engine === ENGINE.RETIRE_JS) {
+					for (const violation of result.violations) {
+						// in the json format we need to replace new lines in the message
+						// for the first line (ending with a colon) we will replace it with a space
+						// for following lines, we will replace it with a semicolon and a space
+						violation.message = violation.message.replace(/:\n/g, ': ').replace(/\n/g, '; ');
+					}
+				}
+			}
+			return JSON.stringify(resultsVerbose.filter(r => r.violations.length > 0));
+		}
+		
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
-	private static async constructHtml(results: RuleResult[], executedEngines: Set<string>): Promise<string> {
+	private static async constructHtml(results: RuleResult[], executedEngines: Set<string>, verboseViolations = false): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
@@ -373,7 +389,7 @@ URL: ${url}`;
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: v.message,
+						message: verboseViolations && result.engine === ENGINE.RETIRE_JS ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.line,
 						column: v.column,
 						endLine: v.endLine || null,

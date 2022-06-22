@@ -7,5 +7,4 @@
 
 rootProject.name = "sfdx-scanner"
 
-include("pmd-cataloger")
-include("sfge")
+include(":cli-messaging", ":pmd-cataloger", ":sfge")

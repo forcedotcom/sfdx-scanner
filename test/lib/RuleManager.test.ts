@@ -1,22 +1,26 @@
 import {expect} from 'chai';
-import path = require('path');
-import Sinon = require('sinon');
+
+import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
-import {Rule, RuleGroup, RuleTarget} from '../../src/types';
+import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
+import {ENGINE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
-import {OUTPUT_FORMAT, RuleManager} from '../../src/lib/RuleManager';
-import {uxEvents, EVENTS} from '../../src/lib/ScannerEvents';
+import {OUTPUT_FORMAT, RuleManager, RunOptions} from '../../src/lib/RuleManager';
+import {EVENTS, uxEvents} from '../../src/lib/ScannerEvents';
 
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
 import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
+import {SfgeEngine} from '../../src/lib/sfge/SfgeEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
+import path = require('path');
+import Sinon = require('sinon');
 
 TestOverrides.initializeTestSetup();
 
@@ -25,10 +29,12 @@ const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 describe('RuleManager', () => {
 	let uxSpy;
+	let telemetrySpy;
 
 	beforeEach(() => {
 		Sinon.createSandbox();
 		uxSpy = Sinon.spy(uxEvents, 'emit');
+		telemetrySpy = Sinon.spy(Lifecycle.getInstance(), 'emitTelemetry');
 	});
 
 	afterEach(() => {
@@ -179,10 +185,16 @@ describe('RuleManager', () => {
 			after(() => {
 				process.chdir("../../..");
 			});
+			const runOptions: RunOptions = {
+				format: OUTPUT_FORMAT.JSON,
+				normalizeSeverity: false,
+				runDfa: false,
+				sfdxVersion: 'test'
+			};
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -194,11 +206,12 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('TS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -210,12 +223,13 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('App project files', async () => {
 
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -226,6 +240,7 @@ describe('RuleManager', () => {
 					for (const res of parsedRes) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('All targets match', async () => {
@@ -234,7 +249,7 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -243,6 +258,7 @@ describe('RuleManager', () => {
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 0);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Single target file does not match', async () => {
@@ -250,10 +266,11 @@ describe('RuleManager', () => {
 					// No filters
 					const filters = [];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
 
@@ -264,7 +281,7 @@ describe('RuleManager', () => {
 					const filters = [
 						new CategoryFilter([category])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -279,6 +296,7 @@ describe('RuleManager', () => {
 							expect(violation.category).to.equal(category);
 						}
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Filtering by multiple categories runs any rule in either category', async () => {
@@ -286,7 +304,7 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -299,17 +317,52 @@ describe('RuleManager', () => {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 						expect(res.violations[0].category).to.be.oneOf(categories);
 					}
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
+
+			describe('Test Case: Run by engine', () => {
+				it('Filtering by engine works as expected', async () => {
+					const engines = [ENGINE.RETIRE_JS, ENGINE.ESLINT];
+					const filters = [new EngineFilter(engines)];
+
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
+					let parsedRes = null;
+					if (typeof results !== 'string') {
+						expect(false, `Invalid output: ${results}`);
+					} else {
+						parsedRes = JSON.parse(results);
+					}
+					// This result indicates that not all executed engines found violations, which is what we expected. That's fine.
+					expect(parsedRes).to.be.an('array').that.has.length(1, 'Wrong number of engines returned violations');
+					expect(parsedRes[0].engine).to.equal('eslint', 'Wrong engine returned results');
+					expect(parsedRes[0].violations.length).to.equal(1, 'Wrong number of violations found');
+					Sinon.assert.callCount(telemetrySpy, 1);
+					const telemetryArg: TelemetryData = telemetrySpy.args[0][0];
+					expect(telemetryArg.eventName).to.equal('ENGINE_EXECUTION');
+					expect(telemetryArg.executedEnginesCount).to.equal(2);
+					expect(telemetryArg.executedEnginesString).to.equal(JSON.stringify(['eslint', 'retire-js']));
+					expect(telemetryArg['pmd']).to.equal(false);
+					expect(telemetryArg['pmd-custom']).to.equal(false);
+					expect(telemetryArg['eslint']).to.equal(true);
+					expect(telemetryArg['eslint-lwc']).to.equal(false);
+					expect(telemetryArg['eslint-typescript']).to.equal(false);
+					expect(telemetryArg['eslint-custom']).to.equal(false);
+					expect(telemetryArg['retire-js']).to.equal(true);
+					expect(telemetryArg['cpd']).to.equal(false);
+					expect(telemetryArg['sfge']).to.equal(false);
+				});
+			})
 
 			describe('Edge Cases', () => {
 				it('When no rules match the given criteria, an empty string is returned', async () => {
 					// Define our preposterous filter array.
 					const filters = [new CategoryFilter(['beebleborp'])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
 					expect(results).to.equal('', `Output ${results} should have been an empty string`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Single target file does not match', async () => {
@@ -318,11 +371,12 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 
@@ -332,11 +386,12 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Multiple targets do not match', async () => {
@@ -345,11 +400,12 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
 				it('Some targets do not match', async () => {
@@ -359,7 +415,7 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false}, EMPTY_ENGINE_OPTIONS);
+					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], runOptions, EMPTY_ENGINE_OPTIONS);
 					let parsedRes = null;
 					if (typeof results !== "string") {
 						expect(false, `Invalid output: ${results}`);
@@ -369,6 +425,7 @@ describe('RuleManager', () => {
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
 		});
@@ -458,6 +515,35 @@ describe('RuleManager', () => {
 				expect(results[0].target).to.equal(targets[0], 'Wrong directory matched');
 				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
+			});
+
+			it('Positive method-level targets are properly matched', async () => {
+				// All tests will use the SFGE engine, since method-level targeting is intended for that engine anyway.
+				const engine = new SfgeEngine();
+				await engine.init();
+
+				// Targets are all going to be normalized Unix paths, some of which also specify individual methods.
+				const targetFile1 = 'test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls';
+				const targetMethods1 = ['flsNoEnforcementAttempted', 'flsDoneCorrectly'];
+				const targetFile2 = 'test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/VfControllerFls.cls';
+				const targetMethods2 = ['flsWrongPermissionChecked'];
+				const targets = [
+					`${targetFile1}#${targetMethods1.join(';')}`,
+					`${targetFile2}#${targetMethods2.join(';')}`
+				];
+
+				const testRuleManager: UnpackTargetsDRM = new UnpackTargetsDRM();
+				await testRuleManager.init();
+
+				// THIS IS THE INVOCATION OF THE TARGET METHOD!
+				const results: RuleTarget[] = await testRuleManager.unpackTargets(engine, targets, new Set());
+
+				// Validate the results.
+				expect(results.length).to.equal(2, 'Wrong number of targets matched');
+				expect(results[0].target).to.equal(targetFile1, 'Expected different first file');
+				expect(results[0].methods).to.deep.equal(targetMethods1, 'Expected different first methods');
+				expect(results[1].target).to.equal(targetFile2, 'Expected different second file');
+				expect(results[1].methods).to.deep.equal(targetMethods2, 'Expected different second methods');
 			});
 
 			it('Positive glob-type targets are properly matched', async () => {

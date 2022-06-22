@@ -25,6 +25,10 @@ export class FileHandler {
 		return await this.exists(filename) && (await this.stats(filename)).isDirectory();
 	}
 
+	async isFile(filename: string): Promise<boolean> {
+		return await this.exists(filename) && (await this.stats(filename)).isFile();
+	}
+
 	readDir(filename: string): Promise<string[]> {
 		return fs.readdir(filename);
 	}
