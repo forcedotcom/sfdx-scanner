@@ -54,6 +54,20 @@ Example usage:
 insert a;
 ```
 
+### Disable method
+
+`/* sfge-disable-stack <rule_name> */`
+
+Use this when you want to disable all the sink operations in paths passing through this method.
+As with the other engine directives, make sure you add it in the line immediately before the method declaration.
+Example usage:
+
+```
+@AuraEnabled
+/* sfge-disable-stack ApexFlsViolationRule */
+public static boolean someMethodName() {
+```
+
 ### Disable class
 
 `/* sfge-disable <rule_name> */`

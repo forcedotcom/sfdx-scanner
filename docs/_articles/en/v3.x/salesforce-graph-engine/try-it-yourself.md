@@ -108,6 +108,20 @@ violations in the file should be decreased by one.
 
 The remaining violations in the working app have been left as exercises for you to complete.
 
+## Targeting individual methods
+When you fix the violations in a given method, you may wish to analyze that method individually instead of the whole file.
+For example, suppose you want to analyze the [`flsHelperGivenIncorrectObjectType()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L4)
+and [`flsHelperMultipleInstances()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L21)
+methods in `AuraEnabledFls.cls`, and skip all the others. You can do that by running the following command:
+```
+sfdx scanner:run:dfa --target './force-app/main/default/classes/AuraEnabledFls.cls#flsHelperGivenIncorrectObjectType;flsHelperMultipleInstances' --projectdir './force-app/main/default' --format csv
+```
+Please note the following:
+- This syntax is only supported for file paths. You can't use it with globs or directories.
+- If multiple methods in the target file share the specified name (e.g., overloads, inner classes, etc), then all such methods will be included.
+- Methods specified through method-level targeting are considered as [path entrypoints](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule)
+even when they otherwise wouldn't be. This can cause methods that would ordinarily be skipped to be analyzed.
+
 ## Skipping a violation
 Suppose that one of these violations was a false positive (they're not, but let's pretend). Or alternatively, suppose that
 you have a good reason for why a CRUD/FLS check is actually unnecessary (e.g., the code is only executed from an admin-only page).
@@ -116,4 +130,5 @@ If you're really, truly certain that you want to skip that violation, you can us
 For example, if you add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`
 and rerun the command, the violation in that method will be suppressed.
 
-You can also suppress all violations in an entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
+You can also suppress all violations in a method by adding `/* sfge-disable-stack ApexFlsViolationRule */` immediately above the method,
+or in the entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
