@@ -20,9 +20,9 @@ describe('scanner:rule:describe', () => {
 				.it('--json flag yields correct results', ctx => {
 					const ctxJson = JSON.parse(ctx.stdout);
 					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
-					expect(ctxJson.warnings.length).to.equal(2, 'Should be two warning');
-					// The first warning is the pilot banner, and the second is the one we want.
-					expect(ctxJson.warnings[1]).to.equal(formattedWarning, 'Warning message should match');
+					expect(ctxJson.warnings.length).to.equal(3, 'Should be three warnings');
+					// First is the End-of-life banner, second is the pilot banner, third is the one we want.
+					expect(ctxJson.warnings[2]).to.equal(formattedWarning, 'Warning message should match');
 				});
 		});
 

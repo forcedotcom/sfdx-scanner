@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
-import {PILOT_AVAILABILITY_BANNER} from '../../../Constants';
+import {END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 
 // Initialize Messages with the current plugin directory
@@ -41,6 +41,7 @@ export default class Describe extends ScannerCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
+		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
