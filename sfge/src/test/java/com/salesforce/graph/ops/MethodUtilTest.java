@@ -337,7 +337,7 @@ public class MethodUtilTest {
 
     @ValueSource(strings = {Schema.AURA_ENABLED, Schema.NAMESPACE_ACCESSIBLE})
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testGetNamespaceAccessibleMethods(String annotation) {
+    public void testGetMethodsWithAnnotation(String annotation) {
         String[] sourceCode = {
             "public class MyClass {\n"
                     + "    @"
