@@ -58,6 +58,28 @@ public class RuleUtilTest {
     }
 
     @Test
+    public void getPathEntryPoints_includesNamespaceAccessibleMethods() {
+        String sourceCode =
+                "public class Foo {\n"
+                        + " @NamespaceAccessible\n"
+                        + " public boolean nsMethod() {\n"
+                        + "     return true;\n"
+                        + " }\n"
+                        + "\n"
+                        + " public boolean nonNsMethod() {\n"
+                        + "     return true;\n"
+                        + " }\n"
+                        + "}\n";
+        TestUtil.buildGraph(g, sourceCode, true);
+
+        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
+
+        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
+        MethodVertex firstVertex = entryPoints.get(0);
+        assertEquals("nsMethod", firstVertex.getName());
+    }
+
+    @Test
     public void getPathEntryPoints_includesPageReferenceMethods() {
         String sourceCode =
                 "public class Foo {\n"
