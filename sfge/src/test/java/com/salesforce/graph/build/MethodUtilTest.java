@@ -1190,55 +1190,6 @@ public class MethodUtilTest {
     }
 
     /**
-     * This only tests the positive UserClass case. The compiler does not accept annotations on the
-     * other types of vertices that are excluded from the query. Exclude test classes and methods
-     */
-    @Test
-    public void testGetAuraEnabledMethods() {
-        String[] sourceCode = {
-            "public class MyClass {\n"
-                    + "    @AuraEnabled\n"
-                    + "    public static void foo() {\n"
-                    + "    }\n"
-                    + "    @AuraEnabled\n"
-                    + "    public static testMethod void shouldBeExcludedByModifier() {\n"
-                    + "    }\n"
-                    + "    @AuraEnabled\n"
-                    + "    @isTest\n"
-                    + "    public static void shouldBeExcludedByAnnotation() {\n"
-                    + "    }\n"
-                    + "    public static void bar() {\n"
-                    + "    }\n"
-                    + "}\n",
-            "@isTest\n"
-                    + "public class MyTestClass {\n"
-                    + "    @AuraEnabled\n"
-                    + "    public static void foo() {\n"
-                    + "    }\n"
-                    + "}\n",
-        };
-
-        TestUtil.buildGraph(g, sourceCode);
-
-        List<MethodVertex> methods = MethodUtil.getAuraEnabledMethods(g, new ArrayList<>());
-        MatcherAssert.assertThat(methods, hasSize(equalTo(1)));
-
-        MethodVertex method = methods.get(0);
-        MatcherAssert.assertThat(method.getName(), equalTo("foo"));
-        MatcherAssert.assertThat(method.isTest(), equalTo(false));
-
-        for (String excludedName :
-                new String[] {"shouldBeExcludedByModifier", "shouldBeExcludedByAnnotation"}) {
-            MethodVertex excludedMethod =
-                    SFVertexFactory.load(
-                            g,
-                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
-                                    .has(Schema.NAME, excludedName));
-            MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
-        }
-    }
-
-    /**
      * Test that UserClass methods that return are PageReference included. UserInterface methods are
      * excluded. Test methods are exclude. Methods from test classes are excluded.
      */

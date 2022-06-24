@@ -165,24 +165,30 @@ public final class MethodUtil {
      */
     public static List<MethodVertex> getAuraEnabledMethods(
             GraphTraversalSource g, List<String> targetFiles) {
-        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
+        return getMethodsWithAnnotation(g, targetFiles, Schema.AURA_ENABLED);
+    }
+
+    /**
+     * Returns non-test methods in the target files with a @NamespaceAccessible annotation. An empty
+     * list implicitly includes all files.
+     */
+    public static List<MethodVertex> getNamespaceAccessibleMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.NAMESPACE_ACCESSIBLE);
+    }
+
+    static List<MethodVertex> getMethodsWithAnnotation(
+            GraphTraversalSource g, List<String> targetFiles, String annotation) {
+        // Only look at UserClass vertices. Uninterested in Enums, Interfaces, or Triggers.
         final String[] labels = new String[] {NodeType.USER_CLASS};
         return SFVertexFactory.loadVertices(
                 g,
-                TraversalUtil.fileRootTraversal(g, labels, targetFiles)
-                        .not(has(Schema.IS_TEST, true))
-                        .repeat(__.out(Schema.CHILD))
-                        .until(__.hasLabel(NodeType.METHOD))
-                        .not(has(Schema.IS_TEST, true))
+                rootMethodTraversal(g, targetFiles)
                         .where(
                                 out(Schema.CHILD)
                                         .hasLabel(NodeType.MODIFIER_NODE)
                                         .out(Schema.CHILD)
-                                        .where(
-                                                H.has(
-                                                        NodeType.ANNOTATION,
-                                                        Schema.NAME,
-                                                        Schema.AURA_ENABLED)))
+                                        .where(H.has(NodeType.ANNOTATION, Schema.NAME, annotation)))
                         .order(Scope.global)
                         .by(Schema.DEFINING_TYPE, Order.asc)
                         .by(Schema.NAME, Order.asc));
@@ -194,19 +200,24 @@ public final class MethodUtil {
      */
     public static List<MethodVertex> getPageReferenceMethods(
             GraphTraversalSource g, List<String> targetFiles) {
-        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
-        final String[] labels = new String[] {NodeType.USER_CLASS};
         return SFVertexFactory.loadVertices(
                 g,
-                TraversalUtil.fileRootTraversal(g, labels, targetFiles)
-                        .not(has(Schema.IS_TEST, true))
-                        .repeat(__.out(Schema.CHILD))
-                        .until(__.hasLabel(NodeType.METHOD))
-                        .not(has(Schema.IS_TEST, true))
+                rootMethodTraversal(g, targetFiles)
                         .where(H.has(NodeType.METHOD, Schema.RETURN_TYPE, PAGE_REFERENCE))
                         .order(Scope.global)
                         .by(Schema.DEFINING_TYPE, Order.asc)
                         .by(Schema.NAME, Order.asc));
+    }
+
+    private static GraphTraversal<Vertex, Vertex> rootMethodTraversal(
+            GraphTraversalSource g, List<String> targetFiles) {
+        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
+        final String[] labels = new String[] {NodeType.USER_CLASS};
+        return TraversalUtil.fileRootTraversal(g, labels, targetFiles)
+                .not(has(Schema.IS_TEST, true))
+                .repeat(__.out(Schema.CHILD))
+                .until(__.hasLabel(NodeType.METHOD))
+                .not(has(Schema.IS_TEST, true));
     }
 
     /**
