@@ -15,15 +15,18 @@ import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.BlockStatementVertex;
 import com.salesforce.graph.vertex.FieldDeclarationVertex;
+import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserClassVertex;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.T;
 
 /** Used when invoking a static method on a class. */
 public final class ClassStaticScope extends AbstractClassScope
@@ -110,9 +113,9 @@ public final class ClassStaticScope extends AbstractClassScope
         return results;
     }
 
-	private static List<MethodVertex> getStaticBlocks(
+	private static List<MethodCallExpressionVertex> getStaticBlocks(
 		GraphTraversalSource g, UserClassVertex userClass) {
-		List<MethodVertex> results = new ArrayList<>();
+		List<MethodCallExpressionVertex> results = new ArrayList<>();
 
 		String superClassName = userClass.getSuperClassName().orElse(null);
 		if (superClassName != null) {
@@ -122,24 +125,27 @@ public final class ClassStaticScope extends AbstractClassScope
 			}
 		}
 
-		results.addAll(
-			SFVertexFactory.loadVertices(
-				g,
-				g.V(userClass.getId())
-					.out(Schema.CHILD)
-					.hasLabel(ASTConstants.NodeType.METHOD)
-					.has(Schema.IS_STATIC_BLOCK_METHOD, true)
-					.order(Scope.global)
-					.by(Schema.CHILD_INDEX, Order.asc)
-					/*.out(Schema.CHILD)
-					.hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
-					.order(Scope.global)
-					.by(Schema.CHILD_INDEX, Order.asc)*/));
+		results.addAll(SFVertexFactory.loadVertices(
+			g,
+			g.V(userClass.getId())
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.METHOD)
+				.has(Schema.IS_STATIC_BLOCK_INVOKER_METHOD, true)
+				.order(Scope.global)
+				.by(Schema.CHILD_INDEX, Order.asc)
+				.out(Schema.CHILD)
+				.hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
+				.order(Scope.global)
+				.by(Schema.CHILD_INDEX, Order.asc)
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.EXPRESSION_STATEMENT)
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.METHOD_CALL_EXPRESSION)));
 
 		return results;
 	}
 
-    /**
+	/**
      * Returns a path that represents the static properties defined by the class. The following
      * example would contain a path for 'MyClass' that contains the Field and FieldDeclarations for
      * 's'. {@code
@@ -156,20 +162,25 @@ public final class ClassStaticScope extends AbstractClassScope
             GraphTraversalSource g, String classname) {
         ClassStaticScope classStaticScope = ClassStaticScope.get(g, classname);
         List<BaseSFVertex> vertices = new ArrayList<>();
-		List<MethodVertex> methodVertices = new ArrayList<>();
         vertices.addAll(classStaticScope.getFields());
         vertices.addAll(getFieldDeclarations(g, classStaticScope.userClass));
-		methodVertices.addAll(getStaticBlocks(g, classStaticScope.userClass));
-        if (vertices.isEmpty() && methodVertices.isEmpty()) {
+		vertices.addAll(getStaticBlocks(g, classStaticScope.userClass));
+        if (vertices.isEmpty()) {
             return Optional.empty();
         } else {
-			ArrayList<Collectible<ApexPath>> apexPaths = new ArrayList<>();
-			for (MethodVertex methodVertex : methodVertices) {
-				apexPaths.add(new ApexPath(methodVertex));
-			}
             ApexPath apexPath = new ApexPath(null);
             apexPath.addVertices(vertices);
             return Optional.of(apexPath);
         }
     }
+
+//	private static MethodCallExpressionVertex createSyntheticInvocation(MethodVertex.StaticBlockVertex methodVertex) {
+//		final HashMap<Object, Object> map = new HashMap<>();
+//		map.put(T.id, Long.valueOf(-1));
+//		map.put(T.label, NodeType.METHOD_CALL_EXPRESSION);
+//		map.put(Schema.METHOD_NAME, methodVertex.getName());
+//		map.put(Schema.DEFINING_TYPE, methodVertex.getDefiningType());
+//		map.put(Schema.STATIC, Boolean.valueOf(true));
+//		return new MethodCallExpressionVertex(map);
+//	}
 }

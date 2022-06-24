@@ -83,9 +83,8 @@ public final class MethodUtil {
     private static final String PAGE_REFERENCE = "PageReference";
     public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
-	public static final String SYNTHETIC_STATIC_BLOCK_METHOD_NAME = "SyntheticStaticBlock_%d";
 
-    public static List<MethodVertex> getTargetedMethods(
+	public static List<MethodVertex> getTargetedMethods(
             GraphTraversalSource g, List<RuleRunnerTarget> targets) {
         // The targets passed into this method should exclusively be ones that target specific
         // methods instead of files.

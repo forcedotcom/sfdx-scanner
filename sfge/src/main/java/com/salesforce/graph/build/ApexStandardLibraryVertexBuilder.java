@@ -73,8 +73,8 @@ public class ApexStandardLibraryVertexBuilder extends AbstractApexVertexBuilder
     }
 
     @Override
-    protected Map<String, Object> getAdditionalProperties(JorjeNode node, HashMap<String, Object> overrides) {
-        Map<String, Object> result = super.getAdditionalProperties(node, overrides);
+    protected Map<String, Object> getAdditionalProperties(JorjeNode node) {
+        Map<String, Object> result = super.getAdditionalProperties(node);
 
         // Mark all nodes as being from the Standard library
         // TODO: Reduce number of nodes where this is set
