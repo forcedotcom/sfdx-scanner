@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.salesforce.TestUtil;
+import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
 import com.salesforce.metainfo.VisualForceHandlerImpl;
@@ -25,6 +26,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class RuleUtilTest {
     private static final Logger LOGGER = LogManager.getLogger(RuleUtilTest.class);
@@ -35,16 +38,19 @@ public class RuleUtilTest {
         this.g = TestUtil.getGraph();
     }
 
-    @Test
-    public void getPathEntryPoints_includesAuraEnabledMethods() {
+    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.REMOTE_ACTION, Schema.NAMESPACE_ACCESSIBLE})
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void getPathEntryPoints_includesAnnotatedMethods(String annotation) {
         String sourceCode =
                 "public class Foo {\n"
-                        + "	@AuraEnabled\n"
-                        + "	public boolean auraMethod() {\n"
+                        + "	@"
+                        + annotation
+                        + "\n"
+                        + "	public boolean annotatedMethod() {\n"
                         + "		return true;\n"
                         + "	}\n"
                         + "\n"
-                        + "	public boolean nonAuraMethod() {\n"
+                        + "	public boolean nonAnnotatedMethod() {\n"
                         + "		return true;\n"
                         + "	}\n"
                         + "}\n";
@@ -54,29 +60,7 @@ public class RuleUtilTest {
 
         MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
         MethodVertex firstVertex = entryPoints.get(0);
-        assertEquals("auraMethod", firstVertex.getName());
-    }
-
-    @Test
-    public void getPathEntryPoints_includesNamespaceAccessibleMethods() {
-        String sourceCode =
-                "public class Foo {\n"
-                        + " @NamespaceAccessible\n"
-                        + " public boolean nsMethod() {\n"
-                        + "     return true;\n"
-                        + " }\n"
-                        + "\n"
-                        + " public boolean nonNsMethod() {\n"
-                        + "     return true;\n"
-                        + " }\n"
-                        + "}\n";
-        TestUtil.buildGraph(g, sourceCode, true);
-
-        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
-
-        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
-        MethodVertex firstVertex = entryPoints.get(0);
-        assertEquals("nsMethod", firstVertex.getName());
+        assertEquals("annotatedMethod", firstVertex.getName());
     }
 
     @Test

@@ -47,6 +47,7 @@ public class Schema {
     public static final String NAMESPACE_ACCESSIBLE = "NamespaceAccessible";
     public static final String OPERATOR = "Operator";
     public static final String REFERENCE_TYPE = "ReferenceType";
+    public static final String REMOTE_ACTION = "RemoteAction";
     public static final String RETURN_TYPE = "ReturnType";
     public static final String RULE_NAMES = "RulesNames";
     public static final String STATIC = "Static";

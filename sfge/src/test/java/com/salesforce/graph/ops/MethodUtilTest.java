@@ -181,20 +181,20 @@ public class MethodUtilTest {
 
         MatcherAssert.assertThat(methodVertices, hasSize(equalTo(2)));
 
-		boolean method1Found = false;
-		boolean method2Found = false;
-		for (MethodVertex methodVertex : methodVertices) {
-			String name = methodVertex.getName();
-			if (METHOD_WITHOUT_OVERLOADS_1.equals(name)) {
-				method1Found = true;
-			} else if (METHOD_WITHOUT_OVERLOADS_2.equals(name)) {
-				method2Found = true;
-			} else {
-				fail("Unexpected method name " + name);
-			}
-		}
-		assertTrue(method1Found);
-		assertTrue(method2Found);
+        boolean method1Found = false;
+        boolean method2Found = false;
+        for (MethodVertex methodVertex : methodVertices) {
+            String name = methodVertex.getName();
+            if (METHOD_WITHOUT_OVERLOADS_1.equals(name)) {
+                method1Found = true;
+            } else if (METHOD_WITHOUT_OVERLOADS_2.equals(name)) {
+                method2Found = true;
+            } else {
+                fail("Unexpected method name " + name);
+            }
+        }
+        assertTrue(method1Found);
+        assertTrue(method2Found);
         String messages = CliMessager.getInstance().getAllMessages();
         assertEquals("[]", messages);
     }
@@ -242,20 +242,20 @@ public class MethodUtilTest {
 
         MatcherAssert.assertThat(methodVertices, hasSize(equalTo(2)));
 
-		boolean line18Found = false;
-		boolean line22Found = false;
-		for (MethodVertex methodVertex : methodVertices) {
-			assertEquals(METHOD_WITH_EXTERNAL_NAME_DUPLICATION, methodVertex.getName());
-			if (methodVertex.getBeginLine() == 18) {
-				line18Found = true;
-			} else if (methodVertex.getBeginLine() == 22) {
-				line22Found = true;
-			} else {
-				fail("Unexpected line number " + methodVertex.getBeginLine());
-			}
-		}
-		assertTrue(line18Found);
-		assertTrue(line22Found);
+        boolean line18Found = false;
+        boolean line22Found = false;
+        for (MethodVertex methodVertex : methodVertices) {
+            assertEquals(METHOD_WITH_EXTERNAL_NAME_DUPLICATION, methodVertex.getName());
+            if (methodVertex.getBeginLine() == 18) {
+                line18Found = true;
+            } else if (methodVertex.getBeginLine() == 22) {
+                line22Found = true;
+            } else {
+                fail("Unexpected line number " + methodVertex.getBeginLine());
+            }
+        }
+        assertTrue(line18Found);
+        assertTrue(line22Found);
 
         String messages = CliMessager.getInstance().getAllMessages();
         MatcherAssert.assertThat(
@@ -335,7 +335,7 @@ public class MethodUtilTest {
                 containsString(EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES.getMessageKey()));
     }
 
-    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.NAMESPACE_ACCESSIBLE})
+    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.REMOTE_ACTION, Schema.NAMESPACE_ACCESSIBLE})
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testGetMethodsWithAnnotation(String annotation) {
         String[] sourceCode = {

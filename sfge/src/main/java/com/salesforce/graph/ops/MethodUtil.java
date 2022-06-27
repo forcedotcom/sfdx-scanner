@@ -177,6 +177,15 @@ public final class MethodUtil {
         return getMethodsWithAnnotation(g, targetFiles, Schema.NAMESPACE_ACCESSIBLE);
     }
 
+    /**
+     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty
+     * list implicitly includes all files.
+     */
+    public static List<MethodVertex> getRemoteActionMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.REMOTE_ACTION);
+    }
+
     static List<MethodVertex> getMethodsWithAnnotation(
             GraphTraversalSource g, List<String> targetFiles, String annotation) {
         // Only look at UserClass vertices. Uninterested in Enums, Interfaces, or Triggers.
