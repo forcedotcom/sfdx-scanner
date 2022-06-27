@@ -178,7 +178,7 @@ public final class MethodUtil {
     }
 
     /**
-     * Returns non-test methods in the target files with a @NamespaceAccessible annotation. An empty
+     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty
      * list implicitly includes all files.
      */
     public static List<MethodVertex> getRemoteActionMethods(
