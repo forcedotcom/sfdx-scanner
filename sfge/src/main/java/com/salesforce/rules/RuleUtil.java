@@ -65,6 +65,8 @@ public final class RuleUtil {
             methods.addAll(MethodUtil.getRemoteActionMethods(g, fileLevelTargets));
             // ...and PageReference methods...
             methods.addAll(MethodUtil.getPageReferenceMethods(g, fileLevelTargets));
+            // ...and global-exposed methods...
+            methods.addAll(MethodUtil.getGlobalMethods(g, fileLevelTargets));
             // ...and exposed methods on VF controllers.
             methods.addAll(MethodUtil.getExposedControllerMethods(g, fileLevelTargets));
         }

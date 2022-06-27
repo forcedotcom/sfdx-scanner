@@ -389,4 +389,66 @@ public class MethodUtilTest {
             MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
         }
     }
+
+    @Test
+    public void testGetGlobalMethods() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "    global static void foo() {\n"
+                    + "    }\n"
+                    + "    global static testMethod void shouldBeExcludedByModifier() {\n"
+                    + "    }\n"
+                    + "    @isTest\n"
+                    + "    global static void shouldBeExcludedByAnnotation() {\n"
+                    + "    }\n"
+                    + "    public static void bar() {\n"
+                    + "    }\n"
+                    + "}\n",
+            "@isTest\n"
+                    + "public class MyTestClass {\n"
+                    + "    public static void foo() {\n"
+                    + "    }\n"
+                    + "}\n",
+        };
+
+        TestUtil.buildGraph(g, sourceCode);
+
+        List<MethodVertex> methods = MethodUtil.getGlobalMethods(g, new ArrayList<>());
+        // The `foo` method should be included because it's declared as global. The `<init>` method
+        // (i.e. the constructor) and the `clone` method are included because they implicitly exist even though they were
+        // never actually declared. The inclusion of unreal methods isn't a problem, because they're just empty paths.
+        MatcherAssert.assertThat(methods, hasSize(equalTo(3)));
+
+        boolean cloneFound = false;
+        boolean fooFound = false;
+        boolean initFound = false;
+        for (MethodVertex methodVertex : methods) {
+            switch (methodVertex.getName()) {
+                case "clone":
+                    cloneFound = true;
+                    break;
+                case "<init>":
+                    initFound = true;
+                    break;
+                case "foo":
+                    fooFound = true;
+                    break;
+                default:
+                    fail("Unexpected method name: " + methodVertex.getName());
+            }
+        }
+        assertTrue(cloneFound);
+        assertTrue(initFound);
+        assertTrue(fooFound);
+
+        for (String excludedName :
+                new String[] {"shouldBeExcludedByModifier", "shouldBeExcludedByAnnotation"}) {
+            MethodVertex excludedMethod =
+                    SFVertexFactory.load(
+                            g,
+                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                                    .has(Schema.NAME, excludedName));
+            MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
+        }
+    }
 }

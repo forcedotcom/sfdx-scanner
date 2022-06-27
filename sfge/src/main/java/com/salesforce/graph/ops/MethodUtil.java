@@ -178,8 +178,8 @@ public final class MethodUtil {
     }
 
     /**
-     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty
-     * list implicitly includes all files.
+     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty list
+     * implicitly includes all files.
      */
     public static List<MethodVertex> getRemoteActionMethods(
             GraphTraversalSource g, List<String> targetFiles) {
@@ -227,6 +227,21 @@ public final class MethodUtil {
                 .repeat(__.out(Schema.CHILD))
                 .until(__.hasLabel(NodeType.METHOD))
                 .not(has(Schema.IS_TEST, true));
+    }
+
+    /**
+     * Returns non-test methods in the target files whose modifier scope is `global`. An empty list implicitly includes
+     * all files.
+     */
+    public static List<MethodVertex> getGlobalMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        // Get all methods in the target files.
+        List<MethodVertex> methodVertices =
+                SFVertexFactory.loadVertices(g, rootMethodTraversal(g, targetFiles));
+        // Filter for the global methods.
+        return methodVertices.stream()
+                        .filter(m -> m.getModifierNode().isGlobal() && !m.isStandardType())
+                        .collect(Collectors.toList());
     }
 
     /**
