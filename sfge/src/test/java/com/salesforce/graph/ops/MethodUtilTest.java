@@ -414,32 +414,9 @@ public class MethodUtilTest {
         TestUtil.buildGraph(g, sourceCode);
 
         List<MethodVertex> methods = MethodUtil.getGlobalMethods(g, new ArrayList<>());
-        // The `foo` method should be included because it's declared as global. The `<init>` method
-        // (i.e. the constructor) and the `clone` method are included because they implicitly exist even though they were
-        // never actually declared. The inclusion of unreal methods isn't a problem, because they're just empty paths.
-        MatcherAssert.assertThat(methods, hasSize(equalTo(3)));
-
-        boolean cloneFound = false;
-        boolean fooFound = false;
-        boolean initFound = false;
-        for (MethodVertex methodVertex : methods) {
-            switch (methodVertex.getName()) {
-                case "clone":
-                    cloneFound = true;
-                    break;
-                case "<init>":
-                    initFound = true;
-                    break;
-                case "foo":
-                    fooFound = true;
-                    break;
-                default:
-                    fail("Unexpected method name: " + methodVertex.getName());
-            }
-        }
-        assertTrue(cloneFound);
-        assertTrue(initFound);
-        assertTrue(fooFound);
+        // The `foo` method should be included because it's declared as global.
+        MatcherAssert.assertThat(methods, hasSize(equalTo(1)));
+        MatcherAssert.assertThat(methods.get(0).getName(), equalTo("foo"));
 
         for (String excludedName :
                 new String[] {"shouldBeExcludedByModifier", "shouldBeExcludedByAnnotation"}) {

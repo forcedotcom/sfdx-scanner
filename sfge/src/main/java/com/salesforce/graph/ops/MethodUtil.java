@@ -230,18 +230,31 @@ public final class MethodUtil {
     }
 
     /**
-     * Returns non-test methods in the target files whose modifier scope is `global`. An empty list implicitly includes
-     * all files.
+     * Returns non-test methods in the target files whose modifier scope is `global`. An empty list
+     * implicitly includes all files.
      */
     public static List<MethodVertex> getGlobalMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         // Get all methods in the target files.
-        List<MethodVertex> methodVertices =
-                SFVertexFactory.loadVertices(g, rootMethodTraversal(g, targetFiles));
-        // Filter for the global methods.
-        return methodVertices.stream()
-                        .filter(m -> m.getModifierNode().isGlobal() && !m.isStandardType())
-                        .collect(Collectors.toList());
+        return SFVertexFactory.loadVertices(
+                g,
+                rootMethodTraversal(g, targetFiles)
+                        .filter(
+                                __.and(
+                                        // If a method has at least one block statement, then it is
+                                        // definitely actually declared, as
+                                        // opposed to being an implicit method.
+                                        out(Schema.CHILD)
+                                                .hasLabel(NodeType.BLOCK_STATEMENT)
+                                                .count()
+                                                .is(P.gte(1)),
+                                        // We only want global methods.
+                                        out(Schema.CHILD)
+                                                .hasLabel(NodeType.MODIFIER_NODE)
+                                                .has(Schema.GLOBAL, true),
+                                        // Ignore any standard methods, otherwise will get a ton of
+                                        // extra results.
+                                        __.not(__.has(Schema.IS_STANDARD, true)))));
     }
 
     /**
