@@ -5,8 +5,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.salesforce.TestUtil;
 import com.salesforce.graph.Schema;
@@ -61,6 +60,40 @@ public class RuleUtilTest {
         MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
         MethodVertex firstVertex = entryPoints.get(0);
         assertEquals("annotatedMethod", firstVertex.getName());
+    }
+
+    @Test
+    public void getPathEntryPoints_includesGlobalMethods() {
+        String sourceCode =
+            "public class Foo {\n"
+                + "    global static void globalStaticMethod() {\n"
+                + "    }\n"
+                + "    global void globalInstanceMethod() {\n"
+                + "    }\n"
+                + "    public static void publicStaticMethod() {\n"
+                + "    }\n"
+                + "}\n";
+        TestUtil.buildGraph(g, sourceCode, true);
+
+        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
+
+        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(2)));
+        boolean staticMethodFound = false;
+        boolean instanceMethodFound = false;
+        for (MethodVertex entrypoint : entryPoints) {
+            switch (entrypoint.getName()) {
+                case "globalStaticMethod":
+                    staticMethodFound = true;
+                    break;
+                case "globalInstanceMethod":
+                    instanceMethodFound = true;
+                    break;
+                default:
+                    fail("Unexpected method " + entrypoint.getName());
+            }
+        }
+        assertTrue(staticMethodFound);
+        assertTrue(instanceMethodFound);
     }
 
     @Test
