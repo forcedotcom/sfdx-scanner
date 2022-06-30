@@ -137,42 +137,6 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         }
     }
 
-    public static final class StaticBlockVertex extends MethodVertex
-            implements Collectible<StaticBlockVertex> {
-        public static final NullCollectible<StaticBlockVertex> NULL_VALUE =
-                new NullCollectible<>(StaticBlockVertex.class);
-
-        private StaticBlockVertex(Map<Object, Object> properties) {
-            super(properties);
-        }
-
-        @Override
-        public boolean visit(PathVertexVisitor visitor, SymbolProvider symbols) {
-            return visitor.visit(this, symbols);
-        }
-
-        @Override
-        public boolean visit(SymbolProviderVertexVisitor visitor) {
-            return visitor.visit(this);
-        }
-
-        @Override
-        public void afterVisit(PathVertexVisitor visitor, SymbolProvider symbols) {
-            visitor.afterVisit(this, symbols);
-        }
-
-        @Override
-        public void afterVisit(SymbolProviderVertexVisitor visitor) {
-            visitor.afterVisit(this);
-        }
-
-        @Nullable
-        @Override
-        public StaticBlockVertex getCollectible() {
-            return this;
-        }
-    }
-
     public static final class InstanceMethodVertex extends MethodVertex {
         private InstanceMethodVertex(Map<Object, Object> properties) {
             super(properties);
@@ -201,15 +165,8 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
 
     public static final class Builder {
         public static MethodVertex create(Map<Object, Object> vertex) {
-            final boolean isStaticBlockMethod =
-                    BaseSFVertex.toBoolean(vertex.get(Schema.IS_STATIC_BLOCK_METHOD));
             boolean isConstructor = BaseSFVertex.toBoolean(vertex.get(Schema.CONSTRUCTOR));
-            if (isStaticBlockMethod) {
-                return new StaticBlockVertex(vertex);
-            } else if (isConstructor) {
-                return new ConstructorVertex(vertex);
-            }
-            return new InstanceMethodVertex(vertex);
+            return isConstructor ? new ConstructorVertex(vertex) : new InstanceMethodVertex(vertex);
         }
     }
 }
