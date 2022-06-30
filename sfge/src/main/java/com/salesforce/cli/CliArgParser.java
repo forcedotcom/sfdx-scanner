@@ -126,9 +126,13 @@ public class CliArgParser {
 
         private void identifyRules(List<String> rulesToRun) {
             try {
-                for (String ruleName : rulesToRun) {
-                    AbstractRule rule = RuleUtil.getRule(ruleName);
-                    selectedRules.add(rule);
+                if (rulesToRun.isEmpty()) {
+                    selectedRules.addAll(RuleUtil.getAllRules());
+                } else {
+                    for (String ruleName : rulesToRun) {
+                        AbstractRule rule = RuleUtil.getRule(ruleName);
+                        selectedRules.add(rule);
+                    }
                 }
             } catch (RuleUtil.RuleNotFoundException ex) {
                 throw new InvocationException(ex.getMessage(), ex);

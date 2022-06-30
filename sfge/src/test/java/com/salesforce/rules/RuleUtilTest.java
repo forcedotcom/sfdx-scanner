@@ -65,14 +65,14 @@ public class RuleUtilTest {
     @Test
     public void getPathEntryPoints_includesGlobalMethods() {
         String sourceCode =
-            "public class Foo {\n"
-                + "    global static void globalStaticMethod() {\n"
-                + "    }\n"
-                + "    global void globalInstanceMethod() {\n"
-                + "    }\n"
-                + "    public static void publicStaticMethod() {\n"
-                + "    }\n"
-                + "}\n";
+                "public class Foo {\n"
+                        + "    global static void globalStaticMethod() {\n"
+                        + "    }\n"
+                        + "    global void globalInstanceMethod() {\n"
+                        + "    }\n"
+                        + "    public static void publicStaticMethod() {\n"
+                        + "    }\n"
+                        + "}\n";
         TestUtil.buildGraph(g, sourceCode, true);
 
         List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
@@ -296,6 +296,8 @@ public class RuleUtilTest {
     public void getAllRules_noExceptionThrown() {
         try {
             List<AbstractRule> allRules = RuleUtil.getAllRules();
+            MatcherAssert.assertThat(allRules, hasSize(1));
+            assertTrue(allRules.contains(ApexFlsViolationRule.getInstance()));
         } catch (Exception ex) {
             fail("Unexpected " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }

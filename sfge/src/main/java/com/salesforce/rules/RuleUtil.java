@@ -90,7 +90,10 @@ public final class RuleUtil {
         for (Class<? extends AbstractRule> ruleType : ruleTypes) {
             // Skip abstract classes.
             if (!Modifier.isAbstract(ruleType.getModifiers())) {
-                rules.add(getRuleInner(ruleType.getName()));
+                final AbstractRule rule = getRuleInner(ruleType.getName());
+                if (rule.isEnabled()) {
+                    rules.add(rule);
+                }
             }
         }
         return rules;
