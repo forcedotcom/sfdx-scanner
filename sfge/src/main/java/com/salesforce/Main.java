@@ -132,7 +132,8 @@ public class Main {
             return INTERNAL_ERROR;
         } catch (UnexpectedException ex) {
             LOGGER.error("Unexpected exception while loading graph", ex);
-            System.err.println("Unexpected exception while loading graph. See logs for more information.");
+            System.err.println(
+                    "Unexpected exception while loading graph. See logs for more information.");
             return INTERNAL_ERROR;
         }
 

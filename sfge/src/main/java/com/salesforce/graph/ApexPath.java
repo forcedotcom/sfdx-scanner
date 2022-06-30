@@ -270,9 +270,9 @@ public final class ApexPath implements DeepCloneable<ApexPath>, Collectible<Apex
                 &&
                 // Class Instantiation Path
                 !(vertices.get(0) instanceof FieldVertex)
-				&&
-				// Static blocks
-				!(vertices.get(0) instanceof MethodCallExpressionVertex)) {
+                &&
+                // Static blocks
+                !(vertices.get(0) instanceof MethodCallExpressionVertex)) {
             throw new UnexpectedException(vertices);
         }
         this.vertices.addAll(vertices);

@@ -1,55 +1,51 @@
 package com.salesforce.graph.build;
 
+import com.salesforce.exception.UnexpectedException;
+import com.salesforce.graph.Schema;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
-import com.salesforce.exception.UnexpectedException;
-import com.salesforce.graph.Schema;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.TreeSet;
-
-/**
- * Handles common operations performed while creating vertices on Graph
- */
+/** Handles common operations performed while creating vertices on Graph */
 public final class GremlinVertexUtil {
-	private static final Logger LOGGER = LogManager.getLogger(GremlinVertexUtil.class);
-	private GremlinVertexUtil(){}
+    private static final Logger LOGGER = LogManager.getLogger(GremlinVertexUtil.class);
 
-	/**
-	 * Create parent-child relationship between vertices on graph
-	 */
-	static void addParentChildRelationship(GraphTraversalSource g, Vertex parentVertex, Vertex childVertex) {
-		// We are currently adding PARENT and CHILD, in theory the same edge could be navigated
-		// both ways, however
-		// the code looks messy when that is done.
-		// TODO: Determine if this causes performance or resource issues. Consider a single edge
-		g.addE(Schema.PARENT).from(childVertex).to(parentVertex).iterate();
-		g.addE(Schema.CHILD).from(parentVertex).to(childVertex).iterate();
-	}
+    private GremlinVertexUtil() {}
 
-	/**
-	 * Make a synthetic vertex a sibling of an existing vertex on graph
-	 */
-	static void makeSiblings(GraphTraversalSource g, Vertex vertex, Vertex syntheticVertex) {
-		// Get parent node of vertex
-		final Optional<Vertex> rootVertex = GremlinUtil.getParent(g, vertex);
-		if (rootVertex.isEmpty()) {
-			throw new UnexpectedException("Did not expect vertex to not have a parent vertex. vertex=" + vertex);
-		}
+    /** Create parent-child relationship between vertices on graph */
+    static void addParentChildRelationship(
+            GraphTraversalSource g, Vertex parentVertex, Vertex childVertex) {
+        // We are currently adding PARENT and CHILD, in theory the same edge could be navigated
+        // both ways, however
+        // the code looks messy when that is done.
+        // TODO: Determine if this causes performance or resource issues. Consider a single edge
+        g.addE(Schema.PARENT).from(childVertex).to(parentVertex).iterate();
+        g.addE(Schema.CHILD).from(parentVertex).to(childVertex).iterate();
+    }
 
-		addParentChildRelationship(g, rootVertex.get(), syntheticVertex);
-	}
+    /** Make a synthetic vertex a sibling of an existing vertex on graph */
+    static void makeSiblings(GraphTraversalSource g, Vertex vertex, Vertex syntheticVertex) {
+        // Get parent node of vertex
+        final Optional<Vertex> rootVertex = GremlinUtil.getParent(g, vertex);
+        if (rootVertex.isEmpty()) {
+            throw new UnexpectedException(
+                    "Did not expect vertex to not have a parent vertex. vertex=" + vertex);
+        }
 
-	/** Add a property to the traversal, throwing an exception if any keys are duplicated. */
+        addParentChildRelationship(g, rootVertex.get(), syntheticVertex);
+    }
+
+    /** Add a property to the traversal, throwing an exception if any keys are duplicated. */
     protected static void addProperty(
-		TreeSet<String> previouslyInsertedKeys,
-		GraphTraversal<Vertex, Vertex> traversal,
-		String keyParam,
-		Object value) {
+            TreeSet<String> previouslyInsertedKeys,
+            GraphTraversal<Vertex, Vertex> traversal,
+            String keyParam,
+            Object value) {
         final String key = keyParam.intern();
 
         if (!previouslyInsertedKeys.add(key)) {

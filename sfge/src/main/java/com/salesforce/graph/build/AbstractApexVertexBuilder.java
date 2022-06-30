@@ -6,7 +6,6 @@ import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -73,53 +72,54 @@ abstract class AbstractApexVertexBuilder {
             vNode.property(Schema.FILE_NAME, fileName);
         }
 
-		Vertex vPreviousSibling = null;
-		final List<JorjeNode> children = node.getChildren();
-		final Set<Vertex> verticesAddressed = new HashSet<>();
-		verticesAddressed.add(vNode);
+        Vertex vPreviousSibling = null;
+        final List<JorjeNode> children = node.getChildren();
+        final Set<Vertex> verticesAddressed = new HashSet<>();
+        verticesAddressed.add(vNode);
 
-		for (int i = 0; i < children.size(); i++) {
-			final JorjeNode child = children.get(i);
-			final Vertex vChild = g.addV(child.getLabel()).next();
-			addProperties(g, child, vChild);
+        for (int i = 0; i < children.size(); i++) {
+            final JorjeNode child = children.get(i);
+            final Vertex vChild = g.addV(child.getLabel()).next();
+            addProperties(g, child, vChild);
 
-			// Handle static block if needed
-			if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
-				final Vertex parentVertexForChild = StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, vChild, i);
-				GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
-				verticesAddressed.add(parentVertexForChild);
-			} else {
-				GremlinVertexUtil.addParentChildRelationship(g, vNode, vChild);
-			}
+            // Handle static block if needed
+            if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
+                final Vertex parentVertexForChild =
+                        StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, vChild, i);
+                GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
+                verticesAddressed.add(parentVertexForChild);
+            } else {
+                GremlinVertexUtil.addParentChildRelationship(g, vNode, vChild);
+            }
 
-			if (vPreviousSibling != null) {
-				g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
-			}
-			vPreviousSibling = vChild;
+            if (vPreviousSibling != null) {
+                g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
+            }
+            vPreviousSibling = vChild;
 
-			// To save memory in the graph, don't pass the source name into recursive calls.
-			buildVertices(child, vChild, null);
-		}
-		// Execute afterInsert() on each vertex we addressed
-		for (Vertex vertex: verticesAddressed) {
-			afterInsert(g, node, vertex);
-		}
+            // To save memory in the graph, don't pass the source name into recursive calls.
+            buildVertices(child, vChild, null);
+        }
+        // Execute afterInsert() on each vertex we addressed
+        for (Vertex vertex : verticesAddressed) {
+            afterInsert(g, node, vertex);
+        }
         if (rootVNode != null) {
             // Only call this for the root node
             afterFileInsert(g, rootVNode);
         }
     }
 
-	/**
+    /**
      * Adds edges to Method vertices after they are inserted. TODO: Replace this with a listener or
      * visitor pattern for more general purpose solutions
      */
     private final void afterInsert(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
         if (node.getLabel().equals(ASTConstants.NodeType.METHOD)) {
-				MethodPathBuilderVisitor.apply(g, vNode);
+            MethodPathBuilderVisitor.apply(g, vNode);
         } else if (ROOT_VERTICES.contains(node.getLabel())) {
-			StaticBlockUtil.createSyntheticStaticBlockInvocation(g, vNode);
-		}
+            StaticBlockUtil.createSyntheticStaticBlockInvocation(g, vNode);
+        }
     }
 
     /**
@@ -131,7 +131,7 @@ abstract class AbstractApexVertexBuilder {
         // Intentionally left blank
     }
 
-	protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
+    protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
         GraphTraversal<Vertex, Vertex> traversal = g.V(vNode.id());
 
         TreeSet<String> previouslyInsertedKeys = CollectionUtil.newTreeSet();
@@ -143,7 +143,8 @@ abstract class AbstractApexVertexBuilder {
         }
 
         for (Map.Entry<String, Object> entry : getAdditionalProperties(node).entrySet()) {
-            GremlinVertexUtil.addProperty(previouslyInsertedKeys, traversal, entry.getKey(), entry.getValue());
+            GremlinVertexUtil.addProperty(
+                    previouslyInsertedKeys, traversal, entry.getKey(), entry.getValue());
         }
 
         // Commit the changes.
@@ -157,7 +158,6 @@ abstract class AbstractApexVertexBuilder {
 
     /** Add additional properties to the node that aren't present in the orginal AST */
     protected Map<String, Object> getAdditionalProperties(JorjeNode node) {
-		return new HashMap<>();
-	}
-
+        return new HashMap<>();
+    }
 }

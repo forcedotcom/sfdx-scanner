@@ -70,12 +70,15 @@ public class Schema {
     public static final String PARENT = "Parent";
     public static final String NEXT_SIBLING = "NextSibling";
 
-	/** Mark a vertex as synthetic */
-	public static final String IS_SYNTHETIC = "IsSynthetic";
-	/** Indicates if a method is a synthetic static block method */
-	public static final String IS_STATIC_BLOCK_METHOD = "IsStaticBlockMethod";
-	/** Indicates if a method is a synthetic static block invoker method */
-	public static final String IS_STATIC_BLOCK_INVOKER_METHOD = "IsStaticBlockInvokerMethod";
-	/** Indicates if a MethodCallExpression is a synthetic invocation of static block from invoker method*/
-	public static final String IS_STATIC_BLOCK_INVOCATION = "IsStaticBlockInvocation";
+    /** Mark a vertex as synthetic */
+    public static final String IS_SYNTHETIC = "IsSynthetic";
+    /** Indicates if a method is a synthetic static block method */
+    public static final String IS_STATIC_BLOCK_METHOD = "IsStaticBlockMethod";
+    /** Indicates if a method is a synthetic static block invoker method */
+    public static final String IS_STATIC_BLOCK_INVOKER_METHOD = "IsStaticBlockInvokerMethod";
+    /**
+     * Indicates if a MethodCallExpression is a synthetic invocation of static block from invoker
+     * method
+     */
+    public static final String IS_STATIC_BLOCK_INVOCATION = "IsStaticBlockInvocation";
 }

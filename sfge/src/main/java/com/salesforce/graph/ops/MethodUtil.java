@@ -84,7 +84,7 @@ public final class MethodUtil {
     public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
 
-	public static List<MethodVertex> getTargetedMethods(
+    public static List<MethodVertex> getTargetedMethods(
             GraphTraversalSource g, List<RuleRunnerTarget> targets) {
         // The targets passed into this method should exclusively be ones that target specific
         // methods instead of files.

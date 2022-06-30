@@ -5,8 +5,6 @@ import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.ops.CloneUtil;
-import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +22,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 /** Visits a method and draws all control flow edges. */
 public class MethodPathBuilderVisitor {
     private static final Logger LOGGER = LogManager.getLogger(MethodPathBuilderVisitor.class);
-	/** Load the vertices as SFVertices and log more information. Will impact performance. */
+    /** Load the vertices as SFVertices and log more information. Will impact performance. */
     private static boolean SF_VERTEX_LOGGING = true;
 
     /**
@@ -98,8 +96,7 @@ public class MethodPathBuilderVisitor {
         }
     }
 
-
-	private void _visit(Vertex vertex, Vertex parent, boolean lastChild) {
+    private void _visit(Vertex vertex, Vertex parent, boolean lastChild) {
         try {
             String label = vertex.label();
 

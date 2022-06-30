@@ -150,6 +150,12 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
      */
     private final TreeSet<String> currentlyInitializingStaticClasses;
 
+    /**
+     * Track classes whose static scopes have been initialized. This would help double visiting some
+     * nodes.
+     */
+    private final TreeSet<String> alreadyInitializedStaticClasses;
+
     /** The symbol provider that corresponds to the {@link #topMostPath} */
     private /*finalTODO Add clear method to SymbolProviderVertexVisitor*/
     SymbolProviderVertexVisitor symbolProviderVisitor;
@@ -195,6 +201,7 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.classStaticScopes = CollectionUtil.newTreeMap();
         this.engineDirectiveContext = new EngineDirectiveContext();
         this.currentlyInitializingStaticClasses = CollectionUtil.newTreeSet();
+        this.alreadyInitializedStaticClasses = CollectionUtil.newTreeSet();
     }
 
     /**
@@ -272,6 +279,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.startScope = (SymbolProvider) CloneUtil.clone((DeepCloneable) other.startScope);
         this.currentlyInitializingStaticClasses =
                 CloneUtil.cloneTreeSet(other.currentlyInitializingStaticClasses);
+        this.alreadyInitializedStaticClasses =
+                CloneUtil.cloneTreeSet(other.alreadyInitializedStaticClasses);
     }
 
     /**
@@ -370,15 +379,18 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                     apexPath = getTopMostPath().getStaticInitializationPath(className).get();
                 }
 
-                if (!classStaticScope.getState().equals(AbstractClassScope.State.INITIALIZED)) {
+                if (!classStaticScope.getState().equals(AbstractClassScope.State.INITIALIZED)
+                        && !alreadyInitializedStaticClasses.contains(fullClassName)) {
                     if (apexPath != null && apexPath.getCollectible() != null) {
                         visit(apexPath.getCollectible());
                     }
                     symbolProviderVisitor.popScope(classStaticScope);
                     classStaticScope.setState(AbstractClassScope.State.INITIALIZED);
+                    alreadyInitializedStaticClasses.add(fullClassName);
                 }
             } finally {
-                if (!currentlyInitializingStaticClasses.remove(fullClassName)) {
+                if (!currentlyInitializingStaticClasses.remove(fullClassName)
+                        && alreadyInitializedStaticClasses.contains(fullClassName)) {
                     throw new ProgrammingException(
                             "Set did not contain class. values="
                                     + currentlyInitializingStaticClasses);

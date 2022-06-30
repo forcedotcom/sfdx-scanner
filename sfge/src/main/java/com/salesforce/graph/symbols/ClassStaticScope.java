@@ -5,6 +5,7 @@ import static com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.Collectible;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.DeepCloneable;
@@ -131,8 +132,6 @@ public final class ClassStaticScope extends AbstractClassScope
 				.out(Schema.CHILD)
 				.hasLabel(NodeType.METHOD)
 				.has(Schema.IS_STATIC_BLOCK_INVOKER_METHOD, true)
-				.order(Scope.global)
-				.by(Schema.CHILD_INDEX, Order.asc)
 				.out(Schema.CHILD)
 				.hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
 				.order(Scope.global)
@@ -161,6 +160,9 @@ public final class ClassStaticScope extends AbstractClassScope
     public static Optional<ApexPath> getInitializationPath(
             GraphTraversalSource g, String classname) {
         ClassStaticScope classStaticScope = ClassStaticScope.get(g, classname);
+		if (classStaticScope.getState().equals(State.INITIALIZED)) {
+			throw new ProgrammingException("Initialization path does not need to be invoked on a class that's already initialized: " + classStaticScope.getClassName());
+		}
         List<BaseSFVertex> vertices = new ArrayList<>();
         vertices.addAll(classStaticScope.getFields());
         vertices.addAll(getFieldDeclarations(g, classStaticScope.userClass));
@@ -174,13 +176,4 @@ public final class ClassStaticScope extends AbstractClassScope
         }
     }
 
-//	private static MethodCallExpressionVertex createSyntheticInvocation(MethodVertex.StaticBlockVertex methodVertex) {
-//		final HashMap<Object, Object> map = new HashMap<>();
-//		map.put(T.id, Long.valueOf(-1));
-//		map.put(T.label, NodeType.METHOD_CALL_EXPRESSION);
-//		map.put(Schema.METHOD_NAME, methodVertex.getName());
-//		map.put(Schema.DEFINING_TYPE, methodVertex.getDefiningType());
-//		map.put(Schema.STATIC, Boolean.valueOf(true));
-//		return new MethodCallExpressionVertex(map);
-//	}
 }
