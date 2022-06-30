@@ -52,21 +52,22 @@ public final class StaticBlockUtil {
      *
      * @param g traversal graph
      * @param clintVertex <clint>() method's vertex
-     * @param blockStatementVertex static block originally placed by Jorje under <clint>()
      * @param staticBlockIndex index to use for name uniqueness - TODO: this index is currently just
      *     the child count index and does not necessarily follow sequence
      * @return new synthetic method vertex with name SyntheticStaticBlock_%d, which will be the
      *     parent for blockStatementVertex, and a sibling of <clint>()
      */
     public static Vertex createSyntheticStaticBlockMethod(
-            GraphTraversalSource g,
-            Vertex clintVertex,
-            Vertex blockStatementVertex,
-            int staticBlockIndex) {
+        GraphTraversalSource g,
+        Vertex clintVertex,
+        int staticBlockIndex) {
         final Vertex syntheticMethodVertex = g.addV(ASTConstants.NodeType.METHOD).next();
         final String definingType = clintVertex.value(Schema.DEFINING_TYPE);
+        final List<Vertex> siblings = GremlinUtil.getChildren(g, GremlinVertexUtil.getParentVertex(g, clintVertex));
+        final int nextSiblingIndex = siblings.size();
+
         addSyntheticStaticBlockMethodProperties(
-                g, definingType, syntheticMethodVertex, staticBlockIndex);
+                g, definingType, syntheticMethodVertex, staticBlockIndex, nextSiblingIndex);
 
         final Vertex modifierNodeVertex = g.addV(ASTConstants.NodeType.MODIFIER_NODE).next();
         addStaticModifierProperties(g, definingType, modifierNodeVertex);
@@ -114,8 +115,9 @@ public final class StaticBlockUtil {
             String definingType) {
         // Create new synthetic method StaticBlockInvoker to invoke each synthetic static block
         // method
+        final List<Vertex> siblings = GremlinUtil.getChildren(g, rootNode);
         final Vertex invokerMethodVertex = g.addV(ASTConstants.NodeType.METHOD).next();
-        addStaticBlockInvokerProperties(g, definingType, invokerMethodVertex);
+        addStaticBlockInvokerProperties(g, definingType, invokerMethodVertex, siblings.size());
         GremlinVertexUtil.addParentChildRelationship(g, rootNode, invokerMethodVertex);
 
         final Vertex modifierNodeVertex = g.addV(ASTConstants.NodeType.MODIFIER_NODE).next();
@@ -252,24 +254,27 @@ public final class StaticBlockUtil {
     }
 
     private static void addStaticBlockInvokerProperties(
-            GraphTraversalSource g, String definingType, Vertex staticBlockInvokerVertex) {
+        GraphTraversalSource g, String definingType, Vertex staticBlockInvokerVertex, int childIndex) {
         verifyType(staticBlockInvokerVertex, ASTConstants.NodeType.METHOD);
         final Map<String, Object> properties = new HashMap<>();
         properties.put(Schema.NAME, STATIC_BLOCK_INVOKER_METHOD);
         properties.put(Schema.IS_STATIC_BLOCK_INVOKER_METHOD, true);
+        properties.put(Schema.CHILD_INDEX, childIndex);
         addCommonSynthMethodProperties(g, definingType, staticBlockInvokerVertex, properties);
     }
 
     private static void addSyntheticStaticBlockMethodProperties(
-            GraphTraversalSource g,
-            String definingType,
-            Vertex syntheticMethodVertex,
-            int staticBlockIndex) {
+        GraphTraversalSource g,
+        String definingType,
+        Vertex syntheticMethodVertex,
+        int staticBlockIndex,
+        int childIndex) {
         verifyType(syntheticMethodVertex, ASTConstants.NodeType.METHOD);
         final Map<String, Object> properties = new HashMap<>();
         properties.put(
                 Schema.NAME, String.format(SYNTHETIC_STATIC_BLOCK_METHOD_NAME, staticBlockIndex));
         properties.put(Schema.IS_STATIC_BLOCK_METHOD, true);
+        properties.put(Schema.CHILD_INDEX, childIndex);
 
         addCommonSynthMethodProperties(g, definingType, syntheticMethodVertex, properties);
     }

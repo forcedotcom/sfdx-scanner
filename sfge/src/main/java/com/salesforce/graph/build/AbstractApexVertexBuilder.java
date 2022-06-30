@@ -85,7 +85,7 @@ abstract class AbstractApexVertexBuilder {
             // Handle static block if needed
             if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
                 final Vertex parentVertexForChild =
-                        StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, vChild, i);
+                        StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);
                 GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
                 verticesAddressed.add(parentVertexForChild);
             } else {

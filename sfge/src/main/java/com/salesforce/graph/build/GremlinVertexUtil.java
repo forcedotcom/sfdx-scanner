@@ -30,14 +30,19 @@ public final class GremlinVertexUtil {
 
     /** Make a synthetic vertex a sibling of an existing vertex on graph */
     static void makeSiblings(GraphTraversalSource g, Vertex vertex, Vertex syntheticVertex) {
+        final Vertex rootVertex = getParentVertex(g, vertex);
+
+        addParentChildRelationship(g, rootVertex, syntheticVertex);
+    }
+
+    static Vertex getParentVertex(GraphTraversalSource g, Vertex vertex) {
         // Get parent node of vertex
         final Optional<Vertex> rootVertex = GremlinUtil.getParent(g, vertex);
         if (rootVertex.isEmpty()) {
             throw new UnexpectedException(
                     "Did not expect vertex to not have a parent vertex. vertex=" + vertex);
         }
-
-        addParentChildRelationship(g, rootVertex.get(), syntheticVertex);
+        return rootVertex.get();
     }
 
     /** Add a property to the traversal, throwing an exception if any keys are duplicated. */
