@@ -19,25 +19,57 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 /**
  * Handles creation of synthetic methods and vertices to gracefully invoke static code blocks.
  *
- * <p>Consider this example: class StaticBlockClass { static { System.debug("inside static block
- * 1"); } static { System.debug("inside static block 2"); } } In Jorje's compilation structure,
- * static blocks are represented like this: class StaticBlockClass { private static void <clint>() {
- * { System.debug("inside static block 1"); } { System.debug("inside static block 2"); } } }
+ * <p>Consider this example:
  *
- * <p>Having multiple block statements inside a method breaks SFGE's makes handling code blocks in
- * <clint>() impossible. As an alternative, we are creating synthetic vertices in the Graph to
- * represent the static blocks as individual methods. We also create one top-level synthetic method
- * ("StaticBlockInvoker") that invokes individual static block methods. While creating static scope
+ * <code>
+ * class StaticBlockClass {
+ *  static {
+ *      System.debug("inside static block 1");
+ *  }
+ *  static {
+ *      System.debug("inside static block 2");
+ *  }
+ * }
+ * </code>
+ *
+ * In Jorje's compilation structure, static blocks are represented like this:
+ * <code>
+ * class StaticBlockClass {
+ *  private static void <clinit>() {
+ *      {
+ *          System.debug("inside static block 1");
+ *      }
+ *      {
+ *          System.debug("inside static block 2");
+ *      }
+ *   }
+ * }
+ * </code>
+ *
+ * <p>Having multiple block statements inside a method breaks SFGE's normal code flow logic.
+ * This makes handling code blocks in <code><clinit>()</code> impossible.
+ * <p>As an alternative, we are creating synthetic vertices in the Graph to
+ * represent the static blocks as individual methods.
+ * <p>We also create one top-level synthetic method ("StaticBlockInvoker") that invokes
+ * individual static block methods. While creating static scope
  * for this class, we should invoke the method call expressions inside the top-level synthetic
  * method.
  *
- * <p>New structure looks like this: class StaticBlockClass { private static void
- * SyntheticStaticBlock_1() { System.debug("inside static block 1"); }
- *
- * <p>private static void SyntheticStaticBlock_2() { System.debug("inside static block 2"); }
- *
- * <p>private static void StaticBlockInvoker() { SyntheticStaticBlock_1(); SyntheticStaticBlock_2();
- * } }
+ * <p>New structure looks like this:
+ * <code>
+ *     class StaticBlockClass {
+ *      private static void SyntheticStaticBlock_1() {
+ *          System.debug("inside static block 1");
+ *     }
+ *     private static void SyntheticStaticBlock_2() {
+ *          System.debug("inside static block 2");
+ *     }
+ *     private static void StaticBlockInvoker() {
+ *          SyntheticStaticBlock_1();
+ *          SyntheticStaticBlock_2();
+ *     }
+ * }
+ * </code>
  */
 public final class StaticBlockUtil {
     private static final Logger LOGGER = LogManager.getLogger(StaticBlockUtil.class);
@@ -51,19 +83,19 @@ public final class StaticBlockUtil {
      * Creates a synthetic method vertex to represent a static code block
      *
      * @param g traversal graph
-     * @param clintVertex <clint>() method's vertex
+     * @param clinitVertex <clinit>() method's vertex
      * @param staticBlockIndex index to use for name uniqueness - TODO: this index is currently just
      *     the child count index and does not necessarily follow sequence
      * @return new synthetic method vertex with name SyntheticStaticBlock_%d, which will be the
-     *     parent for blockStatementVertex, and a sibling of <clint>()
+     *     parent for blockStatementVertex, and a sibling of <clinit>()
      */
     public static Vertex createSyntheticStaticBlockMethod(
         GraphTraversalSource g,
-        Vertex clintVertex,
+        Vertex clinitVertex,
         int staticBlockIndex) {
         final Vertex syntheticMethodVertex = g.addV(ASTConstants.NodeType.METHOD).next();
-        final String definingType = clintVertex.value(Schema.DEFINING_TYPE);
-        final List<Vertex> siblings = GremlinUtil.getChildren(g, GremlinVertexUtil.getParentVertex(g, clintVertex));
+        final String definingType = clinitVertex.value(Schema.DEFINING_TYPE);
+        final List<Vertex> siblings = GremlinUtil.getChildren(g, GremlinVertexUtil.getParentVertex(g, clinitVertex));
         final int nextSiblingIndex = siblings.size();
 
         addSyntheticStaticBlockMethodProperties(
@@ -73,7 +105,7 @@ public final class StaticBlockUtil {
         addStaticModifierProperties(g, definingType, modifierNodeVertex);
         GremlinVertexUtil.addParentChildRelationship(g, syntheticMethodVertex, modifierNodeVertex);
 
-        GremlinVertexUtil.makeSiblings(g, clintVertex, syntheticMethodVertex);
+        GremlinVertexUtil.makeSiblings(g, clinitVertex, syntheticMethodVertex);
 
         return syntheticMethodVertex;
     }
@@ -105,7 +137,7 @@ public final class StaticBlockUtil {
     }
 
     static boolean isStaticBlockStatement(JorjeNode node, JorjeNode child) {
-        return isClintMethod(node) && containsStaticBlock(node) && isBlockStatement(child);
+        return isClinitMethod(node) && containsStaticBlock(node) && isBlockStatement(child);
     }
 
     private static Vertex createSyntheticInvocationsMethod(
@@ -308,14 +340,14 @@ public final class StaticBlockUtil {
         traversal.next();
     }
 
-    /** @return true if given node represents <clint>() */
-    private static boolean isClintMethod(JorjeNode node) {
+    /** @return true if given node represents <clinit>() */
+    private static boolean isClinitMethod(JorjeNode node) {
         return ASTConstants.NodeType.METHOD.equals(node.getLabel())
                 && MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME.equals(
                         node.getProperties().get(Schema.NAME));
     }
 
-    /** @return true if <clint>() node contains any static block definitions */
+    /** @return true if <clinit>() node contains any static block definitions */
     private static boolean containsStaticBlock(JorjeNode node) {
         for (JorjeNode childNode : node.getChildren()) {
             if (ASTConstants.NodeType.BLOCK_STATEMENT.equals(childNode.getLabel())) {

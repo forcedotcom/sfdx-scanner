@@ -24,6 +24,7 @@ public final class CustomerApexVertexBuilder extends AbstractApexVertexBuilder
 
     @Override
     protected void afterFileInsert(GraphTraversalSource g, Vertex vNode) {
+        super.afterFileInsert(g, vNode);
         ApexPropertyAnnotator.apply(g, vNode);
     }
 }

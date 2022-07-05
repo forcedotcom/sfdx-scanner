@@ -82,7 +82,9 @@ abstract class AbstractApexVertexBuilder {
             final Vertex vChild = g.addV(child.getLabel()).next();
             addProperties(g, child, vChild);
 
-            // Handle static block if needed
+            /** Handle static block if we are looking at a <clinit> method that has a block statement.
+             * See {@linkplain StaticBlockUtil} on why this is needed
+             * and how we handle it. */
             if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
                 final Vertex parentVertexForChild =
                         StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);
@@ -116,9 +118,9 @@ abstract class AbstractApexVertexBuilder {
      */
     private final void afterInsert(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
         if (node.getLabel().equals(ASTConstants.NodeType.METHOD)) {
+            // If we just added a method, create forward and
+            // backward code flow for the contents of the method
             MethodPathBuilderVisitor.apply(g, vNode);
-        } else if (ROOT_VERTICES.contains(node.getLabel())) {
-            StaticBlockUtil.createSyntheticStaticBlockInvocation(g, vNode);
         }
     }
 
@@ -128,7 +130,9 @@ abstract class AbstractApexVertexBuilder {
      * @param vNode root node that corresponds to the file
      */
     protected void afterFileInsert(GraphTraversalSource g, Vertex vNode) {
-        // Intentionally left blank
+        // If the root (class/trigger/etc) contained any static blocks,
+        // create an invoker method to invoke the static blocks
+        StaticBlockUtil.createSyntheticStaticBlockInvocation(g, vNode);
     }
 
     protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
