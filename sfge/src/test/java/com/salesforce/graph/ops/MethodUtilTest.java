@@ -428,4 +428,34 @@ public class MethodUtilTest {
             MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
         }
     }
+
+    @Test
+    public void testGetInboundEmailHandlerMethods() {
+        String[] sourceCode = {
+            "public class MyClass implements Messaging.InboundEmailHandler {\n"
+                    + "    public Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
+                    + "        return null;\n"
+                    + "    }\n"
+                    + "    public Messaging.InboundEmailHandler someSecondaryMethod() {\n"
+                    + "        return null;\n"
+                    + "    }\n"
+                    + "}\n",
+            "public class MyClass2 {\n"
+                    + "    public Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
+                    + "        return null;\n"
+                    + "    }\n"
+                    + "    public Messaging.InboundEmailHandler someSecondaryMethod() {\n"
+                    + "        return null;\n"
+                    + "    }\n"
+                    + "}\n"
+        };
+        TestUtil.buildGraph(g, sourceCode);
+
+        List<MethodVertex> methods = MethodUtil.getInboundEmailHandlerMethods(g, new ArrayList<>());
+        // The `MyClass#handleInboundEmail` method should be included because it's an implementation
+        // of the desired interface.
+        MatcherAssert.assertThat(methods, hasSize(equalTo(1)));
+        MatcherAssert.assertThat(methods.get(0).getName(), equalTo("handleInboundEmail"));
+        MatcherAssert.assertThat(methods.get(0).getDefiningType(), equalTo("MyClass"));
+    }
 }

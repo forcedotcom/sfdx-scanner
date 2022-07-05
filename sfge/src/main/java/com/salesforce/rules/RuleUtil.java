@@ -67,6 +67,8 @@ public final class RuleUtil {
             methods.addAll(MethodUtil.getPageReferenceMethods(g, fileLevelTargets));
             // ...and global-exposed methods...
             methods.addAll(MethodUtil.getGlobalMethods(g, fileLevelTargets));
+            // ...and implementations of Messaging.InboundEmailHandler#handleInboundEmail...
+            methods.addAll(MethodUtil.getInboundEmailHandlerMethods(g, fileLevelTargets));
             // ...and exposed methods on VF controllers.
             methods.addAll(MethodUtil.getExposedControllerMethods(g, fileLevelTargets));
         }
