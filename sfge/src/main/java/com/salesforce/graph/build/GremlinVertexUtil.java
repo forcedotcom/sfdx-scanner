@@ -38,7 +38,7 @@ public final class GremlinVertexUtil {
     static Vertex getParentVertex(GraphTraversalSource g, Vertex vertex) {
         // Get parent node of vertex
         final Optional<Vertex> rootVertex = GremlinUtil.getParent(g, vertex);
-        if (rootVertex.isEmpty()) {
+        if (!rootVertex.isPresent()) {
             throw new UnexpectedException(
                     "Did not expect vertex to not have a parent vertex. vertex=" + vertex);
         }
