@@ -70,6 +70,11 @@ public final class TraversalUtil {
                                         .toArray(GraphTraversal[]::new));
     }
 
+    /**
+     * Returns a traversal containing every class in the target files that  implements the specified interface, either
+     * directly or indirectly (i.e., by extending a class that implements it, implementing an interface that extends it,
+     * or extending a class that does either of those things). An empty target array implicitly targets the whole graph.
+     */
     public static GraphTraversal<Vertex, Vertex> traverseImplementationsOf(
             GraphTraversalSource g, List<String> targetFiles, String interfaceName) {
         // For our traversal, we want to start with every class that implements either the target
