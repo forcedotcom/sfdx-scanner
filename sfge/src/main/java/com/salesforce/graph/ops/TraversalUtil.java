@@ -1,7 +1,9 @@
 package com.salesforce.graph.ops;
 
 import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.graph.Schema;
+import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,6 +68,71 @@ public final class TraversalUtil {
                                 targets.stream()
                                         .map(t -> t.createTraversal(__.select("Root")))
                                         .toArray(GraphTraversal[]::new));
+    }
+
+    /**
+     * Returns a traversal containing every class in the target files that implements the specified
+     * interface, either directly or indirectly (i.e., by extending a class that implements it,
+     * implementing an interface that extends it, or extending a class that does either of those
+     * things). An empty target array implicitly targets the whole graph.
+     */
+    public static GraphTraversal<Vertex, Vertex> traverseImplementationsOf(
+            GraphTraversalSource g, List<String> targetFiles, String interfaceName) {
+        // For our traversal, we want to start with every class that implements either the target
+        // interface or one of its
+        // subtypes. Do that with a union of these two subtraversals.
+        // Also, start with the hasLabel() call, because doing an initial filter along an indexed
+        // field saves us a ton of time.
+        GraphTraversal<Vertex, Vertex> traversal =
+                g.V().hasLabel(NodeType.USER_CLASS, NodeType.USER_INTERFACE)
+                        .union(
+                                // Subtraversal 1: Get every class that implements the target
+                                // interface, via a helper method.
+                                __.where(
+                                        H.hasArrayContaining(
+                                                NodeType.USER_CLASS,
+                                                Schema.INTERFACE_DEFINING_TYPES,
+                                                interfaceName)),
+                                // Subtraversal 2: Get every class that implements a subtype of the
+                                // target interface, by starting with all
+                                // the direct subtypes of the interface...
+                                __.where(
+                                                H.has(
+                                                        NodeType.USER_INTERFACE,
+                                                        Schema.SUPER_INTERFACE_NAME,
+                                                        interfaceName))
+                                        .union(
+                                                __.identity(),
+                                                // ...recursively adding subtypes of those
+                                                // interfaces...
+                                                __.repeat(__.out(Schema.EXTENDED_BY)).emit())
+                                        // ... and getting every class that implements one of those
+                                        // interfaces.
+                                        .out(Schema.IMPLEMENTED_BY)
+                                // Now, we add every subclass of any of these classes, recursively.
+                                )
+                        .union(__.identity(), __.repeat(__.out(Schema.EXTENDED_BY)).emit());
+
+        // If there are no target files, we're clear to return this traversal since it includes all
+        // relevant classes in
+        // the graph.
+        if (targetFiles.isEmpty()) {
+            return traversal;
+        } else {
+            // Otherwise, we need to filter so we're only returning the classes in a target file. To
+            // do that, do a traversal
+            // to get all the IDs of classes defined in the target files.
+            Object[] targetIds =
+                    fileRootTraversal(g, targetFiles)
+                            .union(__.identity(), __.repeat(__.out(Schema.CHILD)).emit())
+                            .hasLabel(NodeType.USER_CLASS)
+                            .id()
+                            .toList()
+                            .toArray();
+            // Note, there's no .hasId(Object...) overload, so we're using the .hasId(Object,
+            // ...Object) overload instead.
+            return traversal.hasId(targetIds);
+        }
     }
 
     private TraversalUtil() {}
