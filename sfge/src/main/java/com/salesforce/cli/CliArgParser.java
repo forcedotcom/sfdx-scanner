@@ -127,7 +127,7 @@ public class CliArgParser {
         private void identifyRules(List<String> rulesToRun) {
             try {
                 if (rulesToRun.isEmpty()) {
-                    selectedRules.addAll(RuleUtil.getAllRules());
+                    selectedRules.addAll(RuleUtil.getEnabledRules());
                 } else {
                     for (String ruleName : rulesToRun) {
                         AbstractRule rule = RuleUtil.getRule(ruleName);

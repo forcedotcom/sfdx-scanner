@@ -89,7 +89,7 @@ public class Main {
         LOGGER.info("Invoked CATALOG flow");
         List<AbstractRule> rules;
         try {
-            rules = RuleUtil.getAllRules();
+            rules = RuleUtil.getEnabledRules();
         } catch (SfgeException | SfgeRuntimeException ex) {
             System.err.println(ex.getMessage());
             return INTERNAL_ERROR;
