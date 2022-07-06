@@ -30,6 +30,7 @@ public class Schema {
     public static final String IMPLEMENTED_BY = "ImplementedBy";
     public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
+    public static final String INVOCABLE_METHOD = "InvocableMethod";
     /** True if this vertex is part of the Apex Standard Library */
     public static final String IS_STANDARD = "IsStandard";
     /**

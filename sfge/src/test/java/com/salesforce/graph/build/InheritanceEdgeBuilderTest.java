@@ -337,9 +337,7 @@ public class InheritanceEdgeBuilderTest {
                         .values(Schema.INTERFACE_DEFINING_TYPES)
                         .toList();
         for (Object propValue : propValues) {
-            MatcherAssert.assertThat(
-                (Object[])propValue,
-                arrayContaining(parentDefiningType));
+            MatcherAssert.assertThat((Object[]) propValue, arrayContaining(parentDefiningType));
         }
     }
 }
