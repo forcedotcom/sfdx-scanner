@@ -81,16 +81,16 @@ public class CaseSafePropertyUtil {
         return value.toLowerCase(Locale.ROOT);
     }
 
-    private static ArrayList toCaseSafeValue(ArrayList value) {
+    private static Object[] toCaseSafeValue(ArrayList value) {
         if (value.isEmpty() || !(value.get(0) instanceof String)) {
             // An empty array or non-string array can't be made case-safe.
-            return value;
+            return value.toArray();
         } else {
             ArrayList<String> stringList = new ArrayList<>();
             for (Object o : value) {
                 stringList.add(((String) o).toLowerCase(Locale.ROOT));
             }
-            return stringList;
+            return stringList.toArray();
         }
     }
 

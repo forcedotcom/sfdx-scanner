@@ -183,11 +183,17 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
     }
 
     private void addProperties(Long inheritorId, List<String> implementedVertexDefiningTypes) {
-        GraphTraversal<Vertex,Vertex> traversal = g.V(inheritorId);
-        // It's probably not best practice to be using an empty treeset here, but we no longer have access to the treeset
-        // that was used when adding the base properties, and we're setting a property that definitely isn't set elsewhere,
+        GraphTraversal<Vertex, Vertex> traversal = g.V(inheritorId);
+        // It's probably not best practice to be using an empty treeset here, but we no longer have
+        // access to the treeset
+        // that was used when adding the base properties, and we're setting a property that
+        // definitely isn't set elsewhere,
         // so it should be fine.
-        GremlinVertexUtil.addProperty(new TreeSet<>(), traversal, Schema.INTERFACE_DEFINING_TYPES, implementedVertexDefiningTypes);
+        GremlinVertexUtil.addProperty(
+                new TreeSet<>(),
+                traversal,
+                Schema.INTERFACE_DEFINING_TYPES,
+                implementedVertexDefiningTypes);
         traversal.iterate();
     }
 }

@@ -1,5 +1,6 @@
 package com.salesforce.graph.build;
 
+import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -337,8 +338,8 @@ public class InheritanceEdgeBuilderTest {
                         .toList();
         for (Object propValue : propValues) {
             MatcherAssert.assertThat(
-                    propValue.toString(),
-                    equalTo(Collections.singletonList(parentDefiningType).toString()));
+                (Object[])propValue,
+                arrayContaining(parentDefiningType));
         }
     }
 }
