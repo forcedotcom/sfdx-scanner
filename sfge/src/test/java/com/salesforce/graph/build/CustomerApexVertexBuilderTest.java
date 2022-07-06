@@ -117,11 +117,10 @@ public class CustomerApexVertexBuilderTest {
                         Schema.SUPER_CLASS_NAME + CaseSafePropertyUtil.CASE_SAFE_SUFFIX));
         assertEquals(
                 "someinterface",
-                ((ArrayList)
+                ((Object[])
                                 userClassVertex.get(
                                         Schema.INTERFACE_NAMES
-                                                + CaseSafePropertyUtil.CASE_SAFE_SUFFIX))
-                        .get(0));
+                                                + CaseSafePropertyUtil.CASE_SAFE_SUFFIX))[0]);
 
         Map<Object, Object> userInterfaceVertex =
                 g.V().hasLabel(NodeType.USER_INTERFACE).elementMap().next();

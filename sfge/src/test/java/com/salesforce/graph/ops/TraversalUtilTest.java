@@ -2,6 +2,7 @@ package com.salesforce.graph.ops;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -18,6 +21,8 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class TraversalUtilTest {
     private GraphTraversalSource g;
@@ -62,6 +67,47 @@ public class TraversalUtilTest {
                     + "		return false;\n"
                     + "	}\n"
                     + "}\n";
+
+    private String[] interfaceTestSourceCodes = {
+        // An interface
+        "public interface MyInterface1 {}",
+        // An interface that extends another interface.
+        "public interface MyInterface2 extends MyInterface1 {}",
+        // A class that implements the first interface.
+        "public class MyClass1 implements MyInterface1 {}",
+        // A class that extends a class that implements an interface.
+        "public class MyClass2 extends MyClass1 {}",
+        // A class that implements an interface that extends another interface.
+        "public class MyClass3 implements MyInterface2 {}",
+        // A class that implements its own inner interface without using the outer class syntax.
+        "public class MyClass4 implements InnerInterface1 {\n"
+                + "    public interface InnerInterface1 {}\n"
+                // A class that implements an inner interface in the same outer class, without using
+                // the outer class syntax.
+                + "    public class InnerClass1 implements InnerInterface1 {}\n"
+                // A class that implements an inner interface in the same outer class, using the
+                // outer class syntax.
+                + "    public class InnerClass2 implements MyClass4.InnerInterface1 {}\n"
+                // A class that does nothing in particular.
+                + "    public class InnerClass3 {}\n"
+                + "}",
+        // A class that implements its own inner interface using the outer class syntax.
+        "public class MyClass5 implements MyClass5.InnerInterface1 {\n"
+                + "    public interface InnerInterface1 {}\n"
+                + "}",
+        // A class that implements another class's inner interface.
+        "public class MyClass6 implements MyClass4.InnerInterface1 {}",
+        // An interface whose name will be shared by an inner interface in another class.
+        "public interface SharedInterfaceName1 {}",
+        // A class implementing an inner interface whose name is shared by another outer interface.
+        "public class MyClass7 implements SharedInterfaceName1 {\n"
+                + "    public interface SharedInterfaceName1 {}\n"
+                + "}",
+        // A class implementing the outer interface with the duplicate name.
+        "public class MyClass8 implements SharedInterfaceName1 {}",
+        // A class that does nothing in particular.
+        "public class MyClass9 {}"
+    };
 
     @BeforeEach
     public void setup() {
@@ -212,5 +258,54 @@ public class TraversalUtilTest {
         // not be 0.
         MatcherAssert.assertThat(
                 targetResults, hasSize(expectedWholeFile.size() + expectedSingleMethod.size()));
+    }
+
+    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        // MyInterface1 is directly implemented by MyClass1, and indirectly implemented by MyClass2
+        // and MyClass3.
+        "MyInterface1,  'MyClass1,MyClass2,MyClass3'",
+        // MyInterface2 is directly implemented by MyClass3
+        "MyInterface2,  'MyClass3'",
+        // MyClass4.InnerInterface1 is directly implemented by MyClass4, two of its inner classes,
+        // and MyClass6.
+        "MyClass4.InnerInterface1,  'MyClass4,MyClass4.InnerClass1,MyClass4.InnerClass2,MyClass6'",
+        // MyClass5.InnerInterface1 is implemented only by its outer class, MyClass5.
+        "MyClass5.InnerInterface1,  'MyClass5'",
+        // SharedInterfaceName1 is implemented by MyClass8.
+        "SharedInterfaceName1,  'MyClass8'",
+        // MyClass7.SharedInterfaceName1 is implemented by MyClass7.
+        "MyClass7.SharedInterfaceName1,  'MyClass7'"
+    })
+    public void traverseImplementationsOf_testWithoutTargetFiles(
+            String interfaceName, String expectedClassNameString) {
+        String[] expectedClassNames = expectedClassNameString.split(",");
+        TestUtil.buildGraph(g, interfaceTestSourceCodes);
+
+        // RUN THE TESTED METHOD.
+        List<Object> traversedVertices =
+                TraversalUtil.traverseImplementationsOf(g, new ArrayList<>(), interfaceName)
+                        // For testing purposes, get the name of each vertex instead of returning
+                        // the whole vertex.
+                        .values(Schema.DEFINING_TYPE)
+                        .toList();
+        // Turn the object list into a string set for comparison purposes.
+        Set<String> traversedVertexNames =
+                traversedVertices.stream().map(Object::toString).collect(Collectors.toSet());
+
+        // Create an array of booleans indicating whether we returned each expected class.
+        boolean[] expectedClassPresent = new boolean[expectedClassNames.length];
+        Arrays.fill(expectedClassPresent, false);
+
+        // Iterate over the expected classes and set each class's boolean based on whether it's in
+        // the name set.
+        for (int i = 0; i < expectedClassPresent.length; i++) {
+            expectedClassPresent[i] = traversedVertexNames.contains(expectedClassNames[i]);
+        }
+
+        // If any of the booleans are still false, the test fails.
+        for (int i = 0; i < expectedClassPresent.length; i++) {
+            assertTrue(expectedClassPresent[i], "Class " + expectedClassNames[i] + " is absent");
+        }
     }
 }

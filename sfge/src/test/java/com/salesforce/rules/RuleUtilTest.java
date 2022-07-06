@@ -65,14 +65,14 @@ public class RuleUtilTest {
     @Test
     public void getPathEntryPoints_includesGlobalMethods() {
         String sourceCode =
-            "public class Foo {\n"
-                + "    global static void globalStaticMethod() {\n"
-                + "    }\n"
-                + "    global void globalInstanceMethod() {\n"
-                + "    }\n"
-                + "    public static void publicStaticMethod() {\n"
-                + "    }\n"
-                + "}\n";
+                "public class Foo {\n"
+                        + "    global static void globalStaticMethod() {\n"
+                        + "    }\n"
+                        + "    global void globalInstanceMethod() {\n"
+                        + "    }\n"
+                        + "    public static void publicStaticMethod() {\n"
+                        + "    }\n"
+                        + "}\n";
         TestUtil.buildGraph(g, sourceCode, true);
 
         List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
@@ -115,6 +115,26 @@ public class RuleUtilTest {
         MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
         MethodVertex firstVertex = entryPoints.get(0);
         assertEquals("pageRefMethod", firstVertex.getName());
+    }
+
+    @Test
+    public void getPathEntryPoints_includesInboundEmailHandlerMethods() {
+        String sourceCode =
+                "public class MyClass implements Messaging.InboundEmailHandler {\n"
+                        + "    public Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
+                        + "        return null;\n"
+                        + "    }\n"
+                        + "    public Messaging.InboundEmailHandler someSecondaryMethod() {\n"
+                        + "        return null;\n"
+                        + "    }\n"
+                        + "}\n";
+        TestUtil.buildGraph(g, sourceCode, true);
+
+        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
+
+        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
+        MethodVertex firstVertex = entryPoints.get(0);
+        assertEquals("handleInboundEmail", firstVertex.getName());
     }
 
     @Test

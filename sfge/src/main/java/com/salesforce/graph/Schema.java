@@ -28,6 +28,7 @@ public class Schema {
     public static final String IDENTIFIER = "Identifier";
     public static final String IMPLEMENTATION_OF = "ImplementationOf";
     public static final String IMPLEMENTED_BY = "ImplementedBy";
+    public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
     /** True if this vertex is part of the Apex Standard Library */
     public static final String IS_STANDARD = "IsStandard";

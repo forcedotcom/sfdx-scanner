@@ -10,7 +10,6 @@ import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.InheritableSFVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserClassVertex;
-import com.salesforce.graph.vertex.UserInterfaceVertex;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,10 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
+import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -73,7 +73,8 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
 
     private void processVertexInheritance(InheritableSFVertex vertex) {
         InheritableSFVertex extendedVertex = findExtendedVertex(vertex).orElse(null);
-        List<InheritableSFVertex> implementedVertices = findImplementedVertices(vertex);
+        Map<String, InheritableSFVertex> implementedVerticesByName =
+                findImplementedVerticesByName(vertex);
 
         // It's possible for the extendedVertex to be null, if the extended class is declared in a
         // file that wasn't scanned.
@@ -85,17 +86,30 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
                     Schema.EXTENSION_OF);
         }
 
-        if (implementedVertices != null) {
-            for (InheritableSFVertex implementedVertex : implementedVertices) {
-                // It's possible for the implementedVertex to be null if the interface being
-                // implemented is declared in a file
-                // that wasn't scanned.
+        if (!implementedVerticesByName.isEmpty()) {
+            List<String> implementedVertexDefiningTypes = new ArrayList<>();
+            Long myId = vertex.getId();
+            for (String implementedVertexName : implementedVerticesByName.keySet()) {
+                InheritableSFVertex implementedVertex =
+                        implementedVerticesByName.get(implementedVertexName);
+                // If we actually have a vertex for this interface, we need to create edges
+                // connecting it to the implementor,
+                // and we can use its defining type for our list.
                 if (implementedVertex != null) {
                     Long implId = implementedVertex.getId();
-                    Long myId = vertex.getId();
                     addEdges(implId, myId, Schema.IMPLEMENTED_BY, Schema.IMPLEMENTATION_OF);
+                    implementedVertexDefiningTypes.add(implementedVertex.getDefiningType());
+                } else {
+                    // If there's no vertex for this interface, we can assume it's defined in some
+                    // other codebase, and therefore
+                    // whatever name was used by the implementor to reference it can be assumed to
+                    // be the defining type.
+                    implementedVertexDefiningTypes.add(implementedVertexName);
                 }
             }
+            // Give the implementor new properties indicating the full names of the implemented
+            // interfaces.
+            addProperties(myId, implementedVertexDefiningTypes);
         }
     }
 
@@ -108,18 +122,20 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
         }
     }
 
-    private List<InheritableSFVertex> findImplementedVertices(InheritableSFVertex vertex) {
-        if (vertex instanceof UserInterfaceVertex) {
-            return new ArrayList<>();
-        } else {
+    private Map<String, InheritableSFVertex> findImplementedVerticesByName(
+            InheritableSFVertex vertex) {
+        Map<String, InheritableSFVertex> results = new HashMap<>();
+        // Only classes can implement interfaces.
+        if (vertex instanceof UserClassVertex) {
             String inheritorType = vertex.getDefiningType();
-            return ((UserClassVertex) vertex)
-                    .getInterfaceNames().stream()
-                            .map(i -> findInheritedVertex(i, inheritorType))
-                            .filter(v -> v.isPresent())
-                            .map(v -> v.get())
-                            .collect(Collectors.toList());
+            List<String> interfaceNames = ((UserClassVertex) vertex).getInterfaceNames();
+            for (String interfaceName : interfaceNames) {
+                InheritableSFVertex inheritedVertex =
+                        findInheritedVertex(interfaceName, inheritorType).orElse(null);
+                results.put(interfaceName, inheritedVertex);
+            }
         }
+        return results;
     }
 
     private Optional<InheritableSFVertex> findInheritedVertex(
@@ -127,17 +143,19 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
         if (inheritableType == null) {
             throw new UnexpectedException("inheritableType can't be null");
         }
-        // If the inheritor type contains a period, it's an inner type. If the inheritable type does
-        // not contain a period,
-        // it could be either an outer type, or an inner type declared in the same outer type. The
-        // latter overrides the
-        // former, so we'll derive the full name of such an inner type so we can check if it exists.
-        if (inheritorType.contains(".") && !inheritableType.contains(".")) {
-            String[] parts = inheritorType.split("\\.");
-
-            String possibleInnerType = parts[0] + "." + inheritableType;
-            if (verticesByDefiningType.containsKey(possibleInnerType)) {
-                return Optional.ofNullable(verticesByDefiningType.get(possibleInnerType));
+        // If the inheritable type does NOT contain a period, then it's either an outer type, or an
+        // inner type declared
+        // in the same outer type as the inheritor type.
+        // The latter takes priority over the former, so we should check if it's the case.
+        if (!inheritableType.contains(".")) {
+            // If the inheritor type contains a period, then it's an inner type, and we should use
+            // its outer type.
+            // Otherwise, we should use the inheritor type as a potential outer type.
+            String potentialOuterType =
+                    inheritorType.contains(".") ? inheritorType.split("\\.")[0] : inheritorType;
+            String potentialInnerType = potentialOuterType + "." + inheritableType;
+            if (verticesByDefiningType.containsKey(potentialInnerType)) {
+                return Optional.ofNullable(verticesByDefiningType.get(potentialInnerType));
             }
         }
 
@@ -162,5 +180,20 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
         Vertex inheritor = g.V(inheritorId).next();
         g.addE(fromEdge).from(inheritable).to(inheritor).iterate();
         g.addE(toEdge).from(inheritor).to(inheritable).iterate();
+    }
+
+    private void addProperties(Long inheritorId, List<String> implementedVertexDefiningTypes) {
+        GraphTraversal<Vertex, Vertex> traversal = g.V(inheritorId);
+        // It's probably not best practice to be using an empty treeset here, but we no longer have
+        // access to the treeset
+        // that was used when adding the base properties, and we're setting a property that
+        // definitely isn't set elsewhere,
+        // so it should be fine.
+        GremlinVertexUtil.addProperty(
+                new TreeSet<>(),
+                traversal,
+                Schema.INTERFACE_DEFINING_TYPES,
+                implementedVertexDefiningTypes);
+        traversal.iterate();
     }
 }

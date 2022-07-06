@@ -39,12 +39,13 @@ public class CaseSafePropertyUtil {
     // The following properties are (with rare exception) assumed to be case-sensitive.
     private static final ImmutableSet<String> CASE_SENSITIVE_PROPERTIES =
             ImmutableSet.of(
-                    Schema.NAME,
                     Schema.DEFINING_TYPE,
                     Schema.FULL_METHOD_NAME,
+                    Schema.INTERFACE_DEFINING_TYPES,
                     Schema.INTERFACE_NAMES,
                     Schema.METHOD_NAME,
                     Schema.NAME,
+                    Schema.RETURN_TYPE,
                     Schema.SUPER_CLASS_NAME,
                     Schema.SUPER_INTERFACE_NAME);
 
@@ -80,16 +81,16 @@ public class CaseSafePropertyUtil {
         return value.toLowerCase(Locale.ROOT);
     }
 
-    private static ArrayList toCaseSafeValue(ArrayList value) {
+    private static Object[] toCaseSafeValue(ArrayList value) {
         if (value.isEmpty() || !(value.get(0) instanceof String)) {
             // An empty array or non-string array can't be made case-safe.
-            return value;
+            return value.toArray();
         } else {
             ArrayList<String> stringList = new ArrayList<>();
             for (Object o : value) {
                 stringList.add(((String) o).toLowerCase(Locale.ROOT));
             }
-            return stringList;
+            return stringList.toArray();
         }
     }
 
@@ -189,6 +190,20 @@ public class CaseSafePropertyUtil {
                 return __.has(nodeType, caseSafeVariant, TextP.endingWith(toCaseSafeValue(value)));
             } else {
                 return __.has(nodeType, property, TextP.endingWith(value));
+            }
+        }
+
+        public static GraphTraversal<Object, Object> hasArrayContaining(
+                String nodeType, String property, String value) {
+            if (property.equalsIgnoreCase(Schema.DEFINING_TYPE)) {
+                throw new UnexpectedException(property);
+            }
+            String caseSafeVariant = toCaseSafeProperty(property).orElse(null);
+            if (caseSafeVariant != null) {
+                return __.hasLabel(nodeType)
+                        .has(caseSafeVariant, __.unfold().is(toCaseSafeValue(value)));
+            } else {
+                return __.hasLabel(nodeType).has(property, __.unfold().is(value));
             }
         }
     }
