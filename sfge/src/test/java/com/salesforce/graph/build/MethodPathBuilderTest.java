@@ -13,12 +13,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
-import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.ops.ApexPathUtil;
-import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.BlockStatementVertex;
 import com.salesforce.graph.vertex.CatchBlockStatementVertex;
@@ -39,9 +36,6 @@ import com.salesforce.graph.vertex.TryCatchFinallyBlockStatementVertex;
 import com.salesforce.graph.vertex.ValueWhenBlockVertex;
 import com.salesforce.graph.vertex.VariableDeclarationStatementsVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
-import com.salesforce.graph.visitor.ApexPathWalker;
-import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
-import com.salesforce.graph.visitor.PathVertexVisitor;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +51,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class MethodPathBuilderTest {
-    private GraphTraversalSource g;
+    protected GraphTraversalSource g;
 
     private static final String[] BLOCK = new String[] {NodeType.BLOCK_STATEMENT};
 
@@ -129,7 +123,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='4'>
         //    <ExpressionStatement BeginLine='3' EndLine='3'>
@@ -159,7 +153,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(1)));
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 3);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -175,7 +169,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='8' Image='' RealLoc='true'>
         //    <IfElseBlockStatement BeginLine='3' DefiningType='MyClass' ElseStatement='false'
@@ -252,7 +246,7 @@ public class MethodPathBuilderTest {
         // Outer implicit else
         assertEndScopes(BLOCK_IF_BLOCK, BlockStatementVertex.class, 3, 3);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -269,7 +263,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='8' Image='' RealLoc='true'>
         //    <IfElseBlockStatement BeginLine='3' DefiningType='MyClass' ElseStatement='false'
@@ -342,7 +336,7 @@ public class MethodPathBuilderTest {
         // System.debug('After')
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 8);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -356,7 +350,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='6'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='3'>
@@ -437,7 +431,7 @@ public class MethodPathBuilderTest {
         // Implicit else
         assertEndScopes(BLOCK_IF_BLOCK, BlockStatementVertex.class, 3, 3);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -453,7 +447,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='8'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='3'>
@@ -542,7 +536,7 @@ public class MethodPathBuilderTest {
         // System.debug('GoodBye');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 6);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -560,7 +554,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='10'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='5'>
@@ -692,7 +686,7 @@ public class MethodPathBuilderTest {
         // System.debug('GoodBye');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 8);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -712,7 +706,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='12'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='3'>
@@ -819,7 +813,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -835,7 +829,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='12'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='3'>
@@ -946,7 +940,7 @@ public class MethodPathBuilderTest {
         // System.debug('After');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 7);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -965,7 +959,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' EndLine='12'>
         //    <IfElseBlockStatement BeginLine='3' EndLine='3'>
@@ -1114,7 +1108,7 @@ public class MethodPathBuilderTest {
         // System.debug('After');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1133,7 +1127,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (9 edges) BlockStatement->VariableDeclarationStatements->ForEachStatement
         //
@@ -1185,7 +1179,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK_FOREACH_BLOCK, ExpressionStatementVertex.class, 8);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1205,7 +1199,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (10 edges) BlockStatement->VariableDeclarationStatements->ForLoopStatement
         //
@@ -1258,7 +1252,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 9);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     /**
@@ -1283,7 +1277,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (8 edges) BlockStatement->VariableDeclarationStatements->ForLoopStatement
         //          ->BlockStatement
@@ -1335,7 +1329,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     /** Tests the case where the for loop doesn't contain an initializer. */
@@ -1357,7 +1351,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (10 edges)
         // BlockStatement->VariableDeclarationStatements->ForLoopStatement->StandardCondition->PostfixExpression
@@ -1410,7 +1404,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     /**
@@ -1435,7 +1429,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (9 edges)
         // BlockStatement->VariableDeclarationStatements->ForLoopStatement->PostfixExpression
@@ -1488,7 +1482,7 @@ public class MethodPathBuilderTest {
         // System.debug('Not Logged');
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1509,7 +1503,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (10 edges) BlockStatement->VariableDeclarationStatements->ForLoopStatement
         //
@@ -1591,7 +1585,7 @@ public class MethodPathBuilderTest {
         // System.debug('After');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 12);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1613,7 +1607,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
@@ -1629,7 +1623,7 @@ public class MethodPathBuilderTest {
         // System.debug('After');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 13);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1644,7 +1638,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='7' Image='' RealLoc='true'>
         //    <IfElseBlockStatement BeginLine='3' DefiningType='MyClass' ElseStatement='false'
@@ -1745,7 +1739,7 @@ public class MethodPathBuilderTest {
         // System.debug('Hello');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 6);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1760,7 +1754,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='7' Image='' RealLoc='true'>
         //    <IfElseBlockStatement BeginLine='3' DefiningType='MyClass' ElseStatement='false'
@@ -1862,7 +1856,7 @@ public class MethodPathBuilderTest {
         // System.debug('Hello');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 6);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -1881,7 +1875,7 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='11' Image=''
         // RealLoc='true'>
@@ -2046,7 +2040,7 @@ public class MethodPathBuilderTest {
         // insert
         assertEndScopes(BLOCK, DmlInsertStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -2066,7 +2060,7 @@ public class MethodPathBuilderTest {
                     + "}\n"
         };
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         List<ApexPath> paths;
         MethodVertex methodVertex = TestUtil.getVertexOnLine(g, MethodVertex.class, 2);
@@ -2092,7 +2086,7 @@ public class MethodPathBuilderTest {
         // insert
         assertEndScopes(BLOCK, ThrowStatementVertex.class, 10);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -2108,7 +2102,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='8' Image='' RealLoc='true'>
         //    <TryCatchFinallyBlockStatement BeginLine='3' DefiningType='MyClass' EndLine='3'
@@ -2210,7 +2204,7 @@ public class MethodPathBuilderTest {
                 ExpressionStatementVertex.class,
                 6);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -2228,7 +2222,7 @@ public class MethodPathBuilderTest {
                         + "   }\n"
                         + "}";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='10' Image=''
         // RealLoc='true'>
@@ -2322,7 +2316,7 @@ public class MethodPathBuilderTest {
         // System.debug('After');
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 9);
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -2339,7 +2333,7 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // doSomething
         // <BlockStatement BeginLine='2' DefiningType='MyClass' EndLine='6' Image='' RealLoc='true'>
@@ -2397,7 +2391,7 @@ public class MethodPathBuilderTest {
         List<Edge> edges = g.V().outE(Schema.CFG_PATH).toList();
         MatcherAssert.assertThat(edges, hasSize(7));
 
-        walkAllPaths("doSomething");
+        GraphBuildTestUtil.walkAllPaths(g, "doSomething");
     }
 
     @Test
@@ -2413,7 +2407,7 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         // (6 edges)
         // BlockStatement->VariableDeclarationStatements->WhileLoopStatement->StandardCondition->BlockStatement->ExpressionStatement->ExpressionStatement
@@ -2424,7 +2418,7 @@ public class MethodPathBuilderTest {
                 ExpressionStatementVertex.class,
                 6);
 
-        List<ApexPath> paths = walkAllPaths("doSomething");
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
     }
 
@@ -2448,9 +2442,9 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
-        List<ApexPath> paths = walkAllPaths("doSomething");
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
     }
 
@@ -2535,7 +2529,7 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         BlockStatementVertex blockStatementLine2 =
                 TestUtil.getVertexOnLine(g, BlockStatementVertex.class, 2);
@@ -2611,7 +2605,7 @@ public class MethodPathBuilderTest {
                 Pair.of(elseWhenBlock, elseWhenBlockBlockStatement),
                 Pair.of(elseWhenBlockBlockStatement, elseWhenBlockExpressionStatement));
 
-        List<ApexPath> paths = walkAllPaths("doSomething");
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
     }
 
@@ -2635,7 +2629,7 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
 
         BlockStatementVertex blockStatementLine2 =
                 TestUtil.getVertexOnLine(g, BlockStatementVertex.class, 2);
@@ -2709,7 +2703,7 @@ public class MethodPathBuilderTest {
                 Pair.of(elseWhenBlock, elseWhenBlockBlockStatement),
                 Pair.of(elseWhenBlockBlockStatement, elseWhenBlockExpressionStatement));
 
-        List<ApexPath> paths = walkAllPaths("doSomething");
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
     }
 
@@ -2736,8 +2730,8 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "}\n";
 
-        buildGraph(g, sourceCode);
-        List<ApexPath> paths = walkAllPaths("doSomething");
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         // There are 3 paths since #walkPaths does not use any excluders
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
     }
@@ -2808,45 +2802,5 @@ public class MethodPathBuilderTest {
                 vertex.getEndScopes(),
                 hasSize(equalTo(endScopes.length)));
         MatcherAssert.assertThat(vertex.getEndScopes(), contains(endScopes));
-    }
-
-    /** Sanity method to walk all paths. Helps to ensure all of the push/pops are correct */
-    private List<ApexPath> walkAllPaths(String methodName) {
-        MethodVertex methodVertex =
-                SFVertexFactory.load(
-                        g,
-                        g.V().hasLabel(NodeType.METHOD)
-                                .has(Schema.NAME, methodName)
-                                .not(has(Schema.IS_STANDARD, true)));
-        List<ApexPath> paths = ApexPathUtil.getForwardPaths(g, methodVertex);
-
-        for (ApexPath path : paths) {
-            DefaultSymbolProviderVertexVisitor symbols = new DefaultSymbolProviderVertexVisitor(g);
-            PathVertexVisitor visitor = new DefaultNoOpPathVertexVisitor();
-            ApexPathWalker.walkPath(g, path, visitor, symbols);
-        }
-
-        return paths;
-    }
-
-    private static void buildGraph(GraphTraversalSource g, String sourceCode) {
-        buildGraph(g, new String[] {sourceCode});
-    }
-
-    private static void buildGraph(GraphTraversalSource g, String[] sourceCodes) {
-        List<Util.CompilationDescriptor> compilations = new ArrayList<>();
-        for (int i = 0; i < sourceCodes.length; i++) {
-            compilations.add(
-                    new Util.CompilationDescriptor(
-                            "TestCode" + i, JorjeUtil.compileApexFromString(sourceCodes[i])));
-        }
-
-        VertexCacheProvider.get().initialize(g);
-        CustomerApexVertexBuilder customerApexVertexBuilder =
-                new CustomerApexVertexBuilder(g, compilations);
-
-        for (GraphBuilder graphBuilder : new GraphBuilder[] {customerApexVertexBuilder}) {
-            graphBuilder.build();
-        }
     }
 }

@@ -32,7 +32,11 @@ public final class GremlinUtil {
         if (children.isEmpty()) {
             return Optional.empty();
         } else if (children.size() > 1) {
-            throw new UnexpectedException(children);
+            throw new UnexpectedException(
+                    "Did not expect more than one child node of type "
+                            + childLabel
+                            + ". Actual count: "
+                            + children.size());
         } else {
             return Optional.of(children.get(0));
         }
@@ -54,6 +58,11 @@ public final class GremlinUtil {
                 .order(Scope.global)
                 .by(Schema.CHILD_INDEX, Order.asc)
                 .toList();
+    }
+
+    public static List<Vertex> getChildren(
+            GraphTraversalSource g, Vertex vertex, String childLabel) {
+        return g.V(vertex).out(Schema.CHILD).hasLabel(childLabel).toList();
     }
 
     public static Optional<Vertex> getPreviousSibling(GraphTraversalSource g, Vertex vertex) {
@@ -80,6 +89,15 @@ public final class GremlinUtil {
 
     public static Optional<Vertex> getFirstChild(GraphTraversalSource g, Vertex vertex) {
         Iterator<Vertex> it = g.V(vertex).out(Schema.CHILD).has(Schema.FIRST_CHILD, true);
+        if (it.hasNext()) {
+            return Optional.of(it.next());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<Vertex> getParent(GraphTraversalSource g, Vertex vertex) {
+        Iterator<Vertex> it = g.V(vertex).out(Schema.PARENT);
         if (it.hasNext()) {
             return Optional.of(it.next());
         } else {
