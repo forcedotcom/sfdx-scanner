@@ -335,7 +335,13 @@ public class MethodUtilTest {
                 containsString(EventKey.WARNING_MULTIPLE_METHOD_TARGET_MATCHES.getMessageKey()));
     }
 
-    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.REMOTE_ACTION, Schema.NAMESPACE_ACCESSIBLE})
+    @ValueSource(
+            strings = {
+                Schema.AURA_ENABLED,
+                Schema.INVOCABLE_METHOD,
+                Schema.REMOTE_ACTION,
+                Schema.NAMESPACE_ACCESSIBLE
+            })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testGetMethodsWithAnnotation(String annotation) {
         String[] sourceCode = {
@@ -369,7 +375,7 @@ public class MethodUtilTest {
                     + "}\n",
         };
 
-        TestUtil.buildGraph(g, sourceCode);
+        TestUtil.buildGraph(g, sourceCode, true);
 
         List<MethodVertex> methods =
                 MethodUtil.getMethodsWithAnnotation(g, new ArrayList<>(), annotation);

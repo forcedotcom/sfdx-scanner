@@ -189,10 +189,17 @@ public final class MethodUtil {
         return getMethodsWithAnnotation(g, targetFiles, Schema.REMOTE_ACTION);
     }
 
+    /**
+     * Returns non-test methods in the target files with an @InvocableMethod annotation. An empty
+     * list implicitly includes all files.
+     */
+    public static List<MethodVertex> getInvocableMethodMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.INVOCABLE_METHOD);
+    }
+
     static List<MethodVertex> getMethodsWithAnnotation(
             GraphTraversalSource g, List<String> targetFiles, String annotation) {
-        // Only look at UserClass vertices. Uninterested in Enums, Interfaces, or Triggers.
-        final String[] labels = new String[] {NodeType.USER_CLASS};
         return SFVertexFactory.loadVertices(
                 g,
                 rootMethodTraversal(g, targetFiles)
