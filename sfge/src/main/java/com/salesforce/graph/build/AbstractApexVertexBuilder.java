@@ -82,9 +82,11 @@ abstract class AbstractApexVertexBuilder {
             final Vertex vChild = g.addV(child.getLabel()).next();
             addProperties(g, child, vChild);
 
-            /** Handle static block if we are looking at a <clinit> method that has a block statement.
-             * See {@linkplain StaticBlockUtil} on why this is needed
-             * and how we handle it. */
+            /**
+             * Handle static block if we are looking at a <clinit> method that has a block
+             * statement. See {@linkplain StaticBlockUtil} on why this is needed and how we handle
+             * it.
+             */
             if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
                 final Vertex parentVertexForChild =
                         StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);

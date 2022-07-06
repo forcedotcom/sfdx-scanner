@@ -65,14 +65,14 @@ public class RuleUtilTest {
     @Test
     public void getPathEntryPoints_includesGlobalMethods() {
         String sourceCode =
-            "public class Foo {\n"
-                + "    global static void globalStaticMethod() {\n"
-                + "    }\n"
-                + "    global void globalInstanceMethod() {\n"
-                + "    }\n"
-                + "    public static void publicStaticMethod() {\n"
-                + "    }\n"
-                + "}\n";
+                "public class Foo {\n"
+                        + "    global static void globalStaticMethod() {\n"
+                        + "    }\n"
+                        + "    global void globalInstanceMethod() {\n"
+                        + "    }\n"
+                        + "    public static void publicStaticMethod() {\n"
+                        + "    }\n"
+                        + "}\n";
         TestUtil.buildGraph(g, sourceCode, true);
 
         List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);

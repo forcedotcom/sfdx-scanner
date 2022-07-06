@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -182,13 +183,11 @@ public class InheritanceEdgeBuilder implements GraphBuilder {
     }
 
     private void addProperties(Long inheritorId, List<String> implementedVertexDefiningTypes) {
-        // Add the base property and its case-safe version.
-        GraphTraversal<Vertex, Vertex> traversal =
-                g.V(inheritorId)
-                        .property(Schema.INTERFACE_DEFINING_TYPES, implementedVertexDefiningTypes);
-        CaseSafePropertyUtil.addCaseSafeProperty(
-                traversal, Schema.INTERFACE_DEFINING_TYPES, implementedVertexDefiningTypes);
-        // Commit the traversal.
+        GraphTraversal<Vertex,Vertex> traversal = g.V(inheritorId);
+        // It's probably not best practice to be using an empty treeset here, but we no longer have access to the treeset
+        // that was used when adding the base properties, and we're setting a property that definitely isn't set elsewhere,
+        // so it should be fine.
+        GremlinVertexUtil.addProperty(new TreeSet<>(), traversal, Schema.INTERFACE_DEFINING_TYPES, implementedVertexDefiningTypes);
         traversal.iterate();
     }
 }

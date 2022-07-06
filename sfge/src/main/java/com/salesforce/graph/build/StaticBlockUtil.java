@@ -19,9 +19,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 /**
  * Handles creation of synthetic methods and vertices to gracefully invoke static code blocks.
  *
- * <p>Consider this example:
- *
- * <code>
+ * <p>Consider this example: <code>
  * class StaticBlockClass {
  *  static {
  *      System.debug("inside static block 1");
@@ -30,10 +28,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  *      System.debug("inside static block 2");
  *  }
  * }
- * </code>
- *
- * In Jorje's compilation structure, static blocks are represented like this:
- * <code>
+ * </code> In Jorje's compilation structure, static blocks are represented like this: <code>
  * class StaticBlockClass {
  *  private static void <clinit>() {
  *      {
@@ -46,17 +41,17 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  * }
  * </code>
  *
- * <p>Having multiple block statements inside a method breaks SFGE's normal code flow logic.
- * This makes handling code blocks in <code><clinit>()</code> impossible.
- * <p>As an alternative, we are creating synthetic vertices in the Graph to
- * represent the static blocks as individual methods.
- * <p>We also create one top-level synthetic method ("StaticBlockInvoker") that invokes
- * individual static block methods. While creating static scope
- * for this class, we should invoke the method call expressions inside the top-level synthetic
- * method.
+ * <p>Having multiple block statements inside a method breaks SFGE's normal code flow logic. This
+ * makes handling code blocks in <code><clinit>()</code> impossible.
  *
- * <p>New structure looks like this:
- * <code>
+ * <p>As an alternative, we are creating synthetic vertices in the Graph to represent the static
+ * blocks as individual methods.
+ *
+ * <p>We also create one top-level synthetic method ("StaticBlockInvoker") that invokes individual
+ * static block methods. While creating static scope for this class, we should invoke the method
+ * call expressions inside the top-level synthetic method.
+ *
+ * <p>New structure looks like this: <code>
  *     class StaticBlockClass {
  *      private static void SyntheticStaticBlock_1() {
  *          System.debug("inside static block 1");
@@ -90,12 +85,11 @@ public final class StaticBlockUtil {
      *     parent for blockStatementVertex, and a sibling of <clinit>()
      */
     public static Vertex createSyntheticStaticBlockMethod(
-        GraphTraversalSource g,
-        Vertex clinitVertex,
-        int staticBlockIndex) {
+            GraphTraversalSource g, Vertex clinitVertex, int staticBlockIndex) {
         final Vertex syntheticMethodVertex = g.addV(ASTConstants.NodeType.METHOD).next();
         final String definingType = clinitVertex.value(Schema.DEFINING_TYPE);
-        final List<Vertex> siblings = GremlinUtil.getChildren(g, GremlinVertexUtil.getParentVertex(g, clinitVertex));
+        final List<Vertex> siblings =
+                GremlinUtil.getChildren(g, GremlinVertexUtil.getParentVertex(g, clinitVertex));
         final int nextSiblingIndex = siblings.size();
 
         addSyntheticStaticBlockMethodProperties(
@@ -286,7 +280,10 @@ public final class StaticBlockUtil {
     }
 
     private static void addStaticBlockInvokerProperties(
-        GraphTraversalSource g, String definingType, Vertex staticBlockInvokerVertex, int childIndex) {
+            GraphTraversalSource g,
+            String definingType,
+            Vertex staticBlockInvokerVertex,
+            int childIndex) {
         verifyType(staticBlockInvokerVertex, ASTConstants.NodeType.METHOD);
         final Map<String, Object> properties = new HashMap<>();
         properties.put(Schema.NAME, STATIC_BLOCK_INVOKER_METHOD);
@@ -296,11 +293,11 @@ public final class StaticBlockUtil {
     }
 
     private static void addSyntheticStaticBlockMethodProperties(
-        GraphTraversalSource g,
-        String definingType,
-        Vertex syntheticMethodVertex,
-        int staticBlockIndex,
-        int childIndex) {
+            GraphTraversalSource g,
+            String definingType,
+            Vertex syntheticMethodVertex,
+            int staticBlockIndex,
+            int childIndex) {
         verifyType(syntheticMethodVertex, ASTConstants.NodeType.METHOD);
         final Map<String, Object> properties = new HashMap<>();
         properties.put(
