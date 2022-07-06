@@ -295,7 +295,7 @@ public class RuleUtilTest {
     @Test
     public void getAllRules_noExceptionThrown() {
         try {
-            List<AbstractRule> allRules = RuleUtil.getAllRules();
+            List<AbstractRule> allRules = RuleUtil.getEnabledRules();
             MatcherAssert.assertThat(allRules, hasSize(1));
             assertTrue(allRules.contains(ApexFlsViolationRule.getInstance()));
         } catch (Exception ex) {
