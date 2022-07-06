@@ -23,7 +23,7 @@ public final class Util {
                 new GraphBuilder[] {
                     new ApexStandardLibraryVertexBuilder(config.g),
                     new CustomerApexVertexBuilder(config.g, config.customerCompilations),
-                    new InheritanceEdgeBuilder(config.g)
+                    new InheritanceInformationBuilder(config.g)
                 }) {
             if (config.ignoreBuilders.contains(graphBuilder.getClass())) {
                 if (LOGGER.isWarnEnabled()) {
