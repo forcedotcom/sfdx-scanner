@@ -83,7 +83,12 @@ public final class RuleUtil {
         return new ArrayList<>(methods);
     }
 
-    public static List<AbstractRule> getAllRules() throws RuleNotFoundException {
+    public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {
+        final List<AbstractRule> allRules = getAllRules();
+        return allRules.stream().filter(rule -> rule.isEnabled()).collect(Collectors.toList());
+    }
+
+    static List<AbstractRule> getAllRules() throws RuleNotFoundException {
         // Get a set of every class in the Rules package that extends AbstractRule.
         Reflections reflections = new Reflections(PackageConstants.RULES_PACKAGE);
         Set<Class<? extends AbstractRule>> ruleTypes =
@@ -94,7 +99,8 @@ public final class RuleUtil {
         for (Class<? extends AbstractRule> ruleType : ruleTypes) {
             // Skip abstract classes.
             if (!Modifier.isAbstract(ruleType.getModifiers())) {
-                rules.add(getRuleInner(ruleType.getName()));
+                final AbstractRule rule = getRuleInner(ruleType.getName());
+                rules.add(rule);
             }
         }
         return rules;

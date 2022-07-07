@@ -83,10 +83,6 @@ export class SfgeEngine extends AbstractRuleEngine {
 		const categoryNames: Set<string> = new Set();
 
 		partialRules.forEach(({name, description, category}) => {
-			// TODO: This should be accomplished by actually disabling the rules within SFGE, instead of this hacky fix.
-			if (name !== 'ApexFlsViolationRule') {
-				return;
-			}
 			completeRules.push({
 				engine: ENGINE.SFGE,
 				sourcepackage: "sfge",
