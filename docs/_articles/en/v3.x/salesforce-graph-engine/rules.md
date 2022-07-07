@@ -11,9 +11,14 @@ The following are its source, sink, and sanitizer definitions:
 *Source*
 
 1. `@AuraEnabled`-annotated methods
-2. Any method returning a `PageReference` object
-3. `public`/`global`-scoped methods on Visualforce Controllers
-4. Any method specifically targeted during invocation
+2. `@InvocableMethod`-annotated methods
+3. `@NamespaceAccessible`-annotated methods
+4. `@RemoteAction`-annotated methods
+5. Any method returning a `PageReference` object
+6. `public`-scoped methods on Visualforce Controllers
+7. `global`-scoped methods on any class
+8. `Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`
+9. Any method specifically targeted during invocation
 
 *Sink*
 
