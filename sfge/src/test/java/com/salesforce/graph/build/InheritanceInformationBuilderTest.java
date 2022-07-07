@@ -18,7 +18,7 @@ import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class InheritanceEdgeBuilderTest {
+public class InheritanceInformationBuilderTest {
     private GraphTraversalSource g;
 
     @BeforeEach
@@ -337,9 +337,7 @@ public class InheritanceEdgeBuilderTest {
                         .values(Schema.INTERFACE_DEFINING_TYPES)
                         .toList();
         for (Object propValue : propValues) {
-            MatcherAssert.assertThat(
-                (Object[])propValue,
-                arrayContaining(parentDefiningType));
+            MatcherAssert.assertThat((Object[]) propValue, arrayContaining(parentDefiningType));
         }
     }
 }

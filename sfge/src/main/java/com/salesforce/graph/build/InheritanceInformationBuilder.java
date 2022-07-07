@@ -25,13 +25,13 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public class InheritanceEdgeBuilder implements GraphBuilder {
-    private static final Logger LOGGER = LogManager.getLogger(InheritanceEdgeBuilder.class);
+public class InheritanceInformationBuilder implements GraphBuilder {
+    private static final Logger LOGGER = LogManager.getLogger(InheritanceInformationBuilder.class);
     private final GraphTraversalSource g;
     private final Map<Long, InheritableSFVertex> verticesById;
     private final TreeMap<String, InheritableSFVertex> verticesByDefiningType;
 
-    public InheritanceEdgeBuilder(GraphTraversalSource g) {
+    public InheritanceInformationBuilder(GraphTraversalSource g) {
         this.g = g;
         this.verticesById = new HashMap<>();
         this.verticesByDefiningType = CollectionUtil.newTreeMap();

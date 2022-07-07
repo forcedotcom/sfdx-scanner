@@ -37,7 +37,13 @@ public class RuleUtilTest {
         this.g = TestUtil.getGraph();
     }
 
-    @ValueSource(strings = {Schema.AURA_ENABLED, Schema.REMOTE_ACTION, Schema.NAMESPACE_ACCESSIBLE})
+    @ValueSource(
+            strings = {
+                Schema.AURA_ENABLED,
+                Schema.INVOCABLE_METHOD,
+                Schema.REMOTE_ACTION,
+                Schema.NAMESPACE_ACCESSIBLE
+            })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void getPathEntryPoints_includesAnnotatedMethods(String annotation) {
         String sourceCode =
