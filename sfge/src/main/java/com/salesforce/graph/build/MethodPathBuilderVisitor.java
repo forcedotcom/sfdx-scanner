@@ -2,8 +2,10 @@ package com.salesforce.graph.build;
 
 import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
+import com.salesforce.config.UserFacingErrorMessages;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.ArrayList;
@@ -165,7 +167,7 @@ public class MethodPathBuilderVisitor {
                 currentInnerScope.pop();
                 nextVertexInOuterScope.pop();
             }
-        } catch (TodoException | UnexpectedException ex) {
+        } catch (UserActionException | TodoException | UnexpectedException ex) {
             throw ex;
         } catch (Exception ex) {
             throw new UnexpectedException(g, vertex, ex);
@@ -592,7 +594,13 @@ public class MethodPathBuilderVisitor {
 
     private void addEdge(String name, Vertex from, Vertex to) {
         if (NodeType.TERMINAL_VERTEX_LABELS.contains(from.label())) {
-            throw new UnexpectedException("Vertex is terminal. vertex=" + vertexToString(from));
+            // Ask user to fix unreachable code
+            throw new UserActionException(
+                    String.format(
+                            UserFacingErrorMessages.UNREACHABLE_CODE,
+                            GremlinUtil.getFileName(g, to),
+                            to.value(Schema.DEFINING_TYPE),
+                            to.value(Schema.BEGIN_LINE)));
         }
 
         if (LOGGER.isTraceEnabled()) {

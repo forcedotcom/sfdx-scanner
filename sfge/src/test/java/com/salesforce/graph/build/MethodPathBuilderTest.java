@@ -3,16 +3,19 @@ package com.salesforce.graph.build;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.ops.ApexPathUtil;
@@ -2734,6 +2737,25 @@ public class MethodPathBuilderTest {
         List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
         // There are 3 paths since #walkPaths does not use any excluders
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
+    }
+
+    @Test
+    public void testUnreachableCodeDetection() {
+        final String sourceCode =
+                "public class MyClass {\n"
+                        + "   String doSomething() {\n"
+                        + "       return 'hello';\n"
+                        + "       System.debug('This line is unreachable');\n"
+                        + "   }\n"
+                        + "}\n";
+
+        UserActionException thrown =
+                assertThrows(
+                        UserActionException.class,
+                        () -> GraphBuildTestUtil.buildGraph(g, sourceCode),
+                        "UserActionException should've been thrown before this point");
+
+        MatcherAssert.assertThat(thrown.getMessage(), containsString("MyClass:4"));
     }
 
     /**

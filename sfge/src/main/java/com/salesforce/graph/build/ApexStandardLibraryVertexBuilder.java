@@ -51,8 +51,7 @@ public class ApexStandardLibraryVertexBuilder extends AbstractApexVertexBuilder
         Object result = value;
 
         final boolean isRootVertexNameName =
-                AbstractApexVertexBuilder.ROOT_VERTICES.contains(node.getLabel())
-                        && key.equals(Schema.NAME);
+                GremlinUtil.ROOT_VERTICES.contains(node.getLabel()) && key.equals(Schema.NAME);
         if (isRootVertexNameName || key.equals(Schema.DEFINING_TYPE)) {
             result = getFullName(currentPackage, (String) value);
             if (LOGGER.isTraceEnabled()) {
