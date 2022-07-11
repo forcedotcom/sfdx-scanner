@@ -48,6 +48,7 @@ public class Schema {
     public static final String NAMES = "Names";
     public static final String NAMESPACE_ACCESSIBLE = "NamespaceAccessible";
     public static final String OPERATOR = "Operator";
+    public static final String OVERRIDE = "Override";
     public static final String REFERENCE_TYPE = "ReferenceType";
     public static final String REMOTE_ACTION = "RemoteAction";
     public static final String RETURN_TYPE = "ReturnType";
@@ -60,6 +61,7 @@ public class Schema {
     public static final String TYPE_REF = "TypeRef";
 
     public static final String VALUE = "Value";
+    public static final String VIRTUAL = "Virtual";
     public static final String QUERY = "Query";
 
     public static final class JorjeNodeType {
