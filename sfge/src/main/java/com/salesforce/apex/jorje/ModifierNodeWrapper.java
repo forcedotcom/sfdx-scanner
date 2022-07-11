@@ -23,5 +23,7 @@ final class ModifierNodeWrapper extends AstNodeWrapper<ModifierNode> {
         properties.put(Schema.ABSTRACT, Modifier.isAbstract(javaModifiers));
         properties.put(Schema.STATIC, Modifier.isStatic(javaModifiers));
         properties.put(Schema.GLOBAL, getNode().getModifiers().has(ModifierTypeInfos.GLOBAL));
+        properties.put(Schema.VIRTUAL, getNode().getModifiers().has(ModifierTypeInfos.VIRTUAL));
+        properties.put(Schema.OVERRIDE, getNode().getModifiers().has(ModifierTypeInfos.OVERRIDE));
     }
 }
