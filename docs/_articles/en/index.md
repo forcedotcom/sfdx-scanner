@@ -10,6 +10,13 @@ lang: en
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
+  <span class="slds-assistive-text">success</span>
+    What do you think about Salesforce Code Analyzer?
+    &nbsp;&nbsp;
+    <a href="https://research.net/r/SalesforceCA">Share your feedback</a>
+</div>
+<br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
   	A new version (v{{ site.data.versions.scanner }}) of the plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
