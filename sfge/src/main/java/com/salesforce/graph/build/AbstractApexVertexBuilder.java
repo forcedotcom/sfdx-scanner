@@ -1,12 +1,10 @@
 package com.salesforce.graph.build;
 
-import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,10 +25,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 abstract class AbstractApexVertexBuilder {
     private static final Logger LOGGER = LogManager.getLogger(AbstractApexVertexBuilder.class);
-    protected static final Set<String> ROOT_VERTICES =
-            ImmutableSet.<String>builder()
-                    .addAll(Arrays.asList(ASTConstants.NodeType.ROOT_VERTICES))
-                    .build();
     protected final GraphTraversalSource g;
 
     protected AbstractApexVertexBuilder(GraphTraversalSource g) {
@@ -66,7 +60,7 @@ abstract class AbstractApexVertexBuilder {
             // The engine assumes that only certain types of nodes can be roots. We need to enforce
             // that assumption and
             // fail noisily if it's violated.
-            if (!ROOT_VERTICES.contains(vNode.label())) {
+            if (!GremlinUtil.ROOT_VERTICES.contains(vNode.label())) {
                 throw new UnexpectedException("Unexpected root vertex of type " + vNode.label());
             }
             vNode.property(Schema.FILE_NAME, fileName);

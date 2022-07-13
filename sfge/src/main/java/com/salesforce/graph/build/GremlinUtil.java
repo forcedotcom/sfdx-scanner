@@ -1,14 +1,19 @@
 package com.salesforce.graph.build;
 
+import com.google.common.collect.ImmutableSet;
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.T;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
@@ -17,6 +22,11 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  * and labels.
  */
 public final class GremlinUtil {
+    protected static final Set<String> ROOT_VERTICES =
+            ImmutableSet.<String>builder()
+                    .addAll(Arrays.asList(ASTConstants.NodeType.ROOT_VERTICES))
+                    .build();
+
     public static Long getId(Map<Object, Object> vertexProperties) {
         return (Long) vertexProperties.get(T.id);
     }
@@ -103,6 +113,20 @@ public final class GremlinUtil {
         } else {
             return Optional.empty();
         }
+    }
+
+    public static String getFileName(GraphTraversalSource g, Vertex vertex) {
+        if (ROOT_VERTICES.contains(vertex.label())) {
+            return vertex.value(Schema.FILE_NAME);
+        }
+        List<Vertex> verticesWithFileName =
+                g.V(vertex).repeat(__.in(Schema.CHILD)).until(__.has(Schema.FILE_NAME)).toList();
+
+        if (verticesWithFileName.isEmpty()) {
+            return "UNKNOWN_FILENAME";
+        }
+
+        return verticesWithFileName.get(0).value(Schema.FILE_NAME);
     }
 
     private GremlinUtil() {}
