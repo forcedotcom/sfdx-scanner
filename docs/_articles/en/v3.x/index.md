@@ -14,7 +14,7 @@ lang: en
   <span class="slds-assistive-text">success</span>
     What do you think about Salesforce Code Analyzer?
     &nbsp;&nbsp;
-    <a href="https://research.net/r/SalesforceCA">Share your feedback</a>
+    <a href="https://research.net/r/SalesforceCA">Take our feedback survey</a>
 </div>
 <br>
 
