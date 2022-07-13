@@ -31,8 +31,8 @@ describe('scanner:run', function () {
 					'--severity-threshold', '1'
 				])
 				.it('When no violations are found equal to or greater than flag value, no error is thrown', ctx => {
-
-                    const output = JSON.parse(ctx.stdout);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+                    const output = JSON.parse(ctx.stdout.split('\n')[1]);
                     // check that test file still has severities of 3
                     for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
@@ -51,8 +51,8 @@ describe('scanner:run', function () {
 					'--severity-threshold', '3'
 				])
 				.it('When violations are found equal to or greater than flag value, an error is thrown', ctx => {
-
-                    const output = JSON.parse(ctx.stdout);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
                     // check that test file still has severities of 3
                     for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
@@ -94,7 +94,8 @@ describe('scanner:run', function () {
 					'--normalize-severity'
 				])
 				.it('Ensure normalized severity is correct', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
 
 					for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {
@@ -128,7 +129,8 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('Ensure normalized severity is not outputted when --normalize-severity not provided', ctx => {
-					const output = JSON.parse(ctx.stdout);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
 
 					for (let i=0; i<output.length; i++) {
                         for (let j=0; j<output[i].violations.length; j++) {

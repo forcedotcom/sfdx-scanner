@@ -214,8 +214,8 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('Properly writes CSV to console', ctx => {
-					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					validateCsvOutput(ctx.stdout, false);
+					// Throw away the first line of output, since it's a banner.
+					validateCsvOutput(ctx.stdout.slice(ctx.stdout.indexOf('\n')), false);
 				});
 
 			setupCommandTest
