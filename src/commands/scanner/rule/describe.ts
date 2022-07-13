@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
-import {END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
+import {END_OF_LIFE_BANNER, FEEDBACK_SURVEY_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 
 // Initialize Messages with the current plugin directory
@@ -41,6 +41,7 @@ export default class Describe extends ScannerCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
+		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		const ruleFilters = this.buildRuleFilters();
