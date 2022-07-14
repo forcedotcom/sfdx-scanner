@@ -1,5 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest} from '../../../TestUtils';
+import {setupCommandTest, stripExtraneousOutput} from '../../../TestUtils';
 import {Rule} from '../../../../src/types';
 import {CATALOG_FILE, ENGINE} from '../../../../src/Constants';
 import fs = require('fs');
@@ -54,10 +54,10 @@ describe('scanner:rule:list', () => {
 				.it('All rules for enabled engines are returned', async ctx => {
 					const totalRuleCount = await getRulesFilteredByCategoryCount(false);
 
-					// Split the output table by newline and throw out the first three rows, since they just contain header information. That
+					// Split the output table by newline and throw out the first two rows, since they just contain header information. That
 					// should leave us with the actual data.
-					const rows = ctx.stdout.trim().split('\n');
-					rows.shift();
+					const output = stripExtraneousOutput(ctx.stdout);
+					const rows = output.trim().split('\n');
 					rows.shift();
 					rows.shift();
 					expect(rows).to.have.lengthOf(totalRuleCount, 'All rules should have been returned');
@@ -306,9 +306,10 @@ describe('scanner:rule:list', () => {
 			setupCommandTest
 				.command(['scanner:rule:list', '--category', 'Beebleborp'])
 				.it('Without --json flag, an empty table is printed', ctx => {
-					// Split the result by newline, and make sure there are three rows.
-					const rows = ctx.stdout.trim().split('\n');
-					expect(rows).to.have.lengthOf(3, 'Only the header rows should have been printed');
+					// Split the result by newline, and make sure there are two rows.
+					const output = stripExtraneousOutput(ctx.stdout);
+					const rows = output.trim().split('\n');
+					expect(rows).to.have.lengthOf(2, 'Only the header rows should have been printed');
 				});
 
 			setupCommandTest
