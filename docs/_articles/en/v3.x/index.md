@@ -10,6 +10,14 @@ lang: en
 </div>
 <br>
 
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
+  <span class="slds-assistive-text">success</span>
+    What do you think about Salesforce Code Analyzer?
+    &nbsp;&nbsp;
+    <a href="https://research.net/r/SalesforceCA">Take our feedback survey</a>
+</div>
+<br>
+
 <!-- temporary comment until v3.x becomes the new norm -->
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
