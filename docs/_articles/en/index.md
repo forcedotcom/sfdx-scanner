@@ -3,18 +3,18 @@ title: Salesforce Code Analyzer Plug-In
 permalink: /
 lang: en
 ---
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_info" role="alert">
+  <span class="slds-assistive-text">success</span>
+    We're constantly improving Salesforce Code Analyzer. Tell us what you think!
+    &nbsp;&nbsp;
+	<a href="https://research.net/r/SalesforceCA"><button class="slds-button slds-button_brand">Give Feedback</button></a>
+</div>
+<br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
   	New pilot version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
 	&nbsp;&nbsp;
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
-</div>
-<br>
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
-  <span class="slds-assistive-text">success</span>
-    What do you think about Salesforce Code Analyzer?
-    &nbsp;&nbsp;
-    <a href="https://research.net/r/SalesforceCA">Take our feedback survey</a>
 </div>
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
