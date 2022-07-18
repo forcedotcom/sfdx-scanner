@@ -10,7 +10,7 @@ export const INTERNAL_ERROR_CODE = 500;
 export const END_OF_LIFE_BANNER = `In September 2022, v3.x of the Salesforce Code Analyzer will become the default version,
          and older versions, including your currently installed version, will no longer be supported.
          You can manually update to v3.x earlier for a smoother transition.`;
-export const FEEDBACK_SURVEY_BANNER = `We're constantly improving Salesforce Code Analayzer. Tell us what you think! Give feedback at https://research.net/r/SalesforceCA.`
+export const FEEDBACK_SURVEY_BANNER = `We're constantly improving Salesforce Code Analyzer. Tell us what you think! Give feedback at https://research.net/r/SalesforceCA.`
 export const PILOT_AVAILABILITY_BANNER = `As of April 27, 2022, v3.x of the Salesforce Code Analyzer is available as an open pilot.
          To update to v3.x and try out our pilot features, run these commands:
          > sfdx plugins:uninstall @salesforce/sfdx-scanner
