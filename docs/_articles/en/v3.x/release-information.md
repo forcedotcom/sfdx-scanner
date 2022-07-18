@@ -11,7 +11,12 @@ lang: en
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.2.0...v3.3.0)
 
 ### Release Summary
-* SFGE: Added new entry points for CRUD/FLS rule
+* SFGE: Added new entry points for CRUD/FLS rule:
+	- `@InvocableMethod`-annotated methods
+	- `@NamespaceAccessible`-annotated methods
+	- `@RemoteAction`-annotated methods
+	- `global`-scoped methods on any class
+	- `Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`
 * SFGE: Ability to recognize static code blocks in Apex
 * SFGE: Return intelligible error to users when the engine encounters unreachable code that blocks the code flow
 * Upgraded PMD to 6.47.0
