@@ -6,6 +6,22 @@ lang: en
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
 
 
+## [v2.13.6](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.5) (07-20-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.5...v2.13.6)
+
+### Release Summary
+* New banner to collect user feedback
+* PMD upgraded to 6.47.0
+
+**Merged pull requests:**
+
+- @W-11267443@ \[2.x\] Upgrade PMD to 6.47.0 [\#750](https://github.com/forcedotcom/sfdx-scanner/pull/750)
+- @W-11397711@: \[2.x\] Added banner about our feedback survey. [\#752](https://github.com/forcedotcom/sfdx-scanner/pull/752)
+- @W-11445992@: \[2.x\] Update version number in preparation for 2.13.6 release. [\#755](https://github.com/forcedotcom/sfdx-scanner/pull/755)
+- @W-11397711@: \[2.x\] Updated text to match feedback from PR. [\#758](https://github.com/forcedotcom/sfdx-scanner/pull/758)
+
+
 ## [v2.13.5](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.5) (06-22-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.4...v2.13.5)
