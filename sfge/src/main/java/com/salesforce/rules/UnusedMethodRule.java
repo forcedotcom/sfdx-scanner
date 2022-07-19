@@ -1,9 +1,5 @@
 package com.salesforce.rules;
 
-import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.graph.Schema;
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;

@@ -12,7 +12,6 @@ import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
 import com.salesforce.metainfo.VisualForceHandlerImpl;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -35,9 +34,7 @@ public class UnusedMethodRuleTest {
 
     /* =============== SECTION 1: SIMPLE POSITIVE/NEGATIVE CASES =============== */
 
-    /**
-     * Obviously unused static/instance methods are unused.
-     */
+    /** Obviously unused static/instance methods are unused. */
     @ValueSource(strings = {"public static", "public"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
@@ -51,9 +48,7 @@ public class UnusedMethodRuleTest {
         assertViolations(sourceCode, "unusedMethod");
     }
 
-    /**
-     * Obviously unused inner class instance methods are unused.
-     */
+    /** Obviously unused inner class instance methods are unused. */
     @Test
     @Disabled
     public void innerInstanceMethodWithoutInvocation_expectViolation() {
@@ -69,9 +64,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * When no constructor is declared on a class, a no-parameter constructor
-     * is implicitly generated.
-     * To reduce noise, this should always count as used.
+     * When no constructor is declared on a class, a no-parameter constructor is implicitly
+     * generated. To reduce noise, this should always count as used.
      */
     @Test
     @Disabled
@@ -106,9 +100,7 @@ public class UnusedMethodRuleTest {
     // REASONING: Public-facing entry points probably aren't explicitly invoked within the codebase,
     //            but they're almost definitely used by external sources.
 
-    /**
-     * Global methods are entrypoints, and should count as used.
-     */
+    /** Global methods are entrypoints, and should count as used. */
     @ValueSource(strings = {"global", "global static"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
@@ -122,9 +114,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /**
-     * public methods on controllers are entrypoints, and should count as used.
-     */
+    /** public methods on controllers are entrypoints, and should count as used. */
     @Test
     @Disabled
     public void publicControllerMethod_expectNoViolation() {
@@ -158,9 +148,7 @@ public class UnusedMethodRuleTest {
         }
     }
 
-    /**
-     * Methods returning PageReferences are entrypoints, and should count as used.
-     */
+    /** Methods returning PageReferences are entrypoints, and should count as used. */
     @Test
     @Disabled
     public void pageReferenceMethod_expectNoViolation() {
@@ -173,9 +161,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /**
-     * Certain annotated methods are entrypoints, and should count as used.
-     */
+    /** Certain annotated methods are entrypoints, and should count as used. */
     @ValueSource(
             strings = {
                 Schema.AURA_ENABLED,
@@ -197,8 +183,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class implements Messaging.InboundEmailHandler, its handleInboundEmail()
-     * method is an entrypoint, and should count as used.
+     * If a class implements Messaging.InboundEmailHandler, its handleInboundEmail() method is an
+     * entrypoint, and should count as used.
      */
     @Test
     @Disabled
@@ -217,9 +203,7 @@ public class UnusedMethodRuleTest {
     //            those methods for the code to compile. And if the interface/class isn't
     //            implemented anywhere, we have separate rules for surfacing that.
 
-    /**
-     * Abstract methods on abstract classes/interfaces are abstract, and count as used.
-     */
+    /** Abstract methods on abstract classes/interfaces are abstract, and count as used. */
     @Test
     @Disabled
     public void abstractMethodDeclaration_expectNoViolation() {
@@ -235,8 +219,8 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 4: NEGATIVE CASE W/INTERNAL CALL =============== */
 
     /**
-     * If a class has static methods that call its other static methods, the called
-     * methods count as used.
+     * If a class has static methods that call its other static methods, the called methods count as
+     * used.
      */
     @ValueSource(
             strings = {
@@ -261,8 +245,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has instance methods that call its static methods,
-     * those static methods count as used.
+     * If a class has instance methods that call its static methods, those static methods count as
+     * used.
      */
     @ValueSource(
             strings = {
@@ -286,8 +270,7 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If an inner class calls its outer class's static methods, those static
-     * methods count as used.
+     * If an inner class calls its outer class's static methods, those static methods count as used.
      */
     @ValueSource(
             strings = {
@@ -313,8 +296,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class's instance methods call its other instance methods,
-     * the called instance methods count as used.
+     * If a class's instance methods call its other instance methods, the called instance methods
+     * count as used.
      */
     @ValueSource(
             strings = {
@@ -338,10 +321,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /**
-     * If a class internally calls its own constructor, that constructor
-     * counts as used.
-     */
+    /** If a class internally calls its own constructor, that constructor counts as used. */
     @Test
     @Disabled
     public void constructorInternallyCalled_expectNoViolation() {
@@ -360,10 +340,9 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 5: NEGATIVE CASE W/SIBLING CLASS CALLS =============== */
 
     /**
-     * If a class has two inner classes, and one inner class's instance
-     * methods are invoked by another inner class, then those methods
-     * count as used.
-     * Specific case: Instance provided as method parameter.
+     * If a class has two inner classes, and one inner class's instance methods are invoked by
+     * another inner class, then those methods count as used. Specific case: Instance provided as
+     * method parameter.
      */
     @ValueSource(strings = {"MyClass.MyInner1", "MyInner1"})
     @ParameterizedTest(name = "{displayName}: {0}")
@@ -389,10 +368,9 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has two inner classes, and one inner class's instance
-     * methods are invoked by another inner class, then those methods
-     * count as used.
-     * Specific case: Instance available as property of invoking inner class.
+     * If a class has two inner classes, and one inner class's instance methods are invoked by
+     * another inner class, then those methods count as used. Specific case: Instance available as
+     * property of invoking inner class.
      */
     @CsvSource({
         // The four possible combinations of implicit/explicit outer type reference and
@@ -425,10 +403,9 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has two inner classes, and one inner class's instance
-     * methods are invoked by another inner class, then those methods
-     * count as used.
-     * Specific case: Instance available as property of outer class.
+     * If a class has two inner classes, and one inner class's instance methods are invoked by
+     * another inner class, then those methods count as used. Specific case: Instance available as
+     * property of outer class.
      */
     @CsvSource({
         // Two options for implicit/explicit outer type reference for an instance property.
@@ -464,8 +441,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has two inner classes, and one inner class's constructor
-     * is invoked by another inner class, then that constructor counts as used.
+     * If a class has two inner classes, and one inner class's constructor is invoked by another
+     * inner class, then that constructor counts as used.
      */
     @CsvSource({
         // Four combinations of explicit/implicit outer class reference between variable declaration
@@ -499,8 +476,8 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 6: NEGATIVE CASES W/EXTERNAL CALLS =============== */
 
     /**
-     * If a class has static methods, and those methods are invoked by another class,
-     * then they count as used.
+     * If a class has static methods, and those methods are invoked by another class, then they
+     * count as used.
      */
     @Test
     @Disabled
@@ -522,8 +499,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has static methods, and those methods are invoked to set
-     * properties on another class, then they count as used.
+     * If a class has static methods, and those methods are invoked to set properties on another
+     * class, then they count as used.
      */
     @Test
     @Disabled
@@ -548,8 +525,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has instance methods, and those methods are invoked on an instance
-     * of the object, then they count as used.
+     * If a class has instance methods, and those methods are invoked on an instance of the object,
+     * then they count as used.
      */
     @ValueSource(
             strings = {
@@ -607,14 +584,14 @@ public class UnusedMethodRuleTest {
             "global class InvokingClass {\n"
                     + "    public DefiningClass instanceProp;"
                     + "    public static DefiningClass staticProp;"
-                // Make this method global, so it doesn't trip the rule.
-                + "    global DefiningClass instanceMethod() {\n"
-                + "        return new DefiningClass();\n"
-                + "    }\n"
-                // Make this method global, so it doesn't trip the rule.
-                + "    global static DefiningClass staticMethod() {\n"
-                + "        return new DefiningClass();\n"
-                + "    }\n"
+                    // Make this method global, so it doesn't trip the rule.
+                    + "    global DefiningClass instanceMethod() {\n"
+                    + "        return new DefiningClass();\n"
+                    + "    }\n"
+                    // Make this method global, so it doesn't trip the rule.
+                    + "    global static DefiningClass staticMethod() {\n"
+                    + "        return new DefiningClass();\n"
+                    + "    }\n"
                     // Make this method global, so it doesn't trip the rule.
                     + "    global boolean anotherMethod(DefiningClass directParam, MiddlemanClass middlemanParam) {\n"
                     + "        DefiningClass directVariable = new DefiningClass();\n"
@@ -627,24 +604,22 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a class has constructors, and those constructors are invoked by other classes,
-     * then they count as used.
-     * (Note: Test cases for both explicitly declared 0-arity and 1-arity constructor.)
+     * If a class has constructors, and those constructors are invoked by other classes, then they
+     * count as used. (Note: Test cases for both explicitly declared 0-arity and 1-arity
+     * constructor.)
      */
-    @CsvSource({
-        "(),  ()",
-        "(boolean b),  (false)"
-    })
+    @CsvSource({"(),  ()", "(boolean b),  (false)"})
     @ParameterizedTest(name = "{displayName}: {0}/{1}")
     @Disabled
-    public void constructorInvokedExternally_expectNoViolation(String definingParams, String invokingParams) {
+    public void constructorInvokedExternally_expectNoViolation(
+            String definingParams, String invokingParams) {
         String[] sourceCodes = {
             "global class DefiningClass {\n"
                     + "    public boolean prop = false;\n"
                     + String.format("    public DefiningClass%s {\n", definingParams)
                     + "    }\n",
             "global class InvokingClass {\n"
-                // Make this global, so it can't trip the rule.
+                    // Make this global, so it can't trip the rule.
                     + "    global boolean someMethod() {\n"
                     + String.format("        return new DefiningClass%s.prop;\n", invokingParams)
                     + "    }\n"
@@ -656,8 +631,7 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 7: NEGATIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
-     * If a subclass invokes a static method on its parent class, then that
-     * method counts as used.
+     * If a subclass invokes a static method on its parent class, then that method counts as used.
      */
     @CsvSource({
         // Invocation in static method, with implicit/explicit `this`,
@@ -672,7 +646,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: invoker scope {0}; invocation {1}")
     @Disabled
-    public void staticMethodInvokedInSubclass_expectNoViolation(String invokerScope, String invocation) {
+    public void staticMethodInvokedInSubclass_expectNoViolation(
+            String invokerScope, String invocation) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
                     + "    public static boolean staticMethod() {\n"
@@ -680,7 +655,7 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class ChildClass extends ParentClass {\n"
-                // Make this method global, so it doesn't trip the rule.
+                    // Make this method global, so it doesn't trip the rule.
                     + String.format("    global %s invokingMethod() {\n", invokerScope)
                     + String.format("        return %s;\n", invocation)
                     + "    }\n"
@@ -690,15 +665,11 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a subclass's inner class invokes a static method on the parent class,
-     * then that method counts as used.
+     * If a subclass's inner class invokes a static method on the parent class, then that method
+     * counts as used.
      */
     @ValueSource(
-        strings = {
-            "staticMethod()",
-            "ParentClass.staticMethod()",
-            "ChildClass.staticMethod()"
-        })
+            strings = {"staticMethod()", "ParentClass.staticMethod()", "ChildClass.staticMethod()"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void staticMethodInvokedInSubclassInnerClass_expectNoViolation(String invocation) {
@@ -719,10 +690,9 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-
     /**
-     * If a subclass invokes methods it inherited from the parent without overriding them,
-     * those methods count as used.
+     * If a subclass invokes methods it inherited from the parent without overriding them, those
+     * methods count as used.
      */
     @CsvSource({
         "parentMethod1,  parentMethod2",
@@ -731,7 +701,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: {0}, {1}")
     @Disabled
-    public void instanceMethodInvokedWithinNonOverridingSubclass_expectNoViolation(String method1Reference, String method2Reference) {
+    public void instanceMethodInvokedWithinNonOverridingSubclass_expectNoViolation(
+            String method1Reference, String method2Reference) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
                     + "    public boolean parentMethod1() {\n"
@@ -741,14 +712,14 @@ public class UnusedMethodRuleTest {
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
-                "global virtual class ChildClass extends ParentClass {\n"
+            "global virtual class ChildClass extends ParentClass {\n"
                     // Make this global, so it can't trip the rule.
                     + "    global boolean childMethod() {\n"
                     + String.format("        return %s();\n", method1Reference)
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                // Make this global, so it can't trip the rule.
+                    // Make this global, so it can't trip the rule.
                     + "    global boolean grandchildMethod() {\n"
                     + String.format("        return %s();\n", method2Reference)
                     + "    }\n"
@@ -758,30 +729,24 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a subclass inherits a method from a parent without overriding it,
-     * and that method is called on an instance of the subclass, then
-     * the parent method counts as used.
+     * If a subclass inherits a method from a parent without overriding it, and that method is
+     * called on an instance of the subclass, then the parent method counts as used.
      */
-    @ValueSource(
-        strings = {
-            "ChildClass",
-            "GrandchildClass"
-        })
+    @ValueSource(strings = {"ChildClass", "GrandchildClass"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
-    public void instanceMethodInvokedOnInstanceOfNonOverridingSubclass_expectNoViolation(String subclass) {
+    public void instanceMethodInvokedOnInstanceOfNonOverridingSubclass_expectNoViolation(
+            String subclass) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                + "    public boolean parentMethod() {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "}\n",
-            "global virtual class ChildClass extends ParentClass {\n"
-                + "}\n",
-            "global class GrandchildClass extends ChildClass {\n"
-                + "}\n",
+                    + "    public boolean parentMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "}\n",
+            "global virtual class ChildClass extends ParentClass {\n}\n",
+            "global class GrandchildClass extends ChildClass {\n}\n",
             "global class InvokerClass {\n"
-                // Make this global, so it can't trip the rule.
+                    // Make this global, so it can't trip the rule.
                     + String.format("    global boolean invokerMethod(%s instance) {\n", subclass)
                     + "        return instance.parentMethod();\n"
                     + "    }\n"
@@ -791,66 +756,63 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * If a subclass overrides an inherited method, but calls the `super`
-     * version of that method, the parent method counts as used.
+     * If a subclass overrides an inherited method, but calls the `super` version of that method,
+     * the parent method counts as used.
      */
     @Test
     @Disabled
     public void instanceMethodInvokedViaSuperInOverridingSubclass_expectNoViolation() {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                + "    public virtual boolean parentMethod1() {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "    public virtual boolean parentMethod2() {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "}\n",
+                    + "    public virtual boolean parentMethod1() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "    public virtual boolean parentMethod2() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                // Make the method override global, so it doesn't trip the rule.
-                + "    global override boolean parentMethod1() {\n"
-                + "        return false;\n"
-                + "    }\n"
-                // Make this method global, so it doesn't trip the rule.
-                + "    global boolean childMethod() {\n"
-                // Invoke the super version instead of the override version.
-                + "        return super.parentMethod1();\n"
-                + "    }\n"
-                + "}\n",
+                    // Make the method override global, so it doesn't trip the rule.
+                    + "    global override boolean parentMethod1() {\n"
+                    + "        return false;\n"
+                    + "    }\n"
+                    // Make this method global, so it doesn't trip the rule.
+                    + "    global boolean childMethod() {\n"
+                    // Invoke the super version instead of the override version.
+                    + "        return super.parentMethod1();\n"
+                    + "    }\n"
+                    + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                // Make the override global, so it doesn't trip the rule.
-                + "    global override boolean parentMethod2() {\n"
-                + "        return false;\n"
-                + "    }\n"
-                // Make this method global, so it doesn't trip the rule.
-                + "    global boolean grandchildMethod() {\n"
-                // Invoke the super version instead of the override version.
-                + "        return super.parentMethod2();\n"
-                + "    }\n"
-                + "}\n"
+                    // Make the override global, so it doesn't trip the rule.
+                    + "    global override boolean parentMethod2() {\n"
+                    + "        return false;\n"
+                    + "    }\n"
+                    // Make this method global, so it doesn't trip the rule.
+                    + "    global boolean grandchildMethod() {\n"
+                    // Invoke the super version instead of the override version.
+                    + "        return super.parentMethod2();\n"
+                    + "    }\n"
+                    + "}\n"
         };
         assertNoViolations(sourceCodes);
     }
 
     /**
-     * If subclass's constructor calls a `super` constructor, the relevant
-     * parent constructor counts as used.
-     * (Note: Tests for both explicitly-declared 0-arity and 1-arity constructors.)
+     * If subclass's constructor calls a `super` constructor, the relevant parent constructor counts
+     * as used. (Note: Tests for both explicitly-declared 0-arity and 1-arity constructors.)
      */
-    @CsvSource({
-        "(),  ()",
-        "(boolean b),  (b)"
-    })
+    @CsvSource({"(),  ()", "(boolean b),  (b)"})
     @ParameterizedTest(name = "{displayName}: constructor super{0}")
     @Disabled
-    public void constructorInvokedViaSuperInSubclass_expectNoViolation(String paramTypes, String invocationArgs) {
+    public void constructorInvokedViaSuperInSubclass_expectNoViolation(
+            String paramTypes, String invocationArgs) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
                     + String.format("    public ParentClass%s {\n", paramTypes)
                     + "    }\n"
                     + "}\n",
             "global class ChildClass extends ParentClass {\n"
-                // Make constructor global, so it doesn't trip the rule.
+                    // Make constructor global, so it doesn't trip the rule.
                     + String.format("    global ChildClass%s {\n", paramTypes)
                     + String.format("        super%s;\n", invocationArgs)
                     + "    }\n"
@@ -862,14 +824,10 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 8: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
-     * If a subclass overrides an inherited method and calls the overriding version,
-     * then the overridden original method on the parent doesn't count as used.
+     * If a subclass overrides an inherited method and calls the overriding version, then the
+     * overridden original method on the parent doesn't count as used.
      */
-    @ValueSource(
-        strings = {
-            "this.parentMethod",
-            "parentMethod"
-        })
+    @ValueSource(strings = {"this.parentMethod", "parentMethod"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void overrideMethodInSubclass_expectViolation(String invocation) {
@@ -880,76 +838,75 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                // Make the override global, so it doesn't trip the rule.
+                    // Make the override global, so it doesn't trip the rule.
                     + "    global override boolean parentMethod() {\n"
                     + "        return false;\n"
                     + "    }\n"
-                // Make the invoker method global, so it doesn't trip the rule.
+                    // Make the invoker method global, so it doesn't trip the rule.
                     + "    global boolean invokerMethod() {\n"
-                // This calls the overrider, not the original method, so it shouldn't count.
+                    // This calls the overrider, not the original method, so it shouldn't count.
                     + String.format("        return %s();\n", invocation)
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                // Make the invoker method global, so it doesn't trip the rule.
-                + "    global boolean invokerMethod() {\n"
-                // This calls the overrider, not the original method, so it shouldn't count.
-                + String.format("        return %s();\n", invocation)
-                + "    }\n"
+                    // Make the invoker method global, so it doesn't trip the rule.
+                    + "    global boolean invokerMethod() {\n"
+                    // This calls the overrider, not the original method, so it shouldn't count.
+                    + String.format("        return %s();\n", invocation)
+                    + "    }\n"
                     + "}\n"
         };
-        assertViolations(sourceCodes, v -> {
-            assertEquals("parentMethod", v.getSourceVertexName());
-            assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
-        });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("parentMethod", v.getSourceVertexName());
+                    assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
+                });
     }
 
     /**
-     * If an overridden method is invoked on an instance of a subclass, then the
-     * overridden version of the method on the parent doesn't count as used.
+     * If an overridden method is invoked on an instance of a subclass, then the overridden version
+     * of the method on the parent doesn't count as used.
      */
-    @ValueSource(
-        strings = {
-            "ChildClass",
-            "GrandchildClass"
-        })
+    @ValueSource(strings = {"ChildClass", "GrandchildClass"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void overrideMethodOnInstanceOfSubclass_expectViolation(String instanceType) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                + "    public virtual boolean parentMethod() {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "}\n",
+                    + "    public virtual boolean parentMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                // Make the override global, so it doesn't trip the rule.
-                + "    global override boolean parentMethod() {\n"
-                + "        return false;\n"
-                + "    }\n"
-                + "}\n",
-            "global class GrandchildClass extends ChildClass {\n"
-                + "}\n",
+                    // Make the override global, so it doesn't trip the rule.
+                    + "    global override boolean parentMethod() {\n"
+                    + "        return false;\n"
+                    + "    }\n"
+                    + "}\n",
+            "global class GrandchildClass extends ChildClass {\n" + "}\n",
             "global class InvokerClass {\n"
-                // Make this global, so it doesn't trip the rule.
-                    + String.format("    global boolean invokeMethod(%s instance) {\n", instanceType)
+                    // Make this global, so it doesn't trip the rule.
+                    + String.format(
+                            "    global boolean invokeMethod(%s instance) {\n", instanceType)
                     + "        return instance.parentMethod();\n"
                     + "    }\n"
                     + "}\n"
         };
-        assertViolations(sourceCodes, v -> {
-            assertEquals("parentMethod", v.getSourceVertexName());
-            assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
-        });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("parentMethod", v.getSourceVertexName());
+                    assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
+                });
     }
 
     /* =============== SECTION 9: NEGATIVE CASES W/OVERRIDDEN INVOCATIONS IN SUPERCLASS =============== */
 
     /**
-     * If a superclass internally calls an instance method, that counts as
-     * invoking all overriding versions of that method on subclasses.
-     * Reasoning: This is commonly done with abstract classes especially,
-     *            but using elsewhere isn't unheard of.
+     * If a superclass internally calls an instance method, that counts as invoking all overriding
+     * versions of that method on subclasses. Reasoning: This is commonly done with abstract classes
+     * especially, but using elsewhere isn't unheard of.
      */
     @CsvSource({
         // All four combinations of implicit/explicit `this` on each method, for each parent type.
@@ -964,21 +921,22 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: Parent class {0}; invocation {1}")
     @Disabled
-    public void invocationOfOverriddenInstanceMethodInSuperclass_expectNoViolation(String parentClass, String invocation) {
+    public void invocationOfOverriddenInstanceMethodInSuperclass_expectNoViolation(
+            String parentClass, String invocation) {
         String[] sourceCodes = {
             // Have a virtual class that defines a set of methods.
             "global virtual class VirtualParent {\n"
-                // Make method global, so it can't trip the rule.
+                    // Make method global, so it can't trip the rule.
                     + "    global virtual boolean parentMethod1() {\n"
                     + "        return true;\n"
                     + "    }\n"
-                // Make method global, so it can't trip the rule.
+                    // Make method global, so it can't trip the rule.
                     + "    global virtual boolean parentMethod2() {\n"
                     + "        return true;\n"
                     + "    }\n"
-                // Make method global, so it can't trip the rule.
+                    // Make method global, so it can't trip the rule.
                     + "    global boolean invokerMethod() {\n"
-                // Invoke both virtual methods.
+                    // Invoke both virtual methods.
                     + String.format("        return %s;\n", invocation)
                     + "    }\n"
                     + "}\n",
@@ -995,13 +953,13 @@ public class UnusedMethodRuleTest {
             // Have a child class that extends one of the two available parents. Make it abstract
             // to guarantee compilation in all test cases.
             String.format("global abstract class ChildClass extends %s {\n", parentClass)
-                // The child class overrides one of the parent methods.
+                    // The child class overrides one of the parent methods.
                     + "    public override boolean parentMethod1() {\n"
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                // The grandchild class overrides the other.
+                    // The grandchild class overrides the other.
                     + "    public override boolean parentMethod2() {\n"
                     + "        return false;\n"
                     + "    }\n"
@@ -1011,21 +969,15 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * Calling an instance method on a parent class also counts as calling
-     * all overrides of that method on subclasses.
-     * Reasoning: Particularly with abstract classes, it's frequent for
-     *            something typed as a parent class to actually be an
-     *            instance of the child class.
+     * Calling an instance method on a parent class also counts as calling all overrides of that
+     * method on subclasses. Reasoning: Particularly with abstract classes, it's frequent for
+     * something typed as a parent class to actually be an instance of the child class.
      */
-    @ValueSource(
-        strings = {
-            "InterfaceParent",
-            "VirtualParent",
-            "AbstractParent"
-        })
+    @ValueSource(strings = {"InterfaceParent", "VirtualParent", "AbstractParent"})
     @ParameterizedTest(name = "{displayName}: Parent class {0}")
     @Disabled
-    public void externalInvocationOfOverriddenMethodOnSuperclass_expectNoViolation(String parentClass) {
+    public void externalInvocationOfOverriddenMethodOnSuperclass_expectNoViolation(
+            String parentClass) {
         String[] sourceCodes = {
             // Have an interface that declares some methods.
             "global interface InterfaceParent {\n"
@@ -1049,23 +1001,23 @@ public class UnusedMethodRuleTest {
             // Have a child class that extends a specified parent class. Make it abstract
             // to guarantee compilation.
             String.format("global abstract class ChildClass extends %s {\n", parentClass)
-                // Have the child class extend one of the parent methods.
+                    // Have the child class extend one of the parent methods.
                     + "    public override boolean inheritedMethod1() {\n"
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             // Have a grandchild class that extends the child class.
             "global class GrandchildClass extends ChildClass {\n"
-                // Have the grandchild class extend the other parent method.
+                    // Have the grandchild class extend the other parent method.
                     + "    public override boolean inheritedMethod2() {\n"
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             // Have an unrelated class that uses an instance of a superclass to invoke a method.
             "global class InvokerClass {\n"
-                // Make this method global so it can't trip the rules.
+                    // Make this method global so it can't trip the rules.
                     + String.format("    global boolean doInvocation(%s instance) {\n", parentClass)
-                // Invoke both methods on the instance.
+                    // Invoke both methods on the instance.
                     + "        return instance.inheritedMethod1() && instance.inheritedMethod2();\n"
                     + "    }\n"
                     + "}\n"
@@ -1076,9 +1028,8 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 10: POSITIVE CASES WITH METHOD OVERLOADS =============== */
 
     /**
-     * If there's different overloads of an instance method, then only the ones
-     * that are actually invoked count as used.
-     * Specific case: Methods with different arities.
+     * If there's different overloads of an instance method, then only the ones that are actually
+     * invoked count as used. Specific case: Methods with different arities.
      */
     @CsvSource({
         // Provide the arity of the *other* method, since that's the one that is uncalled.
@@ -1087,7 +1038,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
-    public void callInstanceMethodWithDifferentArityOverloads_expectViolation(String invocation, int arity) {
+    public void callInstanceMethodWithDifferentArityOverloads_expectViolation(
+            String invocation, int arity) {
         String[] sourceCodes = {
             "global class MethodHostClass {\n"
                     + "    public boolean overloadedMethod() {\n"
@@ -1098,23 +1050,23 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {\n"
-                // Make this global, so it can't trigger the rule.
+                    // Make this global, so it can't trigger the rule.
                     + "    global boolean methodInvoker(MethodHostClass instance) {\n"
                     + String.format("        return instance.%s;\n", invocation)
                     + "    }\n"
                     + "}\n"
         };
-        assertViolations(sourceCodes,
-            v -> {
-                assertEquals(v.getSourceVertexName(), "overloadedMethod");
-                assertEquals(((MethodVertex)v.getSourceVertex()).getArity(), arity);
-            });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals(v.getSourceVertexName(), "overloadedMethod");
+                    assertEquals(((MethodVertex) v.getSourceVertex()).getArity(), arity);
+                });
     }
 
     /**
-     * If there's different overloads of an instance method, then only the ones
-     * that are actually invoked count as used.
-     * Specific case: Methods with the same arity, but different signatures.
+     * If there's different overloads of an instance method, then only the ones that are actually
+     * invoked count as used. Specific case: Methods with the same arity, but different signatures.
      */
     @CsvSource({
         // Specify the beginning line of the overload that WASN'T called.
@@ -1123,34 +1075,35 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: overload: {1}")
     @Disabled
-    public void callInstanceMethodWithDifferentSignatureOverloads_expectViolation(String invocation, int beginLine) {
+    public void callInstanceMethodWithDifferentSignatureOverloads_expectViolation(
+            String invocation, int beginLine) {
         String[] sourceCodes = {
             "global class MethodHostClass {\n"
-                + "    public boolean overloadedMethod(Integer i) {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "    public boolean overloadedMethod(boolean b) {\n"
-                + "        return b;\n"
-                + "    }\n"
-                + "}\n",
+                    + "    public boolean overloadedMethod(Integer i) {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "    public boolean overloadedMethod(boolean b) {\n"
+                    + "        return b;\n"
+                    + "    }\n"
+                    + "}\n",
             "global class InvokerClass {\n"
-                // Make this global, so it can't trigger the rule.
-                + "    global boolean methodInvoker(MethodHostClass instance) {\n"
-                + String.format("        return instance.%s;\n", invocation)
-                + "    }\n"
-                + "}\n"
+                    // Make this global, so it can't trigger the rule.
+                    + "    global boolean methodInvoker(MethodHostClass instance) {\n"
+                    + String.format("        return instance.%s;\n", invocation)
+                    + "    }\n"
+                    + "}\n"
         };
-        assertViolations(sourceCodes,
-            v -> {
-            assertEquals(v.getSourceVertexName(), "overloadedMethod");
-            assertEquals(v.getSourceVertex().getBeginLine(), beginLine);
-            });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals(v.getSourceVertexName(), "overloadedMethod");
+                    assertEquals(v.getSourceVertex().getBeginLine(), beginLine);
+                });
     }
 
     /**
-     * If there's different overloads of a constructor, then only the ones
-     * that are actually invoked count as used.
-     * Specific case: Methods with different arities.
+     * If there's different overloads of a constructor, then only the ones that are actually invoked
+     * count as used. Specific case: Methods with different arities.
      */
     @CsvSource({
         // Use the arity of the constructor that ISN'T being called
@@ -1159,7 +1112,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: constructor {0}")
     @Disabled
-    public void callConstructorWithDifferentArityOverloads_expectViolation(String constructor, int arity) {
+    public void callConstructorWithDifferentArityOverloads_expectViolation(
+            String constructor, int arity) {
         String[] sourceCodes = {
             "global class MethodHostClass {\n"
                     + "    public MethodHostClass(boolean b) {\n"
@@ -1168,23 +1122,23 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {"
-                // Make this global, so it can't trigger the rule.
+                    // Make this global, so it can't trigger the rule.
                     + "    global void methodInvoker() {\n"
                     + String.format("        MethodHostClass mhc = %s;\n", constructor)
                     + "    }\n"
                     + "}\n"
         };
-        assertViolations(sourceCodes,
-            v -> {
-                assertEquals(v.getSourceVertexName(), "<init>");
-                assertEquals(((MethodVertex)v.getSourceVertex()).getArity(), arity);
-            });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals(v.getSourceVertexName(), "<init>");
+                    assertEquals(((MethodVertex) v.getSourceVertex()).getArity(), arity);
+                });
     }
 
     /**
-     * If there's different overloads of a constructor, then only the ones
-     * that are actually invoked count as used.
-     * Specific case: Methods with the same arity, but different signatures.
+     * If there's different overloads of a constructor, then only the ones that are actually invoked
+     * count as used. Specific case: Methods with the same arity, but different signatures.
      */
     @CsvSource({
         // Use the arity of the constructor that ISN'T being called
@@ -1193,42 +1147,43 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: constructor {0}")
     @Disabled
-    public void callConstructorWithDifferentSignatureOverloads_expectViolation(String constructor, int beginLine) {
+    public void callConstructorWithDifferentSignatureOverloads_expectViolation(
+            String constructor, int beginLine) {
         String[] sourceCodes = {
             "global class MethodHostClass {\n"
-                + "    public MethodHostClass(boolean b) {\n"
-                + "    }\n"
-                + "    public MethodHostClass(Integer i) {\n"
-                + "    }\n"
-                + "}\n",
+                    + "    public MethodHostClass(boolean b) {\n"
+                    + "    }\n"
+                    + "    public MethodHostClass(Integer i) {\n"
+                    + "    }\n"
+                    + "}\n",
             "global class InvokerClass {"
-                // Make this global, so it can't trigger the rule.
-                + "    global void methodInvoker() {\n"
-                + String.format("        MethodHostClass mhc = %s;\n", constructor)
-                + "    }\n"
-                + "}\n"
+                    // Make this global, so it can't trigger the rule.
+                    + "    global void methodInvoker() {\n"
+                    + String.format("        MethodHostClass mhc = %s;\n", constructor)
+                    + "    }\n"
+                    + "}\n"
         };
-        assertViolations(sourceCodes,
-            v -> {
-                assertEquals("<init>", v.getSourceVertexName());
-                assertEquals(beginLine, ((MethodVertex)v.getSourceVertex()).getArity());
-            });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("<init>", v.getSourceVertexName());
+                    assertEquals(beginLine, ((MethodVertex) v.getSourceVertex()).getArity());
+                });
     }
 
     /* =============== SECTION 11: WEIRD CORNER CASES =============== */
 
     /**
-     * If an outer class has a static method, and its inner class has an
-     * instance method with the same name, then invoking that method
-     * without the `this` keyword should still count as using the instance
-     * method, not the static method.
+     * If an outer class has a static method, and its inner class has an instance method with the
+     * same name, then invoking that method without the `this` keyword should still count as using
+     * the instance method, not the static method.
      */
     @Test
     @Disabled
     public void innerInstanceOverlapsWithOuterStatic_expectViolationForOuter() {
         String[] sourceCodes = {
             "global virtual class ParentClass {"
-                // Declare a static method on the outer class with a certain name.
+                    // Declare a static method on the outer class with a certain name.
                     + "    public static boolean overlappingName() {\n"
                     + "        return true;\n"
                     + "    }\n"
@@ -1236,9 +1191,9 @@ public class UnusedMethodRuleTest {
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
-                // Make this method global, so it can't trip the rule.
+                    // Make this method global, so it can't trip the rule.
                     + "        global boolean invoker() {"
-                // Invoke the instance method without using `this`.
+                    // Invoke the instance method without using `this`.
                     + "            return overlappingName();\n"
                     + "        }\n"
                     + "    }\n"
@@ -1248,26 +1203,27 @@ public class UnusedMethodRuleTest {
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
-                // Make this method global, so it can't trip the rule.
+                    // Make this method global, so it can't trip the rule.
                     + "        global boolean invoker() {\n"
-                // Invoke the instance method without using `this`.
+                    // Invoke the instance method without using `this`.
                     + "            return overlappingName();\n"
                     + "        }\n"
                     + "    }\n"
                     + "}\n"
         };
         // We expect the outer static method to be unused, and both inner methods to be used.
-        assertViolations(sourceCodes, v -> {
-            assertEquals("overlappingName", v.getSourceVertexName());
-            assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
-        });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("overlappingName", v.getSourceVertexName());
+                    assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
+                });
     }
 
     /**
-     * If an outer class defines an inner class, it can reference the class
-     * with just the inner class name instead of the full class name, even
-     * if an unrelated outer class shares the same name.
-     * In this case, the methods invoked are the ones on the inner class.
+     * If an outer class defines an inner class, it can reference the class with just the inner
+     * class name instead of the full class name, even if an unrelated outer class shares the same
+     * name. In this case, the methods invoked are the ones on the inner class.
      */
     @Test
     @Disabled
@@ -1275,92 +1231,97 @@ public class UnusedMethodRuleTest {
         String[] sourceCodes = {
             "global class OuterClass {\n"
                     + "    global class OverlappingNameClass {\n"
-                // Declare a constructor.
+                    // Declare a constructor.
                     + "        public OverlappingNameClass(boolean b) {\n"
                     + "        }\n"
-                // Declare an instance method.
+                    // Declare an instance method.
                     + "        public boolean someMethod() {\n"
                     + "            return true;\n"
                     + "        }\n"
                     + "    }\n"
-                // This method is global, so it can't trip the rule.
+                    // This method is global, so it can't trip the rule.
                     + "    global boolean invokerMethod() {\n"
-                // Invoke the constructor.
+                    // Invoke the constructor.
                     + "        OverlappingNameClass instance = new OverlappingNameClass(true);\n"
-                // Invoke the instance method.
+                    // Invoke the instance method.
                     + "        return instance.someMethod();\n"
                     + "    }\n"
                     + "}\n",
             // Declare another class with the same name as the other class's inner class.
             "global class OverlappingNameClass {\n"
-                // Give it a constructor with the same signature as the inner class.
+                    // Give it a constructor with the same signature as the inner class.
                     + "    public OverlappingNameClass(boolaen b) {\n"
                     + "    }\n"
-                // Give it a method with the same signature as the instance method on the inner class.
+                    // Give it a method with the same signature as the instance method on the inner
+                    // class.
                     + "    public boolean someMethod() {\n"
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n"
         };
         // All methods on the outer class should be unused.
-        assertViolations(sourceCodes, v -> {
-            assertEquals("<init>", v.getSourceVertexName());
-            assertEquals("OverlappingNameClass", v.getSourceDefiningType());
-            assertEquals(1, v.getSourceLineNumber());
-        }, v -> {
-            assertEquals("someMethod", v.getSourceVertexName());
-            assertEquals("OverlappingNameClass", v.getSourceDefiningType());
-            assertEquals(4, v.getSourceLineNumber());
-        });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("<init>", v.getSourceVertexName());
+                    assertEquals("OverlappingNameClass", v.getSourceDefiningType());
+                    assertEquals(1, v.getSourceLineNumber());
+                },
+                v -> {
+                    assertEquals("someMethod", v.getSourceVertexName());
+                    assertEquals("OverlappingNameClass", v.getSourceDefiningType());
+                    assertEquals(4, v.getSourceLineNumber());
+                });
     }
 
     /**
-     * If a variable shares the same name as a wholly unrelated class, and
-     * it has an instance method whose name overlaps with that of a static method
-     * on that other class, then calling `var.theMethod()` invokes the instance
-     * method, not the static one.
-     * So the static method should count as unused.
+     * If a variable shares the same name as a wholly unrelated class, and it has an instance method
+     * whose name overlaps with that of a static method on that other class, then calling
+     * `var.theMethod()` invokes the instance method, not the static one. So the static method
+     * should count as unused.
      */
     @Test
     @Disabled
     public void variableSharesNameWithOtherClass_expectViolation() {
         String[] sourceCodes = {
             "global class MyClass {\n"
-                // Declare a static method.
+                    // Declare a static method.
                     + "    public static boolean someMethod() {\n"
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global class MyOtherClass {\n"
-                // Declare an instance method with the same name as the
-                // other class's static method.
+                    // Declare an instance method with the same name as the
+                    // other class's static method.
                     + "    public boolean someMethod() {\n"
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {\n"
-                // This method is global, so it can't trigger the rule.
-                // Its parameter is an instance of MyOtherClass whose name
-                // is myClass.
+                    // This method is global, so it can't trigger the rule.
+                    // Its parameter is an instance of MyOtherClass whose name
+                    // is myClass.
                     + "    global boolean invokerMethod(MyOtherClass myClass) {\n"
-                // Per manual experimentation, this counts as an invocation of the
-                // instance method, NOT the static method.
+                    // Per manual experimentation, this counts as an invocation of the
+                    // instance method, NOT the static method.
                     + "        return myClass.someMethod();\n"
                     + "    }\n"
                     + "}\n"
         };
-        assertViolations(sourceCodes, v -> {
-           assertEquals("someMethod", v.getSourceVertexName());
-           assertEquals("MyClass", v.getSourceDefiningType());
-        });
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("someMethod", v.getSourceVertexName());
+                    assertEquals("MyClass", v.getSourceDefiningType());
+                });
     }
 
     /* =============== SECTION OMEGA: HELPER METHODS =============== */
     // TODO: LONG-TERM, WE MAY WANT TO MODULARIZE THESE AND PUT THEM IN ANOTHER CLASS FOR REUSE.
 
     /**
-     * Assert that each of the provided method names corresponds to a method
-     * that threw a violation.
+     * Assert that each of the provided method names corresponds to a method that threw a violation.
+     *
      * @param sourceCode - A single source file.
      */
     private void assertViolations(String sourceCode, String... methodNames) {
@@ -1368,8 +1329,8 @@ public class UnusedMethodRuleTest {
     }
 
     /**
-     * Assert that each of the provided method names corresponds to a method
-     * that threw a violation.
+     * Assert that each of the provided method names corresponds to a method that threw a violation.
+     *
      * @param sourceCodes - An array of source files.
      */
     private void assertViolations(String[] sourceCodes, String... methodNames) {
@@ -1387,9 +1348,10 @@ public class UnusedMethodRuleTest {
 
     /**
      * Assert that violations were generated that match the provided checks.
+     *
      * @param sourceCode - A source file.
-     * @param assertions - One or more consumers that perform assertions.
-     *                   The n-th consumer is applied to the n-th violation.
+     * @param assertions - One or more consumers that perform assertions. The n-th consumer is
+     *     applied to the n-th violation.
      */
     private void assertViolations(
             String sourceCode, Consumer<Violation.RuleViolation>... assertions) {
@@ -1398,9 +1360,10 @@ public class UnusedMethodRuleTest {
 
     /**
      * Assert that violations were generated that match the provided checks.
+     *
      * @param sourceCodes - An array of source files.
-     * @param assertions - One or more consumers that perform assertions.
-     *                   The n-th consumer is applied to the n-th violation.
+     * @param assertions - One or more consumers that perform assertions. The n-th consumer is
+     *     applied to the n-th violation.
      */
     private void assertViolations(
             String[] sourceCodes, Consumer<Violation.RuleViolation>... assertions) {
@@ -1417,6 +1380,7 @@ public class UnusedMethodRuleTest {
 
     /**
      * Assert that all methods in the provided source code are used.
+     *
      * @param sourceCode - A source file.
      */
     private void assertNoViolations(String sourceCode) {
@@ -1425,6 +1389,7 @@ public class UnusedMethodRuleTest {
 
     /**
      * Assert that all methods in the provided source codes are used.
+     *
      * @param sourceCodes - An array of source files.
      */
     private void assertNoViolations(String[] sourceCodes) {
