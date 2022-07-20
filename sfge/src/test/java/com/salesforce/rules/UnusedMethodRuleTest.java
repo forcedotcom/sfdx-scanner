@@ -35,7 +35,13 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 1: SIMPLE POSITIVE/NEGATIVE CASES =============== */
 
     /** Obviously unused static/instance methods are unused. */
-    @ValueSource(strings = {"public static", "public"})
+    @ValueSource(strings = {
+        "public static",
+        "public",
+        "protected", // No need for protected static, since those are mutually exclusive.
+        "private static",
+        "private"
+    })
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void outerMethodWithoutInvocation_expectViolation(String methodScope) {
@@ -49,13 +55,19 @@ public class UnusedMethodRuleTest {
     }
 
     /** Obviously unused inner class instance methods are unused. */
-    @Test
+    @ValueSource(
+        strings = {
+            "public",
+            "protected",
+            "private"
+        })
+    @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
-    public void innerInstanceMethodWithoutInvocation_expectViolation() {
+    public void innerInstanceMethodWithoutInvocation_expectViolation(String scope) {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    global class MyInnerClass {\n"
-                        + "        public boolean unusedMethod() {\n"
+                        + String.format("        %s boolean unusedMethod() {\n", scope)
                         + "            return true;\n"
                         + "        }\n"
                         + "    }\n"
@@ -96,7 +108,54 @@ public class UnusedMethodRuleTest {
         assertViolations(sourceCode, assertion);
     }
 
-    /* =============== SECTION 2: NEGATIVE CASES W/PATH ENTRY POINTS =============== */
+    /* =============== SECTION 2: NEGATIVE CASES W/ENGINE DIRECTIVES =============== */
+
+    @Test
+    @Disabled
+    public void applySkipLineDirective_expectNoViolation() {
+        String sourceCode =
+            "public class MyClass {\n"
+                    // Unused static method, annotated with the directive.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public static boolean unusedStaticMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    // Unused instance method, annotated with the directive.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean unusedInstanceMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    // Unused constructor, annotated with the method.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public MyClass () {\n"
+                    + "    }\n"
+                    + "}\n";
+        assertNoViolations(sourceCode);
+    }
+
+
+    @Test
+    @Disabled
+    public void applySkipClassDirective_expectNoViolation() {
+        String sourceCode =
+            "/* sfge-disable UnusedMethodRule */"
+                    + "public class MyClass {\n"
+                    // Unused static method
+                    + "    public static boolean unusedStaticMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    // Unused instance method
+                    + "    public boolean unusedInstanceMethod() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    // Unused constructor
+                    + "    public MyClass () {\n"
+                    + "    }\n"
+                    + "}\n";
+        assertNoViolations(sourceCode);
+    }
+
+    /* =============== SECTION 3: NEGATIVE CASES W/PATH ENTRY POINTS =============== */
     // REASONING: Public-facing entry points probably aren't explicitly invoked within the codebase,
     //            but they're almost definitely used by external sources.
 
@@ -198,46 +257,56 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 3: NEGATIVE CASES W/ABSTRACT METHOD DECLARATION =============== */
+    /* =============== SECTION 4: NEGATIVE CASES W/ABSTRACT METHOD DECLARATION =============== */
     // REASONING: If an interface/class has abstract methods, then subclasses must implement
     //            those methods for the code to compile. And if the interface/class isn't
     //            implemented anywhere, we have separate rules for surfacing that.
 
     /** Abstract methods on abstract classes/interfaces are abstract, and count as used. */
-    @Test
+    @ValueSource(
+        strings = {
+            "public",
+            "protected"
+        })
+    @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
-    public void abstractMethodDeclaration_expectNoViolation() {
+    public void abstractMethodDeclaration_expectNoViolation(String scope) {
         String[] sourceCodes = {
-            "public abstract class MyAbstractClass {\n"
-                    + "    public abstract boolean someMethod();\n"
+            "global abstract class MyAbstractClass {\n"
+                    + String.format("    %s abstract boolean someMethod();\n", scope)
                     + "}\n",
-            "public interface MyInterface {\n" + "    boolean anotherMethod();\n" + "}\n"
+            "global interface MyInterface {\n" + "    boolean anotherMethod();\n" + "}\n"
         };
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 4: NEGATIVE CASE W/INTERNAL CALL =============== */
+    /* =============== SECTION 5: NEGATIVE CASE W/INTERNAL CALL =============== */
 
     /**
      * If a class has static methods that call its other static methods, the called methods count as
      * used.
      */
-    @ValueSource(
-            strings = {
-                "method1", // Invocation with implicit type reference
-                "this.method1", // Invocation with explicit `this` reference
-                "MyClass.method1" // Invocation with explicit class reference
-            })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    // (NOTE: No need for a `protected` case, since methods can't be both
+    // `protected` and `static`.)
+    @CsvSource({
+        "public,  method1", // Invocation with implicit type reference
+        "private,  method1", // Invocation with implicit type reference
+        "public,  this.method1", // Invocation with explicit `this` reference
+        "private,  this.method1", // Invocation with explicit `this` reference
+        "public,  MyClass.method1", // Invocation with explicit class reference
+        "private,  MyClass.method1" // Invocation with explicit class reference
+    })
+    @ParameterizedTest(name = "{displayName}: scope {0}, invocation {1}")
     @Disabled
-    public void staticMethodCalledFromOwnStatic_expectNoViolation(String methodCall) {
+    public void staticMethodCalledFromOwnStatic_expectNoViolation(String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public static boolean method1() {\n"
+                        + String.format("    %s static boolean method1() {\n", scope)
                         + "        return true;\n"
                         + "    }\n"
-                        // Make this method global so that it doesn't trigger the rule.
-                        + "    global static boolean method2() {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public static boolean method2() {\n"
                         + String.format("        return %s();\n", methodCall)
                         + "    }\n"
                         + "}\n";
@@ -248,21 +317,25 @@ public class UnusedMethodRuleTest {
      * If a class has instance methods that call its static methods, those static methods count as
      * used.
      */
-    @ValueSource(
-            strings = {
-                "method1", // Invocation with implicit type reference
-                "MyClass.method1" // Invocation with explicit class reference
-            })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    // (NOTE: No need for a `protected` case, since methods can't be both
+    // `protected` and `static`.)
+    @CsvSource({
+        "public,  method1", // Invocation with implicit type reference
+        "private,  method1", // Invocation with implicit type reference
+        "public,  MyClass.method1", // Invocation with explicit class reference
+        "private,  MyClass.method1" // Invocation with explicit class reference
+    })
+    @ParameterizedTest(name = "{displayName}: method scope {0}, invocation {1}")
     @Disabled
-    public void staticMethodCalledFromOwnInstance_expectNoViolation(String methodCall) {
+    public void staticMethodCalledFromOwnInstanceMethod_expectNoViolation(String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public static boolean method1() {\n"
+                        + String.format("    %s static boolean method1() {\n", scope)
                         + "        return true;\n"
                         + "    }\n"
-                        // Make this method global so that it doesn't trigger the rule.
-                        + "    global boolean method2() {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public boolean method2() {\n"
                         + String.format("        return %s();\n", methodCall)
                         + "    }\n"
                         + "}\n";
@@ -272,22 +345,26 @@ public class UnusedMethodRuleTest {
     /**
      * If an inner class calls its outer class's static methods, those static methods count as used.
      */
-    @ValueSource(
-            strings = {
-                "method1", // Invocation with implicit type reference
-                "MyClass.method1" // Invocation with explicit class reference
-            })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    // (NOTE: No need for a `protected` case, since methods can't be both
+    // `protected` and `static`.)
+    @CsvSource({
+        "public,  method1", // Invocation with implicit type reference
+        "private,  method1", // Invocation with implicit type reference
+        "public,  MyClass.method1", // Invocation with explicit class reference
+        "private,  MyClass.method1" // Invocation with explicit class reference
+    })
+    @ParameterizedTest(name = "{displayName}: scope {0}, invocation {1}")
     @Disabled
-    public void staticMethodCalledFromInnerInstance_expectNoViolation(String methodCall) {
+    public void staticMethodCalledFromInnerInstance_expectNoViolation(String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public static boolean method1() {\n"
+                        + String.format("    %s static boolean method1() {\n", scope)
                         + "        return true;\n"
                         + "    }\n"
                         + "    global class InnerClass1 {\n"
-                        // Make this method global, so it doesn't trigger the rule.
-                        + "        global boolean method2() {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "        /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "        public boolean method2() {\n"
                         + String.format("            return %s();\n", methodCall)
                         + "        }\n"
                         + "    }\n"
@@ -299,21 +376,25 @@ public class UnusedMethodRuleTest {
      * If a class's instance methods call its other instance methods, the called instance methods
      * count as used.
      */
-    @ValueSource(
-            strings = {
-                "method1", // Invocation with implicit this reference
-                "this.method1" // Invocation with explicit this reference
-            })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        "public,  method1", // Invocation with implicit type reference
+        "protected,  method1", // Invocation with implicit type reference
+        "private,  method1", // Invocation with implicit type reference
+        "public,  this.method1", // Invocation with explicit this reference
+        "protected,  this.method1", // Invocation with explicit this reference
+        "private,  this.method1" // Invocation with explicit this reference
+    })
+    @ParameterizedTest(name = "{displayName}: scope {0}, invocation {1}")
     @Disabled
-    public void instanceMethodInternallyCalled_expectNoViolation(String methodCall) {
+    public void instanceMethodInternallyCalled_expectNoViolation(String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public boolean method1() {\n"
+                        + String.format("    %s boolean method1() {\n", scope)
                         + "        return true;\n"
                         + "    }\n"
-                        // Make this method global, so it doesn't trigger the rule.
-                        + "    global boolean method2() {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public boolean method2() {\n"
                         + String.format("        return %s();\n", methodCall)
                         + "    }\n"
                         + "}\n";
@@ -322,22 +403,29 @@ public class UnusedMethodRuleTest {
     }
 
     /** If a class internally calls its own constructor, that constructor counts as used. */
-    @Test
+    @ValueSource(
+        strings = {
+            "public",
+            "protected",
+            "private"
+        })
+    @ParameterizedTest(name = "{displayName}: scope {0}")
     @Disabled
-    public void constructorInternallyCalled_expectNoViolation() {
+    public void constructorInternallyCalled_expectNoViolation(String scope) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public MyClass(boolean b, boolean b2) {\n"
+                        + String.format("    %s MyClass(boolean b, boolean b2) {\n", scope)
                         + "    }\n"
-                        // Make this overloaded constructor global, so it doesn't trigger the rule.
-                        + "    global MyClass(boolean b) {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public MyClass(boolean b) {\n"
                         + "        this(b, true);\n"
                         + "    }\n"
                         + "}\n";
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 5: NEGATIVE CASE W/SIBLING CLASS CALLS =============== */
+    /* =============== SECTION 6: NEGATIVE CASE W/SIBLING CLASS CALLS =============== */
 
     /**
      * If a class has two inner classes, and one inner class's instance methods are invoked by
@@ -345,21 +433,30 @@ public class UnusedMethodRuleTest {
      * method parameter.
      */
     @ValueSource(strings = {"MyClass.MyInner1", "MyInner1"})
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        "public,  MyClass.MyInner1",
+        "protected,  MyClass.MyInner1",
+        "private,  MyClass.MyInner1",
+        "public,  MyInner1",
+        "protected,  MyInner1",
+        "private,  MyInner1"
+    })
+    @ParameterizedTest(name = "{displayName}: method scope {0}, param type {1}")
     @Disabled
     public void innerInstanceMethodCalledFromSiblingViaParameter_expectNoViolation(
-            String paramType) {
+            String scope, String paramType) {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    global class MyInner1 {\n"
-                        + "        public boolean innerMethod1() {\n"
+                        + String.format("        %s boolean innerMethod1() {\n", scope)
                         + "            return true;\n"
                         + "        }\n"
                         + "    }\n"
                         + "    global class MyInner2 {\n"
-                        // Make this global, so it doesn't trigger the rule.
+                    // Use the engine directive to prevent this method from tripping the rule.
+                        + "        /* sfge-disable-next-line UnusedMethodRule */\n"
                         + String.format(
-                                "        global boolean innerMethod2(%s instance) {\n", paramType)
+                                "        public boolean innerMethod2(%s instance) {\n", paramType)
                         + "            return instance.innerMethod1();\n"
                         + "        }\n"
                         + "    }\n"
@@ -374,27 +471,36 @@ public class UnusedMethodRuleTest {
      */
     @CsvSource({
         // The four possible combinations of implicit/explicit outer type reference and
-        // implicit/explicit `this`.
-        "MyClass.MyInner1,  this.instance",
-        "MyClass.MyInner1,  instance",
-        "MyInner1,  this.instance",
-        "MyInner1,  instance",
+        // implicit/explicit `this`, for all three visibility scopes
+        "public,  MyClass.MyInner1,  this.instance",
+        "protected,  MyClass.MyInner1,  this.instance",
+        "private,  MyClass.MyInner1,  this.instance",
+        "public,  MyClass.MyInner1,  instance",
+        "protected,  MyClass.MyInner1,  instance",
+        "private,  MyClass.MyInner1,  instance",
+        "public,  MyInner1,  this.instance",
+        "protected,  MyInner1,  this.instance",
+        "private,  MyInner1,  this.instance",
+        "public,  MyInner1,  instance",
+        "protected,  MyInner1,  instance",
+        "private,  MyInner1,  instance"
     })
-    @ParameterizedTest(name = "{displayName}: Declaration {0}; Reference {1}")
+    @ParameterizedTest(name = "{displayName}: Method scope {0}; Declaration {1}; Reference {2}")
     @Disabled
     public void innerInstanceMethodCalledFromSiblingViaOwnProperty_expectNoViolation(
-            String propType, String propRef) {
+            String scope, String propType, String propRef) {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    global class MyInner1 {\n"
-                        + "        public boolean innerMethod1() {\n"
+                        + String.format("        %s boolean innerMethod1() {\n", scope)
                         + "            return true;\n"
                         + "        }\n"
                         + "    }\n"
                         + "    global class MyInner2() {\n"
                         + String.format("        public %s instance;\n", propType)
-                        // Make this global, so it doesn't trigger the rule.
-                        + "        global boolean innerMethod2 {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                        + "        /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "        public boolean innerMethod2 {\n"
                         + String.format("            return %s.innerMethod1();\n", propRef)
                         + "        }\n"
                         + "    }\n"
@@ -408,31 +514,46 @@ public class UnusedMethodRuleTest {
      * property of outer class.
      */
     @CsvSource({
-        // Two options for implicit/explicit outer type reference for an instance property.
-        "MyClass.MyInner1,  outer.outerProp",
-        "MyInner1,  outer.outerProp",
-        // Four combinations of implicit/explicit outer class references.
-        "static MyClass.MyInner1,  outerProp",
-        "static MyClass.MyInner1,  MyClass.outerProp",
-        "static MyInner1,  outerProp",
-        "static MyInner1, MyClass.outerProp"
+        // Two options for implicit/explicit outer type reference for an instance property,
+        // for each of the three visibility scopes.
+        "public,  MyClass.MyInner1,  outer.outerProp",
+        "protected,  MyClass.MyInner1,  outer.outerProp",
+        "private,  MyClass.MyInner1,  outer.outerProp",
+        "public,  MyInner1,  outer.outerProp",
+        "protected,  MyInner1,  outer.outerProp",
+        "private,  MyInner1,  outer.outerProp",
+        // Four combinations of implicit/explicit outer class references,
+        // for each of the three visibility scopes.
+        "public,  static MyClass.MyInner1,  outerProp",
+        "protected,  static MyClass.MyInner1,  outerProp",
+        "private,  static MyClass.MyInner1,  outerProp",
+        "public,  static MyClass.MyInner1,  MyClass.outerProp",
+        "protected,  static MyClass.MyInner1,  MyClass.outerProp",
+        "private,  static MyClass.MyInner1,  MyClass.outerProp",
+        "public,  static MyInner1,  outerProp",
+        "protected,  static MyInner1,  outerProp",
+        "private,  static MyInner1,  outerProp",
+        "public,  static MyInner1, MyClass.outerProp",
+        "protected,  static MyInner1, MyClass.outerProp",
+        "private,  static MyInner1, MyClass.outerProp"
     })
-    @ParameterizedTest(name = "{displayName}: Declaration {0}; Reference {1}")
+    @ParameterizedTest(name = "{displayName}: Method scope {0}; Declaration {1}; Reference {2}")
     @Disabled
     public void innerInstanceMethodCalledFromSiblingViaOuterProperty_expectNoViolation(
-            String propType, String propRef) {
+            String scope, String propType, String propRef) {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    public %s outerProp", propType)
                         + "    global class MyInner1 {\n"
-                        + "        public boolean innerMethod1() {\n"
+                        + String.format("        %s boolean innerMethod1() {\n", scope)
                         + "            return true;\n"
                         + "        }\n"
                         + "    }\n"
                         + "    global class MyInner2 {\n"
-                        // Make this global, so it doesn't trigger the rule, and give it a param for
-                        // use in some tests.
-                        + "        global boolean innerMethod2(MyClass outer) {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        // Give this method a parameter for some of the tests.
+                        + "        public boolean innerMethod2(MyClass outer) {\n"
                         + String.format("            return %s.innerMethod1();\n", propRef)
                         + "        }\n"
                         + "    }\n"
@@ -446,25 +567,34 @@ public class UnusedMethodRuleTest {
      */
     @CsvSource({
         // Four combinations of explicit/implicit outer class reference between variable declaration
-        // and constructor.
-        "MyClass.MyInner1,  MyClass.MyInner1",
-        "MyClass.MyInner1,  MyInner1",
-        "MyInner1,  MyClass.MyInner1",
-        "MyInner1,  MyInner1",
+        // and constructor, for each of the three visibility scopes.
+        "public,  MyClass.MyInner1,  MyClass.MyInner1",
+        "protected,  MyClass.MyInner1,  MyClass.MyInner1",
+        "private,  MyClass.MyInner1,  MyClass.MyInner1",
+        "public,  MyClass.MyInner1,  MyInner1",
+        "protected,  MyClass.MyInner1,  MyInner1",
+        "private,  MyClass.MyInner1,  MyInner1",
+        "public,  MyInner1,  MyClass.MyInner1",
+        "protected,  MyInner1,  MyClass.MyInner1",
+        "private,  MyInner1,  MyClass.MyInner1",
+        "public,  MyInner1,  MyInner1",
+        "protected,  MyInner1,  MyInner1",
+        "private,  MyInner1,  MyInner1",
     })
-    @ParameterizedTest(name = "{displayName}: Var type {0}; Constructor {1}")
+    @ParameterizedTest(name = "{displayName}: Method scope {0}; Var type {1}; Constructor {2}")
     @Disabled
     public void innerConstructorCalledFromSibling_expectNoViolation(
-            String varType, String constructor) {
+            String scope, String varType, String constructor) {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    global class MyInner1 {\n"
-                        + "        public MyInner1(boolean b) {\n"
+                        + String.format("        %s MyInner1(boolean b) {\n", scope)
                         + "        }\n"
                         + "    }\n"
                         + "    global class MyInner2 {\n"
-                        // Make this constructor global, so it doesn't trip the rule.
-                        + "        global MyInner2() {\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "        /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "        public MyInner2() {\n"
                         + String.format(
                                 "            %s instance = new %s(true);\n", varType, constructor)
                         + "        }\n"
@@ -473,7 +603,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 6: NEGATIVE CASES W/EXTERNAL CALLS =============== */
+    /* =============== SECTION 7: NEGATIVE CASES W/EXTERNAL CALLS =============== */
 
     /**
      * If a class has static methods, and those methods are invoked by another class, then they
@@ -489,8 +619,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokingClass {\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global boolean anotherMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean anotherMethod() {\n"
                     + "        return DefiningClass.someMethod();\n"
                     + "    }\n"
                     + "}\n"
@@ -562,8 +693,9 @@ public class UnusedMethodRuleTest {
             String objectInstance) {
         String[] sourceCodes = {
             "global class DefiningClass {\n"
-                    // Make the constructor global, so it doesn't trip the rule.
-                    + "    global DefiningClass() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public DefiningClass() {\n"
                     + "    }\n"
                     + "    public boolean testedMethod() {\n"
                     + "        return true;\n"
@@ -572,28 +704,33 @@ public class UnusedMethodRuleTest {
             "global class MiddlemanClass {\n"
                     + "    public DefiningClass instanceMiddlemanProperty;\n"
                     + "    public static DefiningClass staticMiddlemanProperty;\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global DefiningClass instanceMiddlemanMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public DefiningClass instanceMiddlemanMethod() {\n"
                     + "        return new DefiningClass();\n"
                     + "    }\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global static DefiningClass staticMiddlemanMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public static DefiningClass staticMiddlemanMethod() {\n"
                     + "        return new DefiningClass();\n"
                     + "    }\n"
                     + "}\n",
             "global class InvokingClass {\n"
                     + "    public DefiningClass instanceProp;"
                     + "    public static DefiningClass staticProp;"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global DefiningClass instanceMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public DefiningClass instanceMethod() {\n"
                     + "        return new DefiningClass();\n"
                     + "    }\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global static DefiningClass staticMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public static DefiningClass staticMethod() {\n"
                     + "        return new DefiningClass();\n"
                     + "    }\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global boolean anotherMethod(DefiningClass directParam, MiddlemanClass middlemanParam) {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean anotherMethod(DefiningClass directParam, MiddlemanClass middlemanParam) {\n"
                     + "        DefiningClass directVariable = new DefiningClass();\n"
                     + "        MiddlemanClass middlemanVariable = new MiddlemanClass();\n"
                     + String.format("        return %s.testedMethod();\n", objectInstance)
@@ -619,8 +756,9 @@ public class UnusedMethodRuleTest {
                     + String.format("    public DefiningClass%s {\n", definingParams)
                     + "    }\n",
             "global class InvokingClass {\n"
-                    // Make this global, so it can't trip the rule.
-                    + "    global boolean someMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean someMethod() {\n"
                     + String.format("        return new DefiningClass%s.prop;\n", invokingParams)
                     + "    }\n"
                     + "}\n"
@@ -628,14 +766,16 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 7: NEGATIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
+    /* =============== SECTION 8: NEGATIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
      * If a subclass invokes a static method on its parent class, then that method counts as used.
      */
+    // (NOTE: No need for a `protected` case, since methods can't be both
+    // `protected` and `static`.)
     @CsvSource({
         // Invocation in static method, with implicit/explicit `this`,
-        // and explicit references to the parent and child classes.
+        // and explicit references to the parent and child classes
         "static boolean,  this.staticMethod()",
         "static boolean,  staticMethod()",
         "static boolean,  ParentClass.staticMethod()",
@@ -655,8 +795,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class ChildClass extends ParentClass {\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + String.format("    global %s invokingMethod() {\n", invokerScope)
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + String.format("    public %s invokingMethod() {\n", invokerScope)
                     + String.format("        return %s;\n", invocation)
                     + "    }\n"
                     + "}\n"
@@ -668,6 +809,8 @@ public class UnusedMethodRuleTest {
      * If a subclass's inner class invokes a static method on the parent class, then that method
      * counts as used.
      */
+    // (NOTE: No need for a `protected` case, since methods can't be both
+    // `protected` and `static`.)
     @ValueSource(
             strings = {"staticMethod()", "ParentClass.staticMethod()", "ChildClass.staticMethod()"})
     @ParameterizedTest(name = "{displayName}: {0}")
@@ -681,7 +824,9 @@ public class UnusedMethodRuleTest {
                     + "}\n",
             "global class ChildClass extends ParentClass {\n"
                     + "    global class InnerClass {\n"
-                    + "        global boolean invokingMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "        public boolean invokingMethod() {\n"
                     + String.format("            return %s;\n", invocation)
                     + "        }\n"
                     + "    }\n"
@@ -695,32 +840,39 @@ public class UnusedMethodRuleTest {
      * methods count as used.
      */
     @CsvSource({
-        "parentMethod1,  parentMethod2",
-        "this.parentMethod1,  this.parentMethod2",
-        "super.parentMethod1,  super.parentMethod2"
+        // Implicit/explicit `this`, and `super`, for each of the two relevant
+        // visibility scopes.
+        "public,  parentMethod1,  parentMethod2",
+        "protected,  parentMethod1,  parentMethod2",
+        "public,  this.parentMethod1,  this.parentMethod2",
+        "protected,  this.parentMethod1,  this.parentMethod2",
+        "public,  super.parentMethod1,  super.parentMethod2",
+        "protected,  super.parentMethod1,  super.parentMethod2"
     })
-    @ParameterizedTest(name = "{displayName}: {0}, {1}")
+    @ParameterizedTest(name = "{displayName}: method scopes {0}, method 1 reference {1}, method 2 reference {2}")
     @Disabled
     public void instanceMethodInvokedWithinNonOverridingSubclass_expectNoViolation(
-            String method1Reference, String method2Reference) {
+            String scope, String method1Reference, String method2Reference) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + "    public boolean parentMethod1() {\n"
+                    + String.format("    %s boolean parentMethod1() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
-                    + "    public boolean parentMethod2() {\n"
+                    + String.format("    %s boolean parentMethod2() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                    // Make this global, so it can't trip the rule.
-                    + "    global boolean childMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean childMethod() {\n"
                     + String.format("        return %s();\n", method1Reference)
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                    // Make this global, so it can't trip the rule.
-                    + "    global boolean grandchildMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean grandchildMethod() {\n"
                     + String.format("        return %s();\n", method2Reference)
                     + "    }\n"
                     + "}\n"
@@ -732,22 +884,30 @@ public class UnusedMethodRuleTest {
      * If a subclass inherits a method from a parent without overriding it, and that method is
      * called on an instance of the subclass, then the parent method counts as used.
      */
-    @ValueSource(strings = {"ChildClass", "GrandchildClass"})
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        // Both the child and grandchild classes, for each of the two
+        // relevant visibility scopes.
+        "public,  ChildClass",
+        "protected,  ChildClass",
+        "public,  GrandchildClass",
+        "protected,  GrandchildClass",
+    })
+    @ParameterizedTest(name = "{displayName}: method scope {0}, invoking class {1}")
     @Disabled
     public void instanceMethodInvokedOnInstanceOfNonOverridingSubclass_expectNoViolation(
-            String subclass) {
+            String scope, String subclass) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + "    public boolean parentMethod() {\n"
+                    + String.format("    %s boolean parentMethod() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n}\n",
             "global class GrandchildClass extends ChildClass {\n}\n",
             "global class InvokerClass {\n"
-                    // Make this global, so it can't trip the rule.
-                    + String.format("    global boolean invokerMethod(%s instance) {\n", subclass)
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + String.format("    public boolean invokerMethod(%s instance) {\n", subclass)
                     + "        return instance.parentMethod();\n"
                     + "    }\n"
                     + "}\n"
@@ -759,36 +919,42 @@ public class UnusedMethodRuleTest {
      * If a subclass overrides an inherited method, but calls the `super` version of that method,
      * the parent method counts as used.
      */
-    @Test
+    @ValueSource(
+        strings = {"public", "protected"})
+    @ParameterizedTest(name = "{displayName}: method scope {0}")
     @Disabled
-    public void instanceMethodInvokedViaSuperInOverridingSubclass_expectNoViolation() {
+    public void instanceMethodInvokedViaSuperInOverridingSubclass_expectNoViolation(String scope) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + "    public virtual boolean parentMethod1() {\n"
+                    + String.format("    %s virtual boolean parentMethod1() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
-                    + "    public virtual boolean parentMethod2() {\n"
+                    + String.format("    %s virtual boolean parentMethod2() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                    // Make the method override global, so it doesn't trip the rule.
-                    + "    global override boolean parentMethod1() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public override boolean parentMethod1() {\n"
                     + "        return false;\n"
                     + "    }\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global boolean childMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean childMethod() {\n"
                     // Invoke the super version instead of the override version.
                     + "        return super.parentMethod1();\n"
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                    // Make the override global, so it doesn't trip the rule.
-                    + "    global override boolean parentMethod2() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public override boolean parentMethod2() {\n"
                     + "        return false;\n"
                     + "    }\n"
-                    // Make this method global, so it doesn't trip the rule.
-                    + "    global boolean grandchildMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean grandchildMethod() {\n"
                     // Invoke the super version instead of the override version.
                     + "        return super.parentMethod2();\n"
                     + "    }\n"
@@ -801,19 +967,25 @@ public class UnusedMethodRuleTest {
      * If subclass's constructor calls a `super` constructor, the relevant parent constructor counts
      * as used. (Note: Tests for both explicitly-declared 0-arity and 1-arity constructors.)
      */
-    @CsvSource({"(),  ()", "(boolean b),  (b)"})
-    @ParameterizedTest(name = "{displayName}: constructor super{0}")
+    @CsvSource({
+        "public,  (),  ()",
+        "protected,  (),  ()",
+        "public,  (boolean b),  (b)",
+        "protected,  (boolean b),  (b)"
+    })
+    @ParameterizedTest(name = "{displayName}: scope {0}; signature{1}")
     @Disabled
     public void constructorInvokedViaSuperInSubclass_expectNoViolation(
-            String paramTypes, String invocationArgs) {
+            String scope, String paramTypes, String invocationArgs) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + String.format("    public ParentClass%s {\n", paramTypes)
+                    + String.format("    %s ParentClass%s {\n", scope, paramTypes)
                     + "    }\n"
                     + "}\n",
             "global class ChildClass extends ParentClass {\n"
-                    // Make constructor global, so it doesn't trip the rule.
-                    + String.format("    global ChildClass%s {\n", paramTypes)
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + String.format("    public ChildClass%s {\n", paramTypes)
                     + String.format("        super%s;\n", invocationArgs)
                     + "    }\n"
                     + "}\n"
@@ -821,36 +993,46 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 8: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
+    /* =============== SECTION 9: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
-     * If a subclass overrides an inherited method and calls the overriding version, then the
-     * overridden original method on the parent doesn't count as used.
+     * If a subclass overrides an inherited method and calls its own version of the method
+     * rather than the `super`, then the original parent method doesn't count as used.
      */
-    @ValueSource(strings = {"this.parentMethod", "parentMethod"})
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        // Implicit/explicit `this`, for each of the two relevant
+        // visibility scopes.
+        "public,  this.parentMethod",
+        "protected,  this.parentMethod",
+        "public,  parentMethod",
+        "protected,  parentMethod",
+    })
+    @ParameterizedTest(name = "{displayName}: method scope {0}, method reference {1}")
     @Disabled
-    public void overrideMethodInSubclass_expectViolation(String invocation) {
+    public void overrideMethodInSubclass_expectViolation(String scope, String invocation) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + "    public virtual boolean parentMethod() {\n"
+                    + String.format("    %s virtual boolean parentMethod() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                    // Make the override global, so it doesn't trip the rule.
-                    + "    global override boolean parentMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public override boolean parentMethod() {\n"
                     + "        return false;\n"
                     + "    }\n"
-                    // Make the invoker method global, so it doesn't trip the rule.
-                    + "    global boolean invokerMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean invokerMethod() {\n"
                     // This calls the overrider, not the original method, so it shouldn't count.
                     + String.format("        return %s();\n", invocation)
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
-                    // Make the invoker method global, so it doesn't trip the rule.
-                    + "    global boolean invokerMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean invokerMethod() {\n"
                     // This calls the overrider, not the original method, so it shouldn't count.
                     + String.format("        return %s();\n", invocation)
                     + "    }\n"
@@ -868,27 +1050,35 @@ public class UnusedMethodRuleTest {
      * If an overridden method is invoked on an instance of a subclass, then the overridden version
      * of the method on the parent doesn't count as used.
      */
-    @ValueSource(strings = {"ChildClass", "GrandchildClass"})
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @CsvSource({
+        // Child/Grandchild class, for each of the two relevant visibility scopes.
+        "public,  ChildClass",
+        "protected,  ChildClass",
+        "public,  GrandchildClass",
+        "protected,  GrandchildClass",
+    })
+    @ParameterizedTest(name = "{displayName}: method visibility {0}, instance type {1}")
     @Disabled
-    public void overrideMethodOnInstanceOfSubclass_expectViolation(String instanceType) {
+    public void overrideMethodOnInstanceOfSubclass_expectViolation(String scope, String instanceType) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
-                    + "    public virtual boolean parentMethod() {\n"
+                    + String.format("    %s virtual boolean parentMethod() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             "global virtual class ChildClass extends ParentClass {\n"
-                    // Make the override global, so it doesn't trip the rule.
-                    + "    global override boolean parentMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public override boolean parentMethod() {\n"
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n" + "}\n",
             "global class InvokerClass {\n"
-                    // Make this global, so it doesn't trip the rule.
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
                     + String.format(
-                            "    global boolean invokeMethod(%s instance) {\n", instanceType)
+                            "    public boolean invokeMethod(%s instance) {\n", instanceType)
                     + "        return instance.parentMethod();\n"
                     + "    }\n"
                     + "}\n"
@@ -901,7 +1091,7 @@ public class UnusedMethodRuleTest {
                 });
     }
 
-    /* =============== SECTION 9: NEGATIVE CASES W/OVERRIDDEN INVOCATIONS IN SUPERCLASS =============== */
+    /* =============== SECTION 10: NEGATIVE CASES W/OVERRIDDEN INVOCATIONS IN SUPERCLASS =============== */
 
     /**
      * If a superclass internally calls an instance method, that counts as invoking all overriding
@@ -909,43 +1099,62 @@ public class UnusedMethodRuleTest {
      * especially, but using elsewhere isn't unheard of.
      */
     @CsvSource({
-        // All four combinations of implicit/explicit `this` on each method, for each parent type.
-        "VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
-        "VirtualParent,  'this.parentMethod1() && parentMethod2()",
-        "VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
-        "VirtualParent,  'parentMethod1() && parentMethod2()",
-        "AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
-        "AbstractParent,  'this.parentMethod1() && parentMethod2()",
-        "AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
-        "AbstractParent,  'parentMethod1() && parentMethod2()",
+        // All four combinations of implicit/explicit `this` on each method, for each parent type,
+        // for each of the two relevant visibility scopes.
+        "public,  VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
+        "protected,  VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
+        "public,  VirtualParent,  'this.parentMethod1() && parentMethod2()",
+        "protected,  VirtualParent,  'this.parentMethod1() && parentMethod2()",
+        "public,  VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
+        "protected,  VirtualParent,  'this.parentMethod1() && this.parentMethod2()",
+        "public,  VirtualParent,  'parentMethod1() && parentMethod2()",
+        "protected,  VirtualParent,  'parentMethod1() && parentMethod2()",
+        "public,  AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
+        "protected,  AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
+        "public,  AbstractParent,  'this.parentMethod1() && parentMethod2()",
+        "protected,  AbstractParent,  'this.parentMethod1() && parentMethod2()",
+        "public,  AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
+        "protected,  AbstractParent,  'this.parentMethod1() && this.parentMethod2()",
+        "public,  AbstractParent,  'parentMethod1() && parentMethod2()",
+        "protected,  AbstractParent,  'parentMethod1() && parentMethod2()",
     })
-    @ParameterizedTest(name = "{displayName}: Parent class {0}; invocation {1}")
+    @ParameterizedTest(name = "{displayName}: Method scope {0}; Parent class {1}; invocation {2}")
     @Disabled
     public void invocationOfOverriddenInstanceMethodInSuperclass_expectNoViolation(
-            String parentClass, String invocation) {
+            String scope, String parentClass, String invocation) {
         String[] sourceCodes = {
             // Have a virtual class that defines a set of methods.
             "global virtual class VirtualParent {\n"
-                    // Make method global, so it can't trip the rule.
-                    + "    global virtual boolean parentMethod1() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    // The super method needs to be at least as visible as its override,
+                    // or else the code won't compile.
+                    + String.format("    %s virtual boolean parentMethod1() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
-                    // Make method global, so it can't trip the rule.
-                    + "    global virtual boolean parentMethod2() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    // The super method needs to be at least as visible as its override,
+                    // or else the code won't compile.
+                    + String.format("    %s virtual boolean parentMethod2() {\n", scope)
                     + "        return true;\n"
                     + "    }\n"
-                    // Make method global, so it can't trip the rule.
-                    + "    global boolean invokerMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean invokerMethod() {\n"
                     // Invoke both virtual methods.
                     + String.format("        return %s;\n", invocation)
                     + "    }\n"
                     + "}\n",
             // Have an abstract class that defines the same set of methods.
             "global abstract class AbstractParent {\n"
-                    + "    global abstract boolean parentMethod1();\n"
-                    + "    global abstract boolean parentMethod2();\n"
-                    // Make method global, so it can't trip the rule.
-                    + "    global boolean invokerMethod() {\n"
+                    // The super methods need to be at least as visible as their overrides,
+                    // or else the code won't compile.
+                    + String.format("    %s abstract boolean parentMethod1();\n", scope)
+                    + String.format("    %s abstract boolean parentMethod2();\n", scope)
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean invokerMethod() {\n"
                     // Invoke both abstract methods.
                     + String.format("        return %s() && %s();\n", invocation)
                     + "    }\n"
@@ -954,13 +1163,13 @@ public class UnusedMethodRuleTest {
             // to guarantee compilation in all test cases.
             String.format("global abstract class ChildClass extends %s {\n", parentClass)
                     // The child class overrides one of the parent methods.
-                    + "    public override boolean parentMethod1() {\n"
+                    + String.format("    %s override boolean parentMethod1() {\n", scope)
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n",
             "global class GrandchildClass extends ChildClass {\n"
                     // The grandchild class overrides the other.
-                    + "    public override boolean parentMethod2() {\n"
+                    + String.format("    %s override boolean parentMethod2() {\n", scope)
                     + "        return false;\n"
                     + "    }\n"
                     + "}\n"
@@ -981,22 +1190,26 @@ public class UnusedMethodRuleTest {
         String[] sourceCodes = {
             // Have an interface that declares some methods.
             "global interface InterfaceParent {\n"
-                    + "    global boolean inheritedMethod1();\n"
-                    + "    global boolean inheritedMethod2();\n"
+                    + "    public boolean inheritedMethod1();\n"
+                    + "    public boolean inheritedMethod2();\n"
                     + "}\n",
             // Have a virtual class that declares the same methods.
             "global virtual class VirtualParent {\n"
-                    + "    global virtual boolean inheritedMethod1() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public virtual boolean inheritedMethod1() {\n"
                     + "        return true;\n\n"
                     + "    }\n"
-                    + "    global virtual boolean inheritedMethod2() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public virtual boolean inheritedMethod2() {\n"
                     + "        return true;\n"
                     + "    }\n"
                     + "}\n",
             // have an abstract class that declares the same methods.
             "global abstract class AbstractParent {\n"
-                    + "    global abstract boolean inheritedMethod1();\n"
-                    + "    global abstract boolean inheritedMethod2();\n"
+                    + "    public abstract boolean inheritedMethod1();\n"
+                    + "    public abstract boolean inheritedMethod2();\n"
                     + "}\n",
             // Have a child class that extends a specified parent class. Make it abstract
             // to guarantee compilation.
@@ -1015,8 +1228,9 @@ public class UnusedMethodRuleTest {
                     + "}\n",
             // Have an unrelated class that uses an instance of a superclass to invoke a method.
             "global class InvokerClass {\n"
-                    // Make this method global so it can't trip the rules.
-                    + String.format("    global boolean doInvocation(%s instance) {\n", parentClass)
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + String.format("    public boolean doInvocation(%s instance) {\n", parentClass)
                     // Invoke both methods on the instance.
                     + "        return instance.inheritedMethod1() && instance.inheritedMethod2();\n"
                     + "    }\n"
@@ -1025,7 +1239,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 10: POSITIVE CASES WITH METHOD OVERLOADS =============== */
+    /* =============== SECTION 11: POSITIVE CASES WITH METHOD OVERLOADS =============== */
 
     /**
      * If there's different overloads of an instance method, then only the ones that are actually
@@ -1050,8 +1264,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {\n"
-                    // Make this global, so it can't trigger the rule.
-                    + "    global boolean methodInvoker(MethodHostClass instance) {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean methodInvoker(MethodHostClass instance) {\n"
                     + String.format("        return instance.%s;\n", invocation)
                     + "    }\n"
                     + "}\n"
@@ -1087,8 +1302,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {\n"
-                    // Make this global, so it can't trigger the rule.
-                    + "    global boolean methodInvoker(MethodHostClass instance) {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean methodInvoker(MethodHostClass instance) {\n"
                     + String.format("        return instance.%s;\n", invocation)
                     + "    }\n"
                     + "}\n"
@@ -1122,8 +1338,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {"
-                    // Make this global, so it can't trigger the rule.
-                    + "    global void methodInvoker() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public void methodInvoker() {\n"
                     + String.format("        MethodHostClass mhc = %s;\n", constructor)
                     + "    }\n"
                     + "}\n"
@@ -1157,8 +1374,9 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {"
-                    // Make this global, so it can't trigger the rule.
-                    + "    global void methodInvoker() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public void methodInvoker() {\n"
                     + String.format("        MethodHostClass mhc = %s;\n", constructor)
                     + "    }\n"
                     + "}\n"
@@ -1171,7 +1389,7 @@ public class UnusedMethodRuleTest {
                 });
     }
 
-    /* =============== SECTION 11: WEIRD CORNER CASES =============== */
+    /* =============== SECTION 12: WEIRD CORNER CASES =============== */
 
     /**
      * If an outer class has a static method, and its inner class has an instance method with the
@@ -1191,8 +1409,9 @@ public class UnusedMethodRuleTest {
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
-                    // Make this method global, so it can't trip the rule.
-                    + "        global boolean invoker() {"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "        /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "        public boolean invoker() {"
                     // Invoke the instance method without using `this`.
                     + "            return overlappingName();\n"
                     + "        }\n"
@@ -1203,8 +1422,9 @@ public class UnusedMethodRuleTest {
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
-                    // Make this method global, so it can't trip the rule.
-                    + "        global boolean invoker() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "        /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "        public boolean invoker() {\n"
                     // Invoke the instance method without using `this`.
                     + "            return overlappingName();\n"
                     + "        }\n"
@@ -1239,8 +1459,9 @@ public class UnusedMethodRuleTest {
                     + "            return true;\n"
                     + "        }\n"
                     + "    }\n"
-                    // This method is global, so it can't trip the rule.
-                    + "    global boolean invokerMethod() {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    + "    public boolean invokerMethod() {\n"
                     // Invoke the constructor.
                     + "        OverlappingNameClass instance = new OverlappingNameClass(true);\n"
                     // Invoke the instance method.
@@ -1298,10 +1519,11 @@ public class UnusedMethodRuleTest {
                     + "    }\n"
                     + "}\n",
             "global class InvokerClass {\n"
-                    // This method is global, so it can't trigger the rule.
-                    // Its parameter is an instance of MyOtherClass whose name
-                    // is myClass.
-                    + "    global boolean invokerMethod(MyOtherClass myClass) {\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                    // This method's param parameter is an instance of MyOtherClass
+                    // whose name is myClass.
+                    + "    public boolean invokerMethod(MyOtherClass myClass) {\n"
                     // Per manual experimentation, this counts as an invocation of the
                     // instance method, NOT the static method.
                     + "        return myClass.someMethod();\n"
@@ -1393,7 +1615,7 @@ public class UnusedMethodRuleTest {
      * @param sourceCodes - An array of source files.
      */
     private void assertNoViolations(String[] sourceCodes) {
-        TestUtil.buildGraph(g, sourceCodes, true);
+        TestUtil.buildGraph(g, sourceCodes, false);
 
         AbstractStaticRule rule = UnusedMethodRule.getInstance();
         List<Violation> violations = rule.run(g);
