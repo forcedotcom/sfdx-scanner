@@ -1,13 +1,12 @@
 package com.salesforce.graph.build;
 
-import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,10 +25,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 abstract class AbstractApexVertexBuilder {
     private static final Logger LOGGER = LogManager.getLogger(AbstractApexVertexBuilder.class);
-    protected static final Set<String> ROOT_VERTICES =
-            ImmutableSet.<String>builder()
-                    .addAll(Arrays.asList(ASTConstants.NodeType.ROOT_VERTICES))
-                    .build();
     protected final GraphTraversalSource g;
 
     protected AbstractApexVertexBuilder(GraphTraversalSource g) {
@@ -65,30 +60,48 @@ abstract class AbstractApexVertexBuilder {
             // The engine assumes that only certain types of nodes can be roots. We need to enforce
             // that assumption and
             // fail noisily if it's violated.
-            if (!ROOT_VERTICES.contains(vNode.label())) {
+            if (!GremlinUtil.ROOT_VERTICES.contains(vNode.label())) {
                 throw new UnexpectedException("Unexpected root vertex of type " + vNode.label());
             }
             vNode.property(Schema.FILE_NAME, fileName);
         }
 
         Vertex vPreviousSibling = null;
-        for (JorjeNode child : node.getChildren()) {
-            Vertex vChild = g.addV(child.getLabel()).next();
+        final List<JorjeNode> children = node.getChildren();
+        final Set<Vertex> verticesAddressed = new HashSet<>();
+        verticesAddressed.add(vNode);
+
+        for (int i = 0; i < children.size(); i++) {
+            final JorjeNode child = children.get(i);
+            final Vertex vChild = g.addV(child.getLabel()).next();
             addProperties(g, child, vChild);
-            // We are currently adding PARENT and CHILD, in theory the same edge could be navigated
-            // both ways, however
-            // the code looks messy when that is done.
-            // TODO: Determine if this causes performance or resource issues. Consider a single edge
-            g.addE(Schema.PARENT).from(vChild).to(vNode).iterate();
-            g.addE(Schema.CHILD).from(vNode).to(vChild).iterate();
+
+            /**
+             * Handle static block if we are looking at a <clinit> method that has a block
+             * statement. See {@linkplain StaticBlockUtil} on why this is needed and how we handle
+             * it.
+             */
+            if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
+                final Vertex parentVertexForChild =
+                        StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);
+                GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
+                verticesAddressed.add(parentVertexForChild);
+            } else {
+                GremlinVertexUtil.addParentChildRelationship(g, vNode, vChild);
+            }
+
             if (vPreviousSibling != null) {
                 g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
             }
             vPreviousSibling = vChild;
+
             // To save memory in the graph, don't pass the source name into recursive calls.
             buildVertices(child, vChild, null);
         }
-        afterInsert(g, node, vNode);
+        // Execute afterInsert() on each vertex we addressed
+        for (Vertex vertex : verticesAddressed) {
+            afterInsert(g, node, vertex);
+        }
         if (rootVNode != null) {
             // Only call this for the root node
             afterFileInsert(g, rootVNode);
@@ -101,6 +114,8 @@ abstract class AbstractApexVertexBuilder {
      */
     private final void afterInsert(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
         if (node.getLabel().equals(ASTConstants.NodeType.METHOD)) {
+            // If we just added a method, create forward and
+            // backward code flow for the contents of the method
             MethodPathBuilderVisitor.apply(g, vNode);
         }
     }
@@ -111,7 +126,9 @@ abstract class AbstractApexVertexBuilder {
      * @param vNode root node that corresponds to the file
      */
     protected void afterFileInsert(GraphTraversalSource g, Vertex vNode) {
-        // Intentionally left blank
+        // If the root (class/trigger/etc) contained any static blocks,
+        // create an invoker method to invoke the static blocks
+        StaticBlockUtil.createSyntheticStaticBlockInvocation(g, vNode);
     }
 
     protected void addProperties(GraphTraversalSource g, JorjeNode node, Vertex vNode) {
@@ -122,11 +139,12 @@ abstract class AbstractApexVertexBuilder {
             String key = entry.getKey();
             Object value = entry.getValue();
             value = adjustPropertyValue(node, key, value);
-            addProperty(previouslyInsertedKeys, traversal, key, value);
+            GremlinVertexUtil.addProperty(previouslyInsertedKeys, traversal, key, value);
         }
 
         for (Map.Entry<String, Object> entry : getAdditionalProperties(node).entrySet()) {
-            addProperty(previouslyInsertedKeys, traversal, entry.getKey(), entry.getValue());
+            GremlinVertexUtil.addProperty(
+                    previouslyInsertedKeys, traversal, entry.getKey(), entry.getValue());
         }
 
         // Commit the changes.
@@ -141,50 +159,5 @@ abstract class AbstractApexVertexBuilder {
     /** Add additional properties to the node that aren't present in the orginal AST */
     protected Map<String, Object> getAdditionalProperties(JorjeNode node) {
         return new HashMap<>();
-    }
-
-    /** Add a property to the traversal, throwing an exception if any keys are duplicated. */
-    protected void addProperty(
-            TreeSet<String> previouslyInsertedKeys,
-            GraphTraversal<Vertex, Vertex> traversal,
-            String keyParam,
-            Object value) {
-        final String key = keyParam.intern();
-
-        if (!previouslyInsertedKeys.add(key)) {
-            throw new UnexpectedException(key);
-        }
-
-        if (value instanceof List) {
-            List list = (List) value;
-            // Convert ArrayList to an Array. There seems to be a Tinkerpop bug where a singleton
-            // ArrayList
-            // isn't properly stored. Remote graphs also have issues with empty lists, so don't add
-            // an empty list.
-            if (!list.isEmpty()) {
-                traversal.property(key, list.toArray());
-            } else {
-                // return so that we don't store a case insensitive version
-                return;
-            }
-        } else if (value instanceof Boolean
-                || value instanceof Double
-                || value instanceof Integer
-                || value instanceof Long
-                || value instanceof String) {
-            traversal.property(key, value);
-        } else {
-            if (value != null) {
-                if (!(value instanceof Enum)) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn(
-                                "Using string for value. type=" + value.getClass().getSimpleName());
-                    }
-                }
-                final String strValue = String.valueOf(value).intern();
-                traversal.property(key, strValue);
-            }
-        }
-        CaseSafePropertyUtil.addCaseSafeProperty(traversal, key, value);
     }
 }

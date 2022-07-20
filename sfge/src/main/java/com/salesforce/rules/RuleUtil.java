@@ -59,8 +59,18 @@ public final class RuleUtil {
         if (!fileLevelTargets.isEmpty() || targets.isEmpty()) {
             // Use the file-level targets to get aura-enabled methods...
             methods.addAll(MethodUtil.getAuraEnabledMethods(g, fileLevelTargets));
+            // ...and NamespaceAccessible methods...
+            methods.addAll(MethodUtil.getNamespaceAccessibleMethods(g, fileLevelTargets));
+            // ...and RemoteAction methods...
+            methods.addAll(MethodUtil.getRemoteActionMethods(g, fileLevelTargets));
+            // ...and InvocableMethod methods...
+            methods.addAll(MethodUtil.getInvocableMethodMethods(g, fileLevelTargets));
             // ...and PageReference methods...
             methods.addAll(MethodUtil.getPageReferenceMethods(g, fileLevelTargets));
+            // ...and global-exposed methods...
+            methods.addAll(MethodUtil.getGlobalMethods(g, fileLevelTargets));
+            // ...and implementations of Messaging.InboundEmailHandler#handleInboundEmail...
+            methods.addAll(MethodUtil.getInboundEmailHandlerMethods(g, fileLevelTargets));
             // ...and exposed methods on VF controllers.
             methods.addAll(MethodUtil.getExposedControllerMethods(g, fileLevelTargets));
         }
@@ -73,7 +83,12 @@ public final class RuleUtil {
         return new ArrayList<>(methods);
     }
 
-    public static List<AbstractRule> getAllRules() throws RuleNotFoundException {
+    public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {
+        final List<AbstractRule> allRules = getAllRules();
+        return allRules.stream().filter(rule -> rule.isEnabled()).collect(Collectors.toList());
+    }
+
+    static List<AbstractRule> getAllRules() throws RuleNotFoundException {
         // Get a set of every class in the Rules package that extends AbstractRule.
         Reflections reflections = new Reflections(PackageConstants.RULES_PACKAGE);
         Set<Class<? extends AbstractRule>> ruleTypes =
@@ -84,7 +99,8 @@ public final class RuleUtil {
         for (Class<? extends AbstractRule> ruleType : ruleTypes) {
             // Skip abstract classes.
             if (!Modifier.isAbstract(ruleType.getModifiers())) {
-                rules.add(getRuleInner(ruleType.getName()));
+                final AbstractRule rule = getRuleInner(ruleType.getName());
+                rules.add(rule);
             }
         }
         return rules;

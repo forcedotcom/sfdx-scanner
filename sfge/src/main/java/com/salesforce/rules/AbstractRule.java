@@ -48,6 +48,11 @@ public abstract class AbstractRule {
     //  probably un-abstract this method.
     protected abstract String getCategory();
 
+    protected boolean isEnabled() {
+        // By default, every rule is disabled, unless specifically enabled
+        return false;
+    }
+
     /**
      * Unless the rule has a predetermined URL, we'll return a link to information about the engine.
      */

@@ -13,7 +13,6 @@ import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -117,11 +116,11 @@ public class CustomerApexVertexBuilderTest {
                         Schema.SUPER_CLASS_NAME + CaseSafePropertyUtil.CASE_SAFE_SUFFIX));
         assertEquals(
                 "someinterface",
-                ((ArrayList)
+                ((Object[])
                                 userClassVertex.get(
                                         Schema.INTERFACE_NAMES
                                                 + CaseSafePropertyUtil.CASE_SAFE_SUFFIX))
-                        .get(0));
+                        [0]);
 
         Map<Object, Object> userInterfaceVertex =
                 g.V().hasLabel(NodeType.USER_INTERFACE).elementMap().next();

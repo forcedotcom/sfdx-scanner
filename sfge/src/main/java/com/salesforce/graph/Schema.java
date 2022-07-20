@@ -28,7 +28,9 @@ public class Schema {
     public static final String IDENTIFIER = "Identifier";
     public static final String IMPLEMENTATION_OF = "ImplementationOf";
     public static final String IMPLEMENTED_BY = "ImplementedBy";
+    public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
+    public static final String INVOCABLE_METHOD = "InvocableMethod";
     /** True if this vertex is part of the Apex Standard Library */
     public static final String IS_STANDARD = "IsStandard";
     /**
@@ -44,8 +46,11 @@ public class Schema {
     public static final String MODIFIERS = "Modifiers";
     public static final String NAME = "Name";
     public static final String NAMES = "Names";
+    public static final String NAMESPACE_ACCESSIBLE = "NamespaceAccessible";
     public static final String OPERATOR = "Operator";
+    public static final String OVERRIDE = "Override";
     public static final String REFERENCE_TYPE = "ReferenceType";
+    public static final String REMOTE_ACTION = "RemoteAction";
     public static final String RETURN_TYPE = "ReturnType";
     public static final String RULE_NAMES = "RulesNames";
     public static final String STATIC = "Static";
@@ -56,6 +61,7 @@ public class Schema {
     public static final String TYPE_REF = "TypeRef";
 
     public static final String VALUE = "Value";
+    public static final String VIRTUAL = "Virtual";
     public static final String QUERY = "Query";
 
     public static final class JorjeNodeType {
@@ -67,4 +73,16 @@ public class Schema {
     public static final String CHILD = "Child";
     public static final String PARENT = "Parent";
     public static final String NEXT_SIBLING = "NextSibling";
+
+    /** Mark a vertex as synthetic */
+    public static final String IS_SYNTHETIC = "IsSynthetic";
+    /** Indicates if a method is a synthetic static block method */
+    public static final String IS_STATIC_BLOCK_METHOD = "IsStaticBlockMethod";
+    /** Indicates if a method is a synthetic static block invoker method */
+    public static final String IS_STATIC_BLOCK_INVOKER_METHOD = "IsStaticBlockInvokerMethod";
+    /**
+     * Indicates if a MethodCallExpression is a synthetic invocation of static block from invoker
+     * method
+     */
+    public static final String IS_STATIC_BLOCK_INVOCATION = "IsStaticBlockInvocation";
 }

@@ -81,6 +81,9 @@ public final class MethodUtil {
     private static final Logger LOGGER = LogManager.getLogger(MethodUtil.class);
 
     private static final String PAGE_REFERENCE = "PageReference";
+    private static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
+    private static final String HANDLE_INBOUND_EMAIL = "handleInboundEmail";
+    private static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
     public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
 
@@ -165,24 +168,46 @@ public final class MethodUtil {
      */
     public static List<MethodVertex> getAuraEnabledMethods(
             GraphTraversalSource g, List<String> targetFiles) {
-        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
-        final String[] labels = new String[] {NodeType.USER_CLASS};
+        return getMethodsWithAnnotation(g, targetFiles, Schema.AURA_ENABLED);
+    }
+
+    /**
+     * Returns non-test methods in the target files with a @NamespaceAccessible annotation. An empty
+     * list implicitly includes all files.
+     */
+    public static List<MethodVertex> getNamespaceAccessibleMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.NAMESPACE_ACCESSIBLE);
+    }
+
+    /**
+     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty list
+     * implicitly includes all files.
+     */
+    public static List<MethodVertex> getRemoteActionMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.REMOTE_ACTION);
+    }
+
+    /**
+     * Returns non-test methods in the target files with an @InvocableMethod annotation. An empty
+     * list implicitly includes all files.
+     */
+    public static List<MethodVertex> getInvocableMethodMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return getMethodsWithAnnotation(g, targetFiles, Schema.INVOCABLE_METHOD);
+    }
+
+    static List<MethodVertex> getMethodsWithAnnotation(
+            GraphTraversalSource g, List<String> targetFiles, String annotation) {
         return SFVertexFactory.loadVertices(
                 g,
-                TraversalUtil.fileRootTraversal(g, labels, targetFiles)
-                        .not(has(Schema.IS_TEST, true))
-                        .repeat(__.out(Schema.CHILD))
-                        .until(__.hasLabel(NodeType.METHOD))
-                        .not(has(Schema.IS_TEST, true))
+                rootMethodTraversal(g, targetFiles)
                         .where(
                                 out(Schema.CHILD)
                                         .hasLabel(NodeType.MODIFIER_NODE)
                                         .out(Schema.CHILD)
-                                        .where(
-                                                H.has(
-                                                        NodeType.ANNOTATION,
-                                                        Schema.NAME,
-                                                        Schema.AURA_ENABLED)))
+                                        .where(H.has(NodeType.ANNOTATION, Schema.NAME, annotation)))
                         .order(Scope.global)
                         .by(Schema.DEFINING_TYPE, Order.asc)
                         .by(Schema.NAME, Order.asc));
@@ -194,19 +219,67 @@ public final class MethodUtil {
      */
     public static List<MethodVertex> getPageReferenceMethods(
             GraphTraversalSource g, List<String> targetFiles) {
-        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
-        final String[] labels = new String[] {NodeType.USER_CLASS};
         return SFVertexFactory.loadVertices(
                 g,
-                TraversalUtil.fileRootTraversal(g, labels, targetFiles)
-                        .not(has(Schema.IS_TEST, true))
-                        .repeat(__.out(Schema.CHILD))
-                        .until(__.hasLabel(NodeType.METHOD))
-                        .not(has(Schema.IS_TEST, true))
+                rootMethodTraversal(g, targetFiles)
                         .where(H.has(NodeType.METHOD, Schema.RETURN_TYPE, PAGE_REFERENCE))
                         .order(Scope.global)
                         .by(Schema.DEFINING_TYPE, Order.asc)
                         .by(Schema.NAME, Order.asc));
+    }
+
+    private static GraphTraversal<Vertex, Vertex> rootMethodTraversal(
+            GraphTraversalSource g, List<String> targetFiles) {
+        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
+        final String[] labels = new String[] {NodeType.USER_CLASS};
+        return TraversalUtil.fileRootTraversal(g, labels, targetFiles)
+                .not(has(Schema.IS_TEST, true))
+                .repeat(__.out(Schema.CHILD))
+                .until(__.hasLabel(NodeType.METHOD))
+                .not(has(Schema.IS_TEST, true));
+    }
+
+    /**
+     * Returns non-test methods in the target files whose modifier scope is `global`. An empty list
+     * implicitly includes all files.
+     */
+    public static List<MethodVertex> getGlobalMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        // Get all methods in the target files.
+        return SFVertexFactory.loadVertices(
+                g,
+                rootMethodTraversal(g, targetFiles)
+                        .filter(
+                                __.and(
+                                        // If a method has at least one block statement, then it is
+                                        // definitely actually declared, as
+                                        // opposed to being an implicit method.
+                                        out(Schema.CHILD)
+                                                .hasLabel(NodeType.BLOCK_STATEMENT)
+                                                .count()
+                                                .is(P.gte(1)),
+                                        // We only want global methods.
+                                        out(Schema.CHILD)
+                                                .hasLabel(NodeType.MODIFIER_NODE)
+                                                .has(Schema.GLOBAL, true),
+                                        // Ignore any standard methods, otherwise will get a ton of
+                                        // extra results.
+                                        __.not(__.has(Schema.IS_STANDARD, true)))));
+    }
+
+    public static List<MethodVertex> getInboundEmailHandlerMethods(
+            GraphTraversalSource g, List<String> targetFiles) {
+        return SFVertexFactory.loadVertices(
+                g,
+                // Get any target class that implements the email handler interface.
+                TraversalUtil.traverseImplementationsOf(g, targetFiles, INBOUND_EMAIL_HANDLER)
+                        // Get every implementation of the handle email method.
+                        .out(Schema.CHILD)
+                        .where(H.has(NodeType.METHOD, Schema.NAME, HANDLE_INBOUND_EMAIL))
+                        // Filter the results by return type and arity to limit the possibility of
+                        // getting unnecessary results.
+                        .where(H.has(NodeType.METHOD, Schema.RETURN_TYPE, INBOUND_EMAIL_RESULT))
+                        .has(Schema.ARITY, 2));
     }
 
     /**

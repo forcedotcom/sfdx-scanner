@@ -5,10 +5,10 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.salesforce.TestUtil;
+import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
 import com.salesforce.metainfo.VisualForceHandlerImpl;
@@ -25,6 +25,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class RuleUtilTest {
     private static final Logger LOGGER = LogManager.getLogger(RuleUtilTest.class);
@@ -35,16 +37,25 @@ public class RuleUtilTest {
         this.g = TestUtil.getGraph();
     }
 
-    @Test
-    public void getPathEntryPoints_includesAuraEnabledMethods() {
+    @ValueSource(
+            strings = {
+                Schema.AURA_ENABLED,
+                Schema.INVOCABLE_METHOD,
+                Schema.REMOTE_ACTION,
+                Schema.NAMESPACE_ACCESSIBLE
+            })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void getPathEntryPoints_includesAnnotatedMethods(String annotation) {
         String sourceCode =
                 "public class Foo {\n"
-                        + "	@AuraEnabled\n"
-                        + "	public boolean auraMethod() {\n"
+                        + "	@"
+                        + annotation
+                        + "\n"
+                        + "	public boolean annotatedMethod() {\n"
                         + "		return true;\n"
                         + "	}\n"
                         + "\n"
-                        + "	public boolean nonAuraMethod() {\n"
+                        + "	public boolean nonAnnotatedMethod() {\n"
                         + "		return true;\n"
                         + "	}\n"
                         + "}\n";
@@ -54,7 +65,41 @@ public class RuleUtilTest {
 
         MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
         MethodVertex firstVertex = entryPoints.get(0);
-        assertEquals("auraMethod", firstVertex.getName());
+        assertEquals("annotatedMethod", firstVertex.getName());
+    }
+
+    @Test
+    public void getPathEntryPoints_includesGlobalMethods() {
+        String sourceCode =
+                "public class Foo {\n"
+                        + "    global static void globalStaticMethod() {\n"
+                        + "    }\n"
+                        + "    global void globalInstanceMethod() {\n"
+                        + "    }\n"
+                        + "    public static void publicStaticMethod() {\n"
+                        + "    }\n"
+                        + "}\n";
+        TestUtil.buildGraph(g, sourceCode, true);
+
+        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
+
+        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(2)));
+        boolean staticMethodFound = false;
+        boolean instanceMethodFound = false;
+        for (MethodVertex entrypoint : entryPoints) {
+            switch (entrypoint.getName()) {
+                case "globalStaticMethod":
+                    staticMethodFound = true;
+                    break;
+                case "globalInstanceMethod":
+                    instanceMethodFound = true;
+                    break;
+                default:
+                    fail("Unexpected method " + entrypoint.getName());
+            }
+        }
+        assertTrue(staticMethodFound);
+        assertTrue(instanceMethodFound);
     }
 
     @Test
@@ -76,6 +121,26 @@ public class RuleUtilTest {
         MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
         MethodVertex firstVertex = entryPoints.get(0);
         assertEquals("pageRefMethod", firstVertex.getName());
+    }
+
+    @Test
+    public void getPathEntryPoints_includesInboundEmailHandlerMethods() {
+        String sourceCode =
+                "public class MyClass implements Messaging.InboundEmailHandler {\n"
+                        + "    public Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
+                        + "        return null;\n"
+                        + "    }\n"
+                        + "    public Messaging.InboundEmailHandler someSecondaryMethod() {\n"
+                        + "        return null;\n"
+                        + "    }\n"
+                        + "}\n";
+        TestUtil.buildGraph(g, sourceCode, true);
+
+        List<MethodVertex> entryPoints = RuleUtil.getPathEntryPoints(g);
+
+        MatcherAssert.assertThat(entryPoints, hasSize(equalTo(1)));
+        MethodVertex firstVertex = entryPoints.get(0);
+        assertEquals("handleInboundEmail", firstVertex.getName());
     }
 
     @Test
@@ -256,7 +321,9 @@ public class RuleUtilTest {
     @Test
     public void getAllRules_noExceptionThrown() {
         try {
-            List<AbstractRule> allRules = RuleUtil.getAllRules();
+            List<AbstractRule> allRules = RuleUtil.getEnabledRules();
+            MatcherAssert.assertThat(allRules, hasSize(1));
+            assertTrue(allRules.contains(ApexFlsViolationRule.getInstance()));
         } catch (Exception ex) {
             fail("Unexpected " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }

@@ -2,6 +2,10 @@ package com.salesforce.graph.symbols;
 
 import static com.salesforce.apex.jorje.ASTConstants.NodeType;
 
+import com.salesforce.Collectible;
+import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.collections.CollectionUtil;
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.DeepCloneable;
@@ -10,15 +14,20 @@ import com.salesforce.graph.ops.ClassUtil;
 import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.BaseSFVertex;
+import com.salesforce.graph.vertex.BlockStatementVertex;
 import com.salesforce.graph.vertex.FieldDeclarationVertex;
+import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserClassVertex;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.T;
 
 /** Used when invoking a static method on a class. */
 public final class ClassStaticScope extends AbstractClassScope
@@ -105,7 +114,37 @@ public final class ClassStaticScope extends AbstractClassScope
         return results;
     }
 
-    /**
+	private static List<MethodCallExpressionVertex> getStaticBlocks(
+		GraphTraversalSource g, UserClassVertex userClass) {
+		List<MethodCallExpressionVertex> results = new ArrayList<>();
+
+		String superClassName = userClass.getSuperClassName().orElse(null);
+		if (superClassName != null) {
+			UserClassVertex superClass = ClassUtil.getUserClass(g, superClassName).orElse(null);
+			if (superClass != null) {
+				results.addAll(getStaticBlocks(g, superClass));
+			}
+		}
+
+		results.addAll(SFVertexFactory.loadVertices(
+			g,
+			g.V(userClass.getId())
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.METHOD)
+				.has(Schema.IS_STATIC_BLOCK_INVOKER_METHOD, true)
+				.out(Schema.CHILD)
+				.hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
+				.order(Scope.global)
+				.by(Schema.CHILD_INDEX, Order.asc)
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.EXPRESSION_STATEMENT)
+				.out(Schema.CHILD)
+				.hasLabel(NodeType.METHOD_CALL_EXPRESSION)));
+
+		return results;
+	}
+
+	/**
      * Returns a path that represents the static properties defined by the class. The following
      * example would contain a path for 'MyClass' that contains the Field and FieldDeclarations for
      * 's'. {@code
@@ -121,9 +160,13 @@ public final class ClassStaticScope extends AbstractClassScope
     public static Optional<ApexPath> getInitializationPath(
             GraphTraversalSource g, String classname) {
         ClassStaticScope classStaticScope = ClassStaticScope.get(g, classname);
+		if (classStaticScope.getState().equals(State.INITIALIZED)) {
+			throw new ProgrammingException("Initialization path does not need to be invoked on a class that's already initialized: " + classStaticScope.getClassName());
+		}
         List<BaseSFVertex> vertices = new ArrayList<>();
         vertices.addAll(classStaticScope.getFields());
         vertices.addAll(getFieldDeclarations(g, classStaticScope.userClass));
+		vertices.addAll(getStaticBlocks(g, classStaticScope.userClass));
         if (vertices.isEmpty()) {
             return Optional.empty();
         } else {
@@ -132,4 +175,5 @@ public final class ClassStaticScope extends AbstractClassScope
             return Optional.of(apexPath);
         }
     }
+
 }

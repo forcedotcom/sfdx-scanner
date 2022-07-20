@@ -80,6 +80,9 @@ commands:
       - gradle/collect_test_results:
           reports_path: pmd-cataloger/build/reports/
           test_results_path: pmd-cataloger/build/test-results/
+      - gradle/collect_test_results:
+          reports_path: sfge/build/reports/
+          test_results_path: sfge/build/test-results/
       - store_test_results:
           path: test-results
       - store_artifacts: # upload nyc test coverage as artifact.
@@ -218,12 +221,21 @@ jobs:
 
   # Purpose: Runs the unit tests in a Windows environment.
   windows-unit-tests:
+    # `parallelism` indicates how many simultaneous executors should be run, allowing us to split
+    # long-running tasks across multiple executors.
+    parallelism: 4 # larger values didn't seem to affect performance greatly
     executor:
       name: win/default # executor type
-      size: "medium"
+      size: "large"
       shell: bash.exe
     parameters:
       node-version: *node_version_param
+      # Specify a subset of unit tests to be run, instead of the whole suite.
+      # This allows us to work around the suboptimal performance of the Windows executor by running
+      # multiple executors in parallel where different unit tests are ran in each.
+      test-type:
+          type: string
+          default: all
     working_directory: C:\repo
     steps:
       - attach_workspace:
@@ -259,12 +271,90 @@ jobs:
       - run: mkdir test-results
 
       # Unit tests
-      - run:
-          name: test
-          # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
-          shell: bash.exe
-          command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-          when: always
+      - when:
+          condition:
+              equal: [ all, << parameters.test-type >> ]
+          steps:
+              - run:
+                  name: test
+                  # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+                  shell: bash.exe
+                  command: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+                  when: always
+
+      - when:
+          condition:
+            equal: [ sfge, << parameters.test-type >> ]
+          steps:
+              - run:
+                  name: test-sfge
+                  # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+                  shell: bash.exe
+                  # Identify all the test files and allocate them between parallelized executors by timing data.
+                  # Then turn the array of tests into something that gradle can accept, and run the tests.
+                  command: |
+                      TESTGLOB=$(circleci tests glob "sfge/src/test/**/*Test.java" | circleci tests split --split-by=timings)
+                      echo $TESTGLOB
+                      TESTARRAY=($TESTGLOB)
+                      TESTARG=""
+                      for element in "${TESTARRAY[@]}"
+                      do
+                        TESTARG="$TESTARG --tests `basename $element .java`"
+                      done
+                      echo $TESTARG
+                      yarn test-sfge $TESTARG
+                  when: always
+
+      - when:
+          condition:
+            equal: [ cli-messaging, << parameters.test-type >> ]
+          steps:
+            - run:
+                name: test-cli-messaging
+                # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+                shell: bash.exe
+                # This unit test suite is fast, so we have the first parallel executor run the tests, and all others exit early.
+                command: |
+                      if [[ $CIRCLE_NODE_INDEX -gt 0 ]]
+                      then
+                        exit 0
+                      fi
+                      yarn test-cli-messaging 
+                when: always
+
+      - when:
+          condition:
+              equal: [ pmd-cataloger, << parameters.test-type >> ]
+          steps:
+              - run:
+                  name: test-pmd-cataloger
+                  # Necessary to explicitly use bash, otherwise gradlew's status code won't be received and the job will hang.
+                  shell: bash.exe
+                  # This unit test suite is fast, so we have the first parallel executor run the tests, and all others exit early.
+                  command: |
+                      if [[ $CIRCLE_NODE_INDEX -gt 0 ]]
+                      then
+                        exit 0
+                      fi
+                      yarn test-pmd-cataloger
+                  when: always
+
+      - when:
+          condition:
+              equal: [ ts, << parameters.test-type >> ]
+          steps:
+              - run:
+                  name: test-ts
+                  # Explicitly using bash, for simplicity of required shell script.
+                  shell: bash.exe
+                  # This unit test suite is relatively fast, so we have the first parallel executor run the tests, and all others exit early.
+                  command: |
+                      if [[ $CIRCLE_NODE_INDEX -gt 0 ]]
+                      then
+                        exit 0
+                      fi
+                      yarn test-ts --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+                  when: always
 
       # Linting
       - run:
@@ -510,6 +600,11 @@ workflows:
             <<: *testing_filters
           requires:
             - setup
+          matrix:
+            parameters:
+              # The values of the parameters will be appended to the jobs they create.
+              # So we'll get "windows-unit-tests-pmd-cataloger", "windows-unit-tests-ts", etc.
+              test-type: [pmd-cataloger, cli-messaging, ts, sfge]
       - linux-tarball-test:
           filters:
             <<: *testing_filters
