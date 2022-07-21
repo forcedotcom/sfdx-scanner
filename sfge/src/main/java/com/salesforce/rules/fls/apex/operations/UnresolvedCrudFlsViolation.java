@@ -5,8 +5,8 @@ import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 
 /**
- * FLS Violation when SFGE understands that a DML operation is happening,
- * but it is unable to determine more information about the object and the fields involved.
+ * FLS Violation when SFGE understands that a DML operation is happening, but it is unable to
+ * determine more information about the object and the fields involved.
  */
 public class UnresolvedCrudFlsViolation extends FlsViolationInfo {
     public UnresolvedCrudFlsViolation(FlsConstants.FlsValidationType validationType) {

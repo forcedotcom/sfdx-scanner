@@ -1,7 +1,6 @@
 package com.salesforce.rules.fls.apex.operations;
 
 import com.salesforce.config.UserFacingMessages;
-
 import java.util.TreeSet;
 
 /**

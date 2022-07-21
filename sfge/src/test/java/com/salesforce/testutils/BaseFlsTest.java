@@ -181,9 +181,9 @@ public abstract class BaseFlsTest {
     }
 
     protected ViolationWrapper.FlsViolationBuilder expectUnresolvedCrudFls(
-        int line, FlsConstants.FlsValidationType validationType) {
+            int line, FlsConstants.FlsValidationType validationType) {
         return ViolationWrapper.FlsViolationBuilder.get(line, validationType)
-            .forViolationType(ViolationWrapper.FlsViolationType.UNRESOLVED_CRUD_FLS);
+                .forViolationType(ViolationWrapper.FlsViolationType.UNRESOLVED_CRUD_FLS);
     }
 
     protected ViolationWrapper.MessageBuilder expect(int line, String message) {

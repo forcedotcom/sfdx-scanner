@@ -6,20 +6,18 @@ import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.ChainedVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * Handles creation of various types of {@link FlsViolationInfo} objects
- */
+/** Handles creation of various types of {@link FlsViolationInfo} objects */
 public final class FlsViolationCreatorUtil {
 
     private FlsViolationCreatorUtil() {}
 
-    static Set<FlsViolationInfo> createStripInaccessibleWarningViolations(ApexValue<?> apexValue, Collection<FlsValidationRepresentation> validationReps) {
+    static Set<FlsViolationInfo> createStripInaccessibleWarningViolations(
+            ApexValue<?> apexValue, Collection<FlsValidationRepresentation> validationReps) {
         final Set<FlsViolationInfo> warningViolations = new HashSet<>();
         final ChainedVertex vertex =
                 apexValue
@@ -86,8 +84,10 @@ public final class FlsViolationCreatorUtil {
         return flsViolationInfo;
     }
 
-
-    static FlsViolationInfo createFlsIndecipherableViolation(FlsConstants.FlsValidationType validationType, ChainedVertex parameter, MethodCallExpressionVertex sinkVertex) {
+    static FlsViolationInfo createFlsIndecipherableViolation(
+            FlsConstants.FlsValidationType validationType,
+            ChainedVertex parameter,
+            MethodCallExpressionVertex sinkVertex) {
         final FlsViolationInfo violationInfo = new UnresolvedCrudFlsViolation(validationType);
         violationInfo.setSinkVertex(sinkVertex);
 

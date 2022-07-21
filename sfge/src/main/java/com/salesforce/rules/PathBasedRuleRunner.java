@@ -128,7 +128,8 @@ public class PathBasedRuleRunner {
                 FlsViolationMessageUtil.consolidateFlsViolations(flsViolationInfos);
 
         for (FlsViolationInfo flsViolationInfo : consolidatedFlsViolationInfos) {
-            final String violationMessage = FlsViolationMessageUtil.constructMessage(flsViolationInfo);
+            final String violationMessage =
+                    FlsViolationMessageUtil.constructMessage(flsViolationInfo);
             final Optional<SFVertex> sourceVertex = flsViolationInfo.getSourceVertex();
             final Optional<SFVertex> sinkVertex = flsViolationInfo.getSinkVertex();
             if (sinkVertex.isPresent()) {

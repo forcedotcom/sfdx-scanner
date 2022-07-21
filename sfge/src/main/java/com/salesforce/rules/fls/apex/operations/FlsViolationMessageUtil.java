@@ -133,7 +133,8 @@ public final class FlsViolationMessageUtil {
 
         // Populate field information only if we have anything
         if (!"".equals(fieldString)) {
-            fieldInformation = String.format(UserFacingMessages.FIELDS_MESSAGE_TEMPLATE, fieldString);
+            fieldInformation =
+                    String.format(UserFacingMessages.FIELDS_MESSAGE_TEMPLATE, fieldString);
         }
 
         // Add field notice if we have segments that may not have been parsed correctly
@@ -214,5 +215,4 @@ public final class FlsViolationMessageUtil {
         return RELATIONAL_PATTERN.matcher(input).find()
                 || SPECIAL_CHAR_PATTERN.matcher(input).find();
     }
-
 }

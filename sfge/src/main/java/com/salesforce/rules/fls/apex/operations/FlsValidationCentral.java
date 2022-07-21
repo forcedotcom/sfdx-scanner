@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,7 +96,8 @@ public class FlsValidationCentral {
                 // Values we found in the MultiMap are the FlsValidationReps for Read operation
                 // that have been sanitized by stripInaccessible()
                 // 1. Create Warning violations
-                createStripInaccessibleWarningViolations(readValue, flsValidationRepresentationsForRead);
+                createStripInaccessibleWarningViolations(
+                        readValue, flsValidationRepresentationsForRead);
 
                 // 2. Remove the values from the map since they've been sanitized
                 expectedReadValidations.removeAll(readValueWrapper);
@@ -121,7 +121,9 @@ public class FlsValidationCentral {
             ApexValue<?> apexValue, Collection<FlsValidationRepresentation> validationReps) {
         // If warnings are enabled, create stripInaccessible warnings
         if (IS_WARNING_VIOLATION_ENABLED) {
-            final Set<FlsViolationInfo> warningViolations = FlsViolationCreatorUtil.createStripInaccessibleWarningViolations(apexValue, validationReps);
+            final Set<FlsViolationInfo> warningViolations =
+                    FlsViolationCreatorUtil.createStripInaccessibleWarningViolations(
+                            apexValue, validationReps);
             violations.addAll(warningViolations);
         }
     }
@@ -202,23 +204,26 @@ public class FlsValidationCentral {
         ChainedVertex parameter = parameters.get(0);
         final ValidationConverter validationConverter = new ValidationConverter(validationType);
 
-        final Optional<ApexValue<?>> apexValueOptional = ScopeUtil.resolveToApexValue(symbols, parameter);
+        final Optional<ApexValue<?>> apexValueOptional =
+                ScopeUtil.resolveToApexValue(symbols, parameter);
 
         if (!apexValueOptional.isPresent()) {
             // TODO: add telemetry on missing parameter type that we need to handle in future
-            violations.add(FlsViolationCreatorUtil.createFlsIndecipherableViolation(validationType, parameter, vertex));
+            violations.add(
+                    FlsViolationCreatorUtil.createFlsIndecipherableViolation(
+                            validationType, parameter, vertex));
 
         } else {
-                        /*.(
-                                () ->
-                                        new UnexpectedException(
-                                                "Database operation method has a child of unexpected type: "
-                                                        + parameter.toString()));*/
+            /*.(
+            () ->
+                    new UnexpectedException(
+                            "Database operation method has a child of unexpected type: "
+                                    + parameter.toString()));*/
             final ApexValue<?> apexValue = apexValueOptional.get();
 
             // Add them to our set of expected validations
             final Set<FlsValidationRepresentation> validationReps =
-                validationConverter.convertToExpectedValidations(apexValue);
+                    validationConverter.convertToExpectedValidations(apexValue);
             // Capture the vertex on which the operation is performed
             // We'll need to capture accounts in:
             // Database.insert(accounts);

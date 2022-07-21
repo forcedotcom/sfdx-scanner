@@ -4,10 +4,10 @@ import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
-import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolation;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
+import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolation;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -15,22 +15,26 @@ import java.util.function.Function;
 /** Wrapper around Violation to help comparing only the violation message and line numbers */
 public class ViolationWrapper {
     public enum FlsViolationType {
-        STANDARD((builder) -> new FlsViolationInfo(
-            builder.validationType,
-            builder.objectName,
-            builder.fieldNames,
-            builder.allFields)),
-        STRIP_INACCESSIBLE_WARNING((builder) -> new FlsStripInaccessibleWarningInfo(
-            builder.validationType,
-            builder.objectName,
-            builder.fieldNames,
-            builder.allFields)),
-        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolation(
-            builder.validationType));
+        STANDARD(
+                (builder) ->
+                        new FlsViolationInfo(
+                                builder.validationType,
+                                builder.objectName,
+                                builder.fieldNames,
+                                builder.allFields)),
+        STRIP_INACCESSIBLE_WARNING(
+                (builder) ->
+                        new FlsStripInaccessibleWarningInfo(
+                                builder.validationType,
+                                builder.objectName,
+                                builder.fieldNames,
+                                builder.allFields)),
+        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolation(builder.validationType));
 
         Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier;
 
-        FlsViolationType(Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier) {
+        FlsViolationType(
+                Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier) {
             this.instanceSupplier = instanceSupplier;
         }
 
@@ -103,12 +107,14 @@ public class ViolationWrapper {
             this.violationType = FlsViolationType.STANDARD;
         }
 
-        public static FlsViolationBuilder get(int line, FlsConstants.FlsValidationType validationType, String objectName) {
-            return get(line, validationType, objectName);
+        public static FlsViolationBuilder get(
+                int line, FlsConstants.FlsValidationType validationType, String objectName) {
+            return new FlsViolationBuilder(line, validationType, objectName);
         }
 
-        public static FlsViolationBuilder get(int line, FlsConstants.FlsValidationType validationType) {
-            return new FlsViolationBuilder(line, validationType, SoqlParserUtil.UNKNOWN);
+        public static FlsViolationBuilder get(
+                int line, FlsConstants.FlsValidationType validationType) {
+            return get(line, validationType, SoqlParserUtil.UNKNOWN);
         }
 
         public FlsViolationBuilder withField(String field) {
