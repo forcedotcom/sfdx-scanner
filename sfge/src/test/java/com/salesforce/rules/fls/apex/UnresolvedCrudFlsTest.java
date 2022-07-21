@@ -120,4 +120,22 @@ public class UnresolvedCrudFlsTest extends BaseFlsTest {
                 sourceCode,
                 expectUnresolvedCrudFls(3, validationType));
     }
+
+    @Test
+    public void testReadWithUnresolvedBinaryExpression() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(String fields, String objectName) {\n"
+                        + "       List<Contact> contacts = Database.query('SELECT ' + \n"
+                        + "fields +\n"
+                        + "'FROM ' + \n"
+                        + "objectName);\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expectUnresolvedCrudFls(3, FlsConstants.FlsValidationType.READ));
+    }
 }
