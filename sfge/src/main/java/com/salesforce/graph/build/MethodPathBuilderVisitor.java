@@ -2,7 +2,7 @@ package com.salesforce.graph.build;
 
 import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
-import com.salesforce.config.UserFacingErrorMessages;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.exception.UserActionException;
@@ -597,7 +597,7 @@ public class MethodPathBuilderVisitor {
             // Ask user to fix unreachable code
             throw new UserActionException(
                     String.format(
-                            UserFacingErrorMessages.UNREACHABLE_CODE,
+                            UserFacingMessages.UNREACHABLE_CODE,
                             GremlinUtil.getFileName(g, to),
                             to.value(Schema.DEFINING_TYPE),
                             to.value(Schema.BEGIN_LINE)));

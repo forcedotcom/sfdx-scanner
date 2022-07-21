@@ -9,7 +9,7 @@ import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
-import com.salesforce.rules.fls.apex.operations.FlsViolationUtils;
+import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -125,10 +125,10 @@ public class PathBasedRuleRunner {
         // Consolidate/regroup FLS violations across paths so that there are no
         // duplicates with different field sets for the same source/sink/dmlOperation
         final HashSet<FlsViolationInfo> consolidatedFlsViolationInfos =
-                FlsViolationUtils.consolidateFlsViolations(flsViolationInfos);
+                FlsViolationMessageUtil.consolidateFlsViolations(flsViolationInfos);
 
         for (FlsViolationInfo flsViolationInfo : consolidatedFlsViolationInfos) {
-            final String violationMessage = FlsViolationUtils.constructMessage(flsViolationInfo);
+            final String violationMessage = FlsViolationMessageUtil.constructMessage(flsViolationInfo);
             final Optional<SFVertex> sourceVertex = flsViolationInfo.getSourceVertex();
             final Optional<SFVertex> sinkVertex = flsViolationInfo.getSinkVertex();
             if (sinkVertex.isPresent()) {

@@ -598,4 +598,28 @@ public class ApexPathExpanderTest {
                 TestRunnerListMatcher.hasValuesAnyOrder(
                         "address or currency", "anytype", "unknown"));
     }
+
+    @Test
+    public void testInlineResolvableTwoLevelMethodCall() {
+        String[] sourceCode = {
+            "public class MyClass {\n" +
+                "   void doSomething() {\n" +
+                "       System.debug(Factory.createInstance().secondLevel());\n" +
+                "   }\n" +
+                "}\n",
+            "public class Factory {\n" +
+                "   public static Factory createInstance() {\n" +
+                "       return new Factory();\n" +
+                "   }\n" +
+                "   public String secondLevel() {\n" +
+                "       return 'hello';\n" +
+                "   }\n" +
+                "}\n"
+        };
+
+        List<TestRunner.Result<SystemDebugAccumulator>> results =
+            TestRunner.walkPaths(g, sourceCode);
+        MatcherAssert.assertThat(results, hasSize(equalTo(1)));
+        MatcherAssert.assertThat(results, TestRunnerListMatcher.hasValuesAnyOrder("hello"));
+    }
 }

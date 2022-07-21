@@ -2,6 +2,7 @@ package com.salesforce.rules.fls.apex.operations;
 
 import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.RuleThrowable;
@@ -116,6 +117,10 @@ public class FlsViolationInfo extends ObjectFieldInfo<FlsViolationInfo> implemen
 
     public void setRule(AbstractRule rule) {
         this.rule = rule;
+    }
+
+    public String getMessageTemplate() {
+        return UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE;
     }
 
     @Override

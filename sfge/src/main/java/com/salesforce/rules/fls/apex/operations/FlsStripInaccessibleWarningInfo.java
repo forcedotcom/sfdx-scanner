@@ -1,5 +1,7 @@
 package com.salesforce.rules.fls.apex.operations;
 
+import com.salesforce.config.UserFacingMessages;
+
 import java.util.TreeSet;
 
 /**
@@ -21,5 +23,9 @@ public final class FlsStripInaccessibleWarningInfo extends FlsViolationInfo {
             TreeSet<String> fields,
             boolean isAllFields) {
         super(validationType, objectName, fields, isAllFields);
+    }
+
+    public String getMessageTemplate() {
+        return UserFacingMessages.STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE;
     }
 }
