@@ -7,7 +7,7 @@ import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
-import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolation;
+import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -29,7 +29,7 @@ public class ViolationWrapper {
                                 builder.objectName,
                                 builder.fieldNames,
                                 builder.allFields)),
-        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolation(builder.validationType));
+        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolationInfo(builder.validationType));
 
         Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier;
 

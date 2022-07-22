@@ -87,7 +87,7 @@ public final class FlsViolationCreatorUtil {
     static FlsViolationInfo createUnresolvedCrudFlsViolation(
         FlsConstants.FlsValidationType validationType,
         MethodCallExpressionVertex sinkVertex) {
-        final FlsViolationInfo violationInfo = new UnresolvedCrudFlsViolation(validationType);
+        final FlsViolationInfo violationInfo = new UnresolvedCrudFlsViolationInfo(validationType);
         violationInfo.setSinkVertex(sinkVertex);
 
         return violationInfo;
