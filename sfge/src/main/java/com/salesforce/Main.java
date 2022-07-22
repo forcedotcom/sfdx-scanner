@@ -5,6 +5,7 @@ import com.salesforce.cli.OutputFormatter;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.ops.GraphUtil;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.metainfo.MetaInfoCollector;
@@ -134,6 +135,10 @@ public class Main {
             LOGGER.error("Unexpected exception while loading graph", ex);
             System.err.println(
                     "Unexpected exception while loading graph. See logs for more information.");
+            return INTERNAL_ERROR;
+        } catch (UserActionException ex) {
+            LOGGER.error("User action expected: ", ex);
+            System.err.println(formatError(ex));
             return INTERNAL_ERROR;
         }
 
