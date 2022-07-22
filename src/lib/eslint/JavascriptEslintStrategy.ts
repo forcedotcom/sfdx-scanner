@@ -9,15 +9,22 @@ import {ESLint} from 'eslint';
 const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
 	"overrideConfig": {
+		"parser": "@babel/eslint-parser",
 		"parserOptions": {
-			"sourceType": "module",
-			"ecmaVersion": 2018,
+			"requireConfigFile": false,
+			"babelOptions": {
+				"parserOpts": {
+					"plugins": ["classProperties", ["decorators", {"decoratorsBeforeExport": false}]]
+				}
+			}
 		},
 		"ignorePatterns": [
 			"node_modules/!**"
 		]
 	},
-	"useEslintrc": false // Will not use an external config
+	"useEslintrc": false, // Will not use an external config
+	"resolvePluginsRelativeTo": __dirname, // Use the plugins found in the sfdx scanner installation directory
+	"cwd": __dirname // Use the parser found in the sfdx scanner installation
 };
 
 export class JavascriptEslintStrategy implements EslintStrategy {
