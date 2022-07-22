@@ -4,7 +4,6 @@ import com.salesforce.rules.ApexFlsViolationRule;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.testutils.BaseFlsTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class ReadFlsScenariosTest extends BaseFlsTest {
@@ -504,9 +503,9 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                 "public class MyClass {\n"
                         + "   public void foo() {\n"
                         + "       String queryStr = 'SELECT Name FROM Account';\n"
-                    // TODO: this invocation is incorrect. The correct way would be:
-                    //  String.escapeSingleQuotes(queryStr);
-                    // Created a new work item to track this issue.
+                        // TODO: this invocation is incorrect. The correct way would be:
+                        //  String.escapeSingleQuotes(queryStr);
+                        // Created a new work item to track this issue.
                         + "       Database.query(queryStr.escapeSingleQuotes());\n"
                         + "   }\n"
                         + "}\n";

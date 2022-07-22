@@ -84,10 +84,9 @@ public final class FlsViolationCreatorUtil {
         return flsViolationInfo;
     }
 
-    static FlsViolationInfo createFlsIndecipherableViolation(
-            FlsConstants.FlsValidationType validationType,
-            ChainedVertex parameter,
-            MethodCallExpressionVertex sinkVertex) {
+    static FlsViolationInfo createUnresolvedCrudFlsViolation(
+        FlsConstants.FlsValidationType validationType,
+        MethodCallExpressionVertex sinkVertex) {
         final FlsViolationInfo violationInfo = new UnresolvedCrudFlsViolation(validationType);
         violationInfo.setSinkVertex(sinkVertex);
 
