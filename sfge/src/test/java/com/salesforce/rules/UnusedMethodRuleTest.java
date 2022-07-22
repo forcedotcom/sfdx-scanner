@@ -35,13 +35,14 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 1: SIMPLE POSITIVE/NEGATIVE CASES =============== */
 
     /** Obviously unused static/instance methods are unused. */
-    @ValueSource(strings = {
-        "public static",
-        "public",
-        "protected", // No need for protected static, since those are mutually exclusive.
-        "private static",
-        "private"
-    })
+    @ValueSource(
+            strings = {
+                "public static",
+                "public",
+                "protected", // No need for protected static, since those are mutually exclusive.
+                "private static",
+                "private"
+            })
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void outerMethodWithoutInvocation_expectViolation(String methodScope) {
@@ -55,12 +56,7 @@ public class UnusedMethodRuleTest {
     }
 
     /** Obviously unused inner class instance methods are unused. */
-    @ValueSource(
-        strings = {
-            "public",
-            "protected",
-            "private"
-        })
+    @ValueSource(strings = {/*"public", "protected", */"private"})
     @ParameterizedTest(name = "{displayName}: {0}")
     @Disabled
     public void innerInstanceMethodWithoutInvocation_expectViolation(String scope) {
@@ -90,14 +86,22 @@ public class UnusedMethodRuleTest {
      * We want tests for arity of both 0 and 1, since an explicitly declared 0-arity constructor
      * should cause a violation, unlike the implicitly generated one.
      */
-    @CsvSource({"MyClass(), 0", "MyClass(boolean b), 1"})
-    @ParameterizedTest(name = "{displayName}: Method {0}, arity {1}")
+    @CsvSource({
+        // One test per constructor, per visibility scope.
+        "public,  MyClass(),  0",
+        "protected,  MyClass(),  0",
+        "private,  MyClass(),  0",
+        "public,  MyClass(boolean b) , 1",
+        "protected,  MyClass(boolean b),  1",
+        "private,  MyClass(boolean b),  1"
+    })
+    @ParameterizedTest(name = "{displayName}: Scope {0} Method {1}, arity {2}")
     @Disabled
     public void declaredConstructorWithoutInvocation_expectViolation(
-            String declaration, int arity) {
+            String scope, String declaration, int arity) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + String.format("    public %s {\n", declaration)
+                        + String.format("    %s %s {\n", scope, declaration)
                         + "    }\n"
                         + "}\n";
         Consumer<Violation.RuleViolation> assertion =
@@ -112,46 +116,45 @@ public class UnusedMethodRuleTest {
 
     @Test
     @Disabled
-    public void applySkipLineDirective_expectNoViolation() {
+    public void applySkipStack_expectNoViolation() {
         String sourceCode =
-            "public class MyClass {\n"
-                    // Unused static method, annotated with the directive.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public static boolean unusedStaticMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    // Unused instance method, annotated with the directive.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public boolean unusedInstanceMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    // Unused constructor, annotated with the method.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public MyClass () {\n"
-                    + "    }\n"
-                    + "}\n";
+                "public class MyClass {\n"
+                        // Unused static method, annotated with the directive.
+                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                        + "    private static boolean unusedStaticMethod() {\n"
+                        + "        return true;\n"
+                        + "    }\n"
+                        // Unused instance method, annotated with the directive.
+                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                        + "    private boolean unusedInstanceMethod() {\n"
+                        + "        return true;\n"
+                        + "    }\n"
+                        // Unused constructor, annotated with the method.
+                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                        + "    private MyClass () {\n"
+                        + "    }\n"
+                        + "}\n";
         assertNoViolations(sourceCode);
     }
-
 
     @Test
     @Disabled
     public void applySkipClassDirective_expectNoViolation() {
         String sourceCode =
-            "/* sfge-disable UnusedMethodRule */"
-                    + "public class MyClass {\n"
-                    // Unused static method
-                    + "    public static boolean unusedStaticMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    // Unused instance method
-                    + "    public boolean unusedInstanceMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    // Unused constructor
-                    + "    public MyClass () {\n"
-                    + "    }\n"
-                    + "}\n";
+                "/* sfge-disable UnusedMethodRule */\n"
+                        + "public class MyClass {\n"
+                        // Unused static method
+                        + "    private static boolean unusedStaticMethod() {\n"
+                        + "        return true;\n"
+                        + "    }\n"
+                        // Unused instance method
+                        + "    private boolean unusedInstanceMethod() {\n"
+                        + "        return true;\n"
+                        + "    }\n"
+                        // Unused constructor
+                        + "    private MyClass () {\n"
+                        + "    }\n"
+                        + "}\n";
         assertNoViolations(sourceCode);
     }
 
@@ -213,7 +216,7 @@ public class UnusedMethodRuleTest {
     public void pageReferenceMethod_expectNoViolation() {
         String sourceCode =
                 "global class MyClass {\n"
-                        + "    public PageReference someMethod() {\n"
+                        + "    private PageReference someMethod() {\n"
                         + "        return null;\n"
                         + "    }\n"
                         + "}\n";
@@ -234,7 +237,7 @@ public class UnusedMethodRuleTest {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    @%s\n", annotation)
-                        + "    public boolean someMethod() {\n"
+                        + "    private boolean someMethod() {\n"
                         + "        return true;\n"
                         + "    }\n"
                         + "}\n";
@@ -250,7 +253,7 @@ public class UnusedMethodRuleTest {
     public void emailHandlerMethod_expectNoViolation() {
         String sourceCode =
                 "global class MyClass implements Messaging.InboundEmailhandler {\n"
-                        + "    public Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
+                        + "    private Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
                         + "        return null;\n"
                         + "    }\n"
                         + "}\n";
@@ -263,17 +266,15 @@ public class UnusedMethodRuleTest {
     //            implemented anywhere, we have separate rules for surfacing that.
 
     /** Abstract methods on abstract classes/interfaces are abstract, and count as used. */
-    @ValueSource(
-        strings = {
-            "public",
-            "protected"
-        })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @Test
     @Disabled
     public void abstractMethodDeclaration_expectNoViolation(String scope) {
         String[] sourceCodes = {
-            "global abstract class MyAbstractClass {\n"
-                    + String.format("    %s abstract boolean someMethod();\n", scope)
+            "global abstract class AbstractWithPublic {\n"
+                    + "    public abstract boolean someMethod();\n"
+                    + "}\n",
+            "global abstract class AbstractWithProtected {\n"
+                    + "    protected abstract boolean someMethod();\n"
                     + "}\n",
             "global interface MyInterface {\n" + "    boolean anotherMethod();\n" + "}\n"
         };
@@ -327,7 +328,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: method scope {0}, invocation {1}")
     @Disabled
-    public void staticMethodCalledFromOwnInstanceMethod_expectNoViolation(String scope, String methodCall) {
+    public void staticMethodCalledFromOwnInstanceMethod_expectNoViolation(
+            String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    %s static boolean method1() {\n", scope)
@@ -355,7 +357,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: scope {0}, invocation {1}")
     @Disabled
-    public void staticMethodCalledFromInnerInstance_expectNoViolation(String scope, String methodCall) {
+    public void staticMethodCalledFromInnerInstance_expectNoViolation(
+            String scope, String methodCall) {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    %s static boolean method1() {\n", scope)
@@ -403,12 +406,7 @@ public class UnusedMethodRuleTest {
     }
 
     /** If a class internally calls its own constructor, that constructor counts as used. */
-    @ValueSource(
-        strings = {
-            "public",
-            "protected",
-            "private"
-        })
+    @ValueSource(strings = {"public", "protected", "private"})
     @ParameterizedTest(name = "{displayName}: scope {0}")
     @Disabled
     public void constructorInternallyCalled_expectNoViolation(String scope) {
@@ -453,7 +451,7 @@ public class UnusedMethodRuleTest {
                         + "        }\n"
                         + "    }\n"
                         + "    global class MyInner2 {\n"
-                    // Use the engine directive to prevent this method from tripping the rule.
+                        // Use the engine directive to prevent this method from tripping the rule.
                         + "        /* sfge-disable-next-line UnusedMethodRule */\n"
                         + String.format(
                                 "        public boolean innerMethod2(%s instance) {\n", paramType)
@@ -498,7 +496,7 @@ public class UnusedMethodRuleTest {
                         + "    }\n"
                         + "    global class MyInner2() {\n"
                         + String.format("        public %s instance;\n", propType)
-                    // Use the engine directive to prevent this method from tripping the rule.
+                        // Use the engine directive to prevent this method from tripping the rule.
                         + "        /* sfge-disable-next-line UnusedMethodRule */\n"
                         + "        public boolean innerMethod2 {\n"
                         + String.format("            return %s.innerMethod1();\n", propRef)
@@ -849,7 +847,9 @@ public class UnusedMethodRuleTest {
         "public,  super.parentMethod1,  super.parentMethod2",
         "protected,  super.parentMethod1,  super.parentMethod2"
     })
-    @ParameterizedTest(name = "{displayName}: method scopes {0}, method 1 reference {1}, method 2 reference {2}")
+    @ParameterizedTest(
+            name =
+                    "{displayName}: method scopes {0}, method 1 reference {1}, method 2 reference {2}")
     @Disabled
     public void instanceMethodInvokedWithinNonOverridingSubclass_expectNoViolation(
             String scope, String method1Reference, String method2Reference) {
@@ -919,8 +919,7 @@ public class UnusedMethodRuleTest {
      * If a subclass overrides an inherited method, but calls the `super` version of that method,
      * the parent method counts as used.
      */
-    @ValueSource(
-        strings = {"public", "protected"})
+    @ValueSource(strings = {"public", "protected"})
     @ParameterizedTest(name = "{displayName}: method scope {0}")
     @Disabled
     public void instanceMethodInvokedViaSuperInOverridingSubclass_expectNoViolation(String scope) {
@@ -996,8 +995,8 @@ public class UnusedMethodRuleTest {
     /* =============== SECTION 9: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
-     * If a subclass overrides an inherited method and calls its own version of the method
-     * rather than the `super`, then the original parent method doesn't count as used.
+     * If a subclass overrides an inherited method and calls its own version of the method rather
+     * than the `super`, then the original parent method doesn't count as used.
      */
     @CsvSource({
         // Implicit/explicit `this`, for each of the two relevant
@@ -1059,7 +1058,8 @@ public class UnusedMethodRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: method visibility {0}, instance type {1}")
     @Disabled
-    public void overrideMethodOnInstanceOfSubclass_expectViolation(String scope, String instanceType) {
+    public void overrideMethodOnInstanceOfSubclass_expectViolation(
+            String scope, String instanceType) {
         String[] sourceCodes = {
             "global virtual class ParentClass {\n"
                     + String.format("    %s virtual boolean parentMethod() {\n", scope)
@@ -1247,32 +1247,34 @@ public class UnusedMethodRuleTest {
      */
     @CsvSource({
         // Provide the arity of the *other* method, since that's the one that is uncalled.
-        "overloadedMethod(),  1",
-        "overloadedMethod(false),  0"
+        // One set per method, per visibility scope.
+        "public,  overloadedMethod(),  1",
+        "protected,  overloadedMethod(),  1",
+        "private,  overloadedMethod(),  1",
+        "public,  overloadedMethod(false),  0",
+        "protected,  overloadedMethod(false),  0",
+        "private,  overloadedMethod(false),  0"
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{displayName}: {0} {1}")
     @Disabled
     public void callInstanceMethodWithDifferentArityOverloads_expectViolation(
-            String invocation, int arity) {
-        String[] sourceCodes = {
-            "global class MethodHostClass {\n"
-                    + "    public boolean overloadedMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    + "    public boolean overloadedMethod(boolean b) {\n"
-                    + "        return b;\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokerClass {\n"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public boolean methodInvoker(MethodHostClass instance) {\n"
-                    + String.format("        return instance.%s;\n", invocation)
-                    + "    }\n"
-                    + "}\n"
-        };
+            String scope, String invocation, int arity) {
+        String sourceCode =
+                "global class MyClass {\n"
+                        + String.format("    %s boolean overloadedMethod() {\n", scope)
+                        + "        return true;\n"
+                        + "    }\n"
+                        + String.format("    %s boolean overloadedMethod(boolean b) {\n", scope)
+                        + "        return b;\n"
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public boolean methodInvoker() {\n"
+                        + String.format("        return %s;\n", invocation)
+                        + "    }\n"
+                        + "}\n";
         assertViolations(
-                sourceCodes,
+                sourceCode,
                 v -> {
                     assertEquals(v.getSourceVertexName(), "overloadedMethod");
                     assertEquals(((MethodVertex) v.getSourceVertex()).getArity(), arity);
@@ -1285,32 +1287,34 @@ public class UnusedMethodRuleTest {
      */
     @CsvSource({
         // Specify the beginning line of the overload that WASN'T called.
-        "overloadedMethod(42),  5",
-        "overloadedMethod(true),  1"
+        // One test per method, per visibility scope
+        "public,  overloadedMethod(42),  5",
+        "protected,  overloadedMethod(42),  5",
+        "private,  overloadedMethod(42),  5",
+        "public,  overloadedMethod(true),  1",
+        "protected,  overloadedMethod(true),  1",
+        "private,  overloadedMethod(true),  1"
     })
-    @ParameterizedTest(name = "{displayName}: overload: {1}")
+    @ParameterizedTest(name = "{displayName}: overload: {0} {1}")
     @Disabled
     public void callInstanceMethodWithDifferentSignatureOverloads_expectViolation(
-            String invocation, int beginLine) {
-        String[] sourceCodes = {
-            "global class MethodHostClass {\n"
-                    + "    public boolean overloadedMethod(Integer i) {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    + "    public boolean overloadedMethod(boolean b) {\n"
-                    + "        return b;\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokerClass {\n"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public boolean methodInvoker(MethodHostClass instance) {\n"
-                    + String.format("        return instance.%s;\n", invocation)
-                    + "    }\n"
-                    + "}\n"
-        };
+            String scope, String invocation, int beginLine) {
+        String sourceCode =
+                "global class MethodHostClass {\n"
+                        + String.format("    %s boolean overloadedMethod(Integer i) {\n", scope)
+                        + "        return true;\n"
+                        + "    }\n"
+                        + String.format("    %s boolean overloadedMethod(boolean b) {\n", scope)
+                        + "        return b;\n"
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public boolean methodInvoker() {\n"
+                        + String.format("        return %s;\n", invocation)
+                        + "    }\n"
+                        + "}\n";
         assertViolations(
-                sourceCodes,
+                sourceCode,
                 v -> {
                     assertEquals(v.getSourceVertexName(), "overloadedMethod");
                     assertEquals(v.getSourceVertex().getBeginLine(), beginLine);
@@ -1322,31 +1326,33 @@ public class UnusedMethodRuleTest {
      * count as used. Specific case: Methods with different arities.
      */
     @CsvSource({
-        // Use the arity of the constructor that ISN'T being called
-        "new MethodHostClass(true),  2",
-        "new MethodHostClass(true, true),  1"
+        // Use the arity of the constructor that ISN'T being called,
+        // and have one variant per visibility scope.
+        "public,  new MyClass(true),  2",
+        "protected,  new MyClass(true),  2",
+        "private,  new MyClass(true),  2",
+        "public,  new MyClass(true, true),  1",
+        "protected,  new MyClass(true, true),  1",
+        "private,  new MyClass(true, true),  1"
     })
-    @ParameterizedTest(name = "{displayName}: constructor {0}")
+    @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
     @Disabled
     public void callConstructorWithDifferentArityOverloads_expectViolation(
-            String constructor, int arity) {
-        String[] sourceCodes = {
-            "global class MethodHostClass {\n"
-                    + "    public MethodHostClass(boolean b) {\n"
-                    + "    }\n"
-                    + "    public MethodHostClass(boolean b, boolean c) {\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokerClass {"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public void methodInvoker() {\n"
-                    + String.format("        MethodHostClass mhc = %s;\n", constructor)
-                    + "    }\n"
-                    + "}\n"
-        };
+            String scope, String constructor, int arity) {
+        String sourceCode =
+                "global class MyClass {\n"
+                        + String.format("    %s MyClass(boolean b) {\n", scope)
+                        + "    }\n"
+                        + String.format("    %s MyClass(boolean b, boolean c) {\n", scope)
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public static void constructorInvocation() {\n"
+                        + String.format("        MyClass mc = %s;\n", constructor)
+                        + "    }\n"
+                        + "}\n";
         assertViolations(
-                sourceCodes,
+                sourceCode,
                 v -> {
                     assertEquals(v.getSourceVertexName(), "<init>");
                     assertEquals(((MethodVertex) v.getSourceVertex()).getArity(), arity);
@@ -1358,31 +1364,33 @@ public class UnusedMethodRuleTest {
      * count as used. Specific case: Methods with the same arity, but different signatures.
      */
     @CsvSource({
-        // Use the arity of the constructor that ISN'T being called
-        "new MethodHostClass(42),  4",
-        "new MethodHostClass(true),  2"
+        // Use the arity of the constructor that ISN'T being called.
+        // One test per constructor, per visibility scope.
+        "public,  new MethodHostClass(42),  4",
+        "protected,  new MethodHostClass(42),  4",
+        "private,  new MethodHostClass(42),  4",
+        "public,  new MethodHostClass(true),  2",
+        "protected,  new MethodHostClass(true),  2",
+        "private,  new MethodHostClass(true),  2"
     })
-    @ParameterizedTest(name = "{displayName}: constructor {0}")
+    @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
     @Disabled
     public void callConstructorWithDifferentSignatureOverloads_expectViolation(
-            String constructor, int beginLine) {
-        String[] sourceCodes = {
-            "global class MethodHostClass {\n"
-                    + "    public MethodHostClass(boolean b) {\n"
-                    + "    }\n"
-                    + "    public MethodHostClass(Integer i) {\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokerClass {"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-next-line UnusedMethodRule */\n"
-                    + "    public void methodInvoker() {\n"
-                    + String.format("        MethodHostClass mhc = %s;\n", constructor)
-                    + "    }\n"
-                    + "}\n"
-        };
+            String scope, String constructor, int beginLine) {
+        String sourceCode =
+                "global class MethodHostClass {\n"
+                        + String.format("    %s MethodHostClass(boolean b) {\n", scope)
+                        + "    }\n"
+                        + String.format("    %s MethodHostClass(Integer i) {\n", scope)
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-next-line UnusedMethodRule */\n"
+                        + "    public void methodInvoker() {\n"
+                        + String.format("        MethodHostClass mhc = %s;\n", constructor)
+                        + "    }\n"
+                        + "}\n";
         assertViolations(
-                sourceCodes,
+                sourceCode,
                 v -> {
                     assertEquals("<init>", v.getSourceVertexName());
                     assertEquals(beginLine, ((MethodVertex) v.getSourceVertex()).getArity());
