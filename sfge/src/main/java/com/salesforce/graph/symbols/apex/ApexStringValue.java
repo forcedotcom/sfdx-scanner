@@ -46,6 +46,7 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
     static final String METHOD_ESCAPE_HTML_3 = "escapeHtml3";
     static final String METHOD_ESCAPE_HTML_4 = "escapeHtml4";
     static final String METHOD_ESCAPE_JAVA = "escapeJava";
+    static final String METHOD_ESCAPE_SINGLE_QUOTES = "escapeSingleQuotes";
     static final String METHOD_GET_S_OBJECT_TYPE = "getSObjectType";
     static final String METHOD_HASH_CODE = "hashCode";
     static final String METHOD_INDEX_OF = "indexOf";
@@ -156,6 +157,9 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
                             Pair.of(METHOD_ESCAPE_HTML_3, StringEscapeUtils::escapeHtml3),
                             Pair.of(METHOD_ESCAPE_HTML_4, StringEscapeUtils::escapeHtml4),
                             Pair.of(METHOD_ESCAPE_JAVA, StringEscapeUtils::escapeJava),
+                            Pair.of(
+                                    METHOD_ESCAPE_SINGLE_QUOTES,
+                                    (stringValue) -> stringValue.replace("'", "\\'")),
                             Pair.of(METHOD_NORMALIZE_SPACE, StringUtils::normalizeSpace),
                             Pair.of(METHOD_TO_LOWER_CASE, StringUtils::toRootLowerCase),
                             Pair.of(METHOD_TO_UPPER_CASE, StringUtils::toRootUpperCase),

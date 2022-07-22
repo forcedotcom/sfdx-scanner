@@ -2,15 +2,47 @@ package com.salesforce.testutils;
 
 import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
-import com.salesforce.rules.fls.apex.operations.FlsViolationUtils;
+import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
+import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import java.util.Arrays;
 import java.util.TreeSet;
+import java.util.function.Function;
 
 /** Wrapper around Violation to help comparing only the violation message and line numbers */
 public class ViolationWrapper {
+    public enum FlsViolationType {
+        STANDARD(
+                (builder) ->
+                        new FlsViolationInfo(
+                                builder.validationType,
+                                builder.objectName,
+                                builder.fieldNames,
+                                builder.allFields)),
+        STRIP_INACCESSIBLE_WARNING(
+                (builder) ->
+                        new FlsStripInaccessibleWarningInfo(
+                                builder.validationType,
+                                builder.objectName,
+                                builder.fieldNames,
+                                builder.allFields)),
+        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolationInfo(builder.validationType));
+
+        Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier;
+
+        FlsViolationType(
+                Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier) {
+            this.instanceSupplier = instanceSupplier;
+        }
+
+        FlsViolationInfo createInstance(FlsViolationBuilder builder) {
+            return this.instanceSupplier.apply(builder);
+        }
+    }
+
     final int line;
     final String violationMsg;
 
@@ -21,26 +53,9 @@ public class ViolationWrapper {
 
     private ViolationWrapper(FlsViolationBuilder builder) {
         this.line = builder.line;
-        // A more graceful way would've been to pass the builder to FlsViolationInfo. But since this
-        // is builder
-        // is available only in test code, it is not visible in production code.
-        // Also, moving the builder to production feels like an overkill since definingType,
-        // sourceLine, etc
-        // will not be available where FlsViolationInfo is initialized.
-        final FlsViolationInfo violationInfo =
-                builder.stripInaccWarning
-                        ? new FlsStripInaccessibleWarningInfo(
-                                builder.validationType,
-                                builder.objectName,
-                                builder.fieldNames,
-                                builder.allFields)
-                        : new FlsViolationInfo(
-                                builder.validationType,
-                                builder.objectName,
-                                builder.fieldNames,
-                                builder.allFields);
-
-        this.violationMsg = FlsViolationUtils.constructMessage(violationInfo);
+        // Create new instance of FlsViolationInfo based on the type of violation
+        final FlsViolationInfo violationInfo = builder.violationType.createInstance(builder);
+        this.violationMsg = FlsViolationMessageUtil.constructMessage(violationInfo);
     }
 
     @Override
@@ -80,7 +95,7 @@ public class ViolationWrapper {
         private String definingType;
         private String definingMethod;
 
-        private boolean stripInaccWarning;
+        private FlsViolationType violationType;
 
         private FlsViolationBuilder(
                 int line, FlsConstants.FlsValidationType validationType, String objectName) {
@@ -89,12 +104,17 @@ public class ViolationWrapper {
             this.objectName = objectName;
             this.fieldNames = CollectionUtil.newTreeSet();
             this.allFields = false;
-            this.stripInaccWarning = false;
+            this.violationType = FlsViolationType.STANDARD;
         }
 
         public static FlsViolationBuilder get(
                 int line, FlsConstants.FlsValidationType validationType, String objectName) {
             return new FlsViolationBuilder(line, validationType, objectName);
+        }
+
+        public static FlsViolationBuilder get(
+                int line, FlsConstants.FlsValidationType validationType) {
+            return get(line, validationType, SoqlParserUtil.UNKNOWN);
         }
 
         public FlsViolationBuilder withField(String field) {
@@ -132,8 +152,8 @@ public class ViolationWrapper {
             return this;
         }
 
-        public FlsViolationBuilder forStripInaccWarning() {
-            this.stripInaccWarning = true;
+        public FlsViolationBuilder forViolationType(FlsViolationType violationType) {
+            this.violationType = violationType;
             return this;
         }
 

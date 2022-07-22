@@ -75,7 +75,7 @@ class ValidationVerifier {
         }
 
         return Optional.of(
-                FlsViolationUtils.getFlsViolationInfo(
+                FlsViolationCreatorUtil.getFlsViolationInfo(
                         expectedValidation, missingFields, missingFieldVertices));
     }
 

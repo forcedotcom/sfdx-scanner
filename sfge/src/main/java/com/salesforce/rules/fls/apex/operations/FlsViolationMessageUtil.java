@@ -3,35 +3,23 @@ package com.salesforce.rules.fls.apex.operations;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
-import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.ObjectFieldUtil;
 import com.salesforce.graph.ops.SoqlParserUtil;
-import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /** Utils class that deals with FLS-specific violations */
-public final class FlsViolationUtils {
-    static final String VIOLATION_MESSAGE_TEMPLATE =
-            "%1$s validation is missing for [%2$s] operation on [%3$s]";
-    private static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
+public final class FlsViolationMessageUtil {
     private static final String FIELD_NAME_SEPARATOR = ",";
-    private static final String FIELD_HANDLING_NOTICE =
-            " - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [%s]";
-
-    private static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
-            "For stripInaccessible checks on READ operation, "
-                    + "SFGE does not have the capability to verify that only sanitized data is used after the check."
-                    + "Please ensure that unsanitized data is discarded for [%2$s]";
 
     static final String ALL_FIELDS = "ALL_FIELDS";
 
@@ -55,7 +43,7 @@ public final class FlsViolationUtils {
     private static final Pattern RELATIONAL_PATTERN =
             Pattern.compile(RELATIONAL_PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
-    private FlsViolationUtils() {}
+    private FlsViolationMessageUtil() {}
 
     /**
      * Consolidates a set of FlsViolationInfo to merge items that have the same source/sink/object
@@ -102,11 +90,9 @@ public final class FlsViolationUtils {
 
     private static String getValidationInformation(
             FlsViolationInfo flsViolationInfo, ViolationType violationType) {
-        // TODO: consider using enums to choose message template when there's more than two options
-        final String messageTemplate =
-                flsViolationInfo instanceof FlsStripInaccessibleWarningInfo
-                        ? STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE
-                        : VIOLATION_MESSAGE_TEMPLATE;
+        // Use the template that corresponds to the instance of flsViolationInfo.
+        // This is necessary since individual subtypes have different message templates.
+        final String messageTemplate = flsViolationInfo.getMessageTemplate();
 
         final String validationInformation =
                 String.format(
@@ -147,14 +133,15 @@ public final class FlsViolationUtils {
 
         // Populate field information only if we have anything
         if (!"".equals(fieldString)) {
-            fieldInformation = String.format(FIELDS_MESSAGE_TEMPLATE, fieldString);
+            fieldInformation =
+                    String.format(UserFacingMessages.FIELDS_MESSAGE_TEMPLATE, fieldString);
         }
 
         // Add field notice if we have segments that may not have been parsed correctly
         if (!complexSegments.isEmpty()) {
             fieldInformation +=
                     String.format(
-                            FIELD_HANDLING_NOTICE,
+                            UserFacingMessages.FIELD_HANDLING_NOTICE,
                             Joiner.on(FIELD_NAME_SEPARATOR).join(complexSegments));
         }
         return fieldInformation;
@@ -227,67 +214,5 @@ public final class FlsViolationUtils {
     private static boolean hasUnhandledSegment(String input) {
         return RELATIONAL_PATTERN.matcher(input).find()
                 || SPECIAL_CHAR_PATTERN.matcher(input).find();
-    }
-
-    static FlsStripInaccessibleWarningInfo getFlsStripInaccessibleWarningInfo(
-            FlsValidationRepresentation.Info validationRepInfo) {
-        final String userFriendlyObjectName =
-                ApexValueUtil.deriveUserFriendlyDisplayName(validationRepInfo.getObjectValue())
-                        .orElse(validationRepInfo.getObjectName());
-        final TreeSet<String> combinedFieldNames =
-                combineFieldNamesAndValues(
-                        validationRepInfo.getFieldNames(),
-                        validationRepInfo.getFieldValues(),
-                        validationRepInfo.getValidationType().analysisLevel);
-
-        return new FlsStripInaccessibleWarningInfo(
-                validationRepInfo.getValidationType(),
-                userFriendlyObjectName,
-                combinedFieldNames,
-                validationRepInfo.isAllFields());
-    }
-
-    static FlsViolationInfo getFlsViolationInfo(
-            FlsValidationRepresentation.Info validationRepInfo,
-            Set<String> missingFields,
-            Set<ApexValue<?>> missingFieldValues) {
-        // Create a single set with both field names and field vertices. For field vertices, we use
-        // the name on the image.
-        final TreeSet<String> combinedMissingFields =
-                combineFieldNamesAndValues(
-                        missingFields,
-                        missingFieldValues,
-                        validationRepInfo.getValidationType().analysisLevel);
-        // Use object vertex image name when object vertex is available, else use object name.
-        final String userFriendlyObjectName =
-                ApexValueUtil.deriveUserFriendlyDisplayName(validationRepInfo.getObjectValue())
-                        .orElse(validationRepInfo.getObjectName());
-
-        final FlsViolationInfo flsViolationInfo =
-                new FlsViolationInfo(
-                        validationRepInfo.getValidationType(),
-                        userFriendlyObjectName,
-                        combinedMissingFields,
-                        validationRepInfo.isAllFields());
-
-        return flsViolationInfo;
-    }
-
-    private static TreeSet<String> combineFieldNamesAndValues(
-            Set<String> fieldNames,
-            Set<ApexValue<?>> fieldValues,
-            FlsConstants.AnalysisLevel analysisLevel) {
-        final TreeSet<String> combinedFieldNames = CollectionUtil.newTreeSet();
-
-        if (FlsConstants.AnalysisLevel.FIELD_LEVEL.equals(analysisLevel)) {
-            combinedFieldNames.addAll(fieldNames);
-            fieldValues.forEach(
-                    fieldValue -> {
-                        combinedFieldNames.add(
-                                ApexValueUtil.deriveUserFriendlyDisplayName(fieldValue)
-                                        .orElse("UNKNOWN_FIELD"));
-                    });
-        }
-        return combinedFieldNames;
     }
 }
