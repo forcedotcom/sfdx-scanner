@@ -81,15 +81,7 @@ public final class FlsViolationMessageUtil {
 
         final String fieldInformation =
                 getFieldInformation(fieldNames, allFields, flsViolationInfo.getObjectName());
-        final String validationInformation =
-                getValidationInformation(flsViolationInfo, violationType);
 
-        // Return the full validation message
-        return validationInformation + fieldInformation;
-    }
-
-    private static String getValidationInformation(
-            FlsViolationInfo flsViolationInfo, ViolationType violationType) {
         // Use the template that corresponds to the instance of flsViolationInfo.
         // This is necessary since individual subtypes have different message templates.
         final String messageTemplate = flsViolationInfo.getMessageTemplate();
@@ -99,7 +91,10 @@ public final class FlsViolationMessageUtil {
                         messageTemplate,
                         violationType,
                         flsViolationInfo.getValidationType().name(),
-                        flsViolationInfo.getObjectName());
+                        flsViolationInfo.getObjectName(),
+                        fieldInformation);
+
+        // Return the full validation message
         return validationInformation;
     }
 

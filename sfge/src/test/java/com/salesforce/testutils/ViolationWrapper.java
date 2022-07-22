@@ -29,7 +29,8 @@ public class ViolationWrapper {
                                 builder.objectName,
                                 builder.fieldNames,
                                 builder.allFields)),
-        UNRESOLVED_CRUD_FLS((builder) -> new UnresolvedCrudFlsViolationInfo(builder.validationType));
+        UNRESOLVED_CRUD_FLS(
+                (builder) -> new UnresolvedCrudFlsViolationInfo(builder.validationType));
 
         Function<ViolationWrapper.FlsViolationBuilder, FlsViolationInfo> instanceSupplier;
 

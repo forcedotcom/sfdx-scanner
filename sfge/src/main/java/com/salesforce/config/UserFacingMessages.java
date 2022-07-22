@@ -13,8 +13,9 @@ public final class UserFacingMessages {
             "Remove unreachable code to proceed with analysis: %s,%s:%d";
 
     /** CRUD/FLS Violation messages * */
+    // format: "CRUD" or "FLS", DML operation, Object type, Field information
     public static final String VIOLATION_MESSAGE_TEMPLATE =
-            "%1$s validation is missing for [%2$s] operation on [%3$s]";
+            "%1$s validation is missing for [%2$s] operation on [%3$s]%4$s";
 
     public static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
             "For stripInaccessible checks on READ operation, "
@@ -22,8 +23,8 @@ public final class UserFacingMessages {
                     + "Please confirm that unsanitized data is discarded for [%2$s]";
 
     public static final String UNRESOLVED_CRUD_FLS_TEMPLATE =
-            "SFGE couldn't resolve the parameter passed to [%2$s] operation. "
-                    + "Please confirm that this operation has the necessary CRUD/FLS checks";
+            "SFGE couldn't resolve the parameter passed to [%2$s] operation%4$s. "
+                    + "Please confirm that this operation has the necessary %1$s checks";
 
     public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
     public static final String FIELD_HANDLING_NOTICE =

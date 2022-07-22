@@ -210,9 +210,12 @@ public class FlsValidationCentral {
         if (!apexValueOptional.isPresent()) {
             // TODO: add telemetry on missing parameter type that we need to handle in future
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Database operation method has a parameter of unexpected type: " + parameter);
+                LOGGER.warn(
+                        "Database operation method has a parameter of unexpected type: "
+                                + parameter);
             }
-            // Add a violation to let users know that SFGE cannot resolve the parameter in the DML operation
+            // Add a violation to let users know that SFGE cannot resolve the parameter in the DML
+            // operation
             // and the onus of verifying its check is on them.
             violations.add(
                     FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
