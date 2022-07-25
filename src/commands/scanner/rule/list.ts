@@ -3,7 +3,7 @@ import {Messages} from '@salesforce/core';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
-import {AllowedEngineFilters, END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
+import {AllowedEngineFilters, END_OF_LIFE_BANNER, FEEDBACK_SURVEY_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 
 
 // Initialize Messages with the current plugin directory
@@ -81,6 +81,7 @@ export default class List extends ScannerCommand {
 	};
 
 	public async run(): Promise<Rule[]> {
+		this.ux.warn(FEEDBACK_SURVEY_BANNER)
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		const ruleFilters = this.buildRuleFilters();
