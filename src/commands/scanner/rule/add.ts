@@ -13,7 +13,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
+
 
 export default class Add extends SfdxCommand {
 
@@ -41,7 +41,6 @@ export default class Add extends SfdxCommand {
 
 	public async run(): Promise<AnyJson> {
 		this.validateFlags();
-		this.ux.styledHeader(commonMessages.getMessage('FEEDBACK_SURVEY_BANNER'));
 
 		const language = this.flags.language as string;
 		const paths = this.resolvePaths();
