@@ -2,7 +2,7 @@ import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject, RecombinedRuleResults} from '../../types';
-import {AllowedEngineFilters, INTERNAL_ERROR_CODE, END_OF_LIFE_BANNER, FEEDBACK_SURVEY_BANNER, PILOT_AVAILABILITY_BANNER} from '../../Constants';
+import {AllowedEngineFilters, INTERNAL_ERROR_CODE, END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../Constants';
 import {Controller} from '../../Controller';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT, OutputOptions} from '../../lib/RuleManager';
@@ -121,7 +121,6 @@ export default class Run extends ScannerCommand {
 	public async run(): Promise<AnyJson> {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 

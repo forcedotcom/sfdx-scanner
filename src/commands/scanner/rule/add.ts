@@ -2,7 +2,7 @@ import {flags, SfdxCommand} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
-import {END_OF_LIFE_BANNER, FEEDBACK_SURVEY_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
+import {END_OF_LIFE_BANNER, PILOT_AVAILABILITY_BANNER} from '../../../Constants';
 import path = require('path');
 import untildify = require('untildify');
 
@@ -40,7 +40,6 @@ export default class Add extends SfdxCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		this.validateFlags();
