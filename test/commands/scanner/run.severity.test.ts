@@ -1,5 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest, stripExtraneousOutput} from '../../TestUtils';
+import {setupCommandTest} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import path = require('path');
 
@@ -31,12 +31,12 @@ describe('scanner:run', function () {
 					'--severity-threshold', '1'
 				])
 				.it('When no violations are found equal to or greater than flag value, no error is thrown', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-                    const outputJson = JSON.parse(output);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+                    const output = JSON.parse(ctx.stdout.split('\n')[1]);
                     // check that test file still has severities of 3
-                    for (let i=0; i<outputJson.length; i++) {
-                        for (let j=0; j<outputJson[i].violations.length; j++) {
-                            expect(outputJson[i].violations[j].normalizedSeverity).to.equal(3);
+                    for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+                            expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
 
@@ -51,12 +51,12 @@ describe('scanner:run', function () {
 					'--severity-threshold', '3'
 				])
 				.it('When violations are found equal to or greater than flag value, an error is thrown', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-					const outputJson = JSON.parse(output);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
                     // check that test file still has severities of 3
-                    for (let i=0; i<outputJson.length; i++) {
-                        for (let j=0; j<outputJson[i].violations.length; j++) {
-                            expect(outputJson[i].violations[j].normalizedSeverity).to.equal(3);
+                    for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+                            expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
                     expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']));
@@ -94,28 +94,28 @@ describe('scanner:run', function () {
 					'--normalize-severity'
 				])
 				.it('Ensure normalized severity is correct', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-					const outputJson = JSON.parse(output);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
 
-					for (let i=0; i<outputJson.length; i++) {
-                        for (let j=0; j<outputJson[i].violations.length; j++) {
-							if (outputJson[i].engine.includes("pmd")){
-								if (outputJson[i].violations[j].severity == 1) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(1);
-								} else if (outputJson[i].violations[j].severity == 2) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(2);
-								} else if (outputJson[i].violations[j].severity == 3) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(3);
-								} else if (outputJson[i].violations[j].severity == 4) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(3);
-								} else if (outputJson[i].violations[j].severity == 5) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(3);
+					for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+							if (output[i].engine.includes("pmd")){
+								if (output[i].violations[j].severity == 1) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(1);
+								} else if (output[i].violations[j].severity == 2) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								} else if (output[i].violations[j].severity == 3) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								} else if (output[i].violations[j].severity == 4) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
+								} else if (output[i].violations[j].severity == 5) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(3);
 								}
-							} else if (outputJson[i].engine.includes("eslint")) {
-								if (outputJson[i].violations[j].severity == 1) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(2);
-								} else if (outputJson[i].violations[j].severity == 2) {
-									expect(outputJson[i].violations[j].normalizedSeverity).to.equal(1);
+							} else if (output[i].engine.includes("eslint")) {
+								if (output[i].violations[j].severity == 1) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(2);
+								} else if (output[i].violations[j].severity == 2) {
+									expect(output[i].violations[j].normalizedSeverity).to.equal(1);
 								}
 							}
 
@@ -129,12 +129,12 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('Ensure normalized severity is not outputted when --normalize-severity not provided', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-					const outputJson = JSON.parse(output);
+					// The first line is a header. Strip that away, and parse the rest as JSON.
+					const output = JSON.parse(ctx.stdout.split('\n')[1]);
 
-					for (let i=0; i<outputJson.length; i++) {
-                        for (let j=0; j<outputJson[i].violations.length; j++) {
-							expect(outputJson[i].violations[j].normalizedSeverity).to.equal(undefined);
+					for (let i=0; i<output.length; i++) {
+                        for (let j=0; j<output[i].violations.length; j++) {
+							expect(output[i].violations[j].normalizedSeverity).to.equal(undefined);
                         }
                     }
 				});

@@ -1,7 +1,6 @@
 import fs = require('fs');
 import path = require('path');
-import { test, expect } from '@salesforce/command/lib/test';
-import * as CommonMessages from '../messages/common.js';
+import { test } from '@salesforce/command/lib/test';
 import * as TestOverrides from './test-related-lib/TestOverrides';
 import Sinon = require('sinon');
 import LocalCatalog from '../src/lib/services/LocalCatalog';
@@ -14,12 +13,6 @@ export const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 11;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function prettyPrint(obj: any): string {
 	return JSON.stringify(obj, null, 2);
-}
-
-export function stripExtraneousOutput(stdout: string): string {
-	const splitOutput = stdout.split('\n');
-	expect(splitOutput[0]).to.equal('=== ' + CommonMessages.FEEDBACK_SURVEY_BANNER);
-	return splitOutput.slice(1).join('\n');
 }
 
 export function stubCatalogFixture(): void {

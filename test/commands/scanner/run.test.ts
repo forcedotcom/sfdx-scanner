@@ -1,5 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest, stripExtraneousOutput} from '../../TestUtils';
+import {setupCommandTest} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import fs = require('fs');
 import path = require('path');
@@ -214,8 +214,8 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('Properly writes CSV to console', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-					validateCsvOutput(output, false);
+					// Throw away the first line of output, since it's a banner.
+					validateCsvOutput(ctx.stdout.slice(ctx.stdout.indexOf('\n')), false);
 				});
 
 			setupCommandTest
