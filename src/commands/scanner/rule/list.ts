@@ -81,7 +81,7 @@ export default class List extends ScannerCommand {
 	};
 
 	public async run(): Promise<Rule[]> {
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
+		this.ux.warn(FEEDBACK_SURVEY_BANNER)
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		const ruleFilters = this.buildRuleFilters();
