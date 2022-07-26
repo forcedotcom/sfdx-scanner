@@ -20,7 +20,7 @@ describe('scanner:rule:describe', () => {
 				.it('--json flag yields correct results', ctx => {
 					const ctxJson = JSON.parse(ctx.stdout);
 					expect(ctxJson.result.length).to.equal(0, 'Should be no results');
-					expect(ctxJson.warnings.length).to.equal(2, 'Should be one warning');
+					expect(ctxJson.warnings.length).to.equal(2, 'Incorrect warning count');
 					expect(ctxJson.warnings[1]).to.equal(formattedWarning, 'Warning message should match');
 				});
 		});

@@ -693,6 +693,22 @@ describe('scanner:run', function () {
 			});
 	});
 
+	describe('run with format --json', () => {
+		setupCommandTest
+		.command(['scanner:run',
+		'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
+		'--format', 'json'
+	])
+	.it('provides only json in stdout', ctx => {
+		try {
+			JSON.parse(ctx.stdout);
+		} catch (error) {
+			expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
+		}
+		
+		});
+	});
+
 	describe('Validation on custom config flags', () => {
 		setupCommandTest
 			.command(['scanner:run',
