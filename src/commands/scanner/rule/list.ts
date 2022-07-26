@@ -63,7 +63,7 @@ export default class List extends ScannerCommand {
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 	};
 
-	public async run(): Promise<Rule[]> {
+	async runInternal(): Promise<Rule[]> {
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.

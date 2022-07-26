@@ -19,7 +19,7 @@ export const INTERNAL_ERROR_CODE = 1;
 
 export abstract class ScannerRunCommand extends ScannerCommand {
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		// First, do any validations that can't be handled with out-of-the-box stuff.
 		await this.validateFlags();
 

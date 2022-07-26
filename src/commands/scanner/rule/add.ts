@@ -5,6 +5,7 @@ import {Controller} from '../../../Controller';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import path = require('path');
 import untildify = require('untildify');
+import { ScannerCommand } from '../../../lib/ScannerCommand';
 
 
 // Initialize Messages with the current plugin directory
@@ -14,8 +15,7 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
-
-export default class Add extends SfdxCommand {
+export default class Add extends ScannerCommand {
 
 	public static description = messages.getMessage('commandDescription');
 	public static longDescription = messages.getMessage('commandDescriptionLong');
@@ -39,7 +39,7 @@ export default class Add extends SfdxCommand {
 		})
 	};
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		this.validateFlags();
 
 		const language = this.flags.language as string;

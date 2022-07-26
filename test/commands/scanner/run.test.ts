@@ -640,7 +640,6 @@ describe('scanner:run', function () {
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
 				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
-					expect(ctx.stderr, ctx.stdout).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{"), ctx.stdout.lastIndexOf("}]") + 2));
 					// Look through all of the results and gather a set of unique engines
 					const uniqueEngines = new Set(results.map(r => { return r.engine }));

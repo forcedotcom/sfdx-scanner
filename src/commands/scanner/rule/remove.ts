@@ -43,7 +43,7 @@ export default class Remove extends ScannerCommand {
 		})
 	};
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		// Step 1: Validate our input.
 		this.validateFlags();
 

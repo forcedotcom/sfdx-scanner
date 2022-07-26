@@ -40,7 +40,7 @@ export default class Describe extends ScannerCommand {
 		verbose: flags.builtin()
 	};
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.
