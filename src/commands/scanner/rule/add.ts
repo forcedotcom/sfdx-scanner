@@ -1,4 +1,4 @@
-import {flags, SfdxCommand} from '@salesforce/command';
+import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
