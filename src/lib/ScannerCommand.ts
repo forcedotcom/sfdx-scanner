@@ -2,8 +2,34 @@ import {SfdxCommand} from '@salesforce/command';
 import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {stringArrayTypeGuard} from './util/Utils';
+import {AnyJson} from '@salesforce/ts-types';
+
+import {Messages} from '@salesforce/core';
+
+// Initialize Messages with the current plugin directory
+Messages.importMessagesDirectory(__dirname);
+const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
+
 
 export abstract class ScannerCommand extends SfdxCommand {
+
+	public async run(): Promise<AnyJson> {
+		this.runCommonSteps();
+		return await this.runInternal();
+	}
+
+	/**
+	 * Command's should implement this method to add their
+	 * working steps.
+	 */
+	abstract runInternal(): Promise<AnyJson>;
+
+	/**
+	 * Common steps that should be run before every command
+	 */
+	protected runCommonSteps(): void {
+		this.ux.warn(commonMessages.getMessage('surveyRequestMessage'));
+	}
 
 	protected buildRuleFilters(): RuleFilter[] {
 		const filters: RuleFilter[] = [];

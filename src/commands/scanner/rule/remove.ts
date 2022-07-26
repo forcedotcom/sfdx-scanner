@@ -15,7 +15,6 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
 export default class Remove extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
@@ -44,8 +43,7 @@ export default class Remove extends ScannerCommand {
 		})
 	};
 
-	public async run(): Promise<AnyJson> {
-		this.ux.styledHeader(commonMessages.getMessage('FEEDBACK_SURVEY_BANNER'));
+	async runInternal(): Promise<AnyJson> {
 		// Step 1: Validate our input.
 		this.validateFlags();
 

@@ -14,16 +14,14 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
 
 export abstract class ScannerRunCommand extends ScannerCommand {
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		// First, do any validations that can't be handled with out-of-the-box stuff.
 		await this.validateFlags();
-		this.ux.styledHeader(commonMessages.getMessage('FEEDBACK_SURVEY_BANNER'));
 
 		// If severity-threshold is used, that implicitly normalizes the severity.
 		const normalizeSeverity: boolean = (this.flags['normalize-severity'] || this.flags['severity-threshold']) as boolean;
