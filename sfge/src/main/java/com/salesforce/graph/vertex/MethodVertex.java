@@ -79,6 +79,10 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         return annotations.get();
     }
 
+    public boolean hasAnnotation(String annotation) {
+        return annotations.get().stream().anyMatch(a -> a.getName().equalsIgnoreCase(annotation));
+    }
+
     public LazyVertexList<AnnotationVertex> _getAnnotations() {
         return new LazyVertexList<>(
                 () ->

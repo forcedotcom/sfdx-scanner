@@ -3,17 +3,17 @@ package com.salesforce.rules;
 import com.salesforce.PackageConstants;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.exception.SfgeRuntimeException;
+import com.salesforce.graph.Schema;
 import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.UserClassVertex;
+import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,6 +81,59 @@ public final class RuleUtil {
         }
         // Turn the Set into a List so we can return it.
         return new ArrayList<>(methods);
+    }
+
+    /**
+     * Indicates whether the provided method counts as a path entry point
+     * for the purposes of DFA execution.
+     */
+    public static boolean isPathEntryPoint(MethodVertex methodVertex) {
+        // Global methods are entry points.
+        if (methodVertex.getModifierNode().isGlobal()) {
+            return true;
+        }
+        // Methods that return page references are entry points.
+        if (methodVertex.getReturnType().equalsIgnoreCase(MethodUtil.PAGE_REFERENCE)) {
+            return true;
+        }
+        // Certain annotations can designate a method as an entry point.
+        String[] entryPointAnnotations =
+                new String[] {
+                    Schema.AURA_ENABLED,
+                    Schema.NAMESPACE_ACCESSIBLE,
+                    Schema.REMOTE_ACTION,
+                    Schema.INVOCABLE_METHOD
+                };
+        for (String annotation : entryPointAnnotations) {
+            if (methodVertex.hasAnnotation(annotation)) {
+                return true;
+            }
+        }
+        // Exposed methods on VF controllers are entry points.
+        Set<String> vfControllers = MetaInfoCollectorProvider
+            .getVisualForceHandler()
+            .getMetaInfoCollected()
+            .stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toSet());
+        if (vfControllers.contains(methodVertex.getDefiningType())) {
+            return true;
+        }
+        // InboundEmailHandler methods are entry points.
+        // NOTE: This is a fairly cursory check, and may struggle with nested inheritance.
+        // This isn't likely to become a problem, but if it does, we can make the check
+        // more robust.
+        Optional<UserClassVertex> parentClass = methodVertex.getParentClass();
+        return parentClass.isPresent()
+            && parentClass.get().getInterfaceNames()
+            .stream()
+            .map(String::toLowerCase)
+            // Does the parent class implement InboundEmailHandler?
+            .collect(Collectors.toSet()).contains(MethodUtil.INBOUND_EMAIL_HANDLER.toLowerCase())
+            // Does the method return an InboundEmailResult?
+            && methodVertex.getReturnType().equalsIgnoreCase(MethodUtil.INBOUND_EMAIL_RESULT)
+            // Is the method named handleInboundEmail?
+            && methodVertex.getName().equalsIgnoreCase(MethodUtil.HANDLE_INBOUND_EMAIL);
     }
 
     public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {

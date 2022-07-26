@@ -33,4 +33,8 @@ public abstract class FieldWithModifierVertex extends ChainedVertex {
     public boolean isStatic() {
         return getModifierNode().isStatic();
     }
+
+    public boolean isAbstract() {
+        return getModifierNode().isAbstract();
+    }
 }

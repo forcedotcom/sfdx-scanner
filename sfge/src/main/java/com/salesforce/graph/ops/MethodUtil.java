@@ -80,10 +80,10 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 public final class MethodUtil {
     private static final Logger LOGGER = LogManager.getLogger(MethodUtil.class);
 
-    private static final String PAGE_REFERENCE = "PageReference";
-    private static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
-    private static final String HANDLE_INBOUND_EMAIL = "handleInboundEmail";
-    private static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
+    public static final String PAGE_REFERENCE = "PageReference";
+    public static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
+    public static final String HANDLE_INBOUND_EMAIL = "handleInboundEmail";
+    public static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
     public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
 
