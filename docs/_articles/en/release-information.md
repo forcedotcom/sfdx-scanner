@@ -3,10 +3,28 @@ title: Release Information
 lang: en
 ---
 
-### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in)
+### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in).
+<br>
+
+## [v2.13.7](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.7) (07-27-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.6...v2.13.7)
+
+### Release Summary
+* Emergency survey request banner fix
+* Updates to local RetireJS Vulnerability Repository
+
+**Closed issues:**
+
+- \[BUG\] stdout not in proper JSON format when --format json is used [\#771](https://github.com/forcedotcom/sfdx-scanner/issues/771)
+
+**Merged pull requests:**
+
+- @W-11486406@ \[2.x\] Converting stylized survey request message output to warning [\#772](https://github.com/forcedotcom/sfdx-scanner/pull/772)
+- @W-11494509@ \[2.x\] Updating retireJs and package version for 2.13.7 release [\#774](https://github.com/forcedotcom/sfdx-scanner/pull/774)
 
 
-## [v2.13.6](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.5) (07-20-2022)
+## [v2.13.6](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.6) (07-20-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.5...v2.13.6)
 

@@ -8,7 +8,7 @@ lang: en
   <span class="slds-assistive-text">success</span>
     We're constantly improving Salesforce Code Analyzer. Tell us what you think!
     &nbsp;&nbsp;
-    <a href="https://research.net/r/SalesforceCA"><button class="slds-button slds-button_brand">Give Feedback</button></a>
+    <a href="https://research.net/r/SalesforceCA" target="_blank"><button class="slds-button slds-button_brand">Give Feedback</button></a>
 </div>
 <br>
 
