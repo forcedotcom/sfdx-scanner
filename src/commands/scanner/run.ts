@@ -121,7 +121,7 @@ export default class Run extends ScannerCommand {
 	public async run(): Promise<AnyJson> {
 		// First, we need to do some input validation that's a bit too sophisticated for the out-of-the-box flag validations.
 		this.validateFlags();
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
+		this.ux.warn(FEEDBACK_SURVEY_BANNER)
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 

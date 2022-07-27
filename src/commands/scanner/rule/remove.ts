@@ -44,7 +44,7 @@ export default class Remove extends ScannerCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
+		this.ux.warn(FEEDBACK_SURVEY_BANNER)
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
 		// Step 1: Validate our input.

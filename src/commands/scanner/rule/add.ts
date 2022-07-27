@@ -40,10 +40,11 @@ export default class Add extends SfdxCommand {
 	};
 
 	public async run(): Promise<AnyJson> {
-		this.ux.styledHeader(FEEDBACK_SURVEY_BANNER);
+		this.validateFlags();
+
+		this.ux.warn(FEEDBACK_SURVEY_BANNER)
 		this.ux.warn(END_OF_LIFE_BANNER);
 		this.ux.warn(PILOT_AVAILABILITY_BANNER);
-		this.validateFlags();
 
 		const language = this.flags.language;
 		const paths = this.resolvePaths();
