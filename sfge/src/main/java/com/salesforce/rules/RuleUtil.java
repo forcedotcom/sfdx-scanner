@@ -84,8 +84,8 @@ public final class RuleUtil {
     }
 
     /**
-     * Indicates whether the provided method counts as a path entry point
-     * for the purposes of DFA execution.
+     * Indicates whether the provided method counts as a path entry point for the purposes of DFA
+     * execution.
      */
     public static boolean isPathEntryPoint(MethodVertex methodVertex) {
         // Global methods are entry points.
@@ -110,12 +110,10 @@ public final class RuleUtil {
             }
         }
         // Exposed methods on VF controllers are entry points.
-        Set<String> vfControllers = MetaInfoCollectorProvider
-            .getVisualForceHandler()
-            .getMetaInfoCollected()
-            .stream()
-            .map(String::toLowerCase)
-            .collect(Collectors.toSet());
+        Set<String> vfControllers =
+                MetaInfoCollectorProvider.getVisualForceHandler().getMetaInfoCollected().stream()
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toSet());
         if (vfControllers.contains(methodVertex.getDefiningType())) {
             return true;
         }
@@ -125,15 +123,15 @@ public final class RuleUtil {
         // more robust.
         Optional<UserClassVertex> parentClass = methodVertex.getParentClass();
         return parentClass.isPresent()
-            && parentClass.get().getInterfaceNames()
-            .stream()
-            .map(String::toLowerCase)
-            // Does the parent class implement InboundEmailHandler?
-            .collect(Collectors.toSet()).contains(MethodUtil.INBOUND_EMAIL_HANDLER.toLowerCase())
-            // Does the method return an InboundEmailResult?
-            && methodVertex.getReturnType().equalsIgnoreCase(MethodUtil.INBOUND_EMAIL_RESULT)
-            // Is the method named handleInboundEmail?
-            && methodVertex.getName().equalsIgnoreCase(MethodUtil.HANDLE_INBOUND_EMAIL);
+                && parentClass.get().getInterfaceNames().stream()
+                        .map(String::toLowerCase)
+                        // Does the parent class implement InboundEmailHandler?
+                        .collect(Collectors.toSet())
+                        .contains(MethodUtil.INBOUND_EMAIL_HANDLER.toLowerCase())
+                // Does the method return an InboundEmailResult?
+                && methodVertex.getReturnType().equalsIgnoreCase(MethodUtil.INBOUND_EMAIL_RESULT)
+                // Is the method named handleInboundEmail?
+                && methodVertex.getName().equalsIgnoreCase(MethodUtil.HANDLE_INBOUND_EMAIL);
     }
 
     public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {

@@ -7,10 +7,8 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.vertex.*;
-
 import java.util.*;
 import java.util.stream.Collectors;
-
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -133,7 +131,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     private boolean methodUsedInternally(MethodVertex methodVertex) {
         // Get every method call in the class containing the method.
-        List<MethodCallExpressionVertex> potentialInternalCallers = getInternalCalls(methodVertex.getDefiningType());
+        List<MethodCallExpressionVertex> potentialInternalCallers =
+                getInternalCalls(methodVertex.getDefiningType());
 
         // For each internal call...
         for (MethodCallExpressionVertex potentialCall : potentialInternalCallers) {
@@ -175,30 +174,36 @@ public class UnusedMethodRule extends AbstractStaticRule {
         }
         // Otherwise, we'll need to do a query for internal calls.
         // An internal call is any method call whose reference is `this` or empty.
-        String[] desiredReferenceTypes = new String[]{
-            NodeType.THIS_VARIABLE_EXPRESSION,
-            NodeType.EMPTY_REFERENCE_EXPRESSION
-        };
+        String[] desiredReferenceTypes =
+                new String[] {
+                    NodeType.THIS_VARIABLE_EXPRESSION, NodeType.EMPTY_REFERENCE_EXPRESSION
+                };
         List<MethodCallExpressionVertex> internalCalls =
-            SFVertexFactory.loadVertices(
-                g,
-                g.V()
-                    .where(
-                        H.has(NodeType.METHOD_CALL_EXPRESSION, Schema.DEFINING_TYPE, definingType))
-                    // NOTE: There's no .hasLabel(String...) method, hence the call to .hasLabel(String,String...).
-                    .where(
-                        __.repeat(__.out(Schema.CHILD))
-                            .until(__.hasLabel(desiredReferenceTypes[0], desiredReferenceTypes))
-                            .count().is(P.gt(0))
-                    )
-            );
+                SFVertexFactory.loadVertices(
+                        g,
+                        g.V().where(
+                                        H.has(
+                                                NodeType.METHOD_CALL_EXPRESSION,
+                                                Schema.DEFINING_TYPE,
+                                                definingType))
+                                // NOTE: There's no .hasLabel(String...) method, hence the call to
+                                // .hasLabel(String,String...).
+                                .where(
+                                        __.repeat(__.out(Schema.CHILD))
+                                                .until(
+                                                        __.hasLabel(
+                                                                desiredReferenceTypes[0],
+                                                                desiredReferenceTypes))
+                                                .count()
+                                                .is(P.gt(0))));
 
         // Cache the result, then return it.
         this.internalMethodCallsByDefiningType.put(definingType, internalCalls);
         return internalCalls;
     }
 
-    private boolean parameterTypesMatch(MethodVertex method, MethodCallExpressionVertex potentialCall) {
+    private boolean parameterTypesMatch(
+            MethodVertex method, MethodCallExpressionVertex potentialCall) {
         // Get lists of the expected and actual parameters.
         List<ParameterVertex> expectedParameters = method.getParameters();
         List<ChainedVertex> actualParameters = potentialCall.getParameters();
@@ -211,9 +216,9 @@ public class UnusedMethodRule extends AbstractStaticRule {
             if (actualParameterDeclaration.isPresent()) {
                 String type;
                 if (actualParameterDeclaration.get() instanceof Typeable) {
-                    type = ((Typeable)actualParameterDeclaration.get()).getCanonicalType();
+                    type = ((Typeable) actualParameterDeclaration.get()).getCanonicalType();
                 } else if (actualParameterDeclaration.get() instanceof MethodVertex) {
-                    type = ((MethodVertex)actualParameterDeclaration.get()).getReturnType();
+                    type = ((MethodVertex) actualParameterDeclaration.get()).getReturnType();
                 } else {
                     // TODO: We return true here to avoid throwing false positives as we
                     //  implement more functionality. At a certain point, this will need
@@ -239,15 +244,18 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return Optional.empty();
     }
 
-    private Optional<BaseSFVertex> getTypeDeclaration(LiteralExpressionVertex<?> literalExpressionVertex) {
+    private Optional<BaseSFVertex> getTypeDeclaration(
+            LiteralExpressionVertex<?> literalExpressionVertex) {
         // Literal expressions are their own type declaration.
         return Optional.of(literalExpressionVertex);
     }
 
-    private Optional<BaseSFVertex> getTypeDeclaration(VariableExpressionVertex variableExpressionVertex) {
+    private Optional<BaseSFVertex> getTypeDeclaration(
+            VariableExpressionVertex variableExpressionVertex) {
         Optional<BaseSFVertex> declaration = Optional.empty();
         // How we handle this variable expression depends on the nature of its reference expression.
-        AbstractReferenceExpressionVertex abstractReferenceExpressionVertex = variableExpressionVertex.getReferenceExpression();
+        AbstractReferenceExpressionVertex abstractReferenceExpressionVertex =
+                variableExpressionVertex.getReferenceExpression();
 
         if (abstractReferenceExpressionVertex instanceof EmptyReferenceExpressionVertex) {
             // An empty reference expression could be a reference to a local variable, or
@@ -260,36 +268,46 @@ public class UnusedMethodRule extends AbstractStaticRule {
         } else if (abstractReferenceExpressionVertex instanceof ReferenceExpressionVertex) {
             // TODO: REWRITE THIS PART
             // A non-empty reference means something of the form `x.y`.
-            ReferenceExpressionVertex referenceExpressionVertex = (ReferenceExpressionVertex) abstractReferenceExpressionVertex;
+            ReferenceExpressionVertex referenceExpressionVertex =
+                    (ReferenceExpressionVertex) abstractReferenceExpressionVertex;
             // Check first for `this.property`.
             if (referenceExpressionVertex.getThisVariableExpression().isPresent()) {
                 declaration = getClassLevelDeclaration(variableExpressionVertex);
-            } else if (!referenceExpressionVertex.getChildren().isEmpty() && referenceExpressionVertex.getChild(0) instanceof MethodCallExpressionVertex) {
+            } else if (!referenceExpressionVertex.getChildren().isEmpty()
+                    && referenceExpressionVertex.getChild(0)
+                            instanceof MethodCallExpressionVertex) {
                 // Then check for `methodCall().property`.
                 MethodCallExpressionVertex nestedMethodCall = referenceExpressionVertex.getChild(0);
-                // TODO: USE THIS OPTIONAL TO GET THE TYPE OF THE OBJECT, THEN GET THE TYPE OF THE PROPERTY
+                // TODO: USE THIS OPTIONAL TO GET THE TYPE OF THE OBJECT, THEN GET THE TYPE OF THE
+                // PROPERTY
                 //   BEING REFERENCED.
                 Optional<BaseSFVertex> methodHostClass = getTypeDeclaration(nestedMethodCall);
             } else if (referenceExpressionVertex.getNames().size() > 1) {
                 return Optional.empty();
             } else {
                 // Otherwise, get the declaration of property `y` on host object/class `x`.
-                declaration = getPropertyDeclarationOnHost(variableExpressionVertex, referenceExpressionVertex);
+                declaration =
+                        getPropertyDeclarationOnHost(
+                                variableExpressionVertex, referenceExpressionVertex);
             }
         }
         return declaration;
     }
 
-    private Optional<BaseSFVertex> getTypeDeclaration(MethodCallExpressionVertex methodCallExpressionVertex) {
+    private Optional<BaseSFVertex> getTypeDeclaration(
+            MethodCallExpressionVertex methodCallExpressionVertex) {
         Optional<BaseSFVertex> declaration = Optional.empty();
-        // How we handle this method call expression depends on the nature of its reference expression.
-        AbstractReferenceExpressionVertex abstractReferenceExpressionVertex = methodCallExpressionVertex.getReferenceExpression();
+        // How we handle this method call expression depends on the nature of its reference
+        // expression.
+        AbstractReferenceExpressionVertex abstractReferenceExpressionVertex =
+                methodCallExpressionVertex.getReferenceExpression();
         if (abstractReferenceExpressionVertex instanceof EmptyReferenceExpressionVertex) {
             // An empty reference expression means this is a reference to a class method,
             // using an implicit `this`.
             declaration = getClassLevelDeclaration(methodCallExpressionVertex);
         } else if (abstractReferenceExpressionVertex instanceof ReferenceExpressionVertex) {
-            ReferenceExpressionVertex referenceExpressionVertex = (ReferenceExpressionVertex) abstractReferenceExpressionVertex;
+            ReferenceExpressionVertex referenceExpressionVertex =
+                    (ReferenceExpressionVertex) abstractReferenceExpressionVertex;
             if (referenceExpressionVertex.getThisVariableExpression().isPresent()) {
                 // A `this` expression also means this is a reference to a class method.
                 declaration = getClassLevelDeclaration(methodCallExpressionVertex);
@@ -299,7 +317,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return declaration;
     }
 
-    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getVariableOrPropertyDeclaration(T variableExpression) {
+    private <T extends BaseSFVertex & NamedVertex>
+            Optional<BaseSFVertex> getVariableOrPropertyDeclaration(T variableExpression) {
         // First check for local variables.
         Optional<BaseSFVertex> declaration = getMethodLevelDeclaration(variableExpression);
         if (!declaration.isPresent()) {
@@ -309,26 +328,40 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return declaration;
     }
 
-    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getMethodLevelDeclaration(T variable) {
+    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getMethodLevelDeclaration(
+            T variable) {
         // Search this method for a matching variable/parameter declaration.
-        MethodVertex parentMethod = variable.getParentMethod().orElseThrow(() -> new UnexpectedException(variable));
-        return getDeclarationForNamedUsage(parentMethod.getId(), variable.getName(),  NodeType.PARAMETER, NodeType.VARIABLE_DECLARATION);
+        MethodVertex parentMethod =
+                variable.getParentMethod().orElseThrow(() -> new UnexpectedException(variable));
+        return getDeclarationForNamedUsage(
+                parentMethod.getId(),
+                variable.getName(),
+                NodeType.PARAMETER,
+                NodeType.VARIABLE_DECLARATION);
     }
 
-    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getClassLevelDeclaration(T variable) {
+    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getClassLevelDeclaration(
+            T variable) {
         // Search this class for a field with that name.
-        UserClassVertex parentClass = variable.getParentClass().orElseThrow(() -> new UnexpectedException(variable));
-        return getDeclarationForNamedUsage(parentClass.getId(), variable.getName(),  NodeType.FIELD);
+        UserClassVertex parentClass =
+                variable.getParentClass().orElseThrow(() -> new UnexpectedException(variable));
+        return getDeclarationForNamedUsage(parentClass.getId(), variable.getName(), NodeType.FIELD);
     }
 
-    private Optional<BaseSFVertex> getClassLevelDeclaration(MethodCallExpressionVertex methodCallExpressionVertex) {
+    private Optional<BaseSFVertex> getClassLevelDeclaration(
+            MethodCallExpressionVertex methodCallExpressionVertex) {
         // Search this class for a field with that name.
-        UserClassVertex parentClass = methodCallExpressionVertex.getParentClass().orElseThrow(() -> new UnexpectedException(methodCallExpressionVertex));
-        return getDeclarationForNamedUsage(parentClass.getId(), methodCallExpressionVertex.getMethodName(),  NodeType.METHOD);
+        UserClassVertex parentClass =
+                methodCallExpressionVertex
+                        .getParentClass()
+                        .orElseThrow(() -> new UnexpectedException(methodCallExpressionVertex));
+        return getDeclarationForNamedUsage(
+                parentClass.getId(), methodCallExpressionVertex.getMethodName(), NodeType.METHOD);
     }
 
     // TODO: REFACTOR THIS WHOLE METHOD.
-    private Optional<BaseSFVertex> getPropertyDeclarationOnHost(VariableExpressionVertex variable, ReferenceExpressionVertex reference) {
+    private Optional<BaseSFVertex> getPropertyDeclarationOnHost(
+            VariableExpressionVertex variable, ReferenceExpressionVertex reference) {
         // The ReferenceExpression is the object/class on which the referenced variable resides.
         // Attempt to find the declaration of a matching object.
         Optional<BaseSFVertex> hostObjectDeclaration = getVariableOrPropertyDeclaration(reference);
@@ -338,7 +371,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
         if (hostObjectDeclaration.isPresent() && hostObjectDeclaration.get() instanceof Typeable) {
             // If we found a declaration for the host object, then its type
             // is whatever it was declared as.
-            hostType = ((Typeable)hostObjectDeclaration.get()).getCanonicalType();
+            hostType = ((Typeable) hostObjectDeclaration.get()).getCanonicalType();
         } else {
             // If we found no such declaration, see whether we can find a class
             // whose name matches, in which case the reference is to a static
@@ -346,27 +379,33 @@ public class UnusedMethodRule extends AbstractStaticRule {
             hostType = reference.getName();
         }
         // Now, get the vertex where that class is declared.
-        long classId = (long) g.V().where(H.has(NodeType.USER_CLASS, Schema.NAME, hostType)).id().next();
+        long classId =
+                (long) g.V().where(H.has(NodeType.USER_CLASS, Schema.NAME, hostType)).id().next();
         // See if we can find a declaration of the desired property on this class.
         return getDeclarationForNamedUsage(classId, variable.getName(), NodeType.FIELD);
     }
 
     /**
-     *
-     * @param parentVertexId - The ID of the root vertex for this search, which will be
-     *                       either a class vertex or a method vertex.
+     * @param parentVertexId - The ID of the root vertex for this search, which will be either a
+     *     class vertex or a method vertex.
      * @param referencedName - The name by which the desired property is referenced.
-     * @param nodeTypes - The node types that could possibly be the type declaration for the
-     *                  used vertex.
+     * @param nodeTypes - The node types that could possibly be the type declaration for the used
+     *     vertex.
      * @return
      */
-    private Optional<BaseSFVertex> getDeclarationForNamedUsage(long parentVertexId, String referencedName, String... nodeTypes) {
-        List<BaseSFVertex> vertices = SFVertexFactory.loadVertices(
-            g,
-            g.V(parentVertexId)
-                .repeat(__.out(Schema.CHILD)).emit()
-                .where(H.has(Arrays.asList(nodeTypes), Schema.NAME, referencedName))
-        );
+    private Optional<BaseSFVertex> getDeclarationForNamedUsage(
+            long parentVertexId, String referencedName, String... nodeTypes) {
+        List<BaseSFVertex> vertices =
+                SFVertexFactory.loadVertices(
+                        g,
+                        g.V(parentVertexId)
+                                .repeat(__.out(Schema.CHILD))
+                                .emit()
+                                .where(
+                                        H.has(
+                                                Arrays.asList(nodeTypes),
+                                                Schema.NAME,
+                                                referencedName)));
         if (vertices.isEmpty()) {
             // If we found no vertices, return an empty optional.
             return Optional.empty();

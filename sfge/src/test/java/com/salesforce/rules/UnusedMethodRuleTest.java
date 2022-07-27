@@ -1292,9 +1292,9 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(iParam),  11",
         "overloadedMethod(bParam),  8",
         "overloadedMethod(phcParam.iExternalInstanceProp),  11",
-//        "overloadedMethod(phcParam.getIntegerProp()),  11",
+        //        "overloadedMethod(phcParam.getIntegerProp()),  11",
         "overloadedMethod(phcParam.bExternalInstanceProp),  8",
-//        "overloadedMethod(phcParam.getBooleanProp()),  8",
+        //        "overloadedMethod(phcParam.getBooleanProp()),  8",
         // - Variables (and their instance properties)
         "overloadedMethod(iVar),  11",
         "overloadedMethod(bVar),  8",
@@ -1305,10 +1305,10 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(this.intReturner()),  11",
         "overloadedMethod(boolReturner()),  8",
         "overloadedMethod(this.boolReturner()),  8",
-//        "overloadedMethod(phcReturner().iExternalInstanceProp),  11",
-//        "overloadedMethod(this.phcReturner().iExternalInstanceProp),  11",
-//        "overloadedMethod(phcReturner().bExternalInstanceProp),  8",
-//        "overloadedMethod(this.phcReturner().bExternalInstanceProp),  8",
+        //        "overloadedMethod(phcReturner().iExternalInstanceProp),  11",
+        //        "overloadedMethod(this.phcReturner().iExternalInstanceProp),  11",
+        //        "overloadedMethod(phcReturner().bExternalInstanceProp),  8",
+        //        "overloadedMethod(this.phcReturner().bExternalInstanceProp),  8",
         // - Internal instance properties (and their instance properties)
         // (with implicit/explicit this)
         "overloadedMethod(iInstanceProp),  11",
@@ -1316,9 +1316,9 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(bInstanceProp),  8",
         "overloadedMethod(this.bInstanceProp),  8",
         "overloadedMethod(phcInstanceProp.iExternalInstanceProp),  11",
-//        "overloadedMethod(this.phcInstanceProp.iExternalInstanceProp),  11",
+        //        "overloadedMethod(this.phcInstanceProp.iExternalInstanceProp),  11",
         "overloadedMethod(phcInstanceProp.bExternalInstanceProp),  8",
-//        "overloadedMethod(this.phcInstanceProp.bExternalInstanceProp),  8",
+        //        "overloadedMethod(this.phcInstanceProp.bExternalInstanceProp),  8",
         // - Internal static properties (and their instance properties)
         // (with implicit/explicit class reference)
         "overloadedMethod(iStaticProp),  11",
@@ -1326,9 +1326,9 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(bStaticProp),  8",
         "overloadedMethod(MethodHostClass.bStaticProp),  8",
         "overloadedMethod(phcStaticProp.iExternalInstanceProp),  11",
-//        "overloadedMethod(MethodHostClass.phcStaticProp.iExternalInstanceProp),  11",
+        //        "overloadedMethod(MethodHostClass.phcStaticProp.iExternalInstanceProp),  11",
         "overloadedMethod(phcStaticProp.bExternalInstanceProp),  8",
-//        "overloadedMethod(MethodHostClass.phcStaticProp.bExternalInstanceProp),  8",
+        //        "overloadedMethod(MethodHostClass.phcStaticProp.bExternalInstanceProp),  8",
         // - External static instance properties
         "overloadedMethod(PropertyHostClass.iExternalStaticProp),  11",
         "overloadedMethod(PropertyHostClass.bExternalStaticProp),  8"
@@ -1338,56 +1338,56 @@ public class UnusedMethodRuleTest {
             String invocation, int uncalledBeginLine) {
         String[] sourceCodes = {
             "global class MethodHostClass {\n"
-                + "    private static integer iStaticProp = 42;\n"
-                + "    private static boolean bStaticProp = false;\n"
-                + "    private static PropertyHostClass phcStaticProp = new PropertyHostClass();\n"
-                + "    private integer iInstanceProp = 32;\n"
-                + "    private boolean bInstanceProp = true;\n"
-                + "    private PropertyHostClass phcInstanceProp = new PropertyHostClass();\n"
-                + "    private boolean overloadedMethod(Integer i) {\n"
-                + "        return true;\n"
-                + "    }\n"
-                + "    private boolean overloadedMethod(boolean b) {\n"
-                + "        return b;\n"
-                + "    }\n"
-                // Use the engine directive to prevent this method from tripping the rule.
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public integer intReturner() {\n"
-                + "        return 7;\n"
-                + "    }\n"
-                // Use the engine directive to prevent this method from tripping the rule.
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public boolean boolReturner() {\n"
-                + "        return true;\n"
-                + "    }\n"
-                // Use the engine directive to prevent this method from tripping the rule.
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public PropertyHostClass phcReturner() {\n"
-                + "        return new PropertyHostClass();\n"
-                + "    }\n"
-                // Use the engine directive to prevent this method from tripping the rule.
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public boolean methodInvoker(Integer iParam, Boolean bParam, PropertyHostClass phcParam) {\n"
-                + "        Integer iVar = 42;\n"
-                + "        Boolean bVar = true;\n"
-                + "        PropertyHostClass phcVar = new PropertyHostClass();\n"
-                + String.format("        return %s;\n", invocation)
-                + "    }\n"
-                + "}\n",
+                    + "    private static integer iStaticProp = 42;\n"
+                    + "    private static boolean bStaticProp = false;\n"
+                    + "    private static PropertyHostClass phcStaticProp = new PropertyHostClass();\n"
+                    + "    private integer iInstanceProp = 32;\n"
+                    + "    private boolean bInstanceProp = true;\n"
+                    + "    private PropertyHostClass phcInstanceProp = new PropertyHostClass();\n"
+                    + "    private boolean overloadedMethod(Integer i) {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "    private boolean overloadedMethod(boolean b) {\n"
+                    + "        return b;\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public integer intReturner() {\n"
+                    + "        return 7;\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public boolean boolReturner() {\n"
+                    + "        return true;\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public PropertyHostClass phcReturner() {\n"
+                    + "        return new PropertyHostClass();\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public boolean methodInvoker(Integer iParam, Boolean bParam, PropertyHostClass phcParam) {\n"
+                    + "        Integer iVar = 42;\n"
+                    + "        Boolean bVar = true;\n"
+                    + "        PropertyHostClass phcVar = new PropertyHostClass();\n"
+                    + String.format("        return %s;\n", invocation)
+                    + "    }\n"
+                    + "}\n",
             "global class PropertyHostClass {\n"
-                + "    public static integer iExternalStaticProp = 11;\n"
-                + "    public static boolean bExternalStaticProp = false;\n"
-                + "    public integer iExternalInstanceProp = 9;\n"
-                + "    public boolean bExternalInstanceProp = true;\n"
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public integer getIntegerProp() {\n"
-                + "        return iExternalInstanceProp;\n"
-                + "    }\n"
-                + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                + "    public boolean getBooleanProp() {\n"
-                + "        return bExternalInstanceProp;\n"
-                + "    }\n"
-                + "}\n"
+                    + "    public static integer iExternalStaticProp = 11;\n"
+                    + "    public static boolean bExternalStaticProp = false;\n"
+                    + "    public integer iExternalInstanceProp = 9;\n"
+                    + "    public boolean bExternalInstanceProp = true;\n"
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public integer getIntegerProp() {\n"
+                    + "        return iExternalInstanceProp;\n"
+                    + "    }\n"
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public boolean getBooleanProp() {\n"
+                    + "        return bExternalInstanceProp;\n"
+                    + "    }\n"
+                    + "}\n"
         };
         assertViolations(
                 sourceCodes,
