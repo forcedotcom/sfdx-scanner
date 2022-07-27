@@ -261,9 +261,17 @@ public class UnusedMethodRule extends AbstractStaticRule {
             // TODO: REWRITE THIS PART
             // A non-empty reference means something of the form `x.y`.
             ReferenceExpressionVertex referenceExpressionVertex = (ReferenceExpressionVertex) abstractReferenceExpressionVertex;
-            // Check first for `this.y`.
+            // Check first for `this.property`.
             if (referenceExpressionVertex.getThisVariableExpression().isPresent()) {
                 declaration = getClassLevelDeclaration(variableExpressionVertex);
+            } else if (!referenceExpressionVertex.getChildren().isEmpty() && referenceExpressionVertex.getChild(0) instanceof MethodCallExpressionVertex) {
+                // Then check for `methodCall().property`.
+                MethodCallExpressionVertex nestedMethodCall = referenceExpressionVertex.getChild(0);
+                // TODO: USE THIS OPTIONAL TO GET THE TYPE OF THE OBJECT, THEN GET THE TYPE OF THE PROPERTY
+                //   BEING REFERENCED.
+                Optional<BaseSFVertex> methodHostClass = getTypeDeclaration(nestedMethodCall);
+            } else if (referenceExpressionVertex.getNames().size() > 1) {
+                return Optional.empty();
             } else {
                 // Otherwise, get the declaration of property `y` on host object/class `x`.
                 declaration = getPropertyDeclarationOnHost(variableExpressionVertex, referenceExpressionVertex);
@@ -319,6 +327,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return getDeclarationForNamedUsage(parentClass.getId(), methodCallExpressionVertex.getMethodName(),  NodeType.METHOD);
     }
 
+    // TODO: REFACTOR THIS WHOLE METHOD.
     private Optional<BaseSFVertex> getPropertyDeclarationOnHost(VariableExpressionVertex variable, ReferenceExpressionVertex reference) {
         // The ReferenceExpression is the object/class on which the referenced variable resides.
         // Attempt to find the declaration of a matching object.
@@ -340,18 +349,6 @@ public class UnusedMethodRule extends AbstractStaticRule {
         long classId = (long) g.V().where(H.has(NodeType.USER_CLASS, Schema.NAME, hostType)).id().next();
         // See if we can find a declaration of the desired property on this class.
         return getDeclarationForNamedUsage(classId, variable.getName(), NodeType.FIELD);
-    }
-
-    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getVariableDeclaration(T variableUsage) {
-        // Search this method for a matching variable/parameter declaration.
-        MethodVertex parentMethod = variableUsage.getParentMethod().orElseThrow(() -> new UnexpectedException(variableUsage));
-        return getDeclarationForNamedUsage(parentMethod.getId(), variableUsage.getName(),  NodeType.PARAMETER, NodeType.VARIABLE_DECLARATION);
-    }
-
-    private <T extends BaseSFVertex & NamedVertex> Optional<BaseSFVertex> getFieldDeclaration(T fieldUsage) {
-        // Search this class for a field with that name.
-        UserClassVertex parentClass = fieldUsage.getParentClass().orElseThrow(() -> new UnexpectedException(fieldUsage));
-        return getDeclarationForNamedUsage(parentClass.getId(), fieldUsage.getName(),  NodeType.FIELD);
     }
 
     /**

@@ -1292,7 +1292,9 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(iParam),  11",
         "overloadedMethod(bParam),  8",
         "overloadedMethod(phcParam.iExternalInstanceProp),  11",
+//        "overloadedMethod(phcParam.getIntegerProp()),  11",
         "overloadedMethod(phcParam.bExternalInstanceProp),  8",
+//        "overloadedMethod(phcParam.getBooleanProp()),  8",
         // - Variables (and their instance properties)
         "overloadedMethod(iVar),  11",
         "overloadedMethod(bVar),  8",
@@ -1377,6 +1379,14 @@ public class UnusedMethodRuleTest {
                 + "    public static boolean bExternalStaticProp = false;\n"
                 + "    public integer iExternalInstanceProp = 9;\n"
                 + "    public boolean bExternalInstanceProp = true;\n"
+                + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                + "    public integer getIntegerProp() {\n"
+                + "        return iExternalInstanceProp;\n"
+                + "    }\n"
+                + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                + "    public boolean getBooleanProp() {\n"
+                + "        return bExternalInstanceProp;\n"
+                + "    }\n"
                 + "}\n"
         };
         assertViolations(
