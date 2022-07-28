@@ -5,10 +5,14 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
+import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.vertex.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -16,6 +20,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 public class UnusedMethodRule extends AbstractStaticRule {
+    private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String DESCRIPTION = "Identifies methods that are not invoked";
     GraphTraversalSource g;
     /**
@@ -89,6 +94,9 @@ public class UnusedMethodRule extends AbstractStaticRule {
         for (MethodVertex candidateVertex : candidateVertices) {
             // If the method is one that is ineligible to be analyzed, skip it.
             if (methodIsIneligible(candidateVertex)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Skipping vertex " + candidateVertex.getName() + ", as it is ineligible for analysis.");
+                }
                 continue;
             }
 
@@ -115,7 +123,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
                 // Abstract methods are ineligible.
                 || vertex.isAbstract()
                 // Path entry points should be skipped.
-                || RuleUtil.isPathEntryPoint(vertex);
+                || PathEntryPointUtil.isPathEntryPoint(vertex);
     }
 
     private boolean directedToSkip(MethodVertex methodVertex) {

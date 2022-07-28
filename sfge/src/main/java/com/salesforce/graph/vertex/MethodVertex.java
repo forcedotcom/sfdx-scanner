@@ -31,6 +31,10 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         return this.parameters.get();
     }
 
+    public boolean isAbstract() {
+        return getModifierNode().isAbstract();
+    }
+
     @Override
     public String getName() {
         return getString(Schema.NAME);

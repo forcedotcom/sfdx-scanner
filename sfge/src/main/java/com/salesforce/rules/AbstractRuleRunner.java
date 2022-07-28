@@ -5,6 +5,7 @@ import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
+import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.vertex.MethodVertex;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -81,7 +82,7 @@ public abstract class AbstractRuleRunner {
         if (rules.isEmpty()) {
             return new HashSet<>();
         }
-        List<MethodVertex> pathEntryPoints = RuleUtil.getPathEntryPoints(g, targets);
+        List<MethodVertex> pathEntryPoints = PathEntryPointUtil.getPathEntryPoints(g, targets);
         if (pathEntryPoints.isEmpty()) {
             LOGGER.info("No path-based entry points found");
             return new HashSet<>();

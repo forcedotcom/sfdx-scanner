@@ -96,7 +96,7 @@ public final class ClassStaticScope extends AbstractClassScope
                         g.V(userClass.getId())
                                 .out(Schema.CHILD)
                                 .hasLabel(NodeType.METHOD)
-                                .has(Schema.NAME, MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME)
+                                .has(Schema.NAME, Schema.STATIC_CONSTRUCTOR_CANONICAL_NAME)
                                 // This is a static initializer block, not a constructor
                                 .has(Schema.CONSTRUCTOR, false)
                                 .has(Schema.ARITY, 0)
