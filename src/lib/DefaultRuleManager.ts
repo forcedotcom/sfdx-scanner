@@ -14,7 +14,7 @@ import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
 import {uxEvents, EVENTS} from './ScannerEvents';
-import {CUSTOM_CONFIG} from '../Constants';
+import {CUSTOM_CONFIG, ENGINE, CONFIG_PILOT_FILE} from '../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -80,6 +80,13 @@ export class DefaultRuleManager implements RuleManager {
 		const runDescriptorList: RunDescriptor[] = [];
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
+
+		// Storing the paths from eslint and eslint-lwc to track if any are processed by both.
+		const paths: Map<string, string[]> = new Map([
+			[ENGINE.ESLINT, [] as string[]],
+			[ENGINE.ESLINT_LWC, [] as string[]],
+		]);
+
 		for (const e of engines) {
 			// For each engine, filter for the appropriate groups and rules and targets, and pass
 			// them all in. Note that some engines (pmd) need groups while others (eslint) need the rules.
@@ -107,7 +114,26 @@ export class DefaultRuleManager implements RuleManager {
 				this.logger.trace(`${e.getName()} is not eligible to execute this time.`);
 			}
 
+			if (paths.has(e.getName())) {
+				for (const t of engineTargets) {
+					for (const p of t.paths) {
+						paths.get(e.getName()).push(p);
+					}
+				}
+			}
 		}
+
+		// Checking if any file paths were processed by eslint and eslint-lwc, which may cause duplicate violations.
+		const pathsDoubleProcessed = paths.get(ENGINE.ESLINT).filter(path => paths.get(ENGINE.ESLINT_LWC).includes(path));
+		if (pathsDoubleProcessed.length > 0) {
+			const numFilesShown = 3;
+			const filesToDisplay = pathsDoubleProcessed.slice(0, numFilesShown);
+			if (pathsDoubleProcessed.length > numFilesShown) {
+				filesToDisplay.push(`and ${pathsDoubleProcessed.length - numFilesShown} more`)
+			}
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${filesToDisplay.join(', ')}`]));
+		}
+
 
 		this.validateRunDescriptors(runDescriptorList);
 		await this.emitRunTelemetry(runDescriptorList, runOptions.sfdxVersion);
