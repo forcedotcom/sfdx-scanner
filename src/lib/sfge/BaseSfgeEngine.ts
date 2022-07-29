@@ -200,7 +200,7 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 		}
 	}
 
-	private processStdout(output: string): RuleResult[] {
+	protected processStdout(output: string): RuleResult[] {
 		// Pull the violation objects from the output.
 		const violationsStartString = "VIOLATIONS_START";
 		const violationsStart = output.indexOf(violationsStartString);

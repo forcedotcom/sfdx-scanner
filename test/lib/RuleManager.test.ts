@@ -15,7 +15,7 @@ import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
 import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
-import {SfgeEngine} from '../../src/lib/sfge/SfgeEngine';
+import {SfgeDfaEngine} from '../../src/lib/sfge/SfgeDfaEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
@@ -519,7 +519,7 @@ describe('RuleManager', () => {
 
 			it('Positive method-level targets are properly matched', async () => {
 				// All tests will use the SFGE engine, since method-level targeting is intended for that engine anyway.
-				const engine = new SfgeEngine();
+				const engine = new SfgeDfaEngine();
 				await engine.init();
 
 				// Targets are all going to be normalized Unix paths, some of which also specify individual methods.

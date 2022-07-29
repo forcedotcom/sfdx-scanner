@@ -3,22 +3,22 @@ import {RuleResult} from '../../../src/types';
 import path = require('path');
 import fs = require('fs');
 import {expect} from 'chai';
-import {SfgeEngine} from '../../../src/lib/sfge/SfgeEngine';
+import {SfgeDfaEngine} from '../../../src/lib/sfge/SfgeDfaEngine';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
 
-class TestableSfgeEngine extends SfgeEngine {
+class TestableSfgeDfaEngine extends SfgeDfaEngine {
 	public processStdout(output: string): RuleResult[] {
 		return super.processStdout(output);
 	}
 }
 
-describe('SfgeEngine', () => {
+describe('SfgeDfaEngine', () => {
 	describe('#processStdout()', () => {
 		it('When Sfge finds violations, they are converted into RuleResult objects', async () => {
 			// ==== SETUP ====
-			const testEngine = new TestableSfgeEngine();
+			const testEngine = new TestableSfgeDfaEngine();
 			await testEngine.init();
 			const spoofedOutput = fs.readFileSync(path.join('test', 'code-fixtures', 'sfge-results', 'one_violation.txt')).toString();
 
@@ -31,7 +31,7 @@ describe('SfgeEngine', () => {
 
 		it('When sfge finds no violations, results are empty', async () => {
 			// ==== SETUP ====
-			const testEngine = new TestableSfgeEngine();
+			const testEngine = new TestableSfgeDfaEngine();
 			await testEngine.init();
 			const spoofedOutput = fs.readFileSync(path.join('test', 'code-fixtures', 'sfge-results', 'no_violations.txt')).toString();
 
