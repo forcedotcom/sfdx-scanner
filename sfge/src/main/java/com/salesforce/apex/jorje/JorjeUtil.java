@@ -1,6 +1,7 @@
 package com.salesforce.apex.jorje;
 
 import apex.jorje.data.Locations;
+import apex.jorje.parser.impl.BaseApexLexer;
 import apex.jorje.parser.impl.HiddenToken;
 import apex.jorje.semantic.ast.AstNode;
 import apex.jorje.semantic.ast.visitor.NoopScope;
@@ -22,6 +23,8 @@ import com.salesforce.exception.UnexpectedException;
 import java.util.Collections;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /** Converts string source code into a node that can be imported into the graph. */
@@ -29,6 +32,8 @@ public final class JorjeUtil {
     static {
         // Inform Jorje to track locations
         Locations.useIndexFactory();
+        // Increment log level to avoid printing info lines
+        incrementLogLevel();
     }
 
     public static AstNodeWrapper<?> compileApexFromString(String sourceCode) {
@@ -128,6 +133,15 @@ public final class JorjeUtil {
         JorjeCompilationException(String message) {
             super(message);
         }
+    }
+
+    /**
+     * Increments log level of BaseApexLexer class from jorje jar
+     * to avoid printing info logs.
+     */
+    private static void incrementLogLevel() {
+        Logger jorjeLogger = Logger.getLogger(BaseApexLexer.class.getName());
+        jorjeLogger.setLevel(Level.WARNING);
     }
 
     private JorjeUtil() {}
