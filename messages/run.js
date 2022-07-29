@@ -7,6 +7,10 @@ module.exports = {
 	"flags": {
 		"categoryDescription": "categor(ies) of rules to run",
 		"categoryDescriptionLong": "One or more categories of rules to run. Multiple values can be specified as a comma-separated list.",
+		"ignoreparseerrorsDescription": "ignore compilation failures in scanned files (default: false). Alternatively, set value using environment variable `SFGE_IGNORE_PARSE_ERRORS`",
+		"ignoreparseerrorsDescriptionLong": "ignore compilation failures in scanned files. Inherits value from SFGE_IGNORE_PARSE_ERRORS env-var if set.",
+		"projectdirDescription": "root directory of project",
+		"projectdirDescriptionLong": "Root project directory. Must be paths, not globs. Multiple values can be specified as a comma-separated list",
 		"rulesetDescription": "[deprecated] ruleset(s) of rules to run",
 		"rulesetDescriptionLong": "[Deprecated] One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
 		"targetDescription": "location of source code",
@@ -39,6 +43,10 @@ module.exports = {
 		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
 		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are: .csv; .xml; .json; .html; .sarif.",
+		"projectdirCannotBeGlob": "--projectdir cannot specify globs",
+		"projectdirMustBeDir": "--projectdir must specify directories",
+		"projectdirMustExist": "--projectdir must specify existing paths",
+		"sfgeRequiresProjectdir": "To specify --engine sfge, --projectdir must also be used",
 		"cannotWriteTableToFile": "Format 'table' cannot be written to a file. Please specify a different format.",
 		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},

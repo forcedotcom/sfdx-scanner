@@ -10,7 +10,6 @@ import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.vertex.*;
 import java.util.*;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -66,7 +65,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     @Override
     protected boolean isEnabled() {
-        return false; // TODO: ENABLE THE RULE WHEN READY
+        return true;
     }
 
     @Override
@@ -95,7 +94,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
             // If the method is one that is ineligible to be analyzed, skip it.
             if (methodIsIneligible(candidateVertex)) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Skipping vertex " + candidateVertex.getName() + ", as it is ineligible for analysis.");
+                    LOGGER.info(
+                            "Skipping vertex "
+                                    + candidateVertex.getName()
+                                    + ", as it is ineligible for analysis.");
                 }
                 continue;
             }

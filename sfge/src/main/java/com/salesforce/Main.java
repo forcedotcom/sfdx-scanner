@@ -11,7 +11,6 @@ import com.salesforce.metainfo.MetaInfoCollector;
 import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.RuleRunner;
-import com.salesforce.rules.RuleUtil;
 import com.salesforce.rules.Violation;
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,7 +75,7 @@ public class Main {
 
         switch (action) {
             case CATALOG:
-                return catalog();
+                return catalog(args);
             case EXECUTE:
                 return execute(args);
             default:
@@ -85,11 +84,13 @@ public class Main {
         }
     }
 
-    private int catalog() {
+    private int catalog(String... args) {
         LOGGER.info("Invoked CATALOG flow");
+        CliArgParser.CatalogArgParser cap = new CliArgParser.CatalogArgParser();
         List<AbstractRule> rules;
         try {
-            rules = RuleUtil.getEnabledRules();
+            cap.parseArgs(args);
+            rules = cap.getSelectedRules();
         } catch (SfgeException | SfgeRuntimeException ex) {
             System.err.println(ex.getMessage());
             return INTERNAL_ERROR;

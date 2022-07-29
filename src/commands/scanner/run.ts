@@ -1,13 +1,14 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {LooseObject} from '../../types';
-import {PathlessEngineFilters} from '../../Constants';
+import {ENGINE, PathlessEngineFilters} from '../../Constants';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
+import {stringArrayTypeGuard} from '../../lib/util/Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -92,6 +93,20 @@ export default class Run extends ScannerRunCommand {
 				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
+		projectdir:  flags.array({
+			char: 'p',
+			description: messages.getMessage('flags.projectdirDescription'),
+			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			map: d => normalize(untildify(d))
+		}),
+		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
+		// don't support that. Instead, we check the env-var manually in a subsequent method.
+		'ignore-parse-errors': flags.boolean({
+			description: messages.getMessage('flags.ignoreparseerrorsDescription'),
+			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
+			env: 'SFGE_IGNORE_PARSE_ERRORS'
+		}),
 		'severity-threshold': flags.integer({
             char: 's',
             description: messages.getMessage('flags.stDescription'),
@@ -111,6 +126,12 @@ export default class Run extends ScannerRunCommand {
 	};
 
 	protected validateCommandFlags(): Promise<void> {
+		if (this.flags.engine && stringArrayTypeGuard(this.flags.engine) && this.flags.engine.some(e => e === ENGINE.SFGE)) {
+			if (!this.flags.projectdir || !stringArrayTypeGuard(this.flags.projectdir) || this.flags.projectdir.length === 0) {
+				// If SFGE is specifically requested, then the projectdir flag must be used.
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.sfgeRequiresProjectdir', []);
+			}
+		}
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
 		}
@@ -130,11 +151,10 @@ export default class Run extends ScannerRunCommand {
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 */
-	protected gatherEngineOptions(): Map<string, string> {
-		const options: Map<string,string> = new Map();
+	protected gatherCommandEngineOptions(partialOptions: Map<string,string>): Map<string, string> {
 		if (this.flags.tsconfig) {
 			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
-			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
+			partialOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
 		}
 
 		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
@@ -142,7 +162,7 @@ export default class Run extends ScannerRunCommand {
 		if (this.flags.env) {
 			try {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
-				options.set('env', JSON.stringify(parsedEnv));
+				partialOptions.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
 				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
@@ -151,22 +171,22 @@ export default class Run extends ScannerRunCommand {
 		// Capturing eslintconfig value, if provided
 		if (this.flags.eslintconfig) {
 			const eslintConfig = normalize(untildify(this.flags.eslintconfig as string));
-			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
+			partialOptions.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
 		}
 
 		// Capturing pmdconfig value, if provided
 		if (this.flags.pmdconfig) {
 			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
-			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
+			partialOptions.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
 
 		// Capturing verbose-violations flag value (used for RetireJS output)
 		if (this.flags["verbose-violations"]) {
-			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
+			partialOptions.set(CUSTOM_CONFIG.VerboseViolations, "true");
 		}
 
 
-		return options;
+		return partialOptions;
 	}
 
 	protected pathBasedEngines(): boolean {

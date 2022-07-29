@@ -1,12 +1,17 @@
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
-import {RecombinedRuleResults} from '../types';
+import {RecombinedRuleResults, SfgeConfig} from '../types';
 import {RunOutputProcessor} from './util/RunOutputProcessor';
 import {Controller} from '../Controller';
+import {CUSTOM_CONFIG} from '../Constants';
 import {OUTPUT_FORMAT, RunOptions} from './RuleManager';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
+import globby = require('globby');
+import path = require('path');
+import {FileHandler} from './util/FileHandler';
+import {stringArrayTypeGuard} from './util/Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -17,6 +22,8 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
+
+const SFGE_IGNORE_PARSE_ERRORS = 'SFGE_IGNORE_PARSE_ERRORS';
 
 export abstract class ScannerRunCommand extends ScannerCommand {
 
@@ -71,8 +78,8 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		// First, perform any validation of the command's specific flags.
 		await this.validateCommandFlags();
 
-		// The output flags are common between subclasses. Validate those too.
-		this.validateOutputFlags();
+		// Some flags are common between subclasses. Validate those too.
+		await this.validateCommonFlags();
 	}
 
 	/**
@@ -83,11 +90,24 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	protected abstract validateCommandFlags(): Promise<void>
 
 	/**
-	 * Validate the output-related flags, which are common to all implementations of {@link ScannerRunCommand} and share
+	 * Validate the flags that are common to all implementations of {@link ScannerRunCommand} and share
 	 * the same constraints.
 	 * @private
 	 */
-	private validateOutputFlags(): void {
+	private async validateCommonFlags(): Promise<void> {
+		const fh = new FileHandler();
+		// Entries in the projectdir array must be non-glob paths to existing directories.
+		if (this.flags.projectdir && stringArrayTypeGuard(this.flags.projectdir) && this.flags.projectdir.length > 0) {
+			for (const dir of this.flags.projectdir) {
+				if (globby.hasMagic(dir)) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirCannotBeGlob', []);
+				} else if (!(await fh.exists(dir))) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirMustExist', []);
+				} else if (!(await fh.stats(dir)).isDirectory()) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirMustBeDir', []);
+				}
+			}
+		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
 		if (this.flags.format && this.flags.outfile) {
 			const inferredOutfileFormat = this.inferFormatFromOutfile();
@@ -144,12 +164,45 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		}
 	}
 
+	private gatherBaseEngineOptions(): Map<string,string> {
+		const options: Map<string,string> = new Map();
+
+		if (this.flags.projectdir) {
+			const sfgeConfig: SfgeConfig = {
+				// At this point, we can assume a non-null projectdir flag
+				// as already been type-guarded as a string[], and just cast
+				// it to one.
+				projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
+			};
+			if (this.flags['rule-thread-count'] != null) {
+				sfgeConfig.ruleThreadCount = this.flags['rule-thread-count'] as number;
+			}
+			if (this.flags['rule-thread-timeout'] != null) {
+				sfgeConfig.ruleThreadTimeout = this.flags['rule-thread-timeout'] as number;
+			}
+			// Check the status of the flag first, since the flag being true should trump the environment variable's value.
+			if (this.flags['ignore-parse-errors'] != null) {
+				sfgeConfig.ignoreParseErrors = this.flags['ignore-parse-errors'] as boolean;
+			} else if (SFGE_IGNORE_PARSE_ERRORS in process.env && process.env.SFGE_IGNORE_PARSE_ERRORS.toLowerCase() === 'true') {
+				sfgeConfig.ignoreParseErrors = true;
+			}
+			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
+		}
+		return options;
+	}
+
+	private gatherEngineOptions(): Map<string, string> {
+		const options = this.gatherBaseEngineOptions();
+		this.gatherCommandEngineOptions(options);
+		return options;
+	}
+
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 * @protected
 	 * @abstract
 	 */
-	protected abstract gatherEngineOptions(): Map<string, string>;
+	protected abstract gatherCommandEngineOptions(partialOptions: Map<string,string>): Map<string, string>;
 
 	protected abstract pathBasedEngines(): boolean;
 }

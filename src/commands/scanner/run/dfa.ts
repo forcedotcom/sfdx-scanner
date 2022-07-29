@@ -1,11 +1,8 @@
-import path = require('path');
 import globby = require('globby');
 import normalize = require('normalize-path');
 import untildify = require('untildify');
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
-import {CUSTOM_CONFIG} from '../../../Constants';
-import {SfgeConfig} from '../../../types';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
 import {OUTPUT_FORMAT} from '../../../lib/RuleManager';
 import {FileHandler} from '../../../lib/util/FileHandler';
@@ -16,8 +13,6 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
-
-const SFGE_IGNORE_PARSE_ERRORS = 'SFGE_IGNORE_PARSE_ERRORS';
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -100,16 +95,6 @@ export default class Dfa extends ScannerRunCommand {
 
 	protected async validateCommandFlags(): Promise<void> {
 		const fh = new FileHandler();
-		// Entries in the projectdir array must be non-glob paths to existing directories.
-		for (const dir of (this.flags.projectdir as string[])) {
-			if (globby.hasMagic(dir)) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirCannotBeGlob', []);
-			} else if (!(await fh.exists(dir))) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustExist', []);
-			} else if (!(await fh.stats(dir)).isDirectory()) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustBeDir', []);
-			}
-		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
 		for (const target of (this.flags.target as string[])) {
 			// The target specifies a method if it includes the `#` syntax.
@@ -127,28 +112,13 @@ export default class Dfa extends ScannerRunCommand {
 
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
-	 * @private
+	 * @protected
+	 * @override
 	 */
-	protected gatherEngineOptions(): Map<string,string> {
-		const options: Map<string,string> = new Map();
-		const sfgeConfig: SfgeConfig = {
-			projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
-		};
-
-		if (this.flags['rule-thread-count'] != null) {
-			sfgeConfig.ruleThreadCount = this.flags['rule-thread-count'] as number;
-		}
-		if (this.flags['rule-thread-timeout'] != null) {
-			sfgeConfig.ruleThreadTimeout = this.flags['rule-thread-timeout'] as number;
-		}
-		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
-		if (this.flags['ignore-parse-errors'] != null) {
-			sfgeConfig.ignoreParseErrors = this.flags['ignore-parse-errors'] as boolean;
-		} else if (SFGE_IGNORE_PARSE_ERRORS in process.env && process.env.SFGE_IGNORE_PARSE_ERRORS.toLowerCase() === 'true') {
-			sfgeConfig.ignoreParseErrors = true;
-		}
-		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
-		return options;
+	protected gatherCommandEngineOptions(partialOptions: Map<string,string>): Map<string,string> {
+		// All relevant options are already gathered by the super class, so this can
+		// just return the map as-is.
+		return partialOptions;
 	}
 
 	protected pathBasedEngines(): boolean {
