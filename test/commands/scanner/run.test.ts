@@ -716,7 +716,14 @@ describe('scanner:run', function () {
 				expect(ctx.stdout).to.contain(runMessages.getMessage('output.filtersIgnoredCustom'));
 			});
 
-
+		setupCommandTest
+			.command(['scanner:run',
+				'--target', '/some/path',
+				'--engine', 'sfge'
+			])
+			.it('When SFGE is requested, --projectdir is required', ctx => {
+				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.sfgeRequiresProjectdir'));
+			});
 	});
 
 	// Any commands that specify the --verbose cause subsequent commands to execute as if --verbose was specified.
