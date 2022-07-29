@@ -138,7 +138,7 @@ export default class Run extends ScannerRunCommand {
 		}
 
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
+			this.ux.log(pathlessMessages.getMessage('output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (this.flags.target as string[])) {
@@ -165,7 +165,7 @@ export default class Run extends ScannerRunCommand {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
 				partialOptions.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
+				throw new SfdxError(pathlessMessages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 
