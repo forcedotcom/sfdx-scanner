@@ -59,6 +59,30 @@ public class SObjectAccessDecisionTest {
     }
 
     @Test
+    public void testCustomSettings() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "    public static void doSomething() {\n"
+                    + "       MySettings__c ms = MySettings__c.getOrgDefaults();\n"
+                    + "		SObjectAccessDecision sd = Security.stripInaccessible(AccessType.UPDATABLE, ms);\n"
+                    + "		System.debug(sd.getRecords());\n"
+                    + "    }\n"
+                    + "}\n"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        final ApexListValue outputListValue = visitor.getSingletonResult();
+        assertThat(
+                outputListValue.isSanitized(
+                        MethodBasedSanitization.SanitizerMechanism.STRIP_INACCESSIBLE,
+                        FlsConstants.StripInaccessibleAccessType.UPDATABLE),
+                equalTo(true));
+        assertThat(outputListValue.isIndeterminant(), equalTo(true));
+    }
+
+    @Test
     public void testAccessDecisionValueIncorrectAccessType() {
         String[] sourceCode = {
             "public class MyClass {\n"
