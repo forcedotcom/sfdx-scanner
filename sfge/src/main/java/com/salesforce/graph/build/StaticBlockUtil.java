@@ -5,7 +5,6 @@ import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.ops.MethodUtil;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -340,7 +339,7 @@ public final class StaticBlockUtil {
     /** @return true if given node represents <clinit>() */
     private static boolean isClinitMethod(JorjeNode node) {
         return ASTConstants.NodeType.METHOD.equals(node.getLabel())
-                && MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME.equals(
+                && Schema.STATIC_CONSTRUCTOR_CANONICAL_NAME.equals(
                         node.getProperties().get(Schema.NAME));
     }
 

@@ -31,6 +31,10 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         return this.parameters.get();
     }
 
+    public boolean isAbstract() {
+        return getModifierNode().isAbstract();
+    }
+
     @Override
     public String getName() {
         return getString(Schema.NAME);
@@ -77,6 +81,10 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
     @Override
     public List<AnnotationVertex> getAnnotations() {
         return annotations.get();
+    }
+
+    public boolean hasAnnotation(String annotation) {
+        return annotations.get().stream().anyMatch(a -> a.getName().equalsIgnoreCase(annotation));
     }
 
     public LazyVertexList<AnnotationVertex> _getAnnotations() {

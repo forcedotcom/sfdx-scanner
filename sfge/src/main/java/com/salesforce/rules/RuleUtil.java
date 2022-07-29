@@ -3,85 +3,18 @@ package com.salesforce.rules;
 import com.salesforce.PackageConstants;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.exception.SfgeRuntimeException;
-import com.salesforce.graph.ops.MethodUtil;
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.reflections.Reflections;
 
 public final class RuleUtil {
     private static final Logger LOGGER = LogManager.getLogger(RuleUtil.class);
-
-    /**
-     * Load all path entry points in the graph.
-     *
-     * @param g
-     * @return
-     */
-    public static List<MethodVertex> getPathEntryPoints(GraphTraversalSource g) {
-        return getPathEntryPoints(g, new ArrayList<>());
-    }
-
-    /**
-     * Load all path entry points specified by the target objects. An empty list implicitly includes
-     * all files.
-     */
-    public static List<MethodVertex> getPathEntryPoints(
-            GraphTraversalSource g, List<RuleRunnerTarget> targets) {
-        // Sort the list of targets into full-file targets and method-level targets.
-        List<String> fileLevelTargets =
-                targets.stream()
-                        .filter(t -> t.getTargetMethods().isEmpty())
-                        .map(RuleRunnerTarget::getTargetFile)
-                        .collect(Collectors.toList());
-        List<RuleRunnerTarget> methodLevelTargets =
-                targets.stream()
-                        .filter(t -> !t.getTargetMethods().isEmpty())
-                        .collect(Collectors.toList());
-
-        // Internally, we'll use a Set to preserve uniqueness.
-        Set<MethodVertex> methods = new HashSet<>();
-
-        // If there are any explicitly targeted files, we must process them. If there are no
-        // explicit targets of any kind,
-        // then all files are implicitly targeted.
-        if (!fileLevelTargets.isEmpty() || targets.isEmpty()) {
-            // Use the file-level targets to get aura-enabled methods...
-            methods.addAll(MethodUtil.getAuraEnabledMethods(g, fileLevelTargets));
-            // ...and NamespaceAccessible methods...
-            methods.addAll(MethodUtil.getNamespaceAccessibleMethods(g, fileLevelTargets));
-            // ...and RemoteAction methods...
-            methods.addAll(MethodUtil.getRemoteActionMethods(g, fileLevelTargets));
-            // ...and InvocableMethod methods...
-            methods.addAll(MethodUtil.getInvocableMethodMethods(g, fileLevelTargets));
-            // ...and PageReference methods...
-            methods.addAll(MethodUtil.getPageReferenceMethods(g, fileLevelTargets));
-            // ...and global-exposed methods...
-            methods.addAll(MethodUtil.getGlobalMethods(g, fileLevelTargets));
-            // ...and implementations of Messaging.InboundEmailHandler#handleInboundEmail...
-            methods.addAll(MethodUtil.getInboundEmailHandlerMethods(g, fileLevelTargets));
-            // ...and exposed methods on VF controllers.
-            methods.addAll(MethodUtil.getExposedControllerMethods(g, fileLevelTargets));
-        }
-
-        // Also, if there are any specifically targeted methods, they should be included.
-        if (!methodLevelTargets.isEmpty()) {
-            methods.addAll(MethodUtil.getTargetedMethods(g, methodLevelTargets));
-        }
-        // Turn the Set into a List so we can return it.
-        return new ArrayList<>(methods);
-    }
 
     public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {
         final List<AbstractRule> allRules = getAllRules();
