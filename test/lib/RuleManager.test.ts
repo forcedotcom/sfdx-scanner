@@ -257,7 +257,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					Sinon.assert.callCount(uxSpy, 0);
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -374,7 +374,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -389,7 +389,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -403,7 +403,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -423,7 +423,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});

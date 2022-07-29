@@ -17,7 +17,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getAllEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length, names + '').to.equal(9);
+		expect(engines.length, names + '').to.equal(10);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_LWC);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
@@ -33,7 +33,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(5);
+		expect(engines.length).to.equal(6);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD);
@@ -49,7 +49,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(5);
+		expect(engines.length).to.equal(6);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
@@ -65,7 +65,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(4);
+		expect(engines.length).to.equal(5);
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
@@ -81,7 +81,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(4);
+		expect(engines.length).to.equal(5);
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
