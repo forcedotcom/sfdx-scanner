@@ -12,15 +12,16 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
+const commonRunMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const dfaMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static description = dfaMessages.getMessage('commandDescription');
+	public static longDescription = dfaMessages.getMessage('commandDescriptionLong');
 
 	public static examples = [
-		messages.getMessage('examples')
+		dfaMessages.getMessage('examples')
 	];
 
 	public static args = [{name: 'file'}];
@@ -34,14 +35,14 @@ export default class Dfa extends ScannerRunCommand {
 		// BEGIN: Flags for targeting files.
 		target: flags.array({
 			char: 't',
-			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.targetDescription'),
+			longDescription: dfaMessages.getMessage('flags.targetDescriptionLong'),
 			required: true
 		}),
 		projectdir:  flags.array({
 			char: 'p',
-			description: messages.getMessage('flags.projectdirDescription'),
-			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.projectdirDescription'),
+			longDescription: commonRunMessages.getMessage('flags.projectdirDescriptionLong'),
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			map: d => normalize(untildify(d)),
 			required: true
@@ -50,44 +51,44 @@ export default class Dfa extends ScannerRunCommand {
 		// BEGIN: Flags for result processing.
 		format: flags.enum({
 			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.formatDescription'),
+			longDescription: commonRunMessages.getMessage('flags.formatDescriptionLong'),
 			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
 		}),
 		outfile: flags.string({
 			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+			description: commonRunMessages.getMessage('flags.outfileDescription'),
+			longDescription: commonRunMessages.getMessage('flags.outfileDescriptionLong')
 		}),
 		'severity-threshold': flags.integer({
 			char: 's',
-			description: messages.getMessage('flags.sevthresholdDescription'),
-			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.sevthresholdDescription'),
+			longDescription: commonRunMessages.getMessage('flags.sevthresholdDescriptionLong'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
 		}),
 		'normalize-severity': flags.boolean({
-			description: messages.getMessage('flags.normalizesevDescription'),
-			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
+			description: commonRunMessages.getMessage('flags.normalizesevDescription'),
+			longDescription: commonRunMessages.getMessage('flags.normalizesevDescriptionLong')
 		}),
 		// END: Flags for result processing.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': flags.integer({
-			description: messages.getMessage('flags.rulethreadcountDescription'),
-			longDescription: messages.getMessage('flags.rulethreadcountDescriptionLong'),
+			description: dfaMessages.getMessage('flags.rulethreadcountDescription'),
+			longDescription: dfaMessages.getMessage('flags.rulethreadcountDescriptionLong'),
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
 		'rule-thread-timeout': flags.integer({
-			description: messages.getMessage('flags.rulethreadtimeoutDescription'),
-			longDescription: messages.getMessage('flags.rulethreadtimeoutDescriptionLong'),
+			description: dfaMessages.getMessage('flags.rulethreadtimeoutDescription'),
+			longDescription: dfaMessages.getMessage('flags.rulethreadtimeoutDescriptionLong'),
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
 		'ignore-parse-errors': flags.boolean({
-			description: messages.getMessage('flags.ignoreparseerrorsDescription'),
-			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.ignoreparseerrorsDescription'),
+			longDescription: commonRunMessages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
 			env: 'SFGE_IGNORE_PARSE_ERRORS'
 		})
 		// END: Config-overrideable engine flags.

@@ -4,23 +4,10 @@ module.exports = {
 	You can choose the format of output and decide between printing the results directly
 	or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
-		"formatDescription": "format of results",
-		"formatDescriptionLong": "Specifies output format with results written directly to the console.",
-		"ignoreparseerrorsDescription": "ignore compilation failures in scanned files (default: false). Alternatively, set value using environment variable `SFGE_IGNORE_PARSE_ERRORS`",
-		"ignoreparseerrorsDescriptionLong": "ignore compilation failures in scanned files. Inherits value from SFGE_IGNORE_PARSE_ERRORS env-var if set.",
-		"normalizesevDescription": "return normalized severity in addition to the engine specific severity",
-		"normalizesevDescriptionLong": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity",
-		"outfileDescription": "location of output file",
-		"outfileDescriptionLong": "Write output to a file.",
-		"projectdirDescription": "root directory of project",
-		"projectdirDescriptionLong": "Root project directory. Must be paths, not globs. Multiple values can be specified as a comma-separated list",
 		"rulethreadcountDescription": "number of threads evaluating dfa rules (default: 4). Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`",
 		"rulethreadcountDescriptionLong": "Specify number of rule evaluation threads, i.e. how many entrypoints can be evaluated concurrently. Default is 4. Inherits value from SFGE_RULE_THREAD_COUNT env-var if set.",
 		"rulethreadtimeoutDescription": "timeout for individual rule threads, in milliseconds (default: 900000 ms). Alternatively, set value using environment variable `SFGE_RULE_THREAD_TIMEOUT`",
 		"rulethreadtimeoutDescriptionLong": "Time limit for evaluating a single entrypoint. Value in milliseconds. Inherits from SFGE_RULE_THREAD_TIMEOUT env-var if set. Default is 900,000 ms, or 15 minutes.",
-		"sevthresholdDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
-		"sevthresholdDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
-		"targetDescription": "location of source code",
 		"targetDescriptionLong": "Source code location. May use glob patterns, or specify individual methods with #-syntax. Multiple values can be specified as a comma-separated list"
 	},
 	"validations": {

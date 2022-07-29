@@ -12,7 +12,7 @@ import Sinon = require('sinon');
 import fs = require('fs');
 
 Messages.importMessagesDirectory(__dirname);
-const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});

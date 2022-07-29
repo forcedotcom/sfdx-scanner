@@ -18,7 +18,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
@@ -100,11 +100,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		if (this.flags.projectdir && stringArrayTypeGuard(this.flags.projectdir) && this.flags.projectdir.length > 0) {
 			for (const dir of this.flags.projectdir) {
 				if (globby.hasMagic(dir)) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirCannotBeGlob', []);
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirCannotBeGlob', []);
 				} else if (!(await fh.exists(dir))) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirMustExist', []);
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustExist', []);
 				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.projectdirMustBeDir', []);
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustBeDir', []);
 				}
 			}
 		}
@@ -116,7 +116,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.cannotWriteTableToFile', []);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.cannotWriteTableToFile', []);
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
