@@ -5,7 +5,7 @@ import com.salesforce.exception.TodoException;
 import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.ChainedVertex;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import com.salesforce.graph.vertex.SFVertex;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -85,7 +85,7 @@ public final class FlsViolationCreatorUtil {
     }
 
     static FlsViolationInfo createUnresolvedCrudFlsViolation(
-            FlsConstants.FlsValidationType validationType, MethodCallExpressionVertex sinkVertex) {
+            FlsConstants.FlsValidationType validationType, SFVertex sinkVertex) {
         final FlsViolationInfo violationInfo = new UnresolvedCrudFlsViolationInfo(validationType);
         violationInfo.setSinkVertex(sinkVertex);
 

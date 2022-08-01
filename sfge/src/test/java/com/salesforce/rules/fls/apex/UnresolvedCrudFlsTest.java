@@ -138,4 +138,85 @@ public class UnresolvedCrudFlsTest extends BaseFlsTest {
                 sourceCode,
                 expectUnresolvedCrudFls(3, FlsConstants.FlsValidationType.READ));
     }
+
+    @Test
+    public void testDmlOnSecondLevelObject() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(My_Obj__c myObj) {\n"
+                        + "       myObj.Custom_Field__c.Name = 'Acme Inc.';\n"
+                        + "       update myObj.Custom_Field__c;\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expect(4, FlsConstants.FlsValidationType.UPDATE, "Custom_Field__c"));
+    }
+
+    @Test
+    public void testDmlOnReferenceObject() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(My_Obj__c myObj) {\n"
+                        + "       myObj.Custom_Field__c.Reference__r.Name = 'Acme Inc.';\n"
+                        + "       update myObj.Custom_Field__c.Reference__r;\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expectUnresolvedCrudFls(4, FlsConstants.FlsValidationType.UPDATE));
+    }
+
+    @Test
+    public void testDmlOnMethodReturnValue() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo() {\n"
+                        + "       /* sfge-disable-next-line ApexFlsViolationRule */\n"
+                        + "       List<SObject> accounts = [SELECT Id, Name FROM Account WHERE Type='something'];\n"
+                        + "       Map<String, List<SObject>> listByType = new Map<String, List<SObject>>();\n"
+                        + "       listByType.put('Account', accounts);\n"
+                        + "       delete listByType.get('Account');\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expect(7, FlsConstants.FlsValidationType.DELETE, "Account"));
+    }
+
+    @Test
+    public void testDmlOnMethodReturnValueIndeterminant() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(Map<String, List<SObject>> listByType) {\n"
+                        + "       delete listByType.get('Account');\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expect(3, FlsConstants.FlsValidationType.DELETE, "SObject"));
+    }
+
+    @Test
+    public void testDmlOnMethodInvokedbyMethod() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(Map<String, List<SObject>> listByType, Schema.SObjectType sObjectType) {\n"
+                        + "       delete listByType.get(sObjectType.getDescribe().getName());\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                ApexFlsViolationRule.getInstance(),
+                sourceCode,
+                expect(3, FlsConstants.FlsValidationType.DELETE, "SObject"));
+    }
 }

@@ -135,10 +135,7 @@ public final class JorjeUtil {
         }
     }
 
-    /**
-     * Increments log level of BaseApexLexer class from jorje jar
-     * to avoid printing info logs.
-     */
+    /** Increments log level of BaseApexLexer class from jorje jar to avoid printing info logs. */
     private static void incrementLogLevel() {
         Logger jorjeLogger = Logger.getLogger(BaseApexLexer.class.getName());
         jorjeLogger.setLevel(Level.WARNING);
