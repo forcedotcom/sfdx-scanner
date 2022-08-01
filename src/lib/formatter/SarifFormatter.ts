@@ -302,6 +302,25 @@ class SfgeSarifFormatter extends SarifFormatter {
 	}
 }
 
+class SfgeDfaSarifFormatter extends SarifFormatter {
+	constructor(engine: string) {
+		super(engine, {
+			tool: {
+				driver: {
+					name: ENGINE.SFGE_DFA,
+					version: SFGE_VERSION,
+					informationUri: 'https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/',
+					rules: []
+				}
+			}
+		});
+	}
+
+	protected getLevel(ruleViolation: RuleViolation): Notification.level {
+		return ruleViolation.severity === 1 ? ERROR : WARNING;
+	}
+}
+
 const getSarifFormatter = (engine: string): SarifFormatter => {
 	if (engine === ENGINE.ESLINT_CUSTOM) {
 		// Expose the eslint-custom engine as eslint, the users don't need to know it
@@ -320,6 +339,8 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
 		return new CPDSarifFormatter(engine);
 	} else if (engine === ENGINE.SFGE) {
 		return new SfgeSarifFormatter(engine);
+	} else if (engine === ENGINE.SFGE_DFA) {
+		return new SfgeDfaSarifFormatter(engine);
 	} else {
 		throw new Error(`Developer error. Unknown engine '${engine}'`);
 	}

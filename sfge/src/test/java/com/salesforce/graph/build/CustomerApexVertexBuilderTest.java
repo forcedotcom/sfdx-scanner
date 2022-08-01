@@ -10,7 +10,6 @@ import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.cache.VertexCacheProvider;
-import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.Arrays;
@@ -172,10 +171,7 @@ public class CustomerApexVertexBuilderTest {
                         g.V().hasLabel(NodeType.METHOD)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .not(has(Schema.CONSTRUCTOR, true))
-                                .not(
-                                        has(
-                                                Schema.NAME,
-                                                Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                .not(has(Schema.NAME, Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                                 .not(has(Schema.NAME, Schema.STATIC_CONSTRUCTOR_CANONICAL_NAME))
                                 .not(has(Schema.NAME, "clone"))
                                 .not(has(Schema.IS_STANDARD, true))

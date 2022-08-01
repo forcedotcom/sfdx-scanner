@@ -14,15 +14,16 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const commonRunMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const pathlessMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static description = pathlessMessages.getMessage('commandDescription');
+	public static longDescription = pathlessMessages.getMessage('commandDescriptionLong');
 
 	public static examples = [
-		messages.getMessage('examples')
+		pathlessMessages.getMessage('examples')
 	];
 
 	public static args = [{name: 'file'}];
@@ -34,79 +35,93 @@ export default class Run extends ScannerRunCommand {
 		// These flags are how you choose which rules you're running.
 		category: flags.array({
 			char: 'c',
-			description: messages.getMessage('flags.categoryDescription'),
-			longDescription: messages.getMessage('flags.categoryDescriptionLong')
+			description: pathlessMessages.getMessage('flags.categoryDescription'),
+			longDescription: pathlessMessages.getMessage('flags.categoryDescriptionLong')
 		}),
 		ruleset: flags.array({
 			char: 'r',
 			deprecated: {
-				messageOverride: messages.getMessage('rulesetDeprecation')
+				messageOverride: pathlessMessages.getMessage('rulesetDeprecation')
 			},
-			description: messages.getMessage('flags.rulesetDescription'),
-			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
+			description: pathlessMessages.getMessage('flags.rulesetDescription'),
+			longDescription: pathlessMessages.getMessage('flags.rulesetDescriptionLong')
 		}),
 		engine: flags.array({
 			char: 'e',
-			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
+			description: pathlessMessages.getMessage('flags.engineDescription'),
+			longDescription: pathlessMessages.getMessage('flags.engineDescriptionLong'),
 			options: [...PathlessEngineFilters]
 		}),
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 		// These flags are how you choose which files you're targeting.
 		target: flags.array({
 			char: 't',
-			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.targetDescription'),
+			longDescription: pathlessMessages.getMessage('flags.targetDescriptionLong'),
 			required: true
 		}),
 		// These flags modify how the process runs, rather than what it consumes.
 		format: flags.enum({
 			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
+			description: commonRunMessages.getMessage('flags.formatDescription'),
+			longDescription: commonRunMessages.getMessage('flags.formatDescriptionLong'),
 			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
 		}),
 		outfile: flags.string({
 			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+			description: commonRunMessages.getMessage('flags.outfileDescription'),
+			longDescription: commonRunMessages.getMessage('flags.outfileDescriptionLong')
 		}),
 		tsconfig: flags.string({
-			description: messages.getMessage('flags.tsconfigDescription'),
-			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+			description: pathlessMessages.getMessage('flags.tsconfigDescription'),
+			longDescription: pathlessMessages.getMessage('flags.tsconfigDescriptionLong')
 		}),
 		eslintconfig: flags.string({
-			description: messages.getMessage('flags.eslintConfigDescription'),
-			longDescription: messages.getMessage('flags.eslintConfigDescriptionLong')
+			description: pathlessMessages.getMessage('flags.eslintConfigDescription'),
+			longDescription: pathlessMessages.getMessage('flags.eslintConfigDescriptionLong')
 		}),
 		pmdconfig: flags.string({
-			description: messages.getMessage('flags.pmdConfigDescription'),
-			longDescription: messages.getMessage('flags.pmdConfigDescriptionLong')
+			description: pathlessMessages.getMessage('flags.pmdConfigDescription'),
+			longDescription: pathlessMessages.getMessage('flags.pmdConfigDescriptionLong')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
 		env: flags.string({
-			description: messages.getMessage('flags.envDescription'),
-			longDescription: messages.getMessage('flags.envDescriptionLong'),
+			description: pathlessMessages.getMessage('flags.envDescription'),
+			longDescription: pathlessMessages.getMessage('flags.envDescriptionLong'),
 			deprecated: {
-				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+				messageOverride: pathlessMessages.getMessage('flags.envParamDeprecationWarning')
 			}
+		}),
+		projectdir:  flags.array({
+			char: 'p',
+			description: commonRunMessages.getMessage('flags.projectdirDescription'),
+			longDescription: commonRunMessages.getMessage('flags.projectdirDescriptionLong'),
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			map: d => normalize(untildify(d))
+		}),
+		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
+		// don't support that. Instead, we check the env-var manually in a subsequent method.
+		'ignore-parse-errors': flags.boolean({
+			description: commonRunMessages.getMessage('flags.ignoreparseerrorsDescription'),
+			longDescription: commonRunMessages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
+			env: 'SFGE_IGNORE_PARSE_ERRORS'
 		}),
 		'severity-threshold': flags.integer({
             char: 's',
-            description: messages.getMessage('flags.stDescription'),
-            longDescription: messages.getMessage('flags.stDescriptionLong'),
+            description: commonRunMessages.getMessage('flags.sevthresholdDescription'),
+            longDescription: commonRunMessages.getMessage('flags.sevthresholdDescriptionLong'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
         }),
 		"normalize-severity": flags.boolean({
-			description: messages.getMessage('flags.nsDescription'),
-			longDescription: messages.getMessage('flags.nsDescriptionLong')
+			description: commonRunMessages.getMessage('flags.normalizesevDescription'),
+			longDescription: commonRunMessages.getMessage('flags.normalizesevDescriptionLong')
 		}),
 		"verbose-violations": flags.boolean({
-			description: messages.getMessage('flags.verboseViolationsDescription'),
-			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
+			description: pathlessMessages.getMessage('flags.verboseViolationsDescription'),
+			longDescription: pathlessMessages.getMessage('flags.verboseViolationsDescriptionLong')
 		}),
 	};
 
@@ -116,7 +131,7 @@ export default class Run extends ScannerRunCommand {
 		}
 
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
+			this.ux.log(pathlessMessages.getMessage('output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (this.flags.target as string[])) {
@@ -130,11 +145,10 @@ export default class Run extends ScannerRunCommand {
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 */
-	protected gatherEngineOptions(): Map<string, string> {
-		const options: Map<string,string> = new Map();
+	protected gatherCommandEngineOptions(partialOptions: Map<string,string>): Map<string, string> {
 		if (this.flags.tsconfig) {
 			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
-			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
+			partialOptions.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
 		}
 
 		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
@@ -142,31 +156,31 @@ export default class Run extends ScannerRunCommand {
 		if (this.flags.env) {
 			try {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
-				options.set('env', JSON.stringify(parsedEnv));
+				partialOptions.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
+				throw new SfdxError(pathlessMessages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 
 		// Capturing eslintconfig value, if provided
 		if (this.flags.eslintconfig) {
 			const eslintConfig = normalize(untildify(this.flags.eslintconfig as string));
-			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
+			partialOptions.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
 		}
 
 		// Capturing pmdconfig value, if provided
 		if (this.flags.pmdconfig) {
 			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
-			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
+			partialOptions.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
 
 		// Capturing verbose-violations flag value (used for RetireJS output)
 		if (this.flags["verbose-violations"]) {
-			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
+			partialOptions.set(CUSTOM_CONFIG.VerboseViolations, "true");
 		}
 
 
-		return options;
+		return partialOptions;
 	}
 
 	protected pathBasedEngines(): boolean {

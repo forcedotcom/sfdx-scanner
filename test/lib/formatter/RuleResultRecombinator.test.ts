@@ -225,7 +225,7 @@ const allFakePathlessRuleResultsNormalized: RuleResult[] = [
 
 const allFakeDfaRuleResults: RuleResult[] = [
 	{
-		engine: 'sfge',
+		engine: 'sfge-dfa',
 		fileName: sampleFile5,
 		violations: [{
 			"sourceLine": 15,
@@ -246,7 +246,7 @@ const allFakeDfaRuleResults: RuleResult[] = [
 
 const fakeDfaWithError: RuleResult[] = [
 	{
-		engine: 'sfge',
+		engine: 'sfge-dfa',
 		fileName: sampleFile5,
 		violations: [{
 			"sourceLine": 15,
@@ -268,7 +268,7 @@ const fakeDfaWithError: RuleResult[] = [
 
 const allFakeDfaRuleResultsNormalized: RuleResult[] = [
 	{
-		engine: 'sfge',
+		engine: 'sfge-dfa',
 		fileName: sampleFile5,
 		violations: [{
 			"sourceLine": 15,
@@ -564,7 +564,7 @@ describe('RuleResultRecombinator', () => {
 
 			function validateSfgeSarif(run: unknown, normalizeSeverity: boolean, expectingErrors: boolean): void {
 				const driver = run['tool']['driver'];
-				expect(driver.name).to.equal(ENGINE.SFGE);
+				expect(driver.name).to.equal(ENGINE.SFGE_DFA);
 				expect(driver.version).to.equal(SFGE_VERSION);
 				expect(driver.informationUri).to.equal('https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/');
 
@@ -648,7 +648,7 @@ describe('RuleResultRecombinator', () => {
 			});
 
 			it ('Happy Path - DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.SARIF, new Set(['sfge-dfa']));
 				const sarifResults: unknown[] = JSON.parse(results as string);
 				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
 				const runs = sarifResults['runs'];
@@ -656,7 +656,7 @@ describe('RuleResultRecombinator', () => {
 				for (let i=0; i<runs.length; i++) {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
-					if (engine === ENGINE.SFGE) {
+					if (engine === ENGINE.SFGE_DFA) {
 						validateSfgeSarif(run, false, false);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
@@ -665,11 +665,11 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
 			});
 
 			it ('Happy Path - Normalized DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.SARIF, new Set(['sfge-dfa']));
 				const sarifResults: unknown[] = JSON.parse(results as string);
 				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
 				const runs = sarifResults['runs'];
@@ -677,7 +677,7 @@ describe('RuleResultRecombinator', () => {
 				for (let i=0; i<runs.length; i++) {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
-					if (engine === ENGINE.SFGE) {
+					if (engine === ENGINE.SFGE_DFA) {
 						validateSfgeSarif(run, true, false);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
@@ -686,11 +686,11 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
 			});
 
 			it ('DFA with timeout error', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(fakeDfaWithError, OUTPUT_FORMAT.SARIF, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(fakeDfaWithError, OUTPUT_FORMAT.SARIF, new Set(['sfge-dfa']));
 				const sarifResults: unknown[] = JSON.parse(results as string);
 				expect(sarifResults['runs']).to.have.lengthOf(1, 'Runs');
 				const runs = sarifResults['runs'];
@@ -698,7 +698,7 @@ describe('RuleResultRecombinator', () => {
 				for (let i = 0; i < runs.length; i++) {
 					const run = runs[i];
 					const engine = run['tool']['driver']['name'];
-					if (engine === ENGINE.SFGE) {
+					if (engine === ENGINE.SFGE_DFA) {
 						validateSfgeSarif(run, false, true);
 					} else {
 						fail(`Unexpected engine: ${engine}`);
@@ -707,7 +707,7 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(3, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Sfge summary should be correct');
 			});
 
 			it('Handles all pathless engines', async () => {
@@ -809,7 +809,7 @@ describe('RuleResultRecombinator', () => {
 			});
 
 			it ('Happy path - DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.JSON, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.JSON, new Set(['sfge-dfa']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -829,11 +829,11 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Happy path - normalized DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.JSON, new Set(['sfge-dfa']));
 				const ruleResults: RuleResult[] = JSON.parse(results as string);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -853,7 +853,7 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Using --verbose-violations', async () => {
@@ -989,7 +989,7 @@ describe('RuleResultRecombinator', () => {
 			});
 
 			it('Happy path - DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.XML, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.XML, new Set(['sfge-dfa']));
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, false);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -1009,11 +1009,11 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it('Happy path - normalized DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.XML, new Set(['sfge-dfa']));
 				const ruleResults: RuleResult[] = await convertXmlToJson(results as string, true);
 				expect(ruleResults).to.have.lengthOf(1, 'Rule Results');
 
@@ -1033,7 +1033,7 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
@@ -1180,7 +1180,7 @@ describe('RuleResultRecombinator', () => {
 			});
 
 			it ('Happy path - DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.CSV, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResults, OUTPUT_FORMAT.CSV, new Set(['sfge-dfa']));
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {
@@ -1214,11 +1214,11 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it('Happy path - Normalized DFA rules', async () => {
-				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['sfge']));
+				const {minSev, results, summaryMap} = await RuleResultRecombinator.recombineAndReformatResults(allFakeDfaRuleResultsNormalized, OUTPUT_FORMAT.CSV, new Set(['sfge-dfa']));
 				const records = await new Promise((resolve, reject) => {
 					csvParse(results as string, (err, output) => {
 						if (err) {
@@ -1252,7 +1252,7 @@ describe('RuleResultRecombinator', () => {
 
 				expect(minSev).to.equal(1, 'Most severe problem');
 				expect(summaryMap.size).to.equal(1, 'Each supposedly executed engine needs a summary');
-				expect(summaryMap.get('sfge')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
+				expect(summaryMap.get('sfge-dfa')).to.deep.equal({fileCount: 1, violationCount: 1}, 'SFGE summary should be correct');
 			});
 
 			it ('Edge Cases', async () => {
@@ -1291,7 +1291,7 @@ describe('RuleResultRecombinator', () => {
 		});
 
 		describe('Output Format: HTML', () => {
-			it ('Using --verbose-violations', async () => {				
+			it ('Using --verbose-violations', async () => {
 				const results = (await RuleResultRecombinator.recombineAndReformatResults(retireJsVerboseViolations, OUTPUT_FORMAT.HTML, new Set(['retire-js']), true)).results as string;
 				const violationString = results.split("const violations = [")[1].split("];\n")[0];
 				const violation: RuleViolation = JSON.parse(violationString as string);

@@ -85,6 +85,13 @@ const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.cls",
 				"**/*.trigger"
 			],
+			disabled: true
+		}, {
+			name: ENGINE.SFGE_DFA,
+			targetPatterns: [
+				"**/*.cls",
+				"**/*.trigger"
+			],
 			disabled: false
 		}
 	]

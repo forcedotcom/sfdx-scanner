@@ -1,0 +1,10 @@
+Evaluating SFGE rules. See /Users/jfeingold/.sfdx-scanner/sfge.log for logs... Done
+2022-07-29 14:07:49  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/PageReferenceFls.cls
+2022-07-29 14:07:50  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/MiscellaneousFls.cls
+2022-07-29 14:07:50  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/FlsHelperClass.cls
+2022-07-29 14:07:50  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls
+2022-07-29 14:07:50  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/PermissionsException.cls
+2022-07-29 14:07:50  INFO  GraphUtil:193 - Loading file. path=/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/VfControllerFls.cls
+2022-07-29 14:07:54  INFO  AbstractMetadataInfoImpl:81 - Loading [] as known custom settings. Thread: Thread[main,5,main]
+SFDX-START[]SFDX-END
+VIOLATIONS_START[{"message":"Method someMethod in class AuraEnabledFls is never invoked","sourceFileName":"/Users/jfeingold/Code/sfdx-scanner/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls","sourceType":"AuraEnabledFls","sourceVertexName":"someMethod","sourceLineNumber":20,"sourceColumnNumber":18,"ruleName":"UnusedMethodRule","severity":3,"description":"Identifies methods that are not invoked","category":"Performance","url":"TODO"}]VIOLATIONS_END

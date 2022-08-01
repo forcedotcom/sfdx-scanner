@@ -8,7 +8,7 @@ import {OUTPUT_FORMAT} from '../RuleManager';
 
 Messages.importMessagesDirectory(__dirname);
 
-const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 const INTERNAL_ERROR_CODE = 1;
 
 export type RunOutputOptions = {

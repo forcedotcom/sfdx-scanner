@@ -17,7 +17,7 @@ describe('Controller.ts tests', () => {
 		const engines: RuleEngine[] = await Controller.getAllEngines();
 		const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length, names + '').to.equal(9);
+		expect(engines.length, names + '').to.equal(10);
 		expect(names).to.contain(ENGINE.ESLINT);
 		expect(names).to.contain(ENGINE.ESLINT_LWC);
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
@@ -26,7 +26,7 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
 		expect(names).to.contain(ENGINE.CPD);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(names).to.contain(ENGINE.SFGE_DFA);
 	});
 
 	it('getEnabledEngines returns only non-custom enabled engines when engineOptions is empty', async() => {
@@ -38,7 +38,7 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(names).to.contain(ENGINE.SFGE_DFA);
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM when engineOptions contains pmdconfig', async () => {
@@ -54,7 +54,7 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(names).to.contain(ENGINE.SFGE_DFA);
 	});
 
 	it('getEnabledEngines returns ESLINT_CUSTOM when engineOptions contains eslintconfig', async () => {
@@ -69,7 +69,7 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(names).to.contain(ENGINE.SFGE_DFA);
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM, ESLINT_CUSTOM when engineOptions contains pmdconfig and eslintconfig', async () => {
@@ -85,7 +85,7 @@ describe('Controller.ts tests', () => {
 		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
 		expect(names).to.contain(ENGINE.PMD_CUSTOM);
 		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(names).to.contain(ENGINE.SFGE_DFA);
 	});
 
 	it('getFilteredEngines filters and includes disabled', async() => {
@@ -133,7 +133,7 @@ describe('Controller.ts tests', () => {
 			await Controller.getFilteredEngines(['invalid-engine']);
 			fail('getFilteredEngines should have thrown');
 		} catch (e) {
-			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge`);
+			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge, sfge-dfa`);
 		}
 	});
 });

@@ -28,7 +28,8 @@ export enum ENGINE {
 	ESLINT_CUSTOM = 'eslint-custom',
 	RETIRE_JS = 'retire-js',
 	CPD = 'cpd',
-	SFGE = 'sfge'
+	SFGE = 'sfge',
+	SFGE_DFA = 'sfge-dfa'
 }
 
 /**
@@ -50,7 +51,8 @@ export const AllowedEngineFilters = [
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS,
 	ENGINE.CPD,
-	ENGINE.SFGE
+	ENGINE.SFGE,
+	ENGINE.SFGE_DFA
 ]
 
 /**
@@ -64,11 +66,12 @@ export const PathlessEngineFilters = [
 	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS,
-	ENGINE.CPD
+	ENGINE.CPD,
+	ENGINE.SFGE
 ]
 
 export const DfaEngineFilters = [
-	ENGINE.SFGE
+	ENGINE.SFGE_DFA
 ]
 
 

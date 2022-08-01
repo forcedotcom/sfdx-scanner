@@ -1,6 +1,5 @@
 package com.salesforce.graph.build;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.hamcrest.Matchers.hasSize;
@@ -13,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
@@ -41,13 +39,9 @@ import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
 import com.salesforce.graph.visitor.PathVertexVisitor;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import com.salesforce.matchers.TestRunnerMatcher;
-import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
-import com.salesforce.metainfo.VisualForceHandlerImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

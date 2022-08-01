@@ -74,9 +74,7 @@ public final class PathEntryPointUtil {
                 && methodVertex.getName().equalsIgnoreCase(Schema.HANDLE_INBOUND_EMAIL);
     }
 
-    /**
-     * Load all path entry points in the graph.
-     */
+    /** Load all path entry points in the graph. */
     public static List<MethodVertex> getPathEntryPoints(GraphTraversalSource g) {
         return getPathEntryPoints(g, new ArrayList<>());
     }
