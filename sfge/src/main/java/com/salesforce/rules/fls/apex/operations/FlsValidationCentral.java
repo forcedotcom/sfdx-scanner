@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.salesforce.config.SfgeConfigProvider;
-import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
@@ -156,18 +155,31 @@ public class FlsValidationCentral {
         final BaseSFVertex childVertex = dmlStatementVertexChildren.get(0);
 
         final ValidationConverter validationConverter = new ValidationConverter(validationType);
-        final Set<FlsValidationRepresentation> validationReps;
+        final Set<FlsValidationRepresentation> validationReps = new HashSet<>();
         if (childVertex instanceof ChainedVertex) {
             final Optional<ApexValue<?>> apexValue =
                     ScopeUtil.resolveToApexValue(symbols, (ChainedVertex) childVertex);
             if (apexValue.isPresent()) {
-                validationReps = validationConverter.convertToExpectedValidations(apexValue.get());
+                validationReps.addAll(
+                        validationConverter.convertToExpectedValidations(apexValue.get()));
             } else {
-                throw new TodoException(
-                        "Apex value not detected for dml's child vertex: " + childVertex);
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn(
+                            "TODO: Apex value not detected for dml's child vertex: " + childVertex);
+                    // TODO: add telemetry
+                }
+                violations.add(
+                        FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
+                                validationType, vertex));
             }
         } else {
-            throw new TodoException("Child vertex of DML is not a chained vertex: " + childVertex);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("TODO: Child vertex of DML is not a chained vertex: " + childVertex);
+                // TODO: add telemetry
+            }
+            violations.add(
+                    FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
+                            validationType, vertex));
         }
 
         expectedValidations.addAll(validationReps);
