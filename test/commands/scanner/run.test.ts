@@ -53,11 +53,12 @@ describe('scanner:run', function () {
 				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+						'--engine', 'pmd',
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
 					.it('When the file contains no violations, a message is logged to the console', ctx => {
-						expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+						expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					});
 			});
 
@@ -246,16 +247,18 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--format', 'csv'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--outfile', 'testout.csv'
 				])
@@ -266,7 +269,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runOutputProcessorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
 					expect(fs.existsSync('testout.csv')).to.be.false;
 				});
@@ -326,16 +329,18 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--format', 'html'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--outfile', outputFile
 				])
@@ -346,7 +351,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runOutputProcessorMessages.getMessage('output.writtenToOutFile', [outputFile]));
 					expect(fs.existsSync(outputFile)).to.be.false;
 				});
@@ -402,16 +407,18 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--format', 'json'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--outfile', 'testout.json'
 				])
@@ -422,7 +429,7 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stdout).to.not.contain(runOutputProcessorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
 					expect(fs.existsSync('testout.json')).to.be.false;
 				});
@@ -434,6 +441,7 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--format', 'table'
 				])
@@ -450,11 +458,12 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--format', 'table'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 		});
 
@@ -536,13 +545,14 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--ruleset', 'ApexUnit',
 					'--json'
 				])
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(output.result).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 				});
 		});
 
@@ -580,6 +590,7 @@ describe('scanner:run', function () {
 				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+						'--engine', 'pmd',
 						'--ruleset', 'ApexUnit'
 					])
 					.it('When no format is specified, we default to a TABLE', ctx => {
@@ -599,9 +610,10 @@ describe('scanner:run', function () {
 				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
+						'--engine', 'pmd',
 						'--format', 'xml'
 					])
-					.it('When no rules are explicitly specified, all rules are run', ctx => {
+					.it('When no rules are explicitly specified, all rules in specified engine are run', ctx => {
 						// We'll split the output by the <violation> tag, so we can get individual violations.
 						const violations = ctx.stdout.split('<violation');
 						// The first list item is going to be the header, so we need to pull that off.
@@ -638,7 +650,7 @@ describe('scanner:run', function () {
 		describe('Project: JS', () => {
 			setupCommandTest
 				.do(() => process.chdir(path.join('test', 'code-fixtures', 'projects', 'app')))
-				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
+				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--engine', 'pmd,eslint', '--format', 'json'])
 				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
 					expect(ctx.stderr, ctx.stdout).to.be.empty;
@@ -716,14 +728,14 @@ describe('scanner:run', function () {
 				expect(ctx.stdout).to.contain(runMessages.getMessage('output.filtersIgnoredCustom'));
 			});
 
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', '/some/path',
-				'--engine', 'sfge'
-			])
-			.it('When SFGE is requested, --projectdir is required', ctx => {
-				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.sfgeRequiresProjectdir'));
-			});
+//		setupCommandTest
+//			.command(['scanner:run',
+//				'--target', '/some/path',
+//				'--engine', 'sfge'
+//			])
+//			.it('When SFGE is requested, --projectdir is required', ctx => {
+//				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.sfgeRequiresProjectdir'));
+//			});
 	});
 
 	// Any commands that specify the --verbose cause subsequent commands to execute as if --verbose was specified.

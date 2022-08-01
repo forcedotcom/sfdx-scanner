@@ -147,6 +147,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex'),
+					'--projectdir', path.join('test', 'code-fixtures', 'apex'),
 					'--format', 'json',
 					'--category', category
 				])
@@ -171,6 +172,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex'),
+					'--projectdir', path.join('test', 'code-fixtures', 'apex'),
 					'--format', 'json',
 					'--category', category
 				])

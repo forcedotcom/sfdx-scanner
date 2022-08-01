@@ -1,14 +1,13 @@
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {LooseObject} from '../../types';
-import {ENGINE, PathlessEngineFilters} from '../../Constants';
+import {PathlessEngineFilters} from '../../Constants';
 import {CUSTOM_CONFIG} from '../../Constants';
 import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
-import {stringArrayTypeGuard} from '../../lib/util/Utils';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -127,12 +126,6 @@ export default class Run extends ScannerRunCommand {
 	};
 
 	protected validateCommandFlags(): Promise<void> {
-		if (this.flags.engine && stringArrayTypeGuard(this.flags.engine) && this.flags.engine.some(e => e === ENGINE.SFGE)) {
-			if (!this.flags.projectdir || !stringArrayTypeGuard(this.flags.projectdir) || this.flags.projectdir.length === 0) {
-				// If SFGE is specifically requested, then the projectdir flag must be used.
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.sfgeRequiresProjectdir', []);
-			}
-		}
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
 		}

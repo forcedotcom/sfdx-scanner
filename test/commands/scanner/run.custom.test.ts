@@ -17,9 +17,9 @@ describe('scanner:run with custom config E2E', () => {
 
 	describe('Custom PMD config', () => {
 
-		
+
 		setupCommandTest
-		.command(['scanner:run', 
+		.command(['scanner:run',
 			'--target', path.join('.', 'test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'pages', 'testSELECT2.page'),
 			'--pmdconfig', customPmdConfig,
 			'--format', 'json'])
@@ -33,15 +33,15 @@ describe('scanner:run with custom config E2E', () => {
 			expect(output.length).to.equal(1);
 			expect(output[0].engine).to.equal(ENGINE.PMD_CUSTOM.valueOf());
 			expect(output[0].violations.length).to.equal(1);
-			
+
 		});
 
 		setupCommandTest
-		.command(['scanner:run', 
+		.command(['scanner:run',
 			'--target', path.join('.', 'test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'pages', 'testSELECT2.page'),
 			'--pmdconfig', customPmdConfig])
 		.it('should display warning that we are about to run PMD with custom config', (ctx) => {
-			const stdout = ctx.stdout;			
+			const stdout = ctx.stdout;
 			const expectedMessage = eventMessages.getMessage('info.customPmdHeadsUp', [normalize(customPmdConfig)]);
 
 			expect(stdout).contains(expectedMessage);
@@ -74,9 +74,9 @@ describe('scanner:run with custom config E2E', () => {
 			'--target', path.join('.', 'test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts'),
 			'--eslintconfig', customEslintConfig])
 		.it('should display warning that we are about to run Eslint with custom config', (ctx) => {
-			const stdout = ctx.stdout;			
+			const stdout = ctx.stdout;
 			const expectedMessage = eventMessages.getMessage('info.customEslintHeadsUp', [normalize(customEslintConfig)]);
-							
+
 			expect(stdout).contains(expectedMessage);
 		});
 	});
@@ -86,6 +86,7 @@ describe('scanner:run with custom config E2E', () => {
 		setupCommandTest
 		.command(['scanner:run',
 			'--target', path.join('.', 'test', 'code-fixtures', 'projects', 'app', 'force-app'),
+			'--engine', 'pmd,eslint',
 			'--pmdconfig', customPmdConfig,
 			'--format', 'json'])
 		.it('should not run default PMD engine when custom config provided, but can run default Eslint engines', ctx => {

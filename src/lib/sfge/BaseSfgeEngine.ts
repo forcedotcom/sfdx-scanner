@@ -1,17 +1,15 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, SfdxError} from '@salesforce/core';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, Severity} from '../../Constants';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, SfgeConfig, TargetPattern} from '../../types';
 import {Config} from '../util/Config';
-import {uxEvents, EVENTS} from '../ScannerEvents';
 import {SfgeCatalogWrapper, SfgeExecutionWrapper} from './SfgeWrapper';
 import * as EngineUtils from "../util/CommonEngineUtils";
 
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'BaseSfgeEngine');
-
 const CATALOG_START = 'CATALOG_START';
 const CATALOG_END = 'CATALOG_END';
+const DFA = "dfa";
+const PATHLESS = "pathless";
 
 type SfgePartialRule = {
 	name: string;
@@ -71,7 +69,7 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 			return this.catalog;
 		}
 		// DFA engine should catalog DFA rules, and non-DFA engine should catalog non-DFA rules.
-		const ruleType = this.isDfaEngine() ? "dfa" : "pathless";
+		const ruleType = this.isDfaEngine() ? DFA : PATHLESS;
 		const catalogOutput: string = await SfgeCatalogWrapper.getCatalog(ruleType);
 		const ruleOutputStart: number = catalogOutput.indexOf(CATALOG_START) + CATALOG_START.length;
 		const ruleOutputEnd: number = catalogOutput.indexOf(CATALOG_END);
@@ -82,6 +80,11 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 		return this.catalog;
 	}
 
+	/**
+	 * Convert the rule objects provided by SFGE into an actual catalog suitable for the analyzer's needs.
+	 * @param partialRules - The partial rules returned by SFGE's "catalog" flow.
+	 * @private
+	 */
 	private createCatalogFromPartialRules(partialRules: SfgePartialRule[]): Catalog {
 		// For each raw rule, we'll want to synthesize an actual rule object.
 		const completeRules: Rule[] = [];
@@ -94,7 +97,7 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 				sourcepackage: "sfge",
 				name,
 				description,
-				// SFGE rules each belogn to exactly one category, so the string must be converted to a singleton array.
+				// SFGE rules each belong to exactly one category, so the string must be converted to a singleton array.
 				categories: [category],
 				// SFGE does not use rulesets.
 				rulesets: [],
@@ -130,20 +133,8 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string, string>): boolean {
-		// If the EngineOptions doesn't include an SFGE config, don't try to run this engine.
-		// JUSTIFICATION: Validations earlier in the process prevent user from explicitly running
-		// SFGE with no config, but if SFGE is merely an enabled engine, then not specifying a config
-		// should implicitly cause SFGE to not run, instead of throwing a violation.
-		// Such an implementation is maximally courteous to users upgrading from a previous
-		// version.
-		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
-			return true;
-		} else {
-			uxEvents.emit(EVENTS.WARNING_VERBOSE, messages.getMessage("warning.sfgeSkippedWithoutConfig", []));
-			// TODO: We should throw a (verbose-only?) warning here, indicating that the engine
-			//  was implicitly skipped.
-			return false;
-		}
+		// If the engine wasn't filtered out, there's no reason we shouldn't run it.
+		return true;
 	}
 
 	/**
@@ -163,11 +154,18 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 			}
 		});
 
+		// If there are no targets, there's no point in running the rules.
+		if (targetCount === 0) {
+			this.logger.trace(`No targets from ${BaseSfgeEngine.ENGINE_NAME} found. Nothing to execute. Returning early.`);
+			return [];
+		}
+
 		// The rules have yet to be filtered by DFA/Non-DFA, so it's possible that some of the provided rules
 		// don't actually belong to this SFGE subvariant. So we should filter the rules so we only run ones
 		// in this engine's catalog.
 		const catalogRuleNames: Set<string> = new Set();
-		for (const catalogRule of this.catalog.rules) {
+		const catalog = await this.getCatalog();
+		for (const catalogRule of catalog.rules) {
 			catalogRuleNames.add(catalogRule.name);
 		}
 		const filteredRules: Rule[] = [];
@@ -179,15 +177,21 @@ export abstract class BaseSfgeEngine extends AbstractRuleEngine {
 			}
 		}
 
-		if (targetCount === 0) {
-			this.logger.trace(`No targets from ${BaseSfgeEngine.ENGINE_NAME} found. Nothing to execute. Returning early.`);
+		// If there are no rules that we can run, there's no point in running.
+		if (filteredRules.length === 0) {
+			this.logger.trace(`No eligible rules for ${BaseSfgeEngine.ENGINE_NAME} found. Nothing to execute. Returning early.`);
 			return [];
 		}
 
 		this.logger.trace(`About to run ${BaseSfgeEngine.ENGINE_NAME} rules. Targets: ${targetCount} files and/or methods, Selected rules: ${JSON.stringify(filteredRules)}`);
 
+		// Make sure we've actually got a config, because if we don't, we have a problem.
+		if (!engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'BaseSfgeEngine', 'missingConfig');
+		}
+		const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
 		try {
-			const output = await SfgeExecutionWrapper.runSfge(targets, filteredRules, JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig);
+			const output = await SfgeExecutionWrapper.runSfge(targets, filteredRules, sfgeConfig);
 
 			// TODO: There should be some kind of method-call here to pull logs and warnings from the output.
 			const results = this.processStdout(output);
