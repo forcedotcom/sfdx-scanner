@@ -11,6 +11,7 @@ Messages.importMessagesDirectory(__dirname);
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
 const runCommonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 const runOutputProcessorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
+const sfgeMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'BaseSfgeEngine');
 describe('scanner:run', function () {
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
@@ -718,11 +719,11 @@ describe('scanner:run', function () {
 
 		setupCommandTest
 			.command(['scanner:run',
-				'--target', '/some/path',
+				'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
 				'--engine', 'sfge'
 			])
 			.it('When SFGE is requested, --projectdir is required', ctx => {
-				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.sfgeRequiresProjectdir'));
+				expect(ctx.stderr).to.contain(sfgeMessages.getMessage('missingConfig'));
 			});
 	});
 

@@ -2,9 +2,12 @@ import {Logger} from '@salesforce/core';
 import {BaseSfgeEngine, SfgeViolation} from './BaseSfgeEngine';
 import {Controller} from '../../Controller';
 import {RuleViolation} from '../../types';
+import {ENGINE} from '../../Constants';
 
 
 export class SfgePathlessEngine extends BaseSfgeEngine {
+	private static ENGINE_ENUM: ENGINE = ENGINE.SFGE;
+	private static ENGINE_NAME: string = ENGINE.SFGE.valueOf();
 
 	private initialized: boolean;
 
@@ -19,6 +22,23 @@ export class SfgePathlessEngine extends BaseSfgeEngine {
 		this.logger = await Logger.child("SfgePathlessEngine");
 		this.config = await Controller.getConfig();
 		this.initialized = true;
+	}
+
+	/**
+	 * Returns the name of the engine as referenced everywhere within the code.
+	 * @override
+	 */
+	public getName(): string {
+		// NOTE: Both engines can share the same name without issue.
+		return SfgePathlessEngine.ENGINE_NAME;
+	}
+
+	/**
+	 * @override
+	 * @protected
+	 */
+	protected getEnum(): ENGINE {
+		return SfgePathlessEngine.ENGINE_ENUM;
 	}
 
 	/**

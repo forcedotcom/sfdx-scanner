@@ -26,7 +26,6 @@ module.exports = {
 	},
 	"validations": {
 		"methodLevelTargetingDisallowed": "Target '%s' is invalid, as this command does not support method-level targeting",
-		"sfgeRequiresProjectdir": "To specify --engine sfge, --projectdir must also be used",
 		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
 	},
 	"output": {

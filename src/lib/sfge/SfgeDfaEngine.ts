@@ -2,8 +2,11 @@ import {BaseSfgeEngine, SfgeViolation} from './BaseSfgeEngine';
 import {Logger} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {RuleViolation} from "../../types";
+import {ENGINE} from '../../Constants';
 
 export class SfgeDfaEngine extends BaseSfgeEngine {
+	private static ENGINE_ENUM: ENGINE = ENGINE.SFGE_DFA;
+	private static ENGINE_NAME: string = ENGINE.SFGE_DFA.valueOf();
 
 	private initialized: boolean;
 
@@ -18,6 +21,23 @@ export class SfgeDfaEngine extends BaseSfgeEngine {
 		this.logger = await Logger.child("SfgeDfaEngine");
 		this.config = await Controller.getConfig();
 		this.initialized = true;
+	}
+
+	/**
+	 * Returns the name of the engine as referenced everywhere within the code.
+	 * @override
+	 */
+	public getName(): string {
+		// NOTE: Both engines can share the same name without issue.
+		return SfgeDfaEngine.ENGINE_NAME;
+	}
+
+	/**
+	 * @override
+	 * @protected
+	 */
+	protected getEnum(): ENGINE {
+		return SfgeDfaEngine.ENGINE_ENUM;
 	}
 
 	/**

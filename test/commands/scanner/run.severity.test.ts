@@ -16,17 +16,19 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
+					'--engine', 'pmd',
 					'--format', 'json',
 					'--severity-threshold', '3'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(runOutputProcessorMessages.getMessage('output.noViolationsDetected', ['pmd']));
 					expect(ctx.stderr).to.not.contain(runOutputProcessorMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+					'--engine', 'pmd',
 					'--format', 'json',
 					'--severity-threshold', '1'
 				])
@@ -47,6 +49,7 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
+					'--engine', 'pmd',
 					'--format', 'json',
 					'--severity-threshold', '3'
 				])
