@@ -256,7 +256,25 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 4: NEGATIVE CASES W/ABSTRACT METHOD DECLARATION =============== */
+    /* =============== SECTION 4: NEGATIVE CASES W/GETTERS AND SETTERS =============== */
+    // REASONING: Public setters are often used by Visualforce, and private setters are often
+    //            declared to prevent a variable from being modified entirely.
+
+    @Test
+    public void getterSetterDeclaration_expectNoViolation() {
+        String sourceCode =
+                "global class MyClass {\n"
+                        + "    public Boolean someProperty {\n"
+                        + "        get {\n"
+                        + "            return this.someProperty;\n"
+                        + "        }\n"
+                        + "        private set;\n"
+                        + "    }\n"
+                        + "}\n";
+        assertNoViolations(sourceCode);
+    }
+
+    /* =============== SECTION 5: NEGATIVE CASES W/ABSTRACT METHOD DECLARATION =============== */
     // REASONING: If an interface/class has abstract methods, then subclasses must implement
     //            those methods for the code to compile. And if the interface/class isn't
     //            implemented anywhere, we have separate rules for surfacing that.
@@ -276,7 +294,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 5: NEGATIVE CASE W/INTERNAL CALL =============== */
+    /* =============== SECTION 6: NEGATIVE CASE W/INTERNAL CALL =============== */
 
     /**
      * If a class has static methods that call its other static methods, the called methods count as
@@ -418,7 +436,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 6: NEGATIVE CASE W/SIBLING CLASS CALLS =============== */
+    /* =============== SECTION 7: NEGATIVE CASE W/SIBLING CLASS CALLS =============== */
 
     /**
      * If a class has two inner classes, and one inner class's instance methods are invoked by
@@ -596,7 +614,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCode);
     }
 
-    /* =============== SECTION 7: NEGATIVE CASES W/EXTERNAL CALLS =============== */
+    /* =============== SECTION 8: NEGATIVE CASES W/EXTERNAL CALLS =============== */
 
     /**
      * If a class has static methods, and those methods are invoked by another class, then they
@@ -759,7 +777,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 8: NEGATIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
+    /* =============== SECTION 9: NEGATIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
      * If a subclass invokes a static method on its parent class, then that method counts as used.
@@ -987,7 +1005,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 9: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
+    /* =============== SECTION 10: POSITIVE CASES W/INHERITANCE BY SUBCLASSES =============== */
 
     /**
      * If a subclass overrides an inherited method and calls its own version of the method rather
@@ -1086,7 +1104,7 @@ public class UnusedMethodRuleTest {
                 });
     }
 
-    /* =============== SECTION 10: NEGATIVE CASES W/OVERRIDDEN INVOCATIONS IN SUPERCLASS =============== */
+    /* =============== SECTION 11: NEGATIVE CASES W/OVERRIDDEN INVOCATIONS IN SUPERCLASS =============== */
 
     /**
      * If a superclass internally calls an instance method, that counts as invoking all overriding
@@ -1234,7 +1252,7 @@ public class UnusedMethodRuleTest {
         assertNoViolations(sourceCodes);
     }
 
-    /* =============== SECTION 11: POSITIVE CASES WITH METHOD OVERLOADS =============== */
+    /* =============== SECTION 12: POSITIVE CASES WITH METHOD OVERLOADS =============== */
 
     /**
      * If there's different overloads of an instance method, then only the ones that are actually
@@ -1280,7 +1298,6 @@ public class UnusedMethodRuleTest {
      * If there's different overloads of an instance method, then only the ones that are actually
      * invoked count as used. Specific case: Methods with the same arity, but different signatures.
      */
-    // TODO: Enable subsequent tests as we implement functionality.
     @CsvSource({
         // Specify the beginning line of the overload that WASN'T called.
         // One test per method, per argument source.
@@ -1288,47 +1305,72 @@ public class UnusedMethodRuleTest {
         // - Literal values
         "overloadedMethod(42),  11",
         "overloadedMethod(true),  8",
-        // - Method parameters (and their instance properties)
+        // - Method parameters (and their instance properties/methods)
         "overloadedMethod(iParam),  11",
         "overloadedMethod(bParam),  8",
         "overloadedMethod(phcParam.iExternalInstanceProp),  11",
-        //        "overloadedMethod(phcParam.getIntegerProp()),  11",
+        "overloadedMethod(phcParam.getIntegerProp()),  11",
         "overloadedMethod(phcParam.bExternalInstanceProp),  8",
-        //        "overloadedMethod(phcParam.getBooleanProp()),  8",
-        // - Variables (and their instance properties)
+        "overloadedMethod(phcParam.getBooleanProp()),  8",
+        // - Variables (and their instance properties/methods)
         "overloadedMethod(iVar),  11",
         "overloadedMethod(bVar),  8",
         "overloadedMethod(phcVar.iExternalInstanceProp),  11",
+        "overloadedMethod(phcVar.getIntegerProp()),  11",
         "overloadedMethod(phcVar.bExternalInstanceProp),  8",
-        // - Method returns (and their instance properties)
+        "overloadedMethod(phcVar.getBooleanProp()),  8",
+        // - Internal instance method returns (and their instance properties/methods)
         "overloadedMethod(intReturner()),  11",
         "overloadedMethod(this.intReturner()),  11",
         "overloadedMethod(boolReturner()),  8",
         "overloadedMethod(this.boolReturner()),  8",
-        //        "overloadedMethod(phcReturner().iExternalInstanceProp),  11",
-        //        "overloadedMethod(this.phcReturner().iExternalInstanceProp),  11",
-        //        "overloadedMethod(phcReturner().bExternalInstanceProp),  8",
-        //        "overloadedMethod(this.phcReturner().bExternalInstanceProp),  8",
-        // - Internal instance properties (and their instance properties)
-        // (with implicit/explicit this)
+        "overloadedMethod(phcReturner().iExternalInstanceProp),  11",
+        "overloadedMethod(this.phcReturner().iExternalInstanceProp),  11",
+        "overloadedMethod(phcReturner().getIntegerProp()),  11",
+        "overloadedMethod(this.phcReturner().getIntegerProp()),  11",
+        "overloadedMethod(phcReturner().bExternalInstanceProp),  8",
+        "overloadedMethod(this.phcReturner().bExternalInstanceProp),  8",
+        "overloadedMethod(phcReturner().getBooleanProp()),  8",
+        "overloadedMethod(this.phcReturner().getBooleanProp()),  8",
+        // - Internal instance properties (and their instance properties/methods)
         "overloadedMethod(iInstanceProp),  11",
         "overloadedMethod(this.iInstanceProp),  11",
         "overloadedMethod(bInstanceProp),  8",
         "overloadedMethod(this.bInstanceProp),  8",
         "overloadedMethod(phcInstanceProp.iExternalInstanceProp),  11",
-        //        "overloadedMethod(this.phcInstanceProp.iExternalInstanceProp),  11",
+        "overloadedMethod(this.phcInstanceProp.iExternalInstanceProp),  11",
+        "overloadedMethod(phcInstanceProp.getIntegerProp()),  11",
+        "overloadedMethod(this.phcInstanceProp.getIntegerProp()),  11",
         "overloadedMethod(phcInstanceProp.bExternalInstanceProp),  8",
-        //        "overloadedMethod(this.phcInstanceProp.bExternalInstanceProp),  8",
-        // - Internal static properties (and their instance properties)
-        // (with implicit/explicit class reference)
+        "overloadedMethod(this.phcInstanceProp.bExternalInstanceProp),  8",
+        "overloadedMethod(phcInstanceProp.getBooleanProp()),  8",
+        "overloadedMethod(this.phcInstanceProp.getBooleanProp()),  8",
+        // - Internal static method returns (and their instance properties/methods)
+        "overloadedMethod(staticIntReturner()),  11",
+        "overloadedMethod(MethodHostClass.staticIntReturner()),  11",
+        "overloadedMethod(staticBoolReturner()),  8",
+        "overloadedMethod(MethodHostClass.staticBoolReturner()),  8",
+        "overloadedMethod(staticPhcReturner().iExternalInstanceProp),  11",
+        "overloadedMethod(MethodHostClass.staticPhcReturner().iExternalInstanceProp),  11",
+        "overloadedMethod(staticPhcReturner().getIntegerProp()),  11",
+        "overloadedMethod(MethodHostClass.staticPhcReturner().getIntegerProp()),  11",
+        "overloadedMethod(staticPhcReturner().bExternalInstanceProp),  8",
+        "overloadedMethod(MethodHostClass.staticPhcReturner().bExternalInstanceProp),  8",
+        "overloadedMethod(staticPhcReturner().getBooleanProp()),  8",
+        "overloadedMethod(MethodHostClass.staticPhcReturner().getBooleanProp()),  8",
+        // - Internal static properties (and their instance properties/methods)
         "overloadedMethod(iStaticProp),  11",
         "overloadedMethod(MethodHostClass.iStaticProp),  11",
         "overloadedMethod(bStaticProp),  8",
         "overloadedMethod(MethodHostClass.bStaticProp),  8",
         "overloadedMethod(phcStaticProp.iExternalInstanceProp),  11",
-        //        "overloadedMethod(MethodHostClass.phcStaticProp.iExternalInstanceProp),  11",
+        "overloadedMethod(MethodHostClass.phcStaticProp.iExternalInstanceProp),  11",
+        "overloadedMethod(phcStaticProp.getIntegerProp()),  11",
+        "overloadedMethod(MethodHostClass.phcStaticProp.getIntegerProp()),  11",
         "overloadedMethod(phcStaticProp.bExternalInstanceProp),  8",
-        //        "overloadedMethod(MethodHostClass.phcStaticProp.bExternalInstanceProp),  8",
+        "overloadedMethod(MethodHostClass.phcStaticProp.bExternalInstanceProp),  8",
+        "overloadedMethod(phcStaticProp.getBooleanProp()),  8",
+        "overloadedMethod(MethodHostClass.phcStaticProp.getBooleanProp()),  8",
         // - External static instance properties
         "overloadedMethod(PropertyHostClass.iExternalStaticProp),  11",
         "overloadedMethod(PropertyHostClass.bExternalStaticProp),  8"
@@ -1363,6 +1405,21 @@ public class UnusedMethodRuleTest {
                     // Use the engine directive to prevent this method from tripping the rule.
                     + "    /* sfge-disable-stack UnusedMethodRule */\n"
                     + "    public PropertyHostClass phcReturner() {\n"
+                    + "        return new PropertyHostClass();\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public static integer staticIntReturner() {\n"
+                    + "        return 42;\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public static boolean staticBoolReturner() {\n"
+                    + "        return false;\n"
+                    + "    }\n"
+                    // Use the engine directive to prevent this method from tripping the rule.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "    public static PropertyHostClass staticPhcReturner() {\n"
                     + "        return new PropertyHostClass();\n"
                     + "    }\n"
                     // Use the engine directive to prevent this method from tripping the rule.
@@ -1473,7 +1530,7 @@ public class UnusedMethodRuleTest {
                 });
     }
 
-    /* =============== SECTION 12: WEIRD CORNER CASES =============== */
+    /* =============== SECTION 13: WEIRD CORNER CASES =============== */
 
     /**
      * If an outer class has a static method, and its inner class has an instance method with the
@@ -1490,6 +1547,7 @@ public class UnusedMethodRuleTest {
                     + "        return true;\n"
                     + "    }\n"
                     + "    global class InnerOfParent {\n"
+                    // Declare an instance method on the inner class with the same name.
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
@@ -1501,8 +1559,10 @@ public class UnusedMethodRuleTest {
                     + "        }\n"
                     + "    }\n"
                     + "}\n",
+            // Declare a class that extends the parent class, thereby inheriting its static method.
             "global class ChildClass extends ParentClass {\n"
                     + "    global class InnerOfChild {\n"
+                    // Declare an instance method on the inner class with the same name.
                     + "        public boolean overlappingName() {\n"
                     + "            return true;\n"
                     + "        }\n"
@@ -1521,6 +1581,44 @@ public class UnusedMethodRuleTest {
                 v -> {
                     assertEquals("overlappingName", v.getSourceVertexName());
                     assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
+                });
+    }
+
+    @ValueSource(strings = {"public", "public static"})
+    @ParameterizedTest(name = "{displayName}: parent method {0}")
+    @Disabled
+    public void inheritedInnerClassOverlapsWithOuter_expectViolations(String scope) {
+        String[] sourceCodes = {
+            // Declare a parent class with a method.
+            "public virtual class ParentClass {\n"
+                    + String.format("    %s boolMethod() {\n", scope)
+                    + "        return true;\n"
+                    + "    }\n"
+                    + "}\n",
+            // Declare an outer class with a static method whose name matches the parent class's
+            // method.
+            "public class OuterClass {\n"
+                    + "    public static boolean boolMethod() {\n"
+                    + "        return false;\n"
+                    + "    }\n"
+                    // Declare an inner class that extends the parent class,
+                    // thereby inheriting its methods.
+                    + "    public class InnerChild extends ParentClass {\n"
+                    // Give the inner class a method that calls the inherited method.
+                    + "        /* sfge-disable-stack UnusedMethodRule */\n"
+                    + "        public boolean invoker() {\n"
+                    + "            return boolMethod();\n"
+                    + "        }\n"
+                    + "    }\n"
+                    + "}\n"
+        };
+        // We expect the inherited method on the parent class to be called, not the static
+        // method on the outer class.
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("boolMethod", v.getSourceVertexName());
+                    assertEquals("OuterClass", v.getSourceVertex().getDefiningType());
                 });
     }
 
