@@ -26,6 +26,35 @@ Please check if the affected Visualforce pages/components render correctly.
 If it does, check if it has an HTML tag that has an attribute with a dot? PMD has an [open issue](https://github.com/pmd/pmd/issues/2765) and we are working with them to fix it.
 If this is a new issue, please let us know.
 
+### The `scanner:run` command throws a warning about duplicate violations between ESLint and ESLint-LWC.
+
+If you invoke both eslint and eslint-lwc engines in the same run, and execute them on the same files, there's a possibility that they duplicate the violations found.
+When this happens, you may see a warning that looks like this:
+
+`At least one file was processed by both ESLint and ESLint-LWC simultaneously, which could result in duplicate violations. Customize targetPatterns properties for eslint and eslint-lwc engines in ~/.sfdx-scanner/{{ site.data.versions-v3.configfile }} to remove overlap on the following file(s):`
+
+To prevent the overlap, replace `"**/*.js"` with the pattern for your LWC files to the `eslint-lwc` `targetPatterns` and add the negative pattern to the `eslint` `targetPatterns`. Target patterns use standard glob syntax. For example, if your LWC files are stored in a directory called `lwc`, your `{{ site.data.versions-v3.configfile }}` file might include this information:
+```
+{
+    "name": "eslint",
+    "targetPatterns": [
+        "**/*.js",
+        "!**/lwc/**/*.js",
+        "!**/node_modules/**",
+        "!**/bower_components/**"
+    ],
+    "disabled": false
+},
+{
+    "name": "eslint-lwc",
+    "targetPatterns": [
+        "**/lwc/**/*.js",
+        "!**/node_modules/**"
+    ],
+    "disabled": true
+},
+```
+
 ---
 
 ## `scanner:run` command with eslint-typescript
