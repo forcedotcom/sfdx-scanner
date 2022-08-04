@@ -1376,6 +1376,7 @@ public class UnusedMethodRuleTest {
         "overloadedMethod(PropertyHostClass.bExternalStaticProp),  8"
     })
     @ParameterizedTest(name = "{displayName}: invocation of {0}")
+    @Disabled
     public void callInstanceMethodWithDifferentSignatureOverloads_expectViolation(
             String invocation, int uncalledBeginLine) {
         String[] sourceCodes = {

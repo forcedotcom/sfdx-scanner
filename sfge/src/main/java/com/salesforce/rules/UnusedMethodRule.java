@@ -1,5 +1,6 @@
 package com.salesforce.rules;
 
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.UnexpectedException;
@@ -122,11 +123,19 @@ public class UnusedMethodRule extends AbstractStaticRule {
         (!vertex.isPrivate() || vertex.isStatic() || vertex.isConstructor())
                 // If we're directed to skip this method, then we should obviously do so.
                 || directedToSkip(vertex)
-                // Abstract methods are ineligible.
+                // Abstract methods must be implemented by all child classes.
+                // This rule can detect if those implementations are unused,
+                // and we have other rules to detect unused abstract classes/interfaces.
+                // As such, inspecting absract methods directly is unnecessary.
                 || vertex.isAbstract()
-                // Methods whose name starts with "__sfdc_" are getters/setters, and are ineligible.
-                || vertex.getName().toLowerCase().startsWith("__sfdc_")
-                // Path entry points should be skipped.
+                // Methods whose name starts with this prefix are getters/setters.
+                // Getters are typically used by VF controllers, and setters are frequently
+                // made private to render a property unchangeable.
+                // As such, inspecting these methods is likely to generate false or noisy
+                // positives.
+                || vertex.getName().toLowerCase().startsWith(ASTConstants.PROPERTY_METHOD_PREFIX)
+                // Path entry points should be skipped, since they're definitionally publicly
+                // accessible, and we must assume that they're being used somewhere or other.
                 || PathEntryPointUtil.isPathEntryPoint(vertex);
     }
 
@@ -166,9 +175,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
             // If the arity check was satisfied and the method accepts parameters, then
             // a more thorough check is required to make sure the parameters are
             // of the appropriate types.
-            if (methodVertex.getArity() > 0 && !parameterTypesMatch(methodVertex, potentialCall)) {
-                continue;
-            }
+            // TODO: PROPERLY IMPLEMENT AND ENABLE THESE CHECKS.
+//            if (methodVertex.getArity() > 0 && !parameterTypesMatch(methodVertex, potentialCall)) {
+//                continue;
+//            }
 
             // If we're at this point, then all of our checks were satisfied,
             // and this method call seems to be an invocation of our method.
