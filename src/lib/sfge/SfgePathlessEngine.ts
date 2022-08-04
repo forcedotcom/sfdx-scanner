@@ -29,7 +29,6 @@ export class SfgePathlessEngine extends BaseSfgeEngine {
 	 * @override
 	 */
 	public getName(): string {
-		// NOTE: Both engines can share the same name without issue.
 		return SfgePathlessEngine.ENGINE_NAME;
 	}
 

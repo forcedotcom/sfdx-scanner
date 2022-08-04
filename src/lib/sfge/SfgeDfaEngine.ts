@@ -28,7 +28,6 @@ export class SfgeDfaEngine extends BaseSfgeEngine {
 	 * @override
 	 */
 	public getName(): string {
-		// NOTE: Both engines can share the same name without issue.
 		return SfgeDfaEngine.ENGINE_NAME;
 	}
 
