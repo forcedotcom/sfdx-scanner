@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class UnusedMethodRuleTest_Inheritance extends UnusedMethodRuleTest_BaseClass {
+public class InheritanceTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: STATIC METHODS =============== */
     /**

@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 /** Tests for distinguishing between different overloads of the same method. */
-public class UnusedMethodRuleTest_Overloads extends UnusedMethodRuleTest_BaseClass {
+public class OverloadsTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: INSTANCE METHODS =============== */
     /**

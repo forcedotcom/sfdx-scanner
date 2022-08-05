@@ -14,7 +14,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * A collection of tests for simple positive and negative cases. Comparable to smoke tests. If any
  * of these unexpectedly fail, something's deeply wrong.
  */
-public class UnusedMethodRuleTest_SimpleCases extends UnusedMethodRuleTest_BaseClass {
+public class SimpleCasesTest extends BaseUnusedMethodTest {
 
     /** Obviously unused static/instance methods are unused. */
     // TODO: Enable subsequent tests as we implement functionality.

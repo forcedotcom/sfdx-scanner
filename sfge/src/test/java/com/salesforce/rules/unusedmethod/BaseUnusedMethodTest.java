@@ -16,7 +16,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 
-public class UnusedMethodRuleTest_BaseClass {
+public class BaseUnusedMethodTest {
     protected GraphTraversalSource g;
 
     /* =============== SETUP METHODS =============== */

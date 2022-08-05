@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** A set of tests for methods that are called by the class that defines them. */
-public class UnusedMethodRuleTest_InternalCalls extends UnusedMethodRuleTest_BaseClass {
+public class InternalCallsTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: STATIC METHODS =============== */
 

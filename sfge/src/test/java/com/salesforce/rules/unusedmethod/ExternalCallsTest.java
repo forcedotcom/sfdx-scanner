@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Tests for methods called on classes that are wholly unrelated to the class where they're defined.
  */
-public class UnusedMethodRuleTest_ExternalCalls extends UnusedMethodRuleTest_BaseClass {
+public class ExternalCallsTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: STATIC METHODS =============== */
     /**

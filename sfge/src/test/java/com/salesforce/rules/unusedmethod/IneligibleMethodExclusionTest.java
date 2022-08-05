@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * Some methods shouldn't even be considered eligible candidates for analysis. These tests make sure
  * that this behavior is preserved.
  */
-public class UnusedMethodRuleTest_IneligibleMethodExclusion extends UnusedMethodRuleTest_BaseClass {
+public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
 
     /* ============ SECTION 1: IMPLICIT CONSTRUCTOR ============ */
     /**

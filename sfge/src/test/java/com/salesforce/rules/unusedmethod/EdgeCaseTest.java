@@ -8,7 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /** A collection of tests for weird edge cases. */
-public class UnusedMethodRuleTest_EdgeCases extends UnusedMethodRuleTest_BaseClass {
+public class EdgeCaseTest extends BaseUnusedMethodTest {
     /**
      * If an outer class has a static method, and its inner class has an instance method with the
      * same name, then invoking that method without the `this` keyword should still count as using

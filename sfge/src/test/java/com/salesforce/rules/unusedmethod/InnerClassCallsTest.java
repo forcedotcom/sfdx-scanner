@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * important because inner classes can be referenced in a variety of ways by their outer/sibling
  * classes.
  */
-public class UnusedMethodRuleTest_InnerClassCalls extends UnusedMethodRuleTest_BaseClass {
+public class InnerClassCallsTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: STATIC METHODS =============== */
     // Inner classes can't have static methods, but they can implicitly
