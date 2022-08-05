@@ -3,7 +3,6 @@ package com.salesforce.rules;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
@@ -24,6 +23,12 @@ public class UnusedMethodRule extends AbstractStaticRule {
     private static final String DESCRIPTION = "Identifies methods that are not invoked";
     GraphTraversalSource g;
     /**
+     * The set of methods on which analysis was performed. In tests, it's important to know whether
+     * a method returned no violations because it was inspected and an invocation was found, or if
+     * it was simply never inspected in the first place.
+     */
+    private final Set<MethodVertex> eligibleMethods;
+    /**
      * The set of methods for which no invocation was detected. At the end of execution, we'll
      * generate violations from each method in this set.
      */
@@ -36,6 +41,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     private UnusedMethodRule() {
         super();
+        this.eligibleMethods = new HashSet<>();
         this.unusedMethods = new HashSet<>();
         this.internalMethodCallsByDefiningType = CollectionUtil.newTreeMap();
     }
@@ -69,6 +75,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return true;
     }
 
+    public Set<MethodVertex> getEligibleMethods() {
+        return this.eligibleMethods;
+    }
+
     @Override
     protected List<Violation> _run(
             GraphTraversalSource g, GraphTraversal<Vertex, Vertex> eligibleVertices) {
@@ -80,6 +90,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     private void reset(GraphTraversalSource g) {
         this.g = g;
+        this.eligibleMethods.clear();
         this.unusedMethods.clear();
         this.internalMethodCallsByDefiningType.clear();
     }
@@ -102,6 +113,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
                 }
                 continue;
             }
+
+            // If the method was determined as eligible for scanning, add it to
+            // the set of eligible methods.
+            eligibleMethods.add(candidateVertex);
 
             // Check first for internal usage of the method.
             if (methodUsedInternally(candidateVertex)) {
@@ -217,14 +232,14 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     private List<Violation> convertMethodsToViolations() {
         return unusedMethods.stream()
-            .map(
-                m ->
-                    new Violation.StaticRuleViolation(
-                        String.format(
-                            "Method %s in class %s is never invoked",
-                            m.getName(), m.getDefiningType()),
-                        m))
-            .collect(Collectors.toList());
+                .map(
+                        m ->
+                                new Violation.StaticRuleViolation(
+                                        String.format(
+                                                "Method %s in class %s is never invoked",
+                                                m.getName(), m.getDefiningType()),
+                                        m))
+                .collect(Collectors.toList());
     }
 
     private static final class LazyHolder {
