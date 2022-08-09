@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 public class VisualForceHandlerImpl extends AbstractMetaInfoCollector {
     private static final Logger LOGGER = LogManager.getLogger(VisualForceHandlerImpl.class);
+    private static final String META_INFO_TYPE_NAME = "Apex Controller entry points";
 
     @Override
     protected TreeSet<String> getAcceptedExtensions() {
@@ -211,6 +212,11 @@ public class VisualForceHandlerImpl extends AbstractMetaInfoCollector {
         for (String name : names) {
             collectedMetaInfo.add(name.trim());
         }
+    }
+
+    @Override
+    public String getMetaInfoTypeName() {
+        return META_INFO_TYPE_NAME;
     }
 
     protected static final class LazyHolder {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 
 public class CliMessager {
@@ -12,8 +13,17 @@ public class CliMessager {
 	// The END string lets us know when a message stops, which should prevent bugs involving multi-line output.
 	private static final String END = "SFDX-END";
 
+    private static final String REALTIME_START = "SFCA-REALTIME-START";
+    private static final String REALTIME_END = "SFCA-REALTIME-END";
+
+    /* Deprecated: Don't maintain state in a class that's essentially used as a utility.*/
+    @Deprecated
 	private static final List<Message> MESSAGES = new ArrayList<>();
 
+    /**
+     * Deprecated - switch to static invocation of {@link #postMessage(String, EventKey, String...)}
+     */
+    @Deprecated
 	public static CliMessager getInstance() {
 		return LazyHolder.INSTANCE;
 	}
@@ -26,6 +36,7 @@ public class CliMessager {
 	 *
 	 * @param exception to send to Typescript layer
 	 */
+    @Deprecated
 	public void addMessage(MessagePassableException exception) {
 		final EventKey eventKey = exception.getEventKey();
 		addMessage(
@@ -43,34 +54,59 @@ public class CliMessager {
 	 * @param eventKey    EventKey to display to user
 	 * @param args        String args passed to the EventKey to make the displayed message meaningful
 	 */
+    @Deprecated
 	public void addMessage(String internalLog, EventKey eventKey, String... args) {
-		// Developer error if eventKey was not added to exception and we'll get a bunch of NPEs
-		assert (eventKey != null);
-		// Confirm that the correct number of arguments for the message has been provided
-		// If this fails, this would be a developer error
-		assert (eventKey.getArgCount() == args.length);
-
-		final Message message = new Message(
-			eventKey.getMessageKey(),
-			Arrays.asList(args),
-			internalLog,
-			eventKey.getMessageType(),
-			eventKey.getMessageHandler(),
-			eventKey.isVerbose());
-		MESSAGES.add(message);
+        final Message message = createMessage(internalLog, eventKey, args);
+        MESSAGES.add(message);
 	}
 
-	/**
+    /**
+     * Publish formatted stdout message to pass onto Typescript layer.
+     * Make sure EventKey is updated with messages/EventKeyTemplates.json
+     * and has correct properties in the enum.
+     *
+     * @param internalLog Information for internal use. Will be logged but not displayed to user
+     * @param eventKey    EventKey to display to user
+     * @param args        String args passed to the EventKey to make the displayed message meaningful
+     */
+    public static void postMessage(String internalLog, EventKey eventKey, String... args) {
+        final Message message = createMessage(internalLog, eventKey, args);
+        final List<Message> messages = Lists.newArrayList(message);
+
+        final String messageAsJson = new Gson().toJson(messages);
+        System.out.println(REALTIME_START + messageAsJson + REALTIME_END);
+    }
+
+    private static Message createMessage(String internalLog, EventKey eventKey, String[] args) {
+        // Developer error if eventKey was not added to exception and we'll get a bunch of NPEs
+        assert (eventKey != null);
+        // Confirm that the correct number of arguments for the message has been provided
+        // If this fails, this would be a developer error
+        assert (eventKey.getArgCount() == args.length);
+
+        final Message message = new Message(
+            eventKey.getMessageKey(),
+            Arrays.asList(args),
+            internalLog,
+            eventKey.getMessageType(),
+            eventKey.getMessageHandler(),
+            eventKey.isVerbose());
+        return message;
+    }
+
+    /**
 	 * Convert all messages stored by the instance into a JSON-formatted string, enclosed in the start and end strings.
 	 * Java code can use this method to log the messages to console, and TypeScript code can seek the start and stop
 	 * strings to get an array of messages that can be deserialized.
 	 * @return
 	 */
+    @Deprecated
 	public String getAllMessagesWithFormatting() {
 		final String messagesAsJson = getMessagesAsJson();
 		return START + messagesAsJson + END;
 	}
 
+    @Deprecated
 	private String getMessagesAsJson() {
 		return new Gson().toJson(MESSAGES);
 	}

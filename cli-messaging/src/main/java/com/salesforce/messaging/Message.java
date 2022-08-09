@@ -6,7 +6,7 @@ import java.util.List;
 public class Message {
 	final private String messageKey;
 	final private List<String> args;
-	final private String internalLog;
+    final private String internalLog;
 	final private MessageType type;
 	final private MessageHandler handler;
 	final private boolean verbose;
@@ -33,6 +33,22 @@ public class Message {
 	public String getInternalLog() {
 		return internalLog;
 	}
+
+    public MessageType getType() {
+        return type;
+    }
+
+    public MessageHandler getHandler() {
+        return handler;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public long getTime() {
+        return time;
+    }
 
 	enum MessageHandler {
 		UX,

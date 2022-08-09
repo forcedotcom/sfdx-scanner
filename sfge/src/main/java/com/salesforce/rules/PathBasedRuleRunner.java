@@ -10,6 +10,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
+import com.salesforce.rules.ops.ProgressListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +29,18 @@ public class PathBasedRuleRunner {
     /** Set that holds the violations found by this rule execution. */
     private final Set<Violation> violations;
 
+    private final ProgressListener progressListener;
+
     public PathBasedRuleRunner(
-            GraphTraversalSource g, List<AbstractPathBasedRule> rules, MethodVertex methodVertex) {
+            GraphTraversalSource g,
+            List<AbstractPathBasedRule> rules,
+            MethodVertex methodVertex,
+            ProgressListener progressListener) {
         this.g = g;
         this.rules = rules;
         this.methodVertex = methodVertex;
         this.violations = new HashSet<>();
+        this.progressListener = progressListener;
     }
 
     /**
@@ -45,8 +52,10 @@ public class PathBasedRuleRunner {
         // Build configuration to define how apex paths will be expanded
         final ApexPathExpanderConfig expanderConfig = getApexPathExpanderConfig();
 
+        progressListener.initializingPathCreation();
         // Get all the paths that originate in the entry point
         final List<ApexPath> paths = getPaths(expanderConfig);
+        progressListener.identifiedPaths(paths);
 
         // Execute rules on the paths found
         executeRulesOnPaths(paths);
@@ -81,6 +90,8 @@ public class PathBasedRuleRunner {
                 // Iterate over all vertices in the path...
                 for (ApexPathVertexMetaInfo.PredicateMatch predicateMatch :
                         path.getApexPathMetaInfo().get().getAllMatches()) {
+                    progressListener.pickedNewPathForAnalysis(path);
+
                     AbstractPathBasedRule rule =
                             (AbstractPathBasedRule) predicateMatch.getPredicate();
                     BaseSFVertex vertex = predicateMatch.getPathVertex().getVertex();

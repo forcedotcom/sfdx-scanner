@@ -8,6 +8,7 @@ import com.salesforce.exception.UnexpectedException;
 import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.ops.GraphUtil;
 import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.EventKey;
 import com.salesforce.metainfo.MetaInfoCollector;
 import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRule;
@@ -172,6 +173,11 @@ public class Main {
 
         for (MetaInfoCollector collector : allCollectors) {
             collector.loadProjectFiles(eap.getProjectDirs());
+            CliMessager.postMessage(
+                    "Meta information collected",
+                    EventKey.INFO_META_INFO_COLLECTED,
+                    String.valueOf(collector.getMetaInfoCollected().size()),
+                    collector.getMetaInfoTypeName());
         }
     }
 

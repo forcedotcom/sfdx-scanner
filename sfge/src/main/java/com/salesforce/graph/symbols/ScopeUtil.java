@@ -11,6 +11,7 @@ import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.LiteralExpressionVertex;
 import com.salesforce.graph.vertex.PrefixExpressionVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
+import java.util.Arrays;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,8 +152,8 @@ public class ScopeUtil {
             if (keys.length > 2) {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
-                            "TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
-                                    + keys);
+                            "PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
+                                    + Arrays.toString(keys));
                 }
             } else if (result instanceof ObjectProperties) {
                 final ObjectProperties objectProperties = (ObjectProperties) result;

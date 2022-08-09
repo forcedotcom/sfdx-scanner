@@ -38,6 +38,7 @@ import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import com.salesforce.rules.PathBasedRuleRunner;
 import com.salesforce.rules.StaticRule;
 import com.salesforce.rules.Violation;
+import com.salesforce.rules.ops.ProgressListenerImpl;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -311,7 +312,8 @@ public final class TestUtil {
 
         final MethodVertex methodVertex = getMethodVertex(g, definingType, methodName);
         final PathBasedRuleRunner ruleRunner =
-                new PathBasedRuleRunner(g, Lists.newArrayList(rule), methodVertex);
+                new PathBasedRuleRunner(
+                        g, Lists.newArrayList(rule), methodVertex, new ProgressListenerImpl());
         final List<Violation> violations = new ArrayList<>(ruleRunner.runRules());
 
         return violations;
