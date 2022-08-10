@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.Violation;
 import java.util.function.Consumer;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -61,22 +60,22 @@ public class SimpleCasesTest extends BaseUnusedMethodTest {
      * We want tests for arity of both 0 and 1, since an explicitly declared 0-arity constructor
      * should cause a violation, unlike the implicitly generated one.
      */
+    // TODO: Enable subsequent tests as we implement functionality.
     @CsvSource({
         // One test per constructor, per visibility scope.
-        "public,  MyClass(),  0",
-        "protected,  MyClass(),  0",
-        "private,  MyClass(),  0",
-        "public,  MyClass(boolean b) , 1",
-        "protected,  MyClass(boolean b),  1",
-        "private,  MyClass(boolean b),  1"
+        //        "public MyClass(),  0",
+        //        "protected MyClass(),  0",
+        "private MyClass(),  0",
+        //        "public MyClass(boolean b) , 1",
+        //        "protected MyClass(boolean b),  1",
+        "private MyClass(boolean b),  1"
     })
-    @ParameterizedTest(name = "{displayName}: Scope {0} Method {1}, arity {2}")
-    @Disabled
+    @ParameterizedTest(name = "{displayName}: Declared constructor {0}, arity {1}")
     public void declaredConstructorWithoutInvocation_expectViolation(
-            String scope, String declaration, int arity) {
+            String declaration, int arity) {
         String sourceCode =
                 "global class MyClass {\n"
-                        + String.format("    %s %s {\n", scope, declaration)
+                        + String.format("    %s {\n", declaration)
                         + "    }\n"
                         + "}\n";
         Consumer<Violation.RuleViolation> assertion =

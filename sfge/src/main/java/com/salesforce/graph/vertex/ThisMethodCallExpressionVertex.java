@@ -4,6 +4,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.SymbolProviderVertexVisitor;
 import com.salesforce.graph.visitor.PathVertexVisitor;
+import com.salesforce.graph.visitor.TypedVertexVisitor;
 import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
@@ -43,5 +44,10 @@ public final class ThisMethodCallExpressionVertex extends InvocableWithParameter
     @Override
     public void afterVisit(SymbolProviderVertexVisitor visitor) {
         visitor.afterVisit(this);
+    }
+
+    @Override
+    public <T> T accept(TypedVertexVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 }
