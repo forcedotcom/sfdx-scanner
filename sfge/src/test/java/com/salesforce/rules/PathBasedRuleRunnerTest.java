@@ -4,7 +4,6 @@ import static org.hamcrest.Matchers.hasSize;
 
 import com.salesforce.TestUtil;
 import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.rules.ops.ProgressListenerImpl;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -43,8 +42,7 @@ public class PathBasedRuleRunnerTest {
                 Collections.singletonList(ApexFlsViolationRule.getInstance());
 
         // Define a PathBasedRuleRunner to apply the rule against the method vertex.
-        PathBasedRuleRunner runner =
-                new PathBasedRuleRunner(g, rules, methodVertex, new ProgressListenerImpl());
+        PathBasedRuleRunner runner = new PathBasedRuleRunner(g, rules, methodVertex);
 
         Set<Violation> violations = runner.runRules();
         MatcherAssert.assertThat(violations, hasSize(0));

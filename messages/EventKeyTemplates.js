@@ -9,10 +9,13 @@ module.exports = {
 		"pmdRuleSkipped": "Omitting results for PMD rule \"%s\". Reason: %s.",
 		"unmatchedPathExtensionCpd": "Path extensions for the following files will not be processed by CPD: %s",
 		"sfgeInfoLog": "%s",
-		"sfgeMetaInfoCollected": "Loaded %s %s",
-		"sfgeBeginPathCreation": "Building paths across source code.",
-		"sfgeEndPathCreation": "Completed building paths across source code. Count of paths detected: %s",
-		"sfgePathAnalysisProgress": "Analyzed %s of %s paths."
+		"sfgeMetaInfoCollected": "Loaded %s: [ %s ]",
+		"sfgeFinishedCompilingFiles": "Compiled %s files.",
+		"sfgeStartedBuildingGraph": "Building graph . . .",
+		"sfgeFinishedBuildingGraph": "Added all compilation units to graph.",
+		"sfgePathEntryPointsIdentified": "Identified %s path entry point(s).",
+		"sfgeViolationsInPathProgress": "Detected %s violation(s) from %s path(s) on %s entry point(s) so far.",
+		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s)."
 	},
 	"warning": {
 		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",

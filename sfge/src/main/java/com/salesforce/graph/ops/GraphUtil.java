@@ -20,6 +20,8 @@ import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.io.FileHandler;
+import com.salesforce.rules.ops.ProgressListener;
+import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -154,8 +156,17 @@ public final class GraphUtil {
             }
         }
 
+        final ProgressListener progressListener = ProgressListenerProvider.get();
+
+        // Let progress listener know that we've finished compiling all the files in project
+        progressListener.finishedFileCompilation();
+
         Util.Config config = Util.Config.Builder.get(g, comps).build();
+
+        // Let progress listener know what we are doing
+        progressListener.startedBuildingGraph();
         Util.buildGraph(config);
+        progressListener.completedBuildingGraph();
     }
 
     private static List<Util.CompilationDescriptor> buildFolderComps(String sourceFolder)
@@ -182,6 +193,8 @@ public final class GraphUtil {
 
     private static Optional<Util.CompilationDescriptor> loadFile(Path path) throws IOException {
         String pathString = path.toString();
+        final ProgressListener progressListener = ProgressListenerProvider.get();
+
         if (!pathString.toLowerCase(Locale.ROOT).endsWith(".cls")) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Skipping file. path=" + pathString);
@@ -194,6 +207,8 @@ public final class GraphUtil {
                 }
                 String sourceCode = FileHandler.getInstance().readTargetFile(pathString);
                 AstNodeWrapper<?> astNodeWrapper = JorjeUtil.compileApexFromString(sourceCode);
+                // Let progress listener know that we've compiled another file
+                progressListener.compiledAnotherFile();
                 return Optional.of(new Util.CompilationDescriptor(pathString, astNodeWrapper));
             } catch (JorjeUtil.JorjeCompilationException ex) {
                 if (SfgeConfigProvider.get().shouldIgnoreParseErrors()) {

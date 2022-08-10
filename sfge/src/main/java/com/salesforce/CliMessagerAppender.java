@@ -1,5 +1,6 @@
 package com.salesforce;
 
+import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
 import java.io.Serializable;
@@ -26,14 +27,16 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
         elementType = Appender.ELEMENT_TYPE)
 public class CliMessagerAppender extends AbstractAppender {
 
+    private final boolean shouldLogWarningsOnVerbose;
+
     @PluginFactory
     public static CliMessagerAppender createAppender(
             @PluginAttribute("name") String name,
             @PluginElement("Layout") Layout<? extends Serializable> layout,
             @PluginElement("Filter") final Filter filter) {
         if (name == null) {
-            LOGGER.error("There is no name provided for MyCustomAppender");
-            return null;
+            // Assign default name to avoid complaining
+            name = "CliMessagerAppender";
         }
         if (layout == null) {
             layout = PatternLayout.createDefaultLayout();
@@ -47,23 +50,32 @@ public class CliMessagerAppender extends AbstractAppender {
             Layout<? extends Serializable> layout,
             final boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, null);
+        this.shouldLogWarningsOnVerbose = SfgeConfigProvider.get().shouldLogWarningsOnVerbose();
     }
 
+    /**
+     * {@link CliMessagerAppender} decrements the log level while publishing to CLI. Warning is
+     * reduced to Info, Error is reduced to Warning, Fatal is reduced to Error.
+     *
+     * @param event that was published from code
+     */
     @Override
     public void append(LogEvent event) {
         Level level = event.getLevel();
-        if (Level.INFO.equals(level)) {
-            CliMessager.postMessage("SFGE Info log", EventKey.INFO_GENERAL, getEventMessage(event));
-        } else if (Level.WARN.equals(level)) {
-            CliMessager.postMessage("SFGE Warn", EventKey.WARNING_GENERAL, getEventMessage(event));
-        } else if (Level.ERROR.equals(level) || Level.FATAL.equals(level)) {
+        if (Level.WARN.equals(level) && this.shouldLogWarningsOnVerbose) {
             CliMessager.postMessage(
-                    "SFGE Error/Fatal", EventKey.ERROR_GENERAL, getEventMessage(event));
+                    "SFGE Warn as Info", EventKey.INFO_GENERAL, getEventMessage(event));
+        } else if (Level.ERROR.equals(level)) {
+            CliMessager.postMessage(
+                    "SFGE Error as Warning", EventKey.WARNING_GENERAL, getEventMessage(event));
+        } else if (Level.FATAL.equals(level)) {
+            CliMessager.postMessage(
+                    "SFGE Fatal as Error", EventKey.ERROR_GENERAL, getEventMessage(event));
         } else {
-            // TODO: revisit
+            // TODO: revisit how the outliers are handled
             error(
                     String.format(
-                            "Unable to log less than INFO level [{}]: {}",
+                            "Unable to log less than WARN level [{}]: {}",
                             event.getLevel(),
                             getEventMessage(event)));
         }
