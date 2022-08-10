@@ -22,4 +22,10 @@ public interface SfgeConfig {
      * enabled
      */
     boolean shouldLogWarningsOnVerbose();
+
+    /**
+     * Should be used to set the level of increments at which path analysis progress update is
+     * provided
+     */
+    int getProgressIncrementsOnVerbose();
 }

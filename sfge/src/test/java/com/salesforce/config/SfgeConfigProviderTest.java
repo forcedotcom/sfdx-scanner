@@ -41,6 +41,16 @@ public class SfgeConfigProviderTest {
                         public boolean shouldIgnoreParseErrors() {
                             return !EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS;
                         }
+
+                        @Override
+                        public boolean shouldLogWarningsOnVerbose() {
+                            return !EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE;
+                        }
+
+                        @Override
+                        public int getProgressIncrementsOnVerbose() {
+                            return -1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE;
+                        }
                     });
 
             final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
@@ -57,6 +67,12 @@ public class SfgeConfigProviderTest {
             MatcherAssert.assertThat(
                     sfgeConfig.shouldIgnoreParseErrors(),
                     equalTo(!EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+            MatcherAssert.assertThat(
+                    sfgeConfig.shouldLogWarningsOnVerbose(),
+                    equalTo(!EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
+            MatcherAssert.assertThat(
+                    sfgeConfig.getProgressIncrementsOnVerbose(),
+                    equalTo(-1 * EnvUtil.getProgressIncrementsOnVerbose()));
         } finally {
             SfgeConfigTestProvider.remove();
         }

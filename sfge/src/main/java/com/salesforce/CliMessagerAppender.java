@@ -64,7 +64,7 @@ public class CliMessagerAppender extends AbstractAppender {
         Level level = event.getLevel();
         if (Level.WARN.equals(level) && this.shouldLogWarningsOnVerbose) {
             CliMessager.postMessage(
-                    "SFGE Warn as Info", EventKey.INFO_GENERAL, getEventMessage(event));
+                    "SFGE Warning as Info", EventKey.INFO_GENERAL, getEventMessage(event));
         } else if (Level.ERROR.equals(level)) {
             CliMessager.postMessage(
                     "SFGE Error as Warning", EventKey.WARNING_GENERAL, getEventMessage(event));
@@ -72,7 +72,6 @@ public class CliMessagerAppender extends AbstractAppender {
             CliMessager.postMessage(
                     "SFGE Fatal as Error", EventKey.ERROR_GENERAL, getEventMessage(event));
         } else {
-            // TODO: revisit how the outliers are handled
             error(
                     String.format(
                             "Unable to log less than WARN level [{}]: {}",

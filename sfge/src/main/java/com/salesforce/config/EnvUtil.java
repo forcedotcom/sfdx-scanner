@@ -10,6 +10,8 @@ public final class EnvUtil {
             "SFGE_RULE_ENABLE_WARNING_VIOLATION";
     private static final String ENV_IGNORE_PARSE_ERRORS = "SFGE_IGNORE_PARSE_ERRORS";
     private static final String ENV_LOG_WARNINGS_ON_VERBOSE = "SFGE_LOG_WARNINGS_ON_VERBOSE";
+    private static final String ENV_PROGRESS_INCREMENTS_ON_VERBOSE =
+            "SFGE_PROGRESS_INCREMENTS_ON_VERBOSE";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
     @VisibleForTesting
@@ -23,6 +25,7 @@ public final class EnvUtil {
     @VisibleForTesting static final boolean DEFAULT_RULE_ENABLE_WARNING_VIOLATION = true;
     @VisibleForTesting static final boolean DEFAULT_IGNORE_PARSE_ERRORS = false;
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
+    @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE = 50;
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -71,6 +74,18 @@ public final class EnvUtil {
      */
     static boolean shouldLogWarningsOnVerbose() {
         return getBoolOrDefault(ENV_LOG_WARNINGS_ON_VERBOSE, DEFAULT_LOG_WARNINGS_ON_VERBOSE);
+    }
+
+    /**
+     * Gets the level of increments at which path analysis progress update is provided. Applicable
+     * only with --verbose.
+     *
+     * @return value of {@link #ENV_PROGRESS_INCREMENTS_ON_VERBOSE} environment variable if set,
+     *     else {@link #DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE}
+     */
+    static int getProgressIncrementsOnVerbose() {
+        return getIntOrDefault(
+                ENV_PROGRESS_INCREMENTS_ON_VERBOSE, DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE);
     }
 
     private static int getIntOrDefault(String name, int defaultValue) {

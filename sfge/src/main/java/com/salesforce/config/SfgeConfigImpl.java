@@ -30,6 +30,11 @@ public final class SfgeConfigImpl implements SfgeConfig {
         return EnvUtil.shouldLogWarningsOnVerbose();
     }
 
+    @Override
+    public int getProgressIncrementsOnVerbose() {
+        return EnvUtil.getProgressIncrementsOnVerbose();
+    }
+
     static SfgeConfigImpl getInstance() {
         return SfgeConfigImpl.LazyHolder.INSTANCE;
     }

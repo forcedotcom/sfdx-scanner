@@ -1,6 +1,7 @@
 package com.salesforce.rules.ops;
 
 import com.google.common.base.Joiner;
+import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
@@ -17,7 +18,7 @@ public class ProgressListenerImpl implements ProgressListener {
     private int violationsDetected = 0;
     private int entryPointsAnalyzed = 0;
 
-    private static final int PROGRESS_INCREMENTS = 10; // TODO: get this value from config
+    private final int progressIncrements;
 
     static ProgressListener getInstance() {
         return ProgressListenerImpl.LazyHolder.INSTANCE;
@@ -27,7 +28,9 @@ public class ProgressListenerImpl implements ProgressListener {
         private static final ProgressListenerImpl INSTANCE = new ProgressListenerImpl();
     }
 
-    private ProgressListenerImpl() {}
+    private ProgressListenerImpl() {
+        progressIncrements = SfgeConfigProvider.get().getProgressIncrementsOnVerbose();
+    }
 
     @Override
     public void collectedMetaInfo(String metaInfoType, TreeSet<String> itemsCollected) {
@@ -77,7 +80,7 @@ public class ProgressListenerImpl implements ProgressListener {
         violationsDetected += violations.size();
         entryPointsAnalyzed++;
 
-        if (pathsDetected % PROGRESS_INCREMENTS == 0) {
+        if (pathsDetected % progressIncrements == 0) {
             CliMessager.postMessage(
                     "Count of violations in paths, entry points",
                     EventKey.INFO_PATH_ANALYSIS_PROGRESS,
