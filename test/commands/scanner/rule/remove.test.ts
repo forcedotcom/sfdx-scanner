@@ -48,9 +48,14 @@ describe('scanner:rule:remove', () => {
 		describe('Rule Removal', () => {
 			describe('Test Case: Removing a single PMD JAR', () => {
 				removeTest
-					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 3000)
-					.timeout(10000)
+					// We'll wait ten seconds then send in a 'y', to simulate the user confirming the request.
+					// Note: The real time until the prompt is given shouldn't be anywhere near this long,
+					// but a high delay prevents test failures due to the input being sent before the prompt
+					// is displayed.
+					.stdin('y\n', 10000)
+					// The timeout is twenty seconds, not because we expect it to take that long, but just to make
+					// sure that there's enough time for the test to complete.
+					.timeout(20000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar1
 					])
@@ -70,9 +75,14 @@ describe('scanner:rule:remove', () => {
 
 			describe('Test Case: Removing multiple PMD JARs', () => {
 				removeTest
-					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 3000)
-					.timeout(10000)
+					// We'll wait ten seconds then send in a 'y', to simulate the user confirming the request.
+					// Note: The real time until the prompt is given shouldn't be anywhere near this long,
+					// but a high delay prevents test failures due to the input being sent before the prompt
+					// is displayed.
+					.stdin('y\n', 10000)
+					// The timeout is twenty seconds, not because we expect it to take that long, but just to make
+					// sure that there's enough time for the test to complete.
+					.timeout(20000)
 					.command(['scanner:rule:remove',
 						'--path', [pathToApexJar1, pathToApexJar2].join(',')
 					])
@@ -92,9 +102,14 @@ describe('scanner:rule:remove', () => {
 
 			describe('Test Case: Removing an entire folder of PMD JARs', () => {
 				removeTest
-					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 3000)
-					.timeout(10000)
+					// We'll wait ten seconds then send in a 'y', to simulate the user confirming the request.
+					// Note: The real time until the prompt is given shouldn't be anywhere near this long,
+					// but a high delay prevents test failures due to the input being sent before the prompt
+					// is displayed.
+					.stdin('y\n', 10000)
+					// The timeout is twenty seconds, not because we expect it to take that long, but just to make
+					// sure that there's enough time for the test to complete.
+					.timeout(20000)
 					.command(['scanner:rule:remove',
 						'--path', parentFolderForJars
 					])
@@ -114,9 +129,14 @@ describe('scanner:rule:remove', () => {
 
 			describe('Edge Case: Provided path is not registered as a custom rule', () => {
 				removeTest
-					// We'll wait three seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 3000)
-					.timeout(10000)
+					// We'll wait ten seconds then send in a 'y', to simulate the user confirming the request.
+					// Note: The real time until the prompt is given shouldn't be anywhere near this long,
+					// but a high delay prevents test failures due to the input being sent before the prompt
+					// is displayed.
+					.stdin('y\n', 10000)
+					// The timeout is twenty seconds, not because we expect it to take that long, but just to make
+					// sure that there's enough time for the test to complete.
+					.timeout(20000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar4
 					])
@@ -129,9 +149,14 @@ describe('scanner:rule:remove', () => {
 		describe('User prompt', () => {
 			describe('Test Case: User chooses to abort transaction instead of confirming', () => {
 				removeTest
-					// We'll wait three seconds and then send in a 'n', to simulate the user aborting the request.
-					.stdin('n\n', 3000)
-					.timeout(10000)
+					// We'll wait ten seconds then send in a 'y', to simulate the user confirming the request.
+					// Note: The real time until the prompt is given shouldn't be anywhere near this long,
+					// but a high delay prevents test failures due to the input being sent before the prompt
+					// is displayed.
+					.stdin('n\n', 10000)
+					// The timeout is twenty seconds, not because we expect it to take that long, but just to make
+					// sure that there's enough time for the test to complete.
+					.timeout(20000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar1
 					])

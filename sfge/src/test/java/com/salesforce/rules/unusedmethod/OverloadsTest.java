@@ -216,7 +216,7 @@ public class OverloadsTest extends BaseUnusedMethodTest {
 
     /**
      * If there's different overloads of a constructor, then only the ones that are actually invoked
-     * count as used. Specific case: Methods with different arities.
+     * count as used. Specific case: Methods with different arities, invoked via the `new` keyword.
      */
     @CsvSource({
         // Use the arity of the constructor that ISN'T being called,
@@ -230,7 +230,7 @@ public class OverloadsTest extends BaseUnusedMethodTest {
     })
     @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
     @Disabled
-    public void callConstructorWithDifferentArityOverloads_expectViolation(
+    public void callConstructorViaNewWithDifferentArityOverloads_expectViolation(
             String scope, String constructor, int arity) {
         String sourceCode =
                 "global class MyClass {\n"
@@ -254,7 +254,8 @@ public class OverloadsTest extends BaseUnusedMethodTest {
 
     /**
      * If there's different overloads of a constructor, then only the ones that are actually invoked
-     * count as used. Specific case: Methods with the same arity, but different signatures.
+     * count as used. Specific case: Methods with the same arity, but different signatures, invoked
+     * via the `new` keyword
      */
     @CsvSource({
         // Use the arity of the constructor that ISN'T being called.
@@ -268,7 +269,7 @@ public class OverloadsTest extends BaseUnusedMethodTest {
     })
     @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
     @Disabled
-    public void callConstructorWithDifferentSignatureOverloads_expectViolation(
+    public void callConstructorViaNewWithDifferentSignatureOverloads_expectViolation(
             String scope, String constructor, int beginLine) {
         String sourceCode =
                 "global class MethodHostClass {\n"
@@ -280,6 +281,83 @@ public class OverloadsTest extends BaseUnusedMethodTest {
                         + "    /* sfge-disable-stack UnusedMethodRule */\n"
                         + "    public void methodInvoker() {\n"
                         + String.format("        MethodHostClass mhc = %s;\n", constructor)
+                        + "    }\n"
+                        + "}\n";
+        assertViolations(
+                sourceCode,
+                v -> {
+                    assertEquals("<init>", v.getSourceVertexName());
+                    assertEquals(beginLine, ((MethodVertex) v.getSourceVertex()).getArity());
+                });
+    }
+
+    /**
+     * If there's different overloads of a constructor, then only the ones that are actually invoked
+     * count as used. Specific case: Methods with different arities, invoked via the `this` keyword.
+     */
+    // TODO: Enable subsequent tests as we implement functionality.
+    @CsvSource({
+        // Use the arity of the constructor that ISN'T being called,
+        // and have one variant per visibility scope.
+        //        "public,  this(true),  2",
+        //        "protected,  this(true),  2",
+        "private,  this(true),  2",
+        //        "public,  'this(true, true)', 1",
+        //        "protected,  'this(true, true)', 1",
+        "private,  'this(true, true)', 1"
+    })
+    @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
+    public void callConstructorViaThisWithDifferentArityOverloads_expectViolation(
+            String scope, String constructor, int arity) {
+        String sourceCode =
+                "global class MyClass {\n"
+                        + String.format("    %s MyClass(boolean b) {\n", scope)
+                        + "    }\n"
+                        + String.format("    %s MyClass(boolean b, boolean c) {\n", scope)
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-stack UnusedMethodRule */"
+                        + "    public MyClass() {\n"
+                        + String.format("        %s;\n", constructor)
+                        + "    }\n"
+                        + "}\n";
+        assertViolations(
+                sourceCode,
+                v -> {
+                    assertEquals("<init>", v.getSourceVertexName());
+                    assertEquals(arity, ((MethodVertex) v.getSourceVertex()).getArity());
+                });
+    }
+
+    /**
+     * If there's different overloads of a constructor, then only the ones that are actually invoked
+     * count as used. Specific case: Methods with the same arity, but different signatures, invoked
+     * via the `this` keyword
+     */
+    @CsvSource({
+        // Use the arity of the constructor that ISN'T being called.
+        // One test per constructor, per visibility scope.
+        "public,  this(42),  4",
+        "protected,  this(42),  4",
+        "private,  this(42),  4",
+        "public,  this(true),  2",
+        "protected,  this(true),  2",
+        "private,  this(true),  2"
+    })
+    @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
+    @Disabled
+    public void callConstructorViaThisWithDifferentSignatureOverloads_expectViolation(
+            String scope, String constructor, int beginLine) {
+        String sourceCode =
+                "global class MethodHostClass {\n"
+                        + String.format("    %s MethodHostClass(boolean b) {\n", scope)
+                        + "    }\n"
+                        + String.format("    %s MethodHostClass(Integer i) {\n", scope)
+                        + "    }\n"
+                        // Use the engine directive to prevent this method from tripping the rule.
+                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                        + "    public MethodHostClass() {\n"
+                        + String.format("        %s;", constructor)
                         + "    }\n"
                         + "}\n";
         assertViolations(

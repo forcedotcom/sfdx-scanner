@@ -8,6 +8,7 @@ import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.vertex.*;
+import com.salesforce.graph.visitor.TypedVertexVisitor;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +38,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
      * A map used to cache every method call expression in a given class. Minimizing redundant
      * queries is a very high priority in this rule.
      */
-    private final Map<String, List<MethodCallExpressionVertex>> internalMethodCallsByDefiningType;
+    private final Map<String, List<InvocableWithParametersVertex>>
+            internalMethodCallsByDefiningType;
 
     private UnusedMethodRule() {
         super();
@@ -133,9 +135,9 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     private boolean methodIsIneligible(MethodVertex vertex) {
         return
-        // TODO: At this time, only private, non-static, non-constructor methods are supported.
+        // TODO: At this time, only private, non-static methods are supported.
         //  This limit will be loosened over time, and eventually removed entirely.
-        (!vertex.isPrivate() || vertex.isStatic() || vertex.isConstructor())
+        (!vertex.isPrivate() || vertex.isStatic())
                 // If we're directed to skip this method, then we should obviously do so.
                 || directedToSkip(vertex)
                 // Abstract methods must be implemented by all child classes.
@@ -143,6 +145,11 @@ public class UnusedMethodRule extends AbstractStaticRule {
                 // and we have other rules to detect unused abstract classes/interfaces.
                 // As such, inspecting absract methods directly is unnecessary.
                 || vertex.isAbstract()
+                // Private constructors with arity of 0 are ineligible. Creating such
+                // a constructor is a standard way of preventing utility classes with only
+                // static methods from being instantiated at all, and including it in
+                // our analysis is likely to generate more false positives than true positives.
+                || vertex.isConstructor() && vertex.isPrivate() && vertex.getArity() == 0
                 // Methods whose name starts with this prefix are getters/setters.
                 // Getters are typically used by VF controllers, and setters are frequently
                 // made private to render a property unchangeable.
@@ -166,64 +173,66 @@ public class UnusedMethodRule extends AbstractStaticRule {
     }
 
     private boolean methodUsedInternally(MethodVertex methodVertex) {
+        // Instantiate a visitor to use for checking internal calls.
+        InternalCallValidator visitor = new InternalCallValidator(methodVertex);
         // Get every method call in the class containing the method.
-        List<MethodCallExpressionVertex> potentialInternalCallers =
+        List<InvocableWithParametersVertex> potentialInternalCallers =
                 getInternalCalls(methodVertex.getDefiningType());
 
         // For each internal call...
-        for (MethodCallExpressionVertex potentialCall : potentialInternalCallers) {
-            // If the method's name is wrong, it's not a match.
-            // TODO: When we add support for constructors/static methods, this check must change.
-            if (!potentialCall.getMethodName().equalsIgnoreCase(methodVertex.getName())) {
+        for (InvocableWithParametersVertex potentialCall : potentialInternalCallers) {
+            // Use our visitor to determine whether this invocation is of the target method.
+            if (!visitor.isInternalCall(potentialCall)) {
                 continue;
             }
-
-            // If the arity is wrong, then it's not a match, but rather a call to another
-            // overload of the method.
-            // The method call has a number of children equal to one more than the
-            // arity of the method being called.
-            List<ChainedVertex> parameters = potentialCall.getParameters();
-            if (parameters.size() != methodVertex.getArity()) {
-                continue;
-            }
-            // If we're at this point, then all of our checks were satisfied,
-            // and this method call seems to be an invocation of our method.
+            // If we're here, then our checks were satisfied, and this method call
+            // appears to be an invocation of the target method.
             return true;
         }
         // If we're at this point, none of the method calls satisfied our checks.
         return false;
     }
 
-    private List<MethodCallExpressionVertex> getInternalCalls(String definingType) {
+    private List<InvocableWithParametersVertex> getInternalCalls(String definingType) {
         // First, check if we've got anything for the desired type.
         // If so, we can just return that.
         if (this.internalMethodCallsByDefiningType.containsKey(definingType)) {
             return this.internalMethodCallsByDefiningType.get(definingType);
         }
         // Otherwise, we'll need to do a query for internal calls.
-        // An internal call is any method call whose reference is `this` or empty.
+        // For instance methods, an internal call is any method call whose reference is `this` or
+        // empty.
         String[] desiredReferenceTypes =
                 new String[] {
                     NodeType.THIS_VARIABLE_EXPRESSION, NodeType.EMPTY_REFERENCE_EXPRESSION
                 };
-        List<MethodCallExpressionVertex> internalCalls =
+        List<InvocableWithParametersVertex> internalCalls =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().where(
-                                        H.has(
-                                                NodeType.METHOD_CALL_EXPRESSION,
-                                                Schema.DEFINING_TYPE,
-                                                definingType))
-                                // NOTE: There's no .hasLabel(String...) method, hence the call to
-                                // .hasLabel(String,String...).
-                                .where(
-                                        __.repeat(__.out(Schema.CHILD))
-                                                .until(
-                                                        __.hasLabel(
-                                                                desiredReferenceTypes[0],
-                                                                desiredReferenceTypes))
-                                                .count()
-                                                .is(P.gt(0))));
+                        g.V().or(
+                                        __.where(
+                                                        H.has(
+                                                                NodeType.METHOD_CALL_EXPRESSION,
+                                                                Schema.DEFINING_TYPE,
+                                                                definingType))
+                                                // NOTE: There's no .hasLabel(String...) method,
+                                                // hence the call to
+                                                // .hasLabel(String,String...) with the array
+                                                // defined earlier.
+                                                .where(
+                                                        __.repeat(__.out(Schema.CHILD))
+                                                                .until(
+                                                                        __.hasLabel(
+                                                                                desiredReferenceTypes[
+                                                                                        0],
+                                                                                desiredReferenceTypes))
+                                                                .count()
+                                                                .is(P.gt(0))),
+                                        __.where(
+                                                H.has(
+                                                        NodeType.THIS_METHOD_CALL_EXPRESSION,
+                                                        Schema.DEFINING_TYPE,
+                                                        definingType))));
 
         // Cache the result, then return it.
         this.internalMethodCallsByDefiningType.put(definingType, internalCalls);
@@ -240,6 +249,55 @@ public class UnusedMethodRule extends AbstractStaticRule {
                                                 m.getName(), m.getDefiningType()),
                                         m))
                 .collect(Collectors.toList());
+    }
+
+    private static final class InternalCallValidator
+            extends TypedVertexVisitor.DefaultNoOp<Boolean> {
+        private final MethodVertex invokedMethod;
+
+        private InternalCallValidator(MethodVertex invokedMethod) {
+            this.invokedMethod = invokedMethod;
+        }
+
+        private boolean isInternalCall(InvocableWithParametersVertex vertex) {
+            return vertex.accept(this);
+        }
+
+        private boolean parametersAreValid(InvocableWithParametersVertex vertex) {
+            // If the arity is wrong, then it's not a match, but rather a call to another
+            // overload of the same method.
+            List<ChainedVertex> parameters = vertex.getParameters();
+            if (parameters.size() != invokedMethod.getArity()) {
+                return false;
+            }
+            // TODO: Long-term, we'll want to validate the parameters' types in addition
+            //  to their count.
+            return true;
+        }
+
+        @Override
+        public Boolean visit(MethodCallExpressionVertex vertex) {
+            // If the method is a constructor, then this can't be an
+            // invocation of that method.
+            if (invokedMethod.isConstructor()) {
+                return false;
+            }
+            // If the method's name is wrong, then it's not a match.
+            if (!vertex.getMethodName().equalsIgnoreCase(invokedMethod.getName())) {
+                return false;
+            }
+            return parametersAreValid(vertex);
+        }
+
+        @Override
+        public Boolean visit(ThisMethodCallExpressionVertex vertex) {
+            // If the method we're looking for isn't a constructor, then
+            // this can't be an invocation of that method.
+            if (!invokedMethod.isConstructor()) {
+                return false;
+            }
+            return parametersAreValid(vertex);
+        }
     }
 
     private static final class LazyHolder {

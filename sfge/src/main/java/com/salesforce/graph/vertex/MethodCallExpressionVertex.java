@@ -8,6 +8,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.SymbolProviderVertexVisitor;
 import com.salesforce.graph.visitor.PathVertexVisitor;
+import com.salesforce.graph.visitor.TypedVertexVisitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -252,6 +253,11 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
 
     public String getMethodName() {
         return (String) properties.get(Schema.METHOD_NAME);
+    }
+
+    @Override
+    public <T> T accept(TypedVertexVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     /**

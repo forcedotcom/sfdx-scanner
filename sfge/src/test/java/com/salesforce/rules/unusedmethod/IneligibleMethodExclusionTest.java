@@ -15,20 +15,35 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
 
-    /* ============ SECTION 1: IMPLICIT CONSTRUCTOR ============ */
+    /* ============ SECTION 1: CONSTRUCTORS ============ */
     /**
      * When no constructor is declared on a class, a no-parameter constructor is implicitly
      * generated. To reduce noise, this should always count as used.
      */
     @Test
-    public void impliedConstructorWithoutInvocation_expectNoViolation() {
+    public void impliedConstructorWithoutInvocation_expectNoAnalysis() {
         String sourceCode = "public class MyClass {}";
+        assertNoAnalysis(sourceCode);
+    }
+
+    /**
+     * When a class has a private, 0-arity constructor, that constructor is
+     * ineligible for analysis. This pattern is common for utility classes with
+     * static methods, and we want to minimize false positives.
+     */
+    @Test
+    public void privateArity0ConstructorWithoutInvocation_expectNoAnalysis() {
+        String sourceCode =
+                "public class MyClass {\n"
+                    + "    private MyClass() {\n"
+                    + "    }\n"
+                    + "}\n";
         assertNoAnalysis(sourceCode);
     }
 
     /* ============ SECTION 2: ENGINE DIRECTIVES ============ */
     @Test
-    public void applySkipStack_expectNoViolation() {
+    public void applySkipStack_expectNoAnalysis() {
         String sourceCode =
                 "public class MyClass {\n"
                         // Unused static method, annotated with the directive.
@@ -50,7 +65,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     }
 
     @Test
-    public void applySkipClassDirective_expectNoViolation() {
+    public void applySkipClassDirective_expectNoAnalysis() {
         String sourceCode =
                 "/* sfge-disable UnusedMethodRule */\n"
                         + "public class MyClass {\n"
@@ -76,7 +91,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     /** Global methods are entrypoints, and should count as used. */
     @ValueSource(strings = {"global", "global static"})
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void globalMethod_expectNoViolation(String annotation) {
+    public void globalMethod_expectNoAnalysis(String annotation) {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    %s boolean someMethod() {\n", annotation)
@@ -88,7 +103,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
 
     /** public methods on controllers are entrypoints, and should count as used. */
     @Test
-    public void publicControllerMethod_expectNoViolation() {
+    public void publicControllerMethod_expectNoAnalysis() {
         try {
             String sourceCode =
                     "global class MyController {\n"
@@ -121,7 +136,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
 
     /** Methods returning PageReferences are entrypoints, and should count as used. */
     @Test
-    public void pageReferenceMethod_expectNoViolation() {
+    public void pageReferenceMethod_expectNoAnalysis() {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    private PageReference someMethod() {\n"
@@ -140,7 +155,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                 Schema.NAMESPACE_ACCESSIBLE
             })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void annotatedMethod_expectNoViolation(String annotation) {
+    public void annotatedMethod_expectNoAnalysis(String annotation) {
         String sourceCode =
                 "global class MyClass {\n"
                         + String.format("    @%s\n", annotation)
@@ -156,7 +171,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
      * entrypoint, and should count as used.
      */
     @Test
-    public void emailHandlerMethod_expectNoViolation() {
+    public void emailHandlerMethod_expectNoAnalysis() {
         String sourceCode =
                 "global class MyClass implements Messaging.InboundEmailhandler {\n"
                         + "    private Messaging.InboundEmailResult handleInboundEmail(Messaging.InboundEmail email, Messaging.InboundEnvelope envelope) {\n"
@@ -171,7 +186,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     //            declared to prevent a variable from being modified entirely.
 
     @Test
-    public void getterSetterDeclaration_expectNoViolation() {
+    public void getterSetterDeclaration_expectNoAnalysis() {
         String sourceCode =
                 "global class MyClass {\n"
                         + "    public Boolean someProperty {\n"
@@ -191,7 +206,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
 
     /** Abstract methods on abstract classes/interfaces are abstract, and count as used. */
     @Test
-    public void abstractMethodDeclaration_expectNoViolation() {
+    public void abstractMethodDeclaration_expectNoAnalysis() {
         String[] sourceCodes = {
             "global abstract class AbstractWithPublic {\n"
                     + "    public abstract boolean someMethod();\n"

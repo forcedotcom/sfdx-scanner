@@ -106,9 +106,14 @@ public class InternalCallsTest extends BaseUnusedMethodTest {
     /* =============== SECTION 3: CONSTRUCTOR METHODS =============== */
 
     /** If a class internally calls its own constructor, that constructor counts as used. */
-    @ValueSource(strings = {"public", "protected", "private"})
+    // TODO: Enable subsequent tests as we implement functionality.
+    @ValueSource(
+            strings = {
+                //            "public",
+                //            "protected",
+                "private"
+            })
     @ParameterizedTest(name = "{displayName}: scope {0}")
-    @Disabled
     public void constructorInternallyCalled_expectNoViolation(String scope) {
         String sourceCode =
                 "global class MyClass {\n"
