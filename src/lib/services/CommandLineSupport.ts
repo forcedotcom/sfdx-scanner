@@ -77,12 +77,12 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			// When data is passed back up to us, pop it onto the appropriate string.
 			cp.stdout.on('data', data => {
-				if (!this.handleLiveOut(''+data)) {
+				if (!this.handleLiveOut(String(data))) {
 					stdout += data;
 				}
 			});
 			cp.stderr.on('data', data => {
-				if (!this.handleLiveErr(''+data)) {
+				if (!this.handleLiveErr(String(data))) {
 					stderr += data;
 				}
 			});
@@ -111,6 +111,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param data that was received as stdout
 	 * @returns true if data was handled and false if it needs to be handled later
 	 */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	protected handleLiveOut(data: string): boolean {
 		// By default, we handle all data at the end
 		return false;
@@ -122,6 +123,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param err that was received as on stderr
 	 * @returns true if data was handled and false if it needs to be handled later
 	 */
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	protected handleLiveErr(err: string): boolean {
 		// By default, we handle all the errors at the end
 		return false;

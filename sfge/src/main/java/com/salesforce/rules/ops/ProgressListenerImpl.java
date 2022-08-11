@@ -1,11 +1,13 @@
 package com.salesforce.rules.ops;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
 import com.salesforce.rules.Violation;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,8 +15,11 @@ import java.util.TreeSet;
 /** Publishes information to CLI on the progress of analysis. */
 public class ProgressListenerImpl implements ProgressListener {
 
+    @VisibleForTesting static final String NONE_FOUND = "none found";
+
     private int filesCompiled = 0;
     private int pathsDetected = 0;
+    private int lastPathCountReported = 0;
     private int violationsDetected = 0;
     private int entryPointsAnalyzed = 0;
 
@@ -34,8 +39,7 @@ public class ProgressListenerImpl implements ProgressListener {
 
     @Override
     public void collectedMetaInfo(String metaInfoType, TreeSet<String> itemsCollected) {
-        final String items =
-                (itemsCollected.isEmpty()) ? "none found" : Joiner.on(',').join(itemsCollected);
+        final String items = stringify(itemsCollected);
         CliMessager.postMessage(
                 "Meta information collected",
                 EventKey.INFO_META_INFO_COLLECTED,
@@ -80,13 +84,17 @@ public class ProgressListenerImpl implements ProgressListener {
         violationsDetected += violations.size();
         entryPointsAnalyzed++;
 
-        if (pathsDetected % progressIncrements == 0) {
+        // Make a post only if we have more paths detected than the progress increments
+        // since the last time we posted.
+        if (pathsDetected - lastPathCountReported >= progressIncrements) {
             CliMessager.postMessage(
                     "Count of violations in paths, entry points",
                     EventKey.INFO_PATH_ANALYSIS_PROGRESS,
                     String.valueOf(violationsDetected),
                     String.valueOf(pathsDetected),
                     String.valueOf(entryPointsAnalyzed));
+
+            lastPathCountReported = pathsDetected;
         }
     }
 
@@ -98,5 +106,44 @@ public class ProgressListenerImpl implements ProgressListener {
                 String.valueOf(pathsDetected),
                 String.valueOf(entryPointsAnalyzed),
                 String.valueOf(violationsDetected));
+    }
+
+    @VisibleForTesting
+    String stringify(Collection<String> items) {
+        return (items.isEmpty()) ? NONE_FOUND : Joiner.on(',').join(items);
+    }
+
+    @VisibleForTesting
+    void reset() {
+        filesCompiled = 0;
+        pathsDetected = 0;
+        lastPathCountReported = 0;
+        violationsDetected = 0;
+        entryPointsAnalyzed = 0;
+    }
+
+    @VisibleForTesting
+    int getFilesCompiled() {
+        return filesCompiled;
+    }
+
+    @VisibleForTesting
+    int getPathsDetected() {
+        return pathsDetected;
+    }
+
+    @VisibleForTesting
+    int getLastPathCountReported() {
+        return lastPathCountReported;
+    }
+
+    @VisibleForTesting
+    int getViolationsDetected() {
+        return violationsDetected;
+    }
+
+    @VisibleForTesting
+    int getEntryPointsAnalyzed() {
+        return entryPointsAnalyzed;
     }
 }

@@ -96,5 +96,11 @@ public class SfgeConfigProviderTest {
                 equalTo(EnvUtil.DEFAULT_RULE_ENABLE_WARNING_VIOLATION));
         MatcherAssert.assertThat(
                 sfgeConfig.shouldIgnoreParseErrors(), equalTo(EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+        MatcherAssert.assertThat(
+                sfgeConfig.shouldLogWarningsOnVerbose(),
+                equalTo(EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
+        MatcherAssert.assertThat(
+                sfgeConfig.getProgressIncrementsOnVerbose(),
+                equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE));
     }
 }

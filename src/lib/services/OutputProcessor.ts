@@ -100,7 +100,6 @@ export class OutputProcessor extends AsyncCreatable {
 	private getEventsFromString(str: string, startTag: string, endTag: string): RuleEvent[] {
 		const events: RuleEvent[] = [];
 
-		// const regex = /SFDX-START(.*)SFDX-END/g;
 		const regex = new RegExp(`^${startTag}(.*)${endTag}`, 'g');
 		const headerLength = startTag.length;
 		const tailLength = endTag.length;
