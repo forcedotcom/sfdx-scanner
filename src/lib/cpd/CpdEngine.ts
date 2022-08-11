@@ -189,7 +189,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		if (xmlStart != -1 && xmlEnd != -1) {
 			const cpdXml = stdout.slice(xmlStart, xmlEnd + cpdEnd.length);
 			const cpdJson: Element = xml2js(cpdXml, {compact: false, ignoreDeclaration: true}) as Element;
-
+			// Not all of the elements in this list will be duplication tags. We only want the ones that are.
 			const duplications = (cpdJson.elements[0].elements || []).filter(element => element.name === "duplication");
 			if (duplications) {
 				ruleResults = this.jsonToRuleResults(duplications);
