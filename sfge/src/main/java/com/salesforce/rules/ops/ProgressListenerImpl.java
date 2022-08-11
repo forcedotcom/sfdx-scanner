@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-/** Publishes information to CLI on the progress of analysis. */
+/**
+ * Publishes realtime information to CLI on the progress of analysis.
+ */
 public class ProgressListenerImpl implements ProgressListener {
 
     @VisibleForTesting static final String NONE_FOUND = "none found";
