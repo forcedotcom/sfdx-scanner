@@ -1,7 +1,7 @@
 import os = require('os');
 import path = require('path');
 
-export const PMD_VERSION = '6.47.0';
+export const PMD_VERSION = '6.48.0';
 export const SFGE_VERSION = '1.0.1-pilot';
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
