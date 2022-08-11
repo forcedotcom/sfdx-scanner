@@ -145,6 +145,11 @@ public class UnusedMethodRule extends AbstractStaticRule {
                 // and we have other rules to detect unused abstract classes/interfaces.
                 // As such, inspecting absract methods directly is unnecessary.
                 || vertex.isAbstract()
+                // Private constructors with arity of 0 are ineligible. Creating such
+                // a constructor is a standard way of preventing utility classes with only
+                // static methods from being instantiated at all, and including it in
+                // our analysis is likely to generate more false positives than true positives.
+                || vertex.isConstructor() && vertex.isPrivate() && vertex.getArity() == 0
                 // Methods whose name starts with this prefix are getters/setters.
                 // Getters are typically used by VF controllers, and setters are frequently
                 // made private to render a property unchangeable.
