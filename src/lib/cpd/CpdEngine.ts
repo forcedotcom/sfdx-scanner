@@ -189,7 +189,7 @@ export class CpdEngine extends AbstractRuleEngine {
 			const cpdXml = stdout.slice(xmlStart, xmlEnd + cpdEnd.length);
 			const cpdJson = xml2js(cpdXml, {compact: false, ignoreDeclaration: true});
 
-			const duplications =  cpdJson.elements[0].elements;
+			const duplications = (cpdJson.elements[0].elements || []).filter(element => element.name === "duplication");
 			if (duplications) {
 				ruleResults = this.jsonToRuleResults(duplications);
 			}
