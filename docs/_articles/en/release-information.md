@@ -6,6 +6,18 @@ lang: en
 ### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in).
 <br>
 
+## [v2.13.8](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.8) (08-17-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.7...v2.13.8)
+
+### Release Summary
+* PMD upgrade to 6.48.0
+* Updates to local RetireJS Vulnerability Repository
+
+**Merged pull requests:**
+
+- @W-11567651@: \[2.x\] Updating PMD to v6.48.0. [\#793](https://github.com/forcedotcom/sfdx-scanner/pull/793)
+
 ## [v2.13.7](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.7) (07-27-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.6...v2.13.7)

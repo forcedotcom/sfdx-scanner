@@ -1,5 +1,5 @@
-scanner: '2.13.7'
-releasedon: '07-27-2022'
-pmd: '6.47.0'
+scanner: '2.13.8'
+releasedon: '08-17-2022'
+pmd: '6.48.0'
 eslint: '6.x'
 retirejs: '2.x'
