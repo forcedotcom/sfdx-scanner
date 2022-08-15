@@ -229,11 +229,4 @@ export class SfgeWrapper extends CommandLineSupport {
 		});
 		return wrapper.execute();
 	}
-
-	protected handleLiveOut(data: string): boolean {
-		if (this.outputProcessor.isRealtimeOutput(data)) {
-			return this.outputProcessor.processRealtimeOutput(data);
-		}
-		return false;
-	}
 }

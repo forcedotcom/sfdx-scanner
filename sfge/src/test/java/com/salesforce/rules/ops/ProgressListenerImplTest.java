@@ -3,6 +3,8 @@ package com.salesforce.rules.ops;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.salesforce.config.SfgeConfigTestProvider;
 import com.salesforce.config.TestSfgeConfig;
 import com.salesforce.graph.ApexPath;
@@ -43,9 +45,9 @@ public class ProgressListenerImplTest {
 
     @Test
     public void testFinishedAnalyzingEntryPoint() {
-        List<ApexPath> paths = List.of(new ApexPath(null), new ApexPath(null));
+        List<ApexPath> paths = Lists.newArrayList(new ApexPath(null), new ApexPath(null));
         Set<Violation> violations =
-                Set.of(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
+            Sets.newHashSet(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
 
         progressListener.finishedAnalyzingEntryPoint(paths, violations);
         assertThat(progressListener.getPathsDetected(), equalTo(2));
@@ -56,9 +58,9 @@ public class ProgressListenerImplTest {
 
     @Test
     public void testFinishedAnalyzingEntryPoint_progressIncrement() {
-        List<ApexPath> paths = List.of(new ApexPath(null), new ApexPath(null));
+        List<ApexPath> paths = Lists.newArrayList(new ApexPath(null), new ApexPath(null));
         Set<Violation> violations =
-                Set.of(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
+                Sets.newHashSet(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
 
         progressListener.finishedAnalyzingEntryPoint(paths, violations);
         assertThat(progressListener.getPathsDetected(), equalTo(2));
@@ -74,7 +76,7 @@ public class ProgressListenerImplTest {
 
     @Test
     public void testStringify() {
-        final List<String> items = List.of("one", "two");
+        final List<String> items = Lists.newArrayList("one", "two");
         assertThat(progressListener.stringify(items), equalTo("one,two"));
     }
 

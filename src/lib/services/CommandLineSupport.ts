@@ -28,7 +28,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 	private parentLogger: Logger;
 	private parentInitialized: boolean;
-	protected outputProcessor: OutputProcessor;
+	private outputProcessor: OutputProcessor;
 
 	protected async init(): Promise<void> {
 
@@ -77,11 +77,11 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			// When data is passed back up to us, pop it onto the appropriate string.
 			cp.stdout.on('data', data => {
-				this.handleLiveOut(String(data))
+				this.outputProcessor.processRealtimeOutput(data);
 				stdout += data;
 			});
 			cp.stderr.on('data', data => {
-				this.handleLiveErr(String(data))
+				this.outputProcessor.processRealtimeOutput(data);
 				stderr += data;
 			});
 
@@ -101,29 +101,5 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 				});
 			});
 		});
-	}
-
-	/**
-	 * Handles output in realtime.
-	 * Individual engines can override this hook to have custom implementation.
-	 * @param data that was received as stdout
-	 * @returns true if data was handled and false if it needs to be handled later
-	 */
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-	protected handleLiveOut(data: string): boolean {
-		// By default, we handle all data at the end
-		return false;
-	}
-
-	/**
-	 * Handles error messages in realtime.
-	 * Individual engines can override this hook to have custom implementation.
-	 * @param err that was received as on stderr
-	 * @returns true if data was handled and false if it needs to be handled later
-	 */
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-	protected handleLiveErr(err: string): boolean {
-		// By default, we handle all the errors at the end
-		return false;
 	}
 }

@@ -35,10 +35,6 @@ export class OutputProcessor extends AsyncCreatable {
 		this.initialized = true;
 	}
 
-	public isRealtimeOutput(out: string): boolean {
-		return out.startsWith(REALTIME_MESSAGE_START_TAG);
-	}
-
 	public processOutput(out: string): boolean {
 		return this.processAllOutput(out, MESSAGE_START_TAG, MESSAGE_END_TAG);
 	}
