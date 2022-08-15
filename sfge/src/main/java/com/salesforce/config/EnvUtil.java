@@ -25,7 +25,7 @@ public final class EnvUtil {
     @VisibleForTesting static final boolean DEFAULT_RULE_ENABLE_WARNING_VIOLATION = true;
     @VisibleForTesting static final boolean DEFAULT_IGNORE_PARSE_ERRORS = false;
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
-    @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE = 50;
+    @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE = 10;
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else

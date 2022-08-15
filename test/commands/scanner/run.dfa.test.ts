@@ -77,5 +77,22 @@ describe('scanner:run:dfa', function () {
 					verifyContains(output, completedAnalysisMessage);
 				});
 		});
+
+		describe('run with format --json', () => {
+			setupCommandTest
+			.command(['scanner:run:dfa',
+			'--target', dfaTarget,
+			'--projectdir', projectdir,
+			'--format', 'json'
+		])
+		.it('provides only json in stdout', ctx => {
+			try {
+				JSON.parse(ctx.stdout);
+			} catch (error) {
+				expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
+			}
+			
+			});
+		});
 	});
 });

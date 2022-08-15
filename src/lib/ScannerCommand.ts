@@ -86,6 +86,13 @@ export abstract class ScannerCommand extends SfdxCommand {
 		this.ux.setSpinnerStatus(msg);
 	}
 
+	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+	protected waitOnSpinner(msg: string): void {
+		// msg variable is thrown away - please don't send anything here.
+		const currentStatus = this.ux.getSpinnerStatus();
+		this.ux.setSpinnerStatus(currentStatus + ' .');
+	}
+
 	protected stopSpinner(msg: string): void {
 		this.ux.stopSpinner(msg);
 	}
@@ -104,6 +111,7 @@ export abstract class ScannerCommand extends SfdxCommand {
 		uxEvents.on(EVENTS.ERROR_VERBOSE, (msg: string) => this.displayError(msg));
 		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => this.startSpinner(msg, status));
 		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => this.updateSpinner(msg));
+		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (msg: string) => this.waitOnSpinner(msg));
 		uxEvents.on(EVENTS.STOP_SPINNER, (msg: string) => this.stopSpinner(msg));
 	}
 }

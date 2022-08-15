@@ -52,6 +52,7 @@ public class Message {
 
 	enum MessageHandler {
 		UX,
+        UX_SPINNER,
 		INTERNAL
 	}
 

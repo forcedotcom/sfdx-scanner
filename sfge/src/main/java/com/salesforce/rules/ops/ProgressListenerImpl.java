@@ -12,9 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- * Publishes realtime information to CLI on the progress of analysis.
- */
+/** Publishes realtime information to CLI on the progress of analysis. */
 public class ProgressListenerImpl implements ProgressListener {
 
     @VisibleForTesting static final String NONE_FOUND = "none found";
@@ -24,6 +22,7 @@ public class ProgressListenerImpl implements ProgressListener {
     private int lastPathCountReported = 0;
     private int violationsDetected = 0;
     private int entryPointsAnalyzed = 0;
+    private int totalEntryPoints = 0;
 
     private final int progressIncrements;
 
@@ -74,10 +73,11 @@ public class ProgressListenerImpl implements ProgressListener {
 
     @Override
     public void pathEntryPointsIdentified(int pathEntryPointsCount) {
+        totalEntryPoints = pathEntryPointsCount;
         CliMessager.postMessage(
                 "Path entry points identified",
                 EventKey.INFO_PATH_ENTRY_POINTS_IDENTIFIED,
-                String.valueOf(pathEntryPointsCount));
+                String.valueOf(totalEntryPoints));
     }
 
     @Override
@@ -94,7 +94,8 @@ public class ProgressListenerImpl implements ProgressListener {
                     EventKey.INFO_PATH_ANALYSIS_PROGRESS,
                     String.valueOf(violationsDetected),
                     String.valueOf(pathsDetected),
-                    String.valueOf(entryPointsAnalyzed));
+                    String.valueOf(entryPointsAnalyzed),
+                    String.valueOf(totalEntryPoints));
 
             lastPathCountReported = pathsDetected;
         }

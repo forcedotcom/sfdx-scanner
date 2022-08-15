@@ -14,7 +14,7 @@ module.exports = {
 		"sfgeStartedBuildingGraph": "Building graph . . .",
 		"sfgeFinishedBuildingGraph": "Added all compilation units to graph.",
 		"sfgePathEntryPointsIdentified": "Identified %s path entry point(s).",
-		"sfgeViolationsInPathProgress": "Detected %s violation(s) from %s path(s) on %s entry point(s) so far.",
+		"sfgeViolationsInPathProgress": "Detected %s violation(s) from %s path(s) on %s/%s entry point(s).",
 		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s)."
 	},
 	"warning": {

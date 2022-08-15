@@ -1,7 +1,7 @@
 import {Logger, LoggerLevel, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {RuleEvent} from '../../types';
-import {uxEvents} from '../ScannerEvents';
+import {EVENTS, uxEvents} from '../ScannerEvents';
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -74,16 +74,25 @@ export class OutputProcessor extends AsyncCreatable {
 		// Iterate over all of the events and throw them as appropriate.
 		outEvents.forEach((event) => {
 			this.logEvent(event);
-			if (event.handler === 'UX' || (event.handler === 'INTERNAL' && event.type === 'ERROR')) {
-				const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
-				this.emitUxEvent(eventType, event.messageKey, event.args);
+			let eventType = '';
+			if (event.handler === 'UX_SPINNER') {
+				eventType = EVENTS.UPDATE_SPINNER.toString();
+			} else if (event.handler === 'UX' || (event.handler === 'INTERNAL' && event.type === 'ERROR')) {
+				eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
 			}
+			this.emitUxEvent(eventType, event.messageKey, event.args);
 		});
 		return true;
 	}
 
 
 	private emitUxEvent(eventType: string, messageKey: string, args: string[]): void {
+		if (eventType === '') {
+			this.logger.trace(`No event type requested for message ${messageKey}`);
+			return;
+		}
+
+
 		this.logger.trace(`Sending new event of type ${eventType} and message ${messageKey}`);
 		let constructedMessage: string = null;
 		try {
