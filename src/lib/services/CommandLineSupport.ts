@@ -77,11 +77,11 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			// When data is passed back up to us, pop it onto the appropriate string.
 			cp.stdout.on('data', data => {
-				this.outputProcessor.processRealtimeOutput(data);
+				this.outputProcessor.processRealtimeOutput(String(data));
 				stdout += data;
 			});
 			cp.stderr.on('data', data => {
-				this.outputProcessor.processRealtimeOutput(data);
+				this.outputProcessor.processRealtimeOutput(String(data));
 				stderr += data;
 			});
 
