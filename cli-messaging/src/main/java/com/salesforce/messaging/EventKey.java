@@ -29,10 +29,10 @@ public enum EventKey {
     /** SFGE RELATED **/
     INFO_GENERAL("info.sfgeInfoLog", 1, MessageType.INFO, MessageHandler.UX, true),
     INFO_META_INFO_COLLECTED("info.sfgeMetaInfoCollected", 2, MessageType.INFO, MessageHandler.UX, true),
-    INFO_COMPLETED_FILE_COMPILATION("info.sfgeFinishedCompilingFiles", 1, MessageType.INFO, MessageHandler.UX, false),
+    INFO_COMPLETED_FILE_COMPILATION("info.sfgeFinishedCompilingFiles", 1, MessageType.INFO, MessageHandler.UX_SPINNER, false),
     INFO_STARTED_BUILDING_GRAPH("info.sfgeStartedBuildingGraph", 0, MessageType.INFO, MessageHandler.UX_SPINNER, false),
     INFO_COMPLETED_BUILDING_GRAPH("info.sfgeFinishedBuildingGraph", 0, MessageType.INFO, MessageHandler.UX_SPINNER, false),
-    INFO_PATH_ENTRY_POINTS_IDENTIFIED("info.sfgePathEntryPointsIdentified", 1, MessageType.INFO, MessageHandler.UX, true),
+    INFO_PATH_ENTRY_POINTS_IDENTIFIED("info.sfgePathEntryPointsIdentified", 1, MessageType.INFO, MessageHandler.UX_SPINNER, false),
     INFO_PATH_ANALYSIS_PROGRESS("info.sfgeViolationsInPathProgress", 4, MessageType.INFO, MessageHandler.UX_SPINNER, false),
     INFO_COMPLETED_PATH_ANALYSIS("info.sfgeCompletedPathAnalysis", 3, MessageType.INFO, MessageHandler.UX_SPINNER, false),
     WARNING_GENERAL("warning.sfgeWarnLog", 1, MessageType.WARNING, MessageHandler.UX, true),

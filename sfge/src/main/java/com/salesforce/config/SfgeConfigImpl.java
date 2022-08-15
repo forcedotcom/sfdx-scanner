@@ -31,8 +31,8 @@ public final class SfgeConfigImpl implements SfgeConfig {
     }
 
     @Override
-    public int getProgressIncrementsOnVerbose() {
-        return EnvUtil.getProgressIncrementsOnVerbose();
+    public int getProgressIncrements() {
+        return EnvUtil.getProgressIncrements();
     }
 
     static SfgeConfigImpl getInstance() {

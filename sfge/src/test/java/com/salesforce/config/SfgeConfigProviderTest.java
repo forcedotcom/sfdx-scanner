@@ -48,8 +48,8 @@ public class SfgeConfigProviderTest {
                         }
 
                         @Override
-                        public int getProgressIncrementsOnVerbose() {
-                            return -1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE;
+                        public int getProgressIncrements() {
+                            return -1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS;
                         }
                     });
 
@@ -71,8 +71,8 @@ public class SfgeConfigProviderTest {
                     sfgeConfig.shouldLogWarningsOnVerbose(),
                     equalTo(!EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
             MatcherAssert.assertThat(
-                    sfgeConfig.getProgressIncrementsOnVerbose(),
-                    equalTo(-1 * EnvUtil.getProgressIncrementsOnVerbose()));
+                    sfgeConfig.getProgressIncrements(),
+                    equalTo(-1 * EnvUtil.getProgressIncrements()));
         } finally {
             SfgeConfigTestProvider.remove();
         }
@@ -100,7 +100,6 @@ public class SfgeConfigProviderTest {
                 sfgeConfig.shouldLogWarningsOnVerbose(),
                 equalTo(EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
         MatcherAssert.assertThat(
-                sfgeConfig.getProgressIncrementsOnVerbose(),
-                equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS_ON_VERBOSE));
+                sfgeConfig.getProgressIncrements(), equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS));
     }
 }

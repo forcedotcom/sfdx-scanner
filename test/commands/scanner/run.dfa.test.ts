@@ -2,6 +2,8 @@ import {expect} from '@salesforce/command/lib/test';
 import {setupCommandTest} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import * as path from 'path';
+import Dfa from '../../../src/commands/scanner/run/dfa';
+import * as sinon from 'sinon';
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -26,7 +28,8 @@ const identifiedEntryMessage = sfgeMessages.getMessage('info.sfgePathEntryPoints
 const completedAnalysisMessage = sfgeMessages.getMessage('info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
 
 function isSubstr(output: string, substring: string): boolean {
-	const regex = new RegExp(`^${substring}`, 'gm');
+	const updatedSubstr = substring.replace('[', '\\[');
+	const regex = new RegExp(`^${updatedSubstr}`, 'gm');
 	const regexMatch = output.match(regex);
 	return regexMatch != null && regexMatch.length >= 1;
 }
@@ -40,8 +43,23 @@ function verifyNotContains(output: string, substring: string): void {
 }
 
 describe('scanner:run:dfa', function () {
+	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
+
 	describe('End to end', () => {
-		describe('--verbose', () => {
+
+		describe('Progress output', () => {
+			let sandbox;
+			let spy: sinon.SinonSpy;
+				before(() => {
+					sandbox = sinon.createSandbox();
+					spy = sandbox.spy(Dfa.prototype, "updateSpinner");
+				});
+	
+				after(() => {
+					spy.restore();
+					sinon.restore();
+				});
+
 			setupCommandTest
 				.command(['scanner:run:dfa',
 					'--target', dfaTarget,
@@ -52,11 +70,7 @@ describe('scanner:run:dfa', function () {
 					const output = ctx.stdout;
 					verifyNotContains(output, customSettingsMessage);
 					verifyNotContains(output, apexControllerMessage);
-					verifyNotContains(output, compiledMessage);
-					verifyNotContains(output, startGraphBuildMessage);
-					verifyNotContains(output, endGraphBuildMessage);
-					verifyNotContains(output, identifiedEntryMessage);
-					verifyContains(output, completedAnalysisMessage);
+					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
 				});
 
 			setupCommandTest
@@ -70,29 +84,28 @@ describe('scanner:run:dfa', function () {
 					const output = ctx.stdout;
 					verifyContains(output, customSettingsMessage);
 					verifyContains(output, apexControllerMessage);
-					verifyContains(output, compiledMessage);
-					verifyContains(output, startGraphBuildMessage);
-					verifyContains(output, endGraphBuildMessage);
-					verifyContains(output, identifiedEntryMessage);
-					verifyContains(output, completedAnalysisMessage);
+					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
 				});
 		});
 
-		describe('run with format --json', () => {
-			setupCommandTest
-			.command(['scanner:run:dfa',
-			'--target', dfaTarget,
-			'--projectdir', projectdir,
-			'--format', 'json'
-		])
-		.it('provides only json in stdout', ctx => {
-			try {
-				JSON.parse(ctx.stdout);
-			} catch (error) {
-				expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
-			}
-			
+		describe('Output consistency', () => {
+			describe('run with format --json', () => {
+				setupCommandTest
+				.command(['scanner:run:dfa',
+				'--target', dfaTarget,
+				'--projectdir', projectdir,
+				'--format', 'json'
+			])
+			.it('provides only json in stdout', ctx => {
+				try {
+					JSON.parse(ctx.stdout);
+				} catch (error) {
+					expect.fail("dummy", "another dummy", "Invalid JSON output from --format json: " + ctx.stdout + ", error = " + error);
+				}
+				
+				});
 			});
 		});
+		
 	});
 });

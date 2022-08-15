@@ -31,7 +31,7 @@ public class TestSfgeConfig implements SfgeConfig {
     }
 
     @Override
-    public int getProgressIncrementsOnVerbose() {
-        return SfgeConfigImpl.getInstance().getProgressIncrementsOnVerbose();
+    public int getProgressIncrements() {
+        return SfgeConfigImpl.getInstance().getProgressIncrements();
     }
 }

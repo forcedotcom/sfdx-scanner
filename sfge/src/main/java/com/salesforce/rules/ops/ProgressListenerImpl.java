@@ -35,7 +35,7 @@ public class ProgressListenerImpl implements ProgressListener {
     }
 
     private ProgressListenerImpl() {
-        progressIncrements = SfgeConfigProvider.get().getProgressIncrementsOnVerbose();
+        progressIncrements = SfgeConfigProvider.get().getProgressIncrements();
     }
 
     @Override

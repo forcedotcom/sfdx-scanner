@@ -22,7 +22,7 @@ public class ProgressListenerImplTest {
         SfgeConfigTestProvider.set(
                 new TestSfgeConfig() {
                     @Override
-                    public int getProgressIncrementsOnVerbose() {
+                    public int getProgressIncrements() {
                         return 3;
                     }
                 });
