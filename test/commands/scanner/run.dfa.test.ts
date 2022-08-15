@@ -43,9 +43,28 @@ function verifyNotContains(output: string, substring: string): void {
 }
 
 describe('scanner:run:dfa', function () {
-	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
+	this.timeout(20000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('End to end', () => {
+
+		describe('Output consistency', () => {
+			describe('run with --format json', () => {
+				setupCommandTest
+				.command(['scanner:run:dfa',
+				'--target', dfaTarget,
+				'--projectdir', projectdir,
+				'--format', 'json'
+			])
+			.it('provides only json in stdout', ctx => {
+				try {
+					JSON.parse(ctx.stdout);
+				} catch (error) {
+					expect.fail("dummy", "another dummy", "Invalid JSON output from --format json: " + ctx.stdout + ", error = " + error);
+				}
+				
+				});
+			});
+		});
 
 		describe('Progress output', () => {
 			let sandbox;
@@ -86,25 +105,6 @@ describe('scanner:run:dfa', function () {
 					verifyContains(output, apexControllerMessage);
 					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
 				});
-		});
-
-		describe('Output consistency', () => {
-			describe('run with format --json', () => {
-				setupCommandTest
-				.command(['scanner:run:dfa',
-				'--target', dfaTarget,
-				'--projectdir', projectdir,
-				'--format', 'json'
-			])
-			.it('provides only json in stdout', ctx => {
-				try {
-					JSON.parse(ctx.stdout);
-				} catch (error) {
-					expect.fail("dummy", "another dummy", "Invalid JSON output from --format json: " + ctx.stdout + ", error = " + error);
-				}
-				
-				});
-			});
 		});
 		
 	});
