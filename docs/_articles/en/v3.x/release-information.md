@@ -11,13 +11,14 @@ lang: en
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.3.0...v3.4.0)
 
 ### Release Summary
-* Improvements to `eslint`:
-	- Execute `eslint` engine with babel parser to accommodate more modern javascript syntax
-	- Identify javascript target files that were analyzed by both `eslint` and `eslint-lwc`, and throw warning about the possibility of duplicate violations
-* Survey request banner fix
-* SFGE: Minor code fixes
-* Updates to local RetireJS Vulnerability Repository
-* PMD upgrade to 6.48.0
+
+* NEW \[SFGE\]: We now display progress information of Salesforce Graph Engine's analysis while executing `scanner:run:dfa` command.
+* NEW: If a JavaScript target file is analyzed by both `eslint` and `eslint-lwc`, we throw a warning about duplicate violations to alert you that you should modify your configuration.
+* NEW: We updated the RetireJS Vulnerability Repository.
+* NEW: We upgraded PMD to 6.48.0.
+* CHANGE: We replaced eslint's parser with `@babel/eslint-parser`
+* FIX: We removed the survey request banner's stylization
+* FIX \[SFGE\]: When Salesforce Graph Engine is unable to resolve a method call or a variable passed to a Database operation, instead of throwing an internal error, it creates a violation to let users know that they need to verify the CRUD/FLS access of the operation manually.
 
 **Closed issues:**
 
