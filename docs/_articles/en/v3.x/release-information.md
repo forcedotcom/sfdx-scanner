@@ -16,8 +16,8 @@ lang: en
 * NEW: If a JavaScript target file is analyzed by both `eslint` and `eslint-lwc`, we throw a warning about duplicate violations to alert you that you should modify your configuration.
 * NEW: We updated the RetireJS Vulnerability Repository.
 * NEW: We upgraded PMD to 6.48.0.
-* CHANGE: We replaced eslint's parser with `@babel/eslint-parser`
-* FIX: We removed the survey request banner's stylization
+* CHANGE: We replaced eslint's parser with `@babel/eslint-parser`.
+* FIX: We removed the survey request banner's stylization.
 * FIX \[SFGE\]: When Salesforce Graph Engine (SFGE) is unable to resolve a method call or a variable passed to a database operation, it no longer throws an internal error. Instead, SFGE creates a violation to let you know that you need to verify the CRUD/FLS access of the operation manually.
 
 **Closed issues:**
