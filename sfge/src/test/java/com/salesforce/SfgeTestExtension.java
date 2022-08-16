@@ -4,6 +4,7 @@ import com.salesforce.graph.MetadataInfoTestProvider;
 import com.salesforce.graph.TestMetadataInfo;
 import com.salesforce.graph.cache.VertexCacheTestProvider;
 import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
+import com.salesforce.rules.ops.ProgressListenerTestProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
@@ -31,6 +32,7 @@ public final class SfgeTestExtension
         MetadataInfoTestProvider.initializeForTest();
         VertexCacheTestProvider.initializeForTest();
         MetaInfoCollectorTestProvider.initializeForTest();
+        ProgressListenerTestProvider.initializeForTest();
     }
 
     /**
@@ -45,5 +47,6 @@ public final class SfgeTestExtension
         MetadataInfoTestProvider.remove();
         VertexCacheTestProvider.remove();
         MetaInfoCollectorTestProvider.remove();
+        ProgressListenerTestProvider.remove();
     }
 }

@@ -6,6 +6,7 @@ import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -86,6 +87,9 @@ public abstract class AbstractRuleRunner {
             LOGGER.info("No path-based entry points found");
             return new HashSet<>();
         }
+
+        // Let listener know that we have finished identifying entry points in target
+        ProgressListenerProvider.get().pathEntryPointsIdentified(pathEntryPoints.size());
 
         // For each entry point, generate a submission object.
         List<ThreadableRuleExecutor.ThreadableRuleSubmission> submissions = new ArrayList<>();

@@ -24,6 +24,7 @@ public class CustomSettingInfoCollector extends XmlMetaInfoCollector {
     private static final String CUSTOM_SETTING_PATTERN_STRING = "(.*)" + OBJECT_FILE_NAME_PATTERN;
     private static final Pattern CUSTOM_SETTING_PATTERN =
             Pattern.compile(CUSTOM_SETTING_PATTERN_STRING, Pattern.CASE_INSENSITIVE);
+    private static final String META_INFO_TYPE_NAME = "Custom Settings";
 
     @Override
     HashSet<String> getPathPatterns() {
@@ -86,6 +87,11 @@ public class CustomSettingInfoCollector extends XmlMetaInfoCollector {
                     path);
         }
         return Optional.empty();
+    }
+
+    @Override
+    public String getMetaInfoTypeName() {
+        return META_INFO_TYPE_NAME;
     }
 
     protected static final class LazyHolder {

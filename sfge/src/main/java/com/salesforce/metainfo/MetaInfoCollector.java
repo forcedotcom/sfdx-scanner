@@ -19,6 +19,8 @@ public interface MetaInfoCollector {
      */
     TreeSet<String> getMetaInfoCollected();
 
+    String getMetaInfoTypeName();
+
     /** Thrown when project files cannot be properly loaded/processed. */
     final class MetaInfoLoadException extends SfgeRuntimeException {
         MetaInfoLoadException(String msg) {

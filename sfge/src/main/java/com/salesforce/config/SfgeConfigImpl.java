@@ -25,6 +25,16 @@ public final class SfgeConfigImpl implements SfgeConfig {
         return EnvUtil.shouldIgnoreParseErrors();
     }
 
+    @Override
+    public boolean shouldLogWarningsOnVerbose() {
+        return EnvUtil.shouldLogWarningsOnVerbose();
+    }
+
+    @Override
+    public int getProgressIncrements() {
+        return EnvUtil.getProgressIncrements();
+    }
+
     static SfgeConfigImpl getInstance() {
         return SfgeConfigImpl.LazyHolder.INSTANCE;
     }

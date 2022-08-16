@@ -9,6 +9,8 @@ public final class EnvUtil {
     private static final String ENV_RULE_ENABLE_WARNING_VIOLATION =
             "SFGE_RULE_ENABLE_WARNING_VIOLATION";
     private static final String ENV_IGNORE_PARSE_ERRORS = "SFGE_IGNORE_PARSE_ERRORS";
+    private static final String ENV_LOG_WARNINGS_ON_VERBOSE = "SFGE_LOG_WARNINGS_ON_VERBOSE";
+    private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
     @VisibleForTesting
@@ -21,6 +23,8 @@ public final class EnvUtil {
 
     @VisibleForTesting static final boolean DEFAULT_RULE_ENABLE_WARNING_VIOLATION = true;
     @VisibleForTesting static final boolean DEFAULT_IGNORE_PARSE_ERRORS = false;
+    @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
+    @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS = 10;
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -59,6 +63,27 @@ public final class EnvUtil {
      */
     static boolean shouldIgnoreParseErrors() {
         return getBoolOrDefault(ENV_IGNORE_PARSE_ERRORS, DEFAULT_IGNORE_PARSE_ERRORS);
+    }
+
+    /**
+     * Indicates if SFGE should log internal warnings on --verbose
+     *
+     * @return value of {@link #ENV_LOG_WARNINGS_ON_VERBOSE} env variable. If it is not set, {@link
+     *     #DEFAULT_LOG_WARNINGS_ON_VERBOSE}
+     */
+    static boolean shouldLogWarningsOnVerbose() {
+        return getBoolOrDefault(ENV_LOG_WARNINGS_ON_VERBOSE, DEFAULT_LOG_WARNINGS_ON_VERBOSE);
+    }
+
+    /**
+     * Gets the level of increments at which path analysis progress update is provided. Applicable
+     * only with --verbose.
+     *
+     * @return value of {@link #ENV_PROGRESS_INCREMENTS} environment variable if set, else {@link
+     *     #DEFAULT_PROGRESS_INCREMENTS}
+     */
+    static int getProgressIncrements() {
+        return getIntOrDefault(ENV_PROGRESS_INCREMENTS, DEFAULT_PROGRESS_INCREMENTS);
     }
 
     private static int getIntOrDefault(String name, int defaultValue) {

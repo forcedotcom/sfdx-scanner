@@ -7,7 +7,15 @@ module.exports = {
 		"customEslintHeadsUp": "About to run Eslint with custom config in %s. Please make sure your current directory has all the required NPM dependencies.",
 		"customPmdHeadsUp": "About to run PMD with custom config in %s. Please make sure that any custom rule references have already been added to the plugin through scanner:rule:add command.",
 		"pmdRuleSkipped": "Omitting results for PMD rule \"%s\". Reason: %s.",
-		"unmatchedPathExtensionCpd": "Path extensions for the following files will not be processed by CPD: %s"
+		"unmatchedPathExtensionCpd": "Path extensions for the following files will not be processed by CPD: %s",
+		"sfgeInfoLog": "%s",
+		"sfgeMetaInfoCollected": "Loaded %s: [ %s ]",
+		"sfgeFinishedCompilingFiles": "Compiled %s files.",
+		"sfgeStartedBuildingGraph": "Building graph.",
+		"sfgeFinishedBuildingGraph": "Added all compilation units to graph.",
+		"sfgePathEntryPointsIdentified": "Identified %s path entry point(s).",
+		"sfgeViolationsInPathProgress": "Detected %s violation(s) from %s path(s) on %s/%s entry point(s).",
+		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s)."
 	},
 	"warning": {
 		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
@@ -20,7 +28,8 @@ module.exports = {
 		"unexpectedPmdNodeType": "Encountered unexpected PMD node of type '%s'",
 		"multipleMethodTargetMatches": "Total of %s methods in file %s matched name #%s",
 		"noMethodTargetMatches": "No methods in file %s matched name #%s()",
-		"pmdConfigError": "PMD failed to evaluate rule '%s'. Message: %s"
+		"pmdConfigError": "PMD failed to evaluate rule '%s'. Message: %s",
+		"sfgeWarnLog": "%s"
 	},
 	"error": {
 		"internal": {
@@ -28,7 +37,8 @@ module.exports = {
 			"mainInvalidArgument": "INTERNAL ERROR: Invalid arguments passed to Main. Details: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
 			"jsonWriteFailed": "INTERNAL ERROR: Failed to write JSON to file: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
 			"classpathDoesNotExist": "INTERNAL ERROR: Path does not exist: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
-			"xmlMissingInClasspath": "INTERNAL ERROR: XML resource [%s] found in jar, but not in Classpath. Please log an issue with us at github.com/forcedotcom/sfdx-scanner."
+			"xmlMissingInClasspath": "INTERNAL ERROR: XML resource [%s] found in jar, but not in Classpath. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
+			"sfgeErrorLog": "%s"
 		},
 		"external": {
 			"errorMessageAbove": "Please see error details displayed above.",

@@ -388,7 +388,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
                             "TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
-                                    + keys);
+                                    + Arrays.toString(keys));
                 }
                 return Optional.empty();
             }
@@ -600,7 +600,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
                             "TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
-                                    + keys);
+                                    + Arrays.toString(keys));
                 }
                 return Optional.empty();
             }

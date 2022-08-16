@@ -14,6 +14,7 @@ import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.RuleRunner;
 import com.salesforce.rules.RuleUtil;
 import com.salesforce.rules.Violation;
+import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -146,6 +147,7 @@ public class Main {
         List<Violation> allViolations;
         try {
             allViolations = new RuleRunner(g).runRules(eap.getSelectedRules(), eap.getTargets());
+            ProgressListenerProvider.get().completedAnalysis();
         } catch (SfgeRuntimeException ex) {
             LOGGER.error("Error while running rules", ex);
             System.err.println(formatError(ex));
@@ -172,6 +174,11 @@ public class Main {
 
         for (MetaInfoCollector collector : allCollectors) {
             collector.loadProjectFiles(eap.getProjectDirs());
+
+            // Let progress listener know about the meta information collected
+            ProgressListenerProvider.get()
+                    .collectedMetaInfo(
+                            collector.getMetaInfoTypeName(), collector.getMetaInfoCollected());
         }
     }
 

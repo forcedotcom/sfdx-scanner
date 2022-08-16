@@ -10,6 +10,8 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
+import com.salesforce.rules.ops.ProgressListener;
+import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,12 +30,15 @@ public class PathBasedRuleRunner {
     /** Set that holds the violations found by this rule execution. */
     private final Set<Violation> violations;
 
+    private final ProgressListener progressListener;
+
     public PathBasedRuleRunner(
             GraphTraversalSource g, List<AbstractPathBasedRule> rules, MethodVertex methodVertex) {
         this.g = g;
         this.rules = rules;
         this.methodVertex = methodVertex;
         this.violations = new HashSet<>();
+        this.progressListener = ProgressListenerProvider.get();
     }
 
     /**
@@ -64,6 +69,8 @@ public class PathBasedRuleRunner {
                 LOGGER.info("EntryPoint=" + methodVertex.toSimpleString() + "; no violations");
             }
         }
+
+        progressListener.finishedAnalyzingEntryPoint(paths, violations);
 
         return violations;
     }
