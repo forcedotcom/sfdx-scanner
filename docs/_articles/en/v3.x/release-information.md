@@ -18,7 +18,7 @@ lang: en
 * NEW: We upgraded PMD to 6.48.0.
 * CHANGE: We replaced eslint's parser with `@babel/eslint-parser`
 * FIX: We removed the survey request banner's stylization
-* FIX \[SFGE\]: When Salesforce Graph Engine is unable to resolve a method call or a variable passed to a Database operation, instead of throwing an internal error, it creates a violation to let users know that they need to verify the CRUD/FLS access of the operation manually.
+* FIX \[SFGE\]: When Salesforce Graph Engine (SFGE) is unable to resolve a method call or a variable passed to a database operation, it no longer throws an internal error. Instead, SFGE creates a violation to let you know that you need to verify the CRUD/FLS access of the operation manually.
 
 **Closed issues:**
 
@@ -37,7 +37,12 @@ lang: en
 - @W-11446192@: checks if any files are processed by both eslint and eslint-lwc and emits warning [\#782](https://github.com/forcedotcom/sfdx-scanner/pull/782)
 - @W-11505293@ Skip info logs from dependency [\#784](https://github.com/forcedotcom/sfdx-scanner/pull/784)
 - @W-10778080@ Handle unresolved apex value in DML statements gracefully [\#785](https://github.com/forcedotcom/sfdx-scanner/pull/785)
+- @W-10459671@ Provide progress information of SFGE on verbose mode [\#792](https://github.com/forcedotcom/sfdx-scanner/pull/792)
 - @W-11567651@: Updating PMD to v6.48.0. [\#794](https://github.com/forcedotcom/sfdx-scanner/pull/794)
+- @W-10459671@ Redirecting ApexPathExpander logs to log file [\#796](https://github.com/forcedotcom/sfdx-scanner/pull/796)
+- @W-11606553@ 3.4.0 Release updates [\#799](https://github.com/forcedotcom/sfdx-scanner/pull/799)
+
+
 
 
 ## [v3.3.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.3.0) (07-20-2022)
