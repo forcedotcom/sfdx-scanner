@@ -29,7 +29,8 @@ public class ProgressListenerImplTest {
                     }
                 });
 
-        progressListener = (ProgressListenerImpl) ProgressListenerProvider.get();
+        // Creating an instance directly to avoid conflicts with other tests
+        progressListener = new ProgressListenerImpl();
     }
 
     @BeforeEach
@@ -47,7 +48,8 @@ public class ProgressListenerImplTest {
     public void testFinishedAnalyzingEntryPoint() {
         List<ApexPath> paths = Lists.newArrayList(new ApexPath(null), new ApexPath(null));
         Set<Violation> violations =
-            Sets.newHashSet(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
+                Sets.newHashSet(
+                        new Violation.InternalErrorViolation("details", new DummyVertex("label")));
 
         progressListener.finishedAnalyzingEntryPoint(paths, violations);
         assertThat(progressListener.getPathsDetected(), equalTo(2));
@@ -60,11 +62,13 @@ public class ProgressListenerImplTest {
     public void testFinishedAnalyzingEntryPoint_progressIncrement() {
         List<ApexPath> paths = Lists.newArrayList(new ApexPath(null), new ApexPath(null));
         Set<Violation> violations =
-                Sets.newHashSet(new Violation.InternalErrorViolation("details", new DummyVertex("label")));
+                Sets.newHashSet(
+                        new Violation.InternalErrorViolation("details", new DummyVertex("label")));
 
         progressListener.finishedAnalyzingEntryPoint(paths, violations);
         assertThat(progressListener.getPathsDetected(), equalTo(2));
         assertThat(progressListener.getViolationsDetected(), equalTo(1));
+        assertThat(progressListener.getEntryPointsAnalyzed(), equalTo(1));
         assertThat(progressListener.getLastPathCountReported(), equalTo(0));
 
         progressListener.finishedAnalyzingEntryPoint(paths, violations);

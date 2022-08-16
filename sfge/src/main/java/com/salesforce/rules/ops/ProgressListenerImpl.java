@@ -34,7 +34,8 @@ public class ProgressListenerImpl implements ProgressListener {
         private static final ProgressListenerImpl INSTANCE = new ProgressListenerImpl();
     }
 
-    private ProgressListenerImpl() {
+    @VisibleForTesting
+    ProgressListenerImpl() {
         progressIncrements = SfgeConfigProvider.get().getProgressIncrements();
     }
 
