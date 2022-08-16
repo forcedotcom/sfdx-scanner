@@ -34,9 +34,6 @@ function isSubstr(output: string, substring: string): boolean {
 	return regexMatch != null && regexMatch.length >= 1;
 }
 
-function verifyContains(output: string, substring: string): void {
-	expect(isSubstr(output, substring), `Output "${output}" should contain substring "${substring}"`).is.true;
-}
 
 function verifyNotContains(output: string, substring: string): void {
 	expect(isSubstr(output, substring), `Output "${output}" should not contain substring "${substring}"`).is.false;
@@ -92,19 +89,6 @@ describe('scanner:run:dfa', function () {
 					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
 				});
 
-			setupCommandTest
-				.command(['scanner:run:dfa',
-					'--target', dfaTarget,
-					'--projectdir', projectdir,
-					'--format', 'json',
-					'--verbose'
-				])
-				.it('contains valid information with --verbose', ctx => {
-					const output = ctx.stdout;
-					verifyContains(output, customSettingsMessage);
-					verifyContains(output, apexControllerMessage);
-					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
-				});
 		});
 		
 	});
