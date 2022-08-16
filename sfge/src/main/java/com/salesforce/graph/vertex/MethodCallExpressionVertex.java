@@ -274,6 +274,14 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
         }
     }
 
+    /**
+     * @return True if the method is qualified by an empty reference expression. i.e., returns true
+     *     for "someMethod()", but not "this.someMethod()" or "a.someMethod()".
+     */
+    public boolean isEmptyReference() {
+        return referenceExpression.get() instanceof EmptyReferenceExpressionVertex;
+    }
+
     private LazyVertex<AbstractReferenceExpressionVertex> _getReferenceVertex() {
         return new LazyVertex<>(
                 () ->

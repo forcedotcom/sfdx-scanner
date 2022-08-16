@@ -2,6 +2,8 @@ package com.salesforce.rules.unusedmethod;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.salesforce.rules.Violation;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -457,14 +459,14 @@ public class InheritanceTest extends BaseUnusedMethodTest {
      * If subclass's constructor calls a `super` constructor, the relevant parent constructor counts
      * as used. (Note: Tests for both explicitly-declared 0-arity and 1-arity constructors.)
      */
+    // TODO: Enable subsequent tests as we implement functionality.
     @CsvSource({
-        "public,  (),  ()",
+        //        "public,  (),  ()",
         "protected,  (),  ()",
-        "public,  (boolean b),  (b)",
+        //        "public,  (boolean b),  (b)",
         "protected,  (boolean b),  (b)"
     })
     @ParameterizedTest(name = "{displayName}: scope {0}; signature{1}")
-    @Disabled
     public void constructorInvokedViaSuperInSubclass_expectNoViolation(
             String scope, String paramTypes, String invocationArgs) {
         String[] sourceCodes = {
@@ -481,5 +483,50 @@ public class InheritanceTest extends BaseUnusedMethodTest {
                     + "}\n"
         };
         assertNoViolations(sourceCodes, 1);
+    }
+
+    /**
+     * A class's constructor is only available to its immediate children. If a grandchild class
+     * calls `super()` in its constructor, that refers to the child class, not the parent class.
+     * (Note: Tests for both explicitly-declared 0-arity and 1-arity constructors.)
+     */
+    // TODO: Enable subsequent tests as we implement functionality.
+    @CsvSource({
+        //        "public,  (),  ()",
+        "protected,  (),  ()",
+        //        "public,  (boolean b),  (b)",
+        "protected, (boolean b),  (b)"
+    })
+    @ParameterizedTest(name = "{displayName}: scope {0}; signature {1}")
+    public void superConstructorInvokedInGrandchild_expectViolation(
+            String scope, String paramTypes, String invocationArgs) {
+        String[] sourceCodes = {
+            "global virtual class ParentClass {\n"
+                    // Declare a constructor for the parent class.
+                    + String.format("    %s ParentClass%s {\n", scope, paramTypes)
+                    + "    }\n"
+                    + "}\n",
+            "global virtual class ChildClass extends ParentClass {"
+                    // Give the child class a constructor with the same signature, but
+                    // have it do nothing in particular.
+                    + String.format("    %s ChildClass%s {\n", scope, paramTypes)
+                    + "    }\n"
+                    + "}\n",
+            "global class GrandchildClass extends ChildClass {\n"
+                    // Give the grandchild class a constructor with the same signature, and
+                    // have it call the super method.
+                    // Annotate it so it is skipped.
+                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
+                    + String.format("    %s GrandchildClass%s {\n", scope, paramTypes)
+                    + String.format("        super%s;\n", invocationArgs)
+                    + "    }\n"
+                    + "}\n"
+        };
+        Consumer<Violation.RuleViolation> assertion =
+                v -> {
+                    assertEquals("<init>", v.getSourceVertexName());
+                    assertEquals("ParentClass", v.getSourceDefiningType());
+                };
+        assertViolations(sourceCodes, assertion);
     }
 }
