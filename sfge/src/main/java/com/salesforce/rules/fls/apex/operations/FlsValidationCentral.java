@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.salesforce.config.SfgeConfigProvider;
-import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
@@ -96,7 +95,8 @@ public class FlsValidationCentral {
                 // Values we found in the MultiMap are the FlsValidationReps for Read operation
                 // that have been sanitized by stripInaccessible()
                 // 1. Create Warning violations
-                createWarningViolations(readValue, flsValidationRepresentationsForRead);
+                createStripInaccessibleWarningViolations(
+                        readValue, flsValidationRepresentationsForRead);
 
                 // 2. Remove the values from the map since they've been sanitized
                 expectedReadValidations.removeAll(readValueWrapper);
@@ -116,28 +116,14 @@ public class FlsValidationCentral {
     }
 
     /** Creates warning violations for stripInaccessible check on Read. */
-    private void createWarningViolations(
+    private void createStripInaccessibleWarningViolations(
             ApexValue<?> apexValue, Collection<FlsValidationRepresentation> validationReps) {
         // If warnings are enabled, create stripInaccessible warnings
         if (IS_WARNING_VIOLATION_ENABLED) {
-            ChainedVertex vertex =
-                    apexValue
-                            .getValueVertex()
-                            .orElse((ChainedVertex) apexValue.getInvocable().orElse(null));
-
-            if (vertex == null) {
-                throw new TodoException("No related vertex found for apex value: " + apexValue);
-            }
-            for (FlsValidationRepresentation validationRep : validationReps) {
-                for (FlsValidationRepresentation.Info validationInfo :
-                        validationRep.getValidationInfo()) {
-                    final FlsStripInaccessibleWarningInfo warningInfo =
-                            FlsViolationUtils.getFlsStripInaccessibleWarningInfo(validationInfo);
-
-                    warningInfo.setSinkVertex(vertex);
-                    violations.add(warningInfo);
-                }
-            }
+            final Set<FlsViolationInfo> warningViolations =
+                    FlsViolationCreatorUtil.createStripInaccessibleWarningViolations(
+                            apexValue, validationReps);
+            violations.addAll(warningViolations);
         }
     }
 
@@ -169,18 +155,31 @@ public class FlsValidationCentral {
         final BaseSFVertex childVertex = dmlStatementVertexChildren.get(0);
 
         final ValidationConverter validationConverter = new ValidationConverter(validationType);
-        final Set<FlsValidationRepresentation> validationReps;
+        final Set<FlsValidationRepresentation> validationReps = new HashSet<>();
         if (childVertex instanceof ChainedVertex) {
             final Optional<ApexValue<?>> apexValue =
                     ScopeUtil.resolveToApexValue(symbols, (ChainedVertex) childVertex);
             if (apexValue.isPresent()) {
-                validationReps = validationConverter.convertToExpectedValidations(apexValue.get());
+                validationReps.addAll(
+                        validationConverter.convertToExpectedValidations(apexValue.get()));
             } else {
-                throw new TodoException(
-                        "Apex value not detected for dml's child vertex: " + childVertex);
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn(
+                            "TODO: Apex value not detected for dml's child vertex: " + childVertex);
+                    // TODO: add telemetry
+                }
+                violations.add(
+                        FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
+                                validationType, vertex));
             }
         } else {
-            throw new TodoException("Child vertex of DML is not a chained vertex: " + childVertex);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("TODO: Child vertex of DML is not a chained vertex: " + childVertex);
+                // TODO: add telemetry
+            }
+            violations.add(
+                    FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
+                            validationType, vertex));
         }
 
         expectedValidations.addAll(validationReps);
@@ -217,26 +216,39 @@ public class FlsValidationCentral {
         ChainedVertex parameter = parameters.get(0);
         final ValidationConverter validationConverter = new ValidationConverter(validationType);
 
-        final ApexValue<?> apexValue =
-                ScopeUtil.resolveToApexValue(symbols, parameter)
-                        .orElseThrow(
-                                () ->
-                                        new UnexpectedException(
-                                                "Database operation method has a child of unexpected type: "
-                                                        + parameter));
+        final Optional<ApexValue<?>> apexValueOptional =
+                ScopeUtil.resolveToApexValue(symbols, parameter);
 
-        // Add them to our set of expected validations
-        final Set<FlsValidationRepresentation> validationReps =
-                validationConverter.convertToExpectedValidations(apexValue);
-        // Capture the vertex on which the operation is performed
-        // We'll need to capture accounts in:
-        // Database.insert(accounts);
-        // List<Account> accounts = Database.query('SELECT Name from Account');
-        if (FlsValidationType.READ.equals(validationType)) {
-            addReadValidationReps(vertex, symbols, validationReps);
+        if (!apexValueOptional.isPresent()) {
+            // TODO: add telemetry on missing parameter type that we need to handle in future
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn(
+                        "Database operation method has a parameter of unexpected type: "
+                                + parameter);
+            }
+            // Add a violation to let users know that SFGE cannot resolve the parameter in the DML
+            // operation
+            // and the onus of verifying its check is on them.
+            violations.add(
+                    FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
+                            validationType, vertex));
+
         } else {
-            // for all other Database operations, use parameter passed as key
-            expectedValidations.addAll(validationReps);
+            final ApexValue<?> apexValue = apexValueOptional.get();
+
+            // Add them to our set of expected validations
+            final Set<FlsValidationRepresentation> validationReps =
+                    validationConverter.convertToExpectedValidations(apexValue);
+            // Capture the vertex on which the operation is performed
+            // We'll need to capture accounts in:
+            // Database.insert(accounts);
+            // List<Account> accounts = Database.query('SELECT Name from Account');
+            if (FlsValidationType.READ.equals(validationType)) {
+                addReadValidationReps(vertex, symbols, validationReps);
+            } else {
+                // for all other Database operations, use parameter passed as key
+                expectedValidations.addAll(validationReps);
+            }
         }
     }
 

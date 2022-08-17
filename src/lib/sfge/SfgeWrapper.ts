@@ -63,12 +63,11 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	}
 
 	public startSpinner(): void {
-		uxEvents.emit(EVENTS.START_SPINNER, `Evaluating SFGE rules. See ${this.logFilePath} for logs`, "Please wait");
+		uxEvents.emit(EVENTS.START_SPINNER, `Analyzing with SFGE. See ${this.logFilePath} for details.`, "Please wait");
 
-		let intervalCount = 0;
+		// TODO: This timer logic should ideally live inside waitOnSpinner()
 		this.intervalId = setInterval(() => {
-			uxEvents.emit(EVENTS.UPDATE_SPINNER, "Please wait." + ".".repeat(intervalCount));
-			intervalCount += 1;
+			uxEvents.emit(EVENTS.WAIT_ON_SPINNER, 'message is unused');
 		}, 30000);
 	}
 

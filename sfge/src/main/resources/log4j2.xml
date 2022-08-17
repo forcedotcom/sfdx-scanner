@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="ERROR">
+<Configuration status="ERROR" packages="com.salesforce">
 	<!-- status = The level of internal Log4j events that should be logged to the console. -->
     <Appenders>
+		<CliMessagerAppender name="LogToCliMessager">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %m%n"/>
+		</CliMessagerAppender>
         <Console name="LogToConsole" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %X{ruleRunId} %-5p %c{1}:%L - %m%n"/>
         </Console>
@@ -16,38 +19,36 @@
     <Loggers>
 		<!-- Once an event reaches a logger with its additivity set to false the event will not be passed to any of
 			 its parent loggers, regardless of their additivity setting. -->
-        <Logger name="com.salesforce" level="ERROR" additivity="false">
+        <Logger name="com.salesforce" level="WARN" additivity="false">
             <AppenderRef ref="LogToFile"/>
-            <AppenderRef ref="LogToConsole"/>
+			<AppenderRef ref="LogToCliMessager"/>
         </Logger>
+		<Logger name="com.salesforce.graph.ops.expander.ApexPathExpanderUtil" level="WARN" additivity="false">
+			<AppenderRef ref="LogToFile"/>
+		</Logger>
 		<Logger name="com.salesforce.graph.ops.GraphUtil" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<Logger name="com.salesforce.rules.ApexFlsViolationRule" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<Logger name="com.salesforce.rules.ThreadableRuleExecutor" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<Logger name="com.salesforce.metainfo.VisualForceHandlerImpl" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<Logger name="com.salesforce.metainfo.CustomSettingInfoCollector" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<Logger name="com.salesforce.graph.AbstractMetadataInfoImpl" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
-			<AppenderRef ref="LogToConsole"/>
 		</Logger>
 		<!-- Definition for all classes not covered by those above -->
         <Root level="ERROR">
             <AppenderRef ref="LogToFile"/>
             <AppenderRef ref="LogToConsole"/>
+			<AppenderRef ref="LogToCliMessager"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -490,6 +490,7 @@ public class ApexStringValueTest {
                 Arguments.of(ApexStringValue.METHOD_ESCAPE_ECMA_SCRIPT),
                 Arguments.of(ApexStringValue.METHOD_ESCAPE_HTML_4),
                 Arguments.of(ApexStringValue.METHOD_ESCAPE_JAVA),
+                Arguments.of(ApexStringValue.METHOD_ESCAPE_SINGLE_QUOTES),
                 Arguments.of(ApexStringValue.METHOD_NORMALIZE_SPACE),
                 Arguments.of(ApexStringValue.METHOD_TO_LOWER_CASE),
                 Arguments.of(ApexStringValue.METHOD_TO_UPPER_CASE),
@@ -826,7 +827,15 @@ public class ApexStringValueTest {
                 Arguments.of(
                         "escapeJava",
                         "Company: \"Salesforce.com\"",
-                        "Company: \\\"Salesforce.com\\\""));
+                        "Company: \\\"Salesforce.com\\\""),
+                Arguments.of(
+                        "escapeSingleQuotes",
+                        "\\'Salesforce.com\\'", // During assignment in apex, this would fit in as
+                        // String s = '\'Salesforce.com\'';
+                        "\\'Salesforce.com\\'") // Actual value printed should've undergone
+                // transformation such that it prints the escaped
+                // value
+                );
     }
 
     @MethodSource

@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.UserFacingMessages;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class FlsViolationUtilsTest {
     @Test
     public void testMessageWithNoFields() {
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(
                                 VALIDATION_TYPE, OBJECT_NAME, EMPTY_FIELD_LIST, false));
 
@@ -29,7 +30,7 @@ public class FlsViolationUtilsTest {
     @Test
     public void testMessageWithAllFields() {
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, EMPTY_FIELD_LIST, true));
 
         assertThat(
@@ -42,7 +43,7 @@ public class FlsViolationUtilsTest {
     public void testMessageWithSelectedFields() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("Name", "Status__c");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, false));
 
         assertThat(
@@ -55,7 +56,7 @@ public class FlsViolationUtilsTest {
     public void testMessageWithSelectedFieldsAndAllFieldsFlag() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("Name", "Status__c");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, true));
 
         assertThat(
@@ -70,13 +71,23 @@ public class FlsViolationUtilsTest {
                 CollectionUtil.newTreeSetOf(
                         "Name", "Status__c", "Relational_Field__r.Another_field__c");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, false));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [Relational_Field__r.Another_field__c]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Obj__c",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "Name,Status__c"))
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE,
+                                        "Relational_Field__r.Another_field__c")));
     }
 
     @Test
@@ -84,14 +95,24 @@ public class FlsViolationUtilsTest {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("Name", "Status__c");
         final String relationalObjectName = "My_Relational_Obj__r";
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(
                                 VALIDATION_TYPE, relationalObjectName, fieldList, false));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Relational_Obj__r] with field(s) [Name,Status__c] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [My_Relational_Obj__r]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Relational_Obj__r",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "Name,Status__c"))
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE,
+                                        "My_Relational_Obj__r")));
     }
 
     @Test
@@ -99,13 +120,22 @@ public class FlsViolationUtilsTest {
         final TreeSet<String> fieldList =
                 CollectionUtil.newTreeSetOf("Name", "Status__c", "{1}{2}{3}");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, false));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [{1}{2}{3}]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Obj__c",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "Name,Status__c"))
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE, "{1}{2}{3}")));
     }
 
     @Test
@@ -113,59 +143,92 @@ public class FlsViolationUtilsTest {
         final TreeSet<String> fieldList =
                 CollectionUtil.newTreeSetOf("Name", "Status__c", "{1}{2}{3}");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, true));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [{1}{2}{3}]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Obj__c",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "ALL_FIELDS"))
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE, "{1}{2}{3}")));
     }
 
     @Test
     public void testMessageWithOnlyIllegibleFields() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("{1}{2}{3}");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, false));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [{1}{2}{3}]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Obj__c",
+                                        "")
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE, "{1}{2}{3}")));
     }
 
     @Test
     public void testMessageWithOnlyIllegibleFieldsWithAllFields() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("{1}{2}{3}");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, OBJECT_NAME, fieldList, true));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [{1}{2}{3}]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "My_Obj__c",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "ALL_FIELDS"))
+                                + String.format(
+                                        UserFacingMessages.FIELD_HANDLING_NOTICE, "{1}{2}{3}")));
     }
 
     @Test
     public void testMessageWithIllegibleObject() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("Name", "Status__c");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(VALIDATION_TYPE, "{1}", fieldList, false));
 
         assertThat(
                 message,
                 equalToIgnoringCase(
-                        "FLS validation is missing for [UPDATE] operation on [{1}] with field(s) [Name,Status__c] - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: [{1}]"));
+                        String.format(
+                                        UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE,
+                                        "FLS",
+                                        "UPDATE",
+                                        "{1}",
+                                        String.format(
+                                                UserFacingMessages.FIELDS_MESSAGE_TEMPLATE,
+                                                "Name,Status__c"))
+                                + String.format(UserFacingMessages.FIELD_HANDLING_NOTICE, "{1}")));
     }
 
     @Test
     public void testMessageWithValidCustomObject() {
         final TreeSet<String> fieldList = CollectionUtil.newTreeSetOf("Name", "Status__c");
         final String message =
-                FlsViolationUtils.constructMessageInternal(
+                FlsViolationMessageUtil.constructMessageInternal(
                         new FlsViolationInfo(
                                 VALIDATION_TYPE, "namespace__Random_object__c", fieldList, false));
 
@@ -187,7 +250,7 @@ public class FlsViolationUtilsTest {
         FlsViolationInfo violationInfo =
                 new FlsViolationInfo(validationType, objectName, fieldList, false);
 
-        final String message = FlsViolationUtils.constructMessage(violationInfo);
+        final String message = FlsViolationMessageUtil.constructMessage(violationInfo);
         assertThat(
                 message,
                 equalToIgnoringCase(
@@ -208,7 +271,7 @@ public class FlsViolationUtilsTest {
         FlsViolationInfo violationInfo =
                 new FlsViolationInfo(validationType, objectName, fieldList, allFields);
 
-        final String message = FlsViolationUtils.constructMessage(violationInfo);
+        final String message = FlsViolationMessageUtil.constructMessage(violationInfo);
         assertThat(
                 message,
                 equalToIgnoringCase(
@@ -227,7 +290,7 @@ public class FlsViolationUtilsTest {
         FlsViolationInfo violationInfo =
                 new FlsViolationInfo(validationType, objectName, fieldList, false);
 
-        final String message = FlsViolationUtils.constructMessage(violationInfo);
+        final String message = FlsViolationMessageUtil.constructMessage(violationInfo);
         assertThat(
                 message,
                 equalToIgnoringCase(
@@ -248,7 +311,7 @@ public class FlsViolationUtilsTest {
         FlsViolationInfo violationInfo =
                 new FlsViolationInfo(validationType, objectName, fieldList, allFields);
 
-        final String message = FlsViolationUtils.constructMessage(violationInfo);
+        final String message = FlsViolationMessageUtil.constructMessage(violationInfo);
         assertThat(
                 message,
                 equalToIgnoringCase(

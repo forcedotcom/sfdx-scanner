@@ -2,7 +2,6 @@ package com.salesforce.graph.symbols.apex.system;
 
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.exception.UnimplementedMethodException;
-import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.DeepCloneable;
 import com.salesforce.graph.ops.ApexStandardLibraryUtil;
 import com.salesforce.graph.ops.CloneUtil;
@@ -171,14 +170,12 @@ public final class SObjectAccessDecision extends ApexStandardValue<SObjectAccess
         } else if (sanitizableValue instanceof ApexSoqlValue) {
             sanitizedValue =
                     buildSanitizedValue(builder, (SoqlExpressionVertex) sanitizableValueVertex);
-        } else if (sanitizableValue instanceof ApexSingleValue) {
+        } else if (sanitizableValue instanceof ApexSingleValue
+                || sanitizableValue instanceof ApexCustomValue) {
             sanitizedValue =
                     builder.declarationVertex(SyntheticTypedVertex.get("List<SObject>"))
                             .withStatus(ValueStatus.INDETERMINANT)
                             .buildList();
-        } else if (sanitizableValue instanceof ApexCustomValue) {
-            throw new UserActionException(
-                    "Action needed: Do not use stripInaccessible() check on custom settings since custom settings expect only CRUD");
         } else {
             throw new UnexpectedException(
                     "ApexValue type not handled for stripInaccessible call: " + sanitizableValue);

@@ -4,7 +4,6 @@ import com.salesforce.rules.ApexFlsViolationRule;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.testutils.BaseFlsTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class ReadFlsScenariosTest extends BaseFlsTest {
@@ -267,25 +266,6 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
     }
 
     @Test
-    @Disabled // TODO: handle Binary expressions with indeterminant parts
-    public void testUnsafeDatabaseQueryWithBinaryExpression() {
-        String sourceCode =
-                "public class MyClass {\n"
-                        + "   public void foo(String fields, String objectName) {\n"
-                        + "       List<Contact> contacts = Database.query('SELECT ' + \n"
-                        + "fields +\n"
-                        + "'FROM ' + \n"
-                        + "objectName);\n"
-                        + "   }\n"
-                        + "}\n";
-
-        assertViolations(
-                rule,
-                sourceCode,
-                expect(3, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
-    }
-
-    @Test
     public void testUnsafeDbQueryAsReturn() {
         String sourceCode =
                 "public class MyClass {\n"
@@ -515,5 +495,24 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                 expect(3, FlsConstants.FlsValidationType.READ, "Account")
                         .withField("contact_id__c")
                         .withField("Name"));
+    }
+
+    @Test
+    public void testWithEscapeSingleQuotes() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo() {\n"
+                        + "       String queryStr = 'SELECT Name FROM Account';\n"
+                        // TODO: this invocation is incorrect. The correct way would be:
+                        //  String.escapeSingleQuotes(queryStr);
+                        // Created a new work item to track this issue.
+                        + "       Database.query(queryStr.escapeSingleQuotes());\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(4, FlsConstants.FlsValidationType.READ, "Account").withField("Name"));
     }
 }

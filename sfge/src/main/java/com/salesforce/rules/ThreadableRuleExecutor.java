@@ -5,6 +5,8 @@ import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.ops.LogUtil;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.rules.ops.ProgressListener;
+import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
@@ -78,8 +80,9 @@ public class ThreadableRuleExecutor {
             CompletionService<Set<Violation>> completionService,
             List<ThreadableRuleSubmission> submissions) {
         int submissionCount = 0;
+        final ProgressListener progressListener = ProgressListenerProvider.get();
         for (ThreadableRuleSubmission submission : submissions) {
-            completionService.submit(new CallableExecutor(submission));
+            completionService.submit(new CallableExecutor(submission, progressListener));
             submissionCount += 1;
         }
         if (LOGGER.isInfoEnabled()) {
@@ -113,7 +116,8 @@ public class ThreadableRuleExecutor {
         private final ThreadableRuleSubmission submission;
         private boolean timedOut;
 
-        public CallableExecutor(ThreadableRuleSubmission submission) {
+        public CallableExecutor(
+                ThreadableRuleSubmission submission, ProgressListener progressListener) {
             this.submission = submission;
         }
 

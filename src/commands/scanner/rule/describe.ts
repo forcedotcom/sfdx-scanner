@@ -12,7 +12,6 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
 type DescribeStyledRule = Rule & {
 	enabled: boolean;
@@ -41,8 +40,7 @@ export default class Describe extends ScannerCommand {
 		verbose: flags.builtin()
 	};
 
-	public async run(): Promise<AnyJson> {
-		this.ux.styledHeader(commonMessages.getMessage('FEEDBACK_SURVEY_BANNER'));
+	async runInternal(): Promise<AnyJson> {
 		const ruleFilters = this.buildRuleFilters();
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
 		// allow to boil over.

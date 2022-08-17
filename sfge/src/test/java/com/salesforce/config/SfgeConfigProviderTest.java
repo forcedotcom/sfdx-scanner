@@ -41,6 +41,16 @@ public class SfgeConfigProviderTest {
                         public boolean shouldIgnoreParseErrors() {
                             return !EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS;
                         }
+
+                        @Override
+                        public boolean shouldLogWarningsOnVerbose() {
+                            return !EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE;
+                        }
+
+                        @Override
+                        public int getProgressIncrements() {
+                            return -1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS;
+                        }
                     });
 
             final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
@@ -57,6 +67,12 @@ public class SfgeConfigProviderTest {
             MatcherAssert.assertThat(
                     sfgeConfig.shouldIgnoreParseErrors(),
                     equalTo(!EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+            MatcherAssert.assertThat(
+                    sfgeConfig.shouldLogWarningsOnVerbose(),
+                    equalTo(!EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
+            MatcherAssert.assertThat(
+                    sfgeConfig.getProgressIncrements(),
+                    equalTo(-1 * EnvUtil.getProgressIncrements()));
         } finally {
             SfgeConfigTestProvider.remove();
         }
@@ -80,5 +96,10 @@ public class SfgeConfigProviderTest {
                 equalTo(EnvUtil.DEFAULT_RULE_ENABLE_WARNING_VIOLATION));
         MatcherAssert.assertThat(
                 sfgeConfig.shouldIgnoreParseErrors(), equalTo(EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+        MatcherAssert.assertThat(
+                sfgeConfig.shouldLogWarningsOnVerbose(),
+                equalTo(EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
+        MatcherAssert.assertThat(
+                sfgeConfig.getProgressIncrements(), equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS));
     }
 }

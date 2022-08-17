@@ -49,7 +49,7 @@ public class FlsValidationRepresentationTest {
     }
 
     /** Tests for setting values */
-    private static final String ALL_FIELDS = FlsViolationUtils.ALL_FIELDS;
+    private static final String ALL_FIELDS = FlsViolationMessageUtil.ALL_FIELDS;
 
     @Test
     public void testValidationWithFieldsShouldNotAllowObjectLevelType() {

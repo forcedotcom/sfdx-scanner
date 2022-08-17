@@ -1,9 +1,7 @@
 package com.salesforce.rules.fls.apex;
 
-import com.salesforce.exception.UserActionException;
 import com.salesforce.rules.ApexFlsViolationRule;
 import com.salesforce.testutils.BaseFlsTest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,21 +29,5 @@ public class StripInaccessibleCommonScenariosTest extends BaseFlsTest {
                         + "}\n";
 
         assertNoViolation(rule, sourceCode);
-    }
-
-    @Test
-    public void testRejectCustomSettingFlsCheck() {
-        String[] sourceCode = {
-            "public class MyClass {\n"
-                    + "    public static void foo() {\n"
-                    + "       MySettings__c ms = MySettings__c.getOrgDefaults();\n"
-                    + "		SObjectAccessDecision sd = Security.stripInaccessible(AccessType.UPDATABLE, ms);\n"
-                    + "		update sd.getRecords();\n"
-                    + "    }\n"
-                    + "}\n"
-        };
-
-        Assertions.assertThrows(
-                UserActionException.class, () -> assertNoViolation(rule, sourceCode));
     }
 }

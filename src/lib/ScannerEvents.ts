@@ -14,5 +14,6 @@ export enum EVENTS {
 	// and `ux.stopSpinner()`, which are both no-ops if there's not an active spinner.
 	START_SPINNER = 'start-spinner',
 	UPDATE_SPINNER = 'update-spinner',
+	WAIT_ON_SPINNER = 'wait-on-spinner',
 	STOP_SPINNER = 'stop-spinner'
 }

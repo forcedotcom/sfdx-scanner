@@ -177,7 +177,13 @@ public abstract class BaseFlsTest {
     protected ViolationWrapper.FlsViolationBuilder expectStripInaccWarning(
             int line, FlsConstants.FlsValidationType validationType, String objectName) {
         return ViolationWrapper.FlsViolationBuilder.get(line, validationType, objectName)
-                .forStripInaccWarning();
+                .forViolationType(ViolationWrapper.FlsViolationType.STRIP_INACCESSIBLE_WARNING);
+    }
+
+    protected ViolationWrapper.FlsViolationBuilder expectUnresolvedCrudFls(
+            int line, FlsConstants.FlsValidationType validationType) {
+        return ViolationWrapper.FlsViolationBuilder.get(line, validationType)
+                .forViolationType(ViolationWrapper.FlsViolationType.UNRESOLVED_CRUD_FLS);
     }
 
     protected ViolationWrapper.MessageBuilder expect(int line, String message) {

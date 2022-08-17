@@ -1,5 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest, stripExtraneousOutput} from '../../TestUtils';
+import {setupCommandTest} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import fs = require('fs');
 import path = require('path');
@@ -214,8 +214,8 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('Properly writes CSV to console', ctx => {
-					const output = stripExtraneousOutput(ctx.stdout);
-					validateCsvOutput(output, false);
+					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
+					validateCsvOutput(ctx.stdout, false);
 				});
 
 			setupCommandTest
@@ -640,7 +640,6 @@ describe('scanner:run', function () {
 				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
 				.finally(() => process.chdir("../../../.."))
 				.it('Polyglot project triggers pmd and eslint rules', ctx => {
-					expect(ctx.stderr, ctx.stdout).to.be.empty;
 					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{"), ctx.stdout.lastIndexOf("}]") + 2));
 					// Look through all of the results and gather a set of unique engines
 					const uniqueEngines = new Set(results.map(r => { return r.engine }));
@@ -692,6 +691,22 @@ describe('scanner:run', function () {
 			.it('Providing qunit in the --env override should resolve errors about that framework', ctx => {
 				expect(ctx.stdout).to.contain('No rule violations found.', 'Should be no violations found in the file.');
 			});
+	});
+
+	describe('run with format --json', () => {
+		setupCommandTest
+		.command(['scanner:run',
+		'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
+		'--format', 'json'
+	])
+	.it('provides only json in stdout', ctx => {
+		try {
+			JSON.parse(ctx.stdout);
+		} catch (error) {
+			expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
+		}
+		
+		});
 	});
 
 	describe('Validation on custom config flags', () => {

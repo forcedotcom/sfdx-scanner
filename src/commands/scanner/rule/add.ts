@@ -1,10 +1,11 @@
-import {flags, SfdxCommand} from '@salesforce/command';
+import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import path = require('path');
 import untildify = require('untildify');
+import { ScannerCommand } from '../../../lib/ScannerCommand';
 
 
 // Initialize Messages with the current plugin directory
@@ -13,9 +14,8 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
-export default class Add extends SfdxCommand {
+export default class Add extends ScannerCommand {
 
 	public static description = messages.getMessage('commandDescription');
 	public static longDescription = messages.getMessage('commandDescriptionLong');
@@ -39,9 +39,8 @@ export default class Add extends SfdxCommand {
 		})
 	};
 
-	public async run(): Promise<AnyJson> {
+	async runInternal(): Promise<AnyJson> {
 		this.validateFlags();
-		this.ux.styledHeader(commonMessages.getMessage('FEEDBACK_SURVEY_BANNER'));
 
 		const language = this.flags.language as string;
 		const paths = this.resolvePaths();

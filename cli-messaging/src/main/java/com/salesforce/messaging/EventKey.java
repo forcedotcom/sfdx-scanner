@@ -3,6 +3,8 @@ import static com.salesforce.messaging.Message.*;
 
 public enum EventKey {
 	// MAKE SURE `messageKey` OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
+
+    /** PMD-CATALOGER RELATED **/
 	INFO_GENERAL_INTERNAL_LOG("info.generalInternalLog", 1, MessageType.INFO, MessageHandler.INTERNAL, true),
 	WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
@@ -20,8 +22,23 @@ public enum EventKey {
 	ERROR_EXTERNAL_RECURSION_LIMIT("error.external.recursionLimitReached", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_READABLE("error.external.xmlNotReadable", 2, MessageType.ERROR, MessageHandler.UX, false),
 	ERROR_EXTERNAL_XML_NOT_PARSABLE("error.external.xmlNotParsable", 2, MessageType.ERROR, MessageHandler.UX, false),
+
+
+
+
+    /** SFGE RELATED **/
+    INFO_GENERAL("info.sfgeInfoLog", 1, MessageType.INFO, MessageHandler.UX, true),
+    INFO_META_INFO_COLLECTED("info.sfgeMetaInfoCollected", 2, MessageType.INFO, MessageHandler.UX, true),
+    INFO_COMPLETED_FILE_COMPILATION("info.sfgeFinishedCompilingFiles", 1, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    INFO_STARTED_BUILDING_GRAPH("info.sfgeStartedBuildingGraph", 0, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    INFO_COMPLETED_BUILDING_GRAPH("info.sfgeFinishedBuildingGraph", 0, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    INFO_PATH_ENTRY_POINTS_IDENTIFIED("info.sfgePathEntryPointsIdentified", 1, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    INFO_PATH_ANALYSIS_PROGRESS("info.sfgeViolationsInPathProgress", 4, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    INFO_COMPLETED_PATH_ANALYSIS("info.sfgeCompletedPathAnalysis", 3, MessageType.INFO, MessageHandler.UX_SPINNER, false),
+    WARNING_GENERAL("warning.sfgeWarnLog", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_MULTIPLE_METHOD_TARGET_MATCHES("warning.multipleMethodTargetMatches", 3, MessageType.WARNING, MessageHandler.UX, false),
-	WARNING_NO_METHOD_TARGET_MATCHES("warning.noMethodTargetMatches", 2, MessageType.WARNING, MessageHandler.UX, false);
+	WARNING_NO_METHOD_TARGET_MATCHES("warning.noMethodTargetMatches", 2, MessageType.WARNING, MessageHandler.UX, false),
+    ERROR_GENERAL("error.internal.sfgeErrorLog", 1, MessageType.ERROR, MessageHandler.UX, false);
 
 	final String messageKey;
 	final int argCount;
