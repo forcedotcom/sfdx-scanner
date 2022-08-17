@@ -238,6 +238,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
      * defined. E.g., 'this.method()` if not overridden, or `super.method()` if overridden.
      *
      * @return - True if such an invocation is found, else false.
+     * TODO: Consider optimizing to handle entire classes instead of individual methods.
      */
     private boolean methodUsedBySubclass(MethodVertex methodVertex) {
         // Instantiate a visitor to use for checking subclass calls.
@@ -411,6 +412,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
     }
 
     /** Base class for call validators. */
+    // TODO: Make validators their own public classes, to aid with readability.
     private static class CallValidator extends TypedVertexVisitor.DefaultNoOp<Boolean> {
         protected final MethodVertex invokedMethod;
 
