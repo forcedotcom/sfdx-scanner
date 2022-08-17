@@ -319,7 +319,7 @@ jobs:
                       then
                         exit 0
                       fi
-                      yarn test-cli-messaging 
+                      yarn test-cli-messaging
                 when: always
 
       - when:
@@ -635,7 +635,7 @@ workflows:
             - validate-candidate-branch
           sign: true
           github-release: true
-          tag: latest-pilot-rc
+          tag: latest-rc
           filters:
             <<: *publishing_filters
           context:
@@ -647,17 +647,17 @@ workflows:
             - release-management/release-package
           filters:
             <<: *publishing_filters
-          rc-tag: latest-pilot-rc
+          rc-tag: latest-rc
       - windows-rc-test:
           requires:
             - release-management/release-package
           filters:
             <<: *publishing_filters
-          rc-tag: latest-pilot-rc
+          rc-tag: latest-rc
       # Step 4: Promote the release candidate to a full release.
       - release-management/promote-package:
-          candidate: latest-pilot-rc
-          target: latest-pilot
+          candidate: latest-rc
+          target: latest
           requires:
             - linux-rc-test
             - windows-rc-test
