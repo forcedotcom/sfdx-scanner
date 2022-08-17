@@ -6,6 +6,45 @@ lang: en
 ### To update the plugin, please follow the linked [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in)
 
 
+## [v3.4.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.4.0) (08-17-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.3.0...v3.4.0)
+
+### Release Summary
+
+* NEW \[SFGE\]: We now display progress information of Salesforce Graph Engine's analysis while executing `scanner:run:dfa` command.
+* NEW: If a JavaScript target file is analyzed by both `eslint` and `eslint-lwc`, we throw a warning about duplicate violations to alert you that you should modify your configuration.
+* NEW: We updated the RetireJS Vulnerability Repository.
+* NEW: We upgraded PMD to 6.48.0.
+* CHANGE: We replaced eslint's parser with `@babel/eslint-parser`.
+* FIX: We removed the survey request banner's stylization.
+* FIX \[SFGE\]: When Salesforce Graph Engine (SFGE) is unable to resolve a method call or a variable passed to a database operation, it no longer throws an internal error. Instead, SFGE creates a violation to let you know that you need to verify the CRUD/FLS access of the operation manually.
+
+**Closed issues:**
+
+- \[BUG\] UnexpectedException on v3 DFA on large ISV codebase [\#739](https://github.com/forcedotcom/sfdx-scanner/issues/739)
+- \[BUG\] stdout not in proper JSON format when --format json is used [\#771](https://github.com/forcedotcom/sfdx-scanner/issues/771)
+- apex.jorje.parser.impl.BaseApexLexer dedupe [\#779](https://github.com/forcedotcom/sfdx-scanner/issues/779)
+- \[BUG\] adding custom rule [\#788](https://github.com/forcedotcom/sfdx-scanner/issues/788)
+
+**Merged pull requests:**
+
+- @W-11446174@: changed eslint parser to @babel/eslint-parser [\#767](https://github.com/forcedotcom/sfdx-scanner/pull/767)
+- @W-10778096@ Handle unresolvable parameters passed to database operations [\#768](https://github.com/forcedotcom/sfdx-scanner/pull/768)
+- @W-10778096@ Minor error message fixes [\#770](https://github.com/forcedotcom/sfdx-scanner/pull/770)
+- @W-11494080@ Fix survey request formatting issue [\#773](https://github.com/forcedotcom/sfdx-scanner/pull/773)
+- @W-11476976@ Don't block stripInaccessible() on custom value [\#780](https://github.com/forcedotcom/sfdx-scanner/pull/780)
+- @W-11446192@: checks if any files are processed by both eslint and eslint-lwc and emits warning [\#782](https://github.com/forcedotcom/sfdx-scanner/pull/782)
+- @W-11505293@ Skip info logs from dependency [\#784](https://github.com/forcedotcom/sfdx-scanner/pull/784)
+- @W-10778080@ Handle unresolved apex value in DML statements gracefully [\#785](https://github.com/forcedotcom/sfdx-scanner/pull/785)
+- @W-10459671@ Provide progress information of SFGE on verbose mode [\#792](https://github.com/forcedotcom/sfdx-scanner/pull/792)
+- @W-11567651@: Updating PMD to v6.48.0. [\#794](https://github.com/forcedotcom/sfdx-scanner/pull/794)
+- @W-10459671@ Redirecting ApexPathExpander logs to log file [\#796](https://github.com/forcedotcom/sfdx-scanner/pull/796)
+- @W-11606553@ 3.4.0 Release updates [\#799](https://github.com/forcedotcom/sfdx-scanner/pull/799)
+
+
+
+
 ## [v3.3.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.3.0) (07-20-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.2.0...v3.3.0)
