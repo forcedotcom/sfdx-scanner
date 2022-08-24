@@ -62,21 +62,17 @@ public class CliMessagerAppender extends AbstractAppender {
     @Override
     public void append(LogEvent event) {
         Level level = event.getLevel();
-        if (Level.WARN.equals(level) && this.shouldLogWarningsOnVerbose) {
-            CliMessager.postMessage(
+        if (Level.WARN.equals(level)) {
+            if (this.shouldLogWarningsOnVerbose) {
+                CliMessager.postMessage(
                     "SFGE Warning as Info", EventKey.INFO_GENERAL, getEventMessage(event));
+            }
         } else if (Level.ERROR.equals(level)) {
             CliMessager.postMessage(
                     "SFGE Error as Warning", EventKey.WARNING_GENERAL, getEventMessage(event));
         } else if (Level.FATAL.equals(level)) {
             CliMessager.postMessage(
                     "SFGE Fatal as Error", EventKey.ERROR_GENERAL, getEventMessage(event));
-        } else {
-            error(
-                    String.format(
-                            "Unable to log less than WARN level [{}]: {}",
-                            event.getLevel(),
-                            getEventMessage(event)));
         }
     }
 
