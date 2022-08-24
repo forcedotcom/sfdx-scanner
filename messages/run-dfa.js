@@ -20,6 +20,8 @@ module.exports = {
 		"rulethreadtimeoutDescriptionLong": "Time limit for evaluating a single entrypoint. Value in milliseconds. Inherits from SFGE_RULE_THREAD_TIMEOUT env-var if set. Default is 900,000 ms, or 15 minutes.",
 		"sevthresholdDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
 		"sevthresholdDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
+		"sfgejvmargsDescription": "JVM args to optimize SFGE execution",
+		"sfgejvmargsDescriptionLong": "Specify JVM args to optimize memory utilization of SFGE execution. TODO: more information on what params to include.",
 		"targetDescription": "location of source code",
 		"targetDescriptionLong": "Source code location. May use glob patterns, or specify individual methods with #-syntax. Multiple values can be specified as a comma-separated list"
 	},

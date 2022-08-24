@@ -179,4 +179,5 @@ export type SfgeConfig = {
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ignoreParseErrors?: boolean;
+	jvmArgs?: string;
 };
