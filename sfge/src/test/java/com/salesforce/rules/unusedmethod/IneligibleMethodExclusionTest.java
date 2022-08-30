@@ -27,17 +27,14 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     }
 
     /**
-     * When a class has a private, 0-arity constructor, that constructor is
-     * ineligible for analysis. This pattern is common for utility classes with
-     * static methods, and we want to minimize false positives.
+     * When a class has a private, 0-arity constructor, that constructor is ineligible for analysis.
+     * This pattern is common for utility classes with static methods, and we want to minimize false
+     * positives.
      */
     @Test
     public void privateArity0ConstructorWithoutInvocation_expectNoAnalysis() {
         String sourceCode =
-                "public class MyClass {\n"
-                    + "    private MyClass() {\n"
-                    + "    }\n"
-                    + "}\n";
+                "public class MyClass {\n" + "    private MyClass() {\n" + "    }\n" + "}\n";
         assertNoAnalysis(sourceCode);
     }
 

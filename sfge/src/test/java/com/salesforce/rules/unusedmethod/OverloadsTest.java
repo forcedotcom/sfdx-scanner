@@ -300,10 +300,10 @@ public class OverloadsTest extends BaseUnusedMethodTest {
         // Use the arity of the constructor that ISN'T being called,
         // and have one variant per visibility scope.
         //        "public,  this(true),  2",
-        //        "protected,  this(true),  2",
+        "protected,  this(true),  2",
         "private,  this(true),  2",
         //        "public,  'this(true, true)', 1",
-        //        "protected,  'this(true, true)', 1",
+        "protected,  'this(true, true)', 1",
         "private,  'this(true, true)', 1"
     })
     @ParameterizedTest(name = "{displayName}: {0} constructor {1}")

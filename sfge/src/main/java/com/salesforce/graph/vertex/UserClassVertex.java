@@ -40,6 +40,21 @@ public class UserClassVertex extends BaseSFVertex implements InheritableSFVertex
         visitor.afterVisit(this);
     }
 
+    /**
+     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}.
+     */
+    public boolean isAbstract() {
+        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE))
+                .isAbstract();
+    }
+
+    /**
+     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}.
+     */
+    public boolean isVirtual() {
+        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isVirtual();
+    }
+
     @Override
     public String getName() {
         return getString(Schema.NAME);

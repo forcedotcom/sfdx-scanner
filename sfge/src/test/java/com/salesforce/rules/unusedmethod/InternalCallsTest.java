@@ -110,7 +110,7 @@ public class InternalCallsTest extends BaseUnusedMethodTest {
     @ValueSource(
             strings = {
                 //            "public",
-                //            "protected",
+                "protected",
                 "private"
             })
     @ParameterizedTest(name = "{displayName}: scope {0}")

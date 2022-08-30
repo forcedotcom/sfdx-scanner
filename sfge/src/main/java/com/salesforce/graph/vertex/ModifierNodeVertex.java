@@ -67,6 +67,10 @@ public class ModifierNodeVertex extends BaseSFVertex {
         return getBoolean(Schema.GLOBAL);
     }
 
+    public boolean isVirtual() {
+        return getBoolean(Schema.VIRTUAL);
+    }
+
     public Integer getModifiers() {
         return (Integer) properties.get(Schema.MODIFIERS);
     }
