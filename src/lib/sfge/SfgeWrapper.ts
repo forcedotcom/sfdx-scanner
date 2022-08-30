@@ -5,7 +5,8 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
+import {CommandLineSupport} from '../services/CommandLineSupport';
+import { CommandLineResultHandler } from "../services/CommandLineResultHandler";
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -20,11 +21,17 @@ const SFGE_LOG_FILE = 'sfge.log';
 /**
  * By fiat, an exit code of 0 indicates a successful SFGE run with no violations detected.
  */
-const EXIT_NO_VIOLATIONS = 0;
+const EXIT_GOOD_RUN_NO_VIOLATIONS = 0;
 /**
  * By fiat, an exit code of 4 indicates a successful SFGE run in which violations were detected.
  */
-const EXIT_WITH_VIOLATIONS = 4;
+const EXIT_GOOD_RUN_WITH_VIOLATIONS = 4;
+
+/**
+ * Code when the execution ran into an error but there are some results to
+ * share with users.
+ */
+const EXIT_ERROR_WITH_VIOLATIONS = 5;
 
 interface SfgeWrapperOptions {
 	targets: RuleTarget[];
@@ -47,6 +54,22 @@ type SfgeInput = {
 	targets: SfgeTarget[];
 	projectDirs: string[];
 	rulesToRun: string[];
+};
+
+export type SfgeViolation = {
+	ruleName: string;
+	message: string;
+	severity: number;
+	category: string;
+	url: string;
+	sourceLineNumber: number;
+	sourceColumnNumber: number;
+	sourceFileName: string;
+	sourceType: string;
+	sourceVertexName: string;
+	sinkLineNumber: number;
+	sinkColumnNumber: number;
+	sinkFileName: string;
 };
 
 class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
@@ -128,11 +151,24 @@ export class SfgeWrapper extends CommandLineSupport {
 	}
 
 	protected isSuccessfulExitCode(code: number): boolean {
-		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
+		return code === EXIT_GOOD_RUN_NO_VIOLATIONS || code === EXIT_GOOD_RUN_WITH_VIOLATIONS;
 	}
 
-	protected handleResults(args: ResultHandlerArgs) {
-		new CommandLineResultHandler().handleResults(args);
+	protected hasResults(code: number): boolean {
+		return code === EXIT_ERROR_WITH_VIOLATIONS || code === EXIT_GOOD_RUN_WITH_VIOLATIONS;
+	}
+
+	protected handleResults(args: ResultHandlerArgs): void {
+		if (args.isSuccess) {
+			args.res(args.stdout);
+		} else if (args.hasResults) {
+			// This needs special handling:
+			// SFGE execution ran into problems, but there are some results
+			// the user can look at.
+			
+		} else {
+			args.rej(args);
+		}
 	}
 
 	/**
@@ -158,6 +194,8 @@ export class SfgeWrapper extends CommandLineSupport {
 
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
 		if (this.jvmArgs != null) {
+			// TODO: should we gatekeep what kind of args are sent here?
+			//  Is there a possibility of affecting an out-of-bounds region?
 			args.push(this.jvmArgs);
 		}
 		if (this.ruleThreadCount != null) {
@@ -221,7 +259,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		return inputJson;
 	}
 
-	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
+	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<SfgeViolations[]> {
 		const wrapper = await SfgeWrapper.create({
 			targets,
 			projectDirs: sfgeConfig.projectDirs,

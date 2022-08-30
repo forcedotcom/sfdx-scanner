@@ -28,6 +28,8 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
 	testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
 	testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
+	testImplementation("org.mockito:mockito-core:2.21.0")
+	testImplementation("org.mockito:mockito-junit-jupiter:2.23.0")
 }
 
 group = "com.salesforce.apex"

@@ -1,8 +1,10 @@
 package com.salesforce.cli;
 
 import com.google.gson.Gson;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import com.salesforce.rules.RuleUtil;
@@ -35,7 +37,7 @@ public class CliArgParser {
         } else if ("catalog".equalsIgnoreCase(actionArg)) {
             return CLI_ACTION.CATALOG;
         } else {
-            throw new UnexpectedException("Unexpected action argument: " + actionArg);
+            throw new InvocationException(String.format(UserFacingMessages.UNRECOGNIZED_ACTION, actionArg));
         }
     }
 

@@ -1,28 +1,10 @@
 import { Logger } from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import cspawn = require('cross-spawn');
+import { CommandLineResultHandler, ResultHandlerArgs } from './CommandLineResultHandler';
 import {OutputProcessor} from './OutputProcessor';
 import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
 
-
-export type ResultHandlerArgs = {
-	code: number;
-	isSuccess: boolean;
-	stdout: string;
-	stderr: string;
-	res: (string) => void;
-	rej: (string) => void;
-};
-
-export class CommandLineResultHandler {
-	public handleResults(args: ResultHandlerArgs): void {
-		if (args.isSuccess) {
-			args.res(args.stdout);
-		} else {
-			args.rej(args.stderr);
-		}
-	}
-}
 
 export abstract class CommandLineSupport extends AsyncCreatable {
 
@@ -59,11 +41,17 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param args
 	 * @protected
 	 */
-	protected abstract handleResults(args: ResultHandlerArgs): void;
+	protected handleResults(args: ResultHandlerArgs): void{
+		new CommandLineResultHandler().handleResults(args);
+	}
 
 	protected abstract isSuccessfulExitCode(code: number): boolean;
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
+
+	protected hasResults(code: number): boolean {
+		return false;
+	}
 
 	protected async runCommand(): Promise<string> {
 		const [command, args] = await this.buildCommandArray();
@@ -88,12 +76,14 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 			cp.on('exit', code => {
 				this.parentLogger.trace(`runCommand has received exit code ${code}`);
 				const isSuccess = this.isSuccessfulExitCode(code);
+				const hasResults = this.hasResults(code);
 				this.getSpinnerManager().stopSpinner(isSuccess);
 				// The output processor's input is always stdout.
 				this.outputProcessor.processOutput(stdout);
 				this.handleResults({
 					code,
 					isSuccess,
+					hasResults,
 					stdout,
 					stderr,
 					res,

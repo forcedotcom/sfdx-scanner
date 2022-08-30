@@ -6,6 +6,11 @@ package com.salesforce.config;
  */
 public final class UserFacingMessages {
 
+    /** Main args and process checks **/
+    public static final String REQUIRES_AT_LEAST_ONE_ARGUMENT = "SFGE invocation requires at least one argument.";
+    public static final String UNRECOGNIZED_ACTION = "Unrecognized action to invoke SFGE: %s.";
+
+
     /** UserActionException * */
 
     // format: filename,defined type, line number
@@ -29,4 +34,5 @@ public final class UserFacingMessages {
     public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
     public static final String FIELD_HANDLING_NOTICE =
             " - SFGE may not have parsed some objects/fields correctly. Please confirm that the objects/fields involved in these segments have FLS checks: [%s]";
+
 }

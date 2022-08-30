@@ -3,7 +3,8 @@ import {FileHandler} from '../util/FileHandler';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
 import { PMD_LIB } from '../../Constants';
-import { CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs } from '../services/CommandLineSupport';
+import { CommandLineSupport, ResultHandlerArgs } from '../services/CommandLineSupport';
+import { CommandLineResultHandler } from "../services/CommandLineResultHandler";
 
 const MAIN_CLASS = 'net.sourceforge.pmd.cpd.CPD';
 const HEAP_SIZE = '-Xmx1024m';
@@ -70,10 +71,6 @@ export default class CpdWrapper extends CommandLineSupport {
 
 	private async execute(): Promise<string> {
 		return super.runCommand();
-	}
-
-	protected handleResults(args: ResultHandlerArgs): void {
-		new CommandLineResultHandler().handleResults(args);
 	}
 
 	constructor(options: CpdWrapperOptions) {

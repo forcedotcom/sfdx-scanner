@@ -1,7 +1,11 @@
 package com.salesforce;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.cli.CliArgParser;
 import com.salesforce.cli.OutputFormatter;
+import com.salesforce.cli.Result;
+import com.salesforce.config.UserFacingMessages;
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
@@ -11,10 +15,12 @@ import com.salesforce.messaging.CliMessager;
 import com.salesforce.metainfo.MetaInfoCollector;
 import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRule;
+import com.salesforce.rules.AbstractRuleRunner;
 import com.salesforce.rules.RuleRunner;
 import com.salesforce.rules.RuleUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.ProgressListenerProvider;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -51,11 +57,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 @SuppressWarnings(
         "PMD.SystemPrintln") // Since println is currently used to communicate to outer layer
 public class Main {
-    private static final int EXIT_NO_VIOLATIONS = 0;
-    private static final int EXIT_WITH_VIOLATIONS = 4;
-    private static final int INTERNAL_ERROR = 1;
+    private static final int EXIT_GOOD_RUN_NO_VIOLATIONS = 0;
+    private static final int EXIT_GOOD_RUN_WITH_VIOLATIONS = 4;
+    private static final int EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS = 1;
+    private static final int EXIT_WITH_INTERNAL_ERROR_AND_VIOLATIONS = 5;
     private static final Logger LOGGER = LogManager.getLogger(Main.class);
     public static final String ERROR_PREFIX = "SfgeErrorStart\n";
+
+    private final Dependencies dependencies;
 
     public static void main(String[] args) {
         Main m = new Main();
@@ -63,14 +72,23 @@ public class Main {
         System.exit(status);
     }
 
-    private int process(String... args) {
+    Main() {
+        this(new Dependencies());
+    }
+
+    @VisibleForTesting
+    Main(Dependencies dependencies) {
+        this.dependencies = dependencies;
+    }
+
+    @VisibleForTesting int process(String... args) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Invoked with args=" + Arrays.asList(args));
         }
         if (args.length == 0) {
             // No args means we can't do anything productive.
-            System.err.println("Engine requires at least one argument");
-            return INTERNAL_ERROR;
+            dependencies.printError(UserFacingMessages.REQUIRES_AT_LEAST_ONE_ARGUMENT);
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 
         CliArgParser parser = new CliArgParser();
@@ -82,8 +100,7 @@ public class Main {
             case EXECUTE:
                 return execute(args);
             default:
-                System.err.println("Unrecognized action " + action);
-                return INTERNAL_ERROR;
+                throw new ProgrammingException("Unhandled action: " + action);
         }
     }
 
@@ -93,24 +110,24 @@ public class Main {
         try {
             rules = RuleUtil.getEnabledRules();
         } catch (SfgeException | SfgeRuntimeException ex) {
-            System.err.println(ex.getMessage());
-            return INTERNAL_ERROR;
+            dependencies.printError(ex.getMessage());
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
         OutputFormatter formatter = new OutputFormatter();
         System.out.println(formatter.formatRuleJsons(rules));
-        return EXIT_NO_VIOLATIONS;
+        return EXIT_GOOD_RUN_NO_VIOLATIONS;
     }
 
     private int execute(String... args) {
         LOGGER.info("Invoked EXECUTE flow");
         // Parse the arguments with our delegate class.
-        CliArgParser.ExecuteArgParser eap = new CliArgParser.ExecuteArgParser();
+        CliArgParser.ExecuteArgParser eap = dependencies.createExecuteArgParser();
         try {
             eap.parseArgs(args);
         } catch (SfgeRuntimeException ex) {
             LOGGER.error("Error while parsing input arguments", ex);
-            System.err.println(formatError(ex));
-            return INTERNAL_ERROR;
+            dependencies.printError(formatError(ex));
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 
         // Collect additional information from other files in project
@@ -118,59 +135,76 @@ public class Main {
             collectMetaInfo(eap);
         } catch (MetaInfoCollector.MetaInfoLoadException ex) {
             LOGGER.error("Error while collecting meta info", ex);
-            System.err.println(formatError(ex));
-            return INTERNAL_ERROR;
+            dependencies.printError(formatError(ex));
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 
         // Initialize and clean our graph.
-        GraphTraversalSource g = GraphUtil.getGraph();
+        GraphTraversalSource g = dependencies.getGraph();
 
         // Compile all of the Apex into ASTs.
         try {
-            GraphUtil.loadSourceFolders(g, eap.getProjectDirs());
+            dependencies.loadSourceFoldersToGraph(eap, g);
         } catch (GraphUtil.GraphLoadException ex) {
             LOGGER.error("Error while loading graph", ex);
-            System.err.println(formatError(ex));
-            return INTERNAL_ERROR;
+            dependencies.printError(formatError(ex));
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         } catch (UnexpectedException ex) {
             LOGGER.error("Unexpected exception while loading graph", ex);
-            System.err.println(
+            dependencies.printError(
                     "Unexpected exception while loading graph. See logs for more information.");
-            return INTERNAL_ERROR;
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         } catch (UserActionException ex) {
             LOGGER.error("User action expected: ", ex);
-            System.err.println(formatError(ex));
-            return INTERNAL_ERROR;
+            dependencies.printError(formatError(ex));
+            return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 
         // Run all of the rules.
-        List<Violation> allViolations;
+        final Result result = new Result();
         try {
-            allViolations = new RuleRunner(g).runRules(eap.getSelectedRules(), eap.getTargets());
-            ProgressListenerProvider.get().completedAnalysis();
-        } catch (SfgeRuntimeException ex) {
-            LOGGER.error("Error while running rules", ex);
-            System.err.println(formatError(ex));
-            return INTERNAL_ERROR;
-        }
+            final List<AbstractRuleRunner.RuleRunnerTarget> targets = eap.getTargets();
+            final List<AbstractRule> selectedRules = eap.getSelectedRules();
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace(
+                        String.format(
+                                "This many files: %d. This many rules: %d.",
+                                targets.size(), selectedRules.size()));
+            }
+            final RuleRunner ruleRunner = dependencies.createRuleRunner(g);
+            result.merge(ruleRunner.runRules(selectedRules, targets));
 
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace(
-                    String.format(
-                            "This many files: %d. This many rules: %d. This many violations: %d",
-                            eap.getTargets().size(),
-                            eap.getSelectedRules().size(),
-                            allViolations.size()));
+            // Mark analysis as completed
+            ProgressListenerProvider.get().completedAnalysis();
+        }  finally {
+
+            // No matter the outcome, share the results found so far
+            System.out.println(CliMessager.getInstance().getAllMessagesWithFormatting());
+
+            final List<Violation> violations = result.getViolations();
+            OutputFormatter formatter = new OutputFormatter();
+            System.out.println(formatter.formatViolationJsons(violations));
+
+            // Check if any exceptions were thrown
+            final List<Exception> exceptionsThrown = result.getExceptionsThrown();
+            for (Exception exception: exceptionsThrown) {
+                dependencies.printError(formatError(exception));
+            }
+
+            if (!exceptionsThrown.isEmpty()) {
+                return violations.isEmpty()
+                        ? EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS
+                        : EXIT_WITH_INTERNAL_ERROR_AND_VIOLATIONS;
+            }
+            return violations.isEmpty()
+                    ? EXIT_GOOD_RUN_NO_VIOLATIONS
+                    : EXIT_GOOD_RUN_WITH_VIOLATIONS;
         }
-        OutputFormatter formatter = new OutputFormatter();
-        System.out.println(CliMessager.getInstance().getAllMessagesWithFormatting());
-        System.out.println(formatter.formatViolationJsons(allViolations));
-        return allViolations.isEmpty() ? EXIT_NO_VIOLATIONS : EXIT_WITH_VIOLATIONS;
     }
 
     private void collectMetaInfo(CliArgParser.ExecuteArgParser eap) {
         final Collection<? extends MetaInfoCollector> allCollectors =
-                MetaInfoCollectorProvider.getAllCollectors();
+            dependencies.getMetaInfoCollectors();
 
         for (MetaInfoCollector collector : allCollectors) {
             collector.loadProjectFiles(eap.getProjectDirs());
@@ -184,5 +218,31 @@ public class Main {
 
     private String formatError(Throwable error) {
         return ERROR_PREFIX + error.getMessage();
+    }
+
+    static class Dependencies {
+        CliArgParser.ExecuteArgParser createExecuteArgParser() {
+            return new CliArgParser.ExecuteArgParser();
+        }
+
+        Collection<? extends MetaInfoCollector> getMetaInfoCollectors() {
+            return MetaInfoCollectorProvider.getAllCollectors();
+        }
+
+        GraphTraversalSource getGraph() {
+            return GraphUtil.getGraph();
+        }
+
+        void loadSourceFoldersToGraph(CliArgParser.ExecuteArgParser eap, GraphTraversalSource g) throws GraphUtil.GraphLoadException {
+            GraphUtil.loadSourceFolders(g, eap.getProjectDirs());
+        }
+
+        RuleRunner createRuleRunner(GraphTraversalSource g) {
+            return new RuleRunner(g);
+        }
+
+        void printError(String message) {
+            System.err.println(message);
+        }
     }
 }

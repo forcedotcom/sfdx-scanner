@@ -1,5 +1,5 @@
 import {Logger, SfdxError} from '@salesforce/core';
-import {SfgeWrapper} from './SfgeWrapper';
+import {SfgeWrapper, SfgeViolation} from './SfgeWrapper';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, Severity} from '../../Constants';
 import {Controller} from '../../Controller';
@@ -15,22 +15,6 @@ type SfgePartialRule = {
 	description: string;
 	category: string;
 }
-
-type SfgeViolation = {
-	ruleName: string;
-	message: string;
-	severity: number;
-	category: string;
-	url: string;
-	sourceLineNumber: number;
-	sourceColumnNumber: number;
-	sourceFileName: string;
-	sourceType: string;
-	sourceVertexName: string;
-	sinkLineNumber: number;
-	sinkColumnNumber: number;
-	sinkFileName: string;
-};
 
 export class SfgeEngine extends AbstractRuleEngine {
 	private static ENGINE_ENUM: ENGINE = ENGINE.SFGE;
@@ -159,7 +143,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 		} catch (e) {
 			const message = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`${SfgeEngine.ENGINE_NAME} evaluation failed. ${message}`);
-			throw new SfdxError(SfgeEngine.processStderr(message));
+			throw new SfdxError(this.processStderr(message));
 		}
 	}
 
@@ -199,33 +183,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 		return true;
 	}
 
-	private static processStderr(output: string): string {
-		// We should handle errors by checking for our error start string.
-		const errorStartString = "SfgeErrorStart\n";
-		const errorStart = output.indexOf(errorStartString);
-		if (errorStart === -1) {
-			// If our error start string is missing altogether, then something went disastrously wrong, and we should
-			// assume that the entire stderr is relevant.
-			return output;
-		} else {
-			// If the error start string is present, it means we exited cleanly and everything prior to the string is noise
-			// that can be omitted.
-			return output.slice(errorStart + errorStartString.length);
-		}
-	}
-
-	protected processStdout(output: string): RuleResult[] {
-		// Pull the violation objects from the output.
-		const violationsStartString = "VIOLATIONS_START";
-		const violationsStart = output.indexOf(violationsStartString);
-		if (violationsStart === -1) {
-			return [];
-		}
-		const violationsEndString = "VIOLATIONS_END";
-		const violationsEnd = output.indexOf(violationsEndString);
-		const violationsJson = output.slice(violationsStart + violationsStartString.length, violationsEnd);
-		const sfgeViolations: SfgeViolation[] = JSON.parse(violationsJson) as SfgeViolation[];
-
+	protected convert(sfgeViolations: SfgeViolation[]): RuleResult[] {
 		if (!sfgeViolations || sfgeViolations.length === 0) {
 			// Exit early for no results.
 			return [];
@@ -261,6 +219,8 @@ export class SfgeEngine extends AbstractRuleEngine {
 		}
 		return [...resultMap.values()];
 	}
+
+	
 
 	getNormalizedSeverity(severity: number): Severity {
 		switch (severity) {
