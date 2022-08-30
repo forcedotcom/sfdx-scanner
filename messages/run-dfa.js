@@ -49,9 +49,12 @@ module.exports = {
 	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
 		E.g., $ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --severity-threshold 2
 	Use --rule-thread-count to allow more (or fewer) entrypoints to be evaluated concurrently.
-		E.g., $ sfdx scanner:run:dfa --rule-thread-count 6
+		E.g., $ sfdx scanner:run:dfa --rule-thread-count 6 ...
 	Use --rule-thread-timeout to increase (or decrease) the maximum runtime for a single entrypoint evaluation.
 		E.g., $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
 			Increases timeout from 15 minutes (default) to 150 minutes.
+	Use --sfgejvmargs to pass JVM args to override system defaults while executing Salesforce Graph Engine's rules. 
+		E.g., $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
+			Overrides system's default heapspace allocation to 8g and decreases chances of encountering OutOfMemory error.
 `
 };
