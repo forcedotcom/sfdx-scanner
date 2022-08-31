@@ -1,7 +1,7 @@
 module.exports = {
 	"info": {
 		"categoryImplicitlyRun": "Implicitly including %s rules from category '%s'",
-		"jarAndXmlProcessed": "XML files collected from JAR [%s]: %s",
+		"jarAndXmlProcessed": "Cataloger: XML files collected from JAR [%s]: %s",
 		"usingEngineConfigFile": "Using engine configuration file at %s",
 		"generalInternalLog": "Log from Java: %s",
 		"customEslintHeadsUp": "About to run Eslint with custom config in %s. Please make sure your current directory has all the required NPM dependencies.",
@@ -18,9 +18,9 @@ module.exports = {
 		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s)."
 	},
 	"warning": {
-		"invalidCategorySkipped": "Cataloger skipped invalid PMD Category file '%s'.",
-		"invalidRulesetSkipped": "Cataloger skipped invalid PMD Ruleset file '%s'.",
-		"xmlDropped": "Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
+		"invalidCategorySkipped": "Cataloger: Skipping invalid PMD Category file '%s'.",
+		"invalidRulesetSkipped": "Cataloger: Skipping invalid PMD Ruleset file '%s'.",
+		"xmlDropped": "Cataloger: Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
 		"langMarkedForDeprecation": "Future releases will not include PMD support for %s. If this would cause you hardship, please log an issue on github.com/forcedotcom/sfdx-scanner",
 		"customRuleFileNotFound": "Custom rule file path [%s] for language [%s] was not found.",
 		"pmdSkippedFile": "PMD failed to evaluate against file '%s'. Message: %s",

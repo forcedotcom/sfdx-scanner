@@ -75,10 +75,10 @@ export class DefaultRuleManager implements RuleManager {
 		const executedEngines: Set<string> = new Set();
 
 		// Derives rules from our filters to feed the engines.
-		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters);
+		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions, runOptions);
+		const ruleGroups: RuleGroup[] = this.catalog.getRuleGroupsMatchingFilters(filters, engines);
 		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
 		const runDescriptorList: RunDescriptor[] = [];
-		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions);
 		const matchedTargets: Set<string> = new Set<string>();
 
 		// Storing the paths from eslint and eslint-lwc to track if any are processed by both.
@@ -95,7 +95,7 @@ export class DefaultRuleManager implements RuleManager {
 			const engineTargets = await this.unpackTargets(e, targets, matchedTargets);
 			this.logger.trace(`For ${e.getName()}, found ${engineGroups.length} groups, ${engineRules.length} rules, ${engineTargets.length} targets`);
 
-			if ((e.isDfaEngine() === runOptions.runDfa) && e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
+			if (e.shouldEngineRun(engineGroups, engineRules, engineTargets, engineOptions)) {
 				this.logger.trace(`${e.getName()} is eligible to execute.`);
 				executedEngines.add(e.getName());
 				// Create a descriptor for this engine run, but do not actually run it just yet. This is because the run
@@ -200,7 +200,16 @@ export class DefaultRuleManager implements RuleManager {
 		await Lifecycle.getInstance().emitTelemetry(runTelemetryObject);
 	}
 
-	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map()): Promise<RuleEngine[]> {
+	/**
+	 * Returns a list of engines that match the provided filter criteria.
+	 * Additionally, if a {@link RunOptions} object is provided, then only engines
+	 * eligible to run under those options will be returned.
+	 * @param filters
+	 * @param engineOptions
+	 * @param [runOptions]
+	 * @protected
+	 */
+	protected async resolveEngineFilters(filters: RuleFilter[], engineOptions: Map<string,string> = new Map(), runOptions?: RunOptions): Promise<RuleEngine[]> {
 		let filteredEngineNames: readonly string[] = null;
 		for (const filter of filters) {
 			if (isEngineFilter(filter)) {
@@ -212,7 +221,12 @@ export class DefaultRuleManager implements RuleManager {
 		// just return any enabled engines.
 		// This lets us quietly introduce new engines by making them disabled by default but still available if explicitly
 		// specified.
-		return filteredEngineNames ? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions) : Controller.getEnabledEngines(engineOptions);
+		const enginesMatchingFilter = await (filteredEngineNames
+			? Controller.getFilteredEngines(filteredEngineNames as string[], engineOptions)
+			: Controller.getEnabledEngines(engineOptions));
+		return runOptions
+			? enginesMatchingFilter.filter(e => e.isDfaEngine() == runOptions.runDfa)
+			: enginesMatchingFilter;
 	}
 
 	/**
