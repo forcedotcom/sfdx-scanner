@@ -9,10 +9,7 @@ import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,8 +53,7 @@ public abstract class AbstractRuleRunner {
         return result;
     }
 
-    private Result runStaticRules(
-            List<AbstractStaticRule> rules, List<RuleRunnerTarget> targets) {
+    private Result runStaticRules(List<AbstractStaticRule> rules, List<RuleRunnerTarget> targets) {
         final Result result = new Result();
 
         if (rules.isEmpty()) {
@@ -67,7 +63,8 @@ public abstract class AbstractRuleRunner {
         try {
             for (AbstractStaticRule rule : rules) {
                 for (Violation violation : rule.run(g, targets)) {
-                    // Violations aren't created with all of their properties filled in. Some properties
+                    // Violations aren't created with all of their properties filled in. Some
+                    // properties
                     // must be populated
                     // using the rule that created them.
                     if (violation instanceof Violation.RuleViolation) {
@@ -77,7 +74,7 @@ public abstract class AbstractRuleRunner {
                 }
             }
         } catch (RuntimeException exception) {
-            result.addException(exception);
+            result.addThrowable(exception);
         }
 
         return result;

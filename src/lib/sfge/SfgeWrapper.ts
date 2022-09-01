@@ -5,8 +5,7 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport} from '../services/CommandLineSupport';
-import { CommandLineResultHandler } from "../services/CommandLineResultHandler";
+import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -21,17 +20,14 @@ const SFGE_LOG_FILE = 'sfge.log';
 /**
  * By fiat, an exit code of 0 indicates a successful SFGE run with no violations detected.
  */
-const EXIT_GOOD_RUN_NO_VIOLATIONS = 0;
+const EXIT_NO_VIOLATIONS = 0;
 /**
  * By fiat, an exit code of 4 indicates a successful SFGE run in which violations were detected.
  */
-const EXIT_GOOD_RUN_WITH_VIOLATIONS = 4;
+const EXIT_WITH_VIOLATIONS = 4;
 
-/**
- * Code when the execution ran into an error but there are some results to
- * share with users.
- */
-const EXIT_ERROR_WITH_VIOLATIONS = 5;
+const EXIT_ON_ERROR_NO_VIOLATIONS = 1;
+const EXIT_ON_ERROR_WITH_VIOLATIONS = 5
 
 interface SfgeWrapperOptions {
 	targets: RuleTarget[];
@@ -151,23 +147,19 @@ export class SfgeWrapper extends CommandLineSupport {
 	}
 
 	protected isSuccessfulExitCode(code: number): boolean {
-		return code === EXIT_GOOD_RUN_NO_VIOLATIONS || code === EXIT_GOOD_RUN_WITH_VIOLATIONS;
+		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
 	}
 
 	protected hasResults(code: number): boolean {
-		return code === EXIT_ERROR_WITH_VIOLATIONS || code === EXIT_GOOD_RUN_WITH_VIOLATIONS;
+		return code == EXIT_WITH_VIOLATIONS || code == EXIT_ON_ERROR_WITH_VIOLATIONS;
 	}
 
-	protected handleResults(args: ResultHandlerArgs): void {
+	protected handleResults(args: ResultHandlerArgs) {
 		if (args.isSuccess) {
 			args.res(args.stdout);
-		} else if (args.hasResults) {
-			// This needs special handling:
-			// SFGE execution ran into problems, but there are some results
-			// the user can look at.
-			
 		} else {
-			args.rej(args);
+			// Pass in both stdout and stderr so that results can be salvaged
+			args.rej(args.stdout + ' ' + args.stderr);
 		}
 	}
 
@@ -194,8 +186,6 @@ export class SfgeWrapper extends CommandLineSupport {
 
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
 		if (this.jvmArgs != null) {
-			// TODO: should we gatekeep what kind of args are sent here?
-			//  Is there a possibility of affecting an out-of-bounds region?
 			args.push(this.jvmArgs);
 		}
 		if (this.ruleThreadCount != null) {
@@ -259,7 +249,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		return inputJson;
 	}
 
-	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<SfgeViolations[]> {
+	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
 		const wrapper = await SfgeWrapper.create({
 			targets,
 			projectDirs: sfgeConfig.projectDirs,

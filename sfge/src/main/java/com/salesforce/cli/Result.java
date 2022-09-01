@@ -1,34 +1,31 @@
 package com.salesforce.cli;
 
 import com.salesforce.rules.Violation;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Represents the result of an SFGE execution.
- */
+/** Represents the result of an SFGE execution. */
 public class Result {
 
-    /** Violations detected during an execution **/
+    /** Violations detected during an execution * */
     private final List<Violation> violations;
 
-    /** Exceptions that interrupted the execution **/
-    private final List<Exception> exceptionsThrown;
+    /** Exceptions that interrupted the execution * */
+    private final List<Throwable> errorsThrown;
 
-    /** Indicates if the execution completed successfully **/
+    /** Indicates if the execution completed successfully * */
     private boolean completedSuccessfully;
 
     public Result() {
         this.violations = new ArrayList<>();
-        this.exceptionsThrown = new ArrayList<>();
+        this.errorsThrown = new ArrayList<>();
         this.completedSuccessfully = false;
     }
 
     public void merge(Result result) {
         this.addViolations(result.getViolations());
-        this.addExceptions(result.getExceptionsThrown());
+        this.addThrowable(result.getErrorsThrown());
     }
 
     public void addViolations(Collection<Violation> violations) {
@@ -43,12 +40,12 @@ public class Result {
         this.completedSuccessfully = true;
     }
 
-    public void addExceptions(Collection<Exception> exceptions) {
-        this.exceptionsThrown.addAll(exceptions);
+    public void addThrowable(Collection<? extends Throwable> exceptions) {
+        this.errorsThrown.addAll(exceptions);
     }
 
-    public void addException(Exception ex) {
-        this.exceptionsThrown.add(ex);
+    public void addThrowable(Throwable ex) {
+        this.errorsThrown.add(ex);
     }
 
     public List<Violation> getViolations() {
@@ -59,8 +56,7 @@ public class Result {
         return completedSuccessfully;
     }
 
-    public List<Exception> getExceptionsThrown() {
-        return exceptionsThrown;
+    public List<Throwable> getErrorsThrown() {
+        return errorsThrown;
     }
-
 }

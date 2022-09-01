@@ -1,10 +1,29 @@
 import { Logger } from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import cspawn = require('cross-spawn');
-import { CommandLineResultHandler, ResultHandlerArgs } from './CommandLineResultHandler';
 import {OutputProcessor} from './OutputProcessor';
 import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
 
+
+export type ResultHandlerArgs = {
+	code: number;
+	isSuccess: boolean;
+	hasResults: boolean;
+	stdout: string;
+	stderr: string;
+	res: (string) => void;
+	rej: (string) => void;
+};
+
+export class CommandLineResultHandler {
+	public handleResults(args: ResultHandlerArgs): void {
+		if (args.isSuccess) {
+			args.res(args.stdout);
+		} else {
+			args.rej(args.stderr);
+		}
+	}
+}
 
 export abstract class CommandLineSupport extends AsyncCreatable {
 
@@ -41,9 +60,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param args
 	 * @protected
 	 */
-	protected handleResults(args: ResultHandlerArgs): void{
-		new CommandLineResultHandler().handleResults(args);
-	}
+	protected abstract handleResults(args: ResultHandlerArgs): void;
 
 	protected abstract isSuccessfulExitCode(code: number): boolean;
 

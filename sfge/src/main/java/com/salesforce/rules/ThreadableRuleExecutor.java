@@ -41,7 +41,7 @@ public class ThreadableRuleExecutor {
             // Create a threadpool and a completion service to monitor it.
             ExecutorService pool = Executors.newWorkStealingPool(THREAD_COUNT);
             CompletionService<Set<Violation>> completionService =
-                new ExecutorCompletionService(pool);
+                    new ExecutorCompletionService(pool);
 
             // Submit an appropriate amount of callables into the completion service.
             int submissionCount = submitRunners(completionService, submissions);
@@ -57,11 +57,11 @@ public class ThreadableRuleExecutor {
                 result.addViolations(violations);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info(
-                        "Wait #"
-                            + (completedCount + 1)
-                            + " finished, adding "
-                            + (result.getViolations().size() - priorSize)
-                            + " new entries");
+                            "Wait #"
+                                    + (completedCount + 1)
+                                    + " finished, adding "
+                                    + (result.getViolations().size() - priorSize)
+                                    + " new entries");
                 }
                 completedCount += 1;
             }
@@ -73,10 +73,10 @@ public class ThreadableRuleExecutor {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Finished shutdown");
             }
-        } catch (RuntimeException exception) {
-            result.addException(exception);
+        } catch (Throwable throwable) {
+            result.addThrowable(throwable);
             if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Error while running rules", exception);
+                LOGGER.error("Error while running rules", throwable);
             }
         } finally {
             // No matter what happened, salvage the results collected so far

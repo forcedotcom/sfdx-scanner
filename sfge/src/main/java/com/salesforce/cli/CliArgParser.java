@@ -1,10 +1,9 @@
 package com.salesforce.cli;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gson.Gson;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeRuntimeException;
-import com.salesforce.exception.UnexpectedException;
-import com.salesforce.exception.UserActionException;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import com.salesforce.rules.RuleUtil;
@@ -37,7 +36,8 @@ public class CliArgParser {
         } else if ("catalog".equalsIgnoreCase(actionArg)) {
             return CLI_ACTION.CATALOG;
         } else {
-            throw new InvocationException(String.format(UserFacingMessages.UNRECOGNIZED_ACTION, actionArg));
+            throw new InvocationException(
+                    String.format(UserFacingMessages.UNRECOGNIZED_ACTION, actionArg));
         }
     }
 
@@ -48,10 +48,18 @@ public class CliArgParser {
         private final List<RuleRunnerTarget> targets;
         private final List<AbstractRule> selectedRules;
 
+        private final Dependencies dependencies;
+
         public ExecuteArgParser() {
+            this(new Dependencies());
+        }
+
+        @VisibleForTesting
+        public ExecuteArgParser(Dependencies dependencies) {
             projectDirs = new ArrayList<>();
             targets = new ArrayList<>();
             selectedRules = new ArrayList<>();
+            this.dependencies = dependencies;
         }
 
         public void parseArgs(String... args) {
@@ -62,8 +70,9 @@ public class CliArgParser {
             if (args.length != ARG_COUNT) {
                 throw new InvocationException(
                         String.format(
-                                "Wrong number of arguments. Expected %d; received %d",
-                                ARG_COUNT, args.length));
+                                UserFacingMessages.INCORRECT_ARGUMENT_COUNT,
+                                ARG_COUNT,
+                                args.length));
             }
             ExecuteInput input = readInputFile(args[1]);
             targets.addAll(input.targets);
@@ -117,7 +126,7 @@ public class CliArgParser {
         }
 
         private List<String> readFile(String fileName) throws IOException {
-            final List<String> allLines = Files.readAllLines(Paths.get(fileName));
+            final List<String> allLines = dependencies.getAllLines(fileName);
             final List<String> lines =
                     allLines.stream()
                             .filter(line -> StringUtils.isNotBlank(line))
@@ -156,5 +165,14 @@ public class CliArgParser {
         private List<String> rulesToRun;
         private List<String> projectDirs;
         private List<RuleRunnerTarget> targets;
+    }
+
+    @VisibleForTesting
+    public static class Dependencies {
+
+        @VisibleForTesting
+        public List<String> getAllLines(String fileName) throws IOException {
+            return Files.readAllLines(Paths.get(fileName));
+        }
     }
 }
