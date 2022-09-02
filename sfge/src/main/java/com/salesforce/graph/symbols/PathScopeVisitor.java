@@ -77,6 +77,7 @@ import com.salesforce.graph.vertex.VariableDeclarationStatementsVertex;
 import com.salesforce.graph.vertex.VariableDeclarationVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
 import com.salesforce.graph.vertex.WhileLoopStatementVertex;
+import com.salesforce.logging.LoggerUtil;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -385,11 +386,10 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         String[] keys = var.getFullName().split("\\.");
         if (keys.length > 1) {
             if (keys.length > 2) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn(
-                            "TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
-                                    + Arrays.toString(keys));
-                }
+                LoggerUtil.warnAndPostTelemetry(
+                        LOGGER,
+                        "TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence="
+                                + Arrays.toString(keys));
                 return Optional.empty();
             }
             final String propertyName = keys[1];

@@ -74,13 +74,14 @@ export class OutputProcessor extends AsyncCreatable {
 		// Iterate over all of the events and throw them as appropriate.
 		outEvents.forEach((event) => {
 			this.logEvent(event);
-			let eventType = '';
 			if (event.handler === 'UX_SPINNER') {
-				eventType = EVENTS.UPDATE_SPINNER.toString();
+				this.emitUxEvent(EVENTS.UPDATE_SPINNER.toString(), event.messageKey, event.args);
 			} else if (event.handler === 'UX' || (event.handler === 'INTERNAL' && event.type === 'ERROR')) {
-				eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
+				const eventType = `${event.type.toLowerCase()}-${event.verbose ? 'verbose' : 'always'}`;
+				this.emitUxEvent(eventType, event.messageKey, event.args);
+			} else if (event.handler === 'INTERNAL' && event.type === 'TELEMETRY') {
+				this.emitTelemetryEvent();
 			}
-			this.emitUxEvent(eventType, event.messageKey, event.args);
 		});
 		return true;
 	}
@@ -104,6 +105,11 @@ export class OutputProcessor extends AsyncCreatable {
 			constructedMessage = messages.getMessage(genericMessageKey, []);
 		}
 		uxEvents.emit(eventType, constructedMessage);
+	}
+
+	private emitTelemetryEvent(): void {
+		// TODO: IMPLEMENT METHOD
+		console.log('Doing telemetry nonsense');
 	}
 
 	private getEventsFromString(str: string, startTag: string, endTag: string): RuleEvent[] {
