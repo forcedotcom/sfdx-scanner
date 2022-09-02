@@ -123,8 +123,6 @@ export class SfgeWrapper extends CommandLineSupport {
 
 	private async createInputFile(input: SfgeInput): Promise<string> {
 		const inputFile = await this.fh.tmpFileWithCleanup();
-		console.log(`inputFile=${inputFile}`);
-		console.log(`input file contents=${JSON.stringify(input)}`);
 		await this.fh.writeFile(inputFile, JSON.stringify(input));
 		return inputFile;
 	}
