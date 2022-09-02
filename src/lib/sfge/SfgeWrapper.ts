@@ -32,6 +32,7 @@ interface SfgeWrapperOptions {
 	command: string;
 	rules: Rule[];
 	spinnerManager: SpinnerManager;
+	jvmArgs?: string,
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ignoreParseErrors?: boolean;
@@ -87,6 +88,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	private rules: Rule[];
 	private logFilePath: string;
 	private spinnerManager: SpinnerManager;
+	private jvmArgs: string;
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
 	private ignoreParseErrors: boolean;
@@ -98,6 +100,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.command = options.command;
 		this.rules = options.rules;
 		this.spinnerManager = options.spinnerManager;
+		this.jvmArgs = options.jvmArgs;
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
 		this.ignoreParseErrors = options.ignoreParseErrors;
@@ -154,6 +157,9 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.logger.trace(`Rules to be executed: ${JSON.stringify(inputObject.rulesToRun)}`);
 
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
+		if (this.jvmArgs != null) {
+			args.push(this.jvmArgs);
+		}
 		if (this.ruleThreadCount != null) {
 			args.push(`-DSFGE_RULE_THREAD_COUNT=${this.ruleThreadCount}`);
 		}
@@ -223,6 +229,7 @@ export class SfgeWrapper extends CommandLineSupport {
 			rules: rules,
 			// Running rules could take quite a while, so we should use a functional spinner.
 			spinnerManager: await SfgeSpinnerManager.create({}),
+			jvmArgs: sfgeConfig.jvmArgs,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
 			ignoreParseErrors: sfgeConfig.ignoreParseErrors
