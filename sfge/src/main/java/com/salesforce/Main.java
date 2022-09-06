@@ -218,7 +218,9 @@ public class Main {
     }
 
     private String formatError(Throwable error) {
-        return ERROR_PREFIX + error.getMessage() + ", Caused by: " + error.getCause().getMessage();
+        final String causedByMessage =
+                error.getCause() != null ? ", Caused by: " + error.getCause().getMessage() : "";
+        return ERROR_PREFIX + error.getMessage() + causedByMessage;
     }
 
     static class Dependencies {

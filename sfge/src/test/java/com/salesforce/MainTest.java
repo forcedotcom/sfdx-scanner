@@ -87,16 +87,6 @@ public class MainTest {
     }
 
     @Test
-    void testIncorrectArgCountProvided() {
-        final Main main = new Main(dependencies);
-
-        assertThrows(
-                CliArgParser.InvocationException.class,
-                () -> main.process(EXECUTE_ACTION),
-                String.format(UserFacingMessages.INCORRECT_ARGUMENT_COUNT, 2, 1));
-    }
-
-    @Test
     void testRuleExecutionNoErrorNoViolations() {
         final Result noViolationNoErrorResult = new Result();
         Mockito.lenient()

@@ -5,7 +5,7 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
+import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -26,7 +26,6 @@ const EXIT_NO_VIOLATIONS = 0;
  */
 const EXIT_WITH_VIOLATIONS = 4;
 
-const EXIT_ON_ERROR_NO_VIOLATIONS = 1;
 const EXIT_ON_ERROR_WITH_VIOLATIONS = 5
 
 interface SfgeWrapperOptions {
@@ -50,22 +49,6 @@ type SfgeInput = {
 	targets: SfgeTarget[];
 	projectDirs: string[];
 	rulesToRun: string[];
-};
-
-export type SfgeViolation = {
-	ruleName: string;
-	message: string;
-	severity: number;
-	category: string;
-	url: string;
-	sourceLineNumber: number;
-	sourceColumnNumber: number;
-	sourceFileName: string;
-	sourceType: string;
-	sourceVertexName: string;
-	sinkLineNumber: number;
-	sinkColumnNumber: number;
-	sinkFileName: string;
 };
 
 class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {

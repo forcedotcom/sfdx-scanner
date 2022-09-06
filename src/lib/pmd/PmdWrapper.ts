@@ -2,8 +2,6 @@ import {Logger} from '@salesforce/core';
 import {Format, PmdSupport} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
-import { ResultHandlerArgs } from '../services/CommandLineSupport';
-import { CommandLineResultHandler } from "../services/CommandLineResultHandler";
 import {FileHandler} from '../util/FileHandler';
 
 const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
@@ -95,5 +93,4 @@ export default class PmdWrapper extends PmdSupport {
 		// 4 indicates a successful run with at least one violation.
 		return code === 0 || code === 4;
 	}
-
 }

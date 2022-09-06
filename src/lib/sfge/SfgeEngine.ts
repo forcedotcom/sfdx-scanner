@@ -1,5 +1,5 @@
 import {Logger} from '@salesforce/core';
-import {SfgeWrapper, SfgeViolation} from './SfgeWrapper';
+import {SfgeWrapper} from './SfgeWrapper';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, Severity} from '../../Constants';
 import {Controller} from '../../Controller';
@@ -20,6 +20,22 @@ type SfgePartialRule = {
 	description: string;
 	category: string;
 }
+
+type SfgeViolation = {
+	ruleName: string;
+	message: string;
+	severity: number;
+	category: string;
+	url: string;
+	sourceLineNumber: number;
+	sourceColumnNumber: number;
+	sourceFileName: string;
+	sourceType: string;
+	sourceVertexName: string;
+	sinkLineNumber: number;
+	sinkColumnNumber: number;
+	sinkFileName: string;
+};
 
 export class SfgeEngine extends AbstractRuleEngine {
 	private static ENGINE_ENUM: ENGINE = ENGINE.SFGE;
@@ -149,7 +165,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 			// Handle errors thrown
 			const message = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`${SfgeEngine.ENGINE_NAME} evaluation failed. ${message}`);
-			this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [this.processStderr(message)]);
+			this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [SfgeEngine.processStderr(message)]);
 			// Handle output results no matter the outcome
 			results = this.processStdout(message);
 		}
@@ -193,8 +209,8 @@ export class SfgeEngine extends AbstractRuleEngine {
 		// best course of action is probably to divide SFGE into two engines: one for DFA rules and one for pathless rules.
 		return true;
 	}
-	
-	processStderr(output: string): string {
+
+	private static processStderr(output: string): string {
 		// We should handle errors by checking for our error start string.
 		const errorStart = output.indexOf(ERROR_START);
 		if (errorStart === -1) {
@@ -214,7 +230,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 		if (violationsStart === -1) {
 			return [];
 		}
-		
+
 		const violationsEnd = output.indexOf(VIOLATIONS_END);
 		const violationsJson = output.slice(violationsStart + VIOLATIONS_START.length, violationsEnd);
 		const sfgeViolations: SfgeViolation[] = JSON.parse(violationsJson) as SfgeViolation[];

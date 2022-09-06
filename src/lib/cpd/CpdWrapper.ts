@@ -3,8 +3,7 @@ import {FileHandler} from '../util/FileHandler';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
 import { PMD_LIB } from '../../Constants';
-import { CommandLineSupport, ResultHandlerArgs } from '../services/CommandLineSupport';
-import { CommandLineResultHandler } from "../services/CommandLineResultHandler";
+import { CommandLineSupport} from '../services/CommandLineSupport';
 
 const MAIN_CLASS = 'net.sourceforge.pmd.cpd.CPD';
 const HEAP_SIZE = '-Xmx1024m';
