@@ -8,7 +8,6 @@ import {SpinnerManager, NoOpSpinnerManager} from './SpinnerManager';
 export type ResultHandlerArgs = {
 	code: number;
 	isSuccess: boolean;
-	hasResults: boolean;
 	stdout: string;
 	stderr: string;
 	res: (string) => void;
@@ -68,10 +67,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 	protected abstract buildCommandArray(): Promise<[string, string[]]>;
 
-	protected hasResults(code: number): boolean {
-		return false;
-	}
-
 	protected async runCommand(): Promise<string> {
 		const [command, args] = await this.buildCommandArray();
 
@@ -95,14 +90,12 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 			cp.on('exit', code => {
 				this.parentLogger.trace(`runCommand has received exit code ${code}`);
 				const isSuccess = this.isSuccessfulExitCode(code);
-				const hasResults = this.hasResults(code);
 				this.getSpinnerManager().stopSpinner(isSuccess);
 				// The output processor's input is always stdout.
 				this.outputProcessor.processOutput(stdout);
 				this.handleResults({
 					code,
 					isSuccess,
-					hasResults,
 					stdout,
 					stderr,
 					res,

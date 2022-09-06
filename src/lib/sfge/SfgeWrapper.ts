@@ -26,8 +26,6 @@ const EXIT_NO_VIOLATIONS = 0;
  */
 const EXIT_WITH_VIOLATIONS = 4;
 
-const EXIT_ON_ERROR_WITH_VIOLATIONS = 5
-
 interface SfgeWrapperOptions {
 	targets: RuleTarget[];
 	projectDirs: string[];
@@ -133,10 +131,11 @@ export class SfgeWrapper extends CommandLineSupport {
 		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
 	}
 
-	protected hasResults(code: number): boolean {
-		return code == EXIT_WITH_VIOLATIONS || code == EXIT_ON_ERROR_WITH_VIOLATIONS;
-	}
-
+	/**
+	 * While handling unsuccessful executions, include stdout 
+	 * and stderr information.
+	 * @param args contains information on the outcome of execution
+	 */
 	protected handleResults(args: ResultHandlerArgs) {
 		if (args.isSuccess) {
 			args.res(args.stdout);
