@@ -26,4 +26,16 @@ export class EventCreator extends AsyncCreatable {
 		};
 		this.outputProcessor.emitEvents([event]);
 	}
+
+	public createUxErrorMessage(eventTemplateKey: string, args: string[]): void {
+		const event = {
+			messageKey: eventTemplateKey,
+			args: args,
+			type: 'ERROR',
+			handler: 'UX',
+			verbose: false,
+			time: Date.now()
+		};
+		this.outputProcessor.emitEvents([event]);
+	}
 }

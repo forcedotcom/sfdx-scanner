@@ -5,7 +5,7 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
+import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -131,8 +131,18 @@ export class SfgeWrapper extends CommandLineSupport {
 		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
 	}
 
+	/**
+	 * While handling unsuccessful executions, include stdout 
+	 * and stderr information.
+	 * @param args contains information on the outcome of execution
+	 */
 	protected handleResults(args: ResultHandlerArgs) {
-		new CommandLineResultHandler().handleResults(args);
+		if (args.isSuccess) {
+			args.res(args.stdout);
+		} else {
+			// Pass in both stdout and stderr so that results can be salvaged
+			args.rej(args.stdout + ' ' + args.stderr);
+		}
 	}
 
 	/**

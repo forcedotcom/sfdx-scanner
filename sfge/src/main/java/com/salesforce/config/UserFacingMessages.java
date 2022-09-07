@@ -6,6 +6,14 @@ package com.salesforce.config;
  */
 public final class UserFacingMessages {
 
+    /** Main args and process checks * */
+    public static final String REQUIRES_AT_LEAST_ONE_ARGUMENT =
+            "SFGE invocation requires at least one argument.";
+
+    public static final String UNRECOGNIZED_ACTION = "Unrecognized action to invoke SFGE: %s.";
+    public static final String INCORRECT_ARGUMENT_COUNT =
+            "Wrong number of arguments. Expected %d; received %d";
+
     /** UserActionException * */
 
     // format: filename,defined type, line number

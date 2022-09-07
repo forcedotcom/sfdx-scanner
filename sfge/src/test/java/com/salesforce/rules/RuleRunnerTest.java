@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.cli.Result;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.cache.VertexCache;
@@ -54,7 +55,8 @@ public class RuleRunnerTest {
         rules.add(new StaticTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
-        List<Violation> vs = rr.runRules(rules);
+        final Result result = rr.runRules(rules);
+        List<Violation> vs = result.getViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded static violation", vs.get(0).getMessage());
@@ -80,7 +82,8 @@ public class RuleRunnerTest {
         rules.add(new PathBasedTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
-        List<Violation> vs = rr.runRules(rules);
+        final Result result = rr.runRules(rules);
+        List<Violation> vs = result.getViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded path violation", vs.get(0).getMessage());
@@ -105,7 +108,8 @@ public class RuleRunnerTest {
         rules.add(new PathBasedTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
-        List<Violation> vs = rr.runRules(rules);
+        final Result result = rr.runRules(rules);
+        List<Violation> vs = result.getViolations();
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded path violation", vs.get(0).getMessage());
@@ -158,7 +162,8 @@ public class RuleRunnerTest {
         targets.add(TestUtil.createTarget("TestCode1", new ArrayList<>()));
         // Since we're providing a list of targeted files, only those files should have violations
         // associated with them.
-        List<Violation> vs = rr.runRules(rules, targets);
+        final Result result = rr.runRules(rules, targets);
+        List<Violation> vs = result.getViolations();
 
         MatcherAssert.assertThat(vs, hasSize(4));
         Set<String> filesWithStaticViolation = new HashSet<>();
