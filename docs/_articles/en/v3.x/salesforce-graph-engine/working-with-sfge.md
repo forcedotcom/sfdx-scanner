@@ -89,10 +89,7 @@ Even if SFGE's execution was interrupted, it returns results from the portion of
 While we are working on optimizing SFGE's heap consumption, here are some tips to avoid an OutOfMemory error:
 1. Increase max heap size assigned to SFGE's execution. You can do this by providing an updated `-Xmx` value to either the `sfgejvmargs` parameter with `scanner:run:dfa` command, or to the environment variable, `SFGE_JVM_ARGS`.
 
-	Before you do this, make note of your JVM's default heap size:
-	- Windows: `javaw -XX:+PrintFlagsFinal | find "MaxHeapSize"`
-	- Linux: `jstat -gccapacity <insert-sfge-pid-here>`
-	- Mac OS: `jps -v | grep <insert-sfge-pid-here>` and look for `-Xmx` value.
+	Before you do this, make note of your JVM's default Max Heap size, that is, the `-Xmx` value.
 
 	Execute SFGE with a larger heap space than the default settings. For example, to allocate 2g heap space, you can execute:
 	```bash
@@ -104,9 +101,9 @@ While we are working on optimizing SFGE's heap consumption, here are some tips t
 	sfdx scanner:run:dfa <rest of your parameters>
 	```
 
-	There's no single magic number that works for every project since the value depends on the project code's complexity. We recommend incrementing heap space allocation by at least 1g. Also, note that a very large heap space could slowdown the process further and degrade the performance. You may need a couple of tries to identify what works in your case.
+	There's no single magic number that works for every project since the value depends on the complexity of the target codebase. We recommend increasing heap space allocation in increments of 1g. Also, note that a very large heap space could slow down the process further and degrade the performance. You may need a couple of tries to identify what works in your case.
 
-2. Target a smaller set of files for analysis. You can do this by providing a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This helps with creating a smaller number of paths at a time and avoids OutOfMemory errors.
+2. Target a smaller set of files for analysis. You can do this by providing a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This helps keep the number of paths down, which reduces the likelihood of OutOfMemory errors.
 
 3. Consider simplifying your source code to avoid large IF/ELSE-IF/ELSE conditional trees. This would help bringing down the number of paths created.
 

@@ -21,7 +21,7 @@ A: No! `Salesforce Code Analyzer` can be used on any codebase.
 ## Questions about language support
 
 #### Q: What languages does `Salesforce Code Analyzer` support?
-A: By default, `Salesforce Code Analyzer` supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript. You can specifically invoke `scanner:run` command with `--engine eslint-lwc` to get support for LWC.
+A: By default, `Salesforce Code Analyzer` supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript.
 
 #### Q: How do I get support for additional languages?
 Please create an Issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner). We'll try to help you out. 
