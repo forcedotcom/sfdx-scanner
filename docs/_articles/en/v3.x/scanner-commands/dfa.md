@@ -55,14 +55,17 @@ Execute dataflow-analysis-based rules on a target codebase. This command runs fo
 
 ## Environment-variable-based Controls
 
-### *SFGE-RULE-THREAD-COUNT*
+### *SFGE_RULE_THREAD_COUNT*
 Default value is 4. Modify this variable to adjust the number of threads that will each execute DFA-based rules. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-count`.
 
-### *SFGE-RULE-THREAD-TIMEOUT*
+### *SFGE_RULE_THREAD_TIMEOUT*
 Default value is 900,000ms (15 minutes). Modify this variable to adjust how long DFA-based rules can execute before timing out. You can use this to allow SFGE to run for longer to analyze more complex code. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-timeout`.
 
-### *SFGE-IGNORE-PARSE-ERRORS*
+### *SFGE_IGNORE_PARSE_ERRORS*
 By default, this value is true. Set this variable to false to force SFGE to ignore parse errors. This is not recommended since the analysis results will be incorrect. Equivalent flag on `scanner:run:dfa` command is `--ignore-parse-errors`.
+
+### *SFGE_JVM_ARGS*
+Set this variable to override default JVM settings while executing `scanner:run:dfa` command. Equivalent flag on `scanner:run:dfa` command is `--sfgejvmargs`. This flag helps decrease the probability of [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
 
 ## Example
   The paths specified for `--projectdir` must cumulatively contain all files specified through `--target`.

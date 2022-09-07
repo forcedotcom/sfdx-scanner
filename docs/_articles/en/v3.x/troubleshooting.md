@@ -178,7 +178,6 @@ Otherwise, remove any languages besides those listed above from the PMD engine's
 Depending on the complexity of the source code, Salesforce Graph Engine may take a long time to complete. If you are willing to wait for longer, you can increase the timeout by either increasing *SFCA_RULE_THREAD_TIMEOUT* environment variable, or by invoking the command with rulethreadtimeout parameter. Both take int values of the number of milliseconds it can wait. The default timeout is 15 minutes.
 To get specific results, you can also reduce the number of file sent as `--target` so that there are less entry points to cover per run.
 
-### `scanner:run:dfa` execution ran into an OutOfMemory issue.
+### `scanner:run:dfa` execution ran into this error: `java.lang.OutOfMemoryError: Java heap space`.
 
-This is related to code complexity as well. We are working on improving the experience. In the meantime, please run for more specific targets to get completed results.
-
+We are working on optimizing SFGE's execution to avoid this error. In the meantime, refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) on decreasing its probability.
