@@ -59,7 +59,7 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param args
 	 * @protected
 	 */
-	 protected handleResults(args: ResultHandlerArgs): void {
+	protected handleResults(args: ResultHandlerArgs): void {
 		new CommandLineResultHandler().handleResults(args);
 	}
 
