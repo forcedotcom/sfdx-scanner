@@ -72,6 +72,7 @@
 		"@types/sarif": "^2.1.4",
 		"@types/semver": "^7.3.9",
 		"@types/tmp": "^0.2.3",
+		"@types/uuid": "^8.3.4",
 		"chai": "^4",
 		"eslint": "^8.10.0",
 		"mocha": "^9",

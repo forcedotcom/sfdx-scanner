@@ -115,7 +115,7 @@ export class OutputProcessor extends AsyncCreatable {
 			return;
 		}
 		// Parse the first arg into a telemetry object.
-		const telemetryObject: InternalTelemetryData = JSON.parse(args[0]);
+		const telemetryObject: InternalTelemetryData = JSON.parse(args[0]) as InternalTelemetryData;
 		// We'll also want to add a UUID associated with this CLI execution.
 		telemetryObject.uuid = UUID;
 		// NOTE: In addition to the information provided here, the following information is captured
