@@ -81,10 +81,10 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		const config = await this.extractConfig(configFile);
 
 		// Let users know that they are on their own
-		this.eventCreator.createUxInfoAlwaysMessage('info.customEslintHeadsUp', [configFile]);
+		await this.eventCreator.createUxInfoAlwaysMessage('info.customEslintHeadsUp', [configFile]);
 
 		if (rules.length > 0) {
-			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
+			await this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
 		// The config we loaded from the file should be treated as an override for whatever default configs exist.
 		const eslint = this.dependencies.createESLint({overrideConfig: config});

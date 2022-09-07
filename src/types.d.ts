@@ -16,7 +16,7 @@ export type Rule = {
 	url?: string;
 }
 
-export type TelemetryData = {
+export type RunTelemetryData = {
 	eventName: string;
 	executedEnginesCount: number;
 	executedEnginesString: string;

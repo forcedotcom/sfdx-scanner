@@ -13,7 +13,7 @@ export interface RuleCatalog {
 	 * @param {RuleFilter[]} filters
 	 * @param {RuleEngine[]} engines
 	 */
-	getRuleGroupsMatchingFilters(filters: RuleFilter[], engines: RuleEngine[]): RuleGroup[];
+	getRuleGroupsMatchingFilters(filters: RuleFilter[], engines: RuleEngine[]): Promise<RuleGroup[]>;
 
 	getRulesMatchingFilters(filters: RuleFilter[]): Rule[];
 

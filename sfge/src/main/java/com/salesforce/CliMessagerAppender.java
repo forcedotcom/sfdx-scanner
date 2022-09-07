@@ -65,7 +65,7 @@ public class CliMessagerAppender extends AbstractAppender {
         if (Level.WARN.equals(level)) {
             if (this.shouldLogWarningsOnVerbose) {
                 CliMessager.postMessage(
-                    "SFGE Warning as Info", EventKey.INFO_GENERAL, getEventMessage(event));
+                        "SFGE Warning as Info", EventKey.INFO_GENERAL, getEventMessage(event));
             }
         } else if (Level.ERROR.equals(level)) {
             CliMessager.postMessage(

@@ -510,10 +510,10 @@ export class CustomPmdEngine extends BasePmdEngine {
 		const selectedRules = await this.getCustomConfig(engineOptions);
 
 		// Let users know that they are on their own
-		this.eventCreator.createUxInfoAlwaysMessage('info.customPmdHeadsUp', [selectedRules]);
+		await this.eventCreator.createUxInfoAlwaysMessage('info.customPmdHeadsUp', [selectedRules]);
 
 		if (ruleGroups.length > 0) {
-			this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
+			await this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
 
 		return await this.runInternal(selectedRules, targets);

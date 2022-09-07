@@ -44,7 +44,7 @@ export default class LocalCatalog implements RuleCatalog {
 	 * @param {RuleFilter[]} filters
 	 * @param {RuleEngine[]} engines
 	 */
-	public getRuleGroupsMatchingFilters(filters: RuleFilter[], engines: RuleEngine[]): RuleGroup[] {
+	public async getRuleGroupsMatchingFilters(filters: RuleFilter[], engines: RuleEngine[]): Promise<RuleGroup[]> {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// We only care about category and ruleset filters. If we didn't get any of those, we can implicitly include all
@@ -88,7 +88,7 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 	}
 
-	private getAllCategoryPaths(engines: RuleEngine[]): RuleGroup[] {
+	private async getAllCategoryPaths(engines: RuleEngine[]): Promise<RuleGroup[]> {
 		// Since this method is run when no category/ruleset filter criteria are provided, it could be useful
 		// to provide a level of insight into what categories were automatically run.
 		const events: RuleEvent[] = [];
@@ -107,7 +107,7 @@ export default class LocalCatalog implements RuleCatalog {
 			});
 		});
 
-		this.outputProcessor.emitEvents(events);
+		await this.outputProcessor.emitEvents(events);
 		return categories;
 	}
 
