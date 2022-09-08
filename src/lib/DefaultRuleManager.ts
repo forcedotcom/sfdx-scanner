@@ -2,7 +2,7 @@ import {Logger, Messages, SfdxError, Lifecycle} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, RunTelemetryData} from '../types';
+import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {RunOptions, RuleManager} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
@@ -174,7 +174,7 @@ export class DefaultRuleManager implements RuleManager {
 		// Get the name of every engine being executed.
 		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
 		// Build the base telemetry data.
-		const runTelemetryObject: RunTelemetryData = {
+		const runTelemetryObject: TelemetryData = {
 			// This property is a requirement for the object.
 			eventName: 'ENGINE_EXECUTION',
 			// Knowing how many engines are run with each execution is valuable data.

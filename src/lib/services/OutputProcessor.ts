@@ -1,6 +1,6 @@
 import {Lifecycle, Logger, LoggerLevel, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
-import {RuleEvent} from '../../types';
+import {RuleEvent, TelemetryData} from '../../types';
 import {EVENTS, uxEvents} from '../ScannerEvents';
 import {v5 as uuidv5} from 'uuid';
 
@@ -24,15 +24,6 @@ const UUID_NAMESPACE = '03bcf6c5-7828-4b6b-bc12-94a4bc4ab2f8';
  * aggregate all the events in individual runs and spot patterns.
  */
 const UUID: string = uuidv5('Internal Telemetry', UUID_NAMESPACE);
-
-type InternalTelemetryData = {
-	eventName: string;
-	fatalError: boolean;
-	message: string;
-	stacktrace: string;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	[key: string]: any;
-}
 
 /**
  * Helps with processing output from PmdCatalog java module and converting messages into usable events
@@ -115,7 +106,7 @@ export class OutputProcessor extends AsyncCreatable {
 			return;
 		}
 		// Parse the first arg into a telemetry object.
-		const telemetryObject: InternalTelemetryData = JSON.parse(args[0]) as InternalTelemetryData;
+		const telemetryObject: TelemetryData = JSON.parse(args[0]) as TelemetryData;
 		// We'll also want to add a UUID associated with this CLI execution.
 		telemetryObject.uuid = UUID;
 		// NOTE: In addition to the information provided here, the following information is captured

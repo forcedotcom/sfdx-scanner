@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
-import {Rule, RuleGroup, RuleTarget, RunTelemetryData} from '../../src/types';
+import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
 import {ENGINE, CONFIG_PILOT_FILE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
@@ -371,7 +371,7 @@ describe('RuleManager', () => {
 					expect(parsedRes[0].engine).to.equal('eslint', 'Wrong engine returned results');
 					expect(parsedRes[0].violations.length).to.equal(1, 'Wrong number of violations found');
 					Sinon.assert.callCount(telemetrySpy, 1);
-					const telemetryArg: RunTelemetryData = telemetrySpy.args[0][0];
+					const telemetryArg: TelemetryData = telemetrySpy.args[0][0];
 					expect(telemetryArg.eventName).to.equal('ENGINE_EXECUTION');
 					expect(telemetryArg.executedEnginesCount).to.equal(2);
 					expect(telemetryArg.executedEnginesString).to.equal(JSON.stringify(['eslint', 'retire-js']));
