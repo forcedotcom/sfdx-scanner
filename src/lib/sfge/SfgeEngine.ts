@@ -165,7 +165,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 			// Handle errors thrown
 			const message = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`${SfgeEngine.ENGINE_NAME} evaluation failed. ${message}`);
-			this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [SfgeEngine.processStderr(message)]);
+			await this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [SfgeEngine.processStderr(message)]);
 			// Handle output results no matter the outcome
 			results = this.processStdout(message);
 		}

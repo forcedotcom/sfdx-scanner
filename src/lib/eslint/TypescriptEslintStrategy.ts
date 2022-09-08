@@ -153,7 +153,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		const tsconfigPath = await this.findTsconfig(engineOptions);
 
 		// Alert the user we found a config file, if --verbose
-		this.alertUser(tsconfigPath);
+		await this.alertUser(tsconfigPath);
 
 		const config: ESLint.Options = {};
 
@@ -167,11 +167,11 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return config;
 	}
 
-	private alertUser(tsconfigPath: string): void {
+	private async alertUser(tsconfigPath: string): Promise<void> {
 		const event = {
 			messageKey: 'info.usingEngineConfigFile', args: [tsconfigPath], type: 'INFO', handler: 'UX', verbose: true, time: Date.now()
 		};
-		this.outputProcessor.emitEvents([event]);
+		await this.outputProcessor.emitEvents([event]);
 	}
 
 	/**
