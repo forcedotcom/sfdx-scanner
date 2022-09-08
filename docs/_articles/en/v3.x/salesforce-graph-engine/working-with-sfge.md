@@ -101,9 +101,9 @@ While we are working on optimizing SFGE's heap consumption, here are some tips t
 	sfdx scanner:run:dfa <rest of your parameters>
 	```
 
-	There's no single magic number that works for every project since the value depends on the complexity of the target codebase. We recommend increasing heap space allocation in increments of 1g. Also, note that a very large heap space could slow down the process further and degrade the performance. You may need a couple of tries to identify what works in your case.
+	Since the value depends on the project code's complexity, there's no single magic number. We recommend that you increment heap space allocation by at least 1 G. A very large heap space could slowdown the process and degrade performance. To identify what works for your project, you may need to experiment.
 
-2. Target a smaller set of files for analysis. You can do this by providing a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This helps keep the number of paths down, which reduces the likelihood of OutOfMemory errors.
+2. Target a smaller set of files for analysis. To target a smaller set of files for analysis, provide a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This creates a smaller number of paths and reduces the likelihood of  OutOfMemory errors.
 
 3. Consider simplifying your source code to avoid large IF/ELSE-IF/ELSE conditional trees. This would help bringing down the number of paths created.
 
@@ -116,6 +116,7 @@ Since the engine is actively under development, there are many features and bugs
 3. SFGE cannot handle anonymous apex script. Please provide the classes directory path as the `--projectdir` that does not include any anonymous apex script.
 4. SFGE cannot handle namespace placeholders. Please replace the namespace placeholder with a blank.
 5. SFGE does not understand multiple static blocks in code.
+6. Complex codebases may require increased Java heap space to avoid Out of Memory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
 
 ### Reporting Errors
 

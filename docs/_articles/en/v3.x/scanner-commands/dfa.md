@@ -6,6 +6,8 @@ lang: en
 ## sfdx scanner:run:dfa
 Execute dataflow-analysis-based rules on a target codebase. This command runs for a longer time than `scanner:run`. Also, this execution requires a path to context of where the target code resides.
 
+Important: If your codebase is complex, increase the Java heap space to avoid OutOfMemory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
+
 ## Usage
 ```bash
   $ sfdx scanner:run:dfa -t <array> -p <array> [-f csv|html|json|junit|sarif|table|xml] [-o <string>] [-s <integer> | 
@@ -48,6 +50,9 @@ Execute dataflow-analysis-based rules on a target codebase. This command runs fo
 
   --rule-thread-timeout=rule-thread-timeout
       timeout for individual rule threads, in milliseconds (default: 900000 ms). Alternatively, set value using environment variable `SFGE_RULE_THREAD_TIMEOUT`
+
+  --sfgejvmargs=_sfgejvm_args_
+      JVM arguments to override system defaults while executing Graph Engine. For multiple arguments, add them to the same string separated by space. Alternatively, set value using the environment variable `SFGE_JVM_ARGS`
 
   --verbose
       emit additional command output to stdout
@@ -137,6 +142,14 @@ Example:
     $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
   			
 Increases timeout from 15 minutes (default) to 150 minutes.
+
+
+Use `--sfgejvmargs` to pass JVM args to override system defaults while executing Graph Engine's rules. 
+Example:
+		
+    $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" ...
+			
+Overrides system's default heapspace allocation to 2g and decreases the likelihood of encountering OutOfMemory error.
 
 
 ## Demo
