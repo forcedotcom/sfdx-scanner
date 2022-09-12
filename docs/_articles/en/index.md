@@ -22,6 +22,11 @@ lang: en
   	A new version (v{{ site.data.versions.scanner }}) of the plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
 </div>
 <br>
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
+  <span class="slds-assistive-text">warning</span>
+  	v{{ site.data.versions.scanner }} is the final planned v2.x version. From v{{ site.data.versions-v3.firstdefault }} onwards, v3.x will be the default version.
+</div>
+<br>
 
 ## Salesforce Code Analyzer Plug-in
 
