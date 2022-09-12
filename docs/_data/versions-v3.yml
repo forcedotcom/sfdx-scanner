@@ -1,5 +1,4 @@
 scanner: '3.4.0'
-firstdefault: '3.6.0'
 releasedon: '08-17-2022'
 pmd: '6.48.0'
 eslint: '8.x'

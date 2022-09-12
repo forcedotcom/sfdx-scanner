@@ -24,7 +24,7 @@ lang: en
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	v{{ site.data.versions.scanner }} is the final planned v2.x version. From v{{ site.data.versions-v3.firstdefault }} onwards, v3.x will be the default version.
+  	The v3.x pilot is almost over! Starting with our October 2022 release, v3.x will become the default version of the plug-in, and v2.x will no longer be supported.
 </div>
 <br>
 
