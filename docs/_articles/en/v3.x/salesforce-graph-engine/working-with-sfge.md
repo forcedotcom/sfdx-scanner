@@ -82,30 +82,27 @@ public class MyClass {
 
 ## "OutOfMemory: Java heap space" Error
 
-The number of paths SFGE needs to create increases exponentially with every conditional or method invocation in your code. As the number of paths explode, SFGE's probability of encountering an OutOfMemory error increases. In addition, a variety of factors such as your OS type, java setup, and other processes running in your machine can influence the heap space assigned by JVM, which then impacts SFGE's execution.
+A number of factors can degrade the Graph Engine's efficiency and increase the probability of encountering an `OutOfMemory` error.
+- With every conditional or method invocation in your code, the number of paths the Graph Engine creates increases exponentially.
+- The Head space assigned by the Java Virtual Machine (JVM) can be influenced by your OS type, Java setup, and the other processes running on your machine.
 
-Even if SFGE's execution was interrupted, it returns results from the portion of source code it has analyzed so far.
+If the Graph Engine's execution is interrupted, it returns results from the portion of source code it has analyzed so far.
 
-While we are working on optimizing SFGE's heap consumption, here are some tips to avoid an OutOfMemory error:
-1. Increase max heap size assigned to SFGE's execution. You can do this by providing an updated `-Xmx` value to either the `sfgejvmargs` parameter with `scanner:run:dfa` command, or to the environment variable, `SFGE_JVM_ARGS`.
-
-	Before you do this, make note of your JVM's default Max Heap size, that is, the `-Xmx` value.
-
-	Execute SFGE with a larger heap space than the default settings. For example, to allocate 2g heap space, you can execute:
-	```bash
-	sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
-	```
-	or
-	```bash
-	export SFGE_JVM_ARGS="-Xmx2g"
-	sfdx scanner:run:dfa <rest of your parameters>
-	```
-
-	Since the value depends on the project code's complexity, there's no single magic number. We recommend that you increment heap space allocation by at least 1 G. A very large heap space could slowdown the process and degrade performance. To identify what works for your project, you may need to experiment.
-
-2. Target a smaller set of files for analysis. To target a smaller set of files for analysis, provide a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This creates a smaller number of paths and reduces the likelihood of  OutOfMemory errors.
-
-3. Consider simplifying your source code to avoid large IF/ELSE-IF/ELSE conditional trees. This would help bringing down the number of paths created.
+To avoid an `OutOfMemory` error:
+1. Increase the max heap size assigned to the Graph Engine's execution by providing an updated `-Xmx` value to either the `--sfgejvmargs` parameter of the `scanner:run:dfa` or to the `SFGE_JVM_ARGS` environment variable.
+<br>Before you do this, make note of your JVM's default max heap size, the `-Xmx` value, and execute the Graph Engine with a larger heap space than the default value.
+<br>For example, to allocate 2 GB of heap space:
+```
+sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
+```
+or
+```
+export SFGE_JVM_ARGS="-Xmx2g"
+sfdx scanner:run:dfa <rest of your parameters>
+```
+Since the heap space value depends on the complexity of the target codebase, there's no magic number. A very large heap space could degrade Graph Engine's performance, so increase the heap space allocation in increments of 1 GB. You may need to experiment to see what works for your project.
+2. Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner:run:dfa` command while keeping the same `--projectdir` value. This reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
+3. Simplify your source code to avoid large `if/else-if/else` conditional trees, which helps bring down the number of paths created.
 
 ## Limitations of Salesforce Graph Engine
 
