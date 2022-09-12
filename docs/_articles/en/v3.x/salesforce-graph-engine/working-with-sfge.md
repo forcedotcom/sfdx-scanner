@@ -108,12 +108,10 @@ Since the heap space value depends on the complexity of the target codebase, the
 
 Since the engine is actively under development, there are many features and bugs that are still work in progress.
 
-1. Violations thrown as, `Internal error. Work in progress. Please ignore`, indicate that the entry point’s analysis did not complete successfully. We are working on fixing this issue. In the meantime, please verify its correctness manually.
-2. SFGE cannot handle duplicate class names. If the source code has two distinctly different files that have classes with the same names, the engine fails with an error message, `<example_class> is defined in multiple files`. In cases like these, please provide `--projectdir` a subpath to the source directory that has only one of the file names, and separately rerun with the subpath to the second duplicate.
-3. SFGE cannot handle anonymous apex script. Please provide the classes directory path as the `--projectdir` that does not include any anonymous apex script.
-4. SFGE cannot handle namespace placeholders. Please replace the namespace placeholder with a blank.
-5. SFGE does not understand multiple static blocks in code.
-6. Complex codebases may require increased Java heap space to avoid Out of Memory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
+1. Violations thrown as Internal error. Work in progress. Please ignore, indicate that the entry point’s analysis didn’t complete successfully. We’re working on fixing this issue. In the meantime, you must verify the validity of this error manually.
+2. Graph Engine handles unique class names. If the source code has two distinctly different files that have classes with duplicate names, Graph Engine fails with an error message: <example_class> is defined in multiple files. In cases like these, provide --projectdir subpath to the source directory that has only one of the file names, and separately rerun Graph Engine with the subpath to the second file name.
+3. Graph Engine doesn’t handle anonymous Apex script. Provide the class directory path as the --projectdir that doesn’t include any anonymous Apex script.
+4. Graph Engine doesn’t handle namespace placeholders. Namespace placeholder should be blank.
 
 ### Reporting Errors
 
