@@ -84,13 +84,13 @@ public class MyClass {
 
 A number of factors can degrade the Graph Engine's efficiency and increase the probability of encountering an `OutOfMemory` error.
 - With every conditional or method invocation in your code, the number of paths the Graph Engine creates increases exponentially.
-- The Head space assigned by the Java Virtual Machine (JVM) can be influenced by your OS type, Java setup, and the other processes running on your machine.
+- The heap space assigned by the Java Virtual Machine (JVM) can be influenced by your OS type, Java setup, and the other processes running on your machine.
 
 If the Graph Engine's execution is interrupted, it returns results from the portion of source code it has analyzed so far.
 
 To avoid an `OutOfMemory` error:
-1. Increase the max heap size assigned to the Graph Engine's execution by providing an updated `-Xmx` value to either the `--sfgejvmargs` parameter of the `scanner:run:dfa` or to the `SFGE_JVM_ARGS` environment variable.
-<br>Before you do this, make note of your JVM's default max heap size, the `-Xmx` value, and execute the Graph Engine with a larger heap space than the default value.
+1. Make note of your JVM's default max heap size, the `-Xmx` value. Then execute the Graph Engine with a larger max heap size by
+providing an updated `-Xmx` value to either the `--sfgejvmargs` parameter of `scanner:run:dfa` or to the `SFGE_JVM_ARGS` environment variable.
 <br>For example, to allocate 2 GB of heap space:
 ```
 sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
@@ -108,10 +108,10 @@ Since the heap space value depends on the complexity of the target codebase, the
 
 Since the engine is actively under development, there are many features and bugs that are still work in progress.
 
-1. Violations thrown as Internal error. Work in progress. Please ignore, indicate that the entry point’s analysis didn’t complete successfully. We’re working on fixing this issue. In the meantime, you must verify the validity of this error manually.
-2. Graph Engine handles unique class names. If the source code has two distinctly different files that have classes with duplicate names, Graph Engine fails with an error message: <example_class> is defined in multiple files. In cases like these, provide --projectdir subpath to the source directory that has only one of the file names, and separately rerun Graph Engine with the subpath to the second file name.
-3. Graph Engine doesn’t handle anonymous Apex script. Provide the class directory path as the --projectdir that doesn’t include any anonymous Apex script.
-4. Graph Engine doesn’t handle namespace placeholders. Namespace placeholder should be blank.
+- Violations thrown as `Internal error. Work in progress. Please ignore`, indicate that the entry point’s analysis didn't complete successfully. We're working on fixing this issue. In the meantime, you must verify the validity of this error manually.
+- Graph Engine handles unique class names. If the source code has two distinctly different files that have classes with duplicate names, Graph Engine fails with an error message: `<example_class> is defined in multiple files.` In cases like these, provide `--projectdir` subpath to the source directory that has only one of the file names, and separately rerun Graph Engine with the subpath to the second file name.
+- Graph Engine doesn't handle anonymous Apex script. Provide the class directory path as the `--projectdir` that doesn't include any anonymous Apex script.
+- Graph Engine doesn't handle namespace placeholders. Namespace placeholder should be blank.
 
 ### Reporting Errors
 
