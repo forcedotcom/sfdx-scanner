@@ -11,7 +11,7 @@ lang: en
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.8...v2.13.9)
 
 ### Release Summary
-* NEW: Updates to local RetireJS Vulnerability Repository.
+* NEW: We made some updates to the RetireJS Vulnerability Repository.
 
 **Merged pull requests:**
 - CHANGE: @W-11721133@: \[2.x\] End-of-life banner updated. [\#817](https://github.com/forcedotcom/sfdx-scanner/pull/817)
