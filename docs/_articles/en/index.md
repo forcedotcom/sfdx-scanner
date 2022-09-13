@@ -25,7 +25,7 @@ lang: en
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
 <p>
-  	Support and updates for Code Analyzer v2.x are scheduled to end as of the October 26, 2022 release.
+  	Support and updates for Code Analyzer v2.x are scheduled to end as of the October 2022 release.
   	You can continue to use v2.x after the October release; however, we recommend using Code Analyzer v3.x instead.
  	For more information, see <a href="./en/v3.x/getting-started/prerequisites/">Getting Started with v3.x.</a>
 </p>
