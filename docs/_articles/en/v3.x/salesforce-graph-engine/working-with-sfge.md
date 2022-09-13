@@ -82,41 +82,36 @@ public class MyClass {
 
 ## "OutOfMemory: Java heap space" Error
 
-The number of paths SFGE needs to create increases exponentially with every conditional or method invocation in your code. As the number of paths explode, SFGE's probability of encountering an OutOfMemory error increases. In addition, a variety of factors such as your OS type, java setup, and other processes running in your machine can influence the heap space assigned by JVM, which then impacts SFGE's execution.
+A number of factors can degrade the Graph Engine's efficiency and increase the probability of encountering an `OutOfMemory` error.
+- With every conditional or method invocation in your code, the number of paths the Graph Engine creates increases exponentially.
+- The heap space assigned by the Java Virtual Machine (JVM) can be influenced by your OS type, Java setup, and the other processes running on your machine.
 
-Even if SFGE's execution was interrupted, it returns results from the portion of source code it has analyzed so far.
+If the Graph Engine's execution is interrupted, it returns results from the portion of source code it has analyzed so far.
 
-While we are working on optimizing SFGE's heap consumption, here are some tips to avoid an OutOfMemory error:
-1. Increase max heap size assigned to SFGE's execution. You can do this by providing an updated `-Xmx` value to either the `sfgejvmargs` parameter with `scanner:run:dfa` command, or to the environment variable, `SFGE_JVM_ARGS`.
-
-	Before you do this, make note of your JVM's default Max Heap size, that is, the `-Xmx` value.
-
-	Execute SFGE with a larger heap space than the default settings. For example, to allocate 2g heap space, you can execute:
-	```bash
-	sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
-	```
-	or
-	```bash
-	export SFGE_JVM_ARGS="-Xmx2g"
-	sfdx scanner:run:dfa <rest of your parameters>
-	```
-
-	Since the value depends on the project code's complexity, there's no single magic number. We recommend that you increment heap space allocation by at least 1 G. A very large heap space could slowdown the process and degrade performance. To identify what works for your project, you may need to experiment.
-
-2. Target a smaller set of files for analysis. To target a smaller set of files for analysis, provide a subset of apex files as `--target` to `scanner:run:dfa` command while keeping the same `--projectdir` value. This creates a smaller number of paths and reduces the likelihood of  OutOfMemory errors.
-
-3. Consider simplifying your source code to avoid large IF/ELSE-IF/ELSE conditional trees. This would help bringing down the number of paths created.
+To avoid an `OutOfMemory` error:
+1. Make note of your JVM's default max heap size, the `-Xmx` value. Then execute the Graph Engine with a larger max heap size by
+providing an updated `-Xmx` value to either the `--sfgejvmargs` parameter of `scanner:run:dfa` or to the `SFGE_JVM_ARGS` environment variable.
+<br>For example, to allocate 2 GB of heap space:
+```
+sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
+```
+or
+```
+export SFGE_JVM_ARGS="-Xmx2g"
+sfdx scanner:run:dfa <rest of your parameters>
+```
+Since the heap space value depends on the complexity of the target codebase, there's no magic number. A very large heap space could degrade Graph Engine's performance, so increase the heap space allocation in increments of 1 GB. You may need to experiment to see what works for your project.
+2. Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner:run:dfa` command while keeping the same `--projectdir` value. This reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
+3. Simplify your source code to avoid large `if/else-if/else` conditional trees, which helps bring down the number of paths created.
 
 ## Limitations of Salesforce Graph Engine
 
 Since the engine is actively under development, there are many features and bugs that are still work in progress.
 
-1. Violations thrown as, `Internal error. Work in progress. Please ignore`, indicate that the entry point’s analysis did not complete successfully. We are working on fixing this issue. In the meantime, please verify its correctness manually.
-2. SFGE cannot handle duplicate class names. If the source code has two distinctly different files that have classes with the same names, the engine fails with an error message, `<example_class> is defined in multiple files`. In cases like these, please provide `--projectdir` a subpath to the source directory that has only one of the file names, and separately rerun with the subpath to the second duplicate.
-3. SFGE cannot handle anonymous apex script. Please provide the classes directory path as the `--projectdir` that does not include any anonymous apex script.
-4. SFGE cannot handle namespace placeholders. Please replace the namespace placeholder with a blank.
-5. SFGE does not understand multiple static blocks in code.
-6. Complex codebases may require increased Java heap space to avoid Out of Memory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
+- Violations thrown as `Internal error. Work in progress. Please ignore`, indicate that the entry point’s analysis didn't complete successfully. We're working on fixing this issue. In the meantime, you must verify the validity of this error manually.
+- Graph Engine handles unique class names. If the source code has two distinctly different files that have classes with duplicate names, Graph Engine fails with an error message: `<example_class> is defined in multiple files.` In cases like these, provide `--projectdir` subpath to the source directory that has only one of the file names, and separately rerun Graph Engine with the subpath to the second file name.
+- Graph Engine doesn't handle anonymous Apex script. Provide the class directory path as the `--projectdir` that doesn't include any anonymous Apex script.
+- Graph Engine doesn't handle namespace placeholders. Namespace placeholder should be blank.
 
 ### Reporting Errors
 
