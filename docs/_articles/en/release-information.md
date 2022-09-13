@@ -3,7 +3,7 @@ title: Release Information
 lang: en
 ---
 
-### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in).
+### To update Code Analyzer, follow these [instructions](./en/getting-started/install/#upgrade-plug-in).
 <br>
 
 ## [v2.13.9](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.9) (09-14-2022)
