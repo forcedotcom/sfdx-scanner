@@ -5,7 +5,27 @@ lang: en
 
 ### To update the plugin, please follow the linked [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in)
 
+## [v3.5.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.5.0) (09-14-2022)
 
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.4.0...v3.5.0)
+
+### Release Summary
+
+* NEW: Updates to local RetireJS Vulnerability Repository.
+* NEW \[SFGE\]: Can provide more memory while running `scanner:run:dfa` by using `--sfgejvmargs` parameter.
+See [Understanding `OutOfMemory` Java Heap Space Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) for more detail.
+* FIX \[SFGE\]: If Salesforce Graph Engine errors out, partial results are now captured.
+* FIX: We fixed some under-the-hood bugs.
+
+**Merged pull requests:**
+
+- FIX: @W-11645973@: Remove noisy CliAppender warning logs when SFGE_LOG_WARNINGS_ON_VERBOSE is false [\#805](https://github.com/forcedotcom/sfdx-scanner/pull/805)
+- NEW: @W-11646074@ Added --sfgejvmargs parameter to `scanner:run:dfa` command [\#806](https://github.com/forcedotcom/sfdx-scanner/pull/806)
+- CHANGE: @W-11581708@: scanner:run:dfa command logs more constructively with --verbose [\#807](https://github.com/forcedotcom/sfdx-scanner/pull/807)
+- FIX: @W-11651888@ Salvage results collected by SFGE even if the analysis encounters an error [\#808](https://github.com/forcedotcom/sfdx-scanner/pull/808)
+- CHANGE: @W-11261182@: SFCA can now emit telemetry events based on messages passed from SFGE. [\#811](https://github.com/forcedotcom/sfdx-scanner/pull/811)
+- CHORE: @W-11732835@: Release activities for v3.5.0 release. [\#819](https://github.com/forcedotcom/sfdx-scanner/pull/819)
+  
 ## [v3.4.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.4.0) (08-17-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.3.0...v3.4.0)
