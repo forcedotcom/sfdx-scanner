@@ -11,7 +11,7 @@ lang: en
 
 ### Release Summary
 
-* NEW: We made some updates to the RetireJS Vulnerability Repository.
+* NEW: We made some updates to the RetireJS vulnerability database.
 * NEW: To provide more memory while running `scanner:run:dfa`, use the `--sfgejvmargs` parameter.
 See [Understand `OutOfMemory` Java Heap Space Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) for more detail.
 * FIX: If Salesforce Graph Engine errors out, partial results are now captured.
