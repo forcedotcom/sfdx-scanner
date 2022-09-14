@@ -12,14 +12,23 @@ lang: en
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
-  	New pilot version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
+  	{{ site.data.versions-v3.releasedon }}: New pilot version {{ site.data.versions-v3.scanner }} of Salesforce Code Analyzer is available
 	&nbsp;&nbsp;
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	A new version (v{{ site.data.versions.scanner }}) of the plug-in was released on {{ site.data.versions.releasedon }} &nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+  	{{ site.data.versions.releasedon }}: The latest version v{{ site.data.versions.scanner }} is available&nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+</div>
+<br>
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
+  <span class="slds-assistive-text">warning</span>
+<p>
+  	Support and updates for Code Analyzer v2.x are scheduled to end as of the October 2022 release.
+  	You can continue to use v2.x after the October release; however, we recommend using Code Analyzer v3.x instead.
+ 	For more information, see <a href="./en/v3.x/getting-started/prerequisites/">Getting Started with v3.x.</a>
+</p>
 </div>
 <br>
 

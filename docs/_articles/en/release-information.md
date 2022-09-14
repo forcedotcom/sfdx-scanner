@@ -3,8 +3,19 @@ title: Release Information
 lang: en
 ---
 
-### To update the plugin, please follow the linked [instructions](./en/getting-started/install/#upgrade-plug-in).
+### To update Code Analyzer, follow these [instructions](./en/getting-started/install/#upgrade-plug-in).
 <br>
+
+## [v2.13.9](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.9) (09-14-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v2.13.8...v2.13.9)
+
+### Release Summary
+* NEW: We made some updates to the RetireJS vulnerability database.
+
+**Merged pull requests:**
+- CHANGE: @W-11721133@: \[2.x\] End-of-life banner updated. [\#817](https://github.com/forcedotcom/sfdx-scanner/pull/817)
+- CHORE: @W-11732835@:\[2.x\] Release activity for v2.13.9 release. [\#818](https://github.com/forcedotcom/sfdx-scanner/pull/818)
 
 ## [v2.13.8](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.8) (08-17-2022)
 

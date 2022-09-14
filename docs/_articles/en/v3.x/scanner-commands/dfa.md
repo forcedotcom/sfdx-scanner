@@ -6,6 +6,8 @@ lang: en
 ## sfdx scanner:run:dfa
 Execute dataflow-analysis-based rules on a target codebase. This command runs for a longer time than `scanner:run`. Also, this execution requires a path to context of where the target code resides.
 
+Important: If your codebase is complex, increase the Java heap space to avoid OutOfMemory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
+
 ## Usage
 ```bash
   $ sfdx scanner:run:dfa -t <array> -p <array> [-f csv|html|json|junit|sarif|table|xml] [-o <string>] [-s <integer> | 
@@ -49,20 +51,26 @@ Execute dataflow-analysis-based rules on a target codebase. This command runs fo
   --rule-thread-timeout=rule-thread-timeout
       timeout for individual rule threads, in milliseconds (default: 900000 ms). Alternatively, set value using environment variable `SFGE_RULE_THREAD_TIMEOUT`
 
+  --sfgejvmargs=_sfgejvm_args_
+      JVM arguments to override system defaults while executing Graph Engine. For multiple arguments, add them to the same string separated by space. Alternatively, set value using the environment variable `SFGE_JVM_ARGS`
+
   --verbose
       emit additional command output to stdout
 ```
 
 ## Environment-variable-based Controls
 
-### *SFGE-RULE-THREAD-COUNT*
+### *SFGE_RULE_THREAD_COUNT*
 Default value is 4. Modify this variable to adjust the number of threads that will each execute DFA-based rules. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-count`.
 
-### *SFGE-RULE-THREAD-TIMEOUT*
+### *SFGE_RULE_THREAD_TIMEOUT*
 Default value is 900,000ms (15 minutes). Modify this variable to adjust how long DFA-based rules can execute before timing out. You can use this to allow SFGE to run for longer to analyze more complex code. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-timeout`.
 
-### *SFGE-IGNORE-PARSE-ERRORS*
+### *SFGE_IGNORE_PARSE_ERRORS*
 By default, this value is true. Set this variable to false to force SFGE to ignore parse errors. This is not recommended since the analysis results will be incorrect. Equivalent flag on `scanner:run:dfa` command is `--ignore-parse-errors`.
+
+### *SFGE_JVM_ARGS*
+Set this variable to override default JVM settings while executing `scanner:run:dfa` command. Equivalent flag on `scanner:run:dfa` command is `--sfgejvmargs`. This flag helps decrease the probability of [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
 
 ## Example
   The paths specified for `--projectdir` must cumulatively contain all files specified through `--target`.
@@ -134,6 +142,14 @@ Example:
     $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
   			
 Increases timeout from 15 minutes (default) to 150 minutes.
+
+
+Use `--sfgejvmargs` to pass JVM args to override system defaults while executing Graph Engine's rules. 
+Example:
+		
+    $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" ...
+			
+Overrides system's default heapspace allocation to 2g and decreases the likelihood of encountering OutOfMemory error.
 
 
 ## Demo
