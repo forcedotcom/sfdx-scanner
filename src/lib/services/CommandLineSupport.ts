@@ -59,7 +59,9 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 	 * @param args
 	 * @protected
 	 */
-	protected abstract handleResults(args: ResultHandlerArgs): void;
+	protected handleResults(args: ResultHandlerArgs): void {
+		new CommandLineResultHandler().handleResults(args);
+	}
 
 	protected abstract isSuccessfulExitCode(code: number): boolean;
 
@@ -77,28 +79,37 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			// When data is passed back up to us, pop it onto the appropriate string.
 			cp.stdout.on('data', data => {
-				this.outputProcessor.processRealtimeOutput(String(data));
-				stdout += data;
+				// eslint-disable-next-line @typescript-eslint/no-floating-promises
+				(async () => {
+					await this.outputProcessor.processRealtimeOutput(String(data));
+					stdout += data;
+				})();
 			});
 			cp.stderr.on('data', data => {
-				this.outputProcessor.processRealtimeOutput(String(data));
-				stderr += data;
+				// eslint-disable-next-line @typescript-eslint/no-floating-promises
+				(async () => {
+					await this.outputProcessor.processRealtimeOutput(String(data));
+					stderr += data;
+				})();
 			});
 
 			cp.on('exit', code => {
-				this.parentLogger.trace(`runCommand has received exit code ${code}`);
-				const isSuccess = this.isSuccessfulExitCode(code);
-				this.getSpinnerManager().stopSpinner(isSuccess);
-				// The output processor's input is always stdout.
-				this.outputProcessor.processOutput(stdout);
-				this.handleResults({
-					code,
-					isSuccess,
-					stdout,
-					stderr,
-					res,
-					rej
-				});
+				// eslint-disable-next-line @typescript-eslint/no-floating-promises
+				(async () => {
+					this.parentLogger.trace(`runCommand has received exit code ${code}`);
+					const isSuccess = this.isSuccessfulExitCode(code);
+					this.getSpinnerManager().stopSpinner(isSuccess);
+					// The output processor's input is always stdout.
+					await this.outputProcessor.processOutput(stdout);
+					this.handleResults({
+						code,
+						isSuccess,
+						stdout,
+						stderr,
+						res,
+						rej
+					});
+				})();
 			});
 		});
 	}

@@ -1,4 +1,4 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {SfgeWrapper} from './SfgeWrapper';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, Severity} from '../../Constants';
@@ -6,9 +6,14 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, SfgeConfig, TargetPattern} from '../../types';
 import {Config} from '../util/Config';
 import * as EngineUtils from '../util/CommonEngineUtils';
+import { EventCreator } from '../util/EventCreator';
 
 const CATALOG_START = 'CATALOG_START';
 const CATALOG_END = 'CATALOG_END';
+const VIOLATIONS_START = "VIOLATIONS_START";
+const VIOLATIONS_END = "VIOLATIONS_END";
+const ERROR_START = "SfgeErrorStart\n";
+
 
 type SfgePartialRule = {
 	name: string;
@@ -38,6 +43,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 
 	private logger: Logger;
 	private config: Config;
+	private eventCreator: EventCreator;
 	private initialized: boolean;
 
 	/**
@@ -49,6 +55,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 		}
 		this.logger = await Logger.child(this.getName());
 		this.config = await Controller.getConfig();
+		this.eventCreator = await EventCreator.create({});
 		this.initialized = true;
 	}
 
@@ -149,18 +156,22 @@ export class SfgeEngine extends AbstractRuleEngine {
 
 		this.logger.trace(`About to run ${SfgeEngine.ENGINE_NAME} rules. Targets: ${targetCount} files and/or methods, Selected rules: ${JSON.stringify(rules)}`);
 
+		let results: RuleResult[];
 		try {
+			// Execute SFGE
 			const output = await SfgeWrapper.runSfge(targets, rules, JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig);
-
-			// TODO: There should be some kind of method-call here to pull logs and warnings from the output.
-			const results = this.processStdout(output);
-			this.logger.trace(`Found ${results.length} results for ${SfgeEngine.ENGINE_NAME}`);
-			return results;
+			results = this.processStdout(output);
 		} catch (e) {
+			// Handle errors thrown
 			const message = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`${SfgeEngine.ENGINE_NAME} evaluation failed. ${message}`);
-			throw new SfdxError(SfgeEngine.processStderr(message));
+			await this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [SfgeEngine.processStderr(message)]);
+			// Handle output results no matter the outcome
+			results = this.processStdout(message);
 		}
+
+		this.logger.trace(`Found ${results.length} results for ${SfgeEngine.ENGINE_NAME}`);
+		return results;
 	}
 
 	/**
@@ -201,8 +212,7 @@ export class SfgeEngine extends AbstractRuleEngine {
 
 	private static processStderr(output: string): string {
 		// We should handle errors by checking for our error start string.
-		const errorStartString = "SfgeErrorStart\n";
-		const errorStart = output.indexOf(errorStartString);
+		const errorStart = output.indexOf(ERROR_START);
 		if (errorStart === -1) {
 			// If our error start string is missing altogether, then something went disastrously wrong, and we should
 			// assume that the entire stderr is relevant.
@@ -210,20 +220,19 @@ export class SfgeEngine extends AbstractRuleEngine {
 		} else {
 			// If the error start string is present, it means we exited cleanly and everything prior to the string is noise
 			// that can be omitted.
-			return output.slice(errorStart + errorStartString.length);
+			return output.slice(errorStart + ERROR_START.length);
 		}
 	}
 
 	protected processStdout(output: string): RuleResult[] {
 		// Pull the violation objects from the output.
-		const violationsStartString = "VIOLATIONS_START";
-		const violationsStart = output.indexOf(violationsStartString);
+		const violationsStart = output.indexOf(VIOLATIONS_START);
 		if (violationsStart === -1) {
 			return [];
 		}
-		const violationsEndString = "VIOLATIONS_END";
-		const violationsEnd = output.indexOf(violationsEndString);
-		const violationsJson = output.slice(violationsStart + violationsStartString.length, violationsEnd);
+
+		const violationsEnd = output.indexOf(VIOLATIONS_END);
+		const violationsJson = output.slice(violationsStart + VIOLATIONS_START.length, violationsEnd);
 		const sfgeViolations: SfgeViolation[] = JSON.parse(violationsJson) as SfgeViolation[];
 
 		if (!sfgeViolations || sfgeViolations.length === 0) {

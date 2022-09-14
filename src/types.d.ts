@@ -18,9 +18,6 @@ export type Rule = {
 
 export type TelemetryData = {
 	eventName: string;
-	executedEnginesCount: number;
-	executedEnginesString: string;
-	sfdxVersion: string;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[key: string]: any;
 }
@@ -179,4 +176,5 @@ export type SfgeConfig = {
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ignoreParseErrors?: boolean;
+	jvmArgs?: string;
 };

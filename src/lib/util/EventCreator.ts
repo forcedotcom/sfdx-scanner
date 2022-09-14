@@ -15,7 +15,7 @@ export class EventCreator extends AsyncCreatable {
 		this.initialized = true;
 	}
 
-	public createUxInfoAlwaysMessage(eventTemplateKey: string, args: string[]): void {
+	public async createUxInfoAlwaysMessage(eventTemplateKey: string, args: string[]): Promise<void> {
 		const event = {
 			messageKey: eventTemplateKey,
 			args: args,
@@ -24,6 +24,18 @@ export class EventCreator extends AsyncCreatable {
 			verbose: false,
 			time: Date.now()
 		};
-		this.outputProcessor.emitEvents([event]);
+		await this.outputProcessor.emitEvents([event]);
+	}
+
+	public async createUxErrorMessage(eventTemplateKey: string, args: string[]): Promise<void> {
+		const event = {
+			messageKey: eventTemplateKey,
+			args: args,
+			type: 'ERROR',
+			handler: 'UX',
+			verbose: false,
+			time: Date.now()
+		};
+		await this.outputProcessor.emitEvents([event]);
 	}
 }

@@ -42,20 +42,23 @@ export default class LocalCatalog implements RuleCatalog {
 	/**
 	 * Accepts a set of filter criteria, and returns the paths of all categories and rulesets matching those criteria.
 	 * @param {RuleFilter[]} filters
+	 * @param {RuleEngine[]} engines
 	 */
-	public getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
+	public async getRuleGroupsMatchingFilters(filters: RuleFilter[], engines: RuleEngine[]): Promise<RuleGroup[]> {
 		this.logger.trace(`Getting paths that match filters ${PrettyPrinter.stringifyRuleFilters(filters)}`);
 
 		// We only care about category and ruleset filters. If we didn't get any of those, we can implicitly include all
 		// rules. We do that by returning all categories, since every rule has a category.
 		if (!filters || filters.filter(isRuleGroupFilter).length === 0) {
-			return this.getAllCategoryPaths();
+			return this.getAllCategoryPaths(engines);
 		}
 		// If we actually do have filters, we'll want to iterate over all of them and see which ones
 		// correspond to a path in the catalog.
 		// Since categories and rulesets are both just RuleGroups, we can put both types of
 		// path into a single array and return that.
 		const foundRuleGroups: RuleGroup[] = [];
+		// To cut down on noise, we only want groups for engines that are actually eligible to run in this execution.
+		const engineNames: Set<string> = new Set(engines.map(e => e.getName()));
 		for (const filter of filters) {
 			// For now, we only care about filters that act on rulesets and categories.
 			if (isRuleGroupFilter(filter)) {
@@ -64,7 +67,7 @@ export default class LocalCatalog implements RuleCatalog {
 
 				// If there's a matching category/ruleset for the specified filter, we'll need to add all the
 				// corresponding paths to our list.
-				const filteredRuleGroups = ruleGroups.filter(rg => filter.matchesRuleGroup(rg));
+				const filteredRuleGroups = ruleGroups.filter(rg => filter.matchesRuleGroup(rg) && engineNames.has(rg.engine));
 				foundRuleGroups.push(...filteredRuleGroups);
 			}
 		}
@@ -85,13 +88,15 @@ export default class LocalCatalog implements RuleCatalog {
 		}
 	}
 
-	private getAllCategoryPaths(): RuleGroup[] {
-		// Since this method is run when no filter criteria are provided, it might be nice to provide a level of visibility
-		// into all of the categories that were run. So before returning the category paths, loop through them
-		// and emit events for each path.
-
+	private async getAllCategoryPaths(engines: RuleEngine[]): Promise<RuleGroup[]> {
+		// Since this method is run when no category/ruleset filter criteria are provided, it could be useful
+		// to provide a level of insight into what categories were automatically run.
 		const events: RuleEvent[] = [];
-		this.catalog.categories.forEach(cat => {
+		// In order to reduce unnecessary noise, filter categories by relevant engines.
+		const engineNames: Set<string> = new Set(engines.map(e => e.getName()));
+		const categories: RuleGroup[] = this.catalog.categories.filter(cat => engineNames.has(cat.engine));
+		// Loop through the categories for the eligible engines, and emit an event for each one.
+		categories.forEach(cat => {
 			events.push({
 				messageKey: 'info.categoryImplicitlyRun',
 				args: [cat.engine, cat.name],
@@ -102,8 +107,8 @@ export default class LocalCatalog implements RuleCatalog {
 			});
 		});
 
-		this.outputProcessor.emitEvents(events);
-		return this.catalog.categories;
+		await this.outputProcessor.emitEvents(events);
+		return categories;
 	}
 
 	private static getCatalogName(): string {

@@ -7,6 +7,7 @@ import { ENGINE, LANGUAGE } from '../../../src/Constants';
 import { Rule, RuleGroup } from '../../../src/types';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
 import { expect } from 'chai';
+import {Controller} from '../../../lib/Controller';
 
 TestOverrides.initializeTestSetup();
 
@@ -23,7 +24,10 @@ describe('LocalCatalog', () => {
 		Sinon.restore();
 	});
 
-	describe('getRuleGroupsMatchingFilters', () => {
+	describe('getRuleGroupsMatchingFilters', async () => {
+
+		const ENGINES = await Controller.getAllEngines();
+
 		const LANGUAGE_ECMASCRIPT = 'ecmascript';
 		/**
 		 * Return a map of key=<engine.name>:<ruleGroup.name>, value=RuleGroup
@@ -92,7 +96,7 @@ describe('LocalCatalog', () => {
 
 				// INVOCATION OF TESTED METHOD
 				// Use the created filter to filter the available rules.
-				const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 				// ASSERTIONS
 				// We expect a single ruleset, corresponding to PMD's "Braces" ruleset.
@@ -108,7 +112,7 @@ describe('LocalCatalog', () => {
 
 				// INVOCATION OF TESTED METHOD
 				// Use the created filter to filter the available rules.
-				const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 				// ASSERTIONS
 				// We expect two rulesets, corresponding to PMD's "Security" and "Braces" rulesets.
@@ -128,7 +132,7 @@ describe('LocalCatalog', () => {
 
 					// INVOCATION OF TESTED METHOD
 					// Use the created filter to filter the available rules.
-					const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+					const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 					// ASSERTIONS
 					// There should be three engines with the desired category: Eslint, eslint-typescript, and PMD.
@@ -146,7 +150,7 @@ describe('LocalCatalog', () => {
 
 					// INVOCATION OF TESTED METHOD
 					// Use the created filter to filter the available rules.
-					const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+					const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 					// ASSERTIONS
 					// ESLint and ESLint-typescript should have both categories. PMD should have only one.
@@ -166,7 +170,7 @@ describe('LocalCatalog', () => {
 
 					// INVOCATION OF TESTED METHOD
 					// Use the filter on our catalog.
-					const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+					const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 					// ASSERTIONS
 					// ESLint and ESLint-typescript should both have one category, and PMD should have two.
@@ -185,7 +189,7 @@ describe('LocalCatalog', () => {
 
 					// INVOCATION OF TESTED METHOD
 					// Use the filter on our catalog.
-					const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([filter]);
+					const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([filter], ENGINES);
 
 					// ASSERTIONS
 					// ESLint, ESLint-Typescript, and PMD should each have one category.
@@ -207,7 +211,7 @@ describe('LocalCatalog', () => {
 
 				// INVOCATION OF TESTED METHOD
 				// Use the created filters to filter the available rules.
-				const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([catFilter, engineFilter]);
+				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([catFilter, engineFilter], ENGINES);
 
 				// ASSERTIONS
 				// There should be three engines with the desired category: Eslint, eslint-typescript, and PMD.
@@ -221,13 +225,7 @@ describe('LocalCatalog', () => {
 		});
 
 		describe('Edge Cases', () => {
-			it('Returns all categories when given no filters', async () => {
-				// INVOCATION OF TESTED METHOD
-				// Apply a list of empty filters to the catalog.
-				const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([]);
-
-				// ASSERTIONS
-				// All categories for all engines should have been returned.
+			const validateRuleGroups = (ruleGroups: RuleGroup[]) => {
 				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(7);
 				const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
@@ -236,6 +234,16 @@ describe('LocalCatalog', () => {
 				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
 				validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
 				validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+			}
+
+			it('Returns all categories for eligible engines when given no filters', async () => {
+				// INVOCATION OF TESTED METHOD
+				// Apply a list of empty filters to the catalog.
+				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([], ENGINES);
+
+				// ASSERTIONS
+				// All categories for all engines should have been returned.
+				validateRuleGroups(ruleGroups);
 			});
 
 			it('Returns all categories when given only inapplicable filters', async () => {
@@ -245,19 +253,12 @@ describe('LocalCatalog', () => {
 
 				// INVOCATION OF TESTED METHOD
 				// Attempt to apply the inapplicable filter to the catalog.
-				const ruleGroups: RuleGroup[] = catalog.getRuleGroupsMatchingFilters([engineFilter]);
+				const ruleGroups: RuleGroup[] = await catalog.getRuleGroupsMatchingFilters([engineFilter], ENGINES);
 
 				// ASSERTIONS
 				// Inapplicable filters are skipped entirely, so we should get all categories as though we'd provided an
 				// empty list.
-				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(7);
-				const mappedRuleGroups = mapRuleGroups(ruleGroups);
-
-				validateEslintBestPractices(mappedRuleGroups);
-				validateEslintPossibleErrors(mappedRuleGroups);
-				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
-				validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+				validateRuleGroups(ruleGroups);
 			});
 		});
 	});

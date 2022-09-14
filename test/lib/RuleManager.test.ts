@@ -473,8 +473,8 @@ describe('RuleManager', () => {
 				throw new Error('Method not implemented.');
 			}
 
-			getRuleGroupsMatchingFilters(filters: RuleFilter[]): RuleGroup[] {
-				return [];
+			getRuleGroupsMatchingFilters(filters: RuleFilter[]): Promise<RuleGroup[]> {
+				return Promise.resolve([]);
 			}
 
 			getRulesMatchingFilters(filters: RuleFilter[]): Rule[] {

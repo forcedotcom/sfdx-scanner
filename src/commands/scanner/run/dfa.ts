@@ -94,6 +94,11 @@ export default class Dfa extends ScannerRunCommand {
 			description: messages.getMessage('flags.ignoreparseerrorsDescription'),
 			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
 			env: 'SFGE_IGNORE_PARSE_ERRORS'
+		}),
+		'sfgejvmargs': flags.string({
+			description: messages.getMessage('flags.sfgejvmargsDescription'),
+			longDescription: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
+			env: 'SFGE_JVM_ARGS'
 		})
 		// END: Config-overrideable engine flags.
 	};
@@ -140,6 +145,9 @@ export default class Dfa extends ScannerRunCommand {
 		}
 		if (this.flags['rule-thread-timeout'] != null) {
 			sfgeConfig.ruleThreadTimeout = this.flags['rule-thread-timeout'] as number;
+		}
+		if (this.flags['sfgejvmargs'] != null) {
+			sfgeConfig.jvmArgs = this.flags['sfgejvmargs'] as string;
 		}
 		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
 		if (this.flags['ignore-parse-errors'] != null) {

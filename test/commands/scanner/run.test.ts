@@ -705,7 +705,7 @@ describe('scanner:run', function () {
 		} catch (error) {
 			expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
 		}
-		
+
 		});
 	});
 
@@ -752,7 +752,14 @@ describe('scanner:run', function () {
 				// and the output accumulates each time, so the output on failure is not the true length of the output
 				// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
 				// there are five retries in addition to the initial run.
-				expect(implicitMessages || []).to.have.lengthOf(23, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
+				// The following categories are implicitly included:
+				// - 11 PMD categories
+				// - 3 ESLint categories
+				// - 3 ESLint-Typescript categories
+				// - 1 RetireJS category
+				// For a total of 18
+				expect(implicitMessages || []).to.have.lengthOf(18, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});
 	});

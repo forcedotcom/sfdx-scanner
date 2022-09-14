@@ -1,6 +1,7 @@
 package com.salesforce.rules;
 
 import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.cli.Result;
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.Schema;
@@ -8,10 +9,7 @@ import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,14 +27,14 @@ public abstract class AbstractRuleRunner {
         this.g = g;
     }
 
-    public List<Violation> runRules(List<AbstractRule> rules) {
+    public Result runRules(List<AbstractRule> rules) {
         return runRules(rules, new ArrayList<>());
     }
 
-    public List<Violation> runRules(List<AbstractRule> rules, List<RuleRunnerTarget> targets) {
-        Set<Violation> violations = new TreeSet<>();
+    public Result runRules(List<AbstractRule> rules, List<RuleRunnerTarget> targets) {
+        final Result result = new Result();
 
-        violations.addAll(
+        result.merge(
                 runStaticRules(
                         rules.stream()
                                 .filter(r -> r instanceof AbstractStaticRule)
@@ -44,7 +42,7 @@ public abstract class AbstractRuleRunner {
                                 .collect(Collectors.toList()),
                         targets));
 
-        violations.addAll(
+        result.merge(
                 runPathBasedRules(
                         rules.stream()
                                 .filter(r -> r instanceof AbstractPathBasedRule)
@@ -52,40 +50,45 @@ public abstract class AbstractRuleRunner {
                                 .collect(Collectors.toList()),
                         targets));
 
-        return new ArrayList<>(violations);
+        return result;
     }
 
-    private Set<Violation> runStaticRules(
-            List<AbstractStaticRule> rules, List<RuleRunnerTarget> targets) {
-        Set<Violation> allViolations = new HashSet<>();
+    private Result runStaticRules(List<AbstractStaticRule> rules, List<RuleRunnerTarget> targets) {
+        final Result result = new Result();
+
         if (rules.isEmpty()) {
-            return allViolations;
+            return result;
         }
 
-        for (AbstractStaticRule rule : rules) {
-            for (Violation violation : rule.run(g, targets)) {
-                // Violations aren't created with all of their properties filled in. Some properties
-                // must be populated
-                // using the rule that created them.
-                if (violation instanceof Violation.RuleViolation) {
-                    ((Violation.RuleViolation) violation).setPropertiesFromRule(rule);
+        try {
+            for (AbstractStaticRule rule : rules) {
+                for (Violation violation : rule.run(g, targets)) {
+                    // Violations aren't created with all of their properties filled in. Some
+                    // properties
+                    // must be populated
+                    // using the rule that created them.
+                    if (violation instanceof Violation.RuleViolation) {
+                        ((Violation.RuleViolation) violation).setPropertiesFromRule(rule);
+                    }
+                    result.addViolation(violation);
                 }
-                allViolations.add(violation);
             }
+        } catch (RuntimeException exception) {
+            result.addThrowable(exception);
         }
 
-        return allViolations;
+        return result;
     }
 
-    private Set<Violation> runPathBasedRules(
+    private Result runPathBasedRules(
             List<AbstractPathBasedRule> rules, List<RuleRunnerTarget> targets) {
         if (rules.isEmpty()) {
-            return new HashSet<>();
+            return new Result();
         }
         List<MethodVertex> pathEntryPoints = RuleUtil.getPathEntryPoints(g, targets);
         if (pathEntryPoints.isEmpty()) {
             LOGGER.info("No path-based entry points found");
-            return new HashSet<>();
+            return new Result();
         }
 
         // Let listener know that we have finished identifying entry points in target

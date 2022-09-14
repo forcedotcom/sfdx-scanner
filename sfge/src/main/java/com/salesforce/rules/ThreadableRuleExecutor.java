@@ -1,5 +1,6 @@
 package com.salesforce.rules;
 
+import com.salesforce.cli.Result;
 import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.graph.JustInTimeGraphProvider;
@@ -32,44 +33,55 @@ public class ThreadableRuleExecutor {
     /** This many threads can be running path-based rules at the same time. */
     private static final int THREAD_COUNT = SfgeConfigProvider.get().getRuleThreadCount();
 
-    public static Set<Violation> run(List<ThreadableRuleSubmission> submissions) {
-        // Create a threadpool and a completion service to monitor it.
-        ExecutorService pool = Executors.newWorkStealingPool(THREAD_COUNT);
-        CompletionService<Set<Violation>> completionService = new ExecutorCompletionService(pool);
+    public static Result run(List<ThreadableRuleSubmission> submissions) {
+        // Holder for the results generated
+        Result result = new Result();
 
-        // Submit an appropriate amount of callables into the completion service.
-        int submissionCount = submitRunners(completionService, submissions);
+        try {
+            // Create a threadpool and a completion service to monitor it.
+            ExecutorService pool = Executors.newWorkStealingPool(THREAD_COUNT);
+            CompletionService<Set<Violation>> completionService =
+                    new ExecutorCompletionService(pool);
 
-        // Create an array of results, and add the results into their slots as they come in.
-        Set<Violation> allViolations = new TreeSet<>();
-        int completedCount = 0;
-        while (completedCount < submissionCount) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Beginning wait #" + (completedCount + 1));
+            // Submit an appropriate amount of callables into the completion service.
+            int submissionCount = submitRunners(completionService, submissions);
+
+            int completedCount = 0;
+            while (completedCount < submissionCount) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Beginning wait #" + (completedCount + 1));
+                }
+                // Get the next set of results.
+                Set<Violation> violations = waitForCallable(completionService);
+                int priorSize = result.getViolations().size();
+                result.addViolations(violations);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(
+                            "Wait #"
+                                    + (completedCount + 1)
+                                    + " finished, adding "
+                                    + (result.getViolations().size() - priorSize)
+                                    + " new entries");
+                }
+                completedCount += 1;
             }
-            // Get the next set of results.
-            Set<Violation> violations = waitForCallable(completionService);
-            int priorSize = allViolations.size();
-            allViolations.addAll(violations);
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
-                        "Wait #"
-                                + (completedCount + 1)
-                                + " finished, adding "
-                                + (allViolations.size() - priorSize)
-                                + " new entries");
+                LOGGER.info("Finishing waiting for futures");
+                LOGGER.info("Shutting down");
             }
-            completedCount += 1;
+            pool.shutdown();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Finished shutdown");
+            }
+        } catch (Throwable throwable) {
+            result.addThrowable(throwable);
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("Error while running rules", throwable);
+            }
+        } finally {
+            // No matter what happened, salvage the results collected so far
+            return result;
         }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Finishing waiting for futures");
-            LOGGER.info("Shutting down");
-        }
-        pool.shutdown();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Finished shutdown");
-        }
-        return allViolations;
     }
 
     /**

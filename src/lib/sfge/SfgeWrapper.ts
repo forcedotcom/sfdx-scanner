@@ -5,7 +5,7 @@ import {Controller} from '../../Controller';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
-import {CommandLineSupport, CommandLineResultHandler, ResultHandlerArgs} from '../services/CommandLineSupport';
+import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
 
@@ -32,6 +32,7 @@ interface SfgeWrapperOptions {
 	command: string;
 	rules: Rule[];
 	spinnerManager: SpinnerManager;
+	jvmArgs?: string,
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ignoreParseErrors?: boolean;
@@ -87,6 +88,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	private rules: Rule[];
 	private logFilePath: string;
 	private spinnerManager: SpinnerManager;
+	private jvmArgs: string;
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
 	private ignoreParseErrors: boolean;
@@ -98,6 +100,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.command = options.command;
 		this.rules = options.rules;
 		this.spinnerManager = options.spinnerManager;
+		this.jvmArgs = options.jvmArgs;
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
 		this.ignoreParseErrors = options.ignoreParseErrors;
@@ -128,8 +131,18 @@ export class SfgeWrapper extends CommandLineSupport {
 		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
 	}
 
+	/**
+	 * While handling unsuccessful executions, include stdout 
+	 * and stderr information.
+	 * @param args contains information on the outcome of execution
+	 */
 	protected handleResults(args: ResultHandlerArgs) {
-		new CommandLineResultHandler().handleResults(args);
+		if (args.isSuccess) {
+			args.res(args.stdout);
+		} else {
+			// Pass in both stdout and stderr so that results can be salvaged
+			args.rej(args.stdout + ' ' + args.stderr);
+		}
 	}
 
 	/**
@@ -154,6 +167,9 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.logger.trace(`Rules to be executed: ${JSON.stringify(inputObject.rulesToRun)}`);
 
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
+		if (this.jvmArgs != null) {
+			args.push(this.jvmArgs);
+		}
 		if (this.ruleThreadCount != null) {
 			args.push(`-DSFGE_RULE_THREAD_COUNT=${this.ruleThreadCount}`);
 		}
@@ -223,6 +239,7 @@ export class SfgeWrapper extends CommandLineSupport {
 			rules: rules,
 			// Running rules could take quite a while, so we should use a functional spinner.
 			spinnerManager: await SfgeSpinnerManager.create({}),
+			jvmArgs: sfgeConfig.jvmArgs,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
 			ignoreParseErrors: sfgeConfig.ignoreParseErrors
