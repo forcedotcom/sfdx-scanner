@@ -1,7 +1,7 @@
 package com.salesforce.exception;
 
 /** Indicates a programming logic error, such as an item being initialized more than once. */
-public class ProgrammingException extends SfgeRuntimeException {
+public final class ProgrammingException extends SfgeRuntimeException {
     public ProgrammingException(String message) {
         super(message);
     }

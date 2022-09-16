@@ -12,7 +12,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  * Thrown when an AST related assumption is violated. Some code still uses this where a {@link
  * TodoException} is more appropriate.
  */
-public class UnexpectedException extends SfgeRuntimeException {
+public final class UnexpectedException extends SfgeRuntimeException {
     public UnexpectedException(Object obj) {
         super(obj != null ? obj.toString() : "<null>");
     }

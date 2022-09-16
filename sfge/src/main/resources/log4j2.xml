@@ -3,7 +3,7 @@
 	<!-- status = The level of internal Log4j events that should be logged to the console. -->
     <Appenders>
 		<CliMessagerAppender name="LogToCliMessager">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %m%n"/>
+			<PatternLayout pattern="%c{1}:%L %m%n"/>
 		</CliMessagerAppender>
         <Console name="LogToConsole" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %X{ruleRunId} %-5p %c{1}:%L - %m%n"/>

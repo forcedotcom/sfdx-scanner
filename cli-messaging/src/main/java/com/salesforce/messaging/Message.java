@@ -57,6 +57,7 @@ public class Message {
 	}
 
 	enum MessageType {
+        TELEMETRY,
 		INFO,
 		WARNING,
 		ERROR
