@@ -129,7 +129,7 @@ public final class JorjeUtil {
         }
     }
 
-    public static class JorjeCompilationException extends SfgeRuntimeException {
+    public static final class JorjeCompilationException extends SfgeRuntimeException {
         JorjeCompilationException(String message) {
             super(message);
         }

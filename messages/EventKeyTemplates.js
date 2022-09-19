@@ -15,7 +15,8 @@ module.exports = {
 		"sfgeFinishedBuildingGraph": "Added all compilation units to graph.",
 		"sfgePathEntryPointsIdentified": "Identified %s path entry point(s).",
 		"sfgeViolationsInPathProgress": "Detected %s violation(s) from %s path(s) on %s/%s entry point(s).",
-		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s)."
+		"sfgeCompletedPathAnalysis": "Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s).",
+		"telemetry": "This message is unused."
 	},
 	"warning": {
 		"invalidCategorySkipped": "Cataloger: Skipping invalid PMD Category file '%s'.",

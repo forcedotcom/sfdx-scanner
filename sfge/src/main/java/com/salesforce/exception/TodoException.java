@@ -1,6 +1,6 @@
 package com.salesforce.exception;
 
-public class TodoException extends SfgeRuntimeException {
+public final class TodoException extends SfgeRuntimeException {
     public TodoException() {
         this("TODO");
     }

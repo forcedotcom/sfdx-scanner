@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
  * <p>The ApexValue can be null because it is a real bug in the code, or it could be that the org is
  * setup in such a way that what we interpret as a null condition will never happen in practice.
  */
-public class NullValueAccessedException extends ApexPathExpanderRuntimeException {
+public final class NullValueAccessedException extends ApexPathExpanderRuntimeException {
     private final ApexValue<?> apexValue;
     private final MethodCallExpressionVertex vertex;
 
@@ -22,6 +22,7 @@ public class NullValueAccessedException extends ApexPathExpanderRuntimeException
      */
     public NullValueAccessedException(
             ApexValue<?> apexValue, @Nullable MethodCallExpressionVertex vertex) {
+        super("ApexValue=" + apexValue + ", vertex=" + (vertex != null ? vertex : "<null>"));
         this.apexValue = apexValue;
         this.vertex = vertex;
     }
