@@ -3,7 +3,6 @@ package com.salesforce;
 import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
-import com.salesforce.telemetry.TelemetryUtil;
 import java.io.Serializable;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Appender;
@@ -64,14 +63,9 @@ public class CliMessagerAppender extends AbstractAppender {
     public void append(LogEvent event) {
         Level level = event.getLevel();
         if (Level.WARN.equals(level)) {
-            String eventMessage = getEventMessage(event);
-            if (eventMessage.toLowerCase().startsWith("todo:")) {
-                TelemetryUtil.postWarningTelemetry(
-                        this.getLayout().toSerializable(event).toString());
-            }
             if (this.shouldLogWarningsOnVerbose) {
                 CliMessager.postMessage(
-                        "SFGE Warning as Info", EventKey.INFO_GENERAL, eventMessage);
+                        "SFGE Warning as Info", EventKey.INFO_GENERAL, getEventMessage(event));
             }
         } else if (Level.ERROR.equals(level)) {
             CliMessager.postMessage(

@@ -1,10 +1,12 @@
 package com.salesforce.telemetry;
 
 import com.google.gson.Gson;
+import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 public final class TelemetryUtil {
     private static final String MAIN_THREAD_NAME = "main";
@@ -13,27 +15,45 @@ public final class TelemetryUtil {
      * Posts a telemetry event in response to a {@link org.apache.logging.log4j.Logger#warn} call.
      *
      * @param message - The message being logged.
+     * @param cause - The exception attached to the log, if available.
      */
-    public static void postWarningTelemetry(String message) {
+    public static void postWarningTelemetry(String message, @Nullable Throwable cause) {
         EventType eventType =
                 isMainThread() ? EventType.MAIN_THREAD_WARNING : EventType.RULE_THREAD_WARNING;
-        postTelemetry(message, eventType);
+        StackTraceElement[] trace =
+                cause == null ? Thread.currentThread().getStackTrace() : cause.getStackTrace();
+        postTelemetry(message, trace, eventType);
     }
 
     /**
      * Posts a telemetry event in response to an {@link
      * com.salesforce.exception.SfgeRuntimeException} being thrown.
      *
-     * @param message - The exception's message, if available.
+     * @param runtimeException - The exception being thrown.
      */
-    public static void postExceptionTelemetry(String message) {
-        EventType eventType =
-                isMainThread() ? EventType.MAIN_THREAD_EXCEPTION : EventType.RULE_THREAD_EXCEPTION;
-        postTelemetry(message, eventType);
+    public static void postExceptionTelemetry(SfgeRuntimeException runtimeException) {
+        postExceptionTelemetry(runtimeException, null);
     }
 
-    private static void postTelemetry(String message, EventType eventType) {
-        TelemetryData telemetryData = new TelemetryData(message, eventType);
+    /**
+     * Posts a telemetry event in response to an {@link
+     * com.salesforce.exception.SfgeRuntimeException} being thrown.
+     *
+     * @param runtimeException - The exception being thrown.
+     * @param cause - The exception that caused the runtimeException, if available.
+     */
+    public static void postExceptionTelemetry(
+            SfgeRuntimeException runtimeException, @Nullable Throwable cause) {
+        EventType eventType =
+                isMainThread() ? EventType.MAIN_THREAD_EXCEPTION : EventType.RULE_THREAD_EXCEPTION;
+        StackTraceElement[] trace =
+                cause == null ? runtimeException.getStackTrace() : cause.getStackTrace();
+        postTelemetry(runtimeException.getMessage(), trace, eventType);
+    }
+
+    private static void postTelemetry(
+            String message, StackTraceElement[] trace, EventType eventType) {
+        TelemetryData telemetryData = new TelemetryData(message, trace, eventType);
         CliMessager.postMessage(
                 "TelemetryData", EventKey.INFO_TELEMETRY, new Gson().toJson(telemetryData));
     }
@@ -54,18 +74,15 @@ public final class TelemetryUtil {
         private final EventType eventType;
         private final String stackTrace;
 
-        public TelemetryData(String message, EventType eventType) {
+        public TelemetryData(String message, StackTraceElement[] trace, EventType eventType) {
             this.message = message;
             this.eventType = eventType;
-            StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
             this.stackTrace =
-                    Arrays.stream(stackTraceElements)
-                            // We want five-ish stack frames of meaningful context, and the first
-                            // two
-                            // frames are always going to be this constructor and one of the
-                            // TelemetryUtil methods (which aren't terribly meaningful). So we'll
-                            // get the first seven stack frames.
-                            .limit(7)
+                    Arrays.stream(trace)
+                            // We want five-ish stack frames of meaningful context, and it's
+                            // possible for the first frame to just be a TelemetryUtil method.
+                            // So we'll get the first six frames.
+                            .limit(6)
                             .map(StackTraceElement::toString)
                             .collect(Collectors.joining("\n"));
         }

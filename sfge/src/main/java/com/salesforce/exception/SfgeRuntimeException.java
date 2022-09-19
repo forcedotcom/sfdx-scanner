@@ -5,26 +5,21 @@ import com.salesforce.telemetry.TelemetryUtil;
 public abstract class SfgeRuntimeException extends RuntimeException {
     public SfgeRuntimeException() {
         super();
-        TelemetryUtil.postExceptionTelemetry(
-                this.getClass().getSimpleName() + ": No message available");
+        TelemetryUtil.postExceptionTelemetry(this);
     }
 
     public SfgeRuntimeException(Throwable cause) {
         super(cause);
-        String telemetryMessage =
-                String.format("%s: %s", this.getClass().getSimpleName(), cause.getMessage());
-        TelemetryUtil.postExceptionTelemetry(telemetryMessage);
+        TelemetryUtil.postExceptionTelemetry(this, cause);
     }
 
     public SfgeRuntimeException(String msg) {
         super(msg);
-        String telemetryMessage = String.format("%s: %s", this.getClass().getSimpleName(), msg);
-        TelemetryUtil.postExceptionTelemetry(telemetryMessage);
+        TelemetryUtil.postExceptionTelemetry(this);
     }
 
     public SfgeRuntimeException(String msg, Throwable cause) {
         super(msg, cause);
-        String telemetryMessage = String.format("%s: %s", this.getClass().getSimpleName(), msg);
-        TelemetryUtil.postExceptionTelemetry(telemetryMessage);
+        TelemetryUtil.postExceptionTelemetry(this, cause);
     }
 }

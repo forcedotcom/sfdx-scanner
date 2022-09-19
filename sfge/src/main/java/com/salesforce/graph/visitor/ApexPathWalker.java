@@ -274,7 +274,8 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
         private final ThrowStatementVertex vertex;
 
         private ThrowStatementVertexVisitedException(ThrowStatementVertex vertex) {
-            super(vertex.toString());
+            // NOTE: We're very deliberately NOT calling `super()` here, since this
+            // exception type doesn't require telemetry.
             this.vertex = vertex;
         }
     }

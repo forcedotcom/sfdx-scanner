@@ -3,8 +3,11 @@
 	<!-- status = The level of internal Log4j events that should be logged to the console. -->
     <Appenders>
 		<CliMessagerAppender name="LogToCliMessager">
-			<PatternLayout pattern="%c{1}:%L %m%n"/>
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %m%n"/>
 		</CliMessagerAppender>
+		<TelemetryAppender name="LogToTelemetry">
+			<PatternLayout pattern="%c{1}:%L %m%n"/>
+		</TelemetryAppender>
         <Console name="LogToConsole" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %X{ruleRunId} %-5p %c{1}:%L - %m%n"/>
         </Console>
@@ -22,6 +25,7 @@
         <Logger name="com.salesforce" level="WARN" additivity="false">
             <AppenderRef ref="LogToFile"/>
 			<AppenderRef ref="LogToCliMessager"/>
+			<AppenderRef ref="LogToTelemetry"/>
         </Logger>
 		<Logger name="com.salesforce.graph.ops.expander.ApexPathExpanderUtil" level="WARN" additivity="false">
 			<AppenderRef ref="LogToFile"/>
@@ -49,6 +53,7 @@
             <AppenderRef ref="LogToFile"/>
             <AppenderRef ref="LogToConsole"/>
 			<AppenderRef ref="LogToCliMessager"/>
+			<AppenderRef ref="LogToTelemetry"/>
         </Root>
     </Loggers>
 </Configuration>
