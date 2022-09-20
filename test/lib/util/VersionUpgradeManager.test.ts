@@ -1,8 +1,14 @@
 import {expect} from 'chai';
+import Sinon = require('sinon');
 import {VersionUpgradeError, VersionUpgradeManager} from '../../../src/lib/util/VersionUpgradeManager';
 import {ConfigContent} from '../../../src/lib/util/Config';
 import {ENGINE} from '../../../src/Constants';
 import {RetireJsEngine} from '../../../src/lib/retire-js/RetireJsEngine';
+import {FileHandler} from '../../../src/lib/util/FileHandler';
+import {deepCopy} from '../../../src/lib/util/Utils';
+import * as TestOverrides from '../../test-related-lib/TestOverrides';
+
+TestOverrides.initializeTestSetup();
 
 const v2_6_0 = 'v2.6.0';
 const v2_6_1 = 'v2.6.1';
@@ -230,6 +236,98 @@ describe('VersionUpgradeManager', () => {
 				expect(spoofedConfigWithNonNull.engines[0].disabled).to.equal(false, 'true RetireJS disabled value should have been turned to false');
 				expect(spoofedConfigWithNonNull.engines[1].disabled).to.equal(true, 'true PMD disabled value should be left alone');
 			});
-		})
-	})
+		});
+
+		describe('v3.6.0', () => {
+			// Spoof a config to use as a fake GA config.
+			const spoofedConfig: ConfigContent = {
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns:['**/beep/*.js'],
+					disabled: false
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.beep'],
+					disabled: false
+				}]
+			};
+			// Spoof another config to use as a fake pilot config.
+			const spoofedPilotConfig: ConfigContent = {
+				// Hardcode the version to a value falling within the pilot window.
+				currentVersion: '3.4.0',
+				engines: [{
+					name: ENGINE.RETIRE_JS,
+					targetPatterns:['some/distinctive/filter/criteria/*.js'],
+					disabled: true
+				}, {
+					name: ENGINE.PMD,
+					targetPatterns: ['more/distinctive/filtering/*.cls'],
+					disabled: true
+				}]
+			};
+
+			// The tests will be creating some number of Sinon stubs.
+			// Those need to be cleaned up afterwards, for safety.
+			afterEach(() => {
+				Sinon.restore();
+			});
+
+			it("GA config is overwritten by more recent pilot config", async () => {
+				// Create stubs to pretend that the pilot config exists.
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+				Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(spoofedPilotConfig));
+
+				// Make a copy of the base GA config, and set its currentVersion to a value
+				// that predates the v3.x pilot.
+				const clonedConfig: ConfigContent = deepCopy(spoofedConfig);
+				clonedConfig.currentVersion = 'v2.13.9';
+
+				// INVOCATION OF TESTED METHOD
+				const testManagerAsAny = new VersionUpgradeManager() as any;
+				await testManagerAsAny.upgrade(clonedConfig, clonedConfig.currentVersion, 'v3.6.0');
+
+				// VALIDATIONS
+				// The `engines` attribute of the config should be replaced with that of the pilot.
+				expect(JSON.stringify(clonedConfig.engines)).to.equal(JSON.stringify(spoofedPilotConfig.engines));
+				expect(clonedConfig.currentVersion).to.equal('v3.6.0');
+			});
+
+
+			it("GA config is not overwritten by less recent pilot config", async () => {
+				// Create stubs to pretend that the pilot config exists.
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+				Sinon.stub(FileHandler.prototype, 'readFile').resolves(JSON.stringify(spoofedPilotConfig));
+
+				// Make a copy of the base GA config, and set its currentVersion to a value
+				// that post-dates the pilot config's.
+				const clonedConfig: ConfigContent = deepCopy(spoofedConfig);
+				clonedConfig.currentVersion = 'v3.5.0';
+
+				// INVOCATION OF TESTED METHOD
+				const testManagerAsAny = new VersionUpgradeManager() as any;
+				await testManagerAsAny.upgrade(clonedConfig, clonedConfig.currentVersion, 'v3.6.0');
+
+				// VALIDATIONS
+				// The `engines` attribute of the config should be unchanged.
+				expect(JSON.stringify(clonedConfig.engines)).to.equal(JSON.stringify(spoofedConfig.engines));
+				expect(clonedConfig.currentVersion).to.equal('v3.6.0');
+			});
+
+			it("Non-existing pilot config causes no issues", async () => {
+				// We want to pretend that no pilot config exists.
+				Sinon.stub(FileHandler.prototype, 'exists').resolves(false);
+
+				// Make a copy of the base GA config and attempt to upgrade it.
+				const clonedConfig: ConfigContent = deepCopy(spoofedConfig);
+				// INVOCATION OF TESTED METHOD
+				const testManagerAsAny = new VersionUpgradeManager() as any;
+				await testManagerAsAny.upgrade(clonedConfig, 'v2.13.1', 'v3.6.0');
+
+				// VALIDATION
+				// The engines should be unchanged.
+				expect(JSON.stringify(clonedConfig.engines)).to.equal(JSON.stringify(spoofedConfig.engines));
+				expect(clonedConfig.currentVersion).to.equal('v3.6.0');
+			});
+		});
+	});
 });

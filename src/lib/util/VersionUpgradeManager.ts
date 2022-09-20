@@ -1,10 +1,13 @@
 // ================ IMPORTS ===================
 import semver = require('semver');
 import {Messages} from '@salesforce/core';
+import path = require('path');
 import {ConfigContent, EngineConfigContent} from './Config';
-import {ENGINE} from '../../Constants';
+import {ENGINE, CONFIG_PILOT_FILE} from '../../Constants';
 import {RetireJsEngine} from '../retire-js/RetireJsEngine';
 import {deepCopy} from './Utils';
+import {FileHandler} from './FileHandler';
+import { Controller } from '../../Controller';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -43,6 +46,23 @@ upgradeScriptsByVersion.set('v3.0.0', (config: ConfigContent): Promise<void> => 
 	}
 	return Promise.resolve();
 });
+upgradeScriptsByVersion.set('v3.6.0', async (config: ConfigContent): Promise<void> => {
+	// v3.6.0 is the first v3.x version that's GA instead of a pilot release.
+	// To provide pilot users with a continuity of behavior, we want to overwrite
+	// the existing GA config with the pilot config, if one exists and it is deemed
+	// appropriate to do so.
+	const fh: FileHandler = new FileHandler();
+	const pilotConfigPath = path.join(Controller.getSfdxScannerPath(), CONFIG_PILOT_FILE);
+	if (await fh.exists(pilotConfigPath)) {
+		// If the pilot config exists, read it in.
+		const pilotConfig: ConfigContent = JSON.parse(await fh.readFile(pilotConfigPath)) as ConfigContent;
+		// If the pilot config is for a later plug-in version than the current GA config, replace
+		// the GA config's `engines` property with that of the pilot config.
+		if (!config.currentVersion || semver.lt(config.currentVersion, pilotConfig.currentVersion)) {
+			config.engines = pilotConfig.engines;
+		}
+	}
+});
 
 
 // ================ CLASSES =====================
@@ -73,6 +93,18 @@ export class VersionUpgradeManager {
 
 	public upgradeRequired(configVersion: string): boolean {
 		return !configVersion || (semver.lt(configVersion, this.currentVersion));
+	}
+
+	/**
+	 * Depending on what version we're upgrading from, we may want to force the creation
+	 * of a back-up config, instead of only creating one in response to failure.
+	 * This method indicates whether that's the case.
+	 * @param configVersion
+	 * @returns true if a back-up should always be created, else false
+	 */
+	public versionNecessitatesBackup(configVersion: string): boolean {
+		// Always back up config from previous major versions.
+		return !configVersion || (semver.major(configVersion) < semver.major(this.currentVersion));
 	}
 
 	private getVersionsBetween(fromVersion: string, toVersion: string): string[] {

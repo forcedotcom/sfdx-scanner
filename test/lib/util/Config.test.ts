@@ -11,6 +11,7 @@ import {VersionUpgradeManager, VersionUpgradeError} from '../../../src/lib/util/
 import { Controller } from '../../../src/Controller';
 import {deepCopy} from '../../../src/lib/util/Utils';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import { uxEvents, EVENTS } from '../../../src/lib/ScannerEvents';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -50,7 +51,7 @@ const BASE_CONFIG_GA = {
 		"disabled": false
 	}],
 	"javaHome": "/my/test/java/home",
-	"currentVersion": '2.13.1'
+	"currentVersion": PACKAGE_VERSION
 };
 const BASE_CONFIG_PILOT = {
 	"engines": [{
@@ -68,7 +69,7 @@ const BASE_CONFIG_PILOT = {
 		"disabled": false
 	}],
 	"javaHome": "/my/test/java/home",
-	"currentVersion": PACKAGE_VERSION
+	"currentVersion": '3.4.0'
 };
 const SINON_SETUP_FUNCTIONS = {
 	NO_EXISTING_CONFIGS: (): StubsCollection => {
@@ -92,6 +93,25 @@ const SINON_SETUP_FUNCTIONS = {
 		const existsStub = Sinon.stub(FileHandler.prototype, 'exists');
 		existsStub.withArgs(CONFIG_PATH).resolves(true);
 		existsStub.withArgs(CONFIG_PILOT_PATH).resolves(false);
+		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
+		// testing if they return different objects.
+		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
+		readFileStub.withArgs(CONFIG_PATH).resolves(JSON.stringify(BASE_CONFIG_GA));
+		readFileStub.withArgs(CONFIG_PILOT_PATH).resolves(JSON.stringify(BASE_CONFIG_PILOT));
+		return {
+			existsStub,
+			// The mkdir stub should just resolve, as though it created a directory without problems.
+			mkDirStub: Sinon.stub(FileHandler.prototype, 'mkdirIfNotExists').resolves(),
+			readFileStub,
+			// The writeFile stub should just resolve, as though the file was written without issue.
+			writeFileStub: Sinon.stub(FileHandler.prototype, 'writeFile').resolves()
+		};
+	},
+	PILOT_CONFIG_ONLY: (): StubsCollection => {
+		// The existsStub should say that the pilot config exists, and the GA doesn't.
+		const existsStub = Sinon.stub(FileHandler.prototype, 'exists');
+		existsStub.withArgs(CONFIG_PATH).resolves(false);
+		existsStub.withArgs(CONFIG_PILOT_PATH).resolves(true);
 		// The readFileStub should return the appropriate config for the specified path, because it's helpful for
 		// testing if they return different objects.
 		const readFileStub = Sinon.stub(FileHandler.prototype, 'readFile');
@@ -146,12 +166,12 @@ const SINON_SETUP_FUNCTIONS = {
 
 
 describe('Config.ts', () => {
-	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_PILOT_FILE);
+	const configFilePath = path.resolve(SFDX_SCANNER_PATH, CONFIG_FILE);
 	let testConfig: ConfigContent = null;
 
 	beforeEach(() => {
 		// Before each test, reset the testConfig to a known good state.
-		testConfig = deepCopy(BASE_CONFIG_PILOT);
+		testConfig = deepCopy(BASE_CONFIG_GA);
 	});
 
 	// Most (if not all) of these tests will be creating some number of Sinon stubs. After each test, the stubs should
@@ -161,7 +181,7 @@ describe('Config.ts', () => {
 	});
 	describe('Methods', () => {
 		describe('#init()', () => {
-			it('When neither GA nor pilot configs exist, both are created', async () => {
+			it('When neither GA nor pilot configs exist only the GA config is created', async () => {
 				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.NO_EXISTING_CONFIGS();
 				const config = new Config();
 
@@ -172,13 +192,35 @@ describe('Config.ts', () => {
 				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
 				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'GA config should not have been created');
-				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config should have been created');
-				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be pilot version');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config SHOULD be created');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'pilot config SHOULD NOT be created');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be GA version');
 			});
 
-			it('When only GA config exists, pilot config file is copied from that', async () => {
+			it('When only GA config exists, no pilot file is created', async () => {
 				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.GA_CONFIG_ONLY();
+				const config = new Config();
+
+				// INVOCATION OF TESTED METHOD
+				await config.init();
+
+				// ASSERTIONS
+				// Since we have a GA config, we don't even need to check for the pilot config, so we shouldn't be doing that.
+				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'pilot config existence check unexpectedly occurred');
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
+				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(false, 'Scanner path directory creation unexpectedly attempted');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'GA config SHOULD NOT be written to, because it already exists');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Pilot config SHOULD NOT be created, because GA does not use it');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be GA version');
+			});
+
+			it('When only pilot config exists, GA config file is copied from that', async () => {
+				let warnings: string = '';
+				uxEvents.on(EVENTS.WARNING_ALWAYS, (msg) => {
+					// Concatenate this message onto the ones we've already gotten.
+					warnings = `${warnings}\n${msg}`;
+				});
+				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.PILOT_CONFIG_ONLY();
 				const config = new Config();
 
 				// INVOCATION OF TESTED METHOD
@@ -188,9 +230,11 @@ describe('Config.ts', () => {
 				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
 				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
 				expect(mkDirStub.calledWith(SFDX_SCANNER_PATH)).to.equal(true, 'Scanner path directory should have been created');
-				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'GA config should not have been written to');
-				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config should have been created');
-				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be pilot version');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config SHOULD be created');
+				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Pilot config SHOULD NOT be written to, because it already exists');
+				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be GA version');
+				const expectedWarning = configMessages.getMessage("GeneratingConfigFromPilot", [CONFIG_PILOT_PATH]);
+				expect(warnings).to.contain(expectedWarning, 'Warning about pilot config usage should be thrown');
 			});
 
 			it('Initializes using existing config file if available', async () => {
@@ -202,8 +246,10 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(true, 'pilot config existence check unexpectedly skipped');
-				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(false, 'since pilot config exists, GA existence check should not have occurred');
+				// Since we already have a config, only the creation check for the GA config should have occurred.
+				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
+				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'pilot config existence check unexpectedly occurred');
+				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'Since GA config exists, it should not be modified during initialization');
 				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Since pilot config exists, it should not have been modified during initialization');
 				const javaHome = config.getJavaHome();
 				expect(javaHome).to.equal(testConfig.javaHome, 'Should have used spoofed config');
@@ -239,7 +285,7 @@ describe('Config.ts', () => {
 				expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 				expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'Results of upgrade should be persisted');
 				expect(writeFileStub.callCount).to.equal(1, 'Only one file should be written');
-				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_PILOT_PATH, 'Should have written to the config');
+				expect(writeFileStub.getCall(0).args[0]).to.equal(CONFIG_PATH, 'Should have written to the config');
 			});
 
 			it('Persists partial upgrades', async () => {
@@ -259,8 +305,8 @@ describe('Config.ts', () => {
 					expect(upgradeToLatestStub.callCount).to.equal(1, 'Upgrade should be attempted once');
 					expect(writeFileStub.calledAfter(upgradeToLatestStub)).to.equal(true, 'File persistence should be attempted');
 					expect(writeFileStub.callCount).to.equal(2, 'Two file writes should be attempted');
-					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_PILOT_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
-					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_PILOT_PATH, 'Should have written partial upgrade second');
+					expect(writeFileStub.getCall(0).args[0]).to.equal(`${CONFIG_PATH}.${PACKAGE_VERSION}.bak`, 'Should have written a backup file first');
+					expect(writeFileStub.getCall(1).args[0]).to.equal(CONFIG_PATH, 'Should have written partial upgrade second');
 				}
 			});
 
