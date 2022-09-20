@@ -181,7 +181,7 @@ describe('Config.ts', () => {
 	});
 	describe('Methods', () => {
 		describe('#init()', () => {
-			it('When neither GA nor pilot configs exist only the GA config is created', async () => {
+			it('When neither GA nor pilot configs exist, only the GA config is created', async () => {
 				const {existsStub, mkDirStub, writeFileStub} = SINON_SETUP_FUNCTIONS.NO_EXISTING_CONFIGS();
 				const config = new Config();
 
@@ -246,7 +246,7 @@ describe('Config.ts', () => {
 				await config.init();
 
 				// ASSERTIONS
-				// Since we already have a config, only the creation check for the GA config should have occurred.
+				// Since we already have a config, only the existence check for the GA config should have occurred.
 				expect(existsStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config existence check unexpectedly skipped');
 				expect(existsStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'pilot config existence check unexpectedly occurred');
 				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(false, 'Since GA config exists, it should not be modified during initialization');
