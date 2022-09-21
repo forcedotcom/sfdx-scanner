@@ -50,4 +50,4 @@ To report Code Analyzer issues, create a [bug on GitHub](https://github.com/forc
 - [Github Repository](https://github.com/forcedotcom/sfdx-scanner)
 - [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup)
 - [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev)
-- Trailhead: [Get Started with Salesforce DX](https://trailhead.salesforce.com/trails/sfdx_get_started)
+- [Trailhead: Get Started with Salesforce DX](https://trailhead.salesforce.com/trails/sfdx_get_started)
