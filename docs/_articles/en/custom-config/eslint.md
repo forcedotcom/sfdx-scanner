@@ -3,51 +3,52 @@ title: ESLint Custom Configuration
 lang: en
 ---
 
-## Introduction
+## ESLint Custom Configuration
 
-If you are a Scanner plugin user who is already experienced with Eslint, you may feel restricted by the default Eslint flavors that Scanner plugin offer. Now you can use your own customized `.eslintrc.json` file with the Scanner plugin to bring in the power of any eslint capabilities that are not supported by default. This gives you the flexibility to use different parsers or plugins, and lets you define your custom set of rules. You can find more information about Eslint's configuration [here](https://eslint.org/docs/user-guide/configuring).
+To bring in the power of any ESLint capabilities that aren’t supported by default in Salesforce Code Analyzer (Code Analyzer), use your own customized ```.eslintrc.json```. You have the flexibility to use different parsers or plug-ins, and you can define your own custom ESLint ruleset. 
 
-To invoke this feature, pass in the file path to your config file as a value to `--eslintconfig` flag in `scanner:run` command.
+To invoke a customized ESLint file, pass in your config file filepath as a value to ```--eslintconfig``` flag in ```scanner:run command```. 
 
-```bash
-$ sfdx scanner:run --target "/path/to/your/target" --eslintconfig "/path/to/.eslintrc.json"
-```
+For example:
 
-However, while giving you the power, the Scanner also offloads some responsibilities to you. Please read the following sections fully before attempting to use custom configuration with Eslint through the Scanner.
+```$ sfdx scanner:run --target "/path/to/your/target" --eslintconfig "/path/to/.eslintrc.json"```
 
-## Users' Responsibilities
+## Your ESLint Custom Configuration Responsibilities
 
-1. **IMPORTANT:** Make sure that you have all the NPM dependencies installed (including Eslint) in the directory where you run the `scanner:run` command.
+Before setting up your custom configuration with ESLint through Code Analyzer, make sure that you understand your responsibilities.
 
-2. **IMPORTANT:** Your custom configuration will [cascade into other configurations in the project](https://eslint.org/docs/user-guide/configuring/configuration-files#cascading-and-hierarchy), as though you had run Eslint directly with the [`-c/--config` flag](https://eslint.org/docs/user-guide/configuring#using-configuration-files-1). Please make sure your custom configuration performs the necessary overrides.
+* All npm dependencies, including ESLint, must be installed in the directory where you run the ```scanner:run``` command.
+* Your custom configuration cascades into your other project configurations as though you ran ESLint directly with the ```-c | –config``` flag. Your custom configuration must perform all necessary overrides.
+* Your ```.eslintrc.json``` file must be in ```.eslintrc``` format. However, there are no restrictions on the filename.
+* The ```.eslintignore``` flag isn’t evaluated. Instead, use the ```--target``` flag to define the targets that you want Code Analyzer to scan. ```--target``` accepts a comma-separated list of any combination of files, directories, positive patterns, and negations.
+* If your configuration executes Typescript, make sure that your ```tsconfig``` file is added to the configuration under ```parserOptions.project```. The ```--tsconfig``` flag can’t be used with ```--eslintconfig``` flag. 
 
-3. Ensure correctness of `.eslintrc.json`. Only JSON format of `.eslintrc` is supported today. However, there are no restrictions on the filename.
+	Example:
 
-4. `.eslintignore` is not evaluated today. Please use your target patterns in the `--target` flag that is passed in with `scanner:run` command. As a reminder, `--target` can take a comma separated list of any combination of files, directories, positive patterns and negations.
+	```
+	//.eslintrc.json
+	 "parseOptions": {
+	     "project": "/path/to/tsconfig.json"
+	 },
+	```
 
-5. If you have written your configuration to execute Typescript, make sure your tsconfig file is added to the configuration under `parserOptions.project`. `--tsconfig` flag cannot be used with `--eslintconfig` flag.
-```bash
-//.eslintrc.json
-...
-	"parseOptions": {
-		"project": "/path/to/tsconfig.json"
-	},
-...
-```
+* Any ```package.json``` files with embedded ESLint configuration aren’t supported.
 
-6. `package.json` with embedded eslint configuration is not supported.
+## ESlint Restrictions
 
+ESLint usage in Code Analyzer has these restrictions.
 
+* When ```--eslintconfig``` is provided, no other default ESLint engines run in Code Analyzer.
+* Rule filters such as ```--category``` and ```--ruleset``` aren’t evaluated on rules selected from an ESLint custom configuration.
+* Engine filters can be used with ```--eslintconfig``` flag. However, only the rules included in the config execute. PMD runs with the default set of rules, but ```eslint-lwc``` isn’t invoked. Instead, ESLint is invoked based on the configuration in ```/path/to/.eslintrc.json```.
 
-## Restrictions with Scanner Plugin
+	Example:
 
-1. When `--eslintconfig` is provided, none of the other default Eslint engines with the Scanner plugin will be run.
+	```
+	$ sfdx scanner:run --engine "pmd,eslint-lwc" --eslintconfig "/path/to/.eslintrc.json" --target "/target/path"
+	```
 
-2. Rule filters such as `--category` and `--ruleset` will not be evaluated on rules selected from custom configuration.
+## See Also
 
-
-3. Engine filters can be used with `--eslintconfig` flag. However, only the rules included in the config will be executed. Consider this example:
-```bash
-$ sfdx scanner:run --engine "pmd,eslint-lwc" --eslintconfig "/path/to/.eslintrc.json" --target "/target/path"
-```
-While PMD will be run with the default set of rules, eslint-lwc will not be invoked. Instead, eslint will be invoked based on the configuration in `/path/to/.eslintrc.json` and all the responsibilities listed above should be addressed by the user.
+- [ESLint: Configuring ESLint](https://eslint.org/docs/latest/user-guide/configuring/)
+- [ESLint: Cascading and Hierarchy](https://eslint.org/docs/latest/user-guide/configuring/configuration-files#cascading-and-hierarchy)
