@@ -14,6 +14,8 @@ module.exports = {
 		"outfileDescriptionLong": "Write output to a file.",
 		"projectdirDescription": "root directory of project",
 		"projectdirDescriptionLong": "Root project directory. Must be paths, not globs. Multiple values can be specified as a comma-separated list",
+		"ruledisablewarningviolationDescription": "??????? (default: false). Alternatively, set value using environment variable `SFGE_RULE_DISABLE_WARNING_VIOLATION`",
+		"ruledisablewarningviolationDescriptionLong": "??????. Inherits value from SFGE_RULE_DISABLE_WARNING_VIOLATION env-var if set.",
 		"rulethreadcountDescription": "number of threads evaluating dfa rules (default: 4). Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`",
 		"rulethreadcountDescriptionLong": "Specify number of rule evaluation threads, i.e. how many entrypoints can be evaluated concurrently. Default is 4. Inherits value from SFGE_RULE_THREAD_COUNT env-var if set.",
 		"rulethreadtimeoutDescription": "timeout for individual rule threads, in milliseconds (default: 900000 ms). Alternatively, set value using environment variable `SFGE_RULE_THREAD_TIMEOUT`",
@@ -53,7 +55,7 @@ module.exports = {
 	Use --rule-thread-timeout to increase (or decrease) the maximum runtime for a single entrypoint evaluation.
 		E.g., $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
 			Increases timeout from 15 minutes (default) to 150 minutes.
-	Use --sfgejvmargs to pass JVM args to override system defaults while executing Salesforce Graph Engine's rules. 
+	Use --sfgejvmargs to pass JVM args to override system defaults while executing Salesforce Graph Engine's rules.
 		E.g., $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
 			Overrides system's default heapspace allocation to 8g and decreases chances of encountering OutOfMemory error.
 `

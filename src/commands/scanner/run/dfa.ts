@@ -18,6 +18,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
 
 const SFGE_IGNORE_PARSE_ERRORS = 'SFGE_IGNORE_PARSE_ERRORS';
+const SFGE_RULE_DISABLE_WARNING_VIOLATION = 'SFGE_RULE_DISABLE_WARNING_VIOLATION';
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -95,6 +96,12 @@ export default class Dfa extends ScannerRunCommand {
 			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
 			env: 'SFGE_IGNORE_PARSE_ERRORS'
 		}),
+		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
+		// don't support that. Instead, we check the env-var manually in a subsequent method.
+		'rule-disable-warning-violation': flags.boolean({
+			description: messages.getMessage('flags.ruledisablewarningviolationDescription'),
+			longDescription: messages.getMessage('flags.ruledisablewarningviolationDescriptionLong')
+		}),
 		'sfgejvmargs': flags.string({
 			description: messages.getMessage('flags.sfgejvmargsDescription'),
 			longDescription: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
@@ -154,6 +161,12 @@ export default class Dfa extends ScannerRunCommand {
 			sfgeConfig.ignoreParseErrors = this.flags['ignore-parse-errors'] as boolean;
 		} else if (SFGE_IGNORE_PARSE_ERRORS in process.env && process.env.SFGE_IGNORE_PARSE_ERRORS.toLowerCase() === 'true') {
 			sfgeConfig.ignoreParseErrors = true;
+		}
+		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
+		if (this.flags['rule-disable-warning-violation'] != null) {
+			sfgeConfig.ruleDisableWarningViolation = this.flags['rule-disable-warning-violation'] as boolean;
+		} else if (SFGE_RULE_DISABLE_WARNING_VIOLATION in process.env && process.env.SFGE_RULE_DISABLE_WARNING_VIOLATION.toLowerCase() === 'true') {
+			sfgeConfig.ruleDisableWarningViolation = true;
 		}
 		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		return options;
