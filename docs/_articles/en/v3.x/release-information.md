@@ -5,6 +5,19 @@ lang: en
 
 ### To update Code Analyzer, follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in)
 
+## [v3.5.1](https://github.com/forcedotcom/sfdx-scanner/tree/v3.5.1) (09-26-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.0...v3.5.1)
+
+### Release Summary
+
+* NEW: We made some updates to the RetireJS vulnerability database.
+* CHANGE: SFGE now emits telemetry data when unsupported scenarios are encountered.
+
+**Merged pull requests**
+
+- CHANGE: @W-11261182@: Added SFGE-side telemetry events. [\#828](https://github.com/forcedotcom/sfdx-scanner/pull/828)
+
 ## [v3.5.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.5.0) (09-14-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.4.0...v3.5.0)
