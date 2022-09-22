@@ -3,18 +3,17 @@ title: 'ESLint'
 lang: en
 ---
 ## What is ESLint?
-[ESLint](https://eslint.org) is a popular linting tool for JavaScript. It provides numerous static analysis rules that
-help developers write quality code.
+ESLint is a popular linting tool for JavaScript. It provides numerous static analysis rules that help developers write quality code.
 
 ## How does Salesforce Code Analyzer use ESLint?
-Salesforce Code Analyzer's `scanner:run` command uses ESLint to scan targeted JavaScript files. By default, all rules
-are executed, but one may change which rules are evaluated through the use of the flags described in the
-[command's documentation](./en/v3.x/scanner-commands/run/#options).
+The Salesforce Code Analyzer (Code Analyzer) ```scanner:run``` uses ESLint to scan targeted JavaScript files. By default, all rules are executed, but you can change which rules are evaluated through Code Analyzer optional flags described in the Code Analyzer Command Reference.
 
-Additionally, ESLint is highly configurable through plugins, and Salesforce Code Analyzer provides support for the following:
-- [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint), which adds support for
-[TypeScript](https://typescriptlang.org), a strongly-typed superset of JavaScript. By default, this plugin will be used
-to evaluate any targeted TypeScript (`.ts`) files.
-- [ESLint-LWC](https://github.com/salesforce/eslint-plugin-lwc), the official ESLint rules for Salesforce Lightning Web
-Components. These rules are not enabled by default, and can be enabled on a per-run basis with the
-`--engine "eslint-lwc"` flag, or on a permanent basis by modifying the `{{ site.data.versions-v3.configfile }}` file directly.
+Additionally, ESLint is highly configurable through plug-ins. Code Analyzer supports these plug-ins.
+
+- [TypeScript-ESLint](https://github.com/typescript-eslint/typescript-eslint) adds support for [TypeScript](https://typescriptlang.org), a strongly typed superset of JavaScript. By default, this plug-in is used to evaluate any targeted TypeScript (```.ts```) files.
+- [ESLint-LWC](https://github.com/salesforce/eslint-plugin-lwc), the official ESLint rules for Salesforce Lightning Web Components (LWC). ESLint rules aren’t enabled by default. They can be enabled on a per-run basis with the ```--engine eslint-lwc``` flag or on a permanent basis by modifying the ```config.json``` file directly.
+
+## See Also
+
+- [ESLint](https://eslint.org/)
+- [Salesforce Code Analyzer Command Reference](https://forcedotcom.github.io/sfdx-scanner/en/scanner-commands/run/#options)
