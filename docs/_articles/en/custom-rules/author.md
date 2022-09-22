@@ -59,7 +59,7 @@ $ jar -cp <customRule.jar> <rule_package_base_dir> <xml_base_dir>
 - [PMD Source Code Analyzer Project: XML rule definition](https://pmd.github.io/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition)
 
 
-## Eslint Custom Rules
+## ESLint Custom Rules
 
 ### Write ESLint Custom Rules
 
@@ -92,5 +92,5 @@ After your rule is added, ensure that the ```node_modules``` directory:
 * Has a child directory with your plug-in’s name. 
 * Contains the ```package.json```, ```index.js``` and other files that you created.
 
-##See Also
+## See Also
 - [ESLint: Working with Rules](https://eslint.org/docs/latest/developer-guide/working-with-rules)
