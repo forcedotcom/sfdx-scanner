@@ -12,7 +12,6 @@ lang: en
 ### Release Summary
 
 * NEW: We made some updates to the RetireJS vulnerability database.
-* CHANGE: SFGE now emits telemetry data when unsupported scenarios are encountered.
 
 **Merged pull requests**
 
