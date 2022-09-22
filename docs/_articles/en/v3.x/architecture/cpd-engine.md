@@ -2,21 +2,21 @@
 title: 'CPD'
 lang: en
 ---
-## What is CPD?
-[CPD](https://pmd.github.io/latest/pmd_userdocs_cpd.html) is a copy/paste detector shipped with PMD. It helps identify blocks of duplication across files. [Here](https://pmd.github.io/latest/pmd_userdocs_cpd.html#why-should-you-care-about-duplicates) are some reasons to avoid code duplication in general.
+---
+## What is Copy/Paste Detector (CPD)?
+Shipped with PMD, CPD helps identify blocks of duplication across files. 
 
-## How do I use CPD through Salesforce Code Analyzer?
+## How can you use CPD through Salesforce Code Analyzer?
 
-By default, CPD engine is not enabled and is not run with a generic `scanner:run` command. To specifically invoke CPD, you can use the `--engine` option like this:
+By default, the CPD engine isn’t enabled and isn’t run with a generic ```scanner:run command```. To specifically invoke CPD, you use the ```--engine``` option, like this:
 
-```bash
-sfdx scanner:run --target "/some/path" --engine cpd
-```
+`sfdx scanner:run --target "/some/path" --engine cpd`
 
 ## Understanding the violation message
-Since CPD returns duplicated code fragments, a meaningful output contains more than one file as a part of the grouping. Code Analyzer represents each group by a short checksum of the corresponding code fragment. Every violation message contains this checksum, the number of tokens in the checksum, the total number of occurrences of this duplicated code, and the index of the current occurrence. This information can help understand the impact of the duplication.
+Because CPD returns duplicated code fragments, meaningful output contains more than one file as a part of a group. Salesforce Code Analyzer (Code Analyzer) represents each group by a short checksum of the corresponding code fragment. Every violation message contains this checksum, the number of tokens in the checksum, the total number of occurrences of this duplicated code, and the index of the current occurrence. This information can help you understand the impact of the duplication.
 
-For example, consider this sample violation thrown from CPD engine:
+Consider this sample violation thrown from the CPD engine.
+
 ```
 {
     "line":"1",
@@ -31,7 +31,8 @@ For example, consider this sample violation thrown from CPD engine:
 }
 ```
 
-The message shows that there are 4 other duplicated segments found in other files. You can find these by searching for `c42bf68` amongst the remaining violations detected.
-The number of lines and tokens in the message shows how large the duplicated block is.
-The `line`, `column`, `endLine`, and `endColumn` values help identify the actual block of code fragment within the file.
+The message shows that there are four other duplicated segments in other files. Find these segments by searching for ```c42bf68``` among the remaining violations detected. The number of lines and tokens in the message shows how large the duplicated block is. The `line`, `column`, `endLine`, and `endColumn` values help identify the actual block of code fragment within the file.
 
+## See Also
+- [CPD](https://pmd.github.io/latest/pmd_userdocs_cpd.html)
+- [PMD Source Code Analyzer Project: Why should you care about duplicates?](https://pmd.github.io/latest/pmd_userdocs_cpd.html#why-should-you-care-about-duplicates)
