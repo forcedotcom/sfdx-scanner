@@ -2592,7 +2592,7 @@
       },
       {
         "below": "2.29.2",
-        "severity": "medium",
+        "severity": "high",
         "identifiers": {
           "summary": "This vulnerability impacts npm (server) users of moment.js, especially if user provided locale string, eg fr is directly used to switch moment locale.",
           "CVE": [
@@ -2606,7 +2606,7 @@
       {
         "below": "2.29.4",
         "atOrAbove": "2.18.0",
-        "severity": "medium",
+        "severity": "high",
         "identifiers": {
           "summary": "Regular Expression Denial of Service (ReDoS), Affecting moment package, versions >=2.18.0 <2.29.4",
           "CVE": [
