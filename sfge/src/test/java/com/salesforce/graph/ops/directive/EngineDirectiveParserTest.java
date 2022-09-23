@@ -55,6 +55,7 @@ public class EngineDirectiveParserTest {
 
         List<Arguments> arguments =
                 Arrays.asList(
+                        Arguments.of(",", NodeType.METHOD, null),
                         Arguments.of("", NodeType.METHOD, null),
                         Arguments.of("sfge-unrelated", NodeType.EXPRESSION_STATEMENT, null),
                         Arguments.of("sfge-disable", NodeType.USER_CLASS, DISABLE_NO_RULE),

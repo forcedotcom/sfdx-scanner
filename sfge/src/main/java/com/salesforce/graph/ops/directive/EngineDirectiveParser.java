@@ -45,6 +45,9 @@ public class EngineDirectiveParser {
             comment = normalizeValue(rawComment);
         }
         final String[] arrayElements = directive.split(Token.ARRAY_SEPARATOR);
+        if (arrayElements.length == 0) {
+            return Optional.empty();
+        }
         for (int i = 0; i < arrayElements.length; i++) {
             final String arrayElement = arrayElements[i];
             if (i == 0) {
