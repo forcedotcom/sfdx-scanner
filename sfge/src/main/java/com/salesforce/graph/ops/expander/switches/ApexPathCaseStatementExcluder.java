@@ -114,5 +114,9 @@ public final class ApexPathCaseStatementExcluder implements ApexPathExcluder {
     private ApexPathCaseStatementExcluder() {}
 
     /** Thrown by ExcludeCaseStatementVertexVisitor if the when block should be excluded */
-    static final class CaseStatementExcludedException extends SfgeRuntimeException {}
+    static final class CaseStatementExcludedException extends SfgeRuntimeException {
+        CaseStatementExcludedException() {
+            super();
+        }
+    }
 }

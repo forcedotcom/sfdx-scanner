@@ -5,4 +5,8 @@ package com.salesforce.exception;
  * stop. Any long running methods should periodically invoke {@link Thread#interrupted()} and throw
  * this exception if appropriate.
  */
-public final class SfgeInterruptedException extends SfgeRuntimeException {}
+public final class SfgeInterruptedException extends SfgeRuntimeException {
+    public SfgeInterruptedException() {
+        super();
+    }
+}
