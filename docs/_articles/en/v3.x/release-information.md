@@ -3,9 +3,9 @@ title: Release Information
 lang: en
 ---
 
-Here are the new and changed features in recent updates of the Salesforce Code Analyzer (Code Analyzer) plug-in.
+Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer).
 
-We publish the latest plug-in monthly. 
+We publish the latest Code Analyzer monthly. 
 
 * Run `sfdx plugin` to display the version of Code Analyzer installed on your computer. 
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
