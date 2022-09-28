@@ -31,16 +31,13 @@ Run the ```scanner:rule:list``` command to view the rule catalog. The command’
 
 Example:
 
-```
-|Name								|Languages		|Categories				|Rulesets [Dep]								|Engine			|
+|NAME								|LANGUAGES		|CATEGORIES				|RULESETS [DEP]								|ENGINE	  		|
+| ------- 							| ---------     | ---------				| ---------									| ---------		|
 |MyRule1							|visualforce	|Security				|Basic VF									|pmd			|
 |MyRule2							|apex			|design					|Complexity,Default ruleset...,quickstart 	|pmd			|
-|MyRule3							|Javascript		|insecure dependencies 	|											|retire-js-sfge |
 |FormalParameterNamingConventions	|apex			|Code Style				|quickstart									|pmd			|
 |constructor-super					|javascript		|problem				|problem									|eslint			|
-|insecure-bundled-dependencies		|javascript		|Insecure Dependencies	|											|retire-js		|
 |ApexFlsViolationRule				|apex			|Security				|											|sfge			|
-```
 
 ### Rule Engine Bridge
 
