@@ -4,7 +4,7 @@ import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
 import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
-import {ENGINE, CONFIG_PILOT_FILE} from '../../src/Constants';
+import {ENGINE, CONFIG_FILE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
@@ -284,7 +284,7 @@ describe('RuleManager', () => {
 					await ruleManager.runRulesMatchingCriteria(filters, targets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					const filename = path.join(__dirname, '..','code-fixtures', 'invalid-lwc', 'invalidApiDecorator', 'noLeadingUpperCase.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${filename}`])
+					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -299,7 +299,7 @@ describe('RuleManager', () => {
 					const baseConfigEnv = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')
 					const fileThatUsesQUnit = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')
 					const simpleYetWrong = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'simpleYetWrong.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
+					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);

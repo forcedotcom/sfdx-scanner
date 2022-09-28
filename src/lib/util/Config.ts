@@ -1,11 +1,14 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel, SfdxError} from '@salesforce/core';
+import {Logger, LoggerLevel, Messages, SfdxError} from '@salesforce/core';
 import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
+import { uxEvents, EVENTS } from '../ScannerEvents';
 import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
+Messages.importMessagesDirectory(__dirname);
+const configMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "Config");
 type GenericTypeGuard<T> = (obj: unknown) => obj is T;
 
 export type ConfigContent = {
@@ -122,10 +125,12 @@ export class Config {
 
 	private async upgradeConfig(): Promise<void> {
 		if (this.versionUpgradeManager.upgradeRequired(this.configContent.currentVersion)) {
-			// Start by creating a copy of the existing config, so we have it if we need it to create a backup file.
-			// Also determine where such a file would go.
+			// Start by cloning the existing config, so we have it if we need to create a back-up later.
+			// Also, determine whether a back-up should be created always or just for failed upgrades,
+			// and determine where such a back-up would go.
 			const existingConfig = deepCopy(this.configContent);
-			const backupFileName = `${CONFIG_PILOT_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
+			let shouldCreateBackup = this.versionUpgradeManager.versionNecessitatesBackup(this.configContent.currentVersion);
+			const backupFileName = `${CONFIG_FILE}.${existingConfig.currentVersion || 'pre-2.7.0'}.bak`;
 
 			let upgradeErrorMessage: string = null;
 			let persistConfig = true;
@@ -137,13 +142,18 @@ export class Config {
 				if (e instanceof VersionUpgradeError) {
 					this.configContent = e.getLastSafeConfig();
 				} else {
-					// Otherwise, we should assume that the configuration is entirely unsafe, and prevent any data persistance.
+					// Otherwise, we should assume that the configuration is entirely unsafe, and prevent any data persistence.
 					persistConfig = false;
 				}
-				// Persist the original config as a backup file so the user doesn't lose it.
-				await this.fileHandler.writeFile(path.join(this.sfdxScannerPath, backupFileName), JSON.stringify(existingConfig, null, 4));
+				// Since there was an error, we definitely want to create a back-up.
+				shouldCreateBackup = true;
 				// Hang onto the error so we can rethrow it.
 				upgradeErrorMessage = e instanceof Error ? e.message : e as string;
+			}
+
+			// Persist a back-up of the original config if one is needed.
+			if (shouldCreateBackup) {
+				await this.fileHandler.writeFile(path.join(this.sfdxScannerPath, backupFileName), JSON.stringify(existingConfig, null, 4));
 			}
 
 			// Persist any changes that were successfully made.
@@ -156,7 +166,7 @@ export class Config {
 				throw SfdxError.create('@salesforce/sfdx-scanner',
 					'Config',
 					'UpgradeFailureTroubleshooting',
-					[upgradeErrorMessage, backupFileName, this.configPilotFilePath]
+					[upgradeErrorMessage, backupFileName, this.configFilePath]
 				);
 			}
 		}
@@ -270,33 +280,35 @@ export class Config {
 	private async writeConfig(): Promise<void> {
 		const jsonString = JSON.stringify(this.configContent, null, 4);
 		this.logger.trace(`Writing Config file with content: ${jsonString}`);
-		await this.fileHandler.writeFile(this.configPilotFilePath, jsonString);
+		await this.fileHandler.writeFile(this.configFilePath, jsonString);
 	}
 
 	private async initializeConfig(): Promise<void> {
-		// TODO: This method's current functionality is because we need to support a GA version and a pilot version at the same time.
-		//  Once the pilot version goes GA, we can change this method to, for example, not use separate config files for pilot and GA.
 		this.logger.trace(`Initializing Config`);
-		// If there's no pilot config, we need to instantiate one.
-		if (!await this.fileHandler.exists(this.configPilotFilePath)) {
-			// If there's a GA config, we should copy that to create the pilot config.
-			this.logger.trace(`No pilot config exists. Creating one now`);
-			let baseConfig: ConfigContent = null;
-			if (await this.fileHandler.exists(this.configFilePath)) {
-				this.logger.trace(`Creating pilot config by copying GA config`);
-				const gaContentString = await this.fileHandler.readFile(this.configFilePath);
-				baseConfig = JSON.parse(gaContentString) as ConfigContent;
-			} else {
-				this.logger.trace(`Creating pilot config from defaults`);
-				baseConfig = DEFAULT_CONFIG;
-			}
-			await this.createNewConfigFile(baseConfig, this.configPilotFilePath);
+		if (await this.fileHandler.exists(this.configFilePath)) {
+			// If there's an existing config, we can use that.
+			this.logger.trace(`Getting existing config from ${this.configFilePath}`);
+			const configFileContent = await this.fileHandler.readFile(this.configFilePath);
+			this.configContent = JSON.parse(configFileContent) as ConfigContent;
+		} else if (await this.fileHandler.exists(this.configPilotFilePath)) {
+			// If there's no existing GA config, but there's a pilot config, that means
+			// that the user was previously on the pilot version, and is running GA for
+			// the first time. To avoid unexpected behavior changes, we'll copy the pilot
+			// config as the source for the GA config.
+			this.logger.trace(`Creating GA config by copying pilot config`);
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, configMessages.getMessage("GeneratingConfigFromPilot", [
+				this.configPilotFilePath
+			]));
+			const configFileContent = await this.fileHandler.readFile(this.configPilotFilePath);
+			this.configContent =  JSON.parse(configFileContent) as ConfigContent;
+			await this.createNewConfigFile(this.configContent, this.configFilePath);
+		} else {
+			// If there's neither a pilot nor GA config, then it's a fresh install.
+			// Generate the config from the defaults.
+			this.logger.trace(`Creating GA config from defaults`);
+			this.configContent = DEFAULT_CONFIG;
+			await this.createNewConfigFile(DEFAULT_CONFIG, this.configFilePath);
 		}
-
-		// Read the pilot config file and use that as our config.
-		const pilotFileContent = await this.fileHandler.readFile(this.configPilotFilePath);
-		this.logger.trace(`Config content to be set as ${pilotFileContent}`);
-		this.configContent = JSON.parse(pilotFileContent) as ConfigContent;
 	}
 
 	private async createNewConfigFile(configContent: ConfigContent, configFilePath: string): Promise<void> {
