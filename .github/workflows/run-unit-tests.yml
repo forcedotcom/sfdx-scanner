@@ -1,3 +1,4 @@
+name: run-unit-tests
 on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
