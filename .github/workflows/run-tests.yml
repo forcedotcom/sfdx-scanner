@@ -45,19 +45,25 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
     steps:
-      # Download the artifact so we can get the working directory without needing
-      # to repeat all of the set-up we did.
+      # Download and unzip the artifact, so we can get the working directory without
+      # needing to repeat all the set-up we did.
       - uses: actions/download-artifact@v3
         with:
           name: working-directory
       - run: unzip working-dir.zip
-      # Update to the desired version of Node.
+      # Set up the desired version of node.
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - run: node -v
-      - run: ls
-      - run: echo Running Linux Tests
+      # Set up Java v11. (NOTE: We could matrix-ify this in the future)
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurim'
+          java-version: '11'
+      # Run the unit tests
+      - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+      # Run the linter
+      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
   # Step 2B: Windows unit tests
   windows-unit-tests:
     runs-on: windows-2019
