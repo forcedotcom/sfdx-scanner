@@ -52,7 +52,7 @@ jobs:
           name: working-directory
       - run: unzip working-dir.zip
       # Update to the desired version of Node.
-      - run: actions/setup-node@v2
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
       - run: node -v
