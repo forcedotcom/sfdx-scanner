@@ -18,4 +18,4 @@ jobs:
   # Separately, we need to run our tests
   # Step 1 of that is running the setup job.
   setup_test_env:
-    uses: ./.github/workflows/setup-test-env.yml
+    uses: ./.github/workflows/reusables/setup-test-env.yml
