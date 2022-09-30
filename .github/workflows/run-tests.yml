@@ -25,10 +25,11 @@ jobs:
       - run: npm pack
       # Finally, we upload the entire working directory as an artifact, so it can
       # be used in later jobs.
+      - run: zip working-dir.zip ./* -r
       - uses: actions/upload-artifact@v3
         with:
           name: working-directory
-          path: ./
+          path: ./working-dir.zip
 
   # Step 2: We run our tests.
   # Step 2A: Linux unit tests
