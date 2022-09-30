@@ -60,10 +60,11 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
+      - run: yarn list
       # Run the unit tests
-      - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+      #- run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
       # Run the linter
-      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+      #- run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
   # Step 2B: Windows unit tests
   windows-unit-tests:
     runs-on: windows-2019
