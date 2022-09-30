@@ -3,7 +3,5 @@ on:
     types: [edited, opened, reopened, synchronize]
 
 jobs:
- test:
-   runs-on: ubuntu-latest
-   steps:
-     - uses: forcedotcom/sfdx-scanner/.github/workflows/setup-test-env.yml@{{ env.GITHUB_HEAD_REF }}
+  setup:
+    uses: forcedotcom/sfdx-scanner/.github/workflows/setup-test-env.yml@{{ env.GITHUB_HEAD_REF }}
