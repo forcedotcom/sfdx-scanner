@@ -91,7 +91,7 @@ A: Severity is normalized across all engines using the values in this table.
 A: Code Analyzer supports Apex, Java, Visualforce, and XML in CPD.
 
 #### Q: How do I know which files were not included by CPD execution?
-A: Execute Code Analyzer for CPD with `--verbose` option. Files are filtered first by `targetPatterns` provided in `~/.sfdx-scanner/Config-pilot.json` file. Files that aren't handled by CPD are listed in this message: `Path extensions for the following files will not be processed by CPD`. 
+A: Execute Code Analyzer for CPD with `--verbose` option. Files are filtered first by `targetPatterns` provided in `~/.sfdx-scanner/Config.json` file. Files that aren't handled by CPD are listed in this message: `Path extensions for the following files will not be processed by CPD`. 
 
 #### Q: I have a file pattern for a supported languages that isn't picked up by CPD. How do I add the file pattern?
 A: Add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/Config.json`. If you rerun Code Analyzer with the CPD engine option, and the file is still excluded, create an issue on our GitHub repo.
