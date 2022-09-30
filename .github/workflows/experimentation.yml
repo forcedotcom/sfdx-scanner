@@ -1,0 +1,15 @@
+name: experimentation
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+
+jobs:
+  verify_java_version:
+    strategy:
+      matrix:
+        os: [{vm: ubuntu-latest}, {vm: windows-2019}]
+        node: ['lts/*']
+    runs-on: ${{ matrix.os.vm }}
+    steps:
+      - run: which java
+      - run: java -version
