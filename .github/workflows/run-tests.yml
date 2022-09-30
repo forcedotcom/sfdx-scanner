@@ -43,7 +43,7 @@ jobs:
     needs: setup-test-env
     strategy:
       matrix:
-        node: ${{ inputs.node-matrix }}
+        node: ${{ fromJson(inputs.node-matrix) }}
     steps:
       # Download the artifact so we can get the working directory without needing
       # to repeat all of the set-up we did.
