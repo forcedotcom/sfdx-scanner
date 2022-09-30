@@ -4,4 +4,4 @@ on:
 
 jobs:
   setup:
-    uses: forcedotcom/sfdx-scanner/.github/workflows/setup-test-env.yml
+    uses: ./.github/workflows/setup-test-env.yml
