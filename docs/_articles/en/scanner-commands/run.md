@@ -75,7 +75,7 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 ## Additional Notes
 
 - `--ruleset` option is deprecated. Use --category instead.
-- `-v/--violations-cause-error` flag is deprecated. Please use `-s/--severity-threshold` instead. 
+- `-v/--violations-cause-error` flag is deprecated. Use `-s/--severity-threshold` instead. 
   
 ## Example
 
