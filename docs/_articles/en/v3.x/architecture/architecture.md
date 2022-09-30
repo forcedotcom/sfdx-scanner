@@ -46,7 +46,7 @@ ApexFlsViolationRule		apex		Security		sfge
 
 By unifying the representation of the rules into a rule catalog, Code Analyzer accepts a uniform set of input parameters. Here’s how it works.
 
-1. Using rules that you select, the bridge detects the related engine and determines the target files based on the file types defined in `~/.sfdx-scanner/Config.json`. 
+1. Using rules that you select, the bridge detects the related engine and determines the target files based on the file types defined in `~/.sfdx-scanner/{{ site.data.versions-v3.configfile }}`. 
 2. Next, the bridge tailors the input for each relevant rule engine and hands the input to the rule engine for the actual scan.
 3. After the scan completes and the rule engine provides the results, the bridge surfaces the rule violation results in a normalized output format.
 
