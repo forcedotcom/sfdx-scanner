@@ -37,7 +37,6 @@ Example:
 |MyRule2							|apex			|design					|Complexity,Default ruleset...,quickstart 	|pmd			|
 |FormalParameterNamingConventions	|apex			|Code Style				|quickstart									|pmd			|
 |constructor-super					|javascript		|problem				|problem									|eslint			|
-|ApexFlsViolationRule				|apex			|Security				|											|sfge			|
 
 ### Rule Engine Bridge
 
