@@ -4,6 +4,7 @@ on:
     types: [edited, opened, reopened, synchronize]
 
 jobs:
+  # We need to verify that the pull request's title matches the desired format.
   verify_pr_title:
     runs-on: ubuntu-latest
     name: Verify that PR title contains GUS work item number
@@ -14,3 +15,7 @@ jobs:
       - name: Verify PR title
         uses: ./github-actions/verify-pr-title
         id: verify_pr_title
+  # Separately, we need to run our tests
+  # Step 1 of that is running the setup job.
+  setup_test_env:
+    uses: ./.github/workflows/setup-test-env.yml

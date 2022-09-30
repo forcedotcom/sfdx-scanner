@@ -10,3 +10,4 @@ jobs:
       - uses: actions/checkout@v2
       - run: ls
       - run: pwd
+      - run: git branch

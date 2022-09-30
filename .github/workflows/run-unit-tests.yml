@@ -1,8 +1,0 @@
-name: run-unit-tests
-on:
-  pull_request:
-    types: [edited, opened, reopened, synchronize]
-
-jobs:
-  setup:
-    uses: ./.github/workflows/setup-test-env.yml
