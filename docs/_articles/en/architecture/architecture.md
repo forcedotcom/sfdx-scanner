@@ -9,9 +9,9 @@ Salesforce Code Analyzer (Code Analyzer) is an open-source [Salesforce CLI plug-
 
 ## Salesforce Code Analyzer Internals
 
-Code Analyzer is powered by multiple static analyzers, also known as rule engines, and by Salesforce Graph Engine, which provides data flow analysis. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. Code Analyzer unifies these rules engines as a single static analyzer and provides a common user experience to benefit.
+Code Analyzer is powered by multiple static analyzers, also known as rule engines, which provide data flow analysis. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. Code Analyzer unifies these rules engines as a single static analyzer and provides a common user experience to benefit.
 
-Version {{ site.data.versions.scanner }} of Code Analyzer uses PMD v{{ site.data.versions.pmd }}, ESLint v{{ site.data.versions.eslint }}, RetireJS v{{ site.data.versions.retirejs }}, and Salesforce Graph Engine.
+Version {{ site.data.versions.scanner }} of Code Analyzer uses PMD v{{ site.data.versions.pmd }}, ESLint v{{ site.data.versions.eslint }}, and RetireJS v{{ site.data.versions.retirejs }}.
 
 -------
 
