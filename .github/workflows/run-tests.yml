@@ -58,7 +58,7 @@ jobs:
       # Set up Java v11. (NOTE: We could matrix-ify this in the future)
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurim'
+          distribution: 'temurin'
           java-version: '11'
       # Run the unit tests
       - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
