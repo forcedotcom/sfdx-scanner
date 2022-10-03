@@ -32,29 +32,22 @@ lang: en
 </div>
 <br>
 
-## Salesforce Code Analyzer Plug-in
+## Salesforce Code Analyzer
 
-The Salesforce Code Analyzer plug-in is a unified tool for static analysis of source code, in multiple languages
-(including Apex), with a consistent command-line interface and report output. We currently support the
-[PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/).
-We may add support for more rule engines in the future.
+Salesforce Code Analyzer (Code Analyzer) is a unified tool for source code analysis. Code Analyzer analyzes multiple languages. It relies on a consistent command-line interface and produces a results file of rule violations. Use the results to review and improve your code.
 
-The Salesforce Code Analyzer Plug-in creates "Rule Violations" when the it identifies issues. Developers use this information as feedback to fix their code. 
+Code Analyzer currently supports the [PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/).
+Version 3.x also includes Salesforce Graph Engine.
 
-You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
+Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code.
 
-## Additional Resources
+## Bugs, Feedback, and Feature Requests
 
-- Trailhead: [Get Started with Salesforce DX](https://trailhead.salesforce.com/trails/sfdx_get_started)
-- [Salesforce DX Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup)
-- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev)
+To report Code Analyzer issues, create a [bug on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Bug_report.md). To suggest a feature enhancement, create a [request on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Feature_request.md) or provide feedback [here](https://www.research.net/r/SalesforceCA).
 
-### Open Source
+## See Also
 
 - [Github Repository](https://github.com/forcedotcom/sfdx-scanner)
-
-## Bugs and Feedback
-
-To report issues with Salesforce Code Analyzer, open a [bug on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Bug_report.md). If you want to suggest a feature, create a [feature request on GitHub](https://github.com/forcedotcom/sfdx-scanner/issues/new?template=Feature_request.md).
-
-
+- [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup)
+- [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev)
+- [Trailhead: Get Started with Salesforce DX](https://trailhead.salesforce.com/trails/sfdx_get_started)
