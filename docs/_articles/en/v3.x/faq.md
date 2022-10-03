@@ -79,11 +79,11 @@ A: PMD, ESLint, and RetireJS all have different scales for reporting the severit
 #### Q: How is the severity normalized across all the engines?
 A: Severity is normalized across all engines using the values in this table.
 
-| Normalized Severity | PMD     | ESLint | ESLint-LWC | ESLint-TypeScript | Retire-JS |
-| ------------------- | ------- | ------ | ---------- | ----------------- | --------- |
-| 1 (High)            | 1       | 2      | 2          | 2                 | 1         |
-| 2 (Moderate)        | 2       | 1      | 1          | 1                 | 2         |
-| 3 (Low)             | 3, 4, 5 |        |            |                   | 3
+| Normalized Severity | PMD     | ESLint | ESLint-LWC | ESLint-TypeScript | Retire-JS | Salesforce Graph Engine|
+| ------------------- | ------- | ------ | ---------- | ----------------- | --------- | ---------------------- |
+| 1 (High)            | 1       | 2      | 2          | 2                 | 1         | 1        			   |
+| 2 (Moderate)        | 2       | 1      | 1          | 1                 | 2         | 2      			       |
+| 3 (Low)             | 3, 4, 5 |        |            |                   | 3		  | 3					   |
 
 ### Questions about CPD
 
