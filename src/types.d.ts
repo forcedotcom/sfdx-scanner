@@ -175,6 +175,7 @@ export type SfgeConfig = {
 	projectDirs: string[];
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
+	ruleDisableWarningViolation?: boolean;
 	ignoreParseErrors?: boolean;
 	jvmArgs?: string;
 };

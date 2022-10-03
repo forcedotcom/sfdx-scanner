@@ -6,8 +6,8 @@ import java.util.concurrent.TimeUnit;
 public final class EnvUtil {
     private static final String ENV_RULE_THREAD_COUNT = "SFGE_RULE_THREAD_COUNT";
     private static final String ENV_RULE_THREAD_TIMEOUT = "SFGE_RULE_THREAD_TIMEOUT";
-    private static final String ENV_RULE_ENABLE_WARNING_VIOLATION =
-            "SFGE_RULE_ENABLE_WARNING_VIOLATION";
+    private static final String ENV_RULE_DISABLE_WARNING_VIOLATION =
+            "SFGE_RULE_DISABLE_WARNING_VIOLATION";
     private static final String ENV_IGNORE_PARSE_ERRORS = "SFGE_IGNORE_PARSE_ERRORS";
     private static final String ENV_LOG_WARNINGS_ON_VERBOSE = "SFGE_LOG_WARNINGS_ON_VERBOSE";
     private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
@@ -21,7 +21,7 @@ public final class EnvUtil {
     static final long DEFAULT_RULE_THREAD_TIMEOUT =
             TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES);
 
-    @VisibleForTesting static final boolean DEFAULT_RULE_ENABLE_WARNING_VIOLATION = true;
+    @VisibleForTesting static final boolean DEFAULT_RULE_DISABLE_WARNING_VIOLATION = false;
     @VisibleForTesting static final boolean DEFAULT_IGNORE_PARSE_ERRORS = false;
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
     @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS = 10;
@@ -47,12 +47,12 @@ public final class EnvUtil {
     /**
      * Indicates if info-level violations are enabled
      *
-     * @return value of {@link #ENV_RULE_ENABLE_WARNING_VIOLATION} env variable. If it is not set,
-     *     {@link #DEFAULT_RULE_ENABLE_WARNING_VIOLATION}
+     * @return value of {@link #ENV_RULE_DISABLE_WARNING_VIOLATION} env variable. If it is not set,
+     *     {@link #DEFAULT_RULE_DISABLE_WARNING_VIOLATION}
      */
-    static boolean isWarningViolationEnabled() {
+    static boolean isWarningViolationDisabled() {
         return getBoolOrDefault(
-                ENV_RULE_ENABLE_WARNING_VIOLATION, DEFAULT_RULE_ENABLE_WARNING_VIOLATION);
+                ENV_RULE_DISABLE_WARNING_VIOLATION, DEFAULT_RULE_DISABLE_WARNING_VIOLATION);
     }
 
     /**

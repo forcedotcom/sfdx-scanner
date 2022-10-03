@@ -11,8 +11,8 @@ public interface SfgeConfig {
     /** Should be used to set the timeout for rule execution threads. */
     long getRuleThreadTimeout();
 
-    /** Should be used to check if Warning Violations are enabled. */
-    boolean isWarningViolationEnabled();
+    /** Should be used to check if Warning Violations are disabled. */
+    boolean isWarningViolationDisabled();
 
     /** Indicates if a Jorje parse error causes the entire process to stop. */
     boolean shouldIgnoreParseErrors();

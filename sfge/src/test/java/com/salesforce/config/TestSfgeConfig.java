@@ -16,8 +16,8 @@ public class TestSfgeConfig implements SfgeConfig {
     }
 
     @Override
-    public boolean isWarningViolationEnabled() {
-        return SfgeConfigImpl.getInstance().isWarningViolationEnabled();
+    public boolean isWarningViolationDisabled() {
+        return SfgeConfigImpl.getInstance().isWarningViolationDisabled();
     }
 
     @Override
