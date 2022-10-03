@@ -17,8 +17,14 @@ Messages.importMessagesDirectory(__dirname);
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
 
-const SFGE_IGNORE_PARSE_ERRORS = 'SFGE_IGNORE_PARSE_ERRORS';
-const SFGE_RULE_DISABLE_WARNING_VIOLATION = 'SFGE_RULE_DISABLE_WARNING_VIOLATION';
+const IGNORE_PARSE_ERRORS_FLAG = 'ignore-parse-errors';
+const IGNORE_PARSE_ERRORS_ENVVAR = 'SFGE_IGNORE_PARSE_ERRORS';
+const RULE_DISABLE_WARNING_VIOLATION_FLAG = 'rule-disable-warning-violation';
+const RULE_DISABLE_WARNING_VIOLATION_ENVVAR = 'SFGE_RULE_DISABLE_WARNING_VIOLATION';
+const BOOLEAN_ENVARS_BY_FLAG: Map<string,string> = new Map([
+	[IGNORE_PARSE_ERRORS_FLAG, IGNORE_PARSE_ERRORS_ENVVAR],
+	[RULE_DISABLE_WARNING_VIOLATION_FLAG, RULE_DISABLE_WARNING_VIOLATION_ENVVAR]
+]);
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -91,14 +97,13 @@ export default class Dfa extends ScannerRunCommand {
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
-		'ignore-parse-errors': flags.boolean({
+		[IGNORE_PARSE_ERRORS_FLAG]: flags.boolean({
 			description: messages.getMessage('flags.ignoreparseerrorsDescription'),
-			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong'),
-			env: 'SFGE_IGNORE_PARSE_ERRORS'
+			longDescription: messages.getMessage('flags.ignoreparseerrorsDescriptionLong')
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
-		'rule-disable-warning-violation': flags.boolean({
+		[RULE_DISABLE_WARNING_VIOLATION_FLAG]: flags.boolean({
 			description: messages.getMessage('flags.ruledisablewarningviolationDescription'),
 			longDescription: messages.getMessage('flags.ruledisablewarningviolationDescriptionLong')
 		}),
@@ -156,20 +161,27 @@ export default class Dfa extends ScannerRunCommand {
 		if (this.flags['sfgejvmargs'] != null) {
 			sfgeConfig.jvmArgs = this.flags['sfgejvmargs'] as string;
 		}
-		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
-		if (this.flags['ignore-parse-errors'] != null) {
-			sfgeConfig.ignoreParseErrors = this.flags['ignore-parse-errors'] as boolean;
-		} else if (SFGE_IGNORE_PARSE_ERRORS in process.env && process.env.SFGE_IGNORE_PARSE_ERRORS.toLowerCase() === 'true') {
-			sfgeConfig.ignoreParseErrors = true;
-		}
-		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
-		if (this.flags['rule-disable-warning-violation'] != null) {
-			sfgeConfig.ruleDisableWarningViolation = this.flags['rule-disable-warning-violation'] as boolean;
-		} else if (SFGE_RULE_DISABLE_WARNING_VIOLATION in process.env && process.env.SFGE_RULE_DISABLE_WARNING_VIOLATION.toLowerCase() === 'true') {
-			sfgeConfig.ruleDisableWarningViolation = true;
-		}
+		sfgeConfig.ignoreParseErrors = this.getBooleanEngineOption(IGNORE_PARSE_ERRORS_FLAG);
+		sfgeConfig.ruleDisableWarningViolation = this.getBooleanEngineOption(RULE_DISABLE_WARNING_VIOLATION_FLAG);
 		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		return options;
+	}
+
+	/**
+	 * Boolean flags cannot automatically inherit their value from environment variables. Instead, we use this
+	 * method to handle that inheritance if necessary.
+	 * @param flag - The name of a boolean flag associated with this command
+	 * @returns true if the flag is set or the associated env-var is set to "true"; else false.
+	 * @protected
+	 */
+	private getBooleanEngineOption(flag: string): boolean {
+		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
+		if (this.flags[flag] != null) {
+			return this.flags[flag] as boolean;
+		}
+		// If the flag isn't set, get the name of the corresponding environment variable and check its value.
+		const envVar = BOOLEAN_ENVARS_BY_FLAG.get(flag);
+		return envVar in process.env && process.env[envVar].toLowerCase() === 'true';
 	}
 
 	protected pathBasedEngines(): boolean {
