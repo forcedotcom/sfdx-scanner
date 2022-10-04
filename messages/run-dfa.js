@@ -33,29 +33,29 @@ module.exports = {
 		"projectdirMustBeDir": "--projectdir must specify directories",
 		"projectdirMustExist": "--projectdir must specify existing paths"
 	},
-	"examples": `The paths specified for --projectdir must cumulatively contain all files specified through --target.
-		Good: $ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
-		Good: $ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./"
-		Good: $ sfdx scanner:run:dfa --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
-		Bad:  $ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./myproject"
-	Wrap globs in quotes.
-		Unix example:    $ sfdx scanner:run:dfa --target './**/*.cls,!./**/IgnoreMe.cls' ...
-		Windows example: > sfdx scanner:run:dfa --target ".\\**\\*.cls,!.\\**\\IgnoreMe.cls" ...
-			Evaluate rules against all .cls files below the current directory, except for IgnoreMe.cls.
-	Individual methods within a file may be targeted by suffixing the file's path with a hash (#), and a semi-colon-delimited list of method names. This syntax is incompatible with globs and directories.
-		E.g., $ sfdx scanner:run:dfa --target "./File1.cls#Method1;Method2,./File2.cls#Method3" ...
-			Evaluates rules against ALL methods named Method1 or Method2 in File1.cls, and ALL methods named Method3 in File2.cls.
-	Use --normalize-severity to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown).
-		E.g., $ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --format csv --normalize-severity
-	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
-		E.g., $ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --severity-threshold 2
-	Use --rule-thread-count to allow more (or fewer) entrypoints to be evaluated concurrently.
-		E.g., $ sfdx scanner:run:dfa --rule-thread-count 6 ...
-	Use --rule-thread-timeout to increase (or decrease) the maximum runtime for a single entrypoint evaluation.
-		E.g., $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
-			Increases timeout from 15 minutes (default) to 150 minutes.
-	Use --sfgejvmargs to pass JVM args to override system defaults while executing Salesforce Graph Engine's rules.
-		E.g., $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
-			Overrides system's default heapspace allocation to 8g and decreases chances of encountering OutOfMemory error.
+	"examples": `The paths specified for --projectdir must contain all files specified through --target cumulatively.
+	$ sfdx sacnner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
+	$ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./"
+	$ sfdx scanner:run:dfa --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
+This example fails because the set of files included in --target is larger than that contained in --projectdir:
+	$ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./myproject/"
+Globs must be wrapped in quotes, as in these Windows and Unix examples, which evaluate rules against all .cls files in the current directory and subdirectories except for IgnoreMe.cls:
+Unix example:
+	$ sfdx scanner:run:dfa --target "./**/*.cls,!./**/IgnoreMe.cls" ...
+Windows example:
+	$ sfdx scanner:run:dfa --target ".\\**\\*.cls,!.\\**\\IgnoreMe.cls" ...
+You can target individual methods within a file with a suffix hash (#) on the file's path, and with a semi-colon-delimited list of method names. This syntax is incompatible with globs and directories. This example evaluates rules against all methods named Method1 or Method2 in File1.cls, and all methods named Method3 in File2.cls:
+	$ sfdx scanner:run:dfa --target "./File1.cls#Method1;Method2,./File2.cls#Method3" ...
+Use --normalize-severity to output a normalized severity across all engines, in addition to the engine-specific severity. Normalized severity is 1 (high), 2 (moderate), and 3 (low):
+	$ sfdx scanner:run:dfa --target "./some-project/" --projectdir "./some-project/" --format csv --normalize-severity
+Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity or greater are found. If there are any rule violations with a severity of 2 or 1, the exit code is equal to the severity of the most severe violation:
+	$ sfdx scanner:run:dfa --target "./some-project/" --projectdir "./some-project/" --severity-threshold 2
+use --rule-thread-count to allow more (or fewer) entrypoints to be evaluated concurrently:
+	$ sfdx scanner:run:dfa --rule-thread-count 6 ...
+Use --rule-thread-timeout to increase or decrease the maximum runtime for a single entrypoint evaluation. This increases the timeout from the 15-minute default to 150 minutes:
+	$ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
+Use --sfgejvmargs to pass Java Virtual Machine args to override system defaults while executing Salesforce Graph Engine's rules.
+The example overrides the system's default heap space allocation to 8 GB and decreases chances of encountering OutOfMemory error.
+	$ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
 `
 };
