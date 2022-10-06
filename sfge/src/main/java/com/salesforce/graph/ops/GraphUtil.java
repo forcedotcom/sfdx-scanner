@@ -181,11 +181,7 @@ public final class GraphUtil {
                     "Could not read file/directory " + sourceFileVisitor.lastVisitedFile, ex);
         } catch (JorjeUtil.JorjeCompilationException ex) {
             throw new GraphLoadException(
-                    "Could not parse file "
-                            + sourceFileVisitor.lastVisitedFile
-                            + ": "
-                            + ex.getMessage(),
-                    ex);
+                    "Could not parse file " + sourceFileVisitor.lastVisitedFile, ex);
         }
 
         return comps;
