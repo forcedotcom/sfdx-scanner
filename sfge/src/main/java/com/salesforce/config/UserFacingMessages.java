@@ -34,4 +34,10 @@ public final class UserFacingMessages {
     public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
     public static final String FIELD_HANDLING_NOTICE =
             " Confirm that the objects and fields involved in these segments have FLS checks: [%s].";
+
+    public static final String INVALID_SYNTAX_TEMPLATE = "Invalid syntax at %d:%d. (%s)";
+
+    public static final String FIX_COMPILATION_ERRORS = "Fix compilation errors in %s and retry";
+
+    public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
 }

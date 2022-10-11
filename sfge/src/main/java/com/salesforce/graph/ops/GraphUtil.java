@@ -12,6 +12,7 @@ import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.apex.jorje.TopLevelWrapper;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.SfgeConfigProvider;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.Util;
@@ -181,7 +182,10 @@ public final class GraphUtil {
                     "Could not read file/directory " + sourceFileVisitor.lastVisitedFile, ex);
         } catch (JorjeUtil.JorjeCompilationException ex) {
             throw new GraphLoadException(
-                    "Could not parse file " + sourceFileVisitor.lastVisitedFile, ex);
+                    String.format(
+                            UserFacingMessages.FIX_COMPILATION_ERRORS,
+                            sourceFileVisitor.lastVisitedFile),
+                    ex);
         }
 
         return comps;

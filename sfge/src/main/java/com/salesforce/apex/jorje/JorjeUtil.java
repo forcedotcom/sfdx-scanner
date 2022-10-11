@@ -18,6 +18,7 @@ import apex.jorje.semantic.compiler.parser.ParserEngine;
 import apex.jorje.semantic.compiler.sfdc.NoopCompilerProgressCallback;
 import apex.jorje.services.exception.CompilationException;
 import apex.jorje.services.exception.ParseException;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
 import java.util.*;
@@ -86,11 +87,11 @@ public final class JorjeUtil {
                             .map(
                                     e ->
                                             String.format(
-                                                    "ParseException at %d:%d. (%s)",
+                                                    UserFacingMessages.INVALID_SYNTAX_TEMPLATE,
                                                     e.getLoc().getLine(),
                                                     e.getLoc().getColumn(),
                                                     e.getError()))
-                            .collect(Collectors.joining(";")));
+                            .collect(Collectors.joining("\n")));
         }
 
         // Wrap the top level Jorje node in a AstNodeWrapper and build a new tree of AstNodeWrappers
