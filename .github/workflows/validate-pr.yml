@@ -17,4 +17,4 @@ jobs:
         id: verify_pr_title
   # Separately, we need to run our tests
   run_tests:
-    uses: ./.github/workflows/run-tests.yml
+    uses: ./.github/workflows/experimentation.yml

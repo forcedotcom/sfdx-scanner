@@ -1,15 +1,25 @@
 name: experimentation
 on:
-  pull_request:
-    types: [edited, opened, reopened, synchronize]
+  workflow_call:
+    inputs:
+      node-matrix:
+        description: "An array of node versions against which the tests should be run"
+        required: false
+        type: string
+        default: "['lts/*']"
 
 jobs:
-  verify_java_version:
-    strategy:
-      matrix:
-        os: [{vm: ubuntu-latest}, {vm: windows-2019}]
-        node: ['lts/*']
-    runs-on: ${{ matrix.os.vm }}
+  experiment-with-building:
+    runs-on: ubuntu-latest
     steps:
-      - run: which java
-      - run: java -version
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - run: yarn
+      - run: yarn build
+      - run: ./bin/run scanner:rule:list --engine sfge
