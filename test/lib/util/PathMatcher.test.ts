@@ -21,7 +21,7 @@ describe('PathMatcher', () => {
 
 			it('EXCLUDES paths matching NO positive patterns', async () => {
 				const results = await pm.filterPathsByPatterns(targets);
-				expect(results).to.not.include(targets[1], 'Paths that match no positive patterns should be excluded');
+				expect(results).to.not.include(targets[2], 'Paths that match no positive patterns should be excluded');
 			});
 		});
 
