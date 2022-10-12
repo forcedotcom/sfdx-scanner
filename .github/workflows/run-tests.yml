@@ -73,6 +73,12 @@ jobs:
       - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
       # Run the linter
       - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+      # Upload the test results and coverage information as artifacts.
+      - if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ runner.os }}
+          path: ./test-results
 
 #  # Step 1: Set up the environment and build the things we need.
 #  setup-test-env:
