@@ -29,6 +29,7 @@ jobs:
       - run: find . -name nyc
       # We also need to create a tarball for the smoke tests
       - run: npm pack
+      - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml # TODO
       # Finally, we upload the entire working directory as an artifact, so it can
       # be used in later jobs.
       - run: zip working-dir.zip ./* -r
