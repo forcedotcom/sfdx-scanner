@@ -68,6 +68,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: unit-test-dist
+          path: ./dist
       - run: ls
 #      - run: bin/run scanner:rule:list --engine sfge
 
