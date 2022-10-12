@@ -26,6 +26,7 @@ jobs:
       # Next we install our dependencies and build, so we can run unit tests
       - run: yarn
       - run: yarn build
+      - run: find . -name nyc
       # We also need to create a tarball for the smoke tests
       - run: npm pack
       # Finally, we upload the entire working directory as an artifact, so it can
@@ -61,6 +62,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - run: yarn list
+      - run: find . -name nyc
       # Run the unit tests
       - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
       # Run the linter
