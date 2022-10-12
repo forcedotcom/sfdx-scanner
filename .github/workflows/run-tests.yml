@@ -69,6 +69,7 @@ jobs:
         with:
           name: unit-test-dist
       - run: ls
+      - run: bin/run scanner:rule:list --engine sfge
 
 #  # Step 1: Set up the environment and build the things we need.
 #  setup-test-env:
