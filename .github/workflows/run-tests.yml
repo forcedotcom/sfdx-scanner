@@ -74,11 +74,22 @@ jobs:
       # Run the linter
       - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
       # Upload the test results and coverage information as artifacts.
-      - if: ${{ always() }}
+      - name: Upload node test artifacts
+        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: node-test-results-${{ runner.os }}
-          path: ./test-results
+          name: ${{ runner.os }}-node-results
+          path: |
+            ./test-results
+            ./test-coverage
+      - name: Upload pmd-cataloger test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-pmd-cataloger-results
+          path: |
+            pmd-cataloger/build/reports
+            pmd-cataloger/build/test-results
 
 #  # Step 1: Set up the environment and build the things we need.
 #  setup-test-env:
