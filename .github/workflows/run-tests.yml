@@ -48,28 +48,28 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
     steps:
-      # Check out the code.
-      - uses: actions/checkout@v2
-      # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
-        with:
-          node-version: ${{ matrix.node }} # Node version is a matrix.
-      - uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
-      # Install Node dependencies.
-      # NOTE: We're choosing not to cache Node depencies, because it seems to be more
-      #       trouble than it's worth. If we see serious performance problems, we can
-      #       reconsider that assessment.
-      - run: yarn
-      # Download the dist artifact, to save ourselves the trouble of rebuilding our
-      # Java dependencies from scratch.
+#      # Check out the code.
+#      - uses: actions/checkout@v2
+#      # Make sure we're using the right versions of Node and Java.
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: ${{ matrix.node }} # Node version is a matrix.
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
+#      # Install Node dependencies.
+#      # NOTE: We're choosing not to cache Node depencies, because it seems to be more
+#      #       trouble than it's worth. If we see serious performance problems, we can
+#      #       reconsider that assessment.
+#      - run: yarn
+#      # Download the dist artifact, to save ourselves the trouble of rebuilding our
+#      # Java dependencies from scratch.
       - uses: actions/download-artifact@v3
         with:
           name: unit-test-dist
       - run: ls
-      - run: bin/run scanner:rule:list --engine sfge
+#      - run: bin/run scanner:rule:list --engine sfge
 
 #  # Step 1: Set up the environment and build the things we need.
 #  setup-test-env:
