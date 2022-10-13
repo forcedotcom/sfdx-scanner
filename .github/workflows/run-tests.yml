@@ -59,7 +59,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
       # Install Node dependencies.
-      # NOTE: We're choosing not to cache Node depencies, because it seems to be more
+      # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
       #       trouble than it's worth. If we see serious performance problems, we can
       #       reconsider that assessment.
       - run: yarn
@@ -69,8 +69,8 @@ jobs:
         with:
           name: unit-test-dist
           path: ./dist
-      # Run the unit tests
-      - run: yarn test --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+      # Run the unit tests. Use the -quiet variant so SFGE logs don't blow up the console.
+      - run: yarn test-quiet --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
       # Run the linter
       - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
       # Upload the test results and coverage information as artifacts.
@@ -90,6 +90,22 @@ jobs:
           path: |
             pmd-cataloger/build/reports
             pmd-cataloger/build/test-results
+      - name: Upload sfge test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-sfge-results
+          path: |
+            sfge/build/reports
+            sfge/build/test-results
+      - name: Upload cli-messaging test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-cli-messaging-results
+          path: |
+            cli-messaging/build/reports
+            cli-messaging/build/test-results
 
 #  # Step 1: Set up the environment and build the things we need.
 #  setup-test-env:
