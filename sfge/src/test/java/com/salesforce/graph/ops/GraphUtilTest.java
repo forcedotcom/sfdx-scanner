@@ -62,7 +62,7 @@ public class GraphUtilTest {
                     Assertions.assertThrows(
                             GraphUtil.GraphLoadException.class,
                             () -> TestUtil.compileTestFiles(g, testInfo));
-            MatcherAssert.assertThat(ex.getMessage(), containsString("Could not parse file"));
+            MatcherAssert.assertThat(ex.getMessage(), containsString("Fix compilation errors"));
             MatcherAssert.assertThat(
                     ex.getMessage(),
                     containsString("testParseErrorIsIgnored" + File.separator + "MyClass.cls"));

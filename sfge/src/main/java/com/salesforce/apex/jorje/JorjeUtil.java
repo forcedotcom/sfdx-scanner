@@ -18,11 +18,10 @@ import apex.jorje.semantic.compiler.parser.ParserEngine;
 import apex.jorje.semantic.compiler.sfdc.NoopCompilerProgressCallback;
 import apex.jorje.services.exception.CompilationException;
 import apex.jorje.services.exception.ParseException;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.exception.UnexpectedException;
-import java.util.Collections;
-import java.util.List;
-import java.util.NavigableMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -69,17 +68,30 @@ public final class JorjeUtil {
         final CodeUnit codeUnit = codeUnits.get(0);
 
         // Find any ParseExceptions. Other exceptions are ignored because the compiler does not have
-        // all of the relevant
-        // pieces needed to check semantics.
+        // all of the relevant pieces needed to check semantics.
+        // Sometimes the same ParseException appears multiple times, so we should use a Set to
+        // make sure that the messages are unique.
+        final Set<String> exceptionMessages = new HashSet<>();
         final List<CompilationException> exceptions =
                 codeUnit.getErrors().get().stream()
-                        .filter(e -> e instanceof ParseException)
+                        // Set.add() returns true if the thing being added wasn't already in the
+                        // set.
+                        .filter(
+                                e ->
+                                        e instanceof ParseException
+                                                && exceptionMessages.add(e.getMessage()))
                         .collect(Collectors.toList());
         if (!exceptions.isEmpty()) {
             throw new JorjeCompilationException(
                     exceptions.stream()
-                            .map(Throwable::getMessage)
-                            .collect(Collectors.joining(",")));
+                            .map(
+                                    e ->
+                                            String.format(
+                                                    UserFacingMessages.INVALID_SYNTAX_TEMPLATE,
+                                                    e.getLoc().getLine(),
+                                                    e.getLoc().getColumn(),
+                                                    e.getError()))
+                            .collect(Collectors.joining("\n")));
         }
 
         // Wrap the top level Jorje node in a AstNodeWrapper and build a new tree of AstNodeWrappers
