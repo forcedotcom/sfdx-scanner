@@ -43,7 +43,7 @@ public class LanguageXmlFileMappingTest {
 		assertThat(pathMap.keySet(), hasItems(APEX.toLowerCase(), JAVA.toLowerCase()));
 
 		paths = pathMap.get(APEX.toLowerCase());
-		assertThat(paths, hasSize(equalTo(4)));
+		assertThat(paths, hasSize(equalTo(3)));
 		assertThat(paths, hasItems("category/apex/performance1.xml", "category/apex/performance2.xml",
 				"category/apex/performance3.xml", "category/apex/performance4.xml"));
 
