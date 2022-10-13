@@ -41,12 +41,13 @@ jobs:
           path: ./salesforce-sfdx-scanner-*.tgz
   # Step 2: Run our tests.
   # Step 2A: Linux unit tests
-  linux-unit-tests:
-    runs-on: ubuntu-latest
-    needs: build-dependencies
+  unit-tests:
     strategy:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
+        os: [ubuntu-latest, windows-2019]
+    runs-on: ${{ matrix.os }}
+    needs: build-dependencies
     steps:
       # Check out the code.
       - uses: actions/checkout@v2
@@ -70,9 +71,9 @@ jobs:
           name: unit-test-dist
           path: ./dist
       # Run the unit tests. Use the -quiet variant so SFGE logs don't blow up the console.
-      - run: yarn test-quiet --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+      - run: yarn test-experimental --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
       # Run the linter
-      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+      #- run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
       # Upload the test results and coverage information as artifacts.
       - name: Upload node test artifacts
         if: ${{ always() }}

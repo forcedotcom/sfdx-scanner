@@ -134,6 +134,7 @@
 		"prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
 		"postpack": "rm -f oclif.manifest.json",
 		"lint": "eslint ./src --ext .ts",
+		"test-experimental": "./gradlew pmd-cataloger:test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/PathMatcher.test.ts\"",
 		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-quiet": "SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-cli-messaging": "./gradlew cli-messaging:test",
