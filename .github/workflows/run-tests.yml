@@ -43,6 +43,7 @@ jobs:
   # Step 2A: Linux unit tests
   unit-tests:
     strategy:
+      fail-fast: false
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
         os: [ubuntu-latest, windows-2019]
