@@ -135,7 +135,7 @@
 		"postpack": "rm -f oclif.manifest.json",
 		"lint": "eslint ./src --ext .ts",
 		"test-old": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
-		"test": "/gradlew pmd-cataloger:test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/**.test.ts\"",
+		"test": "./gradlew pmd-cataloger:test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/**.test.ts\"",
 		"test-cli-messaging": "./gradlew cli-messaging:test",
 		"test-pmd-cataloger": "./gradlew pmd-cataloger:test",
 		"test-sfge": "./gradlew sfge:test",
