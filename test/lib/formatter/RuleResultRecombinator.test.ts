@@ -1294,7 +1294,7 @@ describe('RuleResultRecombinator', () => {
 			it ('Using --verbose-violations', async () => {
 				const results = (await RuleResultRecombinator.recombineAndReformatResults(retireJsVerboseViolations, OUTPUT_FORMAT.HTML, new Set(['retire-js']), true)).results as string;
 				const violationString = results.split("const violations = [")[1].split("];\n")[0];
-				console.log(`string is ${violationString}`);
+				console.log(`===START=====\n results is ${results}\n=BREAK=\nviolations is ${violationString}\n===END====\n`);
 				const violation: RuleViolation = JSON.parse(violationString as string);
 				expect(violation.message).to.equal("jquery 3.1.0 has known vulnerabilities:<br>severity: medium; summary: jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution; CVE: CVE-2019-11358; https://blog.jquery.com/2019/04/10/jquery-3-4-0-released/ https://nvd.nist.gov/vuln/detail/CVE-2019-11358 https://github.com/jquery/jquery/commit/753d591aea698e57d6db58c9f722cd0808619b1b<br>severity: medium; summary: Regex in its jQuery.htmlPrefilter sometimes may introduce XSS; CVE: CVE-2020-11022; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/<br>severity: medium; summary: Regex in its jQuery.htmlPrefilter sometimes may introduce XSS; CVE: CVE-2020-11023; https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/");
 			});
