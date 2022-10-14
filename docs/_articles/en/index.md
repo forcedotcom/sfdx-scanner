@@ -3,41 +3,44 @@ title: Salesforce Code Analyzer Plug-In
 permalink: /
 lang: en
 ---
+
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_info" role="alert">
   <span class="slds-assistive-text">success</span>
     We're constantly improving Salesforce Code Analyzer. Tell us what you think!
     &nbsp;&nbsp;
-	<a href="https://research.net/r/SalesforceCA" target="_blank"><button class="slds-button slds-button_brand">Give Feedback</button></a>
+    <a href="https://research.net/r/SalesforceCA" target="_blank"><button class="slds-button slds-button_brand">Give Feedback</button></a>
 </div>
 <br>
+
+<!-- temporary comment until v3.x becomes the new norm -->
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
-  	{{ site.data.versions-v3.releasedon }}: New pilot version {{ site.data.versions-v3.scanner }} of Salesforce Code Analyzer is available
+  	New version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
 	&nbsp;&nbsp;
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
+
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	{{ site.data.versions-v2.releasedon }}: The latest version v{{ site.data.versions-v2.scanner }} is available&nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+  	Salesforce Graph Engine is available for you to try it out &nbsp;&nbsp;&nbsp;<a href="./en/v3.x/salesforce-graph-engine/introduction/">Read more</a>
 </div>
 <br>
+
+<!-- uncomment this once v3 becomes latest -->
+<!--
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-<p>
-  	Support and updates for Code Analyzer v2.x are scheduled to end as of the October 2022 release.
-  	You can continue to use v2.x after the October release; however, we recommend using Code Analyzer v3.x instead.
- 	For more information, see <a href="./en/v3.x/getting-started/prerequisites/">Getting Started with v3.x.</a>
-</p>
+  	A new version (v{{ site.data.versions-v3.scanner }}) of the Code Analyzer Plug-in was released on {{ site.data.versions-v3.releasedon }} &nbsp;&nbsp;<a href="./en/v3.x/release-information/">Release Information</a>
 </div>
 <br>
+-->
 
 ## Salesforce Code Analyzer
 
 Salesforce Code Analyzer (Code Analyzer) is a unified tool for source code analysis. Code Analyzer analyzes multiple languages. It relies on a consistent command-line interface and produces a results file of rule violations. Use the results to review and improve your code.
 
-Code Analyzer currently supports the [PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/).
-Version 3.x also includes Salesforce Graph Engine.
+Code Analyzer currently supports the [PMD rule engine](https://pmd.github.io/), [PMD Copy Paste Detector](https://pmd.github.io/latest/pmd_userdocs_cpd.html), [ESLint](https://eslint.org/), and [RetireJS](https://retirejs.github.io/retire.js/), and Salesforce Graph Engine.
 
 Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code.
 

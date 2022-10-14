@@ -3,7 +3,6 @@
   	<br/>
     <div class="site-logo">
 
-      <!-- Todo: When 3.x is default, modify this link to point to /en/v3.x/-->
       {% assign rootLink = site.baseurl | append: '/' %}
 
       <a href="{{ rootLink }}" class="slds-m-vertical--xx-small D(b)">
@@ -15,25 +14,25 @@
   <div class="version-picker">
 
     {% if page.url == '' %}
-      {% assign ver3url = page.url | append: '/en/v3.x/' %}
-      {% assign ver2url = page.url | append: '/' %}
+      {% assign ver3url = page.url | append: '/' %}
+      {% assign ver2url = page.url | append: '/en/v2.x/' %}
     {% elsif page.url == '/' %}
-      {% assign ver3url = page.url | append: 'en/v3.x/' %}
-      {% assign ver2url = page.url %}
+      {% assign ver3url = page.url %}
+      {% assign ver2url = page.url | append: 'en/v2.x' /%}
     {% else %}
-      {% assign ver3url = '/en/v3.x' %}
-      {% assign ver2url = '/' %}
+      {% assign ver3url = '/' %}
+      {% assign ver2url = '/en/v2.x' %}
     {% endif %}
 
     <a
-        class="{% unless page.path contains 'v3.x' %}is-selected{% endunless %}"
+        class="{% if page.path contains 'v2.x' %}is-selected{% endif %}"
         href="{{ ver2url | prepend: site.baseurl }}"
         translate="no"
         >v2.x</a
       >
       |
       <a
-        class="{% if page.path contains 'v3.x' %}is-selected{% endif %}"
+        class="{% unless page.path contains 'v2.x' %}is-selected{% endunless %}"
         href="{{ ver3url | prepend: site.baseurl }}"
         translate="no"
         >v3.x
@@ -41,11 +40,10 @@
       <label class="new-menu-item">New!</label>
   </div>
 
-  <!-- when we are ready to make v3 the default, swap this out -->
-  {% assign sidebar = site.data.sidebar-v2 %}
+  {% assign sidebar = site.data.sidebar-v3 %}
 
-  {% if page.path contains 'v3.x' %}
-    {% assign sidebar = site.data.sidebar-v3 %}
+  {% if page.path contains 'v2.x' %}
+    {% assign sidebar = site.data.sidebar-v2 %}
   {% endif %}
 
   <div
