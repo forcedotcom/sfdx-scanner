@@ -10,7 +10,7 @@ on:
 
 jobs:
   experiment-with-building:
-    runs-on: ubuntu-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
@@ -20,6 +20,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-      - run: yarn
-      - run: yarn build
-      - run: ./bin/run scanner:rule:list --engine sfge
+      - name: beep
+        shell: bash
+        run: |
+          pwd
