@@ -16,4 +16,4 @@ Additionally, ESLint is highly configurable through plug-ins. Code Analyzer supp
 ## See Also
 
 - [ESLint](https://eslint.org/)
-- [Salesforce Code Analyzer Command Reference](https://forcedotcom.github.io/sfdx-scanner/en/scanner-commands/run/#options)
+- [Salesforce Code Analyzer Command Reference](./en/v2.x/scanner-commands/run/#options)

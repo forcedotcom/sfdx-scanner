@@ -6,7 +6,7 @@ lang: en
 ## sfdx scanner:run
 Scan a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset.
 
-**Note**: To run Salesforce Graph Engine on Code Analyzer version 3.x, you must run a separate command: `scanner:run:dfa`. Learn more in [Introduction to Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/).
+**Note**: To run Salesforce Graph Engine on Code Analyzer version 3.x, you must run a separate command: `scanner:run:dfa`. Learn more in [Introduction to Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
 
 You can specify the format of the output as XML, JUnit, CSV, or table. You can print the output to the console (default) or to a file using the `--outfile` parameter. 
 

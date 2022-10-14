@@ -19,7 +19,7 @@ lang: en
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	{{ site.data.versions.releasedon }}: The latest version v{{ site.data.versions.scanner }} is available&nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
+  	{{ site.data.versions-v2.releasedon }}: The latest version v{{ site.data.versions-v2.scanner }} is available&nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
 </div>
 <br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">

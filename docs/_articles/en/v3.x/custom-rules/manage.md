@@ -12,7 +12,7 @@ Because PMD and ESLint are different engines, their custom rules are handled dif
 ## PMD Custom Rules
 ### Add Rules
 
-Use the ```scanner:rule:add``` [command](./en/v3.x/scanner-commands/add/) to add a custom rule to Salesforce Code Analyzer (Code Analyzer). Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the -p|--path parameter to specify a directory that contains multiple JAR or XML files.
+Use the ```scanner:rule:add``` [command](./en/v3.x/scanner-commands/add/) to add a custom rule to Salesforce Code Analyzer (Code Analyzer). Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the ```-p|--path``` parameter to specify a directory that contains multiple JAR or XML files.
 
 To add one or more custom rules to multiple languages, use a separate ```scanner:rule:add``` for each language.
 
@@ -56,7 +56,7 @@ Use the ``` --force ``` parameter to bypass confirmation of the removal.
 
 ## ESLint Custom Rules
 
-Custom rules on ESLint are handled through Code Analyzer’s [ESLint Custom Configuration](https://forcedotcom.github.io/sfdx-scanner/en/custom-config/eslint/).
+Custom rules on ESLint are handled through Code Analyzer’s [ESLint Custom Configuration](./en/v3.x/custom-config/eslint/).
 
 ### Add Rules
 
