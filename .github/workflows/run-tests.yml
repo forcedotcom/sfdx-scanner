@@ -40,14 +40,87 @@ jobs:
           name: smoke-test-tarball
           path: ./salesforce-sfdx-scanner-*.tgz
   # Step 2: Run our tests.
-  # Step 2A: Linux unit tests
-  unit-tests:
+  # Step 2A: Run the unit tests.
+#  unit-tests:
+#    strategy:
+#      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+#      # to completion instead.
+#      fail-fast: false
+#      matrix:
+#        node: ${{ fromJson(inputs.node-matrix) }}
+#        os: [ubuntu-latest, windows-2019]
+#    runs-on: ${{ matrix.os }}
+#    needs: build-dependencies
+#    steps:
+#      # Check out the code.
+#      - uses: actions/checkout@v2
+#      # Make sure we're using the right versions of Node and Java.
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: ${{ matrix.node }} # Node version is a matrix.
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
+#      # Install Node dependencies.
+#      # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
+#      #       trouble than it's worth. If we see serious performance problems, we can
+#      #       reconsider that assessment.
+#      - run: yarn
+#      # Download the dist artifact, to save ourselves the trouble of rebuilding our
+#      # Java dependencies from scratch.
+#      - uses: actions/download-artifact@v3
+#        with:
+#          name: unit-test-dist
+#          path: ./dist
+#      # Run the unit tests. Use the -quiet variant so SFGE logs don't blow up the console.
+#      - name: Run Tests
+#        run: yarn test-quiet --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+#      # Run the linter
+#      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+#      # Upload the test results and coverage information as artifacts.
+#      - name: Upload node test artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ runner.os }}-node-results
+#          path: |
+#            ./test-results
+#            ./test-coverage
+#      - name: Upload pmd-cataloger test artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ runner.os }}-pmd-cataloger-results
+#          path: |
+#            pmd-cataloger/build/reports
+#            pmd-cataloger/build/test-results
+#      - name: Upload sfge test artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ runner.os }}-sfge-results
+#          path: |
+#            sfge/build/reports
+#            sfge/build/test-results
+#      - name: Upload cli-messaging test artifacts
+#        if: ${{ always() }}
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: ${{ runner.os }}-cli-messaging-results
+#          path: |
+#            cli-messaging/build/reports
+#            cli-messaging/build/test-results
+  # Step 2B: Run the smoke tests
+  smoke-tests:
     strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+      # to completion instead.
       fail-fast: false
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
-        os: [ubuntu-latest, windows-2019]
-    runs-on: ${{ matrix.os }}
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+    runs-on: ${{ matrix.os.vm }}
     needs: build-dependencies
     steps:
       # Check out the code.
@@ -60,53 +133,16 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
-      # Install Node dependencies.
-      # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
-      #       trouble than it's worth. If we see serious performance problems, we can
-      #       reconsider that assessment.
-      - run: yarn
-      # Download the dist artifact, to save ourselves the trouble of rebuilding our
-      # Java dependencies from scratch.
+      # Install Salesforce CLI via NPM
+      - run: npm install -g sfdx-cli
+      # Download and install the tarball artifact built during setup.
       - uses: actions/download-artifact@v3
         with:
-          name: unit-test-dist
-          path: ./dist
-      # Run the unit tests. Use the -quiet variant so SFGE logs don't blow up the console.
-      - name: Run Tests
+          name: smoke-test-tarball
+      - name: Install Tarball
         shell: bash
-        run: yarn test-quiet --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
-      # Run the linter
-      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
-      # Upload the test results and coverage information as artifacts.
-      - name: Upload node test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ runner.os }}-node-results
-          path: |
-            ./test-results
-            ./test-coverage
-      - name: Upload pmd-cataloger test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ runner.os }}-pmd-cataloger-results
-          path: |
-            pmd-cataloger/build/reports
-            pmd-cataloger/build/test-results
-      - name: Upload sfge test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ runner.os }}-sfge-results
-          path: |
-            sfge/build/reports
-            sfge/build/test-results
-      - name: Upload cli-messaging test artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ runner.os }}-cli-messaging-results
-          path: |
-            cli-messaging/build/reports
-            cli-messaging/build/test-results
+        run: |
+          # We need to determine the name of the tarball
+          SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+          # We also need to determine where we are.
+          pwd
