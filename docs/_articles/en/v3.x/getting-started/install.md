@@ -5,7 +5,7 @@ lang: en
 
 ## Install Salesforce Code Analyzer v3.x
 
-**NOTE**: Complete the [prerequisites](./en/getting-started/prerequisites/) before you install this plug-in. Automatic plug-in upgrades don't work with the pilot version 3.x.
+**NOTE**: Complete the [prerequisites](./en/v3.x/getting-started/prerequisites/) before you install this plug-in. Automatic plug-in upgrades don't work with the pilot version 3.x.
 
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_warn" role="alert">
   <span class="slds-assistive-text">warn</span>
