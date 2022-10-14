@@ -143,6 +143,9 @@ jobs:
         shell: bash
         run: |
           # We need to determine the name of the tarball
-          SFDC_TARBALL=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+          TARBALL_NAME=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
           # We also need to determine where we are.
-          pwd
+          CURRENT_DIR=$pwd
+          # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
+          echo y | sfdx plugins:install "file://${CURRENT_DIR}/${TARBALL_NAME}"
+      - run: sfdx scanner:rule:list
