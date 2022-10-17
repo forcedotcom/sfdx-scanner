@@ -42,5 +42,5 @@ jobs:
         with:
           name: beep
           path: ~/download/path
-      - run: echo ${{ steps.download.outputs.download-path }} | tr \\ /
+      - run: echo ${{ steps.download.outputs.download-path }} | tr \ /
         shell: bash
