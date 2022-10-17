@@ -42,5 +42,8 @@ jobs:
         with:
           name: beep
           path: ~/download/path
-      - run: echo ${{ steps.download.outputs.download-path }} | tr \\ \/
+      - run: |
+          BASEDIR=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+          TREATEDDIR=`[[ $BASEDIR = C* ]] && echo $BASEDIR | cut -d':' -f 2 || $BASEDIR`
+          echo $TREATEDDIR
         shell: bash
