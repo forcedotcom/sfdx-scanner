@@ -140,14 +140,20 @@ jobs:
         id: download
         with:
           name: smoke-test-tarball
+          # Download the tarball to subdirectory of HOME, so it's guaranteed
+          # to be in a place where the installation command can see it.
+          path: ~/downloads/tarball
       - run: echo ${{ steps.download.outputs.download-path }}
       - name: Install Tarball
         shell: bash
         run: |
-          # We need to determine the name of the tarball
-          TARBALL_NAME=$(ls | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
-          # We also need to determine where we are.
-          CURRENT_DIR=$(pwd)
+          # We need to determine the tarball's name first.
+          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+          # We need to determine where the tarball is located.
+          # Get the path to the folder, and swap out any backslashes for forward slashes (needed for Windows).
+          RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+          # If the path starts with C:, we need to rip that off (needed for Windows).
+          ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
           # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
-          echo y | sfdx plugins:install "file://${CURRENT_DIR}/${TARBALL_NAME}"
+          echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
       - run: sfdx scanner:rule:list

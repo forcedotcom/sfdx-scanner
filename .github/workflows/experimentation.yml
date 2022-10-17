@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 'lts/*'
       - shell: bash
-        run: echo here is some text > beep.txt
+        run: echo here is some text > salesforce-sfdx-scanner-3.5.1.txt
       - uses: actions/upload-artifact@v3
         with:
           name: beep
