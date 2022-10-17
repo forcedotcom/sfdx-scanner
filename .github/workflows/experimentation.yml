@@ -23,8 +23,15 @@ jobs:
           name: beep
           path: ./beep.txt
   download_the_artifact:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+      # to completion instead.
+      fail-fast: false
+      matrix:
+        node: ${{ fromJson(inputs.node-matrix) }}
+        os: [ { vm: ubuntu-latest, exe: .sh }, { vm: windows-2019, exe: .cmd } ]
+    runs-on: ${{ matrix.os.vm }}
     needs: upload_an_artifact
-    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
