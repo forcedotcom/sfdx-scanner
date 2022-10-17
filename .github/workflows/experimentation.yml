@@ -44,6 +44,6 @@ jobs:
           path: ~/download/path
       - run: |
           BASEDIR=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
-          TREATEDDIR=`[[ $BASEDIR = C* ]] && echo $BASEDIR | cut -d':' -f 2 || $BASEDIR`
+          TREATEDDIR=`[[ $BASEDIR = C* ]] && echo $BASEDIR | cut -d':' -f 2 || echo $BASEDIR`
           echo $TREATEDDIR
         shell: bash
