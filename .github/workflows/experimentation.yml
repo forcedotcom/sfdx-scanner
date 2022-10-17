@@ -30,6 +30,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 'lts/*'
+          path: ~/download/path
       - uses: actions/download-artifact@v3
         id: download
         with:
