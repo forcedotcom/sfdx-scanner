@@ -30,9 +30,9 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: 'lts/*'
-          path: ~/download/path
       - uses: actions/download-artifact@v3
         id: download
         with:
           name: beep
+          path: ~/download/path
       - run: echo ${{ steps.download.outputs.download-path }}
