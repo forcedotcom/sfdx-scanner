@@ -156,4 +156,12 @@ jobs:
           ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
           # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
           echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
-      - run: sfdx scanner:rule:list
+      # The results directory needs to exist.
+      - run: mkdir smoke-test-results
+      # Attempt to execute the smoke tests against the plugin, using the specified script.
+      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: ${{ runner.os }}-smoke-test-results
+          path: smoke-test-results
