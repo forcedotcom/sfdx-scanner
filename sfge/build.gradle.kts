@@ -72,8 +72,8 @@ tasks.test {
 	systemProperty("junit.jupiter.extensions.autodetection.enabled", true)
 	testLogging {
 		events("passed", "skipped", "failed")
-		// Show log4j output during tests
-		showStandardStreams = true
+		// Show log4j output during tests, unless env-var to disable them is set.
+		showStandardStreams = (System.getenv("SFGE_LOGGING") != "false")
 		// Show extra expected info when there is a failure
 		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 	}

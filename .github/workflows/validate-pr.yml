@@ -1,0 +1,20 @@
+name: validate-pr
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronized]
+
+jobs:
+  # We need to verify that the Pull Request's title matches the desired format.
+  verify_pr_title:
+    runs-on: ubuntu-latest
+    name: Verify that PR title contains well-formed GUS work item tag.
+    steps:
+      # Private actions must check out repo first.
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Verify PR title
+        uses: ./github-actions/verify-pr-title
+        id: verify_pr_title
+  # Separately, we also need to run all of our tests.
+  run_tests:
+    uses: ./.github/workflows/run-tests.yml

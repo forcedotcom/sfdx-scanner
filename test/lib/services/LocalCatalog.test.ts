@@ -7,7 +7,7 @@ import { ENGINE, LANGUAGE } from '../../../src/Constants';
 import { Rule, RuleGroup } from '../../../src/types';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
 import { expect } from 'chai';
-import {Controller} from '../../../lib/Controller';
+import {Controller} from '../../../src/Controller';
 
 TestOverrides.initializeTestSetup();
 
