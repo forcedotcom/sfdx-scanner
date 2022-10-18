@@ -44,9 +44,6 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
 		const target = (this.flags.target || []) as string[];
-		if (target.length === -0) {
-			console.log('beep');
-		}
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 
 		const engineOptions = this.gatherEngineOptions();
