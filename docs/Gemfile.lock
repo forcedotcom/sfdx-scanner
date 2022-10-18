@@ -75,6 +75,7 @@ PLATFORMS
 DEPENDENCIES
   jekyll (~> 4.0.1)
   jekyll-feed (~> 0.12)
+  jekyll-redirect-from
   jekyll-sitemap
   octicons
   tzinfo (~> 1.2)
