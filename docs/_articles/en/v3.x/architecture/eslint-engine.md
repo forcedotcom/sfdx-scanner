@@ -1,6 +1,7 @@
 ---
 title: 'ESLint'
 lang: en
+redirect_from: /en/architecture/eslint-engine
 ---
 ## What is ESLint?
 ESLint is a popular linting tool for JavaScript. It provides numerous static analysis rules that help developers write quality code.

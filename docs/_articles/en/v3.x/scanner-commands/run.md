@@ -1,6 +1,7 @@
 ---
 title: Salesforce Code Analyzer Plug-In Command Reference
 lang: en
+redirect_from: /en/scanner-commands/run
 ---
 
 ## sfdx scanner:run

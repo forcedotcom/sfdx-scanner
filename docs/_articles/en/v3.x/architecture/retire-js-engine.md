@@ -1,6 +1,7 @@
 ---
 title: 'RetireJS'
-lang: en
+lang: en'
+redirect_from: /en/architecture/retire-js-engine
 ---
 ## What is RetireJS?
 [RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities. It has a thriving community, and its database of vulnerable libraries is updated frequently.

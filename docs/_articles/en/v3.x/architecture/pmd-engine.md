@@ -1,6 +1,7 @@
 ---
 title: 'PMD'
 lang: en
+redirect_from: /en/architecture/pmd-engine
 ---
 ## What is PMD?
 PMD is a source code analyzer that allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce. Its built-in rules detect common flaws in code, such as empty catch blocks or unused variables.

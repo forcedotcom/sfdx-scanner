@@ -1,6 +1,7 @@
 ---
 title: Install Salesforce Code Analyzer
 lang: en
+redirect_from: /en/getting-started/install
 ---
 
 ## Install Salesforce Code Analyzer v3.x

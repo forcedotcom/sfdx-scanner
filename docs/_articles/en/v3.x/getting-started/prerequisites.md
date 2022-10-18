@@ -1,6 +1,7 @@
 ---
 title: Prerequisites
 lang: en
+redirect_from: /en/getting-started/prerequisites
 ---
 
 ## Prerequisites

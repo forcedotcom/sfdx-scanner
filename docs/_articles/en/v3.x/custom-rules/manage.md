@@ -1,6 +1,7 @@
 ---
 title: Managing Custom Rules
 lang: en
+redirect_from: /en/custom-rules/manage
 ---
 
 ## Different approaches for PMD and ESLint

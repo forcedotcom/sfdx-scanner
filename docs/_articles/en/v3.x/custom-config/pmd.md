@@ -1,6 +1,7 @@
 ---
 title: PMD Custom Configuration
 lang: en
+redirect_from: /en/custom-config/pmd
 ---
 
 ## PMD Custom Configuration

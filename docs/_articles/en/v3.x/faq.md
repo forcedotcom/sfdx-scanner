@@ -1,6 +1,7 @@
 ---
 title: 'Frequently Asked Questions'
 lang: en
+redirect_from: /en/faq
 ---
 ## Salesforce Code Analyzer FAQ
 
