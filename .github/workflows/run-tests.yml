@@ -198,7 +198,7 @@ jobs:
       - name: Self-evaluation
         run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
       # Upload the test results as an artifact.
-      - uses: actions/upload-artifact
+      - uses: actions/upload-artifact@v3
         with:
           name: ${{ runner.os }}-self-eval-results
           path: ./test-results
