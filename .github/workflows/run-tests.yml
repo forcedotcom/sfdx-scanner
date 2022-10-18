@@ -112,56 +112,94 @@ jobs:
 #            cli-messaging/build/reports
 #            cli-messaging/build/test-results
   # Step 2B: Run the smoke tests
-  smoke-tests:
+#  smoke-tests:
+#    strategy:
+#      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+#      # to completion instead.
+#      fail-fast: false
+#      matrix:
+#        node: ${{ fromJson(inputs.node-matrix) }}
+#        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+#    runs-on: ${{ matrix.os.vm }}
+#    needs: build-dependencies
+#    steps:
+#      # Check out the code.
+#      - uses: actions/checkout@v2
+#      # Make sure we're using the right versions of Node and Java.
+#      - uses: actions/setup-node@v2
+#        with:
+#          node-version: ${{ matrix.node }} # Node version is a matrix.
+#      - uses: actions/setup-java@v3
+#        with:
+#          distribution: 'temurin'
+#          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
+#      # Install Salesforce CLI via NPM
+#      - run: npm install -g sfdx-cli
+#      # Download and install the tarball artifact built during setup.
+#      - uses: actions/download-artifact@v3
+#        id: download
+#        with:
+#          name: smoke-test-tarball
+#          # Download the tarball to subdirectory of HOME, so it's guaranteed
+#          # to be in a place where the installation command can see it.
+#          path: ~/downloads/tarball
+#      - run: echo ${{ steps.download.outputs.download-path }}
+#      - name: Install Tarball
+#        shell: bash
+#        run: |
+#          # We need to determine the tarball's name first.
+#          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+#          # We need to determine where the tarball is located.
+#          # Get the path to the folder, and swap out any backslashes for forward slashes (needed for Windows).
+#          RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+#          # If the path starts with C:, we need to rip that off (needed for Windows).
+#          ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
+#          # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
+#          echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
+#      # The results directory needs to exist.
+#      - run: mkdir smoke-test-results
+#      # Attempt to execute the smoke tests against the plugin, using the specified script.
+#      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+#      - uses: actions/upload-artifact@v3
+#        if: ${{ always() }}
+#        with:
+#          name: ${{ runner.os }}-smoke-test-results
+#          path: smoke-test-results
+  # Step 2C: Self-evaluation. Run the plug-in against itself, to make sure we're not violating
+  #          our own rules.
+  # Notes:
+  # - TODO: At present, we do not run PMD against our own Java. In the long-term, we should endeavor to fix this.
+  # - This job has a fair bit of overlap with the build-dependencies job. This isn't a problem per se,
+  #   because the shared steps run quickly enough to not cause undue performance issues. But it's still
+  #   something to be aware of.
+  self-evaluation:
+    runs-on: ubuntu-latest
+    needs: build-dependencies # This job doesn't technically need to run second, but it makes for a cleaner pipeline.
     strategy:
-      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
-      # to completion instead.
       fail-fast: false
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
-        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
-    runs-on: ${{ matrix.os.vm }}
-    needs: build-dependencies
     steps:
-      # Check out the code.
+      # First, we need to get the code.
       - uses: actions/checkout@v2
-      # Make sure we're using the right versions of Node and Java.
+      # Next, make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }} # Node version is a matrix.
+          node-version: 'lts/*' # Always use Node LTS for self-eval.
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
-      # Install Salesforce CLI via NPM
-      - run: npm install -g sfdx-cli
-      # Download and install the tarball artifact built during setup.
-      - uses: actions/download-artifact@v3
-        id: download
+          java-version: '8' # Always use Java v1.8 for building dependencies.
+      # Install/build dependencies.
+      - run: yarn
+      - run: yarn build
+      # Create the results directory.
+      - run: mkdir test-results
+      - name: Self-evaluation
+        run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+      # Upload the test results as an artifact.
+      - uses: actions/upload-artifact
         with:
-          name: smoke-test-tarball
-          # Download the tarball to subdirectory of HOME, so it's guaranteed
-          # to be in a place where the installation command can see it.
-          path: ~/downloads/tarball
-      - run: echo ${{ steps.download.outputs.download-path }}
-      - name: Install Tarball
-        shell: bash
-        run: |
-          # We need to determine the tarball's name first.
-          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
-          # We need to determine where the tarball is located.
-          # Get the path to the folder, and swap out any backslashes for forward slashes (needed for Windows).
-          RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
-          # If the path starts with C:, we need to rip that off (needed for Windows).
-          ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
-          # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
-          echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
-      # The results directory needs to exist.
-      - run: mkdir smoke-test-results
-      # Attempt to execute the smoke tests against the plugin, using the specified script.
-      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
-      - uses: actions/upload-artifact@v3
+          name: ${{ runner.os }}-self-eval-results
+          path: ./test-results
         if: ${{ always() }}
-        with:
-          name: ${{ runner.os }}-smoke-test-results
-          path: smoke-test-results
