@@ -21,11 +21,6 @@ public class TestSfgeConfig implements SfgeConfig {
     }
 
     @Override
-    public boolean shouldIgnoreParseErrors() {
-        return SfgeConfigImpl.getInstance().shouldIgnoreParseErrors();
-    }
-
-    @Override
     public boolean shouldLogWarningsOnVerbose() {
         return SfgeConfigImpl.getInstance().shouldLogWarningsOnVerbose();
     }

@@ -5,8 +5,6 @@ module.exports = {
 	"flags": {
 		"formatDescription": "specify results output format",
 		"formatDescriptionLong": "Specifies results output format written directly to the console.",
-		"ignoreparseerrorsDescription": "ignore compilation failures in scanned files. Alternatively, set value using environment variable `SFGE_IGNORE_PARSE_ERRORS`.",
-		"ignoreparseerrorsDescriptionLong": "Ignores compilation failures in scanned files (default: false). Inherits value from SFGE_IGNORE_PARSE_ERRORS env-var if set.",
 		"normalizesevDescription": "return normalized severity in addition to the engine-specific severity",
 		"normalizesevDescriptionLong": "Returns normalized severity 1 (high), 2 (moderate), and 3 (low) and the engine-specific severity. For the html option, normalized severity is displayed instead of the engine severity.",
 		"outfileDescription": "write output to a file",

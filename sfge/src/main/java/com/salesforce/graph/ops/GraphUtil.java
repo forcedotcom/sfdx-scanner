@@ -11,7 +11,6 @@ import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.apex.jorje.TopLevelWrapper;
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.graph.Schema;
@@ -211,14 +210,7 @@ public final class GraphUtil {
                 progressListener.compiledAnotherFile();
                 return Optional.of(new Util.CompilationDescriptor(pathString, astNodeWrapper));
             } catch (JorjeUtil.JorjeCompilationException ex) {
-                if (SfgeConfigProvider.get().shouldIgnoreParseErrors()) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Error compiling file. path=" + pathString, ex);
-                    }
-                    return Optional.empty();
-                } else {
-                    throw ex;
-                }
+                throw ex;
             }
         }
     }

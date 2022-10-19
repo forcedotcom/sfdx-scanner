@@ -56,16 +56,6 @@ public final class EnvUtil {
     }
 
     /**
-     * Indicates if a Jorje parse error causes the entire process to stop
-     *
-     * @return value of {@link #ENV_IGNORE_PARSE_ERRORS} env variable. If it is not set, {@link
-     *     #DEFAULT_IGNORE_PARSE_ERRORS}
-     */
-    static boolean shouldIgnoreParseErrors() {
-        return getBoolOrDefault(ENV_IGNORE_PARSE_ERRORS, DEFAULT_IGNORE_PARSE_ERRORS);
-    }
-
-    /**
      * Indicates if SFGE should log internal warnings on --verbose
      *
      * @return value of {@link #ENV_LOG_WARNINGS_ON_VERBOSE} env variable. If it is not set, {@link
