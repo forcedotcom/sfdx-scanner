@@ -664,6 +664,16 @@ workflows:
           filters:
             <<: *publishing_filters
           context: salesforce-cli
+      # Step 5: Also tag the release as latest pilot, to give our pilot users continuity.
+      - release-management/promote-package:
+          candidate: latest-rc
+          target: latest-pilot
+          requires:
+            - linux-rc-test
+            - windows-rc-test
+          filters:
+            <<: *publishing_filters
+          context: salesforce-cli
   # Purpose: Run the tarball and unit tests on Linux and Windows, against the LTS and Current versions of node.
   # Triggered by: Nothing. Runs automatically on a daily cadence.
   daily-smoke-test:
