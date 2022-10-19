@@ -1,6 +1,7 @@
 ---
 title: Salesforce Code Analyzer Command Reference
 lang: en
+redirect_from: /en/scanner-commands/describe
 ---
 
 ## sfdx scanner:rule:describe

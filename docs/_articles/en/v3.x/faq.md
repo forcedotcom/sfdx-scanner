@@ -1,6 +1,7 @@
 ---
 title: 'Frequently Asked Questions'
 lang: en
+redirect_from: /en/faq
 ---
 ## Salesforce Code Analyzer FAQ
 
@@ -29,8 +30,8 @@ A: Use [this form](https://www.research.net/r/SalesforceCA) to give us your feed
 #### Q: How do I update Code Analyzer?
 A: You must:
 
-* Update the plug-in to the latest version by following [these instructions](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/getting-started/install/#upgrade-plug-in).
-* To update to a specific version of the plug-in, run: `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}`
+* Update the plug-in to the latest version by following [these instructions](./en/v3.x/getting-started/install/#upgrade-plug-in).
+* To update to a specific version of the plug-in, run: `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v2.scanner }}`
 
 #### Q: How can I use Code Analyzer in my CI/CD?
 A: Use the `sfdx scanner:run` command in any scripts used by your CI/CD. We also recommend that you:

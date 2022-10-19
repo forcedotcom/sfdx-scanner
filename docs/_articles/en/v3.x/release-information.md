@@ -1,6 +1,7 @@
 ---
 title: Release Information
 lang: en
+redirect_from: /en/release-information
 ---
 
 Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer).

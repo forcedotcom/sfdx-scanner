@@ -44,7 +44,7 @@ Have a look at related [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexfls
 - [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
 - [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
 - [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
-- [Frequently Asked Questions](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/faq/)
+- [Frequently Asked Questions](./en/v3.x/faq/)
 
 ## Roadmap
 

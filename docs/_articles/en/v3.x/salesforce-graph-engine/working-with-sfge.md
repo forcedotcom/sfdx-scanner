@@ -15,7 +15,7 @@ A code path must have a sanitizer in between the source and the sink. When the s
 
 A source can lead to multiple sinks. Also, a sink can be reached through multiple sources. In fact, we can have multiple paths between the same source and sink. 
 
-For more information, read [Try it yourself](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/try-it-yourself/).
+For more information, read [Try it yourself](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
 
 ## Invoke Graph Engine through Code Analyzer
 Invoke data-flow-based rules through SFCA by running [scanner:run:dfa](./en/v3.x/scanner-commands/dfa/).
@@ -31,7 +31,7 @@ Here’s a breakdown of the output you see by column name.
 * Source File, Source Line, Source Column. The location where the path begins.
 * Source Type, Source Method. Additional information to help identify the path entry.
 * Rule. The rule that was run which led to the violation.
-* Description. The violation message. For more info on Graph Engine violation messages, read our [FAQ](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/faq/).
+* Description. The violation message. For more info on Graph Engine violation messages, read our [FAQ](./en/v3.x/faq/#q-what-do-the-violation-messages-mean).
 
 ## Add Engine Directives
 

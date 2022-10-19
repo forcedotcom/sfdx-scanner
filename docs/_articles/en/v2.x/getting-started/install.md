@@ -5,26 +5,26 @@ lang: en
 
 ## Install Salesforce Code Analyzer
 
-**NOTE**: Complete the [prerequisites](https://forcedotcom.github.io/sfdx-scanner/en/getting-started/prerequisites/) before you install this plug-in
+**NOTE**: Complete the [prerequisites](./en/v2.x/getting-started/prerequisites/) before you install this plug-in
 
 Install Salesforce Code Analyzer (Code Analyzer) with this simple line of code.
 
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner
 Installing plugin @salesforce/sfdx-scanner...
-installed v{{ site.data.versions.scanner }} 
+installed v{{ site.data.versions-v2.scanner }} 
 ```
 
 #### To check that Code Analyzer is installed, run this command.
 ```bash
 $ sfdx plugins
-@salesforce/sfdx-scanner {{ site.data.versions.scanner }}
+@salesforce/sfdx-scanner {{ site.data.versions-v2.scanner }}
 ```
 #### To install a specific Code Analyzer version, run this command.
 ```bash
-$ sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions.scanner }}
+$ sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v2.scanner }}
 Installing plugin @salesforce/sfdx-scanner... 
-installed v{{ site.data.versions.scanner }}
+installed v{{ site.data.versions-v2.scanner }}
 ```
 
 #### To display Code Analyzer usage and help, run this command.

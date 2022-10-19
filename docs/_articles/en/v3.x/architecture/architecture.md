@@ -1,6 +1,7 @@
 ---
 title: Design
 lang: en
+redirect_from: /en/architecture/architecture
 ---
 
 ## Salesforce Code Analyzer Architecture

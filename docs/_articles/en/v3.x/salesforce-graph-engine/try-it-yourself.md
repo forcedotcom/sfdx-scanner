@@ -8,9 +8,9 @@ lang: en
 
 Salesforce Graph Engine (Graph Engine) works a bit differently from other analyzers. To get started with Graph Engine:
 
-* Read the [Introduction to Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/).
-* Understand [Working with Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/).
-* Install [Salesforce Code Analyzer](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/getting-started/install/).
+* Read the [Introduction to Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
+* Understand [Working with Graph Engine](./en/v3.x/salesforce-graph-engine/working-with-sfge/).
+* Install [Salesforce Code Analyzer](./en/v3.x/getting-started/install/).
 
 Next, run a command to view Graph Engine rules, then install our sample project to try out Graph Engine for yourself.
 
@@ -60,7 +60,7 @@ For example, look at some `AuraEnabledFls.cls` methods that threw violations.
 
 Two `AuraEnabledFls.cls` methods didn’t throw violations.
 * `flsDoneCorrectly()`. All the fields inserted are checked with the FlsHelperClass first. The method is secure, and no violation was thrown.
-* `flsInNonAuraMethod()`. This method isn’t a recognized [entry-point or source](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#dfa-rules), and it isn’t in the call-stack of any entry points. Graph Engine skipped this method even though it’s technically insecure.
+* `flsInNonAuraMethod()`. This method isn’t a recognized [entry-point or source](./en/v3.x/salesforce-graph-engine/rules/#dfa-rules), and it isn’t in the call-stack of any entry points. Graph Engine skipped this method even though it’s technically insecure.
 
 ## Run Graph Engine Against a Single File
 After you fix violations that Graph Engine identified in a specific file, run Graph Engine against that specific file to double-check your work. 
@@ -102,10 +102,10 @@ Running Graph Engine against specific methods has these limitations:
 
 * The syntax is only supported for file paths. You can’t use it with globs or directories.
 * If multiple methods in the target file share the specified name, then all such methods are included. Overloads and inner classes are some examples.
-* Methods specified through method-level targeting are considered [path entrypoints](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#dfa-rules) even when they otherwise wouldn’t be. This misidentification can cause methods that would ordinarily be skipped to be analyzed.
+* Methods specified through method-level targeting are considered [path entrypoints](./en/v3.x/salesforce-graph-engine/rules/#dfa-rules) even when they otherwise wouldn’t be. This misidentification can cause methods that would ordinarily be skipped to be analyzed.
 
 ## Skip a Violation
-Sometimes false positives can occur. Other times, you identify a reason why a CRUD/FLS check is unnecessary, such as your code is only executed from an admin-only page. If you want to skip a violation due to a false positive or other reason, use [engine directives](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/).
+Sometimes false positives can occur. Other times, you identify a reason why a CRUD/FLS check is unnecessary, such as your code is only executed from an admin-only page. If you want to skip a violation due to a false positive or other reason, use [engine directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
 
 To skip a violation using an engine directive:
 
