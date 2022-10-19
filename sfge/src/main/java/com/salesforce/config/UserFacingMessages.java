@@ -23,17 +23,17 @@ public final class UserFacingMessages {
     /** CRUD/FLS Violation messages * */
     // format: "CRUD" or "FLS", DML operation, Object type, Field information
     public static final String VIOLATION_MESSAGE_TEMPLATE =
-            "%1$s validation is missing for [%2$s] operation on [%3$s]%4$s";
+            "%1$s validation is missing for [%2$s] operation on [%3$s]%4$s.";
 
     public static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
             "For stripInaccessible checks on READ operation, Salesforce Graph Engine can't verify that only sanitized data is used after the check. Discard unsanitized data for [%2$s].";
 
     public static final String UNRESOLVED_CRUD_FLS_TEMPLATE =
-            "Salesforce Graph Engine couldn't resolve the parameter passed to [%2$s] operation %4$s. Confirm that this operation has the necessary %1$s checks.";
+            "Salesforce Graph Engine couldn't resolve the parameter passed to [%2$s] operation%4$s. Confirm that this operation has the necessary %1$s checks.";
 
     public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
     public static final String FIELD_HANDLING_NOTICE =
-            " Confirm that the objects and fields involved in these segments have FLS checks: [%s].";
+            ". Confirm that the objects and fields involved in these segments have FLS checks: [%s]";
 
     public static final String INVALID_SYNTAX_TEMPLATE = "Invalid syntax at %d:%d. (%s)";
 
