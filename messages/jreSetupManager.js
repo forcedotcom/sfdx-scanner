@@ -3,8 +3,8 @@ const fixInstructions =
 If the problem persists, please manually add a 'javaHome' property to your Config.json file, referencing your Java home directory.`;
 
 module.exports = {
-	"NoJavaHomeFound": `No Java Home detected.\n${fixInstructions}`,
-	"InvalidJavaHome": `Invalid Java Home: %s. Error code: %s.\n${fixInstructions}`,
-	"VersionNotFound": `Unable to find Java version.\n${fixInstructions}`,
-	"InvalidVersion": "Java version %s not supported. Please install Java 1.8 or later."
+	"NoJavaHomeFound": `We couldn't find Java Home.\n${fixInstructions}`,
+	"InvalidJavaHome": `The Java Home is invalid: %s. Error code: %s.\n${fixInstructions}`,
+	"VersionNotFound": `We couldn't find the Java version.\n${fixInstructions}`,
+	"InvalidVersion": "Java version %s isn't supported. Install Java 1.8 or later."
 };

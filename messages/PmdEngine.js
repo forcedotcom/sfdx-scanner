@@ -1,6 +1,6 @@
 module.exports = {
-	"ConfigNotFound": "PMD Config file (%s) is not found.",
+	"ConfigNotFound": "The PMD config file %s couldn't be found.",
 	"errorTemplates": {
-		"rulesetNotFoundTemplate": "PMD cannot find '%s', the source file for rule '%s'. Please double-check spelling."
+		"rulesetNotFoundTemplate": "PMD couldn't find the source file %s for rule %s. Review the source and rule, and try again."
 	}
 };

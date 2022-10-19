@@ -1,16 +1,13 @@
 module.exports = {
 	"commandDescription": "provide detailed information about a rule",
-	"commandDescriptionLong": `Use this command to better understand a particular rule.
-	For each rule, you can find information about the language it works on,
-	the violation it detects as well as an example code of how the violation looks.
-	The description also includes the categories and rulesets that the rule belongs to.`,
+	"commandDescriptionLong": `Provides detailed information about a rule. Information includes the rule's language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.`,
 	"flags": {
 		"rulenameDescription": "the name of a rule",
-		"rulenameDescriptionLong": "Name of the rule to describe in more detail."
+		"rulenameDescriptionLong": "The name of the rule."
 	},
 	"output": {
-		"noMatchingRules": "No rules exist with the name '%s'",
-		"multipleMatchingRules": "Found %s rules with the name '%s'"
+		"noMatchingRules": "No rules were found with the name '%s'.",
+		"multipleMatchingRules": "%s rules with the name '%s' were found."
 	},
 	"examples": {
 		// The example for when only one rule matches the provided name.

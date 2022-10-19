@@ -1,3 +1,3 @@
 module.exports = {
-	"InvalidLanguageAlias": "Config.json specifies invalid language %s."
+	"InvalidLanguageAlias": "The %s file contains invalid language: %s."
 };

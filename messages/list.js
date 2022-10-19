@@ -1,19 +1,17 @@
 module.exports = {
-	"commandDescription": "lists basic information about all rules matching provided criteria",
-	"commandDescriptionLong": `Lists all the rules available in the catalog. To look at a smaller set of rules,
-	use the filter options available. To get more information about a specific rule,
-	you can use the scanner:rule:describe command.`,
+	"commandDescription": "list basic information about all rules matching provided criteria",
+	"commandDescriptionLong": `Lists all the rules available in the catalog. You can filter the output to view a smaller set of rules. To get more information about a specific rule, use the \`scanner:rule:describe\` command.`,
 	"flags": {
-		"languageDescription": "language(s) to filter list by",
-		"languageDescriptionLong": "Filters the list based on the specified languages. Specify multiple languages as a comma-separated list. See the PMD CLI documentation for a list of supported languages.",
-		"categoryDescription": "categories to filter list by",
-		"categoryDescriptionLong": "Select rules by category. Enter multiple values as a comma-separated list. E.g., 'Best Practices',Performance ",
-		"rulesetDescription": "[deprecated] ruleset(s) to filter list by",
-		"rulesetDescriptionLong": "[Deprecated] Select rules by ruleset. Enter multiple values as a comma-separated list.",
-		'engineDescription': "engine(s) to filter list by",
-		'engineDescriptionLong': "Filters the list based on the specified engines. Specify multiple engines as a comma-separated list."
+		"languageDescription": "select rules by language",
+		"languageDescriptionLong": "Selects rules by language. Enter multiple values as a comma-separated list.",
+		"categoryDescription": "select rules by category",
+		"categoryDescriptionLong": "Selects rules by category. Enter multiple values as a comma-separated list.",
+		"rulesetDescription": "[deprecated] select rules by ruleset",
+		"rulesetDescriptionLong": "[deprecated] Selects rules by ruleset. Enter multiple values as a comma-separated list.",
+		'engineDescription': "select rules by engine",
+		'engineDescriptionLong': "Selects rules by engine. Specify multiple engines as a comma-separated list."
 	},
-	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
+	"rulesetDeprecation": "The 'ruleset' command parameter is deprecated. Use 'category' instead",
 	"columnNames": {
 		"name": "name",
 		"languages": "languages",
@@ -21,23 +19,20 @@ module.exports = {
 		"rulesets": "rulesets [dep]",
 		"engine": "engine"
 	},
-	"examples": `Invoking with no filter criteria returns all rules.
-	E.g., $ sfdx scanner:rule:list
-		Returns a table containing all rules.
+	"examples": `Invoking without filter criteria returns all rules.
+This example returns a table containing all rules.
+	$ sfdx scanner:rule:list
 
 The values supplied to a single filter are handled with a logical OR.
-	E.g., $ sfdx scanner:rule:list --language apex,javascript
-		Returns all rules for Apex OR Javascript.
+This example returns all rules for Apex OR Javascript.
+	$ sfdx scanner:rule:list --language apex,javascript
 
-Categories can be excluded by specifying the negation operator, the values must be enclosed in single quotes.
-	E.g., $ sfdx scanner:rule:list --category '!Design,!Best Practices'
-		Returns all rules except those in the Design or Best Practices categories.
+Exclude categories by specifying the negation operator and enclose the values in single quotes.
+This example returns all rules except those in the Design or Best Practices categories.
+	$ sfdx scanner:rule:list --category '!Design,!Best Practices'
 
 Different filters are combined with a logical AND.
-	E.g., $ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
-		Returns all rules that:
-		1) Target Apex OR Javascript,
-		AND...
-		2) Are members of the Braces OR Security rulesets.
-	`
+This example returns all rules that target Apex or Javascript, and are members of the Braces or Security rulesets.
+	$ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
+`
 };

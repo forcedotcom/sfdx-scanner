@@ -172,6 +172,10 @@ export class Config {
 		}
 	}
 
+	public getConfigFilePath(): string {
+		return this.configFilePath;
+	}
+
 	public async setJavaHome(value: string): Promise<void> {
 		this.configContent.javaHome = value;
 		await this.writeConfig();

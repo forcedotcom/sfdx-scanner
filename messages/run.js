@@ -1,101 +1,100 @@
 module.exports = {
-	"commandDescription": "evaluate a selection of pathless rules against a codebase",
-	"commandDescriptionLong": `Scan codebase with all pathless rules by default
-	or with a chosen set of rules if using rulename/category/ruleset filters.
-	You can choose the format of output and decide between printing the results directly
-	or as contents of a file that you provide with --outfile flag.`,
+	"commandDescription": "scan a codebase with a selection of rules",
+	"commandDescriptionLong": `Scans a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. You can specify the format of the output, such as XML or JUnit. You can print the output to the console (default) or to a file using the --outfile parameter.`,
 	"flags": {
-		"categoryDescription": "categor(ies) of rules to run",
-		"categoryDescriptionLong": "One or more categories of rules to run. Multiple values can be specified as a comma-separated list.",
-		"rulesetDescription": "[deprecated] ruleset(s) of rules to run",
-		"rulesetDescriptionLong": "[Deprecated] One or more rulesets to run. Multiple values can be specified as a comma-separated list.",
-		"targetDescription": "location of source code",
-		"targetDescriptionLong": "Source code location. May use glob patterns. Multiple values can be specified as a comma-separated list",
-		"formatDescription": "format of results",
+		"categoryDescription": "one or more categories of rules to run",
+		"categoryDescriptionLong": "One or more categories of rules to run. Specify multiple values as a comma-separated list.",
+		"rulesetDescription": "[deprecated] ruleset to run",
+		"rulesetDescriptionLong": "[dfeprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.",
+		"targetDescription": "source code location",
+		"targetDescriptionLong": "Source code location. May use glob patterns. Specify multiple values as a comma-separated list.",
+		"formatDescription": "specify results output format",
 		"formatDescriptionLong": "Specifies output format with results written directly to the console.",
-		"outfileDescription": "location of output file",
-		"outfileDescriptionLong": "Write output to a file.",
-		"envDescription": "JSON-formatted string, overrides ESLint's default environment variables",
-		"envDescriptionLong": "JSON-formatted string. Overrides ESLint's default environmental variables.",
-		"envParamDeprecationWarning": "--env parameter is being deprecated, and will be removed in a future release.",
+		"outfileDescription": "write output to a file",
+		"outfileDescriptionLong": "Writes output to a file.",
+		"envDescription": "override ESLint's default environment variables, in JSON-formatted string",
+		"envDescriptionLong": "Overrides ESLint's default environmental variables, in JSON-formatted string.",
+		"envParamDeprecationWarning": "[deprecated] --env parameter is being deprecated, and will be removed in a future release.",
 		"tsconfigDescription": "location of tsconfig.json file",
 		"tsconfigDescriptionLong": "Location of tsconfig.json file used by eslint-typescript engine.",
-		"stDescription": "throws an error when violations of specific severity (or more severe) are detected, invokes --normalize-severity",
-        "stDescriptionLong": "Throws an error if violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag",
-		"nsDescription": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity",
-        "nsDescriptionLong": "A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity",
-		'engineDescription': "engine(s) to run",
-		'engineDescriptionLong': "One or more engines to run. Multiple values can be specified as a comma-separated list.",
-		'eslintConfigDescription': 'location of eslintrc config to customize eslint engine',
-		'eslintConfigDescriptionLong': 'Location of eslintrc to customize eslint engine',
-		'pmdConfigDescription': 'location of PMD rule reference XML file to customize rule selection',
-		'pmdConfigDescriptionLong': 'Location of PMD rule reference XML file to customize rule selection',
-		"verboseViolationsDescription": "retire-js violation messages include more details",
-        "verboseViolationsDescriptionLong": "retire-js violation messages contain details about each vulnerability (e.g. summary, CVE, urls, etc.)"
-
+		"stDescription": "throw an error when a violation threshold is reached, the --normalize-severity is invoked, and severity levels are reset to the baseline",
+        "stDescriptionLong": "Throws an error when violations are found with equal or greater severity than the provided value. --normalize-severity is invoked and severity levels are reset to the baseline. Normalized severity values are: 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation.",
+		"nsDescription": "return normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine-specific severity",
+        "nsDescriptionLong": "Returns normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity.",
+		'engineDescription': "specify which engines to run",
+		'engineDescriptionLong': "Specifies one or more engines to run. Submit multiple values as a comma-separated list.",
+		'eslintConfigDescription': 'specify the location of eslintrc config to customize eslint engine',
+		'eslintConfigDescriptionLong': 'Specifies the location of eslintrc config to customize eslint engine.',
+		'pmdConfigDescription': 'specify location of PMD rule reference XML file to customize rule selection',
+		'pmdConfigDescriptionLong': 'Specifies the location of PMD rule reference XML file to customize rule selection.',
+		"verboseViolationsDescription": "return retire-js violation message details",
+        "verboseViolationsDescriptionLong": "Returns retire-js violation messages details about each vulnerability, including summary, Common Vulnerabilities and Exposures (CVE), and URLs."
 	},
 	"validations": {
-		"methodLevelTargetingDisallowed": "Target '%s' is invalid, as this command does not support method-level targeting",
-		"outfileFormatMismatch": "Your chosen format %s does not appear to match your output file type of %s.",
+		"methodLevelTargetingDisallowed": "The target '%s' is invalid because method-level targeting isn't supported with this command.",
+		"outfileFormatMismatch": "The selected output format doesn't match the output file type. Output format: %s. Output file type: %s.",
 		"outfileMustBeValid": "--outfile must be a well-formed filepath.",
-		"outfileMustBeSupportedType": "--outfile must be of a supported type. Current options are: .csv; .xml; .json; .html; .sarif.",
-		"cannotWriteTableToFile": "Format 'table' cannot be written to a file. Please specify a different format.",
-		"tsConfigEslintConfigExclusive": "You cannot specify --tsconfig flag if you have specified --eslintconfig flag. Please provide tsconfig path within the eslint config file under 'parseOptions.project'."
+		"outfileMustBeSupportedType": "--outfile must be of a supported type: .csv; .xml; .json; .html; .sarif.",
+		"cannotWriteTableToFile": "Format 'table' can't be written to a file. Specify a different format.",
+		"tsConfigEslintConfigExclusive": "A --tsconfig flag can't be specified with an --eslintconfig flag. Review your tsconfig path in the eslint config file under 'parseOptions.project'.",
 	},
 	"output": {
 		"noViolationsDetected": "Executed engines: %s. No rule violations found.",
 		"invalidEnvJson": "--env parameter must be a well-formed JSON.",
 		"engineSummaryTemplate": "Executed %s, found %s violation(s) across %s file(s).",
-		"writtenToOutFile": "Rule violations have been written to %s.",
-		"writtenToConsole": "Rule violations logged to console above.",
-		"sevThresholdSummary": "Detected rule violations of severity %s or more severe.",
-		"pleaseSeeAbove": "Please see the logs above.",
-		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config (using --pmdconfig or --eslintconfig flags). Please modify your config file to reflect the filtering you need."
+		"writtenToOutFile": "Rule violations were written to %s.",
+		"writtenToConsole": "Rule violations were logged to the console.",
+		"sevThresholdSummary": "Rule violations of severity %s or more severe were detected.",
+		"pleaseSeeAbove": "Review the logs.",
+		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config using --pmdconfig or --eslintconfig flags. Modify your config file to include your filters."
 	},
-	"rulesetDeprecation": "'ruleset' command parameter is deprecated. Please use 'category' instead",
-	"examples": `Invoking without specifying any rules causes all rules to be run.
-	E.g., $ sfdx scanner:run --format xml --target "somefile.js"
-		Evaluates all rules against somefile.js.
+	"rulesetDeprecation": "The 'ruleset' command parameter is deprecated. Use 'category' instead.",
+	"examples": `Invoking code analyzer without specifying any rules causes all rules to be run.
+This example evaluates all rules against somefile.js.
+	$ sfdx scanner:run --format xml --target "somefile.js"
 
-	Specifying multiple categories is treated as a logical OR.
-		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices"
-			Evaluates all rules in the Design or Best Practices categories.
+When you specify multiple categories or rulesets, the results are combined with a logical OR.
+This example evaluates all rules in the Design and Best Practices categories.
+	$ sfdx scanner:run --format xml --target "somefile.js" --
 
-	Categories can be excluded by specifying the negation operator, the values must be enclosed in single quotes.
-		E.g., $ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
-			Evaluates all rules except those in the Design or Best Practices categories.
+Exclude categories by specifying the negation operator and enclosing the values in single quotes.
+This example evaluates all rules except those in the Design or Best Practices categories.
+	$ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
 
-	Wrap globs in quotes.
-		Unix example:    $ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
-		Windows example: > sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...
-			Evaluate rules against all .js files below the current directory, except for IgnoreMe.js.
+Wrap globs in quotes. These examples evaluate rules against all .js files in the current directory, except for IgnoreMe.js.
+Unix example:
+	$ sfdx scanner:run --target './**/*.js,!./**/IgnoreMe.js' ...
+Windows example:
+	$ sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...
 
-	Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
-		E.g., sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
-			Scans the project contained in '/my-project' if the current working directory is another directory.
+Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
+This example scans the project contained in '/my-project' if the current working directory is another directory.
+	$ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 
-	Use --env to override the default ESLint environment variables to add frameworks.
-		E.g., $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
-			Evaluates rules against somefile.js, including Jasmine in the environment variables.
+Uses --env to override the default ESLint environment variables to add frameworks.
+This example evaluates rules against somefile.js, including Jasmine in the environment variables.
+	$ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 
-	Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
-		E.g., $ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
-			Evaluates rules against somefile.js, using eslint-lwc and pmd engines.
+Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
+This example evaluates rules aginst somefile.js using eslint-lwc and pmd engines.
+	$ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 
-	Use --engine to invoke engines that are not enabled by default.
-		E.g, $ sfdx scanner:run --target "/some/dir" --engine cpd
-			Executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages.
+Use --engine to invoke engines that are not enabled by default.
+This example executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages.
+	$ sfdx scanner:run --target "/some/dir" --engine cpd
 
-	To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
-		E.g, $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
+To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+This example executes rules defined in pmd_rule_ref.xml against the files in 'src'.
+	$ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 
-	To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
-		E.g., $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
+To use ESLint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+This example uses a custom config to scan the files in 'src'.
+	$ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 
-	Use --normalize-severity to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown).
-		E.g., $ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
+This example uses --normalize-severity to output normalized severity and engine-specific severity across all engines. Normalized severity is: 1 (high), 2 (moderate), and 3 (low).
+	$ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
 
-	Use --severity-threshold to throw a non-zero exit code when rule violations of a specific normalized severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
-		E.g., $ sfdx scanner:run --target "/some-project/" --severity-threshold 2
-	`
+This example uses --severity-threshold to throw a non-zero exit code when rule violations of normalized severity 2 or greater are found. If any violations with the specified severity (or greater) are found, the exit code equals the severity of the most severe violation.
+	$ sfdx scanner:run --target "/some-project/" --severity-threshold 2
+`
 };

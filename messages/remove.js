@@ -1,41 +1,37 @@
 module.exports = {
-	"commandDescription": "removes custom rules from the registry of available rules",
-	"commandDescriptionLong": `Removes custom rules from the registry of available rules. Use the --path parameter to
-specify one or more paths to remove, or omit it to receive a list of all valid custom paths.`,
+	"commandDescription": "remove custom rules from the registry of available rules",
+	"commandDescriptionLong": `Removes custom rules from the registry of available rules. Use the \`-p|--path\` parameter to specify one or more paths to remove. If you don't specify any parameters, the command lists all valid custom paths but doesn't remove any.`,
 	"flags": {
-		"forceDescription": "bypass the confirmation prompt and immediately unregister the rules",
-		"forceDescriptionLong": "Bypass the confirmation prompt and immediately unregister the rules.",
-		"pathDescription": "one or more paths to deregister",
-		"pathDescriptionLong": "One or more paths to deregister. Specify multiple values with a comma-separated list."
+		"forceDescription": "bypass the confirmation prompt and immediately remove the rules",
+		"forceDescriptionLong": "Bypasses the confirmation prompt and immediately removes the rules.",
+		"pathDescription": "one or more paths to remove",
+		"pathDescriptionLong": "One or more paths to remove. Specify multiple values with a comma-separated list."
 	},
 	"validations": {
-		"pathCannotBeEmpty": "Path cannot be empty"
+		"pathCannotBeEmpty": "Specify at least one path."
 	},
 	"errors": {
 		"noMatchingPaths": "No registered custom rules match the provided paths."
 	},
 	"output": {
-		"aborted": "Operation aborted.",
-		"dryRunReturnedNoRules": "No custom rules currently registered.",
+		"aborted": "The operation stopped.",
+		"dryRunReturnedNoRules": "No custom rules are registered.",
 		"dryRunOutput": "%i custom path(s) available for removal:\n%s",
 		// Use a bit of leading whitespace so the paths hang underneath the initial line.
 		"dryRunRuleTemplate": "   %s",
 		// Use a bit of leading whitespace so the rules hang underneath the initial line.
 		"ruleTemplate": "   '%s', defined in %s",
-		"deletionPrompt": "NOTE: This action will unregister the following %i rule(s):\n%s\nDo you wish to proceed? (y/n)",
-		"resultSummary": "Successfully unregistered all rules defined in %s.",
+		"deletionPrompt": "These rules will be unregistered:\n%s\nDo you wish to proceed? (y/n)",
+		"resultSummary": "Success. These rules were deregistered: %s.",
 	},
-	"examples": `Run the command with no arguments to see a list of all currently registered custom paths.
-	E.g., $ sfdx scanner:rule:remove
-		Returns all registered custom paths.
+	"examples": `This example runs the command without arguments to see a list of registered custom paths.
+	$ sfdx scanner:rule:remove
 
-You may use the --path parameter to specify one or more paths to remove.
-	E.g., $ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
-		Deregisters the rules defined in somerules.jar and any JARs/XMLs contained in the rules folder.
+This example uses the --path parameter to deregister the rules defined in somerules.jar and any JARs/XMLs contained in the rules folder.
+	$ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
 
-By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed.
-The --force flag may be used to bypass that confirmation.
-	E.g., $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
-		Deregisters somerules.jar without requiring confirmation.
+By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed. To bypass that confirmation, use the --force flag.
+This example uses the --force flag to bypass the confirmation prompt, removing all rules defined in somerules.jar.
+	$ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
 `
 };
