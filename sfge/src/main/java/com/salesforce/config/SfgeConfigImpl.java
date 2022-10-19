@@ -21,11 +21,6 @@ public final class SfgeConfigImpl implements SfgeConfig {
     }
 
     @Override
-    public boolean shouldIgnoreParseErrors() {
-        return EnvUtil.shouldIgnoreParseErrors();
-    }
-
-    @Override
     public boolean shouldLogWarningsOnVerbose() {
         return EnvUtil.shouldLogWarningsOnVerbose();
     }

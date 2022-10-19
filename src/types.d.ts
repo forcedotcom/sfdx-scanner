@@ -176,6 +176,5 @@ export type SfgeConfig = {
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;
-	ignoreParseErrors?: boolean;
 	jvmArgs?: string;
 };

@@ -35,7 +35,6 @@ interface SfgeWrapperOptions {
 	jvmArgs?: string,
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
-	ignoreParseErrors?: boolean;
 	ruleDisableWarningViolation?: boolean;
 }
 
@@ -92,7 +91,6 @@ export class SfgeWrapper extends CommandLineSupport {
 	private jvmArgs: string;
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
-	private ignoreParseErrors: boolean;
 	private ruleDisableWarningViolation: boolean;
 
 	constructor(options: SfgeWrapperOptions) {
@@ -105,7 +103,6 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.jvmArgs = options.jvmArgs;
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
-		this.ignoreParseErrors = options.ignoreParseErrors;
 		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
 	}
 
@@ -179,9 +176,6 @@ export class SfgeWrapper extends CommandLineSupport {
 		if (this.ruleThreadTimeout != null) {
 			args.push(`-DSFGE_RULE_THREAD_TIMEOUT=${this.ruleThreadTimeout}`);
 		}
-		if (this.ignoreParseErrors != null) {
-			args.push(`-DSFGE_IGNORE_PARSE_ERRORS=${this.ignoreParseErrors.toString()}`);
-		}
 		if (this.ruleDisableWarningViolation != null) {
 			args.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
 		}
@@ -248,8 +242,7 @@ export class SfgeWrapper extends CommandLineSupport {
 			jvmArgs: sfgeConfig.jvmArgs,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
-			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation,
-			ignoreParseErrors: sfgeConfig.ignoreParseErrors
+			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation
 		});
 		return wrapper.execute();
 	}
