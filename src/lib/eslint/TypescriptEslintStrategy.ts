@@ -224,7 +224,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			if (!(await this.fileHandler.exists(tsConfigFromOptions))) {
 				// Specified in the engineOptions but it isn't a file
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'NotAFileTsConfigFromOptions',
-					[tsConfigFromOptions]);
+					[TS_CONFIG, tsConfigFromOptions]);
 			} else if (path.basename(tsConfigFromOptions).toLowerCase() !== TS_CONFIG) {
 				// Found the file, but it's not named tsconfig.json
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'InvalidNameTsConfigFromOptions',

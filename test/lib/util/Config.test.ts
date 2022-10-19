@@ -422,21 +422,21 @@ describe('Config.ts', () => {
 					await config.isEngineEnabled(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', 'pmd', null]));
+					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
 					await config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', 'eslint-typescript', 15]));
+					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'eslint-typescript', 15]));
 				}
 
 				try {
 					await config.getTargetPatterns(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue', ['targetPatterns', 'pmd', null]));
+					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue', ['targetPatterns', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
@@ -444,7 +444,7 @@ describe('Config.ts', () => {
 					fail('Expected error was not thrown');
 				} catch (e) {
 					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue',
-						['targetPatterns', 'eslint-typescript', String([1, 2, 3])]));
+						['targetPatterns', config.getConfigFilePath(), 'eslint-typescript', String([1, 2, 3])]));
 				}
 			});
 
