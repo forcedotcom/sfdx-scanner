@@ -1,5 +1,5 @@
 ---
-title: Salesforce Code Analyzer Plug-In Command Reference
+title: Salesforce Code Analyzer Command Reference
 lang: en
 ---
 
@@ -60,40 +60,35 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
 
 ## Environment-variable-based Controls
 
+### *SFGE_JVM_ARGS*
+Set SFGE_JVM_ARGS to work around [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) and other JVM issues while executing scanner:run:dfa command. Refer to JVM documentation for more info. The equivalent flag on the `scanner:run:dfa` command is `--sfgejvmargs`.
+
+### *SFGE_RULE_DISABLE_WARNING_VIOLATION*
+Set to true to suppress warning violations, such as those related to `StripInaccessable` READ access (default: false). The equivalent flag on the `scanner:run:dfa` command is `--ignore-parse-errors`.
+
 ### *SFGE_RULE_THREAD_COUNT*
-Default value is 4. Modify this variable to adjust the number of threads that will each execute DFA-based rules. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-count`.
+Modify SFGE_RULE_THREAD_COUNT to adjust the number of threads that will each execute DFA-based rules (default: 4). The equivalent flag on the `scanner:run:dfa` command is `--rule-thread-count`.
 
 ### *SFGE_RULE_THREAD_TIMEOUT*
-Default value is 900,000ms (15 minutes). Modify this variable to adjust how long DFA-based rules can execute before timing out. You can use this to allow SFGE to run for longer to analyze more complex code. Equivalent flag on `scanner:run:dfa` command is `--rule-thread-timeout`.
+Modify SFGE_RULE_THREAD_COUNT to adjust how long DFA-based rules execute before timing out (default: 900,000 ms or 15 minutes). Allows Salesforce Graph Engine to run longer and analyze more complex code. The equivalent flag on the `scanner:run:dfa` command is `--rule-thread-timeout`.
 
-### *SFGE_IGNORE_PARSE_ERRORS*
-By default, this value is true. Set this variable to false to force SFGE to ignore parse errors. This is not recommended since the analysis results will be incorrect. Equivalent flag on `scanner:run:dfa` command is `--ignore-parse-errors`.
+## Examples
 
-### *SFGE_JVM_ARGS*
-Set this variable to override default JVM settings while executing `scanner:run:dfa` command. Equivalent flag on `scanner:run:dfa` command is `--sfgejvmargs`. This flag helps decrease the probability of [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error).
+These examples follow Graph Engine syntax: The paths for all files in `--projectdir` are specified through `--target`. When using globs, wrap them in quotes.
 
-## Example
-  The paths specified for `--projectdir` must cumulatively contain all files specified through `--target`.
-
-Good: 
+Good Examples: 
           
     $ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
 
-
-Good: 
-
     $ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./"
-  		
-Good: 
 
     $ sfdx scanner:run:dfa --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
   		
-Bad:  
+Bad Example:  
 
     $ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./myproject"
 
-
-Wrap globs in quotes.
+These two examples evaluate rules against all `.cls` files below the current directory, except for `IgnoreMe.cls`.
 
 Unix example:    
 
@@ -104,53 +99,33 @@ Windows example:
 
     > sfdx scanner:run:dfa --target ".\**\*.cls,!.\**\IgnoreMe.cls" ...
 
-
-Evaluate rules against all .cls files below the current directory, except for IgnoreMe.cls.
-
-Individual methods within a file may be targeted by suffixing the file's path with a hash (#), and a semi-colon-delimited
-	list of method names. This syntax is incompatible with globs and directories. E.g.,
+This example targets individual methods within a file. It uses a suffix of the file's path plus a hash (#) and a semi-colon-delimited list of method names. This syntax is incompatible with globs and directories. This example also evaluates rules against all methods named `Method1` or `Method2` in `File1.cls`, and all methods named `Method3` in `File2.cls`.
 		
 	$ sfdx scanner:run:dfa --target "./File1.cls#Method1;Method2,./File2.cls#Method3" ...
 
-Evaluates rules against ALL methods named `Method1` or `Method2` in `File1.cls`, and ALL methods named `Method3` in `File2.cls`.
-
-
-Use `--normalize-severity` to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in 
-  addition to the engine specific severity (when shown).
-  Example:
+This example uses `--normalize-severity` to output a normalized severity across all engines in addition to the engine-specific severity. Values are 1 (high), 2 (moderate), and 3 (low).
 
   	$ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --format csv --normalize-severity
 
 
-Use `--severity-threshold` to throw a non-zero exit code when rule violations of a specific normalized severity (or 
-  greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 
-  1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation.
-Example:
+This example uses `--severity-threshold` to throw a non-zero exit code when rule violations of a specific normalized severity or 
+  greater are found. When there are rule violations with moderate (1) or high (2) severity, the exit code equals the severity of the most severe violation.
 
     $ sfdx scanner:run:dfa --target "/some-project/" --projectdir "/some-project/" --severity-threshold 2
 
 
-Use `--rule-thread-count` to allow more (or fewer) entrypoints to be evaluated concurrently.
-Example:
+This example uses `--rule-thread-count` so more or fewer entry points can be evaluated concurrently.
     
     $ sfdx scanner:run:dfa --rule-thread-count 6
 
 
-Use `--rule-thread-timeout` to increase (or decrease) the maximum runtime for a single entrypoint evaluation.
-Example:
+This example uses `--rule-thread-timeout` to increase or decrease the maximum runtime for a single entry point evaluation. You can increase the timeout from 15 minutes (default) up to 150 minutes.
 
     $ sfdx scanner:run:dfa --rule-thread-timeout 9000000 ...
-  			
-Increases timeout from 15 minutes (default) to 150 minutes.
-
-
-Use `--sfgejvmargs` to pass JVM args to override system defaults while executing Graph Engine's rules. 
-Example:
+  
+This example uses `--sfgejvmargs` to pass JVM args to override system defaults while executing Graph Engine's rules. It overrides the system's default heapspace allocation to 2 GB and decreases the likelihood of encountering an OutOfMemory error.
 		
     $ sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" ...
-			
-Overrides system's default heapspace allocation to 2g and decreases the likelihood of encountering OutOfMemory error.
-
 
 ## Demo
 ![DFA Example](./assets/images/dfa.gif)
