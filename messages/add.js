@@ -20,12 +20,12 @@ module.exports = {
 See PMD's documentation for more information on writing rules.
 
 This example shows how to specify two JAR files directly.
-	% sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
+	$ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar"
 		Successfully added rules for apex.
 		2 path(s) added:
 		/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar
 
 This example shows how to specify a directory containing one or more JARs, all of which are added to the registry.
-	% sfdx scanner:rule:add --language apex --path "/Users/me/rules"
+	$ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
 		Successfully added rules for apex.`
 };
