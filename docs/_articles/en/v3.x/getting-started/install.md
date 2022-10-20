@@ -69,4 +69,5 @@ sfdx plugins:uninstall @salesforce/sfdx-scanner
 ## See Also
 
 [Salesforce CLI Setup Guide: Update Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_update_cli.htm#sfdx_setup_update_cli)
+
 [Salesforce CLI Setup Guide: Troubleshoot Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_troubleshoot.htm)
