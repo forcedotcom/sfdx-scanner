@@ -2,7 +2,7 @@ module.exports = {
 	"commandDescription": "provide detailed information about a rule",
 	"commandDescriptionLong": `Provides detailed information about a rule. Information includes the rule's language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.`,
 	"flags": {
-		"rulenameDescription": "the name of a rule",
+		"rulenameDescription": "the name of the rule",
 		"rulenameDescriptionLong": "The name of the rule."
 	},
 	"output": {

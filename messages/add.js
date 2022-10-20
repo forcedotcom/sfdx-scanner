@@ -25,7 +25,6 @@ This example shows how to specify two JAR files directly.
 		2 path(s) added:
 		/Users/me/rules/Jar1.jar,/Users/me/rules/Jar2.jar
 
-You can also specify a directory containing one or more JARs, all of which will be added.
 This example shows how to specify a directory containing one or more JARs, all of which are added to the registry.
 	% sfdx scanner:rule:add --language apex --path "/Users/me/rules"
 		Successfully added rules for apex.`

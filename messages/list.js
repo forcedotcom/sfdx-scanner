@@ -9,7 +9,7 @@ module.exports = {
 		"rulesetDescription": "[deprecated] select rules by ruleset",
 		"rulesetDescriptionLong": "[deprecated] Selects rules by ruleset. Enter multiple values as a comma-separated list.",
 		'engineDescription': "select rules by engine",
-		'engineDescriptionLong': "Selects rules by engine. Specify multiple engines as a comma-separated list."
+		'engineDescriptionLong': "Selects rules by engine. Enter multiple engines as a comma-separated list."
 	},
 	"rulesetDeprecation": "The 'ruleset' command parameter is deprecated. Use 'category' instead",
 	"columnNames": {
@@ -19,20 +19,18 @@ module.exports = {
 		"rulesets": "rulesets [dep]",
 		"engine": "engine"
 	},
-	"examples": `Invoking without filter criteria returns all rules.
-This example returns a table containing all rules.
+	"examples": `
+This example invokes the command without filter criteria, which returns all rules.
 	$ sfdx scanner:rule:list
 
-The values supplied to a single filter are handled with a logical OR.
-This example returns all rules for Apex OR Javascript.
+This example returns all rules for Apex OR Javascript. Values supplied to a single filter are handled with a logical OR.
 	$ sfdx scanner:rule:list --language apex,javascript
 
-Exclude categories by specifying the negation operator and enclose the values in single quotes.
-This example returns all rules except those in the Design or Best Practices categories.
+This example returns all rules except those in the Design or Best Practices categories. Exclude categories by specifying the negation operator and enclosing the values in single quotes.
 	$ sfdx scanner:rule:list --category '!Design,!Best Practices'
 
-Different filters are combined with a logical AND.
-This example returns all rules that target Apex or Javascript, and are members of the Braces or Security rulesets.
+This example returns all rules that target Apex OR Javascript, AND are members of the Braces OR Security rulesets.
+The different filters are combined with a logical AND.
 	$ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
 `
 };

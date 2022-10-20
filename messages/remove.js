@@ -22,7 +22,7 @@ module.exports = {
 		// Use a bit of leading whitespace so the rules hang underneath the initial line.
 		"ruleTemplate": "   '%s', defined in %s",
 		"deletionPrompt": "These rules will be unregistered:\n%s\nDo you wish to proceed? (y/n)",
-		"resultSummary": "Success. These rules were deregistered: %s.",
+		"resultSummary": "Success. These rules were unregistered: %s.",
 	},
 	"examples": `This example runs the command without arguments to see a list of registered custom paths.
 	$ sfdx scanner:rule:remove
@@ -30,8 +30,8 @@ module.exports = {
 This example uses the --path parameter to deregister the rules defined in somerules.jar and any JARs/XMLs contained in the rules folder.
 	$ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/folder/containing/rules"
 
-By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed. To bypass that confirmation, use the --force flag.
 This example uses the --force flag to bypass the confirmation prompt, removing all rules defined in somerules.jar.
+By default, a list of all rules that will be unregistered is displayed, and the action must be confirmed. To bypass that confirmation, use the --force flag.
 	$ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
 `
 };

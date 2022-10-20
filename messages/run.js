@@ -4,7 +4,7 @@ module.exports = {
 	"flags": {
 		"categoryDescription": "one or more categories of rules to run",
 		"categoryDescriptionLong": "One or more categories of rules to run. Specify multiple values as a comma-separated list.",
-		"rulesetDescription": "[deprecated] ruleset to run",
+		"rulesetDescription": "[deprecated] rulesets to run",
 		"rulesetDescriptionLong": "[deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.",
 		"targetDescription": "source code location",
 		"targetDescriptionLong": "Source code location. May use glob patterns. Specify multiple values as a comma-separated list.",
@@ -20,7 +20,7 @@ module.exports = {
 		"stDescription": "throw an error when a violation threshold is reached, the --normalize-severity is invoked, and severity levels are reset to the baseline",
         "stDescriptionLong": "Throws an error when violations are found with equal or greater severity than the provided value. --normalize-severity is invoked and severity levels are reset to the baseline. Normalized severity values are: 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation.",
 		"nsDescription": "return normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine-specific severity",
-        "nsDescriptionLong": "Returns normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine specific severity. For the html option, the normalized severity is displayed instead of the engine severity.",
+        "nsDescriptionLong": "Returns normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine-specific severity. For the html option, the normalized severity is displayed instead of the engine severity.",
 		'engineDescription': "specify which engines to run",
 		'engineDescriptionLong': "Specifies one or more engines to run. Submit multiple values as a comma-separated list.",
 		'eslintConfigDescription': 'specify the location of eslintrc config to customize eslint engine',
@@ -49,16 +49,16 @@ module.exports = {
 		"filtersIgnoredCustom": "Rule filters will be ignored by engines that are run with custom config using --pmdconfig or --eslintconfig flags. Modify your config file to include your filters."
 	},
 	"rulesetDeprecation": "The 'ruleset' command parameter is deprecated. Use 'category' instead.",
-	"examples": `Invoking code analyzer without specifying any rules causes all rules to be run.
-This example evaluates all rules against somefile.js.
+	"examples": `This example evaluates all rules against somefile.js.
+Invoking code analyzer without specifying any rules causes all rules to be run.
 	$ sfdx scanner:run --format xml --target "somefile.js"
 
-When you specify multiple categories or rulesets, the results are combined with a logical OR.
 This example evaluates all rules in the Design and Best Practices categories.
+When you specify multiple categories or rulesets, the results are combined with a logical OR.
 	$ sfdx scanner:run --format xml --target "somefile.js" --
 
-Exclude categories by specifying the negation operator and enclosing the values in single quotes.
 This example evaluates all rules except those in the Design or Best Practices categories.
+Exclude categories by specifying the negation operator and enclosing the values in single quotes.
 	$ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
 
 Wrap globs in quotes. These examples evaluate rules against all .js files in the current directory, except for IgnoreMe.js.
@@ -67,28 +67,28 @@ Unix example:
 Windows example:
 	$ sfdx scanner:run --target ".\\**\\*.js,!.\\**\\IgnoreMe.js" ...
 
-Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
 This example scans the project contained in '/my-project' if the current working directory is another directory.
+Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
 	$ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 
-Uses --env to override the default ESLint environment variables to add frameworks.
 This example evaluates rules against somefile.js, including Jasmine in the environment variables.
+Uses --env to override the default ESLint environment variables to add frameworks.
 	$ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 
-Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 This example evaluates rules aginst somefile.js using eslint-lwc and pmd engines.
+Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 	$ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 
-Use --engine to invoke engines that are not enabled by default.
 This example executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages.
+Use --engine to invoke engines that are not enabled by default.
 	$ sfdx scanner:run --target "/some/dir" --engine cpd
 
-To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
 This example executes rules defined in pmd_rule_ref.xml against the files in 'src'.
+To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
 	$ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 
-To use ESLint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
 This example uses a custom config to scan the files in 'src'.
+To use ESLint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
 	$ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 
 This example uses --normalize-severity to output normalized severity and engine-specific severity across all engines. Normalized severity is: 1 (high), 2 (moderate), and 3 (low).
