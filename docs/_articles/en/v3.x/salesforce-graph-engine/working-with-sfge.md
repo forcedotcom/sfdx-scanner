@@ -121,6 +121,7 @@ Graph Engine has these limitations.
 * Graph Engine handles unique class names. If the source code has two distinctly different files that have classes with duplicate names, Graph Engine fails with an error message: `<example_class> is defined in multiple files`. In cases like these, provide --projectdir subpath to the source directory that has only one of the file names, and rerun Graph Engine with the subpath to the second file name.
 * Graph Engine doesn’t handle anonymous Apex script. Provide the class directory path as the `--projectdir` that doesn’t include any anonymous Apex script.
 * Graph Engine doesn’t handle namespace placeholders. Leave the namespace placeholder blank.
+* Graph Engine supports Apex property chains with a depth of 2 or fewer. For example, Graph Engine supports `Object.x.y` but not 'Object.x.y.z'.
 
 ### Reporting Errors
 
