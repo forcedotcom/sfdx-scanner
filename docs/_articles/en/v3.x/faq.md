@@ -140,7 +140,7 @@ Same as the common scenario, but this additionally means SFGE is not confident a
 
 *stripInaccessible warning*
 
-The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on READ access type. This warning is thrown because Graph Engine has no way to ensure that the sanitized value returned by `SecurityDecision` is the value used in the code that follows the check. You must confirm the values through manual inspection, then add an engine directive to have Graph EngineSFGE ignore this warning in the next run. Alternatively, disable these violations by using the `--rule-disable-warning-violation` flag or setting its corresponding environment variable, SFGE_RULE_DISABLE_WARNING_VIOLATION, to true.
+The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on READ access type. This warning is thrown because Graph Engine has no way to ensure that the sanitized value returned by `SecurityDecision` is the value used in the code that follows the check. You must confirm the values through manual inspection, then add an engine directive to have Graph Engine ignore this warning in the next run. Alternatively, disable these violations by using the `--rule-disable-warning-violation` flag or setting its corresponding environment variable, SFGE_RULE_DISABLE_WARNING_VIOLATION, to true.
 
 *Internal error*
 
