@@ -1,4 +1,4 @@
 module.exports = {
-	"NoEnabledEnginesFound": "No engines are currently enabled. Currently disabled engines: %s",
-	"NoFilteredEnginesFound": "No engines meet the given filter. Filter: '%s', Engines not matching filter: %s"
+	"NoEnabledEnginesFound": "You must enable at least one engine. Your currently disabled engines are: %s.",
+	"NoFilteredEnginesFound": "The filter doesn't match any engines. Filter '%s'. Engines: %s."
 }

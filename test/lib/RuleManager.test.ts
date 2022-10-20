@@ -273,7 +273,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -408,7 +408,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -423,7 +423,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -437,7 +437,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -457,7 +457,7 @@ describe('RuleManager', () => {
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});

@@ -1,8 +1,8 @@
 module.exports = {
 	"GeneratingConfigFromPilot": "Generating config file by copying pilot config file. If this is undesirable, delete or rename `%s`.",
-	"InvalidStringArrayValue": "Invalid value for property '%s' in Config for %s. Expected an array of strings: %s",
-	"InvalidBooleanValue": "Invalid value for property '%s' in Config for %s. Expected a boolean: %s",
-	"InvalidNumberValue": "Invalid value for property '%s' in Config for %s. Expected a number: %s",
+	"InvalidStringArrayValue": "Specify a valid property for '%s' in %s for %s. Supply an array of strings: %s.",
+	"InvalidBooleanValue": "Specify a valid property for '%s' in %s for %s. Supply a boolean: %s.",
+	"InvalidNumberValue": "Specify a valid property for '%s' in %s for %s. Supply a number: %s.",
 	"UpgradeFailureTroubleshooting": `%s
-Original config saved to %s. If errors persist, delete %s as a last resort.`
+The upgrade wasn't successful and the original config was saved to %s. Try again. If the upgrade continues to fail, delete %s.`
 };

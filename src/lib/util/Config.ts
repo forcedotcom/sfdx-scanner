@@ -172,6 +172,10 @@ export class Config {
 		}
 	}
 
+	public getConfigFilePath(): string {
+		return this.configFilePath;
+	}
+
 	public async setJavaHome(value: string): Promise<void> {
 		this.configContent.javaHome = value;
 		await this.writeConfig();
@@ -231,7 +235,7 @@ export class Config {
 			this.logger.trace(`Config property ${propertyName} for engine ${engine} has value ${String(propertyValue)}`);
 			return propertyValue;
 		} else {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', errTemplate, [propertyName, engine.valueOf(), String(propertyValue)]);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]);
 		}
 	}
 

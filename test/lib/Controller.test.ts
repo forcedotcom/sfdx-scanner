@@ -124,7 +124,7 @@ describe('Controller.ts tests', () => {
 			await Controller.getEnabledEngines();
 			fail('getEnabledEngines should have thrown');
 		} catch (e) {
-			expect(e.message).to.equal('No engines are currently enabled. Currently disabled engines: fake-engine');
+			expect(e.message).to.equal('You must enable at least one engine. Your currently disabled engines are: fake-engine.');
 		}
 	});
 
@@ -133,7 +133,7 @@ describe('Controller.ts tests', () => {
 			await Controller.getFilteredEngines(['invalid-engine']);
 			fail('getFilteredEngines should have thrown');
 		} catch (e) {
-			expect(e.message).to.equal(`No engines meet the given filter. Filter: 'invalid-engine', Engines not matching filter: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge`);
+			expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge.`);
 		}
 	});
 });

@@ -58,7 +58,7 @@ class PmdLanguageManager extends AsyncCreatable {
 				}
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [alias]);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [this.config.getConfigFilePath(), alias]);
 			}
 		}
 		return langs;

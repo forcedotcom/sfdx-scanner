@@ -1,4 +1,4 @@
 module.exports = {
-	"InvalidPath": "Invalid path in 'overriddenConfigPath' property of Config.json: %s",
-	"ConfigFileMissing": "Cannot find %s with overridden path %s"
+	"InvalidPath": "The path in the `overriddenConfigPath` property of Config.json is invalid. %s.",
+	"ConfigFileMissing": "We couldn't find %s with overridden path %s."
 };
