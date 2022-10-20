@@ -1,7 +1,7 @@
 module.exports = {
 	"warning": {
-		"targetSkipped": "Target: '%s' was not processed by any engines.",
-		"targetsSkipped": "Targets: '%s' were not processed by any engines.",
-		"pathsDoubleProcessed": "At least one file was processed by both ESLint and ESLint-LWC simultaneously, which could result in duplicate violations. Customize the targetPatterns property for eslint and eslint-lwc engines in %s to remove overlap on the following file(s): %s",
+		"targetSkipped": "The specified target wasn't processed by any engines. Use the --engine parameter to select a different engine or specify a different target. Specified target: %s.",
+		"targetsSkipped": "The specified targets weren't processed by any engines: %s. Review your target and engine combinations and try again.",
+		"pathsDoubleProcessed": "One or more files were processed by eslint and eslint-lwc simultaneously. To remove possible duplicate violations, customize the targetPatterns property for eslint and eslint-lwc engines in %s on these files: %s.",
 	}
 }
