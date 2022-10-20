@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.equalToIgnoringCase;
 
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.config.UserFacingMessages;
 import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
@@ -77,7 +76,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [Relational_Field__r.Another_field__c]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [Relational_Field__r.Another_field__c]."));
     }
 
     @Test
@@ -91,7 +91,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Relational_Obj__r] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [My_Relational_Obj__r]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Relational_Obj__r] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [My_Relational_Obj__r]."));
     }
 
     @Test
@@ -104,8 +105,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."
-                ));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
     }
 
     @Test
@@ -118,7 +119,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
     }
 
     @Test
@@ -130,7 +132,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Obj__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
     }
 
     @Test
@@ -142,7 +145,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [My_Obj__c] with field(s) [ALL_FIELDS]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}{2}{3}]."));
     }
 
     @Test
@@ -154,7 +158,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [{1}] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [{1}] with field(s) [Name,Status__c]. Confirm that the objects and fields involved in these segments have FLS checks: [{1}]."));
     }
 
     @Test
@@ -167,7 +172,8 @@ public class FlsViolationUtilsTest {
 
         assertThat(
                 message,
-                equalTo("FLS validation is missing for [UPDATE] operation on [namespace__Random_object__c] with field(s) [Name,Status__c]."));
+                equalTo(
+                        "FLS validation is missing for [UPDATE] operation on [namespace__Random_object__c] with field(s) [Name,Status__c]."));
     }
 
     @Test
@@ -225,7 +231,7 @@ public class FlsViolationUtilsTest {
         final String message = FlsViolationMessageUtil.constructMessage(violationInfo);
         assertThat(
                 message,
-            equalTo("CRUD validation is missing for [DELETE] operation on [Account]."));
+                equalTo("CRUD validation is missing for [DELETE] operation on [Account]."));
     }
 
     @Test
