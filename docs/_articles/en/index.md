@@ -1,5 +1,5 @@
 ---
-title: Salesforce Code Analyzer Plug-In
+title: Salesforce Code Analyzer
 permalink: /
 lang: en
 ---
@@ -12,29 +12,17 @@ lang: en
 </div>
 <br>
 
-<!-- temporary comment until v3.x becomes the new norm -->
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
-  <span class="slds-assistive-text">success</span>
-  	New version {{ site.data.versions-v3.scanner }} of the plug-in has been released on {{ site.data.versions-v3.releasedon }}
-	&nbsp;&nbsp;
-	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
-</div>
-<br>
-
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	Salesforce Graph Engine is available for you to try it out &nbsp;&nbsp;&nbsp;<a href="./en/v3.x/salesforce-graph-engine/introduction/">Read more</a>
+  	Salesforce Code Analyzer (v{{ site.data.versions-v3.scanner }}) is available. Release date: {{ site.data.versions-v3.releasedon }} &nbsp;&nbsp;<a href="./en/v3.x/release-information/">Release Information</a>
 </div>
-<br>
 
-<!-- uncomment this once v3 becomes latest -->
-<!--
+<br>
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	A new version (v{{ site.data.versions-v3.scanner }}) of the Code Analyzer Plug-in was released on {{ site.data.versions-v3.releasedon }} &nbsp;&nbsp;<a href="./en/v3.x/release-information/">Release Information</a>
+  	Check out Code Analyzer's newest engine, <a href="./en/v3.x/salesforce-graph-engine/introduction/">Salesforce Graph Engine</a>. &nbsp;&nbsp;&nbsp;
 </div>
 <br>
--->
 
 ## Salesforce Code Analyzer
 
