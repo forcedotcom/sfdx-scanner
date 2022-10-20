@@ -140,9 +140,7 @@ Same as the common scenario, but this additionally means SFGE is not confident a
 
 *stripInaccessible warning*
 
-For stripInaccessible checks on READ operation, SFCA does not have the capability to verify that only sanitized data is used after the check. Please ensure that unsanitized data is discarded for _Object-Type_
-
-This is thrown for all stripInaccessible checks on READ access type. This is because SFGE has no way to ensure that the sanitized value returned by SecurityDecision is indeed the value used in the code that follows the check. Once you’ve confirmed this, you can add an engine directive to ask SFGE to ignore this in the next run.
+The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on READ access type. This warning is thrown because Graph Engine has no way to ensure that the sanitized value returned by `SecurityDecision` is the value used in the code that follows the check. You must confirm the values through manual inspection, then add an engine directive to have Graph Engine ignore this warning in the next run. Alternatively, disable these violations by using the `--rule-disable-warning-violation` flag or setting its corresponding environment variable, SFGE_RULE_DISABLE_WARNING_VIOLATION, to true.
 
 *Internal error*
 

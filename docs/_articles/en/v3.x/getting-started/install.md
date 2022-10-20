@@ -1,33 +1,30 @@
 ---
-title: Install Salesforce Code Analyzer
+title: Install and Update Salesforce Code Analyzer
 lang: en
 redirect_from: /en/getting-started/install
 ---
 
 ## Install Salesforce Code Analyzer v3.x
 
-**NOTE**: Complete the [prerequisites](./en/v3.x/getting-started/prerequisites/) before you install this plug-in. Automatic plug-in upgrades don't work with the pilot version 3.x.
-
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_warn" role="alert">
-  <span class="slds-assistive-text">warn</span>
-The new major version {{ site.data.versions-v3.scanner }}  is a pilot and is not installed by default.
-</div>
-	
-The first time you execute a ```v2.x``` command, a ```config.json``` file is automatically
-created. When you upgrade to a new version 2.x or to pilot version 3.x, your original ```v2.x config.json``` persists. 
-
-#### To install the `latest-pilot`, use these instructions:
+**NOTE**: Complete the [prerequisites](./en/v3.x/getting-started/prerequisites/) before you install Salesforce Code Analyzer. 
 	
 Install Salesforce Code Analyzer (Code Analyzer) with this simple line of code.
 
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner
 Installing plugin @salesforce/sfdx-scanner...
-installed v{{ site.data.versions-v2.scanner }} 
+installed v{{ site.data.versions-v3.scanner }} 
 ```
-By default, `latest` tag is installed: {{ site.data.versions-v2.scanner }}. Install the ```v3.x``` pilot version by pointing to the `latest-pilot` tag. 
+By default, `latest` tag is installed: {{ site.data.versions-v3.scanner }}. 
 
-#### To install or upgrade to a specific version of Code Analyzer:
+#### To check that Code Analyzer is installed, run this command.
+
+```bash
+$ sfdx plugins
+@salesforce/sfdx-scanner {{ site.data.versions-v3.scanner }}
+```
+
+#### To install a specific Code Analyzer version, run this command.
 
 ```bash
 $ sfdx plugins:install @salesforce/sfdx-scanner@latest-pilot
@@ -35,14 +32,7 @@ Installing plugin @salesforce/sfdx-scanner...
 installed v{{ site.data.versions-v3.scanner }}
 ``` 
 
-#### To check that Code Analyzer is installed, run this command:
-
-```bash
-$ sfdx plugins
-@salesforce/sfdx-scanner {{ site.data.versions-v3.scanner }}
-```
-
-#### To display usage and help for Code Analyzer commands, run this command:
+#### To display Code Analyzer usage and help, run this command.
 
 ```bash
 $ sfdx scanner --help
@@ -60,20 +50,24 @@ TOPICS
   scanner:rule  View/add rules that are used to scan code.
 
 ```
+## Update Code Analyzer v3.x
 
-#### To upgrade Code Analyzer:
+To update Code Analyzer, run this command.
 
-Because Code Analyzer ```v3.x``` is a pilot version, you must uninstall Code Analyzer and reinstall.
+```bash
+$ sfdx plugins:update
+sfdx-cli: Updating plugins... done
+```
+## Uninstall Code Analyzer v3.x
 
-#### To uninstall Code Analyzer:
+To uninstall Code Analyzer, run this command.
 
 ```bash
 sfdx plugins:uninstall @salesforce/sfdx-scanner
 ```
 
-#### To revert to Code Analyzer version 2.x:
+## See Also
 
-Uninstall version 3.x and follow the [installation steps](./en/v2.x/getting-started/install/#install-the-plug-in).
+[Salesforce CLI Setup Guide: Update Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_update_cli.htm#sfdx_setup_update_cli)
 
-If you made any manual changes to the ```{{ site.data.versions-v3.configfile }}``` file,
-and you wish for those changes to apply in ```v2.x```, you'll need to replicate them in the ```Config.json``` file after reverting.
+[Salesforce CLI Setup Guide: Troubleshoot Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_troubleshoot.htm)
