@@ -20,9 +20,9 @@ We publish the latest Code Analyzer monthly.
 
 * NEW: SFCA v3.x will now be the default version for all users.
 * NEW \[SFGE\]: `scanner:run:dfa` has a new `--rule-disable-warning-violation` flag to disable warnings on StripInaccessible call with AccessType.READABLE.
-* CHANGE \[SFGE\]: `--ignore-parse-errors` option has been removed from `scanner:run:dfa`.
-* CHANGE: Help text and user interface messages have been updated.
-* NEW: PMD version has been updated to 6.50.0.
+* CHANGE \[SFGE\]: We removed the `--ignore-parse-errors` option from `scanner:run:dfa`.
+* CHANGE: We've updated Code Analyzer and Graph Engine help text and user interface messages.
+* NEW: We've updated PMD to version 6.50.0.
 
 **Merged pull requests**
 
