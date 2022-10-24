@@ -18,8 +18,8 @@ We publish the latest Code Analyzer monthly.
 
 ### Release Summary
 
-* NEW: SFCA v3.x will now publish as `latest`.
-* CHANGE \[SFGE\]: `scanner:run:dfa` has a new `--rule-disable-warning-violation` flag to disable warnings on StripInaccessible call with AccessType.READABLE.
+* NEW: SFCA v3.x will now be the default version for all users.
+* NEW \[SFGE\]: `scanner:run:dfa` has a new `--rule-disable-warning-violation` flag to disable warnings on StripInaccessible call with AccessType.READABLE.
 * CHANGE \[SFGE\]: `--ignore-parse-errors` option has been removed from `scanner:run:dfa`.
 * CHANGE: Help text and user interface messages have been updated.
 * NEW: PMD version has been updated to 6.50.0.
@@ -32,7 +32,7 @@ We publish the latest Code Analyzer monthly.
 - FIX: @W-11723805@: Fixed null pointer exception when parsing comments with empty commas. [\#835](https://github.com/forcedotcom/sfdx-scanner/pull/835)
 - DOC: @W-11733245@: Fixed inline documentation for `scanner:run:dfa`. [\#839](https://github.com/forcedotcom/sfdx-scanner/pull/839)
 - CHANGE: @W-11790341@: Compilation errors now give more digestible message.[\#840](https://github.com/forcedotcom/sfdx-scanner/pull/840)
-- CHANGE: @W-11689621@: Updated PMD to 6.50.0. [\#841](https://github.com/forcedotcom/sfdx-scanner/pull/841)
+- NEW: @W-11689621@: Updated PMD to 6.50.0. [\#841](https://github.com/forcedotcom/sfdx-scanner/pull/841)
 - FIX: @W-11733245@ Fixed spacing and fullstop on SFGE violation messages. [\#844](https://github.com/forcedotcom/sfdx-scanner/pull/844)
 - CHANGE: @W-11919914@ Removed `--ignore-parse-errors` option from `scanner:run:dfa` [\#845](https://github.com/forcedotcom/sfdx-scanner/pull/845)
 - CHANGE: @W-11733226@: Updated messages to conform to guidelines. [\#846](https://github.com/forcedotcom/sfdx-scanner/pull/846)
