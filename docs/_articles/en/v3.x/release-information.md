@@ -12,6 +12,32 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.6.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.6.0) (10-25-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.1...v3.6.0)
+
+### Release Summary
+
+* NEW: SFCA v3.x will now publish as `latest`.
+* CHANGE \[SFGE\]: `scanner:run:dfa` has a new `--rule-disable-warning-violation` flag to disable warnings on StripInaccessible call with AccessType.READABLE.
+* CHANGE \[SFGE\]: `--ignore-parse-errors` option has been removed from `scanner:run:dfa`.
+* CHANGE: Help text and user interface messages have been updated.
+* NEW: PMD version has been updated to 6.50.0.
+
+**Merged pull requests**
+
+- CHANGE: @W-11606055@: SFCA v3.x will now publish as both latest and latest-pilot. [\#803](https://github.com/forcedotcom/sfdx-scanner/pull/803)
+- CHANGE: @W-11733210@: We made SFCA source config data from Config.json instead of Config-pilot.json. [\#829](https://github.com/forcedotcom/sfdx-scanner/pull/829)
+- NEW: @W-11261216@: SFCA exposes SFGE_RULE_DISABLE_WARNING_VIOLATION through flag and env-var. [\#832](https://github.com/forcedotcom/sfdx-scanner/pull/832)
+- FIX: @W-11723805@: Fixed null pointer exception when parsing comments with empty commas. [\#835](https://github.com/forcedotcom/sfdx-scanner/pull/835)
+- DOC: @W-11733245@: Fixed inline documentation for `scanner:run:dfa`. [\#839](https://github.com/forcedotcom/sfdx-scanner/pull/839)
+- CHANGE: @W-11790341@: Compilation errors now give more digestible message.[\#840](https://github.com/forcedotcom/sfdx-scanner/pull/840)
+- CHANGE: @W-11689621@: Updated PMD to 6.50.0. [\#841](https://github.com/forcedotcom/sfdx-scanner/pull/841)
+- FIX: @W-11733245@ Fixed spacing and fullstop on SFGE violation messages. [\#844](https://github.com/forcedotcom/sfdx-scanner/pull/844)
+- CHANGE: @W-11919914@ Removed `--ignore-parse-errors` option from `scanner:run:dfa` [\#845](https://github.com/forcedotcom/sfdx-scanner/pull/845)
+- CHANGE: @W-11733226@: Updated messages to conform to guidelines. [\#846](https://github.com/forcedotcom/sfdx-scanner/pull/846)
+- FIX: @W-11733226@ Applied minor fixes to UI message. [\#848](https://github.com/forcedotcom/sfdx-scanner/pull/848)
+
 ## [v3.5.1](https://github.com/forcedotcom/sfdx-scanner/tree/v3.5.1) (09-26-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.0...v3.5.1)
