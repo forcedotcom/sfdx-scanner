@@ -1,7 +1,6 @@
 ---
-title: Authoring Custom Rules
+title: Create Custom Rules
 lang: en
-redirect_from: /en/custom-rules/author
 ---
 
 ## What are Custom Rules?

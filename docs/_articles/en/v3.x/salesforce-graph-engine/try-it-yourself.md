@@ -4,131 +4,113 @@ lang: en
 ---
 
 
-## Before you get started
-SFGE works a bit differently from other analyzers with which you might be familiar. As such, we strongly encourage you
-to read about [the engine](./en/v3.x/salesforce-graph-engine/introduction) and [its capabilities](./en/v3.x/salesforce-graph-engine/working-with-sfge) before proceeding.
+## Prerequisites
 
-Also, so you can try these examples yourself, please install the pilot version of the analyzer as per [these instructions](./en/v3.x/getting-started/install).
+Salesforce Graph Engine (Graph Engine) works a bit differently from other analyzers. To get started with Graph Engine:
 
-Once you've done all that, continue reading here to see some basic SFGE operations, so you can get a sense of how it all works together.
+* Read the [Introduction to Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
+* Understand [Working with Graph Engine](./en/v3.x/salesforce-graph-engine/working-with-sfge/).
+* Install [Salesforce Code Analyzer](./en/v3.x/getting-started/install/).
 
-## See the rules
-First thing's first. Let's see the rules that exist in SFGE. Run the following command.
+Next, run a command to view Graph Engine rules, then install our sample project to try out Graph Engine for yourself.
+
+## See the Rules
+To see Graph Engine’s rules, run:
 
 ```bash
 sfdx scanner:rule:list --engine sfge
 ```
 
-Note that there's just the one rule. [ApexFlsViolationRule](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule)
-identifies CRUD/FLS vulnerabilities in your Apex code. In the future, more rules will likely be added, but for now there's
-just that rule. As such, all of the examples will focus on CRUD/FLS.
+Currently, just one rule is returned. [ApexFlsViolationRule](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule) identifies Create Read Update Delete/Field-Level Security (CRUD/FLS) vulnerabilities in your Apex code.
 
-## Let's look at the sample project
-All of our examples will be using the [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
+## Clone the Sample Project
+All our examples use our [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
 
-To begin:
+To begin, clone the `dev-3` branch of the repo.
 
-```bash
-// clone the `dev-3` branch of repo:
+`git clone --branch dev-3 https://github.com/forcedotcom/sfdx-scanner.git`
+ 
+Next, open the sample app directory.
 
-git clone --branch dev-3 https://github.com/forcedotcom/sfdx-scanner.git
+`cd sfdx-scanner/test/code-fixtures/projects/sfge-working-app/`
 
-```
+The sample app contains these key classes.
 
-```bash
-// open sample app directory:
+* `AuraEnabledFls.cls` contains `@AuraEnabled-annotated` methods.
+* `PageReferenceFls.cls` includes methods that return `PageReference` objects.
+* `VfControllerFls.cls` is a Visualforce Controller for the `VfComponentWithController` component.
+* `FlsHelperClass.cls` performs CRUD/FLS checks against objects and fields.
 
-cd sfdx-scanner/test/code-fixtures/projects/sfge-working-app/
-```
+## Run Graph Engine Against All Files
+To run Graph Engine, start with a basic evaluation of all files. 
 
+1. Navigate to the sample app root folder. 
+`test/code-fixtures/projects/sfge-working-app` 
+3. Run: 
+`sfdx scanner:run:dfa --target './force-app/main/default/classes' --projectdir './force-app/main/default' --format csv`
 
-Before we start running our rules, let's take a look at the sample app and take note of a few things.
+Review the results. Notice that each violation has a source and a sink vertex. 
+* The source vertex is the start of the path in question.
+* The sink vertex is the point where the DML operation occurs. 
+* If there’s insufficient CRUD/FLS validation between those two points, a violation is thrown.
 
-The following files are noteworthy:
-- `AuraEnabledFls.cls` is a class that has a bunch of `@AuraEnabled`-annotated methods.
-- `PageReferenceFls.cls` is a class with a bunch of methods that return `PageReference` objects.
-- `VfControllerFls.cls` is a Visualforce Controller for the `VfComponentWithController` component.
-- `FlsHelperClass.cls` is a class that performs CRUD/FLS checks against objects and fields.
+For example, look at some `AuraEnabledFls.cls` methods that threw violations.
+* `flsHelperGivenIncorrectObjectType()`. This method has no branches. Instead, it’s just a single path all the way through. CRUD/FLS was performed on the wrong object type, resulting in the violation. The source vertex is the line where the method is declared, and the sink vertex is the line where the account is inserted.
+* `flsInIfBranchOnly()`. This method has an `if` statement, so it has two paths: one that goes through the `if`, and one that doesn’t. Because CRUD/FLS only occurs in one of those paths, a violation is thrown.
 
-It may be advantageous for you to skim those files now.
+Two `AuraEnabledFls.cls` methods didn’t throw violations.
+* `flsDoneCorrectly()`. All the fields inserted are checked with the FlsHelperClass first. The method is secure, and no violation was thrown.
+* `flsInNonAuraMethod()`. This method isn’t a recognized [entry-point or source](./en/v3.x/salesforce-graph-engine/rules/#dfa-rules), and it isn’t in the call-stack of any entry points. Graph Engine skipped this method even though it’s technically insecure.
 
-## Basic Run
-Let's start with a basic evaluation of all files. From the root folder of the sample app (i.e., `test/code-fixtures/projects/sfge-working-app`),
-run following command:
-```
-sfdx scanner:run:dfa --target './force-app/main/default/classes' --projectdir './force-app/main/default' --format csv
-```
+## Run Graph Engine Against a Single File
+After you fix violations that Graph Engine identified in a specific file, run Graph Engine against that specific file to double-check your work. 
 
-Take a look at the results. Note that, as explained above, each violation has a source and a sink vertex. The source vertex
-is the start of the path in question, and the sink vertex is the point where the DML operation is occurring. If there is
-insufficient CRUD/FLS validation between those two points, a violation is thrown.
+To run Graph Engine against a single file, run:
 
-Let's pick a few of those violations and look a little bit closer at them.
-
-Several methods in `AuraEnabledFls.cls` threw violations.
-
-Let's start with [`flsHelperGivenIncorrectObjectType()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L4).
-Note that this method has no branches. Instead, it's just a single path all the way through. Also note that we're performing
-CRUD/FLS on the wrong object type, hence the violation. The source vertex is the line where the method is declared, and
-the sink vertex is the line where the account is inserted.
-
-Next, let's look at a slightly more complicated example, [`flsInIfBranchOnly()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L60).
-This method has an `if` statement, and therefore has two paths: one that goes through the `if`, and one that doesn't. Since
-CRUD/FLS only occurs in one of those paths, a violation is thrown.
-
-Additionally, let's look at a method that didn't throw a violation: [`flsDoneCorrectly()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L76).
-Note that all of the fields being inserted are first being checked with the `FlsHelperClass` instance. As such, the method
-is secure, and no violation was thrown.
-
-Finally, one more method that didn't throw a violation: [`flsInNonAuraMethod()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L91).
-This method is neither a recognized [entry-point/source](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule), nor is it in the call-stack of any entry-points. As such, the analyzer skipped this method even though it is technically insecure.
-
-## Running against a single file
-As you fix the problems in this file, you'll probably want to run the analyzer against this file specifically rather than
-the entire codebase. You can do that by running the following command:
 ```
 sfdx scanner:run:dfa --target './force-app/main/default/classes/AuraEnabledFls.cls' --projectdir './force-app/main/default' --format csv
 ```
-Please note the following, as they may save you some grief in the future.
-- The `target` file is the one containing the source vertices you wish to scan.
-- The `projectdir` must still be the entire project, so that paths can be properly built.
 
-Note that the analyzer ran faster than it did last time, because it was analyzing a smaller number of paths. And note that
-the results are only those whose source vertex is in the targeted file.
+Keep in mind that:
 
-## Fixing violations
-Let's start by picking one of the violations in the file to fix. To fix `flsInIfBranchOnly()`, you can do one of a number
-of things.
-- You could move the CRUD/FLS check out of the `if` branch, so it's always run.
-- You could move the DML operation into the `if` branch, so it's only run in the path that performed the CRUD/FLS check.
-- You could add an `else` branch that performs the same CRUD/FLS checks as the `if` branch.
+* The `target` file contains the source vertices that you want to scan.
+* The `projectdir` is the entire project that Graph Engine builds all paths against.
 
-Try one (or several) of these options, then run the provided command again. If you've done it right, then the number of
-violations in the file should be decreased by one.
+Graph Engine runs faster against one file than a whole project because it analyzes a smaller number of paths. It also returns results only for source vertices that are in the targeted file.
 
-The remaining violations in the working app have been left as exercises for you to complete.
+## Fixing Violations
+Pick one of the violations in the sample file to fix. For example, to fix `flsInIfBranchOnly()`, you can:
 
-## Targeting individual methods
-When you fix the violations in a given method, you may wish to analyze that method individually instead of the whole file.
-For example, suppose you want to analyze the [`flsHelperGivenIncorrectObjectType()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L4)
-and [`flsHelperMultipleInstances()`](https://github.com/forcedotcom/sfdx-scanner/blob/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default/classes/AuraEnabledFls.cls#L21)
-methods in `AuraEnabledFls.cls`, and skip all the others. You can do that by running the following command:
+* Move the CRUD/FLS check out of the `if` branch so it always runs.
+* Move the DML operation into the `if` branch so it only runs in the path that performed the CRUD/FLS check.
+* Add an `else` branch that performs the same CRUD/FLS checks as the if branch.
+
+Try one or several of these options, then run the provided command again. If you do it right, then the number of violations in the file is smaller.
+
+If you want more experience with Graph Engine, experiment with the remaining violations in the sample app.
+
+## Target Individual Methods
+After you fix the violations in a given method, sometimes you want to analyze that method individually. For example, suppose you only want to analyze the `flsHelperGivenIncorrectObjectType()` and `flsHelperMultipleInstances()` methods in `AuraEnabledFls.cls`.
+
+To analyze these two methods only, run:
+
 ```
 sfdx scanner:run:dfa --target './force-app/main/default/classes/AuraEnabledFls.cls#flsHelperGivenIncorrectObjectType;flsHelperMultipleInstances' --projectdir './force-app/main/default' --format csv
 ```
-Please note the following:
-- This syntax is only supported for file paths. You can't use it with globs or directories.
-- If multiple methods in the target file share the specified name (e.g., overloads, inner classes, etc), then all such methods will be included.
-- Methods specified through method-level targeting are considered as [path entrypoints](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule)
-even when they otherwise wouldn't be. This can cause methods that would ordinarily be skipped to be analyzed.
 
-## Skipping a violation
-Suppose that one of these violations was a false positive (they're not, but let's pretend). Or alternatively, suppose that
-you have a good reason for why a CRUD/FLS check is actually unnecessary (e.g., the code is only executed from an admin-only page).
-If you're really, truly certain that you want to skip that violation, you can use [engine directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to do so.
+Running Graph Engine against specific methods has these limitations:
 
-For example, if you add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`
-and rerun the command, the violation in that method will be suppressed.
+* The syntax is only supported for file paths. You can’t use it with globs or directories.
+* If multiple methods in the target file share the specified name, then all such methods are included. Overloads and inner classes are some examples.
+* Methods specified through method-level targeting are considered [path entrypoints](./en/v3.x/salesforce-graph-engine/rules/#dfa-rules) even when they otherwise wouldn’t be. This misidentification can cause methods that would ordinarily be skipped to be analyzed.
 
-You can also suppress all violations in a method by adding `/* sfge-disable-stack ApexFlsViolationRule */` immediately above the method,
-or in the entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.
+## Skip a Violation
+Sometimes false positives can occur. Other times, you identify a reason why a CRUD/FLS check is unnecessary, such as your code is only executed from an admin-only page. If you want to skip a violation due to a false positive or other reason, use [engine directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
+
+To skip a violation using an engine directive:
+
+1. Add `/* sfge-disable-next-line ApexFlsViolationRule */` before the DML operation in `flsNoEnforcementAttempted()`.
+2. Rerun the command.
+3. The violations in the identified method are suppressed.
+
+You can also suppress all violations in a method by adding `/* sfge-disable-stack ApexFlsViolationRule */` immediately above the method, or in the entire file by adding `/* sfge-disable ApexFlsViolationRule */` at the top of the class.

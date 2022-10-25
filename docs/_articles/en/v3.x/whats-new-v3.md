@@ -3,26 +3,23 @@ title: What's new in v3.x?
 lang: en
 ---
 
-## What’s new in v3.x?
+## What’s new in v3.x
 
-### Access to Salesforce Graph Engine
-We've now added our quickly evolving [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) as one of the backend engines of SFCA. Preview its features using the newly added [`scanner:run:dfa`](./en/v3.x/scanner-commands/dfa/) command. You can also [try it out on our example app](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
+### Added Salesforce Graph Engine
+[Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) is a new Code Analyzer engine. Preview its features using the newly added [`scanner:run:dfa`](./en/v3.x/scanner-commands/dfa/) command, and check out our [example app](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
 
 ### Upgraded major versions
-As a starting point, we have upgraded major versions of the eslint family of engines:
-1. eslint from major version 6 to major version 8
-2. typescript-eslint plugin from major version 2 to major version 5
-3. eslint-lwc plugin from major version 0 to major version 1
+We upgraded major versions of ESLint engines.
 
-### RetireJS is now a default engine
-Another change is that RetireJS will be included as a default engine along with PMD, Eslint, and Eslint-Typescript.
-We have also enhanced the `scanner:run` command with a new `--verbose-violations` flag, which provides more information about RetireJS violations.
+* `eslint` from major version 6 to major version 8
+* `typescript-eslint` plug-in from major version 2 to major version 5
+* `eslint-lwc` plug-in from major version 0 to major version 1
+
+### Included RetireJS as a default engine
+RetireJS is a default engine along with PMD, ESLint, and ESLint-Typescript. To provide more information about RetireJS violations, we enhanced the `scanner:run` command with a new `--verbose-violations` flag.
 
 ### Cleaned up deprecated flags
-`-v/--violations-cause-error` flag on `scanner:run` has been replaced by `-s/--severity-threshold`. 
-
-There are other exciting changes in the works that will be released as a part of minor releases. Watch out this space for more information!
-
+We replaced the  `-v/--violations-cause-error` flag on `scanner:run` with the `-s/--severity-threshold`.
 
 ## Installing version v3.x
-Follow [these](./en/v3.x/getting-started/install) steps to install and try out the latest features in {{ site.data.versions-v3.scanner }}.
+Follow [these](./en/v3.x/getting-started/install) steps to install the latest features in version {{ site.data.versions-v3.scanner }}.

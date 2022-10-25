@@ -3,8 +3,13 @@ title: Release Information
 lang: en
 ---
 
-### To update Code Analyzer, follow these [instructions](./en/getting-started/install/#upgrade-plug-in).
-<br>
+Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer).
+
+We publish the latest Code Analyzer monthly. 
+
+* Run `sfdx plugins` to display the version of Code Analyzer installed on your computer. 
+* Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
+* Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
 ## [v2.13.9](https://github.com/forcedotcom/sfdx-scanner/tree/v2.13.9) (09-14-2022)
 

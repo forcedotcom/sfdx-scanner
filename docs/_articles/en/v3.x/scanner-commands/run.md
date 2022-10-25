@@ -1,12 +1,15 @@
 ---
 title: Salesforce Code Analyzer Plug-In Command Reference
 lang: en
+redirect_from: /en/scanner-commands/run
 ---
 
 ## sfdx scanner:run
-Scan a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. 
+Scan a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset.
 
-You can specify the format of the output as XML, Junit, CSV or table. You can print the output to the console (default) or to a file using the ```--outfile``` parameter. 
+**Note**: To run Salesforce Graph Engine on Code Analyzer version 3.x, you must run a separate command: `scanner:run:dfa`. Learn more in [Introduction to Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
+
+You can specify the format of the output as XML, JUnit, CSV, or table. You can print the output to the console (default) or to a file using the `--outfile` parameter.
 
 ## Usage
 
@@ -73,7 +76,7 @@ retire-js violation messages include more details
 
 ## Additional Notes
 
-- `--ruleset` option is deprecated and will be removed soon. Please use --category instead.
+- `--ruleset` option is deprecated. Use --category instead.
   
 ## Example
 
@@ -104,7 +107,7 @@ Windows example:
 > sfdx scanner:run --target ".\**\*.js,!.\**\IgnoreMe.js" ...
 ```
 
-Specify tsconfig.json if the current working directory does not contain the ```tsconfig.json``` that corresponds to the TypeScript files being scanned. This example demonstrates scanning the project contained in ```/my-project``` if the current working directory is ```/my-home-directory```.
+Specify `tsconfig.json` if the current working directory does not contain the ```tsconfig.json``` that corresponds to the TypeScript files being scanned. This example demonstrates scanning the project contained in ```/my-project``` if the current working directory is ```/my-home-directory```.
 ```bash
 $ cd /my-home-directory
 $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
@@ -114,14 +117,14 @@ Use --env to override the default ESLint environment variables to add frameworks
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
 ```
 
-Use --engine to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
+Use `--engine` to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
 
 In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
 ```bash
 $ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
 ```
 
-In another example, Analyzer executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
+In another example, Code Analyzer executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
 
 ```bash
 $ sfdx scanner:run --target "/some/dir" --engine cpd
@@ -132,7 +135,7 @@ To use PMD with your own rule reference file, use --pmdconfig. Note that rule fi
 $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 ```
 
-To use Eslint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+To use ESLint with your own `.eslintrc.json` file, use `--eslintconfig`. Make sure that the directory you run the command from has all the npm dependencies installed.
 ```bash
 $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 ```

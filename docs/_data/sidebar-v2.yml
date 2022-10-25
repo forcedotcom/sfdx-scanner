@@ -1,78 +1,78 @@
 - title:
     en: Get Started
-  baseUrl: /getting-started/
+  baseUrl: /v2.x/getting-started/
   children:
     - title:
         en: Prerequisites
-      url: /getting-started/prerequisites
+      url: /v2.x/getting-started/prerequisites
     - title:
         en: Installation/Upgrade
-      url: /getting-started/install
+      url: /v2.x/getting-started/install
 - title:
     en: How to use the Plugin
-  baseUrl: /scanner-commands/
+  baseUrl: /v2.x/scanner-commands/
   children:
     - title:
         en: scanner:run
-      url: /scanner-commands/run
+      url: /v2.x/scanner-commands/run
     - title:
         en: scanner:rule:list
-      url: /scanner-commands/list
+      url: /v2.x/scanner-commands/list
     - title:
         en: scanner:rule:describe
-      url: /scanner-commands/describe
+      url: /v2.x/scanner-commands/describe
     - title:
         en: scanner:rule:add
-      url: /scanner-commands/add
+      url: /v2.x/scanner-commands/add
     - title:
         en: scanner:rule:remove
-      url: /scanner-commands/remove
+      url: /v2.x/scanner-commands/remove
 - title:
     en: Custom Configuration
-  baseUrl: /custom-config/
+  baseUrl: /v2.x/custom-config/
   children:
     - title:
         en: PMD Configuration
-      url: /custom-config/pmd
+      url: /v2.x/custom-config/pmd
     - title:
         en: ESLint Configuration
-      url: /custom-config/eslint
+      url: /v2.x/custom-config/eslint
 - title:
     en: Custom Rules
-  baseUrl: /custom-rules/
+  baseUrl: /v2.x/custom-rules/
   children:
     - title:
         en: Authoring Custom Rules
-      url: /custom-rules/author
+      url: /v2.x/custom-rules/author
     - title:
         en: Managing Custom Rules
-      url: /custom-rules/manage
+      url: /v2.x/custom-rules/manage
 - title:
     en: Architecture
-  baseUrl: /architecture/
+  baseUrl: /v2.x/architecture/
   children:
     - title:
         en: Design
-      url: /architecture/architecture
+      url: /v2.x/architecture/architecture
     - title:
         en: RetireJS
-      url: /architecture/retire-js-engine
+      url: /v2.x/architecture/retire-js-engine
     - title:
         en: PMD
-      url: /architecture/pmd-engine
+      url: /v2.x/architecture/pmd-engine
     - title:
         en: ESLint
-      url: /architecture/eslint-engine
+      url: /v2.x/architecture/eslint-engine
     - title:
         en: CPD
-      url: /architecture/cpd-engine
+      url: /v2.x/architecture/cpd-engine
 
 - title:
     en: FAQ
-  url: /faq
+  url: /v2.x/faq
 - title:
     en: Troubleshooting
-  url: /troubleshooting
+  url: /v2.x/troubleshooting
 - title:
     en: Release Information for v2.x
-  url: /release-information/
+  url: /v2.x/release-information/

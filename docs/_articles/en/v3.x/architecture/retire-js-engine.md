@@ -1,28 +1,31 @@
 ---
 title: 'RetireJS'
-lang: en
+lang: en'
+redirect_from: /en/architecture/retire-js-engine
 ---
 ## What is RetireJS?
-[RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project's third-party JavaScript
-dependencies and identifies those that have known security vulnerabilities. It has a lively and responsive community,
-and its database of vulnerable libraries is updated frequently. Starting v3.0.0, RetireJS is included in the default set of engines.
+[RetireJS](https://retirejs.github.io/retire.js/) is an engine that analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities. It has a thriving community, and its database of vulnerable libraries is updated frequently.
 
 ## How does Salesforce Code Analyzer use RetireJS?
-Salesforce Code Analyzer uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.
+Salesforce Code Analyzer (Code Analyzer) uses RetireJS to scan for vulnerable third-party libraries that are bundled into a project.
 
-Files representing vulnerable dependencies are detected by their name *or* by examining their content, and the code analyzer
-can even examine the contents of a ZIP to find vulnerabilities within.
+Files representing vulnerable dependencies are detected in three ways:
+* By their name
+* By examining their content
+* By examining the contents of ZIP
 
-For example, consider the following command, which will scan `MyProject` for vulnerable third-party libraries:
+For example, this command scans MyProject for vulnerable third-party libraries.
+
 ```bash
 $ sfdx scanner:run --engine retire-js --target '/path/to/MyProject' --format csv
 ```
-If `MyProject` contains `MyProject/lorem/ipsum/jquery-3.1.0.min.js`, this will be identified as a vulnerability.
+If `MyProject` contains `MyProject/lorem/ipsum/jquery-3.1.0.min.js`, it’s identified as a vulnerability.
 
-If the file were renamed to `SomeGenericFile.js` or `jquery.resource`, or even hidden within a ZIP such as `AllMyLibs.zip`,
-the code analyzer will still identify the vulnerable library and report it as a violation.
+If you rename the file to ```SomeGenericFile.js``` or ```jquery.resource```, or if you hide it within a ZIP file such as ```AllMyLibs.zip```, Code Analyzer still identifies the vulnerable library and reports it as a violation.
 
-By default, we return a truncated version of RetireJS's internal violations, indicating that the library in question is out of date. To receive more thorough information, you may use the `--verbose-violations` flag. When **not** using `--verbose-violations`, a violation message looks like: 
+By default, we return a truncated version of RetireJS's internal violations which indicates that the library in question is out of date. To receive more information, use the `--verbose-violations` flag. 
+
+A `--verbose-violations` violation message looks like this: 
 ```
 jquery v3.1.0 is insecure. Please upgrade to latest version.
 ```

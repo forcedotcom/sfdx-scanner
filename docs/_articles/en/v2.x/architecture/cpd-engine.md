@@ -1,7 +1,6 @@
 ---
 title: 'CPD'
 lang: en
-redirect_from: /en/architecture/cpd-engine
 ---
 ## What is Copy/Paste Detector (CPD)?
 Shipped with PMD, CPD helps identify blocks of duplication across files. 

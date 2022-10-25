@@ -1,7 +1,6 @@
 ---
 title: 'ESLint'
 lang: en
-redirect_from: /en/architecture/eslint-engine
 ---
 ## What is ESLint?
 ESLint is a popular linting tool for JavaScript. It provides numerous static analysis rules that help developers write quality code.
@@ -17,4 +16,4 @@ Additionally, ESLint is highly configurable through plug-ins. Code Analyzer supp
 ## See Also
 
 - [ESLint](https://eslint.org/)
-- [Salesforce Code Analyzer Command Reference](./en/v3.x/scanner-commands/run/#options)
+- [Salesforce Code Analyzer Command Reference](./en/v2.x/scanner-commands/run/#options)

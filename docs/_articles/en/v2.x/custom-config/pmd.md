@@ -1,7 +1,6 @@
 ---
 title: PMD Custom Configuration
 lang: en
-redirect_from: /en/custom-config/pmd
 ---
 
 ## PMD Custom Configuration
@@ -37,3 +36,4 @@ PMD rulesets in Code Analyzer have these restrictions.
 
 - [PMD Source Code Analyzer Project: Making rulesets](https://pmd.github.io/latest/pmd_userdocs_making_rulesets.html)
 - [Xpath: Writing Xpath rules](https://pmd.github.io/latest/pmd_userdocs_extending_writing_xpath_rules.html)
+

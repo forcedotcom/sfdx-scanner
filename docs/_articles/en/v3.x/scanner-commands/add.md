@@ -1,10 +1,11 @@
 ---
-title: Salesforce Code Analyzer Plug-In Command Reference
+title: Salesforce Code Analyzer Command Reference
 lang: en
+redirect_from: /en/scanner-commands/add
 ---
 
 ## sfdx scanner:rule:add
-Add custom rules to the Salesforce Code Analyzer plug-in's registry so you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
+Add custom rules to the Salesforce Code Analyzer's registry to run them along with the built-in rules. Compile and test custom rules separately before adding them.
 
 See [Authoring Custom Rules](./en/v3.x/custom-rules/author/) for more information.
 
@@ -24,7 +25,7 @@ $ sfdx scanner:rule:add -l <string> -p <array> [--json]
 ```
   
 ## Example
-XPath-only custom PMD rules may be added as standalone XML files. Java-based rules must be bundled in JAR files. Be sure to adhere to PMD conventions, such as defining the custom rules in XML fils under a ```/category``` directory.
+Add XPath-only custom PMD rules as standalone XML files. Java-based rules must be bundled in JAR files. Be sure to adhere to PMD conventions, such as defining the custom rules in XML fils under a ```/category``` directory.
 
 See the [PMD documentation](https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html) for information about writing rules. 
   

@@ -1,7 +1,6 @@
 ---
 title: Troubleshooting Common Issues
 lang: en
-redirect_from: /en/troubleshooting
 ---
 
 Follow these tips to fix common Salesforce Code Analyzer (Code Analyzer) issues.
@@ -25,42 +24,6 @@ $ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
 Check to see if the affected Visualforce pages or components render correctly.
 
 If your Visualforce pages or components include HTML tags that include PMD attributes, review [PMD-Visualforce open issues](https://github.com/pmd/pmd/issues/2765). PMD can provide the fix for you.
-
-### The `scanner:run` command throws a warning about duplicate violations between ESLint and ESLint-LWC.
-
-If you invoke the `eslint` and `eslint-lwc` engines in the same run, and execute them on the same files, Code Analyzer returns duplicate violations.
-
-You see this warning:
-
-`At least one file was processed by both ESLint and ESLint-LWC simultaneously, which could result in duplicate violations. Customize targetPatterns properties for eslint and eslint-lwc engines in ~/.sfdx-scanner/{{ site.data.versions-v3.configfile }} to remove overlap on the following file(s):`
-
-To prevent duplication, use target patterns glob syntax and edit your config file.
-
-* For `eslint-lwc` `targetPatterns`, replace `"**/*.js"` with the pattern of your LWC files
-* For `eslint` `targetPatterns`, add the converse of your `estlint-lwc` files
-
-For example, your LWC files are stored in a directory called `lwc`. Include this information in your `{{ site.data.versions-v3.configfile }}` file.
-
-```
-{
-    "name": "eslint",
-    "targetPatterns": [
-        "**/*.js",
-        "!**/lwc/**/*.js",
-        "!**/node_modules/**",
-        "!**/bower_components/**"
-    ],
-    "disabled": false
-},
-{
-    "name": "eslint-lwc",
-    "targetPatterns": [
-        "**/lwc/**/*.js",
-        "!**/node_modules/**"
-    ],
-    "disabled": true
-},
-```
 
 ---
 
@@ -158,7 +121,6 @@ Example:
         },
 ... Rest of file removed for clarity ...
 ```
-
 ---
 
 ## What languages are supported with PMD?
@@ -171,25 +133,3 @@ We removed the PMD support for all languages except:
 * XML
 
 Remove any languages besides the languages in PMD engine’s `supportedLanguages` array in your `${HOME}/.sfdx-scanner/Config.json` file. Create an issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner) to request that we add more languages.
-
----
-
-## Issues using Salesforce Graph Engine
-
-### My `scanner:run:dfa` execution ran for a long time and ended with a timeout.
-
-Depending on the complexity of the source code, Graph Engine can take a long time to complete. 
-
-Use one of these methods to increase the timeout:
-
-* increase the `SFCA_RULE_THREAD_TIMEOUT` environment variable
-* invoke the command with `rulethreadtimeout` parameter
-
-Both methods take int values of the number of milliseconds to wait. The default timeout is 15 minutes.
-
-To complete the execution within the timeout period, you can also reduce the number of files sent as `--target`, which reduces the number of entry points scanned per run.
-
-
-### My `scanner:run:dfa` execution ran into this error: `java.lang.OutOfMemoryError: Java heap space`.
-
-This `OutOfMemoryError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) to reduce the probability of experiencing the heap space error.

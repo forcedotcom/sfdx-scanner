@@ -1,7 +1,6 @@
 ---
 title: ESLint Custom Configuration
 lang: en
-redirect_from: /en/custom-config/eslint
 ---
 
 ## ESLint Custom Configuration
