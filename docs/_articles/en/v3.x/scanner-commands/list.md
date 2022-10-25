@@ -5,7 +5,7 @@ redirect_from: /en/scanner-commands/list
 ---
 
 ## sfdx scanner:rule:list
-Lists all the rules available in the catalog. Filter the output to view a smaller set of rules. To get more information about a specific rule, use the ```scanner:rule:describe``` command.
+Lists all the rules available in the catalog. You can filter the output to view a smaller set of rules. To get more information about a specific rule, use the ```scanner:rule:describe``` command.
 
 ## Usage
 
