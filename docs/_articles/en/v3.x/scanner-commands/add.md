@@ -5,7 +5,7 @@ redirect_from: /en/scanner-commands/add
 ---
 
 ## sfdx scanner:rule:add
-Add custom rules to the Salesforce Code Analyzer's registry to run them along with the built-in rules. Compile and test custom rules separately before adding them.
+Adds custom rules to Salesforce Code Analyzer’s registry so that you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
 
 See [Authoring Custom Rules](./en/v3.x/custom-rules/author/) for more information.
 
