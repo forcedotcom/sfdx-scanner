@@ -4,7 +4,9 @@ lang: en
 ---
 
 ## sfdx scanner:run:dfa
-Execute dataflow-analysis-based rules on a target codebase. This command runs for a longer time than `scanner:run`. Also, this execution requires a path to context of where the target code resides.
+Scans codebase with all DFA rules by default. Specify the format of output and print results directly or as contents of a file that you provide with --outfile flag. 
+
+This command runs for a longer time than `scanner:run`. Also, this execution requires a path to context of where the target code resides.
 
 Important: If your codebase is complex, increase the Java heap space to avoid OutOfMemory Errors. For more information, read ["OutOfMemory: Java heap space" Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-java-heap-space-error).
 
