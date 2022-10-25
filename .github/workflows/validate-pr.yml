@@ -18,3 +18,5 @@ jobs:
   # Separately, we need to run our tests
   run_tests:
     uses: ./.github/workflows/run-tests.yml
+    with:
+      node-matrix: "['lts/*', 'latest']"
