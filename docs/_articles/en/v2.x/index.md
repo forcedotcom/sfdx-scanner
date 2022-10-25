@@ -17,16 +17,10 @@ lang: en
 	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
 </div>
 <br>
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
-  <span class="slds-assistive-text">warning</span>
-  	{{ site.data.versions-v2.releasedon }}: The latest version v{{ site.data.versions-v2.scanner }} is available&nbsp;&nbsp;<a href="./en/release-information/">Release Information</a>
-</div>
-<br>
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
-  <span class="slds-assistive-text">warning</span>
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_error" role="alert">
+  <span class="slds-assistive-text">error</span>
 <p>
-  	Support and updates for Code Analyzer v2.x are scheduled to end as of the October 2022 release.
-  	You can continue to use v2.x after the October release; however, we recommend using Code Analyzer v3.x instead.
+  	Code Analyzer v2.x is not supported anymore. Use Code Analyzer v3.x instead.
  	For more information, see <a href="./en/v3.x/getting-started/prerequisites/">Getting Started with v3.x.</a>
 </p>
 </div>
