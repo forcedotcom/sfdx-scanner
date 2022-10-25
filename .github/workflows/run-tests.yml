@@ -17,7 +17,7 @@ jobs:
       # First thing's first; we need to get the code.
       - uses: actions/checkout@v2
       # Next, we need to make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
       - uses: actions/setup-java@v3
@@ -55,7 +55,7 @@ jobs:
       # Check out the code.
       - uses: actions/checkout@v2
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }} # Node version is a matrix.
       - uses: actions/setup-java@v3
@@ -126,7 +126,7 @@ jobs:
       # Check out the code.
       - uses: actions/checkout@v2
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }} # Node version is a matrix.
       - uses: actions/setup-java@v3
@@ -183,7 +183,7 @@ jobs:
       # First, we need to get the code.
       - uses: actions/checkout@v2
       # Next, make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*' # Always use Node LTS for self-eval.
       - uses: actions/setup-java@v3
