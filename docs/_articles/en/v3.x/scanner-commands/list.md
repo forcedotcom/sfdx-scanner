@@ -20,51 +20,51 @@ Lists all the rules available in the catalog. Filter the output to view a smalle
 ```bash
 OPTIONS
   -c, --category=category
-      categories to filter list by
+      Selects rules by category. Enter multiple values as a comma-separated list.
 
   -e, --engine=engine
-      engine(s) to filter list by
+      Selects rules by engine. Enter multiple values as a comma-separated list.
 
   -l, --language=language
-      language(s) to filter list by
+      Selects rules by language. Enter multiple values as a comma-separated list.
 
   -r, --ruleset=ruleset
-      [deprecated] ruleset(s) to filter list by
+      [deprecated] Selects rules by ruleset. Enter multiple values as a comma-separated list.
 
   --json
-      format output as json
+      Formats output as json.
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATA
   L)
-      [default: warn] logging level for this command invocation
+      [default: warn] Logging level for this command invocation.
 
   --verbose
-      emit additional command output to stdout
+      Emits additional command output to stdout.
 ```
   
 ## Additional Notes
 
---ruleset option is deprecated and will be removed soon. Please use --category instead.
+--ruleset The `ruleset` command parameter is deprecated. Use `category` instead.
 
 
 ## Example
-To see all rules, run the command without any filters. 
+Invoking without filter criteria returns all rules.
+This example returns a table containing all rules.
 ```bash
 $ sfdx scanner:rule:list
 ```
 
-When you specify multiple values for a single filter, the values are combined with a logical OR. 
+This example returns all rules for Apex OR Javascript. The values supplied to a single filter are handled with a logical OR.
 ```bash
 $ sfdx scanner:rule:list --language apex,javascript
 ```
 
-When you specify multiple filters, they are combined with a logical AND. This example returns all rules that target Apex OR Javascript AND are members of the Braces OR Security rulesets.
-
+This example returns all rules that target Apex or Javascript, and are members of the Braces or Security rulesets. Different filters are combined with a logical AND.
 ```bash
 $ sfdx scanner:rule:list --language apex,javascript --ruleset Braces,Security
 ```
 
-When you negate a category, the category is excluded. This example returns all rules except those in the Design or Best Practices categories. The values must be enclosed in single quotes.
+This example returns all rules except those in the Design or Best Practices categories. Exclude categories by specifying the negation operator and enclose the values in single quotes.
 ```bash
 $ sfdx scanner:rule:list --category '!Design,!Best Practices'
 ```
