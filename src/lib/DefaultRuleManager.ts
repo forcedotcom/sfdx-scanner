@@ -14,7 +14,7 @@ import {Controller} from '../Controller';
 import globby = require('globby');
 import path = require('path');
 import {uxEvents, EVENTS} from './ScannerEvents';
-import {CUSTOM_CONFIG, ENGINE, CONFIG_PILOT_FILE} from '../Constants';
+import {CUSTOM_CONFIG, ENGINE, CONFIG_FILE} from '../Constants';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -131,7 +131,7 @@ export class DefaultRuleManager implements RuleManager {
 			if (pathsDoubleProcessed.length > numFilesShown) {
 				filesToDisplay.push(`and ${pathsDoubleProcessed.length - numFilesShown} more`)
 			}
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${filesToDisplay.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
 		}
 
 

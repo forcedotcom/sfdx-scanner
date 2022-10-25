@@ -11,7 +11,7 @@ import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.apex.jorje.TopLevelWrapper;
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.config.SfgeConfigProvider;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.Util;
@@ -181,10 +181,9 @@ public final class GraphUtil {
                     "Could not read file/directory " + sourceFileVisitor.lastVisitedFile, ex);
         } catch (JorjeUtil.JorjeCompilationException ex) {
             throw new GraphLoadException(
-                    "Could not parse file "
-                            + sourceFileVisitor.lastVisitedFile
-                            + ": "
-                            + ex.getMessage(),
+                    String.format(
+                            UserFacingMessages.FIX_COMPILATION_ERRORS,
+                            sourceFileVisitor.lastVisitedFile),
                     ex);
         }
 
@@ -211,14 +210,7 @@ public final class GraphUtil {
                 progressListener.compiledAnotherFile();
                 return Optional.of(new Util.CompilationDescriptor(pathString, astNodeWrapper));
             } catch (JorjeUtil.JorjeCompilationException ex) {
-                if (SfgeConfigProvider.get().shouldIgnoreParseErrors()) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Error compiling file. path=" + pathString, ex);
-                    }
-                    return Optional.empty();
-                } else {
-                    throw ex;
-                }
+                throw ex;
             }
         }
     }

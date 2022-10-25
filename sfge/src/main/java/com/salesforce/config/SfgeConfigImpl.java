@@ -16,13 +16,8 @@ public final class SfgeConfigImpl implements SfgeConfig {
     }
 
     @Override
-    public boolean isWarningViolationEnabled() {
-        return EnvUtil.isWarningViolationEnabled();
-    }
-
-    @Override
-    public boolean shouldIgnoreParseErrors() {
-        return EnvUtil.shouldIgnoreParseErrors();
+    public boolean isWarningViolationDisabled() {
+        return EnvUtil.isWarningViolationDisabled();
     }
 
     @Override

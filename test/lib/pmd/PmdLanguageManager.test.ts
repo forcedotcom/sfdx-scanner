@@ -6,6 +6,7 @@ import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
 import messages = require('../../../messages/PmdLanguageManager');
 import { ENGINE } from '../../../src/Constants';
+import { Controller } from '../../../src/Controller';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
@@ -70,7 +71,7 @@ describe('PmdLanguageManager', () => {
 					await PmdLanguageManager.getSupportedLanguages();
 					expect(true).to.equal(false, 'Error should have thrown');
 				} catch (e) {
-					expect(e.message).to.include(messages.InvalidLanguageAlias.replace('%s', 'NotRealLang'));
+					expect(e.message).to.include(messages.InvalidLanguageAlias.replace('%s', (await Controller.getConfig()).getConfigFilePath()).replace('%s', 'NotRealLang'));
 				}
 			});
 		});
@@ -93,7 +94,7 @@ describe('PmdLanguageManager', () => {
 					await PmdLanguageManager.getSupportedLanguages();
 					expect(true).to.equal(false, 'Error should have thrown');
 				} catch (ex) {
-					expect(ex.message).to.equal('Javascript is not currently supported by the PMD engine.');
+					expect(ex.message).to.equal(`Javascript isn't supported by the PMD engine.`);
 				}
 			});
 		});

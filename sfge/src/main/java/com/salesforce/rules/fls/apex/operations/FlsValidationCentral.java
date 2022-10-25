@@ -33,8 +33,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class FlsValidationCentral {
     private static final Logger LOGGER = LogManager.getLogger(FlsValidationCentral.class);
-    private final boolean IS_WARNING_VIOLATION_ENABLED =
-            SfgeConfigProvider.get().isWarningViolationEnabled();
+    private final boolean IS_WARNING_VIOLATION_DISABLED =
+            SfgeConfigProvider.get().isWarningViolationDisabled();
 
     private final Set<FlsValidationRepresentation.Info> existingSchemaBasedValidations;
     private final Set<FlsViolationInfo> violations;
@@ -119,7 +119,7 @@ public class FlsValidationCentral {
     private void createStripInaccessibleWarningViolations(
             ApexValue<?> apexValue, Collection<FlsValidationRepresentation> validationReps) {
         // If warnings are enabled, create stripInaccessible warnings
-        if (IS_WARNING_VIOLATION_ENABLED) {
+        if (!IS_WARNING_VIOLATION_DISABLED) {
             final Set<FlsViolationInfo> warningViolations =
                     FlsViolationCreatorUtil.createStripInaccessibleWarningViolations(
                             apexValue, validationReps);

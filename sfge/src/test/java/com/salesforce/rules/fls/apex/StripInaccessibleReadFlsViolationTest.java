@@ -357,8 +357,8 @@ public class StripInaccessibleReadFlsViolationTest extends BaseFlsTest {
             SfgeConfigTestProvider.set(
                     new TestSfgeConfig() {
                         @Override
-                        public boolean isWarningViolationEnabled() {
-                            return false;
+                        public boolean isWarningViolationDisabled() {
+                            return true;
                         }
                     });
 

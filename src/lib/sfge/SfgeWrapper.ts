@@ -35,7 +35,7 @@ interface SfgeWrapperOptions {
 	jvmArgs?: string,
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
-	ignoreParseErrors?: boolean;
+	ruleDisableWarningViolation?: boolean;
 }
 
 type SfgeTarget = {
@@ -91,7 +91,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	private jvmArgs: string;
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
-	private ignoreParseErrors: boolean;
+	private ruleDisableWarningViolation: boolean;
 
 	constructor(options: SfgeWrapperOptions) {
 		super(options);
@@ -103,7 +103,7 @@ export class SfgeWrapper extends CommandLineSupport {
 		this.jvmArgs = options.jvmArgs;
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
-		this.ignoreParseErrors = options.ignoreParseErrors;
+		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
 	}
 
 	protected async init(): Promise<void> {
@@ -132,7 +132,7 @@ export class SfgeWrapper extends CommandLineSupport {
 	}
 
 	/**
-	 * While handling unsuccessful executions, include stdout 
+	 * While handling unsuccessful executions, include stdout
 	 * and stderr information.
 	 * @param args contains information on the outcome of execution
 	 */
@@ -176,8 +176,8 @@ export class SfgeWrapper extends CommandLineSupport {
 		if (this.ruleThreadTimeout != null) {
 			args.push(`-DSFGE_RULE_THREAD_TIMEOUT=${this.ruleThreadTimeout}`);
 		}
-		if (this.ignoreParseErrors != null) {
-			args.push(`-DSFGE_IGNORE_PARSE_ERRORS=${this.ignoreParseErrors.toString()}`);
+		if (this.ruleDisableWarningViolation != null) {
+			args.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
 		}
 		args.push(MAIN_CLASS, this.command, inputFile);
 
@@ -242,7 +242,7 @@ export class SfgeWrapper extends CommandLineSupport {
 			jvmArgs: sfgeConfig.jvmArgs,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
-			ignoreParseErrors: sfgeConfig.ignoreParseErrors
+			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation
 		});
 		return wrapper.execute();
 	}

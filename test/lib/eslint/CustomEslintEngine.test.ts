@@ -184,7 +184,7 @@ describe("Tests for CustomEslintEngine", () => {
 
 				// TODO: throw failure when exception is not thrown
 			} catch (err) {
-				expect(err.message).contains(`Error while reading JSON in Eslint config (${configFilePath})`);
+				expect(err.message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}.`);
 			}
 
 		});

@@ -33,13 +33,8 @@ public class SfgeConfigProviderTest {
                         }
 
                         @Override
-                        public boolean isWarningViolationEnabled() {
-                            return !EnvUtil.DEFAULT_RULE_ENABLE_WARNING_VIOLATION;
-                        }
-
-                        @Override
-                        public boolean shouldIgnoreParseErrors() {
-                            return !EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS;
+                        public boolean isWarningViolationDisabled() {
+                            return !EnvUtil.DEFAULT_RULE_DISABLE_WARNING_VIOLATION;
                         }
 
                         @Override
@@ -62,11 +57,8 @@ public class SfgeConfigProviderTest {
                     sfgeConfig.getRuleThreadTimeout(),
                     equalTo(-1 * EnvUtil.DEFAULT_RULE_THREAD_TIMEOUT));
             MatcherAssert.assertThat(
-                    sfgeConfig.isWarningViolationEnabled(),
-                    equalTo(!EnvUtil.DEFAULT_RULE_ENABLE_WARNING_VIOLATION));
-            MatcherAssert.assertThat(
-                    sfgeConfig.shouldIgnoreParseErrors(),
-                    equalTo(!EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+                    sfgeConfig.isWarningViolationDisabled(),
+                    equalTo(!EnvUtil.DEFAULT_RULE_DISABLE_WARNING_VIOLATION));
             MatcherAssert.assertThat(
                     sfgeConfig.shouldLogWarningsOnVerbose(),
                     equalTo(!EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
@@ -92,10 +84,8 @@ public class SfgeConfigProviderTest {
         MatcherAssert.assertThat(
                 sfgeConfig.getRuleThreadTimeout(), equalTo(EnvUtil.DEFAULT_RULE_THREAD_TIMEOUT));
         MatcherAssert.assertThat(
-                sfgeConfig.isWarningViolationEnabled(),
-                equalTo(EnvUtil.DEFAULT_RULE_ENABLE_WARNING_VIOLATION));
-        MatcherAssert.assertThat(
-                sfgeConfig.shouldIgnoreParseErrors(), equalTo(EnvUtil.DEFAULT_IGNORE_PARSE_ERRORS));
+                sfgeConfig.isWarningViolationDisabled(),
+                equalTo(EnvUtil.DEFAULT_RULE_DISABLE_WARNING_VIOLATION));
         MatcherAssert.assertThat(
                 sfgeConfig.shouldLogWarningsOnVerbose(),
                 equalTo(EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));

@@ -1,3 +1,3 @@
 module.exports = {
-	"JavascriptNotSupported": "Javascript is not currently supported by the PMD engine."
+	"JavascriptNotSupported": "Javascript isn't supported by the PMD engine."
 };

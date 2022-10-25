@@ -165,7 +165,7 @@ describe('TypescriptEslint Strategy', () => {
 					await tsStrategy.findTsconfig(null);
 					fail('findTsconfig should have thrown');
 				} catch(e) {
-					expect(e.message).to.contain(`Unable to find 'tsconfig.json' in current directory '${path.resolve()}'`)
+					expect(e.message).to.contain(`We couldn't find 'tsconfig.json' in the current directory '${path.resolve()}'`)
 				}
 			});
 		});
@@ -236,7 +236,7 @@ describe('TypescriptEslint Strategy', () => {
 					await tsStrategy.checkEngineOptionsForTsconfig(engineOptions);
 					fail('findTsconfig should have thrown');
 				} catch(e) {
-					expect(e.message).to.contain(`Unable to find 'tsconfig.json' at location '${engineOptionPath}'`)
+					expect(e.message).to.contain(`We couldn't find the 'tsconfig.json' at location '${engineOptionPath}'`)
 				}
 			});
 
@@ -253,7 +253,7 @@ describe('TypescriptEslint Strategy', () => {
 					await tsStrategy.checkEngineOptionsForTsconfig(engineOptions);
 					fail('findTsconfig should have thrown');
 				} catch(e) {
-					expect(e.message).to.contain(`File '${engineOptionPath}' specified by the --tsconfig flag must be named 'tsconfig.json'`)
+					expect(e.message).to.contain(`The file '${engineOptionPath}' specified by the --tsconfig flag must be named 'tsconfig.json'`)
 				}
 			});
 		});
@@ -283,7 +283,7 @@ describe('TypescriptEslint Strategy', () => {
 				const violation: RuleViolation = ruleResult.violations[0];
 				const message = violation.message;
 				const thePath = path.join('test', 'code-fixtures', 'projects', 'invalid-ts', 'src', 'notSpecifiedInTsConfig.ts');
-				expect(message).to.contain(`${thePath}' does not reside in a location that is included by your tsconfig.json 'include' attribute.`);
+				expect(message).to.contain(`${thePath}' doesn't reside in a location that is included by your tsconfig.json 'include' attribute.`);
 				expect(message).to.not.contain('Parsing error: \\"parserOptions.project\\" has been set');
 			});
 		});

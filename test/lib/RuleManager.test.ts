@@ -4,7 +4,7 @@ import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
 import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
-import {ENGINE, CONFIG_PILOT_FILE} from '../../src/Constants';
+import {ENGINE, CONFIG_FILE} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
@@ -273,7 +273,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -284,7 +284,7 @@ describe('RuleManager', () => {
 					await ruleManager.runRulesMatchingCriteria(filters, targets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					const filename = path.join(__dirname, '..','code-fixtures', 'invalid-lwc', 'invalidApiDecorator', 'noLeadingUpperCase.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${filename}`])
+					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -299,7 +299,7 @@ describe('RuleManager', () => {
 					const baseConfigEnv = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')
 					const fileThatUsesQUnit = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')
 					const simpleYetWrong = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'simpleYetWrong.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_PILOT_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
+					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -408,7 +408,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -423,7 +423,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Target: '${invalidTarget.join(', ')}' was not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -437,7 +437,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -457,7 +457,7 @@ describe('RuleManager', () => {
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Targets: '${invalidTargets.join(', ')}' were not processed by any engines.`);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
