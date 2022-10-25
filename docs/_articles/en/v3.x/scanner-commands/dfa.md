@@ -18,44 +18,43 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
 ## Options
 ```bash
   -f, --format=(csv|html|json|junit|sarif|table|xml)
-      format of results
+      Specifies results output format written directly to the console.
 
   -o, --outfile=_outfile_
-      location of output file
+      Writes output to a file.
 
   -p, --projectdir=_projectdir_
-      (required) directory where the target location resides in or the context of the remaining files in the target\'s project
+      (required) Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.
 
   -s, --severity-threshold=_severity-threshold_
-      throws an error when violations of specific severity (or
-      more severe) are detected, invokes --normalize-severity
+      Throws an error when violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag.
 
   -t, --target=_target_
-      (required) location of classes that contain entry points to analyze
+      (required) Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list.
 
   --ignore-parse-errors
-      ignore compilation failures in scanned files (default: false). Alternatively, set value using environment variable `SFGE_IGNORE_PARSE_ERRORS`
+      Ignores compilation failures in scanned files. Inherits value from SFGE_IGNORE_PARSE_ERRORS env-var if set.
 
   --json
-      format output as json
+      Formats output as json.
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
       [default: warn] logging level for this command invocation
 
   --normalize-severity
-       A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine specific severity
-
+       Returns normalized severity 1 (high), 2 (moderate), and 3 (low) and the engine-specific severity. For the html option, normalized severity is displayed instead of the engine severity.
+	   
   --rule-thread-count=_rule-thread-count_
-      number of threads evaluating dfa rules (default: 4). Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`
-
+      Specifies number of rule evaluation threads, or how many entrypoints can be evaluated concurrently. Inherits value from SFGE_RULE_THREAD_COUNT env-var, if set. Default is 4.
+	  
   --rule-thread-timeout=rule-thread-timeout
-      timeout for individual rule threads, in milliseconds (default: 900000 ms). Alternatively, set value using environment variable `SFGE_RULE_THREAD_TIMEOUT`
+      Specifies time limit for evaluating a single entrypoint in milliseconds. Inherits from SFGE_RULE_THREAD_TIMEOUT env-var if set. Default is 900,000 ms, or 15 minutes.
 
   --sfgejvmargs=_sfgejvm_args_
-      JVM arguments to override system defaults while executing Graph Engine. For multiple arguments, add them to the same string separated by space. Alternatively, set value using the environment variable `SFGE_JVM_ARGS`
+      Specifies Java Virtual Machine arguments to override system defaults while executing Salesforce Graph Engine. For multiple arguments, add them to the same string separated by space.
 
   --verbose
-      emit additional command output to stdout
+      Emits additional command output to stdout.
 ```
 
 ## Environment-variable-based Controls
