@@ -25,11 +25,12 @@ $ sfdx scanner:rule:add -l <string> -p <array> [--json]
 ```
   
 ## Example
-Add XPath-only custom PMD rules as standalone XML files. Java-based rules must be bundled in JAR files. Be sure to adhere to PMD conventions, such as defining the custom rules in XML fils under a ```/category``` directory.
+Bundle custom PMD rules in JAR files. Follow PMD conventions, such as defining the custom rules in XML files under a ```/category``` directory.
 
-See the [PMD documentation](https://pmd.github.io/latest/pmd_userdocs_extending_writing_pmd_rules.html) for information about writing rules. 
-  
-This example shows how to specify two files directly.
+See PMD's documentation for more information on writing rules.
+
+This example shows how to specify two JAR files directly. You can also specify a directory containing one or more JARs, all of which will be added.
+
 ```bash
 $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml"
          Successfully added rules for apex.
@@ -37,7 +38,8 @@ $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/
          /Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml
 ```
 
-This example shows how to specify a directory that contains one or more rule files, all of which are added to the registry.
+This example shows how to specify a directory that contains one or more JAR files, all of which are added to the registry. 
+
 ```bash
 $ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
          Successfully added rules for apex.
