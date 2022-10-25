@@ -17,7 +17,7 @@ jobs:
       # First thing's first; we need to get the code.
       - uses: actions/checkout@v2
       # Next, we need to make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
       - uses: actions/setup-java@v3
@@ -55,7 +55,7 @@ jobs:
       # Check out the code.
       - uses: actions/checkout@v2
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }} # Node version is a matrix.
       - uses: actions/setup-java@v3
@@ -126,7 +126,7 @@ jobs:
       # Check out the code.
       - uses: actions/checkout@v2
       # Make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }} # Node version is a matrix.
       - uses: actions/setup-java@v3
@@ -174,18 +174,16 @@ jobs:
   #   something to be aware of.
   self-evaluation:
     runs-on: ubuntu-latest
-    needs: build-dependencies # This job doesn't technically need to run second, but it makes for a cleaner pipeline.
-    strategy:
-      fail-fast: false
-      matrix:
-        node: ${{ fromJson(inputs.node-matrix) }}
+    # Technically, this job could run before the build-dependencies job. But having it run second makes
+    # for a cleaner-looking pipeline.
+    needs: build-dependencies
     steps:
       # First, we need to get the code.
       - uses: actions/checkout@v2
       # Next, make sure we're using the right versions of Node and Java.
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
-          node-version: 'lts/*' # Always use Node LTS for self-eval.
+          node-version:  # Always use Node LTS for self-eval.
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
