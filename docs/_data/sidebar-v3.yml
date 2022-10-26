@@ -13,7 +13,7 @@
         en: Installation
       url: /v3.x/getting-started/install
 - title:
-    en: How to use the Plugin
+    en: Command Reference
   baseUrl: /v3.x/scanner-commands/
   children:
     - title:
@@ -75,7 +75,7 @@
         en: RetireJS
       url: /v3.x/architecture/retire-js-engine
     - title:
-        en: SFG Engine
+        en: Graph Engine
       url: /v3.x/architecture/sfg-engine
       new: true
 - title:
@@ -87,7 +87,7 @@
         en: Introduction
       url: /v3.x/salesforce-graph-engine/introduction
     - title:
-        en: Working with SFGE
+        en: Working with Graph Engine
       url: /v3.x/salesforce-graph-engine/working-with-sfge
     - title:
         en: Rules
