@@ -5,7 +5,11 @@ redirect_from: /en/scanner-commands/run
 ---
 
 ## sfdx scanner:run
+
 Scans a codebase with a selection of rules. Scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. Specify the format of the output, such as XML or JUnit. Print the output to the console (default) or to a file using the ```--outfile``` parameter. 
+
+**Note**: To run Salesforce Graph Engine, you must run a separate command: `scanner:run:dfa`. Learn more in [Introduction to Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
+
 
 ## Usage
 
