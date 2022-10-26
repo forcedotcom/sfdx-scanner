@@ -1,15 +1,11 @@
 ---
-title: Salesforce Code Analyzer Plug-In Command Reference
+title: Salesforce Code Analyzer Command Reference
 lang: en
 redirect_from: /en/scanner-commands/run
 ---
 
 ## sfdx scanner:run
-Scan a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset.
-
-**Note**: To run Salesforce Graph Engine on Code Analyzer version 3.x, you must run a separate command: `scanner:run:dfa`. Learn more in [Introduction to Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/).
-
-You can specify the format of the output as XML, JUnit, CSV, or table. You can print the output to the console (default) or to a file using the `--outfile` parameter.
+Scans a codebase with a selection of rules. Scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. Specify the format of the output, such as XML or JUnit. Print the output to the console (default) or to a file using the ```--outfile``` parameter. 
 
 ## Usage
 
@@ -22,81 +18,82 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 
 ```bash
 -c, --category=_category_
- categor(ies) of rules to run
+One or more categories of rules to run. Specify multiple values as a comma-separated list.
 
  -e, --engine=_engine_
- engine(s) to run
+Specifies one or more engines to run. Submit multiple values as a comma-separated list.
+specify the location of eslintrc config to customize eslint engine
 
  -f, --format=(csv|html|json|junit|sarif|table|xml)
- format of results
+ Specifies output format with results written directly to the console.
 
  -o, --outfile=_outfile_
- location of output file
+ Writes output to a file.
 
  -r, --ruleset=_ruleset_
- [deprecated] ruleset(s) of rules to run
+ [deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
 
  -s, --severity-threshold=_severity-threshold_
- throws an error when violations of specific severity (or more severe) are detected, invokes 
+ Throws an error when violations are found with equal or greater severity than the provided value. –normalize-severity is invoked and severity levels are reset to the baseline. Normalized severity values are: 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation.
 
  --normalize-severity
+ Returns normalized severity 1 (high), 2 (moderate), and 3 (low) and the engine-specific severity. For the html option, the normalized severity is displayed instead of the engine severity.
 
  -t, --target=_target_
- (required) location of source code
+ (required) Source code location. May use glob patterns. Specify multiple values as a comma-separated list.
 
  --env=_env_
- JSON-formatted string, overrides ESLint\'s default environment variables
+ Overrides ESLint’s default environment variables, in JSON-formatted string.
 
  --eslintconfig=_eslintconfig_
- location of eslintrc config to customize eslint engine
+ Specifies the location of eslintrc config to customize eslint engine.
 
  --json
- format output as json
+ Formats output as JSON.
 
  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
- [default: warn] logging level for this command invocation
+ [default: warn] Logging level for this command invocation.
 
  --normalize-severity
- A normalized severity 1 (high), 2 (moderate), and 3 (low) is returned in addition to the engine 
- specific severity
+ Returns normalized severity in addition to the engine specific severity. Normalized severity is: 1 (high), 2 (moderate), and 3 (low).
 
  --pmdconfig=_pmdconfig_
- location of PMD rule reference XML file to customize rule selection
+ Specifies the location of PMD rule reference XML file to customize rule selection.
 
  --tsconfig=_tsconfig_
- location of tsconfig.json file
+ Location of tsconfig.json file used by eslint-typescript engine.
 
  --verbose
- emit additional command output to stdout
+ Emits additional command output to stdout.
 
  --verbose-violations
-retire-js violation messages include more details
+Returns retire-js violation messages details about each vulnerability, including summary, Common Vulnerabilities and Exposures (CVE), and URLs.
 
 ```
 
 ## Additional Notes
 
-- `--ruleset` option is deprecated. Use --category instead.
+- The ```--ruleset``` command parameter is deprecated. Use ```category``` instead.
   
 ## Example
 
-This example evaluates all rules against ```somefile.js```.
+This example evaluates all rules against ```somefile.js```. Invoking code analyzer without specifying any rules causes all rules to be run.
 
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js"
 ```
 
-When you specify multiple categories, the categories are combined with a logical OR. This example evaluates all rules in the Design or Best Practices categories.
+This example evaluates all rules in the Design and Best Practices categories. When you specify multiple categories or rulesets, the results are combined with a logical OR.
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices"
 ```
 
-When you negate a category, the category is excluded. This example evaluates all rules except those in the Design or Best Practices categories. The values must be enclosed in single quotes.
+This example evaluates all rules except those in the Design or Best Practices categories. Exclude categories by specifying the negation operator and enclosing the values in single quotes.
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js" --category '!Design,!Best Practices'
 ```
 
-Wrap globs in quotes.  This example evaluates rules against all ```*.js``` files in the current directory, except for ```IgnoreMe.js```.
+These examples evaluate rules against all .js files in the current directory, except for IgnoreMe.js. Wrap globs in quotes. 
 
 Unix example:
 ```bash
@@ -107,45 +104,54 @@ Windows example:
 > sfdx scanner:run --target ".\**\*.js,!.\**\IgnoreMe.js" ...
 ```
 
-Specify `tsconfig.json` if the current working directory does not contain the ```tsconfig.json``` that corresponds to the TypeScript files being scanned. This example demonstrates scanning the project contained in ```/my-project``` if the current working directory is ```/my-home-directory```.
+This example scans the project contained in '/my-project' if the current working directory is another directory. Specify tsconfig.json if the current working directory does not contain the tsconfig.json that corresponds to the TypeScript files being scanned.
 ```bash
 $ cd /my-home-directory
 $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconfig.json"
 ```
-Use --env to override the default ESLint environment variables to add frameworks.
+
+This example evaluates rules against somefile.js, including Jasmine in the environment variables. Uses --env to override the default ESLint environment variables to add frameworks.
 ```bash
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
+
+This example evaluates rules aginst somefile.js using eslint-lwc and pmd engines. Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
+
+```bash
+$ sfdx scanner:run --target "somefile.js" --engine "eslint-lwc,pmd"
 ```
 
-Use `--engine` to include or exclude engines. Regardless of their current 'disabled' attribute, any specified engine will run, and all others will not.
-
-In this example, ESLint and RetireJS will run even if they're disabled, and no other engines will run.
+In this example, ESLint and RetireJS will run even if they’re disabled, and no other engines will run. Use --engine to include or exclude engines. Regardless of their current ‘disabled’ attribute, any specified engine will run, and all others will not. 
 ```bash
 $ sfdx scanner:run --target "somedirectory" --engine "eslint,retire-js"
 ```
 
-In another example, Code Analyzer executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages. 
+Use --engine to invoke engines that are not enabled by default.
+This example executes CPD engine against known file extensions in "/some/dir". CPD helps detect blocks of code duplication in selected languages.
 
 ```bash
 $ sfdx scanner:run --target "/some/dir" --engine cpd
  ```
  
-To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+This example executes rules defined in pmd_rule_ref.xml against the files in 'src'. To use PMD with your own rule reference file, use --pmdconfig. Note that rule filters are not applied.
+
 ```bash
 $ sfdx scanner:run --target "src" --pmdconfig "pmd_rule_ref.xml"
 ```
 
-To use ESLint with your own `.eslintrc.json` file, use `--eslintconfig`. Make sure that the directory you run the command from has all the npm dependencies installed.
+This example uses a custom config to scan the files in 'src'. To use ESLint with your own .eslintrc.json file, use --eslintconfig. Make sure that the directory you run the command from has all the NPM dependencies installed.
+
 ```bash
 $ sfdx scanner:run --target "src" --eslintconfig "/home/my/setup/.eslintrc.json"
 ```
 
-Use `--normalize-severity` to output a normalized (across all engines) severity (1 [high], 2 [moderate], and 3 [low]) in addition to the engine specific severity (when shown). 
+This example uses --normalize-severity to output normalized severity and engine-specific severity across all engines. Normalized severity is: 1 (high), 2 (moderate), and 3 (low). 
+
 ```bash
 $ sfdx scanner:run --target "/some-project/" --format csv --normalize-severity
 ```
 
-Use `--severity-threshold` to throw a non-zero exit code when rule violations of a specific severity (or greater) are found. For this example, if there are any rule violations with a severity of 2 or more (which includes 1-high and 2-moderate), the exit code will be equal to the severity of the most severe violation
+This example uses --severity-threshold to throw a non-zero exit code when rule violations of normalized severity 2 or greater are found. If any violations with the specified severity (or greater) are found, the exit code equals the severity of the most severe violation.
+
 ```bash
 $ sfdx scanner:run --target "/some-project/" --severity-threshold 2
 ```
