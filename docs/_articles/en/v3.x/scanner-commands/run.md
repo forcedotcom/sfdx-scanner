@@ -5,8 +5,7 @@ redirect_from: /en/scanner-commands/run
 ---
 
 ## sfdx scanner:run
-Scans a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset.
-You can specify the format of the output, such as XML or JUnit. You can print the output to the console (default) or to a file using the ```--outfile``` parameter. 
+Scans a codebase with a selection of rules. Scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. Specify the format of the output, such as XML or JUnit. Print the output to the console (default) or to a file using the ```--outfile``` parameter. 
 
 ## Usage
 
