@@ -14,5 +14,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: salesforcecli/github-workflows/.github/actions/getPreReleaseTag@main
-        id: disttag
-      - run: echo ${{ steps.disttag.outputs.tag }}
+        id: distag
+      - run: echo ${{ steps.distag.outputs.tag }}
