@@ -17,6 +17,4 @@ jobs:
         id: verify_pr_title
   # Separately, we need to run our tests
   run_tests:
-    uses: ./.github/workflows/run-tests.yml
-    with:
-      node-matrix: "['lts/*', 'latest']"
+    uses: ./.github/workflows/experimentation.yml

@@ -9,41 +9,10 @@ on:
         default: "['lts/*']"
 
 jobs:
-  upload_an_artifact:
-    runs-on: windows-latest
+  do-thing:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 'lts/*'
-      - shell: bash
-        run: echo here is some text > salesforce-sfdx-scanner-3.5.1.txt
-      - uses: actions/upload-artifact@v3
-        with:
-          name: beep
-          path: ./beep.txt
-  download_the_artifact:
-    strategy:
-      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
-      # to completion instead.
-      fail-fast: false
-      matrix:
-        node: ${{ fromJson(inputs.node-matrix) }}
-        os: [ { vm: ubuntu-latest, exe: .sh }, { vm: windows-2019, exe: .cmd } ]
-    runs-on: ${{ matrix.os.vm }}
-    needs: upload_an_artifact
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: 'lts/*'
-      - uses: actions/download-artifact@v3
-        id: download
-        with:
-          name: beep
-          path: ~/download/path
-      - run: |
-          BASEDIR=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
-          TREATEDDIR=`[[ $BASEDIR = C* ]] && echo $BASEDIR | cut -d':' -f 2 || echo $BASEDIR`
-          echo $TREATEDDIR
-        shell: bash
+      - uses: actions/checkout@v3
+      - uses: salesforcecli/github-workflows/.github/actions/getPreReleaseTag@main
+        id: disttag
+      - run: echo ${{ steps.disttag.outputs.tag }}
