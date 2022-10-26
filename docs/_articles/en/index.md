@@ -15,7 +15,7 @@ lang: en
 
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
-  	`@latest-pilot` tag is deprecated and will be removed by December 2022&nbsp;&nbsp;&nbsp;&nbsp;<a href="./en/v3.x/getting-started/install/">v3.x installation steps</a> &nbsp;&nbsp;&nbsp;
+  	`@latest-pilot` tag is deprecated and will be removed by December 2022&nbsp;&nbsp;&nbsp;&nbsp;<a href="./en/v3.x/getting-started/install/">v3.x Installation Steps</a> &nbsp;&nbsp;&nbsp;
 </div>
 <br>
 
