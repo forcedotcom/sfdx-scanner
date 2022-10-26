@@ -3,28 +3,16 @@ title: Salesforce Code Analyzer Plug-In
 permalink: /en/v2.x/
 lang: en
 ---
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_info" role="alert">
-  <span class="slds-assistive-text">success</span>
-    We're constantly improving Salesforce Code Analyzer. Tell us what you think!
-    &nbsp;&nbsp;
-	<a href="https://research.net/r/SalesforceCA" target="_blank"><button class="slds-button slds-button_brand">Give Feedback</button></a>
-</div>
-<br>
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-theme_success" role="alert">
-  <span class="slds-assistive-text">success</span>
-  	{{ site.data.versions-v3.releasedon }}: New pilot version {{ site.data.versions-v3.scanner }} of Salesforce Code Analyzer is available
-	&nbsp;&nbsp;
-	<a href="./en/v3.x/whats-new-v3/">Check out what's new</a>
-</div>
-<br>
-<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_error" role="alert">
-  <span class="slds-assistive-text">error</span>
+
+<div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
+  <span class="slds-assistive-text">warning</span>
 <p>
-  	Code Analyzer v2.x is not supported anymore. Use Code Analyzer v3.x instead.
- 	For more information, see <a href="./en/v3.x/getting-started/prerequisites/">Getting Started with v3.x.</a>
+  	Code Analyzer v2.x is not supported anymore. <a href="./en/3.x/getting-started/install">Update</a> to Code Analyzer v3.x.
+ 	Check out <a href="./en/v3.x/whats-new-v3/">what's new</a>.
 </p>
 </div>
 <br>
+
 
 ## Salesforce Code Analyzer
 
