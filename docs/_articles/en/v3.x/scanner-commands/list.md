@@ -32,7 +32,7 @@ OPTIONS
       [deprecated] Selects rules by ruleset. Enter multiple values as a comma-separated list.
 
   --json
-      Formats output as json.
+      Formats output as JSON.
 
   --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATA
   L)
