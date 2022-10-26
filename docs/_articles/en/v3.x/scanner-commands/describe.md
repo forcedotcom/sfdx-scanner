@@ -17,7 +17,7 @@ $ sfdx scanner:rule:describe -n <string> [--verbose] [--json]
 
 ```bash
   -n, --rulename=rulename	(required) The name of the rule.
-  --json			Formats output as json.
+  --json			Formats output as JSON.
   --verbose 			Emits additional command output to stdout.
 
 ```
