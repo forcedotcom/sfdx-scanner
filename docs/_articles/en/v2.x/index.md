@@ -7,7 +7,7 @@ lang: en
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_warning" role="alert">
   <span class="slds-assistive-text">warning</span>
 <p>
-  	Code Analyzer v2.x is not supported anymore. <a href="./en/3.x/getting-started/install">Update</a> to Code Analyzer v3.x.
+  	Code Analyzer v2.x is not supported anymore. <a href="./en/v3.x/getting-started/install/">Update</a> to Code Analyzer v3.x.
  	Check out <a href="./en/v3.x/whats-new-v3/">what's new</a>.
 </p>
 </div>
