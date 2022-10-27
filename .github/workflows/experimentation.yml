@@ -32,3 +32,9 @@ jobs:
         run: |
           echo "${{ steps.get-release-commit.outputs.COMMIT_ID }} differed from ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
+      # Verify that the tag matches the version in the package.json
+      - run: |
+          TAG='v3.6.2'
+          PACKAGE_VERSION=v`cat package.json | jq '.version' | xargs`
+          [[ ${TAG} == ${PACKAGE_VERSION} ]] || (echo "Tag name must exactly match version defined in package.json" && exit 1)
+      
