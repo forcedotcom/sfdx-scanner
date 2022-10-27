@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: "['lts/*']"
+      tag:
+        description: "beep"
+        required: false
+        type: string
+        default: "v3.6.2"
 
 jobs:
   do-thing:
@@ -34,7 +39,7 @@ jobs:
           exit 1
       # Verify that the tag matches the version in the package.json
       - run: |
-          TAG='v3.2.2'
+          TAG=${{ inputs.tag }}
           PACKAGE_VERSION=v`cat package.json | jq '.version' | xargs`
           [[ ${TAG} == ${PACKAGE_VERSION} ]] || (echo "Tag name must exactly match version defined in package.json" && exit 1)
 
