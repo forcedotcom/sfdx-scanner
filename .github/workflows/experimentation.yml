@@ -7,16 +7,21 @@ on:
         required: false
         type: string
         default: "['lts/*']"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: a tag
+        type: string
+        required: true
+      dry-run:
+        description: a boolean
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   do-thing:
     runs-on: ubuntu-latest
     steps:
-      - uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "gha_link": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SMOKE_TEST_FAILURE_SLACK_WEBHOOK }}
+      - run: echo ${{ inputs.tag }}
+      - run: echo ${{ inputs.dry-run }}
