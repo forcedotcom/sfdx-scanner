@@ -15,32 +15,13 @@ on:
 
 jobs:
   do-thing:
+    strategy:
+      matrix:
+        v: [0, 0, 0, 0]
     runs-on: ubuntu-latest
     steps:
-      # We want to check out the release-3 branch.
-      - uses: actions/checkout@v3
-        with:
-          ref: 'v3-6-2'
-      # Get the commit at the head of this branch and output it for later use.
-      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        id: get-release-commit
-      # Checkout the tag we want to release.
-      - uses: actions/checkout@v3
-        with:
-          ref: 'v3.6.2'
-      # Get the commit associated with this tag and output it for later use.
-      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-        id: get-tag-commit
-      # Compare the two commits to make sure they're the same.
-      - name: Fail non-matching commits
-        if: ${{ steps.get-release-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
-        run: |
-          echo "${{ steps.get-release-commit.outputs.COMMIT_ID }} differed from ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
-          exit 1
-      # Verify that the tag matches the version in the package.json
-      - name: Compare tag to package.json
-        run: |
-          TAG=${{ inputs.tag }}
-          PACKAGE_VERSION=v`cat package.json | jq '.version' | xargs`
-          [[ ${TAG} == ${PACKAGE_VERSION} ]] || (echo "Tag name must exactly match version defined in package.json" && exit 1)
-
+      - run: sleep 15 && exit ${{ matrix.v }}
+  second-thing:
+    needs: do-thing
+    steps:
+      - run: echo beep
