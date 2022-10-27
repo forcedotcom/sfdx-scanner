@@ -7,21 +7,24 @@ on:
         required: false
         type: string
         default: "['lts/*']"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: a tag
-        type: string
-        required: true
-      dry-run:
-        description: a boolean
-        type: boolean
-        required: false
-        default: false
 
 jobs:
   do-thing:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ inputs.tag }}
-      - run: echo ${{ inputs.dry-run }}
+      - uses: actions/checkout@v3
+        with:
+          ref: 'v3-6-2'
+      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: get-branch-commit
+      - uses: actions/checkout@v3
+        with:
+          ref: 'v3.6.2'
+      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: get-tag-commit
+      - uses: actions/checkout@v3
+        with:
+          ref: 'release-3'
+      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: get-release-commit
+      - run: echo ${{steps.get-branch-commit.outputs.COMMIT_ID }} ${{ steps.get-tag-commit.outputs.COMMIT_ID }} ${{ steps.get-release-commit.outputs.COMMIT_ID }}
