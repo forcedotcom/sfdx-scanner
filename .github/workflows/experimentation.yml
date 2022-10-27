@@ -13,7 +13,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: 'v3-6-2'
-          fetch-depth: 0
+      - run: git fetch --all
       - run: git diff v3.6.2..release-3
