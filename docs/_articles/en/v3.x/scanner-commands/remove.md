@@ -16,26 +16,27 @@ $ sfdx scanner:rule:remove [-f] [-p <array>] [--verbose] [--json]
 ## Options
 
 ```bash
-  -f, --force		Bypass the confirmation prompt and immediately remove the rules
-  -p, --path=path	One or more paths to remove
-  --json      		Format output as json
-  --verbose      	Emit additional command output to stdout
+  -f, --force		Bypasses the confirmation prompt and immediately removes the rules.
+  -p, --path=path	One or more paths to remove. Specify multiple values with a comma-separated list.
+  --json      		Formats output as JSON.
+  --verbose      	Emits additional command output to stdout.
 ```
   
 ## Example
 
-Run the command with no parameters to see a list of all currently registered custom paths.
+This example runs the command without arguments to see a list of registered custom paths.
 ```bash
 $ sfdx scanner:rule:remove
 ```
 
-Use the ```-p|--path``` parameter to specify the path or paths you want to remove from the registry. This example removes the rules defined in ```somerules.jar``` and ```myrules.xml```, and all JARs/XMLs contained in the ```rules``` folder.
+This example uses the `--path` parameter to deregister the rules defined in `somerules.jar` and any JARs/XMLs contained in the rules folder.
+```somerules.jar``` and ```myrules.xml```, and all JARs/XMLs contained in the ```rules``` folder.
   
 ```bash
 $ sfdx scanner:rule:remove --path "~/path/to/somerules.jar,~/path/to/category/apex/myrules.xml,~/path/to/folder/containing/rules"
 ```  
   		
-By default, this command lists the rules that will be removed and prompts you for confirmation. Use the ```-f|--force``` flag to bypass that confirmation. 
+This example uses the `--force` flag to bypass the confirmation prompt, removing all rules defined in `somerules.jar`. By default, a list of all the rules that will be deregistered is displayed, and the action must be confirmed. To bypass that confirmation, use the `--force` flag.
 ```bash
 $ sfdx scanner:rule:remove --force --path "~/path/to/somerules.jar"
 ```

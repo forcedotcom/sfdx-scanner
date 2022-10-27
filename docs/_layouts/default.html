@@ -83,6 +83,19 @@
             <div
               class="site site-main-content slds-col slds-col--rule-right slds-size_1-of-1 slds-large-size--9-of-12 slds-large-order--1"
             >
+            {% if page.url contains 'v2.x' and page.url != '/en/v2.x/' %}
+
+            <br>
+            <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_error" role="alert">
+              <span class="slds-assistive-text">error</span>
+            <p>
+                You're reading documentation of an unsupported version of Code Analyzer. See the <a href="{{ page.url | replace:'v2.x','v3.x' | prepend: site.baseurl }}">latest</a> instead.
+            </p>
+            </div>
+            <br>
+            <br>
+
+            {% endif %}
               <div class="slds-container_medium docs">{{ content }}</div>
             </div>
           </div>

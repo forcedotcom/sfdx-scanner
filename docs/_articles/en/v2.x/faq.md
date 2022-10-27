@@ -97,4 +97,4 @@ A: Execute Code Analyzer for CPD with `--verbose` option. Files are filtered fir
 A: Add your file pattern to the CPD engine’s `targetPatterns` in `~/.sfdx-scanner/Config.json`. If you rerun Code Analyzer with the CPD engine option, and the file is still excluded, create an issue on our GitHub repo.
 
 #### Q: In my violation messages from the CPD engine, I’m seeing multiple groups of the same checksum. The code fragment is also identical. Why aren’t these made up of the same group?
-A: This is a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD, , and it’s on our backlog to address.
+A: This is a [known issue](https://github.com/pmd/pmd/issues/2438) in CPD, and it’s on our backlog to address.
