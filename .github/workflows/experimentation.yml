@@ -29,4 +29,6 @@ jobs:
       # Compare the two commits to make sure they're the same.
       - name: Fail non-matching commits
         if: ${{ steps.get-release-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
-        run: exit 1
+        run: |
+          echo "${{ steps.get-release-commit.outputs.COMMIT_ID }} differed from ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
+          exit 1
