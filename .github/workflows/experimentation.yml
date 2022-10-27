@@ -12,6 +12,21 @@ jobs:
   do-thing:
     runs-on: ubuntu-latest
     steps:
+      # We want to check out the release-3 branch.
       - uses: actions/checkout@v3
-      - run: git fetch --all
-      - run: git diff v3.6.2..release-3
+        with:
+          ref: 'release-3'
+      # Get the commit at the head of this branch and output it for later use.
+      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: get-release-commit
+      # Checkout the tag we want to release.
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
+      # Get the commit associated with this tag and output it for later use.
+      - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        id: get-tag-commit
+      # Compare the two commits to make sure they're the same.
+      - name: Fail non-matching commits
+        if: ${{ steps.get-release-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
+        run: exit 1
