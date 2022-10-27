@@ -22,7 +22,7 @@ jobs:
       # Checkout the tag we want to release.
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag }}
+          ref: 'v3.6.2'
       # Get the commit associated with this tag and output it for later use.
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-tag-commit
