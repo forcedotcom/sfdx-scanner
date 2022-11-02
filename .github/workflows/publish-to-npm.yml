@@ -18,7 +18,7 @@ jobs:
       # Check out the release branch, and get its head commit as output for later.
       - uses: actions/checkout@v3
         with:
-          ref: 'release-3'
+          ref: 'release'
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-branch-commit
       # Checkout the tag we want to release, and get its head commit as output for later.
@@ -31,7 +31,7 @@ jobs:
       - name: Fail non-matching commits
         if: ${{ steps.get-branch-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
         run: |
-          echo "Tag commit must match latest commit in release-3. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
+          echo "Tag commit must match latest commit in release. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
       # Verify that the tag's value matches the version in package.json.
       - name: Compare tag to package.json
