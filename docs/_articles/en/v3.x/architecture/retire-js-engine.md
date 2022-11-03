@@ -1,6 +1,6 @@
 ---
 title: 'RetireJS'
-lang: en'
+lang: en
 redirect_from: /en/architecture/retire-js-engine
 ---
 ## What is RetireJS?
