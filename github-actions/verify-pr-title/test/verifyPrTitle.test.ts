@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { verifyPRTitleForBugId } from "../src/verifyPrTitle";
 import { verifyPRTitleForBadTitle } from "../src/verifyPrTitle";
-import { verifyPRTitleForBaseBranch } from "../src/verifyPrTitle";
 
 describe("Positive Tests", () => {
 	it("work item only", () => {
@@ -30,14 +29,6 @@ describe("Positive Tests", () => {
 
 	it("Title does not start with invalid tokens d/W or r/W", () => {
 		expect(verifyPRTitleForBadTitle("@W-12345678")).to.equal(true);
-	});
-
-	it("Branch is dev and title has version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has the version indicator [2.x]", "dev")).to.equal(true);
-	});
-
-	it("Branch is not dev and title lacks version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has version indicator [3.x]", "release")).to.equal(true);
 	});
 });
 
@@ -68,13 +59,5 @@ describe("Negative Tests", () => {
 
 	it("Title starts with invalid token r/W", () => {
 		expect(verifyPRTitleForBadTitle("r/W")).to.equal(false);
-	});
-
-	it("Branch is dev and title lacks version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("no version indicator here", "dev")).to.equal(false);
-	});
-
-	it("Branch is not dev and title has version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has version indicator [2.x]", "release")).to.equal(false);
 	});
 });

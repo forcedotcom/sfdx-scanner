@@ -2,7 +2,6 @@ import core = require("@actions/core");
 import github = require("@actions/github");
 import { verifyPRTitleForBugId } from "./verifyPrTitle";
 import { verifyPRTitleForBadTitle } from "./verifyPrTitle";
-import { verifyPRTitleForBaseBranch } from "./verifyPrTitle";
 
 /**
  * Verifies that a pull request title conforms to the pattern required by git2gus
@@ -19,9 +18,8 @@ function run(): void {
 		}
 
 		// Examine the title and base branch for the expected patterns
-		const title = pullRequest.title;
-		const baseBranch = pullRequest.base.ref;
-		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title) && verifyPRTitleForBaseBranch(title, baseBranch)) {
+		const title = pullRequest.title as string;
+		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title)) {
 			console.log(`PR Title '${title}' accepted.`);
 		} else {
 			core.setFailed(
@@ -30,7 +28,11 @@ function run(): void {
 			return;
 		}
 	} catch (error) {
-		core.setFailed(error.message);
+		if (error instanceof Error) {
+			core.setFailed(error.message);
+		} else {
+			core.setFailed(error as string);
+		}
 	}
 }
 
