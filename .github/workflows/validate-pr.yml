@@ -1,7 +1,7 @@
 name: validate-pr
 on:
   pull_request:
-    types: [edited, opened, reopened, synchronized]
+    types: [edited, opened, reopened, synchronize]
 
 jobs:
   # We need to verify that the Pull Request's title matches the desired format.
@@ -11,7 +11,7 @@ jobs:
     steps:
       # Private actions must check out repo first.
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Verify PR title
         uses: ./github-actions/verify-pr-title
         id: verify_pr_title
