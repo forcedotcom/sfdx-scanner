@@ -11,4 +11,5 @@ jobs:
   smoke-test:
     uses: ./.github/workflows/run-tests.yml
     with:
-      node-matrix: "['lts/*', 'latest']"
+      node-matrix: "[{version: 'lts/*', artifact: 'lts'}, {version: 'latest', artifact: 'latest'}]"
+      java-matrix: "['8', '11']"

@@ -6,7 +6,12 @@ on:
         description: "An array of node versions against which the tests should be run"
         required: false
         type: string
-        default: "['lts/*']"
+        default: "[{version: 'lts/*', artifact: 'lts'}]"
+      java-matrix:
+        description: "An array of java versions against which the tests should be run"
+        required: false
+        type: string
+        default: "['11']"
 
 jobs:
   # Step 1: We have a number of dependencies that we can build now and cache
@@ -15,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # First thing's first; we need to get the code.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Next, we need to make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v3
         with:
@@ -48,20 +53,21 @@ jobs:
       fail-fast: false
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
+        java: ${{ fromJson(inputs.java-matrix) }}
         os: [ubuntu-latest, windows-2019]
     runs-on: ${{ matrix.os }}
     needs: build-dependencies
     steps:
       # Check out the code.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }} # Node version is a matrix.
+          node-version: ${{ matrix.node.version }} # Node version is a matrix.
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
+          java-version: ${{ matrix.java }} # Java version is a matrix.
       # Install Node dependencies.
       # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
       #       trouble than it's worth. If we see serious performance problems, we can
@@ -83,7 +89,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }}-node-results
+          name: ${{ runner.os }}-node-${{ matrix.node.artifact }}-node-results
           path: |
             ./test-results
             ./test-coverage
@@ -91,7 +97,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }}-pmd-cataloger-results
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-pmd-cataloger-results
           path: |
             pmd-cataloger/build/reports
             pmd-cataloger/build/test-results
@@ -99,7 +105,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }}-sfge-results
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-sfge-results
           path: |
             sfge/build/reports
             sfge/build/test-results
@@ -107,7 +113,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }}-cli-messaging-results
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-cli-messaging-results
           path: |
             cli-messaging/build/reports
             cli-messaging/build/test-results
@@ -119,20 +125,21 @@ jobs:
       fail-fast: false
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
+        java: ${{ fromJson(inputs.java-matrix) }}
         os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
     runs-on: ${{ matrix.os.vm }}
     needs: build-dependencies
     steps:
       # Check out the code.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }} # Node version is a matrix.
+          node-version: ${{ matrix.node.version }} # Node version is a matrix.
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '11' # For now, Java version is hardcoded. It could be changed to a matrix in the future.
+          java-version: ${{ matrix.java }} # Java version is a matrix.
       # Install Salesforce CLI via NPM
       - run: npm install -g sfdx-cli
       # Download and install the tarball artifact built during setup.
@@ -163,7 +170,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
         with:
-          name: ${{ runner.os }}-smoke-test-results
+          name: ${{ runner.os }}-java-v${{ matrix.java}}-node-${{ matrix.node.artifact }}-smoke-test-results
           path: smoke-test-results
   # Step 2C: Self-evaluation. Run the plug-in against itself, to make sure we're not violating
   #          our own rules.
@@ -179,11 +186,11 @@ jobs:
     needs: build-dependencies
     steps:
       # First, we need to get the code.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Next, make sure we're using the right versions of Node and Java.
       - uses: actions/setup-node@v3
         with:
-          node-version:  # Always use Node LTS for self-eval.
+          node-version: 'lts/*' # Always use Node LTS for self-eval.
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'

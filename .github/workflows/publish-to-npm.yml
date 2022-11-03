@@ -33,7 +33,8 @@ jobs:
         run: |
           echo "Tag commit must match latest commit in release. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
-      # Verify that the tag's value matches the version in package.json.
+      # Verify that the tag is of the format "vX.Y.Z", where the X, Y, and Z exactly match the corresponding values in
+      # `package.json`'s version property.
       - name: Compare tag to package.json
         run: |
           TAG=${{ github.event.release.tag_name || inputs.tag }}
