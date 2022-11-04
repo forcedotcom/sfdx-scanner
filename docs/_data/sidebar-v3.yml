@@ -94,7 +94,10 @@
       url: /v3.x/salesforce-graph-engine/rules
     - title:
         en: Try it yourself
-      url: /v3.x/salesforce-graph-engine/try-it-yourself       
+      url: /v3.x/salesforce-graph-engine/try-it-yourself
+- title:
+    en: CI/CD Integration
+  url: /v3.x/ci-cd-integration
 - title:
     en: FAQ
   url: /v3.x/faq
