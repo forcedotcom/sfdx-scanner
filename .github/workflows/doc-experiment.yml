@@ -21,6 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - run: cd docs
+      - run: pwd
       - name: Set up ruby
         uses: ruby/setup-ruby@v1
         with:
