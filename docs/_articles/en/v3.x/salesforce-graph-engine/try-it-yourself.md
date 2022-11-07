@@ -1,5 +1,5 @@
 ---
-title: 'Try it yourself'
+title: 'Try it Yourself'
 lang: en
 ---
 
@@ -26,9 +26,9 @@ Currently, just one rule is returned. [ApexFlsViolationRule](./en/v3.x/salesforc
 ## Clone the Sample Project
 All our examples use our [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
 
-To begin, clone the `dev-3` branch of the repo.
+To begin, clone the repo.
 
-`git clone --branch dev-3 https://github.com/forcedotcom/sfdx-scanner.git`
+`git clone https://github.com/forcedotcom/sfdx-scanner.git`
  
 Next, open the sample app directory.
 
