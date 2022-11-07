@@ -24,6 +24,8 @@ jobs:
       - run: pwd
       - name: Set up ruby
         uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6.0'
       - run: ruby -v
       - run: echo $PATH
       - run: |
