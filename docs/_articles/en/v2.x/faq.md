@@ -1,6 +1,5 @@
 ---
-title: 'Frequently Asked Questions'
-lang: en
+TO DO
 ---
 ## Salesforce Code Analyzer FAQ
 
