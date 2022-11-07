@@ -26,5 +26,8 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.6'
-      - run: bundle install
-      - run: bundle exec jekyll build
+      - run: |
+          cd docs
+          gem install jekyll bundler
+          bundle install
+          bundle exec jekyll build
