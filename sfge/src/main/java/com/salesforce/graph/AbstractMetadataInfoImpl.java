@@ -95,7 +95,8 @@ abstract class AbstractMetadataInfoImpl implements MetadataInfo {
         List<ReferenceExpressionVertex> referenceExpressions =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().where(
+                        g.V()
+                                .where(
                                         CaseSafePropertyUtil.H.hasWithin(
                                                 ASTConstants.NodeType.METHOD_CALL_EXPRESSION,
                                                 Schema.METHOD_NAME,

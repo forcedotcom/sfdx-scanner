@@ -12,7 +12,9 @@ public final class NullCollectibleObject<T> implements CollectibleObject {
         this.clazz = clazz;
     }
 
-    /** @return null, since this value represents a null instance */
+    /**
+     * @return null, since this value represents a null instance
+     */
     @Nullable
     @Override
     public T getCollectibleObject() {

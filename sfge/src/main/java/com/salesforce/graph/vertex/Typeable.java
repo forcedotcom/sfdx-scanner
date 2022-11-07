@@ -24,7 +24,9 @@ public interface Typeable {
         return TypeableUtil.getTypeHierarchy(type);
     }
 
-    /** @return true if this vertex is a match for parameterVertex */
+    /**
+     * @return true if this vertex is a match for parameterVertex
+     */
     default boolean matchesParameterType(Typeable parameterVertex) {
         final TypeableUtil.OrderedTreeSet types = getTypes();
         final String type = parameterVertex.getCanonicalType();

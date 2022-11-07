@@ -27,6 +27,8 @@ abstract class ResultCollector {
     /** Overridden by subclasses to gather the information necessary for their task */
     abstract void _collect(ApexPathExpander pathExpander);
 
-    /** @return the number of objects collected so far */
+    /**
+     * @return the number of objects collected so far
+     */
     abstract int size();
 }

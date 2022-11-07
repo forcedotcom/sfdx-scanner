@@ -54,7 +54,9 @@ public final class FlsViolationMessageUtil {
         return ObjectFieldUtil.regroupByObject(flsViolationInfos);
     }
 
-    /** @return String representation of the FlsViolationInfo that has information on FLS. */
+    /**
+     * @return String representation of the FlsViolationInfo that has information on FLS.
+     */
     public static String constructMessage(FlsViolationInfo flsViolationInfo) {
         final Optional<SFVertex> sourceVertex = flsViolationInfo.getSourceVertex();
         if (sourceVertex.isPresent()) {
@@ -69,7 +71,9 @@ public final class FlsViolationMessageUtil {
         return constructMessageInternal(flsViolationInfo);
     }
 
-    /** @return User readable representation of FLS violations for the given FlsViolationInfo */
+    /**
+     * @return User readable representation of FLS violations for the given FlsViolationInfo
+     */
     @VisibleForTesting
     static String constructMessageInternal(FlsViolationInfo flsViolationInfo) {
         // ViolationType decides if the message is for CRUD or FLS

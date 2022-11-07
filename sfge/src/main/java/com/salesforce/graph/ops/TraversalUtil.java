@@ -84,7 +84,8 @@ public final class TraversalUtil {
         // Also, start with the hasLabel() call, because doing an initial filter along an indexed
         // field saves us a ton of time.
         GraphTraversal<Vertex, Vertex> traversal =
-                g.V().hasLabel(NodeType.USER_CLASS, NodeType.USER_INTERFACE)
+                g.V()
+                        .hasLabel(NodeType.USER_CLASS, NodeType.USER_INTERFACE)
                         .union(
                                 // Subtraversal 1: Get every class that implements the target
                                 // interface, via a helper method.

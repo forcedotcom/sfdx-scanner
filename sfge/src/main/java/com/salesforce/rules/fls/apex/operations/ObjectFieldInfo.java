@@ -27,7 +27,9 @@ public abstract class ObjectFieldInfo<T extends ObjectFieldInfo>
         this.allFields = other.allFields;
     }
 
-    /** @return object name such as Account which is being operated on */
+    /**
+     * @return object name such as Account which is being operated on
+     */
     public String getObjectName() {
         return objectName;
     }

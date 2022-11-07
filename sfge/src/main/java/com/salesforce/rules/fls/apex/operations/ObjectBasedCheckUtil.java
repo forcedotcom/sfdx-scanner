@@ -87,7 +87,9 @@ public final class ObjectBasedCheckUtil {
         return validationType.analysisLevel == FlsConstants.AnalysisLevel.OBJECT_LEVEL;
     }
 
-    /** @return true for System read-only and metadata objects */
+    /**
+     * @return true for System read-only and metadata objects
+     */
     public static boolean isSpecialObject(String objectName) {
         return ApexStandardLibraryUtil.isSystemReadOnlyObject(objectName)
                 || TypeableUtil.isMetadataObject(objectName);

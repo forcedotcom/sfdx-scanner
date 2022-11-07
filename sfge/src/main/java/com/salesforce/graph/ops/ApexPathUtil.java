@@ -193,7 +193,9 @@ public final class ApexPathUtil {
         return results;
     }
 
-    /** @return a builder that contains all of the known collapsers */
+    /**
+     * @return a builder that contains all of the known collapsers
+     */
     public static ApexPathExpanderConfig.Builder getFullConfiguredPathExpanderConfigBuilder() {
         return ApexPathExpanderConfig.Builder.get()
                 .expandMethodCalls(true)
@@ -204,17 +206,23 @@ public final class ApexPathUtil {
                 .with(NullApexValueConstrainer.getInstance());
     }
 
-    /** @return a config that contains all of the known collapsers */
+    /**
+     * @return a config that contains all of the known collapsers
+     */
     public static ApexPathExpanderConfig getFullConfiguredPathExpanderConfig() {
         return getFullConfiguredPathExpanderConfigBuilder().build();
     }
 
-    /** @return a config that contains no collapsers and expands methods */
+    /**
+     * @return a config that contains no collapsers and expands methods
+     */
     public static ApexPathExpanderConfig getSimpleExpandingConfig() {
         return ApexPathExpanderConfig.Builder.get().expandMethodCalls(true).build();
     }
 
-    /** @return a config that contains no collapsers and does not expand methods */
+    /**
+     * @return a config that contains no collapsers and does not expand methods
+     */
     public static ApexPathExpanderConfig getSimpleNonExpandingConfig() {
         return ApexPathExpanderConfig.Builder.get().expandMethodCalls(false).build();
     }

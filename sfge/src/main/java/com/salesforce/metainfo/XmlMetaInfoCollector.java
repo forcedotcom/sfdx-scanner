@@ -33,7 +33,9 @@ public abstract class XmlMetaInfoCollector extends AbstractMetaInfoCollector {
         documentBuilderFactory = getDocumentBuilderFactory();
     }
 
-    /** @return Path patterns that the implementation is interested in */
+    /**
+     * @return Path patterns that the implementation is interested in
+     */
     abstract HashSet<String> getPathPatterns();
 
     /** Collect meta info from XML file into {@link AbstractMetaInfoCollector#collectedMetaInfo} */
@@ -96,7 +98,9 @@ public abstract class XmlMetaInfoCollector extends AbstractMetaInfoCollector {
         return pathPatternsInternal;
     }
 
-    /** @return new instance of {@link DocumentBuilderFactory} */
+    /**
+     * @return new instance of {@link DocumentBuilderFactory}
+     */
     private DocumentBuilderFactory getDocumentBuilderFactory() {
         DocumentBuilderFactory documentBuilderFactoryInternal =
                 DocumentBuilderFactory.newInstance();

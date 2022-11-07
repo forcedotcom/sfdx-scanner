@@ -2545,7 +2545,8 @@ public class MethodPathBuilderTest {
         List<ValueWhenBlockVertex> valueWhenBlocks =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(NodeType.VALUE_WHEN_BLOCK)
+                        g.V()
+                                .hasLabel(NodeType.VALUE_WHEN_BLOCK)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .order(Scope.global)
                                 .by(Schema.CHILD_INDEX, Order.asc));
@@ -2571,7 +2572,8 @@ public class MethodPathBuilderTest {
         ElseWhenBlockVertex elseWhenBlock =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.ELSE_WHEN_BLOCK)
+                        g.V()
+                                .hasLabel(NodeType.ELSE_WHEN_BLOCK)
                                 .has(Schema.DEFINING_TYPE, "MyClass"));
         BlockStatementVertex elseWhenBlockBlockStatement = elseWhenBlock.getOnlyChild();
         ExpressionStatementVertex elseWhenBlockExpressionStatement =
@@ -2645,7 +2647,8 @@ public class MethodPathBuilderTest {
         List<ValueWhenBlockVertex> valueWhenBlocks =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(NodeType.VALUE_WHEN_BLOCK)
+                        g.V()
+                                .hasLabel(NodeType.VALUE_WHEN_BLOCK)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .order(Scope.global)
                                 .by(Schema.CHILD_INDEX, Order.asc));
@@ -2671,7 +2674,8 @@ public class MethodPathBuilderTest {
         ElseWhenBlockVertex elseWhenBlock =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.ELSE_WHEN_BLOCK)
+                        g.V()
+                                .hasLabel(NodeType.ELSE_WHEN_BLOCK)
                                 .has(Schema.DEFINING_TYPE, "MyClass"));
         BlockStatementVertex elseWhenBlockBlockStatement = elseWhenBlock.getOnlyChild();
         ExpressionStatementVertex elseWhenBlockExpressionStatement =

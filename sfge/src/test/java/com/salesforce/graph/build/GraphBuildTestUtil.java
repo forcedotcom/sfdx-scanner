@@ -45,7 +45,8 @@ public class GraphBuildTestUtil {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, methodName)
                                 .not(has(Schema.IS_STANDARD, true)));
         List<ApexPath> paths = ApexPathUtil.getForwardPaths(g, methodVertex);

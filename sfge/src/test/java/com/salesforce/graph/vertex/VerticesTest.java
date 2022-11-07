@@ -49,7 +49,8 @@ public class VerticesTest {
         UserClassVertex userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
         MatcherAssert.assertThat(userClass.getBeginLine(), equalTo(1));
         MatcherAssert.assertThat(userClass.getEndLine(), equalTo(1));
@@ -58,7 +59,8 @@ public class VerticesTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething"));
         MatcherAssert.assertThat(method.getBeginLine(), equalTo(3));
         MatcherAssert.assertThat(method.getEndLine(), equalTo(3));
@@ -81,7 +83,8 @@ public class VerticesTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "debug"));
         MatcherAssert.assertThat(methodCallExpression.getBeginLine(), equalTo(7));
         MatcherAssert.assertThat(methodCallExpression.getEndLine(), equalTo(7));
@@ -109,7 +112,8 @@ public class VerticesTest {
         UserClassVertex userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
         MatcherAssert.assertThat(userClass.getBeginLine(), equalTo(1));
         MatcherAssert.assertThat(userClass.getEndLine(), equalTo(1));
@@ -118,7 +122,8 @@ public class VerticesTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething"));
         MatcherAssert.assertThat(method.getBeginLine(), equalTo(3));
         MatcherAssert.assertThat(method.getEndLine(), equalTo(3));
@@ -141,7 +146,8 @@ public class VerticesTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "debug"));
         MatcherAssert.assertThat(methodCallExpression.getBeginLine(), equalTo(7));
         MatcherAssert.assertThat(methodCallExpression.getEndLine(), equalTo(7));
@@ -210,13 +216,15 @@ public class VerticesTest {
         MethodCallExpressionVertex getNameVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getName"));
 
         MethodCallExpressionVertex getInstanceVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getInstance"));
 
         MatcherAssert.assertThat(getInstanceVertex.getNext().isPresent(), equalTo(true));
@@ -275,7 +283,8 @@ public class VerticesTest {
         MethodCallExpressionVertex getGlobalDescribeVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getGlobalDescribe"));
         MatcherAssert.assertThat(
                 getGlobalDescribeVertex.getFirst(), equalTo(getGlobalDescribeVertex));
@@ -283,14 +292,16 @@ public class VerticesTest {
         MethodCallExpressionVertex getVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "get"));
         MatcherAssert.assertThat(getVertex.getFirst(), equalTo(getGlobalDescribeVertex));
 
         MethodCallExpressionVertex newSObjectVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "newSObject"));
         MatcherAssert.assertThat(newSObjectVertex.getFirst(), equalTo(getGlobalDescribeVertex));
         MatcherAssert.assertThat(getGlobalDescribeVertex.getLast(), equalTo(newSObjectVertex));
@@ -300,14 +311,16 @@ public class VerticesTest {
         MethodCallExpressionVertex getDescribeVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getDescribe"));
         MatcherAssert.assertThat(getDescribeVertex.getFirst(), equalTo(getDescribeVertex));
 
         MethodCallExpressionVertex getNameVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getName"));
         MatcherAssert.assertThat(getNameVertex.getFirst(), equalTo(getDescribeVertex));
         MatcherAssert.assertThat(getDescribeVertex.getLast(), equalTo(getNameVertex));
@@ -343,14 +356,16 @@ public class VerticesTest {
         MethodCallExpressionVertex getNameVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getName"));
         MatcherAssert.assertThat(getNameVertex.getFirst(), equalTo(getNameVertex));
 
         MethodCallExpressionVertex toLowerCaseVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "toLowerCase"));
         MatcherAssert.assertThat(toLowerCaseVertex.getFirst(), equalTo(getNameVertex));
         MatcherAssert.assertThat(getNameVertex.getLast(), equalTo(toLowerCaseVertex));
@@ -374,7 +389,8 @@ public class VerticesTest {
         userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
         MatcherAssert.assertThat(userClass.isStandardType(), equalTo(false));
 
@@ -382,7 +398,8 @@ public class VerticesTest {
         userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(
                                         Schema.NAME,
                                         ApexStandardLibraryUtil.getCanonicalName(
@@ -394,7 +411,8 @@ public class VerticesTest {
         userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(
                                         Schema.NAME,
                                         ApexStandardLibraryUtil.getCanonicalName(
@@ -406,7 +424,8 @@ public class VerticesTest {
         userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(
                                         Schema.NAME,
                                         ApexStandardLibraryUtil.getCanonicalName(
@@ -417,7 +436,8 @@ public class VerticesTest {
         userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(
                                         Schema.NAME,
                                         ApexStandardLibraryUtil.getCanonicalName("Schema")));
@@ -481,7 +501,8 @@ public class VerticesTest {
         FieldVertex vertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .has(Schema.NAME, "myString")
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(vertex.getCanonicalType(), equalTo("String"));
@@ -511,7 +532,8 @@ public class VerticesTest {
         FieldDeclarationVertex vertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.VARIABLE_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.VARIABLE_EXPRESSION)
                                 .has(Schema.NAME, "myString")
                                 .not(has(Schema.IS_STANDARD, true))
                                 .out(Schema.PARENT));
@@ -533,7 +555,8 @@ public class VerticesTest {
         FieldVertex vertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(vertex.hasGetterBlock(), equalTo(false));
         MatcherAssert.assertThat(vertex.hasSetterBlock(), equalTo(false));
@@ -554,7 +577,8 @@ public class VerticesTest {
         FieldVertex vertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(vertex.hasGetterBlock(), equalTo(true));
         MatcherAssert.assertThat(vertex.hasSetterBlock(), equalTo(false));
@@ -575,7 +599,8 @@ public class VerticesTest {
         FieldVertex vertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(vertex.hasGetterBlock(), equalTo(false));
         MatcherAssert.assertThat(vertex.hasSetterBlock(), equalTo(true));
@@ -609,7 +634,8 @@ public class VerticesTest {
         field =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .has(Schema.NAME, "noBlocks")
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(field.hasGetterBlock(), equalTo(false));
@@ -618,7 +644,8 @@ public class VerticesTest {
         field =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .has(Schema.NAME, "getterWithBlock")
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(field.hasGetterBlock(), equalTo(true));
@@ -627,7 +654,8 @@ public class VerticesTest {
         field =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .has(Schema.NAME, "setterWithBlock")
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(field.hasGetterBlock(), equalTo(false));
@@ -636,7 +664,8 @@ public class VerticesTest {
         field =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.FIELD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.FIELD)
                                 .has(Schema.NAME, "bothWithBlock")
                                 .not(has(Schema.IS_STANDARD, true)));
         MatcherAssert.assertThat(field.hasGetterBlock(), equalTo(true));
@@ -681,7 +710,8 @@ public class VerticesTest {
         UserClassVertex userClassVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
 
         MatcherAssert.assertThat(

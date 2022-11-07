@@ -28,7 +28,9 @@ public final class MetaInfoCollectorProvider {
         return ALL_INFO_COLLECTORS.get().get(CustomSettingInfoCollector.class);
     }
 
-    /** @return all MetaInfoCollectors */
+    /**
+     * @return all MetaInfoCollectors
+     */
     public static Collection<? extends MetaInfoCollector> getAllCollectors() {
         return ALL_INFO_COLLECTORS.get().values();
     }

@@ -41,7 +41,8 @@ public class AnnotationTest {
         UserClassVertex userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .not(has(Schema.IS_STANDARD, true)));
 
         List<AnnotationVertex> annotations;
@@ -66,7 +67,8 @@ public class AnnotationTest {
         UserClassVertex userClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .not(has(Schema.IS_STANDARD, true)));
 
         List<AnnotationVertex> annotations;
@@ -94,7 +96,8 @@ public class AnnotationTest {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething"));
         annotations = methodVertex.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));
@@ -134,7 +137,8 @@ public class AnnotationTest {
         UserClassVertex myClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
 
         List<AnnotationVertex> annotations;
@@ -152,7 +156,8 @@ public class AnnotationTest {
         methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething"));
         annotations = methodVertex.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));
@@ -164,7 +169,8 @@ public class AnnotationTest {
         soqlExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.SOQL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.SOQL_EXPRESSION)
                                 .has(Schema.BEGIN_LINE, 7));
         annotations = soqlExpression.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));
@@ -180,7 +186,8 @@ public class AnnotationTest {
         UserClassVertex innerClass =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "InnerClass"));
         annotations = innerClass.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));
@@ -195,7 +202,8 @@ public class AnnotationTest {
         methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "doSomethingInner"));
         annotations = methodVertex.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));
@@ -204,7 +212,8 @@ public class AnnotationTest {
         soqlExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.SOQL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.SOQL_EXPRESSION)
                                 .has(Schema.BEGIN_LINE, 17));
         annotations = soqlExpression.getAnnotations();
         MatcherAssert.assertThat(annotations, hasSize(equalTo(1)));

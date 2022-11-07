@@ -126,7 +126,8 @@ public class TraversalUtilTest {
 
         // Manually generate a query returning all of the vertices in the file.
         List<Vertex> expectedResults =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, "TestCode0")
                         .union(__.identity(), __.repeat(__.out(Schema.CHILD)).emit())
                         .toList();
@@ -154,7 +155,8 @@ public class TraversalUtilTest {
 
         // Manually generate a query returning all of the vertices in both files.
         List<Vertex> expectedResults =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, P.within("TestCode0", "TestCode1"))
                         .union(__.identity(), __.repeat(__.out(Schema.CHILD)).emit())
                         .toList();
@@ -178,7 +180,8 @@ public class TraversalUtilTest {
 
         // Manually generate a query containing only the vertices in the targeted method.
         List<Vertex> expectedResults =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, "TestCode0")
                         .repeat(__.out(Schema.CHILD))
                         .until(__.hasLabel(ASTConstants.NodeType.METHOD).has(Schema.NAME, "foo"))
@@ -204,7 +207,8 @@ public class TraversalUtilTest {
 
         // Manually generate a query containing only the vertices in the targeted method.
         List<Vertex> expectedResults =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, "TestCode1")
                         .repeat(__.out(Schema.CHILD))
                         .until(
@@ -237,12 +241,14 @@ public class TraversalUtilTest {
 
         // Manually generate queries containing only the targeted vertices.
         List<Vertex> expectedWholeFile =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, "TestCode0")
                         .union(__.identity(), __.repeat(__.out(Schema.CHILD)).emit())
                         .toList();
         List<Vertex> expectedSingleMethod =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .has(Schema.FILE_NAME, "TestCode1")
                         .repeat(__.out(Schema.CHILD))
                         .until(__.hasLabel(ASTConstants.NodeType.METHOD).has(Schema.NAME, "baz"))

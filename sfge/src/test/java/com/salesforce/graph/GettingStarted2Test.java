@@ -81,7 +81,8 @@ public class GettingStarted2Test {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "methodWithNoControlFLow"));
         Long id = methodVertex.getId();
 
@@ -410,7 +411,8 @@ public class GettingStarted2Test {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, "methodWithForEachLoop"));
 
         // Figure out the path through the method

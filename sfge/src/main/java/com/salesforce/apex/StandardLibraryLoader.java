@@ -143,7 +143,9 @@ public final class StandardLibraryLoader {
             return FileVisitResult.CONTINUE;
         }
 
-        /** @return the results in an immutable form */
+        /**
+         * @return the results in an immutable form
+         */
         private Map<List<String>, List<JorjeNode>> getPackageToCompilations() {
             Map<List<String>, List<JorjeNode>> result = new HashMap<>();
             for (Map.Entry<List<String>, List<JorjeNode>> entry :

@@ -57,7 +57,8 @@ public class InheritanceInformationBuilder implements GraphBuilder {
         List<BaseSFVertex> vertices =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(P.within(inheritableLabels))
+                        g.V()
+                                .hasLabel(P.within(inheritableLabels))
                                 .not(has(Schema.IS_STANDARD, true)));
 
         // Turn each vertex into one of our vertex objects and then map that by both its ID and its

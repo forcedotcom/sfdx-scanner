@@ -17,7 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 final class ApexEnumValueComparator implements CaseVertexComparator {
     private final ApexEnumValue value;
 
-    /** @param value that was supplied to the switch statement's "switch on" directive */
+    /**
+     * @param value that was supplied to the switch statement's "switch on" directive
+     */
     ApexEnumValueComparator(ApexEnumValue value) {
         this.value = value;
     }

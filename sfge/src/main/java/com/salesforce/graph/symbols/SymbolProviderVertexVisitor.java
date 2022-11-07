@@ -17,7 +17,9 @@ public interface SymbolProviderVertexVisitor extends VertexVisitor {
      */
     SymbolProvider start(BaseSFVertex vertex);
 
-    /** @return A symbol provider that has accumulated state of the current path. */
+    /**
+     * @return A symbol provider that has accumulated state of the current path.
+     */
     SymbolProvider getSymbolProvider();
 
     /** Invoked before the {@code path} corresponding to {@code invocable} is invoked */

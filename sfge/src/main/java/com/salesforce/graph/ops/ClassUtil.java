@@ -81,7 +81,8 @@ public final class ClassUtil {
                             UserClassVertex result =
                                     SFVertexFactory.loadSingleOrNull(
                                             g,
-                                            g.V().where(
+                                            g.V()
+                                                    .where(
                                                             H.has(
                                                                     ASTConstants.NodeType
                                                                             .USER_CLASS,
@@ -124,7 +125,8 @@ public final class ClassUtil {
                             UserClassVertex result =
                                     SFVertexFactory.loadSingleOrNull(
                                             g,
-                                            g.V().where(
+                                            g.V()
+                                                    .where(
                                                             H.has(
                                                                     ASTConstants.NodeType
                                                                             .USER_CLASS,
@@ -137,7 +139,8 @@ public final class ClassUtil {
                                     result =
                                             SFVertexFactory.loadSingleOrNull(
                                                     g,
-                                                    g.V().where(
+                                                    g.V()
+                                                            .where(
                                                                     H.has(
                                                                             ASTConstants.NodeType
                                                                                     .USER_CLASS,

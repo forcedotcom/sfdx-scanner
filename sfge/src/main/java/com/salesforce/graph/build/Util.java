@@ -77,13 +77,17 @@ public final class Util {
                 this.ignoreBuilders = new HashSet<>();
             }
 
-            /** @param compilations customer supplied Apex that has been compiled */
+            /**
+             * @param compilations customer supplied Apex that has been compiled
+             */
             public static Builder get(
                     GraphTraversalSource g, List<CompilationDescriptor> compilations) {
                 return new Builder(g, compilations);
             }
 
-            /** @param compilation customer supplied Apex that has been compiled */
+            /**
+             * @param compilation customer supplied Apex that has been compiled
+             */
             public static Builder get(GraphTraversalSource g, CompilationDescriptor compilation) {
                 return new Builder(g, Collections.singletonList(compilation));
             }

@@ -2,7 +2,7 @@ plugins {
 	java
 	application
 	jacoco
-	id("com.diffplug.spotless") version "6.3.0"
+	id("com.diffplug.spotless") version "6.11.0"
 }
 
 repositories {

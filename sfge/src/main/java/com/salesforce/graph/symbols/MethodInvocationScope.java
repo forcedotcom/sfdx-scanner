@@ -61,7 +61,9 @@ public final class MethodInvocationScope extends AbstractDefaultNoOpScope
         this.returnedApexValue = apexValue;
     }
 
-    /** @return Any values that were returned from the method invocation. */
+    /**
+     * @return Any values that were returned from the method invocation.
+     */
     public Optional<ApexValue<?>> getReturnValue() {
         return Optional.ofNullable(returnedApexValue);
     }
