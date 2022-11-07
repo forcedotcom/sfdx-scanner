@@ -20,19 +20,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - run: cd docs
-      - run: pwd
-      - name: Set up ruby
-        uses: ruby/setup-ruby@v1
+      - name: Build with jekyll
+        uses: actions/jekyll-build-pages@v1
         with:
-          ruby-version: '2.6.0'
-      - run: ruby -v
-      - run: echo $PATH
-      - run: |
-          cd docs
-          export PATH="/usr/local/opt/ruby/bin:$PATH"
-          export LDFLAGS="-L/usr/local/opt/ruby/lib"
-          export CPPFLAGS="-I/usr/local/opt/ruby/include"
-          gem install bundler
-          bundle install
-          bundle exec jekyll build
+          source: ./docs
+          destination: ./docs/_site
+          future: false
+          verbose: true
+          
