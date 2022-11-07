@@ -25,5 +25,5 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '2.6'
-          bundler-cache: true
+      - run: bundle install
       - run: bundle exec jekyll build
