@@ -8,7 +8,7 @@
     - title:
         en: Installation/Upgrade
       url: /v2.x/getting-started/install
-- title:
+-title:
     en: How to use the Plugin
   baseUrl: /v2.x/scanner-commands/
   children:
