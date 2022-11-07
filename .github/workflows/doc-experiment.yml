@@ -1,0 +1,29 @@
+name: doc-experiment
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+jobs:
+  # We need to verify that the Pull Request's title matches the desired format.
+  verify_pr_title:
+    runs-on: ubuntu-latest
+    name: Verify that PR title contains well-formed GUS work item tag.
+    steps:
+      # Private actions must check out repo first.
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Verify PR title
+        uses: ./github-actions/verify-pr-title
+        id: verify_pr_title
+  # Separately, we also need to run all of our tests.
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - run: cd docs
+      - name: Set up ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.6'
+          bundler-cache: true
+      - run: bundle exec jekyll build
