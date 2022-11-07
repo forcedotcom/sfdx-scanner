@@ -1,23 +1,44 @@
-// Matches @W-0000@ through @W-99999999@
-const reBugId = /@W-\d{4,8}@/;
-
-// Matches r/ R/ d/ D/
-const reBranch = /^[rdRD]\//;
-
+/**
+ * This is a regex segment that matches the accepted options for PR type.
+ * NOTE: This segment allows for exactly one type.
+ */
+const TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
 
 /**
- * Verifies title conforms to the pattern required by git2gus.
- * git2gus requires the WorkItemId to be enclosed by two '@' signs.
- * A valid WorkItemId consists of 'W-' followed by 4-8 digits.
+ * These are all of the possible options for PR Scope.
  */
-export function verifyPRTitleForBugId(title: string): boolean {
-	return reBugId.test(title);
-}
+const SCOPE_OPTIONS = [
+	"CodeAnalyzer",
+	"CPD",
+	"ESLint",
+	"GraphEngine",
+	"PMD",
+	"RetireJS"
+];
 
 /**
- * Verifies that the Title does not begin with d/ or r/ to prevent
- * titles that look like d/W-xxx or r/W-xxx
+ * This is a regex segment that matches the accepted options for PR scope, enclosed
+ * in parentheses.
+ * NOTE: This segment allows for multiple scopes, separated by a pipe (|)
  */
-export function verifyPRTitleForBadTitle(title: string): boolean {
-	return !reBranch.test(title);
+const SCOPE_SEGMENT = `\\((${SCOPE_OPTIONS.join("|")})(${SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
+
+/**
+ * This regex portion matches @W-0000@ through @W-999999999@,
+ * to enforce that the title contains a work record number consumable
+ * by Git2Gus.
+ */
+const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
+
+/**
+ * This regex combines the above segments to collectively enforce our naming template.
+ */
+const NAMING_REGEX = new RegExp(`^${TYPE_SEGMENT} ${SCOPE_SEGMENT}: ${WORK_ITEM_SEGMENT}: .+`);
+
+/**
+ * Verifies that PR title conforms to our naming template.
+ * @param title
+ */
+export function verifyPrTitleMatchesTemplate(title: string): boolean {
+	return NAMING_REGEX.test(title);
 }

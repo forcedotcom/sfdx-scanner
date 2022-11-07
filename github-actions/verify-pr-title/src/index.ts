@@ -1,7 +1,6 @@
 import core = require("@actions/core");
 import github = require("@actions/github");
-import { verifyPRTitleForBugId } from "./verifyPrTitle";
-import { verifyPRTitleForBadTitle } from "./verifyPrTitle";
+import { verifyPrTitleMatchesTemplate } from "./verifyPrTitle";
 
 /**
  * Verifies that a pull request title conforms to the pattern required by git2gus
@@ -19,11 +18,11 @@ function run(): void {
 
 		// Examine the title for the expected patterns
 		const title = pullRequest.title;
-		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title)) {
+		if (verifyPrTitleMatchesTemplate(title)) {
 			console.log(`PR Title '${title}' accepted.`);
 		} else {
 			core.setFailed(
-				`PR Title '${title}' is missing a valid GUS work item OR it starts with d/ or r/`
+				`PR Title '${title}' does not match the template 'TYPE (SCOPE): @W-XXXX@: Summary'`
 			);
 			return;
 		}
