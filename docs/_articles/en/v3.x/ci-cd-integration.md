@@ -3,8 +3,6 @@ title: CI/CD Integration
 lang: en
 redirect_from: /en/ci-cd-integration
 ---
-<<<<<<< Updated upstream
-=======
 ## CI/CD Integration
 We recommend that you integrate Salesforce Code Analyzer into your development process to scan your code regularly for potential problems. Code Analyzer makes it easier to identify issues ahead of submitting your code for the AppExchange Security Review.
 
@@ -29,4 +27,3 @@ Try these community tools:
 
 * [SFDX Scan Pull Request](https://github.com/marketplace/actions/sfdx-scan-pull-request) by Mitchell Spano
 * [Pull Request SFDX Code Review](https://github.com/marketplace/actions/pull-request-sfdx-code-review) by Aleš Remta
->>>>>>> Stashed changes
