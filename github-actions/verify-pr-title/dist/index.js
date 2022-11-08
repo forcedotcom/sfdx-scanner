@@ -162,28 +162,62 @@ exports.default = _default;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPRTitleForBadTitle = exports.verifyPRTitleForBugId = void 0;
-// Matches @W-0000@ through @W-99999999@
-const reBugId = /@W-\d{4,8}@/;
-// Matches r/ R/ d/ D/
-const reBranch = /^[rdRD]\//;
+exports.verifyReleaseBranchPrTitle = exports.verifyDevBranchPrTitle = void 0;
 /**
- * Verifies title conforms to the pattern required by git2gus.
- * git2gus requires the WorkItemId to be enclosed by two '@' signs.
- * A valid WorkItemId consists of 'W-' followed by 4-8 digits.
+ * This regex portion matches @W-0000@ through @W-999999999@,
+ * to enforce that the title contains a work record number consumable
+ * by Git2Gus.
+ * All pull request titles will require this segment.
  */
-function verifyPRTitleForBugId(title) {
-    return reBugId.test(title);
-}
-exports.verifyPRTitleForBugId = verifyPRTitleForBugId;
+const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
 /**
- * Verifies that the Title does not begin with d/ or r/ to prevent
- * titles that look like d/W-xxx or r/W-xxx
+ * This is a regex segment that matches the accepted options for feature branch PR type.
+ * NOTE: This segment allows for exactly one type.
  */
-function verifyPRTitleForBadTitle(title) {
-    return !reBranch.test(title);
+const FEATURE_TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
+/**
+ * These are all the possible options for feature branch PR Scope.
+ */
+const FEATURE_SCOPE_OPTIONS = [
+    "CodeAnalyzer",
+    "CPD",
+    "ESLint",
+    "GraphEngine",
+    "PMD",
+    "RetireJS"
+];
+/**
+ * This is a regex segment that matches the accepted options for feature branch PR scope, enclosed
+ * in parentheses.
+ * NOTE: This segment allows for multiple scopes, separated by a pipe (|)
+ */
+const FEATURE_SCOPE_SEGMENT = `\\(\\s*(${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\s*\\|\\s*${s}`).join("|")})*\\s*\\)`;
+/**
+ * This regex combines the above segments to collectively enforce our naming template for pull requests aimed a development branch.
+ */
+const DEV_BRANCH_NAMING_REGEX = new RegExp(`^\\s*${FEATURE_TYPE_SEGMENT}\\s*${FEATURE_SCOPE_SEGMENT}\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
+/**
+ * This regex combines segments to collectively enforce our naming template for pull requests aimed at a release branch.
+ */
+const RELEASE_BRANCH_NAMING_REGEX = new RegExp(`\\s*RELEASE\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
+/**
+ * Returns true if the provided string is an acceptable title for a PR aimed at a development branch.
+ * (e.g., `docdev`, `dev`)
+ * @param title
+ */
+function verifyDevBranchPrTitle(title) {
+    return DEV_BRANCH_NAMING_REGEX.test(title);
 }
-exports.verifyPRTitleForBadTitle = verifyPRTitleForBadTitle;
+exports.verifyDevBranchPrTitle = verifyDevBranchPrTitle;
+/**
+ * Returns true if the provided string is an acceptable title for a PR aimed at a release branch.
+ * (e.g., `documentation`, `release`)
+ * @param title
+ */
+function verifyReleaseBranchPrTitle(title) {
+    return RELEASE_BRANCH_NAMING_REGEX.test(title);
+}
+exports.verifyReleaseBranchPrTitle = verifyReleaseBranchPrTitle;
 //# sourceMappingURL=verifyPrTitle.js.map
 
 /***/ }),
@@ -5396,7 +5430,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
 const verifyPrTitle_1 = __webpack_require__(47);
-const verifyPrTitle_2 = __webpack_require__(47);
 /**
  * Verifies that a pull request title conforms to the pattern required by git2gus
  * Also checks that the title does not start with d/ or r/
@@ -5409,14 +5442,33 @@ function run() {
             core.setFailed(`This action only supports pull requests.`);
             return;
         }
-        // Examine the title and base branch for the expected patterns
+        // Examine the title for the expected patterns, which vary depending on what the target branch is.
         const title = pullRequest.title;
-        if (verifyPrTitle_1.verifyPRTitleForBugId(title) && verifyPrTitle_2.verifyPRTitleForBadTitle(title)) {
-            console.log(`PR Title '${title}' accepted.`);
+        const base = pullRequest.base;
+        const targetBranch = base.ref;
+        if (targetBranch === "release" || targetBranch === "documentation") {
+            // Release branches have their own less stringent format.
+            if (verifyPrTitle_1.verifyReleaseBranchPrTitle(title)) {
+                console.log(`PR title '${title}' accepted for release branch.`);
+            }
+            else {
+                core.setFailed(`PR title '${title}' does not match the release PR template of "RELEASE: @W-XXXX@: Summary".`);
+                return;
+            }
+        }
+        else if (targetBranch === "dev" || targetBranch === "docdev") {
+            // Dev branches have a more stringent format.
+            if (verifyPrTitle_1.verifyDevBranchPrTitle(title)) {
+                console.log(`PR title '${title}' accepted for dev branch.`);
+            }
+            else {
+                core.setFailed(`PR title '${title}' does not match the dev PR template of "TYPE (SCOPE): @W-XXXX@: Summary"`);
+                return;
+            }
         }
         else {
-            core.setFailed(`PR Title '${title}' is missing a valid GUS work item OR it starts with d/ or r/`);
-            return;
+            // Not sure why you'd have a pull request aimed at some other branch, but that should probably be allowed.
+            console.log(`PR title '${title}' automatically accepted for non-release, non-dev branch`);
         }
     }
     catch (error) {
