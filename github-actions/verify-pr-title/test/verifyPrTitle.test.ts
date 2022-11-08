@@ -33,7 +33,7 @@ describe("#verifyDevBranchPrTitle()", () => {
 			});
 
 			it("Allow excessive spacing", () => {
-				expect(verifyDevBranchPrTitle("   NEW   (PMD)  :    @W-1111@  :    beep boop bop.")).to.equal(true);
+				expect(verifyDevBranchPrTitle("   NEW   (    PMD   |    ESLint  | RetireJS   )  :    @W-1111@  :    beep boop bop.")).to.equal(true);
 			});
 
 			it("Allow no spacing", () => {
@@ -43,6 +43,10 @@ describe("#verifyDevBranchPrTitle()", () => {
 	});
 
 	describe("Negative Tests", () => {
+		it("Empty PR title", () => {
+			expect(verifyDevBranchPrTitle("")).to.equal(false);
+		});
+
 		it("Improperly-ordered PR title", () => {
 			expect(verifyDevBranchPrTitle("(PMD) NEW: @W-1111@: beep boop bop.")).to.equal(false);
 		});
@@ -74,8 +78,12 @@ describe("#verifyDevBranchPrTitle()", () => {
 				expect(verifyDevBranchPrTitle("NEW (): @W-1111@: beep boop bop.")).to.equal(false);
 			});
 
-			it("Improperly-delimited PR scopes", () => {
+			it("Improperly-delimited PR scopes (comma instead of pipe)", () => {
 				expect(verifyDevBranchPrTitle("NEW (PMD,CPD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Improperly-delimited PR scopes (missing pipe)", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMDCPD): @W-1111@: beep boop bop.")).to.equal(false);
 			});
 		});
 

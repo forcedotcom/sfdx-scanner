@@ -191,7 +191,7 @@ const FEATURE_SCOPE_OPTIONS = [
  * in parentheses.
  * NOTE: This segment allows for multiple scopes, separated by a pipe (|)
  */
-const FEATURE_SCOPE_SEGMENT = `\\((${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
+const FEATURE_SCOPE_SEGMENT = `\\(\\s*(${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\s*\\|\\s*${s}`).join("|")})*\\s*\\)`;
 /**
  * This regex combines the above segments to collectively enforce our naming template for pull requests aimed a development branch.
  */
