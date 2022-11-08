@@ -5412,7 +5412,7 @@ function run() {
         // Examine the title for the expected patterns
         const title = pullRequest.title;
         console.log(`Keys are ${Object.keys(pullRequest)}`);
-        console.log(`Base is ${pullRequest.base}`);
+        console.log(`Base is ${Object.keys(pullRequest.base)}`);
         if (verifyPrTitle_1.verifyPRTitleForBugId(title) && verifyPrTitle_2.verifyPRTitleForBadTitle(title)) {
             console.log(`PR Title '${title}' accepted.`);
         }
