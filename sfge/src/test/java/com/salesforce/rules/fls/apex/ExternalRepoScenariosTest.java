@@ -45,7 +45,6 @@ import com.salesforce.testutils.BaseFlsTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Disabled;
@@ -744,8 +743,8 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
     }
 
     /**
-     * This covers the following code in {@link
-     * FlsValidationRepresentation#unravelApexValue(ApexValue, Function, Function)}
+     * This covers the following code in {@link FlsValidationRepresentation
+     * unravelApexValue(ApexValue, Function, Function)}
      *
      * <p>} else if (apexValue.getInvocable().orElse(null) instanceof MethodCallExpressionVertex) {
      * // Unresolvable method such as UserInfo.getUserId(). Use the method name
@@ -1150,5 +1149,45 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
                 expect(3, FlsConstants.FlsValidationType.UPDATE, "MyObject__c")
                         .withFields(new String[] {"MyField3__c", SoqlParserUtil.UNKNOWN})
                         .withSourceLine(14));
+    }
+
+    @Test // TODO: rename test
+    public void testIssue862() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "\tprivate static final Set<SObjectField> FIELDS = new Set<SObjectField>{\n"
+                    + "        Account.Name\n"
+                    + "    };"
+                    + "    public static void foo(){\n"
+                    + "                Account acc = new Account();\n"
+                    + "                acc.Name = 'acme inc.';\n"
+                    + "            if (AccessCheckUtility.isCreatable(Schema.SObjectType.Account, FIELDS)) {\n"
+                    + "               insert acc;\n"
+                    + "            }\n"
+                    + "    }\n"
+                    + "}\n",
+            "public class AccessCheckUtility {\n"
+                    + "public static Boolean isCreatable(DescribeSObjectResult sObjectDescribe, SObjectField sObjectField1) {\n"
+                    + "        if (sObjectDescribe == null || ! sObjectDescribe.isCreateable()) {\n"
+                    + "            String accessCreateableError = 'Some Error';\n"
+                    + "            throw new AuraHandledException(accessCreateableError + sObjectDescribe.name + '.');\n"
+                    + "        }\n"
+                    +
+                    //                "        for (SObjectField sObjectField : sObjectFieldSet)
+                    // {\n" +
+                    "            DescribeFieldResult describeFieldResult1 = sObjectField1.getDescribe();\n"
+                    + "            if (!describeFieldResult1.isCreateable()) {\n"
+                    + "                String accessCreateableError = 'Some Error';\n"
+                    + "                System.debug(System.LoggingLevel.ERROR, accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
+                    + "                throw new AuraHandledException(accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
+                    + "            }\n"
+                    +
+                    //                "        }\n" +
+                    "        return true;\n"
+                    + "    }"
+                    + "}\n"
+        };
+
+        assertNoViolation(rule, sourceCode);
     }
 }
