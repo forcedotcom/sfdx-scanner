@@ -19,10 +19,10 @@ jobs:
     timeout-minutes: 60
     steps:
       # === Setup. We need to get the code, set up nodejs, and create the results directory. ===
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: 'release'
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
       - run: mkdir smoke-test-results
@@ -89,7 +89,7 @@ jobs:
       # === Upload the smoke-test-results folder as an artifact ===
       - name: Upload smoke-test-results folder as artifact
         if: ${{ always() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: smoke-test-results-${{ runner.os }}
           path: smoke-test-results

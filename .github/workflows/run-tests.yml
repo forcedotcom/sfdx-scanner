@@ -1,0 +1,210 @@
+name: run-tests
+on:
+  workflow_call:
+    inputs:
+      node-matrix:
+        description: "An array of node versions against which the tests should be run"
+        required: false
+        type: string
+        default: "[{version: 'lts/*', artifact: 'lts'}]"
+      java-matrix:
+        description: "An array of java versions against which the tests should be run"
+        required: false
+        type: string
+        default: "['11']"
+
+jobs:
+  # Step 1: We have a number of dependencies that we can build now and cache
+  #         for future use, to save time later.
+  build-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      # First thing's first; we need to get the code.
+      - uses: actions/checkout@v3
+      # Next, we need to make sure we're using the right versions of Node and Java.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*' # Always use Node LTS for building dependencies.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8' # Always use Java v1.8 for building dependencies.
+      # Install/build dependencies.
+      - run: yarn
+      - run: yarn build
+      # Create a tarball.
+      - run: npm pack
+      # Upload the `dist` directory as an artifact so the unit test jobs have it.
+      - uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-dist
+          path: ./dist
+      # Upload the tarball as an artifact so the smoke test jobs have it.
+      - uses: actions/upload-artifact@v3
+        with:
+          name: smoke-test-tarball
+          path: ./salesforce-sfdx-scanner-*.tgz
+  # Step 2: Run our tests.
+  # Step 2A: Run the unit tests.
+  unit-tests:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+      # to completion instead.
+      fail-fast: false
+      matrix:
+        node: ${{ fromJson(inputs.node-matrix) }}
+        java: ${{ fromJson(inputs.java-matrix) }}
+        os: [ubuntu-latest, windows-2019]
+    runs-on: ${{ matrix.os }}
+    needs: build-dependencies
+    steps:
+      # Check out the code.
+      - uses: actions/checkout@v3
+      # Make sure we're using the right versions of Node and Java.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node.version }} # Node version is a matrix.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }} # Java version is a matrix.
+      # Install Node dependencies.
+      # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
+      #       trouble than it's worth. If we see serious performance problems, we can
+      #       reconsider that assessment.
+      - run: yarn
+      # Download the dist artifact, to save ourselves the trouble of rebuilding our
+      # Java dependencies from scratch.
+      - uses: actions/download-artifact@v3
+        with:
+          name: unit-test-dist
+          path: ./dist
+      # Run the unit tests. Use the -quiet variant so SFGE logs don't blow up the console.
+      - name: Run Tests
+        run: yarn test-quiet --reporter mocha-junit-reporter --reporter-option mochaFile=test-results/mocha/test-results.xml
+      # Run the linter
+      - run: yarn lint --format junit --output-file test-results/eslint/eslint.xml
+      # Upload the test results and coverage information as artifacts.
+      - name: Upload node test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-node-${{ matrix.node.artifact }}-node-results
+          path: |
+            ./test-results
+            ./test-coverage
+      - name: Upload pmd-cataloger test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-pmd-cataloger-results
+          path: |
+            pmd-cataloger/build/reports
+            pmd-cataloger/build/test-results
+      - name: Upload sfge test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-sfge-results
+          path: |
+            sfge/build/reports
+            sfge/build/test-results
+      - name: Upload cli-messaging test artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-java-v${{ matrix.java }}-cli-messaging-results
+          path: |
+            cli-messaging/build/reports
+            cli-messaging/build/test-results
+  # Step 2B: Run the smoke tests
+  smoke-tests:
+    strategy:
+      # By default, if any job in a matrix fails, all other jobs are immediately canceled. This makes the jobs run
+      # to completion instead.
+      fail-fast: false
+      matrix:
+        node: ${{ fromJson(inputs.node-matrix) }}
+        java: ${{ fromJson(inputs.java-matrix) }}
+        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+    runs-on: ${{ matrix.os.vm }}
+    needs: build-dependencies
+    steps:
+      # Check out the code.
+      - uses: actions/checkout@v3
+      # Make sure we're using the right versions of Node and Java.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node.version }} # Node version is a matrix.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }} # Java version is a matrix.
+      # Install Salesforce CLI via NPM
+      - run: npm install -g sfdx-cli
+      # Download and install the tarball artifact built during setup.
+      - uses: actions/download-artifact@v3
+        id: download
+        with:
+          name: smoke-test-tarball
+          # Download the tarball to subdirectory of HOME, so it's guaranteed
+          # to be in a place where the installation command can see it.
+          path: ~/downloads/tarball
+      - run: echo ${{ steps.download.outputs.download-path }}
+      - name: Install Tarball
+        shell: bash
+        run: |
+          # We need to determine the tarball's name first.
+          TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+          # We need to determine where the tarball is located.
+          # Get the path to the folder, and swap out any backslashes for forward slashes (needed for Windows).
+          RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+          # If the path starts with C:, we need to rip that off (needed for Windows).
+          ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
+          # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
+          echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
+      # The results directory needs to exist.
+      - run: mkdir smoke-test-results
+      # Attempt to execute the smoke tests against the plugin, using the specified script.
+      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }}
+        with:
+          name: ${{ runner.os }}-java-v${{ matrix.java}}-node-${{ matrix.node.artifact }}-smoke-test-results
+          path: smoke-test-results
+  # Step 2C: Self-evaluation. Run the plug-in against itself, to make sure we're not violating
+  #          our own rules.
+  # Notes:
+  # - TODO: At present, we do not run PMD against our own Java. In the long-term, we should endeavor to fix this.
+  # - This job has a fair bit of overlap with the build-dependencies job. This isn't a problem per se,
+  #   because the shared steps run quickly enough to not cause undue performance issues. But it's still
+  #   something to be aware of.
+  self-evaluation:
+    runs-on: ubuntu-latest
+    # Technically, this job could run before the build-dependencies job. But having it run second makes
+    # for a cleaner-looking pipeline.
+    needs: build-dependencies
+    steps:
+      # First, we need to get the code.
+      - uses: actions/checkout@v3
+      # Next, make sure we're using the right versions of Node and Java.
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*' # Always use Node LTS for self-eval.
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8' # Always use Java v1.8 for building dependencies.
+      # Install/build dependencies.
+      - run: yarn
+      - run: yarn build
+      # Create the results directory.
+      - run: mkdir test-results
+      - name: Self-evaluation
+        run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+      # Upload the test results as an artifact.
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-self-eval-results
+          path: ./test-results
+        if: ${{ always() }}
