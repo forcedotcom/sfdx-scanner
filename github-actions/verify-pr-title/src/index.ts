@@ -21,6 +21,8 @@ function run(): void {
 		const title = pullRequest.title;
 		console.log(`Keys are ${Object.keys(pullRequest)}`);
 		console.log(`Base is ${Object.keys(pullRequest.base)}`);
+		console.log(`Base ref is ${pullRequest.base.ref}`);
+		console.log(`Base label is ${pullRequest.base.label}`);
 		if (verifyPRTitleForBugId(title) && verifyPRTitleForBadTitle(title)) {
 			console.log(`PR Title '${title}' accepted.`);
 		} else {
