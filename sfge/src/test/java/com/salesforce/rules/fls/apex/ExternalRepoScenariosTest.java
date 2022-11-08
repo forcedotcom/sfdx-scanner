@@ -1157,33 +1157,38 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
             "public class MyClass {\n"
                     + "\tprivate static final Set<SObjectField> FIELDS = new Set<SObjectField>{\n"
                     + "        Account.Name\n"
-                    + "    };"
+                    + "    };\n"
                     + "    public static void foo(){\n"
-                    + "                Account acc = new Account();\n"
-                    + "                acc.Name = 'acme inc.';\n"
-                    + "            if (AccessCheckUtility.isCreatable(Schema.SObjectType.Account, FIELDS)) {\n"
+                    + "            if (AccessCheckUtility.isCreatable(Schema.SObjectType.Account, Schema.SObjectType.Account.fields.Name)) {\n"
+                + "                Account acc = new Account();\n"
+                + "                acc.Name = 'acme inc.';\n"
                     + "               insert acc;\n"
                     + "            }\n"
                     + "    }\n"
                     + "}\n",
             "public class AccessCheckUtility {\n"
-                    + "public static Boolean isCreatable(DescribeSObjectResult sObjectDescribe, SObjectField sObjectField1) {\n"
-                    + "        if (sObjectDescribe == null || ! sObjectDescribe.isCreateable()) {\n"
-                    + "            String accessCreateableError = 'Some Error';\n"
-                    + "            throw new AuraHandledException(accessCreateableError + sObjectDescribe.name + '.');\n"
-                    + "        }\n"
-                    +
-                    //                "        for (SObjectField sObjectField : sObjectFieldSet)
-                    // {\n" +
-                    "            DescribeFieldResult describeFieldResult1 = sObjectField1.getDescribe();\n"
-                    + "            if (!describeFieldResult1.isCreateable()) {\n"
-                    + "                String accessCreateableError = 'Some Error';\n"
-                    + "                System.debug(System.LoggingLevel.ERROR, accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
-                    + "                throw new AuraHandledException(accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
-                    + "            }\n"
-                    +
-                    //                "        }\n" +
-                    "        return true;\n"
+                    + "public static Boolean isCreatable(SObjectType myType, SObjectField myField) {\n" +
+                "       DescribeFieldResult myFieldDescribe = myField.getDescribe();\n" +
+                "           if (!myFieldDescribe.isCreateable()) {\n" +
+                "               throw new Exception();\n" +
+                "           }\n" +
+                "           return true;\n"
+//                    + "        if (sObjectDescribe == null || ! sObjectDescribe.isCreateable()) {\n"
+//                    + "            String accessCreateableError = 'Some Error';\n"
+//                    + "            throw new AuraHandledException(accessCreateableError + sObjectDescribe.name + '.');\n"
+//                    + "        }\n"
+//                    +
+//                    //                "        for (SObjectField sObjectField : sObjectFieldSet)
+//                    // {\n" +
+//                    "            DescribeFieldResult describeFieldResult1 = sObjectField1.getDescribe();\n"
+//                    + "            if (!describeFieldResult1.isCreateable()) {\n"
+//                    + "                String accessCreateableError = 'Some Error';\n"
+//                    + "                System.debug(System.LoggingLevel.ERROR, accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
+//                    + "                throw new AuraHandledException(accessCreateableError + sObjectDescribe1.name + '.' + sObjectField1.getDescribe().label + ' field.');\n"
+//                    + "            }\n"
+//                    +
+//                    //                "        }\n" +
+//                    "        return true;\n"
                     + "    }"
                     + "}\n"
         };
