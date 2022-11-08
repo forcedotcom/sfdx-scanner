@@ -32,16 +32,29 @@ const FEATURE_SCOPE_OPTIONS = [
 const FEATURE_SCOPE_SEGMENT = `\\((${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
 
 /**
- * This regex combines the above segments to collectively enforce our naming template for feature branch pull requests.
+ * This regex combines the above segments to collectively enforce our naming template for pull requests aimed a development branch.
  */
 const DEV_BRANCH_NAMING_REGEX = new RegExp(`^\\s*${FEATURE_TYPE_SEGMENT}\\s*${FEATURE_SCOPE_SEGMENT}\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
 
+/**
+ * This regex combines segments to collectively enforce our naming template for pull requests aimed at a release branch.
+ */
 const RELEASE_BRANCH_NAMING_REGEX = new RegExp(`\\s*RELEASE\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
 
+/**
+ * Returns true if the provided string is an acceptable title for a PR aimed at a development branch.
+ * (e.g., `docdev`, `dev`)
+ * @param title
+ */
 export function verifyDevBranchPrTitle(title: string): boolean {
 	return DEV_BRANCH_NAMING_REGEX.test(title);
 }
 
+/**
+ * Returns true if the provided string is an acceptable title for a PR aimed at a release branch.
+ * (e.g., `documentation`, `release`)
+ * @param title
+ */
 export function verifyReleaseBranchPrTitle(title: string): boolean {
 	return RELEASE_BRANCH_NAMING_REGEX.test(title);
 }
