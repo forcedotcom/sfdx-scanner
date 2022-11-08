@@ -162,7 +162,9 @@ public class SchemaBasedValidationAnalyzer {
         return Sets.newHashSet(validationRep.getValidationInfo());
     }
 
-    /** @return true if the current level of check is the same as what's expected of the object */
+    /**
+     * @return true if the current level of check is the same as what's expected of the object
+     */
     private boolean isCheckLevelValid(
             FlsValidationType validationType,
             DescribeSObjectResult describeSObjectResult,

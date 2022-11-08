@@ -18,6 +18,8 @@ import javax.annotation.Nullable;
  */
 public interface Collectible<T> {
     @Nullable
-    /** @return the value stored in the collection. May return null. */
+    /**
+     * @return the value stored in the collection. May return null.
+     */
     T getCollectible();
 }

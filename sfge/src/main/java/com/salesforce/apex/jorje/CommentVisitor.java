@@ -52,7 +52,9 @@ final class CommentVisitor extends JorjeNodeVisitor {
         }
     }
 
-    /** @return true if the comment is on a single line */
+    /**
+     * @return true if the comment is on a single line
+     */
     private static boolean isSingleLineComment(HiddenToken hiddenToken) {
         final String[] comments = hiddenToken.getValue().split(PositionInformation.END_LINE);
         return comments.length == 1;

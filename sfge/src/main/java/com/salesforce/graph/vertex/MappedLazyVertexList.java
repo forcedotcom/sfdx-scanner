@@ -30,7 +30,9 @@ public class MappedLazyVertexList<T, U extends BaseSFVertex> {
         this.map = new ConcurrentHashMap<>();
     }
 
-    /** @return the list that was loaded from the graph */
+    /**
+     * @return the list that was loaded from the graph
+     */
     public List<U> get(T parameter) {
         final GraphTraversalSource g = VertexCacheProvider.get().getFullGraph();
         return map.computeIfAbsent(

@@ -108,7 +108,8 @@ public class EngineDirectiveTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD)
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething")
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(method, DISABLE_1);
@@ -116,7 +117,8 @@ public class EngineDirectiveTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(methodCallExpression, DISABLE_1);
     }
@@ -163,7 +165,8 @@ public class EngineDirectiveTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD)
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething")
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(method, expected);
@@ -171,7 +174,8 @@ public class EngineDirectiveTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(methodCallExpression, expected);
     }
@@ -197,7 +201,8 @@ public class EngineDirectiveTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD)
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething")
                                 .not(has(Schema.IS_STANDARD, true)));
         engineDirectives = method.getEngineDirectives();
@@ -206,7 +211,8 @@ public class EngineDirectiveTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(methodCallExpression, DISABLE_STACK_1);
     }
@@ -245,7 +251,8 @@ public class EngineDirectiveTest {
         ExpressionStatementVertex expressionStatement =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.EXPRESSION_STATEMENT)
+                        g.V()
+                                .hasLabel(NodeType.EXPRESSION_STATEMENT)
                                 .not(has(Schema.IS_STANDARD, true)));
         engineDirectives = expressionStatement.getEngineDirectives();
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_NEXT_LINE_1));
@@ -253,7 +260,8 @@ public class EngineDirectiveTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(methodCallExpression, DISABLE_NEXT_LINE_1);
     }
@@ -290,7 +298,8 @@ public class EngineDirectiveTest {
         ExpressionStatementVertex expressionStatement =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.EXPRESSION_STATEMENT)
+                        g.V()
+                                .hasLabel(NodeType.EXPRESSION_STATEMENT)
                                 .not(has(Schema.IS_STANDARD, true)));
         engineDirectives = expressionStatement.getEngineDirectives();
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_NEXT_LINE_1));
@@ -298,7 +307,8 @@ public class EngineDirectiveTest {
         SoqlExpressionVertex soqlExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.SOQL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.SOQL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(soqlExpression, DISABLE_NEXT_LINE_1);
     }
@@ -338,7 +348,8 @@ public class EngineDirectiveTest {
         VariableDeclarationStatementsVertex variableDeclarationStatements =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS)
+                        g.V()
+                                .hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS)
                                 .not(has(Schema.IS_STANDARD, true)));
         engineDirectives = variableDeclarationStatements.getEngineDirectives();
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_NEXT_LINE_1));
@@ -346,7 +357,8 @@ public class EngineDirectiveTest {
         SoqlExpressionVertex soqlExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.SOQL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.SOQL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(soqlExpression, DISABLE_NEXT_LINE_1);
     }
@@ -385,7 +397,8 @@ public class EngineDirectiveTest {
         ExpressionStatementVertex expressionStatement =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.EXPRESSION_STATEMENT)
+                        g.V()
+                                .hasLabel(NodeType.EXPRESSION_STATEMENT)
                                 .not(has(Schema.IS_STANDARD, true)));
         engineDirectives = expressionStatement.getEngineDirectives();
         MatcherAssert.assertThat(engineDirectives, contains(DISABLE_NEXT_LINE_1));
@@ -393,7 +406,8 @@ public class EngineDirectiveTest {
         SoqlExpressionVertex soqlExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.SOQL_EXPRESSION)
+                        g.V()
+                                .hasLabel(NodeType.SOQL_EXPRESSION)
                                 .not(has(Schema.IS_STANDARD, true)));
         assertDirectiveIsInherited(soqlExpression, DISABLE_NEXT_LINE_1);
     }
@@ -443,7 +457,8 @@ public class EngineDirectiveTest {
         DmlStatementVertex dmlStatementVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(
+                        g.V()
+                                .hasLabel(
                                         NodeType.DML_DELETE_STATEMENT,
                                         ASTConstants.NodeType.DML_INSERT_STATEMENT,
                                         ASTConstants.NodeType.DML_MERGE_STATEMENT,
@@ -636,7 +651,8 @@ public class EngineDirectiveTest {
         MethodVertex method =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(NodeType.METHOD)
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
                                 .has(Schema.NAME, "doSomething")
                                 .not(has(Schema.IS_STANDARD, true)));
         // It's not hoisted to the method

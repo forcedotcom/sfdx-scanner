@@ -18,7 +18,9 @@ public class LazyOptionalVertex<T extends BaseSFVertex>
         extends UncheckedLazyInitializer<Optional<T>> {
     private final Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier;
 
-    /** @param traversalSupplier a supplier that runs the desired gremlin query */
+    /**
+     * @param traversalSupplier a supplier that runs the desired gremlin query
+     */
     LazyOptionalVertex(Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier) {
         this.traversalSupplier = traversalSupplier;
     }

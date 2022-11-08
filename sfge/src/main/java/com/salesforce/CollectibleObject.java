@@ -24,6 +24,8 @@ import javax.annotation.Nullable;
 @Deprecated
 public interface CollectibleObject {
     @Nullable
-    /** @return the value stored in the collection. May return null. */
+    /**
+     * @return the value stored in the collection. May return null.
+     */
     Object getCollectibleObject();
 }

@@ -11,7 +11,9 @@ import java.util.Objects;
 final class ApexSimpleValueComparator implements CaseVertexComparator {
     private final ApexSimpleValue<?, ?> value;
 
-    /** @param value that was supplied to the switch statement's "switch on" directive */
+    /**
+     * @param value that was supplied to the switch statement's "switch on" directive
+     */
     ApexSimpleValueComparator(ApexSimpleValue<?, ?> value) {
         this.value = value;
     }

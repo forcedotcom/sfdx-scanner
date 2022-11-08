@@ -47,7 +47,8 @@ public class CustomerApexVertexBuilderTest {
         assertEquals(Long.valueOf(9), g.V().not(has(Schema.IS_STANDARD, true)).count().next());
         assertEquals(
                 Long.valueOf(1),
-                g.V().hasLabel(NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(NodeType.USER_CLASS)
                         .not(has(Schema.IS_STANDARD, true))
                         .count()
                         .next());
@@ -56,13 +57,15 @@ public class CustomerApexVertexBuilderTest {
                 g.V().hasLabel(NodeType.METHOD).not(has(Schema.IS_STANDARD, true)).count().next());
         assertEquals(
                 Long.valueOf(4),
-                g.V().hasLabel(NodeType.MODIFIER_NODE)
+                g.V()
+                        .hasLabel(NodeType.MODIFIER_NODE)
                         .not(has(Schema.IS_STANDARD, true))
                         .count()
                         .next());
         assertEquals(
                 Long.valueOf(1),
-                g.V().hasLabel(NodeType.USER_CLASS_METHODS)
+                g.V()
+                        .hasLabel(NodeType.USER_CLASS_METHODS)
                         .not(has(Schema.IS_STANDARD, true))
                         .count()
                         .next());
@@ -72,7 +75,8 @@ public class CustomerApexVertexBuilderTest {
 
         // Validate some properties of the UserClass vertex
         Map<Object, Object> properties =
-                g.V().hasLabel(NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(NodeType.USER_CLASS)
                         .not(has(Schema.IS_STANDARD, true))
                         .elementMap()
                         .next();
@@ -103,7 +107,8 @@ public class CustomerApexVertexBuilderTest {
 
         // Validate the case-safe properties of the vertices.
         Map<Object, Object> userClassVertex =
-                g.V().hasLabel(NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(NodeType.USER_CLASS)
                         .not(has(Schema.IS_STANDARD, true))
                         .elementMap()
                         .next();
@@ -169,7 +174,8 @@ public class CustomerApexVertexBuilderTest {
         List<MethodVertex> vertices =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(NodeType.METHOD)
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .not(has(Schema.CONSTRUCTOR, true))
                                 .not(

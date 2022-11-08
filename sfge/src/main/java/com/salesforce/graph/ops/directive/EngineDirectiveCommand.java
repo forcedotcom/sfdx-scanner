@@ -109,7 +109,9 @@ public enum EngineDirectiveCommand {
         return token;
     }
 
-    /** @return true if this directive is valid for the given label */
+    /**
+     * @return true if this directive is valid for the given label
+     */
     public boolean isValidForLabel(String label) {
         return validVertexTypes.contains(label);
     }

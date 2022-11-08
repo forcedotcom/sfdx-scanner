@@ -44,7 +44,8 @@ public final class ApexClassUtil {
         return Optional.ofNullable(
                 SFVertexFactory.loadSingleOrNull(
                         g,
-                        g.V().where(
+                        g.V()
+                                .where(
                                         H.has(
                                                 ASTConstants.NodeType.USER_CLASS,
                                                 Schema.DEFINING_TYPE,

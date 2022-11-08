@@ -62,7 +62,9 @@ public final class SerializerUtil {
     public static final class Json {
         private static final String CHILDREN = "Children";
 
-        /** @return the vertex as a pretty printed json string */
+        /**
+         * @return the vertex as a pretty printed json string
+         */
         public static String serialize(BaseSFVertex vertex) {
             return serialize(vertex, Collections.emptySet());
         }
@@ -100,7 +102,9 @@ public final class SerializerUtil {
         private static final String YES = "yes";
         private static final int INDENT = 4;
 
-        /** @return the vertex as a pretty printed xml string */
+        /**
+         * @return the vertex as a pretty printed xml string
+         */
         public static String serialize(BaseSFVertex vertex) {
             return serialize(vertex, Collections.emptySet());
         }

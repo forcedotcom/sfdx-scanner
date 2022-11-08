@@ -74,12 +74,16 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 );
     }
 
-    /** @return true if the query uses fields(all), fields(standard), or fields(custom) */
+    /**
+     * @return true if the query uses fields(all), fields(standard), or fields(custom)
+     */
     public boolean isAllFields() {
         return allFields;
     }
 
-    /** @return true if any of the fields in the query require access check */
+    /**
+     * @return true if any of the fields in the query require access check
+     */
     public boolean getFieldsRequireAccessCheck() {
         final TreeSet<String> myFields = getFields();
         myFields.removeAll(SoqlParserUtil.ALWAYS_ACCESSIBLE_FIELDS);
@@ -96,7 +100,9 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
         return true;
     }
 
-    /** @return true if the query uses a COUNT() phrase. */
+    /**
+     * @return true if the query uses a COUNT() phrase.
+     */
     public boolean isCount() {
         return count;
     }

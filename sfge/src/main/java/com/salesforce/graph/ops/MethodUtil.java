@@ -107,7 +107,8 @@ public final class MethodUtil {
             List<MethodVertex> targetMethodVertices =
                     SFVertexFactory.loadVertices(
                             g,
-                            g.V().where(
+                            g.V()
+                                    .where(
                                             H.hasWithin(
                                                     NodeType.METHOD,
                                                     Schema.NAME,
@@ -352,7 +353,8 @@ public final class MethodUtil {
             methods =
                     SFVertexFactory.loadVertices(
                             g,
-                            g.V().where(
+                            g.V()
+                                    .where(
                                             H.has(
                                                     NodeType.METHOD,
                                                     Schema.DEFINING_TYPE,
@@ -393,7 +395,12 @@ public final class MethodUtil {
             methods =
                     SFVertexFactory.loadVertices(
                             g,
-                            g.V().where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, definingType))
+                            g.V()
+                                    .where(
+                                            H.has(
+                                                    NodeType.METHOD,
+                                                    Schema.DEFINING_TYPE,
+                                                    definingType))
                                     .where(
                                             H.has(
                                                     NodeType.METHOD,
@@ -422,7 +429,8 @@ public final class MethodUtil {
             List<MethodVertex> methods =
                     SFVertexFactory.loadVertices(
                             g,
-                            g.V().where(
+                            g.V()
+                                    .where(
                                             H.has(
                                                     NodeType.METHOD,
                                                     Schema.DEFINING_TYPE,
@@ -450,7 +458,8 @@ public final class MethodUtil {
         return Optional.ofNullable(
                 SFVertexFactory.loadSingleOrNull(
                         g,
-                        g.V().where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
+                        g.V()
+                                .where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
                                 .where(
                                         H.has(
                                                 NodeType.METHOD,
@@ -460,12 +469,15 @@ public final class MethodUtil {
                                 .has(Schema.ARITY, 0)));
     }
 
-    /** @return constructors explicitly declared in code. */
+    /**
+     * @return constructors explicitly declared in code.
+     */
     public static List<MethodVertex.ConstructorVertex> getNonDefaultConstructors(
             GraphTraversalSource g, String className) {
         return SFVertexFactory.loadVertices(
                 g,
-                g.V().where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
+                g.V()
+                        .where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
                         .where(
                                 H.has(
                                         NodeType.METHOD,
@@ -491,7 +503,8 @@ public final class MethodUtil {
             methods =
                     SFVertexFactory.loadVertices(
                             g,
-                            g.V().where(
+                            g.V()
+                                    .where(
                                             H.has(
                                                     NodeType.METHOD,
                                                     Schema.DEFINING_TYPE,
@@ -522,7 +535,8 @@ public final class MethodUtil {
         List<MethodVertex> methods =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
+                        g.V()
+                                .where(H.has(NodeType.METHOD, Schema.DEFINING_TYPE, className))
                                 .where(
                                         H.has(
                                                 NodeType.METHOD,
@@ -611,7 +625,8 @@ public final class MethodUtil {
         if (methodVertex.getModifierNode().isStatic()) {
             // For static methods, we want all of the method call expressions where...
             gt =
-                    g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                    g.V()
+                            .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                             // One of the following is true:
                             .or(
                                     // The FullMethodName is [this class].[this method]`, meaning
@@ -635,7 +650,8 @@ public final class MethodUtil {
         } else {
             // For instance methods, we want all of the method call expressions where...
             gt =
-                    g.V().hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                    g.V()
+                            .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
                             // One of the following is true:
                             .or(
                                     // The DefiningType is the same and the FullMethodName equals

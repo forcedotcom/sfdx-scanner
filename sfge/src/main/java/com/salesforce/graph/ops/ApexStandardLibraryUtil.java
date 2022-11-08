@@ -131,7 +131,9 @@ public final class ApexStandardLibraryUtil {
                                 .collect(Collectors.toList()));
     }
 
-    /** @return {@link ApexValue} if this vertex references a standard type */
+    /**
+     * @return {@link ApexValue} if this vertex references a standard type
+     */
     public static Optional<ApexValue<?>> getStandardType(VariableExpressionVertex.Unknown vertex) {
         for (VariableExpressionApexValueBuilder function : VARIABLE_EXPRESSION_BUILDER_FUNCTIONS) {
             Optional<ApexValue<?>> result = function.apply(vertex);
@@ -143,7 +145,9 @@ public final class ApexStandardLibraryUtil {
         return Optional.empty();
     }
 
-    /** @return {@link ApexValue} if this vertex generates a standard type */
+    /**
+     * @return {@link ApexValue} if this vertex generates a standard type
+     */
     public static Optional<ApexValue<?>> getStandardType(
             GraphTraversalSource g, MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         for (MethodCallApexValueBuilder function : METHOD_CALL_BUILDER_FUNCTIONS) {
@@ -227,12 +231,16 @@ public final class ApexStandardLibraryUtil {
             return getFileAsTreeSet(S_OBJECT_LIST_FILENAME);
         }
 
-        /** @return subset of {@link #getStandardObjects()} with objects that require FLS check */
+        /**
+         * @return subset of {@link #getStandardObjects()} with objects that require FLS check
+         */
         static TreeSet<String> getSObjectsRequiringFlsCheck() {
             return getFileAsTreeSet(S_OBJECT_FLS_LIST_FILENAME);
         }
 
-        /** @return subset of {@link #getStandardObjects()} with objects that require CRUD check */
+        /**
+         * @return subset of {@link #getStandardObjects()} with objects that require CRUD check
+         */
         static TreeSet<String> getSObjectsRequiringCrudCheck() {
             return getFileAsTreeSet(S_OBJECT_CRUD_LIST_FILENAME);
         }

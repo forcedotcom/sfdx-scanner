@@ -40,7 +40,9 @@ public abstract class ApexStandardMapValue<T extends ApexStandardMapValue>
         super(other, returnedFrom, invocable);
     }
 
-    /** @return an indeterminant value that can be returned from the #get and #remove methods */
+    /**
+     * @return an indeterminant value that can be returned from the #get and #remove methods
+     */
     protected abstract ApexValue<?> getReturnValue(ApexValueBuilder builder, ApexValue<?> keyName);
 
     private static final TreeMap<String, Function<ApexValueBuilder, IndeterminantValueProvider<?>>>

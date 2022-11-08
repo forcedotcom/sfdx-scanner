@@ -361,7 +361,8 @@ public class MethodUtilTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.METHOD_NAME, "getMap"));
 
         assertEquals(
@@ -1168,7 +1169,8 @@ public class MethodUtilTest {
             MethodVertex method =
                     SFVertexFactory.load(
                             g,
-                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                            g.V()
+                                    .hasLabel(ASTConstants.NodeType.METHOD)
                                     .has(Schema.NAME, methodName));
             MatcherAssert.assertThat(methodName, method.isTest(), equalTo(true));
         }

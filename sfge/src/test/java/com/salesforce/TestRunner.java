@@ -91,7 +91,9 @@ public final class TestRunner {
         return get(g, sourceCode).getPaths();
     }
 
-    /** @param methodName - defaults to {@link #DEFAULT_METHOD_NAME} */
+    /**
+     * @param methodName - defaults to {@link #DEFAULT_METHOD_NAME}
+     */
     public TestRunner withMethodName(String methodName) {
         this.methodName = methodName;
         return this;
@@ -106,7 +108,9 @@ public final class TestRunner {
         return this;
     }
 
-    /** @param visitorSupplier - defaults to {@link SystemDebugAccumulator} */
+    /**
+     * @param visitorSupplier - defaults to {@link SystemDebugAccumulator}
+     */
     public TestRunner withPathVertexVisitor(Supplier<PathVertexVisitor> visitorSupplier) {
         this.visitorSupplier = visitorSupplier;
         return this;

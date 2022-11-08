@@ -92,7 +92,8 @@ public abstract class BaseFlsTest {
     protected int getLineWithDmlStatement(FlsConstants.FlsValidationType validationType) {
         return SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(validationType.dmlStatementType)
+                        g.V()
+                                .hasLabel(validationType.dmlStatementType)
                                 .has(Schema.DEFINING_TYPE, CLASS_NAME))
                 .getBeginLine();
     }
@@ -105,7 +106,8 @@ public abstract class BaseFlsTest {
             FlsConstants.FlsValidationType validationType) {
         return SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(validationType.dmlStatementType)
+                        g.V()
+                                .hasLabel(validationType.dmlStatementType)
                                 .has(Schema.DEFINING_TYPE, CLASS_NAME)
                                 .order(Scope.global)
                                 .by(Schema.DEFINING_TYPE, Order.asc))

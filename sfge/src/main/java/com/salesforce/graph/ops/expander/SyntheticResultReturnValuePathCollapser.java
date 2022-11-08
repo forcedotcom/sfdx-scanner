@@ -78,7 +78,9 @@ public final class SyntheticResultReturnValuePathCollapser
         return (T) apexValue;
     }
 
-    /** @throws ReturnValueInvalidException if {@code optApexValue} is not present */
+    /**
+     * @throws ReturnValueInvalidException if {@code optApexValue} is not present
+     */
     private <T extends ApexValue<?>> void validateIsPresent(
             Optional<T> optApexValue, String objectName) throws ReturnValueInvalidException {
         if (!optApexValue.isPresent()) {

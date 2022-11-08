@@ -390,7 +390,8 @@ public class MethodUtilTest {
             MethodVertex excludedMethod =
                     SFVertexFactory.load(
                             g,
-                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                            g.V()
+                                    .hasLabel(ASTConstants.NodeType.METHOD)
                                     .has(Schema.NAME, excludedName));
             MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
         }
@@ -429,7 +430,8 @@ public class MethodUtilTest {
             MethodVertex excludedMethod =
                     SFVertexFactory.load(
                             g,
-                            g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                            g.V()
+                                    .hasLabel(ASTConstants.NodeType.METHOD)
                                     .has(Schema.NAME, excludedName));
             MatcherAssert.assertThat(excludedName, excludedMethod.isTest(), equalTo(true));
         }

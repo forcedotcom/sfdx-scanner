@@ -72,7 +72,9 @@ public class CustomSettingInfoCollector extends XmlMetaInfoCollector {
         }
     }
 
-    /** @return Get custom settings name from filename */
+    /**
+     * @return Get custom settings name from filename
+     */
     private Optional<String> getCustomSettingName(Path path) {
         final String fileName = path.getName(path.getNameCount() - 1).toString();
         final Matcher matcher = CUSTOM_SETTING_PATTERN.matcher(fileName);

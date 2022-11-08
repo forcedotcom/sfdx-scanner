@@ -168,7 +168,9 @@ public abstract class ApexValue<T extends ApexValue> implements DeepCloneable<T>
         positiveConstraints.add(constraint);
     }
 
-    /** @return true if the constraint is contained in either the positive or negative set */
+    /**
+     * @return true if the constraint is contained in either the positive or negative set
+     */
     public final boolean hasEitherConstraint(Constraint constraint) {
         return hasPositiveConstraint(constraint) || hasNegativeConstraint(constraint);
     }

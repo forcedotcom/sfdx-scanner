@@ -22,7 +22,9 @@ import java.util.List;
 final class SObjectComparator {
     private final ApexPropertiesValue<?> value;
 
-    /** @param value that was supplied to the switch statement's "switch on" directive */
+    /**
+     * @param value that was supplied to the switch statement's "switch on" directive
+     */
     SObjectComparator(ApexPropertiesValue<?> value) {
         this.value = value;
     }

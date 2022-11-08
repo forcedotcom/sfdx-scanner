@@ -395,7 +395,9 @@ public final class ApexPath implements DeepCloneable<ApexPath>, Collectible<Apex
         return Optional.ofNullable(result);
     }
 
-    /** @return true if any paths related to this path ends in an exception. */
+    /**
+     * @return true if any paths related to this path ends in an exception.
+     */
     public boolean endsInException() {
         if (pathEndsInException) {
             return true;

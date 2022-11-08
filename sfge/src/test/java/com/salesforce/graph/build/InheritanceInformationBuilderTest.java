@@ -300,14 +300,16 @@ public class InheritanceInformationBuilderTest {
             String parentDefiningType,
             List<String> childDefiningTypes) {
         List<Object> outgoingVertices =
-                g.V().has(Schema.DEFINING_TYPE, parentDefiningType)
+                g.V()
+                        .has(Schema.DEFINING_TYPE, parentDefiningType)
                         .out(outgoingEdge)
                         .values(Schema.DEFINING_TYPE)
                         .order(Scope.global)
                         .by(Order.asc)
                         .toList();
         List<Object> incomingVertices =
-                g.V().has(Schema.DEFINING_TYPE, parentDefiningType)
+                g.V()
+                        .has(Schema.DEFINING_TYPE, parentDefiningType)
                         .in(incomingEdge)
                         .values(Schema.DEFINING_TYPE)
                         .order(Scope.global)
@@ -329,7 +331,8 @@ public class InheritanceInformationBuilderTest {
             GraphTraversalSource g, String parentDefiningType, List<String> childDefiningTypes) {
         // For each child type, get the property on that vertex.
         List<Object> propValues =
-                g.V().where(
+                g.V()
+                        .where(
                                 CaseSafePropertyUtil.H.hasWithin(
                                         NodeType.USER_CLASS,
                                         Schema.DEFINING_TYPE,
