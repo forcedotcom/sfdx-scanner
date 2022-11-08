@@ -1,13 +1,21 @@
 /**
- * This is a regex segment that matches the accepted options for PR type.
- * NOTE: This segment allows for exactly one type.
+ * This regex portion matches @W-0000@ through @W-999999999@,
+ * to enforce that the title contains a work record number consumable
+ * by Git2Gus.
+ * All pull request titles will require this segment.
  */
-const TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
+const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
 
 /**
- * These are all of the possible options for PR Scope.
+ * This is a regex segment that matches the accepted options for feature branch PR type.
+ * NOTE: This segment allows for exactly one type.
  */
-const SCOPE_OPTIONS = [
+const FEATURE_TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
+
+/**
+ * These are all the possible options for feature branch PR Scope.
+ */
+const FEATURE_SCOPE_OPTIONS = [
 	"CodeAnalyzer",
 	"CPD",
 	"ESLint",
@@ -17,28 +25,23 @@ const SCOPE_OPTIONS = [
 ];
 
 /**
- * This is a regex segment that matches the accepted options for PR scope, enclosed
+ * This is a regex segment that matches the accepted options for feature branch PR scope, enclosed
  * in parentheses.
  * NOTE: This segment allows for multiple scopes, separated by a pipe (|)
  */
-const SCOPE_SEGMENT = `\\((${SCOPE_OPTIONS.join("|")})(${SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
+const FEATURE_SCOPE_SEGMENT = `\\((${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
 
 /**
- * This regex portion matches @W-0000@ through @W-999999999@,
- * to enforce that the title contains a work record number consumable
- * by Git2Gus.
+ * This regex combines the above segments to collectively enforce our naming template for feature branch pull requests.
  */
-const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
+const DEV_BRANCH_NAMING_REGEX = new RegExp(`^\\s*${FEATURE_TYPE_SEGMENT}\\s*${FEATURE_SCOPE_SEGMENT}\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
 
-/**
- * This regex combines the above segments to collectively enforce our naming template.
- */
-const NAMING_REGEX = new RegExp(`^${TYPE_SEGMENT} ${SCOPE_SEGMENT}: ${WORK_ITEM_SEGMENT}: .+`);
+const RELEASE_BRANCH_NAMING_REGEX = new RegExp(`\\s*RELEASE\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
 
-/**
- * Verifies that PR title conforms to our naming template.
- * @param title
- */
-export function verifyPrTitleMatchesTemplate(title: string): boolean {
-	return NAMING_REGEX.test(title);
+export function verifyDevBranchPrTitle(title: string): boolean {
+	return DEV_BRANCH_NAMING_REGEX.test(title);
+}
+
+export function verifyReleaseBranchPrTitle(title: string): boolean {
+	return RELEASE_BRANCH_NAMING_REGEX.test(title);
 }

@@ -162,16 +162,23 @@ exports.default = _default;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyPrTitleMatchesTemplate = void 0;
+exports.verifyReleaseBranchPrTitle = exports.verifyDevBranchPrTitle = void 0;
 /**
- * This is a regex segment that matches the accepted options for PR type.
+ * This regex portion matches @W-0000@ through @W-999999999@,
+ * to enforce that the title contains a work record number consumable
+ * by Git2Gus.
+ * All pull request titles will require this segment.
+ */
+const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
+/**
+ * This is a regex segment that matches the accepted options for feature branch PR type.
  * NOTE: This segment allows for exactly one type.
  */
-const TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
+const FEATURE_TYPE_SEGMENT = "(NEW|FIX|CHANGE)";
 /**
- * These are all of the possible options for PR Scope.
+ * These are all the possible options for feature branch PR Scope.
  */
-const SCOPE_OPTIONS = [
+const FEATURE_SCOPE_OPTIONS = [
     "CodeAnalyzer",
     "CPD",
     "ESLint",
@@ -180,29 +187,24 @@ const SCOPE_OPTIONS = [
     "RetireJS"
 ];
 /**
- * This is a regex segment that matches the accepted options for PR scope, enclosed
+ * This is a regex segment that matches the accepted options for feature branch PR scope, enclosed
  * in parentheses.
  * NOTE: This segment allows for multiple scopes, separated by a pipe (|)
  */
-const SCOPE_SEGMENT = `\\((${SCOPE_OPTIONS.join("|")})(${SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
+const FEATURE_SCOPE_SEGMENT = `\\((${FEATURE_SCOPE_OPTIONS.join("|")})(${FEATURE_SCOPE_OPTIONS.map(s => `\\|${s}`).join("|")})*\\)`;
 /**
- * This regex portion matches @W-0000@ through @W-999999999@,
- * to enforce that the title contains a work record number consumable
- * by Git2Gus.
+ * This regex combines the above segments to collectively enforce our naming template for feature branch pull requests.
  */
-const WORK_ITEM_SEGMENT = "@W-\\d{4,8}@";
-/**
- * This regex combines the above segments to collectively enforce our naming template.
- */
-const NAMING_REGEX = new RegExp(`^${TYPE_SEGMENT} ${SCOPE_SEGMENT}: ${WORK_ITEM_SEGMENT}: .+`);
-/**
- * Verifies that PR title conforms to our naming template.
- * @param title
- */
-function verifyPrTitleMatchesTemplate(title) {
-    return NAMING_REGEX.test(title);
+const DEV_BRANCH_NAMING_REGEX = new RegExp(`^\\s*${FEATURE_TYPE_SEGMENT}\\s*${FEATURE_SCOPE_SEGMENT}\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
+const RELEASE_BRANCH_NAMING_REGEX = new RegExp(`\\s*RELEASE\\s*:\\s*${WORK_ITEM_SEGMENT}\\s*:.+`, "i");
+function verifyDevBranchPrTitle(title) {
+    return DEV_BRANCH_NAMING_REGEX.test(title);
 }
-exports.verifyPrTitleMatchesTemplate = verifyPrTitleMatchesTemplate;
+exports.verifyDevBranchPrTitle = verifyDevBranchPrTitle;
+function verifyReleaseBranchPrTitle(title) {
+    return RELEASE_BRANCH_NAMING_REGEX.test(title);
+}
+exports.verifyReleaseBranchPrTitle = verifyReleaseBranchPrTitle;
 //# sourceMappingURL=verifyPrTitle.js.map
 
 /***/ }),
@@ -5427,14 +5429,32 @@ function run() {
             core.setFailed(`This action only supports pull requests.`);
             return;
         }
-        // Examine the title for the expected patterns
+        // Examine the title for the expected patterns, which vary depending on what the target branch is.
         const title = pullRequest.title;
-        if (verifyPrTitle_1.verifyPrTitleMatchesTemplate(title)) {
-            console.log(`PR Title '${title}' accepted.`);
+        const targetBranch = pullRequest.base.ref;
+        if (targetBranch === "release" || targetBranch === "documentation") {
+            // Release branches have their own less stringent format.
+            if (verifyPrTitle_1.verifyReleaseBranchPrTitle(title)) {
+                console.log(`PR title '${title}' accepted for release branch.`);
+            }
+            else {
+                core.setFailed(`PR title '${title}' does not match the release PR template of "RELEASE: @W-XXXX@: Summary".`);
+                return;
+            }
+        }
+        else if (targetBranch === "dev" || targetBranch === "docdev") {
+            // Dev branches have a more stringent format.
+            if (verifyPrTitle_1.verifyDevBranchPrTitle(title)) {
+                console.log(`PR title '${title}' accepted for dev branch.`);
+            }
+            else {
+                core.setFailed(`PR title '${title}' does not match the dev PR template of "TYPE (SCOPE): @W-XXXX@: Summary"`);
+                return;
+            }
         }
         else {
-            core.setFailed(`PR Title '${title}' does not match the template 'TYPE (SCOPE): @W-XXXX@: Summary'`);
-            return;
+            // Not sure why you'd have a pull request aimed at some other branch, but that should probably be allowed.
+            console.log(`PR title '${title}' automatically accepted for non-release, non-dev branch`);
         }
     }
     catch (error) {
