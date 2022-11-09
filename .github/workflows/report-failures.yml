@@ -1,7 +1,7 @@
 name: report-failures
 on:
   workflow_run:
-    workflows: [run-tests]
+    workflows: [validate-pr]
     types: [completed]
 
 permissions:
