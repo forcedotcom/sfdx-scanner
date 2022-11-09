@@ -12,7 +12,9 @@ on:
         required: false
         type: string
         default: "['11']"
-
+permissions:
+  checks: write
+  contents: read
 jobs:
   # Step 1: We have a number of dependencies that we can build now and cache
   #         for future use, to save time later.
@@ -216,6 +218,3 @@ jobs:
           name: Code Analyzer Results
           path: ./test-results/src.xml
           reporter: java-junit # Report format
-        permissions:
-          checks: write
-          contents: read
