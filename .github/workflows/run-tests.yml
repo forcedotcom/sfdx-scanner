@@ -12,9 +12,6 @@ on:
         required: false
         type: string
         default: "['11']"
-permissions:
-  checks: write
-  contents: read
 jobs:
   # Step 1: We have a number of dependencies that we can build now and cache
   #         for future use, to save time later.
@@ -182,6 +179,9 @@ jobs:
   #   because the shared steps run quickly enough to not cause undue performance issues. But it's still
   #   something to be aware of.
   self-evaluation:
+    permissions:
+      checks: write
+      contents: read
     runs-on: ubuntu-latest
     # Technically, this job could run before the build-dependencies job. But having it run second makes
     # for a cleaner-looking pipeline.
