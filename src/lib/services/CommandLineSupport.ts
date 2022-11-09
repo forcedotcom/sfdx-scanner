@@ -79,7 +79,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 
 			// When data is passed back up to us, pop it onto the appropriate string.
 			cp.stdout.on('data', data => {
-				// eslint-disable-next-line @typescript-eslint/no-floating-promises
 				(async () => {
 					await this.outputProcessor.processRealtimeOutput(String(data));
 					stdout += data;

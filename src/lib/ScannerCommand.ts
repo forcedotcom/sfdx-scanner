@@ -86,7 +86,6 @@ export abstract class ScannerCommand extends SfdxCommand {
 		this.ux.setSpinnerStatus(msg);
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	protected waitOnSpinner(msg: string): void {
 		// msg variable is thrown away - please don't send anything here.
 		const currentStatus = this.ux.getSpinnerStatus();
