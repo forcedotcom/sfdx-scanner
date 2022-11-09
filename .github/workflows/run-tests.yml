@@ -198,6 +198,21 @@ jobs:
       # Install/build dependencies.
       - run: yarn
       - run: yarn build
+      # Create the results directory.
+      - run: mkdir test-results
       - name: Self-evaluation
-        run: bin/run scanner:run --target ./src --format junit --severity-threshold 3
-
+        run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+      # Upload the test results as an artifact.
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }}-self-eval-results
+          path: ./test-results
+        if: ${{ always() }}
+      # Create a test report with results
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() # Generate report in either case
+        with:
+          name: Code Analyzer Results
+          path: ./test-results/src.xml
+          reporter: jest-junit # Report format
