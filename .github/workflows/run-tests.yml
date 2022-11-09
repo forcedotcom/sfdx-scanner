@@ -211,6 +211,6 @@ jobs:
       # Create a report with results
       - name: Report
         uses: mikepenz/action-junit-report@v3
-        if: ${{ steps.self-eval.conclusion == 'failure' }}
+        if: ${{ failure() && steps.self-eval.conclusion == 'failure' }}
         with:
           report_paths: "./test-results/src.xml"
