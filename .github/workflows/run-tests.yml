@@ -208,11 +208,11 @@ jobs:
           name: ${{ runner.os }}-self-eval-results
           path: ./test-results
         if: ${{ always() }}
-      # Create a test report with results
-      - name: Test Report
+      # Create a report with results
+      - name: Report
         uses: dorny/test-reporter@v1
         if: success() || failure() # Generate report in either case
         with:
           name: Code Analyzer Results
           path: ./test-results/src.xml
-          reporter: jest-junit # Report format
+          reporter: java-junit # Report format
