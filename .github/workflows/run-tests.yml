@@ -125,7 +125,7 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
         java: ${{ fromJson(inputs.java-matrix) }}
-        os: [{vm: ubuntu-latest, exe: .sh}, {vm: windows-2019, exe: .cmd}]
+        os: [{vm: ubuntu-latest, exe: .sh}]
     runs-on: ${{ matrix.os.vm }}
     needs: build-dependencies
     steps:
