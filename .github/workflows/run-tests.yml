@@ -12,9 +12,6 @@ on:
         required: false
         type: string
         default: "['11']"
-permissions:
-  checks: write
-  contents: read
 jobs:
   # Step 1: We have a number of dependencies that we can build now and cache
   #         for future use, to save time later.
@@ -203,18 +200,17 @@ jobs:
       # Create the results directory.
       - run: mkdir test-results
       - name: Self-evaluation
+        id: self-eval
         run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
       # Upload the test results as an artifact.
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner.os }}-self-eval-results
+          name: self-eval-results
           path: ./test-results
         if: ${{ always() }}
       # Create a report with results
       - name: Report
-        uses: dorny/test-reporter@v1
-        if: success() || failure() # Generate report in either case
+        uses: mikepenz/action-junit-report@v3
+        if: ${{ steps.self-eval.conclusion == 'failure' }}
         with:
-          name: Code Analyzer Results
-          path: ./test-results/src.xml
-          reporter: java-junit # Report format
+          report_paths: "./test-results/src.xml"
