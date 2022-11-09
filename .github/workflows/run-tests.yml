@@ -53,7 +53,7 @@ jobs:
       matrix:
         node: ${{ fromJson(inputs.node-matrix) }}
         java: ${{ fromJson(inputs.java-matrix) }}
-        os: [ubuntu-latest, windows-2019]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     needs: build-dependencies
     steps:
@@ -208,9 +208,3 @@ jobs:
           name: self-eval-results
           path: ./test-results
         if: ${{ always() }}
-      # Create a report with results
-      - name: Report
-        uses: mikepenz/action-junit-report@v3
-        if: ${{ failure() && steps.self-eval.conclusion == 'failure' }}
-        with:
-          report_paths: "./test-results/src.xml"

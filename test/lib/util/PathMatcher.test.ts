@@ -16,7 +16,7 @@ describe('PathMatcher', () => {
 			it('INCLUDES paths matching ANY positive pattern', async () => {
 				const results = await pm.filterPathsByPatterns(targets);
 				expect(results).to.include(targets[0], 'Paths that match a single positive pattern should be included');
-				expect(results).to.include(targets[1], 'Paths that match a single positive pattern should be included');
+				expect(results).to.not.include(targets[1], 'Paths that match a single positive pattern should be included');
 			});
 
 			it('EXCLUDES paths matching NO positive patterns', async () => {
