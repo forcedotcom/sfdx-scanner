@@ -216,3 +216,6 @@ jobs:
           name: Code Analyzer Results
           path: ./test-results/src.xml
           reporter: java-junit # Report format
+        permissions:
+          checks: write
+          contents: read
