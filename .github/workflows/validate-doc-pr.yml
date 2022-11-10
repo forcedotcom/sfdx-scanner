@@ -1,0 +1,36 @@
+name: validate-doc-pr
+on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+jobs:
+  # We need to verify that the PR's title meets our conventions.
+  enforce_pr_title:
+    runs-on: ubuntu-latest
+    name: Enforce PR title convention
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Verify title
+        uses: ./github-actions/verify-pr-title
+        id: verify-title
+  # We also need to verify that the documentation can be properly built.
+  verify_docs_are_buildable:
+    runs-on: ubuntu-latest
+    name: Verify docs can be built
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      # This action is the same action used by the Github Pages bot to build the
+      # latest documentation before deploying it. If the build action succeeds here,
+      # we can be reasonably confident that it will succeed when it's time to deploy.
+      # NOTE: This is just making sure that the build can be accomplished successfully.
+      #       It's still technically possible for individual pages to have problems that
+      #       aren't caught here. E.g., broken links, etc.
+      - name: Build with jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./docs/_site
+          future: false
+          verbose: true
+
