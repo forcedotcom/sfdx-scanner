@@ -119,6 +119,8 @@ jobs:
             ./cli-messaging/build/reports
             ./cli-messaging/build/test-results
       # If any of the steps failed, we need to report that.
+      # TODO: In the future, we could replace this step with a JS-based one that uses `core.setFailed()` to set a failure
+      #       message in the annotations.
       - name: Report failures
         if: ${{ failure() || cancelled() }}
         shell: bash
@@ -232,6 +234,8 @@ jobs:
       - name: Self-evaluation
         id: self-eval
         run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+      # TODO: In the future, we could replace this step with a JS-based one that uses `core.setFailed()` to set a failure
+      #       message in the annotations.
       - name: Log results
         if: ${{ failure() && steps.self-eval.outcome == 'failure' }}
         run: |
