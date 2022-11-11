@@ -95,7 +95,7 @@ export class CpdEngine extends AbstractRuleEngine {
 		return true;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 
 		const languageToPaths = this.sortPaths(targets);

@@ -148,7 +148,6 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return true;
 	}
 
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
 		return engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
@@ -230,7 +229,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
 					res(this.processOutput(stdout, invocation.rule, verboseViolations));
-					
+
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. The error could be
 					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
@@ -332,7 +331,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			vulnMessageItems.unshift(`severity: ${vuln.severity}`); // unshift after other identifiers so severity is first
 			vulnMessageItems.push(vuln.info.join(" ")); // list info elements separated by space
 			messageLines.push(`${vulnMessageItems.join("; ")}`)
-			
+
 		}
 
 		return messageLines.join("\n");
