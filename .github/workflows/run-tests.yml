@@ -230,7 +230,13 @@ jobs:
       # Create the results directory.
       - run: mkdir test-results
       - name: Self-evaluation
+        id: self-eval
         run: bin/run scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+      - name: Log results
+        if: ${{ failure() && steps.self-eval.outcome == 'failure' }}
+        run: |
+          echo "Self evaluation failed. The following is the output file. Use it directly or download the build artifact"
+          cat ./test-results/src.xml
       # Upload the test results as an artifact.
       - uses: actions/upload-artifact@v3
         with:
