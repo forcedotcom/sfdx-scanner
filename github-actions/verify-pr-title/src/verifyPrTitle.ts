@@ -20,6 +20,7 @@ const FEATURE_SCOPE_OPTIONS = [
 	"CPD",
 	"ESLint",
 	"GraphEngine",
+	"Other",
 	"PMD",
 	"RetireJS"
 ];
