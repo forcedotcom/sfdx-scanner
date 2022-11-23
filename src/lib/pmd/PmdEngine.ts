@@ -73,7 +73,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	 * This Map is a temporary solution allowing us to silence new rules until they can be properly integrated.
 	 * @private
 	 */
-	private SKIPPED_RULES_TO_REASON_MAP: Map<string,string> = new Map([['eagerlyloadeddescribesobjectresult', 'Semantic version incompatible']]);
+	private SKIPPED_RULES_TO_REASON_MAP: Map<string,string> = new Map([['apexunittestclassshouldhaverunas', 'Semantic version incompatible']]);
 
 	protected logger: Logger;
 	protected config: Config;
