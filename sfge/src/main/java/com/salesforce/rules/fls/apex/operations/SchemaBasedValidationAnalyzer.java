@@ -93,7 +93,6 @@ public class SchemaBasedValidationAnalyzer {
 
         // Convert the value to a boolean that represents if the object was initialized
         // TODO: This might need to be more specific
-        // FIXME: Handle forloop correctly
         if (apexValue instanceof ApexForLoopValue || apexValue instanceof ApexSingleValue) {
             apexValue = ApexValueBuilder.getWithoutSymbolProvider().buildBoolean();
         }

@@ -1151,35 +1151,4 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
                         .withSourceLine(14));
     }
 
-    @Test // FIXME: remove once alternative tests are ready
-    public void testIssue862_repro() {
-        String[] sourceCode = {
-            "public class MyClass {\n"
-                    + "\tprivate static final Set<SObjectField> FIELDS = new Set<SObjectField>{\n"
-                    + "        Schema.Account.fields.Name\n"
-                    + "    };\n"
-                    + "    public static void foo(){\n"
-                    + "        Account acc = new Account();\n"
-                    + "        if (AccessCheckUtility.isCreatable(Schema.SObjectType.Account, FIELDS)) {\n"
-                    + "            acc.Name = 'acme inc.';\n"
-                    + "        }\n"
-                    + "        insert acc;\n"
-                    + "    }\n"
-                    + "}\n",
-            "public class AccessCheckUtility {\n"
-                    + "public static Boolean isCreatable(DescribeSObjectResult myType, Set<SObjectField> fieldSet) {\n"
-                    + "       for (SObjectField myfield: fieldSet) {\n"
-                    + "       DescribeFieldResult myFieldDescribe = myField.getDescribe();\n"
-                    + "           if (!myFieldDescribe.isCreateable()) {\n"
-                    + "               throw new Exception();\n"
-                    + "           }\n"
-                    + "       }\n"
-                    + "           return true;\n"
-                    + "    }"
-                    + "}\n"
-        };
-
-        assertNoViolation(rule, sourceCode);
-    }
-
 }
