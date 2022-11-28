@@ -13,6 +13,8 @@ import com.salesforce.testutils.DummyVertex;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,6 +38,12 @@ public class ProgressListenerImplTest {
     @BeforeEach
     public void beforeEach() {
         progressListener.reset();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        progressListener.reset();
+        SfgeConfigTestProvider.remove();
     }
 
     @Test
