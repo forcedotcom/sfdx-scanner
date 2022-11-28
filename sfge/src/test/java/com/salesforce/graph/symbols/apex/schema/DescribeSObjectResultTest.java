@@ -37,6 +37,7 @@ public class DescribeSObjectResultTest {
     @ValueSource(
             strings = {
                 "Schema.SObjectType.Account",
+                "SObjectType.Account",
                 "Account.SObjectType.getDescribe()",
                 "Schema.getGlobalDescribe().get('Account').getDescribe()"
             })
@@ -54,12 +55,13 @@ public class DescribeSObjectResultTest {
                         + "       System.debug(dr.getSObjectType());\n"
                         + "       System.debug(dr.getRecordTypeInfos());\n"
                         + "       System.debug(dr.getRecordTypeInfosByDeveloperName());\n"
+                        + "       System.debug(dr.isDeletable());\n"
                         + "    }\n"
                         + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
-        MatcherAssert.assertThat(visitor.getAllResults(), hasSize(equalTo(6)));
+        MatcherAssert.assertThat(visitor.getAllResults(), hasSize(equalTo(7)));
 
         // dr
         DescribeSObjectResult dr = visitor.getResult(0);
@@ -91,6 +93,9 @@ public class DescribeSObjectResultTest {
         // dr.getRecordTypeInfosByDeveloperName
         ApexMapValue recordTypeInfosMap = visitor.getResult(5);
         MatcherAssert.assertThat(recordTypeInfosMap.isIndeterminant(), equalTo(true));
+
+        // dr.isDeletable() - if casting happens successfully, we are good.
+        ApexBooleanValue isDeletableValue = visitor.getResult(6);
     }
 
     @Test
@@ -146,6 +151,21 @@ public class DescribeSObjectResultTest {
         MatcherAssert.assertThat(
                 TestUtil.apexValueToString(dr.getSObjectType().get().getType()),
                 equalTo("Account"));
+    }
+
+    @Test
+    public void testObjectAccessDirectCall() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public static void doSomething() {\n"
+                        + "       System.debug(SObjectType.Account.isDeletable());\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexBooleanValue isDeletableValue = visitor.getResult(0);
     }
 
     public static Stream<Arguments> testDMLAccessMethods() {

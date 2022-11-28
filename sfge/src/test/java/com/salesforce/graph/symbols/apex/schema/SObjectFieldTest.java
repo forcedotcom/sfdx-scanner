@@ -11,6 +11,9 @@ import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class SObjectFieldTest {
     private GraphTraversalSource g;
@@ -20,12 +23,18 @@ public class SObjectFieldTest {
         this.g = TestUtil.getGraph();
     }
 
-    @Test
-    public void testDirectSObjectField() {
+    @CsvSource({
+            "Schema.Account.Fields.Name, Account, Name",
+            "Account.Name, Account, Name",
+            "Schema.MyObj__c.Fields.My_Field__c, MyObj__c, My_Field__c",
+            "MyObj__c.My_Field__c, MyObj__c, My_Field__c"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSObjectFieldFormat(String initializer, String sObjectTypeName, String fieldName) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "    public static void doSomething() {\n"
-                        + "       SObjectField sObjField = Schema.Account.Fields.Name;\n"
+                        + "       SObjectField sObjField = " + initializer + ";\n"
                         + "       System.debug(sObjField);\n"
                         + "       System.debug(sObjField.getDescribe());\n"
                         + "    }\n"
@@ -38,7 +47,7 @@ public class SObjectFieldTest {
         // sObjectField
         SObjectField sObjectField = (SObjectField) visitor.getAllResults().get(0).get();
         assertThat(sObjectField.isIndeterminant(), equalTo(false));
-        assertThat(TestUtil.apexValueToString(sObjectField.getFieldname()), equalTo("Name"));
+        assertThat(TestUtil.apexValueToString(sObjectField.getFieldname()), equalTo(fieldName));
 
         // sObjField.getDescribe()
         DescribeFieldResult describeFieldResult =
@@ -46,7 +55,8 @@ public class SObjectFieldTest {
         assertThat(describeFieldResult.isIndeterminant(), equalTo(false));
         assertThat(
                 TestUtil.apexValueToString(describeFieldResult.getSObjectType()),
-                equalTo("Account"));
+                equalTo(sObjectTypeName));
         assertThat(describeFieldResult.getReturnedFrom().get(), instanceOf(SObjectField.class));
     }
+
 }
