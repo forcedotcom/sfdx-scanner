@@ -455,7 +455,6 @@ public class ApexForLoopValueTest {
     }
 
     @Test
-    @Disabled
     public void testStdMethodCallOnForLoopVariable() {
         String sourceCode =
                 "public class MyClass {\n"
@@ -474,7 +473,6 @@ public class ApexForLoopValueTest {
     }
 
     @Test
-    @Disabled
     public void testMethodCallOnForLoopVariable() {
         String[] sourceCode = {
             "public class MyClass {\n"

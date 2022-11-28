@@ -7,6 +7,7 @@ import com.salesforce.matchers.TestRunnerMatcher;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -39,6 +40,42 @@ public class MethodUtilStandardLibraryTest {
                     + "       System.debug('hello');\n"
                     + "   }\n"
                     + "}\n"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        MatcherAssert.assertThat(result, TestRunnerMatcher.hasValues("hello"));
+    }
+
+    @Test
+    public void testSObjectTypeMatching() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "   public static doSomething() {\n"
+                + "       callMethod(Schema.SObjectType.Account);\n"
+                + "   }\n"
+                + "   static void callMethod(DescribeSObjectResult myObj) {\n"
+                + "       System.debug('hello');\n"
+                + "   }\n"
+                + "}\n"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        MatcherAssert.assertThat(result, TestRunnerMatcher.hasValues("hello"));
+    }
+
+    @Test
+    public void testListOfSObjectTypeMatching() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "   public static doSomething() {\n"
+                + "       List<SObjectType> objList = new List<SObjectType>();\n"
+                + "       objList.add(Schema.SObjectType.Account);\n"
+                + "       callMethod(objList);\n"
+                + "   }\n"
+                + "   static void callMethod(List<SObjectType> myObj) {\n"
+                + "       System.debug('hello');\n"
+                + "   }\n"
+                + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
