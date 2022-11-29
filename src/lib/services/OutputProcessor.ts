@@ -1,8 +1,9 @@
-import {Lifecycle, Logger, LoggerLevel, Messages} from '@salesforce/core';
+import {Logger, LoggerLevel, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {RuleEvent, TelemetryData} from '../../types';
 import {EVENTS, uxEvents} from '../ScannerEvents';
 import {v5 as uuidv5} from 'uuid';
+import * as TelemetryUtil from '../util/TelemetryUtil';
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -114,7 +115,7 @@ export class OutputProcessor extends AsyncCreatable {
 		// - node version
 		// - plugin version
 		// - executed command (e.g., `scanner:run`)
-		await Lifecycle.getInstance().emitTelemetry(telemetryObject);
+		await TelemetryUtil.emitTelemetry(telemetryObject);
 	}
 
 
