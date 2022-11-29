@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -37,6 +38,7 @@ public class DescribeSObjectResultTest {
     @ValueSource(
             strings = {
                 "Schema.SObjectType.Account",
+                "SObjectType.Account",
                 "Account.SObjectType.getDescribe()",
                 "Schema.getGlobalDescribe().get('Account').getDescribe()"
             })
@@ -54,12 +56,13 @@ public class DescribeSObjectResultTest {
                         + "       System.debug(dr.getSObjectType());\n"
                         + "       System.debug(dr.getRecordTypeInfos());\n"
                         + "       System.debug(dr.getRecordTypeInfosByDeveloperName());\n"
+                        + "       System.debug(dr.isDeletable());\n"
                         + "    }\n"
                         + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
-        MatcherAssert.assertThat(visitor.getAllResults(), hasSize(equalTo(6)));
+        MatcherAssert.assertThat(visitor.getAllResults(), hasSize(equalTo(7)));
 
         // dr
         DescribeSObjectResult dr = visitor.getResult(0);
@@ -91,6 +94,9 @@ public class DescribeSObjectResultTest {
         // dr.getRecordTypeInfosByDeveloperName
         ApexMapValue recordTypeInfosMap = visitor.getResult(5);
         MatcherAssert.assertThat(recordTypeInfosMap.isIndeterminant(), equalTo(true));
+
+        // dr.isDeletable() - if casting happens successfully, we are good.
+        ApexBooleanValue isDeletableValue = visitor.getResult(6);
     }
 
     @Test
@@ -146,6 +152,24 @@ public class DescribeSObjectResultTest {
         MatcherAssert.assertThat(
                 TestUtil.apexValueToString(dr.getSObjectType().get().getType()),
                 equalTo("Account"));
+    }
+
+    @CsvSource({"SObjectType.Account.isDeletable()", "Schema.SObjectType.Account.isDeletable()"})
+    @ParameterizedTest
+    public void testObjectAccessDirectCall(String isDeletableCall) {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public static void doSomething() {\n"
+                        + "       System.debug("
+                        + isDeletableCall
+                        + ");\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexBooleanValue isDeletableValue = visitor.getResult(0);
     }
 
     public static Stream<Arguments> testDMLAccessMethods() {
@@ -282,5 +306,24 @@ public class DescribeSObjectResultTest {
                 MatcherAssert.assertThat(globalDescribeMapValue, is(nullValue()));
             }
         }
+    }
+
+    @CsvSource({"Schema.SObjectType.Account.Name", "SObjectType.Account.Name"})
+    @ParameterizedTest
+    public void testFieldValueCall(String initializer) {
+        final String sourceCode =
+                "public class MyClass {\n"
+                        + "   public static void doSomething() {\n"
+                        + "       System.debug("
+                        + initializer
+                        + ");\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        // If casting happens successfully, we should be good.
+        ApexStringValue stringValue = visitor.getSingletonResult();
     }
 }

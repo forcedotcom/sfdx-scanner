@@ -45,7 +45,6 @@ import com.salesforce.testutils.BaseFlsTest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Disabled;
@@ -744,8 +743,8 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
     }
 
     /**
-     * This covers the following code in {@link
-     * FlsValidationRepresentation#unravelApexValue(ApexValue, Function, Function)}
+     * This covers the following code in {@link FlsValidationRepresentation
+     * unravelApexValue(ApexValue, Function, Function)}
      *
      * <p>} else if (apexValue.getInvocable().orElse(null) instanceof MethodCallExpressionVertex) {
      * // Unresolvable method such as UserInfo.getUserId(). Use the method name
