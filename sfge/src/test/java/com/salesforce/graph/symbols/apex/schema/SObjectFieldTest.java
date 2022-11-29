@@ -10,10 +10,8 @@ import com.salesforce.TestUtil;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 public class SObjectFieldTest {
     private GraphTraversalSource g;
@@ -24,17 +22,20 @@ public class SObjectFieldTest {
     }
 
     @CsvSource({
-            "Schema.Account.Fields.Name, Account, Name",
-            "Account.Name, Account, Name",
-            "Schema.MyObj__c.Fields.My_Field__c, MyObj__c, My_Field__c",
-            "MyObj__c.My_Field__c, MyObj__c, My_Field__c"
+        "Schema.Account.Fields.Name, Account, Name",
+        "Account.Name, Account, Name",
+        "Schema.MyObj__c.Fields.My_Field__c, MyObj__c, My_Field__c",
+        "MyObj__c.My_Field__c, MyObj__c, My_Field__c"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testSObjectFieldFormat(String initializer, String sObjectTypeName, String fieldName) {
+    public void testSObjectFieldFormat(
+            String initializer, String sObjectTypeName, String fieldName) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "    public static void doSomething() {\n"
-                        + "       SObjectField sObjField = " + initializer + ";\n"
+                        + "       SObjectField sObjField = "
+                        + initializer
+                        + ";\n"
                         + "       System.debug(sObjField);\n"
                         + "       System.debug(sObjField.getDescribe());\n"
                         + "    }\n"
@@ -58,5 +59,4 @@ public class SObjectFieldTest {
                 equalTo(sObjectTypeName));
         assertThat(describeFieldResult.getReturnedFrom().get(), instanceOf(SObjectField.class));
     }
-
 }

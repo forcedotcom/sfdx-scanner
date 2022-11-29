@@ -1150,5 +1150,4 @@ public class ExternalRepoScenariosTest extends BaseFlsTest {
                         .withFields(new String[] {"MyField3__c", SoqlParserUtil.UNKNOWN})
                         .withSourceLine(14));
     }
-
 }

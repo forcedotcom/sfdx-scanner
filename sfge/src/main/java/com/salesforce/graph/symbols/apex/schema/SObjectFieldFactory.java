@@ -30,33 +30,34 @@ public final class SObjectFieldFactory {
                             && ApexStandardLibraryUtil.VariableNames.FIELDS.equalsIgnoreCase(
                                     chainedNames.get(fieldsIndex))) {
 
-                        return getSObjectFieldValue(chainedNames.get(objectNameIndex), vertex.getName());
+                        return getSObjectFieldValue(
+                                chainedNames.get(objectNameIndex), vertex.getName());
                     }
                 } else if (chainedNames.size() == 1) {
                     // Account.Name
                     final int objectNameIndex = 0;
                     final String fieldNameCandidate = vertex.getName();
                     if (TypeableUtil.isDataObject(chainedNames.get(objectNameIndex))
-                    && !ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE.equalsIgnoreCase(
-                        vertex.getName())) {
-                        return getSObjectFieldValue(chainedNames.get(objectNameIndex), fieldNameCandidate);
+                            && !ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE
+                                    .equalsIgnoreCase(vertex.getName())) {
+                        return getSObjectFieldValue(
+                                chainedNames.get(objectNameIndex), fieldNameCandidate);
                     }
                 }
 
                 return Optional.empty();
             };
 
-    private static Optional<ApexValue<?>> getSObjectFieldValue(String associatedObjectType, String fieldNameString) {
+    private static Optional<ApexValue<?>> getSObjectFieldValue(
+            String associatedObjectType, String fieldNameString) {
         final SObjectType objectType =
-                ApexValueBuilder.getWithoutSymbolProvider()
-                        .buildSObjectType(associatedObjectType);
+                ApexValueBuilder.getWithoutSymbolProvider().buildSObjectType(associatedObjectType);
         final ApexStringValue fieldName =
-                ApexValueBuilder.getWithoutSymbolProvider()
-                        .buildString(fieldNameString);
+                ApexValueBuilder.getWithoutSymbolProvider().buildString(fieldNameString);
 
         return Optional.of(
-            ApexValueBuilder.getWithoutSymbolProvider()
-                .buildSObjectField(objectType, fieldName));
+                ApexValueBuilder.getWithoutSymbolProvider()
+                        .buildSObjectField(objectType, fieldName));
     }
 
     private SObjectFieldFactory() {}

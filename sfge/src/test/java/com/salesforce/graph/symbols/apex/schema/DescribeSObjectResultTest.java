@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -153,12 +154,15 @@ public class DescribeSObjectResultTest {
                 equalTo("Account"));
     }
 
-    @Test
-    public void testObjectAccessDirectCall() {
+    @CsvSource({"SObjectType.Account.isDeletable()", "Schema.SObjectType.Account.isDeletable()"})
+    @ParameterizedTest
+    public void testObjectAccessDirectCall(String isDeletableCall) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "   public static void doSomething() {\n"
-                        + "       System.debug(SObjectType.Account.isDeletable());\n"
+                        + "       System.debug("
+                        + isDeletableCall
+                        + ");\n"
                         + "   }\n"
                         + "}\n";
 
@@ -302,5 +306,24 @@ public class DescribeSObjectResultTest {
                 MatcherAssert.assertThat(globalDescribeMapValue, is(nullValue()));
             }
         }
+    }
+
+    @CsvSource({"Schema.SObjectType.Account.Name", "SObjectType.Account.Name"})
+    @ParameterizedTest
+    public void testFieldValueCall(String initializer) {
+        final String sourceCode =
+                "public class MyClass {\n"
+                        + "   public static void doSomething() {\n"
+                        + "       System.debug("
+                        + initializer
+                        + ");\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        // If casting happens successfully, we should be good.
+        ApexStringValue stringValue = visitor.getSingletonResult();
     }
 }

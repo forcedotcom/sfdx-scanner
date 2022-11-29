@@ -10,148 +10,106 @@ import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import java.util.List;
 import java.util.Optional;
 
-/** Generates {@link DescribeSObjectResult}s from methods and variable expressions. */
+/**
+ * Generates {@link DescribeSObjectResult}s from methods and variable expressions. This code has a
+ * lot of redundancy from looking for "Schema.SObjectType" and "SObjectType".
+ */
 public final class DescribeSObjectResultFactory {
     private static final String NAME_PROPERTY = "Name";
+    /**
+     * Chained names contain the prefixes to the variable. The last name in the dotted chain is
+     * considered the variable name (and hence, the vertex name) and the rest are stored in the
+     * array. For example, Schema.SObjectType.Account becomes: <VariableExpression BeginColumn='38'
+     * BeginLine='3' DefiningType='MyClass' EndLine='3' Image='Account' RealLoc='true'>
+     * <ReferenceExpression BeginColumn='19' BeginLine='3' Context='' DefiningType='MyClass'
+     * EndLine='3' Image='Schema' Names='[Schema, ObjectType]' RealLoc='true' ReferenceType='LOAD'
+     * SafeNav='false' /> </VariableExpression> In the steps below, we look into the chain of names
+     * to determine the corresponding ApexValue.
+     *
+     * <p>Possibilities covered so far:
+     *
+     * <ul>
+     *   <li>SObjectType.Account
+     *   <li>Schema.SObjectType.Account
+     *   <li>SObjectType.MyObject__c.Name
+     *   <li>Schema.SObjectType.MyObject__c.Name
+     * </ul>
+     */
     public static final VariableExpressionApexValueBuilder VARIABLE_EXPRESSION_BUILDER_FUNCTION =
             vertex -> {
-                List<String> chainedNames = vertex.getChainedNames();
+                final List<String> chainedNames = vertex.getChainedNames();
+                final String vertexName = vertex.getName();
 
-                if (chainedNames.size() == 1) {
+                final Optional<String> sObjectName =
+                        SObjectTypeChainUtil.getSObjectName(chainedNames, vertex);
+
+                if (sObjectName.isPresent()) {
+                    // SObjectType.MyObject__c.Name
+                    // Schema.SObjectType.MyObject__c.Name
+                    if (NAME_PROPERTY.equalsIgnoreCase(vertexName)) {
+                        // TODO: how do we handle other fields with individual types?
+                        //  Stretch goal when we get to parsing field definitions of SObjects
+                        return getApexStringValue(sObjectName.get());
+                    } else if (ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE.equalsIgnoreCase(
+                            vertexName)) {
+                        // Schema.SObjectType.Account.SObjectType is a SObjectType value.
+                        //  Reject this as a {@link DescribeSObjectResult}
+                        // TODO: streamline all of this
+                        return Optional.empty();
+                    }
+
                     // SObjectType.Account
-                    // <VariableExpression BeginColumn='38' BeginLine='3' DefiningType='MyClass'
-                    // EndLine='3' Image='Account' RealLoc='true'>
-                    //    <ReferenceExpression BeginColumn='19' BeginLine='3' Context=''
-                    // DefiningType='MyClass' EndLine='3' Image='Schema' Names='[
-                    // SObjectType]' RealLoc='true' ReferenceType='LOAD' SafeNav='false' />
-                    // </VariableExpression>
-
-                    final int sObjectTypeIndex = 0;
-
-                    final String sObjectType = chainedNames.get(sObjectTypeIndex);
-                    final String nameProperty = vertex.getName();
-
-                    return getSObjectTypeValue(sObjectType, nameProperty);
-                } else if (chainedNames.size() == 2) {
-                    {
-                        // Schema.SObjectType.Account
-                        // <VariableExpression BeginColumn='38' BeginLine='3' DefiningType='MyClass'
-                        // EndLine='3' Image='Account' RealLoc='true'>
-                        //    <ReferenceExpression BeginColumn='19' BeginLine='3' Context=''
-                        // DefiningType='MyClass' EndLine='3' Image='Schema' Names='[Schema,
-                        // SObjectType]' RealLoc='true' ReferenceType='LOAD' SafeNav='false' />
-                        // </VariableExpression>
-
-                        final int sObjectTypeIndex = chainedNames.size() - 1;
-                        final int schemaIndex = chainedNames.size() - 2;
-
-                        final String nameProperty = vertex.getName();
-                        final String sObjectType = chainedNames.get(sObjectTypeIndex);
-                        final String schema = chainedNames.get(schemaIndex);
-
-                        if (schema.equalsIgnoreCase(
-                            ApexStandardLibraryUtil.VariableNames.SCHEMA)) {
-                            return getSObjectTypeValue(sObjectType, nameProperty);
-                        }
-                    }
-
-                    {
-                        // SObjectType.MyObject__c.Name
-                        int objectNameIndex = chainedNames.size() - 1;
-                        int sObjectTypeIndex = chainedNames.size() - 2;
-
-                        String nameProperty = vertex.getName();
-                        String sObjectTypeString = chainedNames.get(sObjectTypeIndex);
-
-                        if (NAME_PROPERTY.equalsIgnoreCase(nameProperty)) {
-                            if (sObjectTypeString.equalsIgnoreCase(
-                                    ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE)) {
-                                String objectName = chainedNames.get(objectNameIndex);
-                                SObjectType sObjectType =
-                                        ApexValueBuilder.getWithoutSymbolProvider()
-                                                .buildSObjectType(objectName);
-                                DescribeSObjectResult describeSObjectResult =
-                                        ApexValueBuilder.getWithoutSymbolProvider()
-                                                .buildDescribeSObjectResult(sObjectType);
-                                return Optional.of(
-                                        ApexValueBuilder.getWithoutSymbolProvider()
-                                                .returnedFrom(describeSObjectResult, null)
-                                                .buildString(objectName));
-                            }
-                        }
-                    }
+                    // Schema.SObjectType.Account
+                    return getDescribeSObjectResult(sObjectName.get());
                 }
 
                 return Optional.empty();
             };
 
-    private static Optional<ApexValue<?>> getSObjectTypeValue(String sObjectType, String nameProperty) {
-        if (sObjectType.equalsIgnoreCase(
-            ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE)) {
-            SObjectType apexValueSObjectType =
-                    ApexValueBuilder.getWithoutSymbolProvider()
-                            .buildSObjectType(nameProperty);
-            return Optional.of(
-                ApexValueBuilder.getWithoutSymbolProvider()
-                    .returnedFrom(apexValueSObjectType, null)
-                    .buildDescribeSObjectResult(apexValueSObjectType));
-        }
-        return Optional.empty();
-    }
-
+    /**
+     * Helps create ApexValues based on {@link MethodCallExpressionVertex}'s method name. For
+     * example, Account.SObjectType.getDescribe() would become: <MethodCallExpression
+     * BeginColumn='72' BeginLine='3' DefiningType='MyClass' EndLine='3'
+     * FullMethodName='Account.SObjectType.getDescribe' Image='' MethodName='getDescribe'
+     * RealLoc='true'> <ReferenceExpression BeginColumn='48' BeginLine='3' Context=''
+     * DefiningType='MyClass' EndLine='3' Image='Account' Names='[Account, SObjectType]'
+     * RealLoc='true' ReferenceType='METHOD' SafeNav='false' /> </MethodCallExpression>
+     *
+     * <p>These are methods that can be executed to either return a {@link DescribeSObjectResult} or
+     * methods that can be executed on a series of chained names that resolve to a {@link
+     * DescribeSObjectResult}. Examples of what's covered here:
+     *
+     * <ul>
+     *   <li>Account.SObjectType.getDescribe()
+     *   <li>Schema.SObjectType.Account.isDeletable()
+     *   <li>SObjectType.Account.isDeletable()
+     * </ul>
+     */
     public static final MethodCallApexValueBuilder METHOD_CALL_BUILDER_FUNCTION =
             (g, vertex, symbols) -> {
                 String methodName = vertex.getMethodName();
                 List<String> chainedNames = vertex.getChainedNames();
 
-                if (methodName.equalsIgnoreCase(SObjectType.METHOD_GET_DESCRIBE)
-                        && chainedNames.size() == 2) {
+                Optional<String> sObjectName =
+                        SObjectTypeChainUtil.getSObjectName(chainedNames, vertex);
+                if (sObjectName.isPresent()) {
                     // Account.SObjectType.getDescribe()
-                    // <MethodCallExpression BeginColumn='72' BeginLine='3' DefiningType='MyClass'
-                    // EndLine='3' FullMethodName='Account.SObjectType.getDescribe' Image=''
-                    // MethodName='getDescribe' RealLoc='true'>
-                    //    <ReferenceExpression BeginColumn='48' BeginLine='3' Context=''
-                    // DefiningType='MyClass' EndLine='3' Image='Account' Names='[Account,
-                    // SObjectType]' RealLoc='true' ReferenceType='METHOD' SafeNav='false' />
-                    // </MethodCallExpression>
-                    if (chainedNames
-                            .get(1)
-                            .equalsIgnoreCase(
-                                    ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE)) {
-                        SObjectType sObjectType =
-                                ApexValueBuilder.getWithoutSymbolProvider()
-                                        .valueVertex(vertex)
-                                        .buildSObjectType(chainedNames.get(0));
-                        return Optional.of(
-                                ApexValueBuilder.getWithoutSymbolProvider()
-                                        .valueVertex(vertex)
-                                        .returnedFrom(sObjectType, vertex)
-                                        .buildDescribeSObjectResult(sObjectType));
-                    }
-                } else if (SystemNames.DML_OBJECT_ACCESS_METHODS.contains(methodName)) {
-                    // Schema.SObjectType.Account.isDeletable()
-                    if (chainedNames.size() == 3
-                            && chainedNames
-                                    .get(0)
-                                    .equalsIgnoreCase(ApexStandardLibraryUtil.VariableNames.SCHEMA)
-                            && chainedNames
-                                    .get(1)
-                                    .equalsIgnoreCase(
-                                            ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE)) {
-                        return getDmlAccessValue(vertex, chainedNames.get(2));
-
-                    // SObjectType.Account.isDeletable()
-                    } else if (chainedNames.size() == 2
-                            && chainedNames
-                                    .get(0)
-                                    .equalsIgnoreCase(
-                                            ApexStandardLibraryUtil.VariableNames.S_OBJECT_TYPE)) {
-                        return getDmlAccessValue(vertex, chainedNames.get(1));
+                    if (methodName.equalsIgnoreCase(SObjectType.METHOD_GET_DESCRIBE)) {
+                        return getDescribeSObjectResult(vertex, sObjectName.get());
+                    } else if (SystemNames.DML_OBJECT_ACCESS_METHODS.contains(methodName)) {
+                        // Schema.SObjectType.Account.isDeletable()
+                        // SObjectType.Account.isDeletable()
+                        return getDmlAccessValue(vertex, sObjectName.get());
                     }
                 }
+
                 return Optional.empty();
             };
 
+    /**
+     * Builds {@link com.salesforce.graph.symbols.apex.ApexBooleanValue} to be returned when a Dml
+     * access value is needed.
+     */
     private static Optional<ApexValue<?>> getDmlAccessValue(
             MethodCallExpressionVertex vertex, String associatedObjectType) {
         SObjectType sObjectType =
@@ -167,6 +125,47 @@ public final class DescribeSObjectResultFactory {
                 ApexValueBuilder.getWithoutSymbolProvider()
                         .returnedFrom(describeSObjectResult, vertex)
                         .buildBoolean());
+    }
+
+    /**
+     * Provides {@link com.salesforce.graph.symbols.apex.ApexStringValue}
+     *
+     * @param objectName
+     * @return
+     */
+    private static Optional<ApexValue<?>> getApexStringValue(String objectName) {
+        SObjectType sObjectType =
+                ApexValueBuilder.getWithoutSymbolProvider().buildSObjectType(objectName);
+        DescribeSObjectResult describeSObjectResult =
+                ApexValueBuilder.getWithoutSymbolProvider().buildDescribeSObjectResult(sObjectType);
+        return Optional.of(
+                ApexValueBuilder.getWithoutSymbolProvider()
+                        .returnedFrom(describeSObjectResult, null)
+                        .buildString(objectName));
+    }
+
+    /** Get a {@link DescribeSObjectResult} value for a given sObject type */
+    private static Optional<ApexValue<?>> getDescribeSObjectResult(String SObjectTypeName) {
+        SObjectType apexValueSObjectType =
+                ApexValueBuilder.getWithoutSymbolProvider().buildSObjectType(SObjectTypeName);
+        return Optional.of(
+                ApexValueBuilder.getWithoutSymbolProvider()
+                        .returnedFrom(apexValueSObjectType, null)
+                        .buildDescribeSObjectResult(apexValueSObjectType));
+    }
+
+    /** Get {@link DescribeSObjectResult} as a return value for a method call. */
+    private static Optional<ApexValue<?>> getDescribeSObjectResult(
+            MethodCallExpressionVertex vertex, String sObjectName) {
+        SObjectType sObjectType =
+                ApexValueBuilder.getWithoutSymbolProvider()
+                        .valueVertex(vertex)
+                        .buildSObjectType(sObjectName);
+        return Optional.of(
+                ApexValueBuilder.getWithoutSymbolProvider()
+                        .valueVertex(vertex)
+                        .returnedFrom(sObjectType, vertex)
+                        .buildDescribeSObjectResult(sObjectType));
     }
 
     private DescribeSObjectResultFactory() {}
