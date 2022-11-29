@@ -133,7 +133,7 @@ describe('Controller.ts tests', () => {
 			await Controller.getFilteredEngines(['invalid-engine']);
 			fail('getFilteredEngines should have thrown');
 		} catch (e) {
-			expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: Salesforce Graph Engine, cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js.`);
+			expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge.`);
 		}
 	});
 });
