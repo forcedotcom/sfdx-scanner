@@ -28,7 +28,7 @@ export enum ENGINE {
 	ESLINT_CUSTOM = 'eslint-custom',
 	RETIRE_JS = 'retire-js',
 	CPD = 'cpd',
-	SFGE = 'Salesforce Graph Engine'
+	SFGE = 'sfge'
 }
 
 /**
