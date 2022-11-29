@@ -368,22 +368,22 @@ describe('RuleManager', () => {
 					}
 					// This result indicates that not all executed engines found violations, which is what we expected. That's fine.
 					expect(parsedRes).to.be.an('array').that.has.length(1, 'Wrong number of engines returned violations');
-					expect(parsedRes[0].engine).to.equal('eslint', 'Wrong engine returned results');
+					expect(parsedRes[0].engine).to.equal(ENGINE.ESLINT.valueOf(), 'Wrong engine returned results');
 					expect(parsedRes[0].violations.length).to.equal(1, 'Wrong number of violations found');
 					Sinon.assert.callCount(telemetrySpy, 1);
 					const telemetryArg: TelemetryData = telemetrySpy.args[0][0];
 					expect(telemetryArg.eventName).to.equal('ENGINE_EXECUTION');
 					expect(telemetryArg.executedEnginesCount).to.equal(2);
-					expect(telemetryArg.executedEnginesString).to.equal(JSON.stringify(['eslint', 'retire-js']));
-					expect(telemetryArg['pmd']).to.equal(false);
-					expect(telemetryArg['pmd-custom']).to.equal(false);
-					expect(telemetryArg['eslint']).to.equal(true);
-					expect(telemetryArg['eslint-lwc']).to.equal(false);
-					expect(telemetryArg['eslint-typescript']).to.equal(false);
-					expect(telemetryArg['eslint-custom']).to.equal(false);
-					expect(telemetryArg['retire-js']).to.equal(true);
-					expect(telemetryArg['cpd']).to.equal(false);
-					expect(telemetryArg['sfge']).to.equal(false);
+					expect(telemetryArg.executedEnginesString).to.equal(JSON.stringify([ENGINE.ESLINT.valueOf(), ENGINE.RETIRE_JS.valueOf()]));
+					expect(telemetryArg[ENGINE.PMD.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.PMD_CUSTOM.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.ESLINT.valueOf().toLowerCase()]).to.equal(true);
+					expect(telemetryArg[ENGINE.ESLINT_LWC.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.ESLINT_TYPESCRIPT.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.ESLINT_CUSTOM.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.RETIRE_JS.valueOf().toLowerCase()]).to.equal(true);
+					expect(telemetryArg[ENGINE.CPD.valueOf().toLowerCase()]).to.equal(false);
+					expect(telemetryArg[ENGINE.SFGE.valueOf().toLowerCase()]).to.equal(false);
 				});
 			})
 
