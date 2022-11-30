@@ -126,6 +126,24 @@ public class ApexPathUtilTest {
     }
 
     @Test
+    public void testSimpleSingleMethodCall() {
+        String sourceCode = "public class MyClass {\n" +
+            "   public void doSomething() {\n" +
+            "       debug1('hi');\n" +
+            "   }\n" +
+            "   public void debug1(String s) {\n" +
+            "       System.debug(s);\n" +
+            "   }\n" +
+            "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexStringValue value = visitor.getSingletonResult();
+        MatcherAssert.assertThat(value.getValue().get(), equalTo("hi"));
+    }
+
+    @Test
     public void testSimpleWithMethodCalls() {
         String sourceCode =
                 "public class MyClass {\n"
@@ -1005,12 +1023,12 @@ public class ApexPathUtilTest {
         Map<Integer, Optional<ApexValue<?>>> results;
 
         results = visitor.getSingleResultPerLineByName("a");
-        MatcherAssert.assertThat(results.keySet(), hasSize(Matchers.equalTo(1)));
+        MatcherAssert.assertThat(results.keySet(), hasSize(equalTo(1)));
         ApexValue<?> apexValue = results.get(7).get();
         MatcherAssert.assertThat(TestUtil.apexValueToString(apexValue), IsEqual.equalTo("Hello"));
 
         results = visitor.getSingleResultPerLineByName("sObjType");
-        MatcherAssert.assertThat(results.keySet(), hasSize(Matchers.equalTo(1)));
+        MatcherAssert.assertThat(results.keySet(), hasSize(equalTo(1)));
         SObjectType sObjectType = (SObjectType) results.get(8).get();
         MatcherAssert.assertThat(
                 TestUtil.apexValueToString(sObjectType.getType()), IsEqual.equalTo("MyObject__c"));
@@ -1145,5 +1163,26 @@ public class ApexPathUtilTest {
         List<TestRunner.Result<SystemDebugAccumulator>> results =
                 TestRunner.walkPaths(g, sourceCode);
         MatcherAssert.assertThat(results, hasSize(equalTo(3)));
+    }
+
+    @Test
+    public void testSimpleForEachLoopMethodCall() {
+        String sourceCode = "public class MyClass {\n" +
+            "   public void doSomething() {\n" +
+            "       String[] myStrings = new String[]{'hi','hello'};\n" +
+            "       for (String myString: myList) {\n" +
+            "           debug1(myString);\n" +
+            "       }\n" +
+            "   }\n" +
+            "   public void debug1(String s) {\n" +
+            "       System.debug(s);\n" +
+            "   }\n" +
+            "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexStringValue value = visitor.getSingletonResult();
+        MatcherAssert.assertThat(value.getValue().get(), equalTo("hi"));
     }
 }
