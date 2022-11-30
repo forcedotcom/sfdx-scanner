@@ -110,6 +110,8 @@ Graph Engine builds up the context of the source code in its entirety before it 
 
 To learn how, read about [Engine Directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
 
+## Questions about Interpreting ApexFlsViolationRule results
+
 #### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
 If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
