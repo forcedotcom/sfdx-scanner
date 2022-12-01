@@ -8,11 +8,7 @@ import com.salesforce.graph.ops.LogUtil;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -20,6 +16,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.CloseableThreadContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,21 +179,29 @@ public class ThreadableRuleExecutor {
                             new Violation.TimeoutViolation(
                                     "Path evaluation timed out after " + TIMEOUT + " ms",
                                     submission.getPathEntry()));
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("Timeout Error executing rule. submission=" + submission, ex);
+                    }
                 } else {
                     // If the thread threw another exception, wrap it in a violation, including the
-                    // last line that executed
+                    // last 3 frames that got executed.
+                    String frameString =
+                            Arrays.stream(ex.getStackTrace())
+                                    .limit(3)
+                                    .map(StackTraceElement::toString)
+                                    .collect(Collectors.joining(";"));
                     final String details =
                             ex.getClass().getSimpleName()
                                     + ": "
                                     + ex.getMessage()
                                     + ": "
-                                    + ex.getStackTrace()[0];
+                                    + frameString;
                     violations.add(
                             new Violation.InternalErrorViolation(
                                     details, submission.getPathEntry()));
-                }
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error("Error executing rule. submission=" + submission, ex);
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error("Internal Error executing rule. submission=" + submission, ex);
+                    }
                 }
             } finally {
                 // TODO: This should be in a method similar to initializeThreadLocals
