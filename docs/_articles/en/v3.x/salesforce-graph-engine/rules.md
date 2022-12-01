@@ -41,7 +41,7 @@ ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-
 
 Match any violation message that you receive with these scenarios to understand more about the violation.
 
-*Common Scenario*
+*Common Case*
 
 >_Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with fields _Comma-Separated-Fields_
 
@@ -55,21 +55,21 @@ Parameter explanation:
 
 * _Comma-Separated-Fields_: Fields on which the data operation works. If you see _Unknown_ as the only field or as one of the fields, Graph Engine didn't have enough information to guess the fields, and you must determine the unlisted fields manually.
 
-*Additional Clause Scenario*
+*Additional Clause Case*
 
 > _Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with fields _Comma-Separated-Fields_ - Graph Engine couldn't parse all objects and fields correctly. Confirm manually if the objects and fields involved in these segments have FLS checks: _Unknown-Segments_
 
-Same as the common scenario, but also Graph Engine isn't confident about the object names or field names it detected. You also see this additional clause when your field or object ends with `__r`. In both cases, review the relational field, object, and the unparsed segments to ensure they have the required CRUD/FLS checks. Next, add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to force Graph Engine to ignore this warning in the next run.
+Same as the common case, but also Graph Engine isn't confident about the object names or field names it detected. You also see this additional clause when your field or object ends with `__r`. In both cases, review the relational field, object, and the unparsed segments to ensure they have the required CRUD/FLS checks. Next, add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to force Graph Engine to ignore this warning in the next run.
 
-*stripInaccessible Warning Scenario*
+*stripInaccessible Warning Case*
 
 The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on READ access type. Graph Engine has no way to ensure that the sanitized value returned by `SecurityDecision` is the value used in the code that follows the check. Confirm the values manually, then add an engine directive to force Graph Engine to ignore this warning in the next run. Alternatively, disable these violations by using the `--rule-disable-warning-violation` flag or setting its corresponding environment variable, SFGE_RULE_DISABLE_WARNING_VIOLATION, to true.
 
-*Internal Error Scenario*
+*Internal Error Case*
 
-> Graph Engine ran into an error while accessing the path mentioned in the violation. Graph Engine identified your source and sink, but couldn’t identify your sanitizer. Verify manually that you have a sanitizer in this path.
+> Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path. Then, add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace. After we fix this issue, check the Code Analyzer release notes for more info. Error and stacktrace: [placeholder error message + stacktrace info]
 
-Graph Engine ran into an error while assessing the source and sink path mentioned in the violation. Verify your code manually to ensure that the path in question is sanitized.
+Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/release-information/) for more info.
 
 #### See Also
 
