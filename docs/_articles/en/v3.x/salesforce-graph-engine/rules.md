@@ -39,7 +39,7 @@ ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-
 
 ### Interpreting ApexFlsViolationRule Results
 
-Match any violation message that you receive with these scenarios to understand more about the violation.
+Match any violation message that you receive with these cases to understand more about the violation.
 
 *Common Case*
 
