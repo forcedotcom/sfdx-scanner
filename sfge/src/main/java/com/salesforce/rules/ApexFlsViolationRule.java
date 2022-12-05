@@ -19,8 +19,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 public final class ApexFlsViolationRule extends AbstractPathBasedRule {
     private static final Logger LOGGER = LogManager.getLogger(ApexFlsViolationRule.class);
 
-    private static final String URL =
+    /**
+     * This isn't private, so it can be used as the value for InternalErrorViolation and
+     * TimeoutViolation URL fields. If those ever start being unique, this can be made private
+     * again.
+     */
+    static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#ApexFlsViolationRule";
+
     private static final String DESCRIPTION =
             "Identifies data read/write operations that may not have CRUD/FLS";
     private final List<FlsRuleHandler> ruleHandlers;
