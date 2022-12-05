@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -127,14 +126,15 @@ public class ApexPathUtilTest {
 
     @Test
     public void testSimpleSingleMethodCall() {
-        String sourceCode = "public class MyClass {\n" +
-            "   public void doSomething() {\n" +
-            "       debug1('hi');\n" +
-            "   }\n" +
-            "   public void debug1(String s) {\n" +
-            "       System.debug(s);\n" +
-            "   }\n" +
-            "}\n";
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void doSomething() {\n"
+                        + "       debug1('hi');\n"
+                        + "   }\n"
+                        + "   public void debug1(String s) {\n"
+                        + "       System.debug(s);\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -1167,17 +1167,18 @@ public class ApexPathUtilTest {
 
     @Test
     public void testSimpleForEachLoopMethodCall() {
-        String sourceCode = "public class MyClass {\n" +
-            "   public void doSomething() {\n" +
-            "       String[] myStrings = new String[]{'hi','hello'};\n" +
-            "       for (String myString: myList) {\n" +
-            "           debug1(myString);\n" +
-            "       }\n" +
-            "   }\n" +
-            "   public void debug1(String s) {\n" +
-            "       System.debug(s);\n" +
-            "   }\n" +
-            "}\n";
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void doSomething() {\n"
+                        + "       String[] myStrings = new String[]{'hi','hello'};\n"
+                        + "       for (String myString: myList) {\n"
+                        + "           debug1(myString);\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "   public void debug1(String s) {\n"
+                        + "       System.debug(s);\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
         SystemDebugAccumulator visitor = result.getVisitor();

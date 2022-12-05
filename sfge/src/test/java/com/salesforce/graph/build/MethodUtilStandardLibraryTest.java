@@ -50,13 +50,13 @@ public class MethodUtilStandardLibraryTest {
     public void testSObjectTypeMatching() {
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "   public static doSomething() {\n"
-                + "       callMethod(Schema.SObjectType.Account);\n"
-                + "   }\n"
-                + "   static void callMethod(DescribeSObjectResult myObj) {\n"
-                + "       System.debug('hello');\n"
-                + "   }\n"
-                + "}\n"
+                    + "   public static doSomething() {\n"
+                    + "       callMethod(Schema.SObjectType.Account);\n"
+                    + "   }\n"
+                    + "   static void callMethod(DescribeSObjectResult myObj) {\n"
+                    + "       System.debug('hello');\n"
+                    + "   }\n"
+                    + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
@@ -67,15 +67,15 @@ public class MethodUtilStandardLibraryTest {
     public void testListOfSObjectTypeMatching() {
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "   public static doSomething() {\n"
-                + "       List<SObjectType> objList = new List<SObjectType>();\n"
-                + "       objList.add(Schema.SObjectType.Account);\n"
-                + "       callMethod(objList);\n"
-                + "   }\n"
-                + "   static void callMethod(List<SObjectType> myObj) {\n"
-                + "       System.debug('hello');\n"
-                + "   }\n"
-                + "}\n"
+                    + "   public static doSomething() {\n"
+                    + "       List<SObjectType> objList = new List<SObjectType>();\n"
+                    + "       objList.add(Schema.SObjectType.Account);\n"
+                    + "       callMethod(objList);\n"
+                    + "   }\n"
+                    + "   static void callMethod(List<SObjectType> myObj) {\n"
+                    + "       System.debug('hello');\n"
+                    + "   }\n"
+                    + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
