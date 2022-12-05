@@ -12,13 +12,30 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.7.0) (12-07-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.1...v3.7.0)
+
+### Release Summary
+
+- NEW: We opened the Discussions feature on our [GitHub repo](https://github.com/forcedotcom/sfdx-scanner). Use Discussions to ask and answer questions, share info, and participate in Code Analyzer and Graph Engine development.
+- NEW: To integrate Code Analyzer into your continuous integration/continuous development (CI/CD) process, read our [CI/CD Integration](./en/v3.x/ci-cd-integration/) documentation.
+- NEW: We made some updates to the RetireJS vulnerability database.
+- NEW: We updated the PMD engine to version 6.51.0
+- FIX: `SObjectType.My_Obj__c` is now recognized as a valid `DescribeSObjectResult`.
+- FIX: `My_Obj__c.My_Field__c` is now recognized as a valid `SObjectField`- .
+
+
+**Merged pull requests**
+
+
 ## [v3.6.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.6.0) (10-25-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.1...v3.6.0)
 
 ### Release Summary
 
-* NEW: SFCA v3.x is now the default version for all users.
+* NEW: Code Analyzer v3.x is now the default version for all users.
 * NEW \[SFGE\]: Use the --rule-disable-warning-violation flag with scanner:run:dfa to disable warnings on StripInaccessible calls with AccessType.READABLE.
 * CHANGE \[SFGE\]: We removed the `--ignore-parse-errors` option from `scanner:run:dfa`.
 * CHANGE: We've updated Code Analyzer and Graph Engine help text and user interface messages.
