@@ -67,7 +67,7 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 
 *Internal Error Case*
 
-> Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path. Then, add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace. After we fix this issue, check the Code Analyzer release notes for more info. Error and stacktrace: [placeholder error message + stacktrace info]
+> Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path. Then, add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace. After we fix this issue, check the Code Analyzer release notes for more info. Error and stacktrace: [details]
 
 Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/release-information/) for more info.
 
