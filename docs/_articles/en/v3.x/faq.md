@@ -112,42 +112,6 @@ To learn how, read about [Engine Directives](./en/v3.x/salesforce-graph-engine/w
 
 ## Questions about Interpreting ApexFlsViolationRule results
 
-#### Q: What do the violation messages mean?
-
-Match your violation message with the different message formats described below to understand what it implies.
-
-*Common Scenario*
-
->_Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_
-
-Parameter explanation:
-
-* _Validation-Type_: Type of validation to be added. CRUD requires object-level checks. FLS requires field-level checks.
-
-* _Operation-Name_: Data operation that needs to be sanitized.
-
-* _Object-Type_: Object on which the data operations happen. If SFGE couldn’t guess the object type, you might see the variable name sometimes, and *SFGE_Unresolved_Argument* at other times.
-
-* _Comma-Separated-Fields_: Fields on which the data operation works. If you see _Unknown_ as the only field or as one of the fields, this means SFGE did not have all the information to guess the fields, and trusts you to determine the unlisted fields.
-
-
-*Additional Clause*
-
-
-> _Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with field(s) _Comma-Separated-Fields_ - SFGE may not have parsed some objects/fields correctly. Please confirm if the objects/fields involved in these segments have FLS checks: _Unknown-Segments_
-
-Same as the common scenario, but this additionally means SFGE is not confident about the object names and/or field names it detected. This could also happen if the field or object ends with __r. In both cases, please make sure the relational field/object or the unparsed segments has the required CRUD/FLS checks. Once you’ve taken care of it, you could add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that it doesn’t have to create a violation.
-
-*stripInaccessible warning*
-
-The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on READ access type. This warning is thrown because Graph Engine has no way to ensure that the sanitized value returned by `SecurityDecision` is the value used in the code that follows the check. You must confirm the values through manual inspection, then add an engine directive to have Graph Engine ignore this warning in the next run. Alternatively, disable these violations by using the `--rule-disable-warning-violation` flag or setting its corresponding environment variable, SFGE_RULE_DISABLE_WARNING_VIOLATION, to true.
-
-*Internal error*
-
-Internal error. Work in progress. Please ignore.
-
-This indicates that SFGE ran into an error while assessing the source/sink path mentioned in the violation. While we continue to work on fixing these errors, please make sure that the path in question is sanitized anyway.
-
 #### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
 If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
