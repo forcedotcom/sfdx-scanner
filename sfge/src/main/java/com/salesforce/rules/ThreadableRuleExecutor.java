@@ -184,10 +184,13 @@ public class ThreadableRuleExecutor {
                     }
                 } else {
                     // If the thread threw another exception, wrap it in a violation, including the
-                    // last 3 frames that got executed.
+                    // last 6 frames that got executed.
+                    // NOTE: The choice of 6 frames is arbitrary. If users complain, we should feel free to adjust
+                    //       it downwards. By contrast, if we find it to be insufficiently informative, we should
+                    //       feel free to adjust it upwards.
                     String frameString =
                             Arrays.stream(ex.getStackTrace())
-                                    .limit(3)
+                                    .limit(6)
                                     .map(StackTraceElement::toString)
                                     .collect(Collectors.joining(";"));
                     final String details =
