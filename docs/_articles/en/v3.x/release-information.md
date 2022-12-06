@@ -12,6 +12,45 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.7.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.7.0) (12-06-2022)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.7.0...v3.6.2)
+
+### Release Summary
+
+* NEW: We opened the Discussions feature on our [GitHub repo](https://github.com/forcedotcom/sfdx-scanner). Use Discussions to ask and answer questions, share info, and participate in Code Analyzer and Graph Engine development.
+* NEW: To integrate Code Analyzer into your continuous integration/continuous development (CI/CD) process, read our [CI/CD Integration](./en/v3.x/ci-cd-integration/) documentation.
+* NEW: We made some updates to the RetireJS vulnerability database.
+* NEW: We updated the PMD engine to version 6.51.0
+* FIX: `SObjectType.My_Obj__c` is now recognized as a valid `DescribeSObjectResult`.
+* FIX: `My_Obj__c.My_Field__c` is now recognized as a valid `SObjectField`- .
+
+**Closed issues:**
+
+- \[BUG\] Winter 22 Assert classes are not considered when scanning for PMD.ApexUnitTestClassShouldHaveAsserts rule [\#836](https://github.com/forcedotcom/sfdx-scanner/issues/836)
+- List command - INTERNAL ERROR: Unexpected error occurred while cataloging rules: null [\#882](https://github.com/forcedotcom/sfdx-scanner/issues/882)
+- \[Question\] Can the DFA detect CRUD/FLS using all forms of schema checking? [\#883](https://github.com/forcedotcom/sfdx-scanner/issues/883)
+- \[BUG\] SObjectType.My_Obj__c is not recognized as a DescribeSObjectResult type [\#890](https://github.com/forcedotcom/sfdx-scanner/issues/890)
+
+**Merged pull requests**
+
+- @W-11831625@: Ported testing jobs from CircleCI to Github Actions. [\#843](https://github.com/forcedotcom/sfdx-scanner/pull/843)
+- CHANGE(GraphEngine): @W-12024733@ We upgraded spotless plugin version to 6.11.0. [\#874](https://github.com/forcedotcom/sfdx-scanner/pull/874)
+- CHANGE (CodeAnalyzer): @W-11326833@: We more robustly enforce PR naming conventions. [\#876](https://github.com/forcedotcom/sfdx-scanner/pull/876)
+- CHANGE (GraphEngine): @W-12028485@: User-facing message no longer mentions SFGE. [\#879](https://github.com/forcedotcom/sfdx-scanner/pull/879)
+- CHANGE (CodeAnalyzer): @W-11326833@: PR scope of 'other' is now allowed in PR titles. [\#880](https://github.com/forcedotcom/sfdx-scanner/pull/880)
+- CHANGE (CodeAnalyzer): @W-11831625@: Our CI will now output more informative information. [\#884](https://github.com/forcedotcom/sfdx-scanner/pull/884)
+- CHANGE (PMD): @W-12107365@: Upgrade to PMD 6.51.0 [\#892](https://github.com/forcedotcom/sfdx-scanner/pull/892)
+- FIX (GraphEngine): @W-11992240@: Handle more SObjectField and DescribeSObjectResult formats [\#893](https://github.com/forcedotcom/sfdx-scanner/pull/893)
+- FIX (GraphEngine): @W-12130636@: Update Apache Log4j to 2.17.1 [\#894](https://github.com/forcedotcom/sfdx-scanner/pull/894)
+- FIX (CodeAnalyzer): @W-12130427@: Enclose telemetry callouts in try-catch blocks. [\#896](https://github.com/forcedotcom/sfdx-scanner/pull/896)
+- CHANGE (GraphEngine): @W-12028485@: Replace SFGE in Graph Engine error messages. [\#897](https://github.com/forcedotcom/sfdx-scanner/pull/897)
+- FIX (CodeAnalyzer): @W-12130427@: Replace unnecessary message template with hardcoded string. [\#898](https://github.com/forcedotcom/sfdx-scanner/pull/898)
+- CHANGE (GraphEngine): @W-11988825@: Update error message for internal error violations. [\#901](https://github.com/forcedotcom/sfdx-scanner/pull/901)
+- FIX (CodeAnalyzer): @W-12168234@: Replicate dependabot changes in new PR. [\#903](https://github.com/forcedotcom/sfdx-scanner/pull/903)
+- FIX (GraphEngine): @W-11988825@: Links for non-rule-related GraphEngine violations now point to ApexFlsViolationRule doc [\#904](https://github.com/forcedotcom/sfdx-scanner/pull/904)
+
+
 ## [v3.6.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.6.0) (10-25-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.5.1...v3.6.0)
