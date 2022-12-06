@@ -1,4 +1,4 @@
-import {Logger, Messages, SfdxError, Lifecycle} from '@salesforce/core';
+import {Logger, Messages, SfdxError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
@@ -15,6 +15,7 @@ import globby = require('globby');
 import path = require('path');
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {CUSTOM_CONFIG, ENGINE, CONFIG_FILE} from '../Constants';
+import * as TelemetryUtil from './util/TelemetryUtil';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -197,7 +198,7 @@ export class DefaultRuleManager implements RuleManager {
 		// - node version
 		// - plugin version
 		// - executed command (e.g., `scanner:run`)
-		await Lifecycle.getInstance().emitTelemetry(runTelemetryObject);
+		await TelemetryUtil.emitTelemetry(runTelemetryObject);
 	}
 
 	/**

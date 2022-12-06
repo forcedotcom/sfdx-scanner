@@ -287,7 +287,8 @@ public class GettingStarted1Test {
         List<ExpressionStatementVertex> vertices =
                 SFVertexFactory.loadVertices(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.EXPRESSION_STATEMENT)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.EXPRESSION_STATEMENT)
                                 .order(Scope.global)
                                 .by(Schema.CHILD_INDEX, Order.asc));
         MatcherAssert.assertThat(vertices, hasSize(equalTo(3)));

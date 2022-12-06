@@ -28,7 +28,9 @@ public class MappedLazyVertex<T, U extends BaseSFVertex> {
         this.map = new ConcurrentHashMap<>();
     }
 
-    /** @return the vertex that was loaded from the graph */
+    /**
+     * @return the vertex that was loaded from the graph
+     */
     public U get(T parameter) {
         final GraphTraversalSource g = VertexCacheProvider.get().getFullGraph();
         return map.computeIfAbsent(

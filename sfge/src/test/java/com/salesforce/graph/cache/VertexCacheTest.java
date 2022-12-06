@@ -68,7 +68,8 @@ public class VertexCacheTest {
         vertexCache.initialize(g);
 
         final List<Vertex> vertices =
-                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                         .not(has(Schema.IS_STANDARD, true))
                         // Guarantee vertex order
                         .order()
@@ -130,12 +131,14 @@ public class VertexCacheTest {
         UserClassVertex parentClassVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyParentClass"));
         UserClassVertex subclassVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MySubClass"));
 
         // Unlike #testGetById we we can use the existing cache because we are using custom cache
@@ -206,7 +209,8 @@ public class VertexCacheTest {
         UserClassVertex myClassVertex =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .has(Schema.NAME, "MyClass"));
 
         // Unlike #testGetById we we can use the existing cache because we are using custom cache
@@ -406,7 +410,8 @@ public class VertexCacheTest {
                 userClassVertex =
                         SFVertexFactory.loadSingleOrNull(
                                 g,
-                                g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                                g.V()
+                                        .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                         .has(Schema.NAME, superclassName));
             } else {
                 userClassVertex = null;
@@ -443,7 +448,8 @@ public class VertexCacheTest {
             final UserClassVertex userClassVertex =
                     SFVertexFactory.loadSingleOrNull(
                             g,
-                            g.V().hasLabel(ASTConstants.NodeType.USER_CLASS)
+                            g.V()
+                                    .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                     .has(Schema.NAME, className));
             CollectibleObject result =
                     userClassVertex != null ? userClassVertex : UserClassVertex.NULL_VALUE;

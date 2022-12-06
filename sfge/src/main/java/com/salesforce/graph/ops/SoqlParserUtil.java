@@ -97,12 +97,16 @@ public final class SoqlParserUtil {
         return UNKNOWN;
     }
 
-    /** @return true if the Soql query looks up only COUNT() */
+    /**
+     * @return true if the Soql query looks up only COUNT()
+     */
     public static boolean isCountQuery(SoqlQueryInfo queryInfo) {
         return queryInfo.isCount() && queryInfo.getFields().isEmpty() && !queryInfo.isAllFields();
     }
 
-    /** @return true if the outermost query returns a single SObject */
+    /**
+     * @return true if the outermost query returns a single SObject
+     */
     public static boolean isSingleSObject(HashSet<SoqlQueryInfo> queryInfos) {
         final Optional<SoqlQueryInfo> outerMostQueryInfo = getOuterMostQueryInfo(queryInfos);
         if (outerMostQueryInfo.isPresent()) {
@@ -116,7 +120,9 @@ public final class SoqlParserUtil {
         return false;
     }
 
-    /** @return true if the query has a Limit 1 clause */
+    /**
+     * @return true if the query has a Limit 1 clause
+     */
     public static boolean isSingleSObject(SoqlQueryInfo queryInfo) {
         return queryInfo.isLimit1();
     }

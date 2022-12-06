@@ -308,8 +308,11 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
      */
     public static final class InternalErrorViolation extends Violation {
         /** Used as a hardcoded message for {@link InternalErrorViolation} objects. */
-        private static final String SIMPLIFIED_MESSAGE =
-                "Internal error. Work in progress. Please ignore.";
+        private static final String MESSAGE_TEMPLATE =
+                "Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path."
+                        + " Then, add an engine directive to skip the path. Next, create a Github issue for the"
+                        + " Code Analyzer team that includes the error and stack trace. After we fix this issue,"
+                        + " check the Code Analyzer release notes for more info. Error and stacktrace: %s";
         /**
          * A more thorough description of the violation than {@link #message}, not displayed to
          * users of the plugin, but useful for internal debugging and analysis.
@@ -317,13 +320,14 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
         private final String details;
 
         /**
-         * Creates an {@link InternalErrorViolation} object whose {@link #message} is hardcoded to
-         * {@link #SIMPLIFIED_MESSAGE}, and whose {@link #details} property is provided as input.
+         * Creates an {@link InternalErrorViolation} object whose {@link #message} is created from
+         * the {@link #MESSAGE_TEMPLATE} template, and whose {@link #details} property is provided
+         * as input.
          *
          * @param details - The value to be inserted into the {@link #details} property.
          */
         public InternalErrorViolation(final String details, final SFVertex vertex) {
-            super(SIMPLIFIED_MESSAGE, vertex);
+            super(String.format(MESSAGE_TEMPLATE, details), vertex);
             this.details = details;
             // Internal error violations don't have a rule associated with them, so we should set
             // the rule-related properties
@@ -332,6 +336,10 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             this.category = INTERNAL_ERROR_CATEGORY;
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
+            // NOTE: For now, we're hardcoding the URL to the URL for the Apex FLS violation rule,
+            // since that's the only rule that can throw this violation. This may change in a future
+            // release.
+            this.url = ApexFlsViolationRule.URL;
         }
 
         public String getDetails() {
@@ -413,6 +421,10 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             this.category = INTERNAL_ERROR_CATEGORY;
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
+            // NOTE: For now, we're hardcoding the URL to the URL for the Apex FLS violation rule,
+            // since that's the only rule that can throw this violation. This may change in a future
+            // release.
+            this.url = ApexFlsViolationRule.URL;
         }
     }
 }

@@ -157,8 +157,7 @@ public final class TestUtil {
             List<BaseSFVertex> vertices =
                     SFVertexFactory.loadVertices(
                             config.g,
-                            config.g
-                                    .V()
+                            config.g.V()
                                     // Work around hasLabel not accepting lists
                                     .hasLabel(
                                             ASTConstants.NodeType.ROOT_VERTICES[0],
@@ -183,7 +182,8 @@ public final class TestUtil {
             GraphTraversalSource g, String definingType, String methodName) {
         return SFVertexFactory.load(
                 g,
-                g.V().hasLabel(ASTConstants.NodeType.METHOD)
+                g.V()
+                        .hasLabel(ASTConstants.NodeType.METHOD)
                         .has(Schema.DEFINING_TYPE, definingType)
                         .has(Schema.NAME, methodName));
     }
@@ -493,8 +493,7 @@ public final class TestUtil {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         config.g,
-                        config.g
-                                .V()
+                        config.g.V()
                                 .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, methodName));
 
@@ -540,8 +539,7 @@ public final class TestUtil {
         MethodVertex methodVertex =
                 SFVertexFactory.load(
                         config.g,
-                        config.g
-                                .V()
+                        config.g.V()
                                 .hasLabel(ASTConstants.NodeType.METHOD)
                                 .has(Schema.NAME, methodName));
 

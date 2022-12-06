@@ -209,7 +209,9 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
         return results.get(results.size() - 1);
     }
 
-    /** @return a list of all methods in the chain, starting with the first. */
+    /**
+     * @return a list of all methods in the chain, starting with the first.
+     */
     @Override
     public List<InvocableVertex> firstToList() {
         List<InvocableVertex> results = new ArrayList<>();

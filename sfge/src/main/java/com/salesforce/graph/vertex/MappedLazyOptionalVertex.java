@@ -29,7 +29,9 @@ public class MappedLazyOptionalVertex<T, U extends BaseSFVertex> {
         this.map = new ConcurrentHashMap<>();
     }
 
-    /** @return the vertex that was loaded from the graph */
+    /**
+     * @return the vertex that was loaded from the graph
+     */
     public Optional<U> get(T parameter) {
         final GraphTraversalSource g = VertexCacheProvider.get().getFullGraph();
         return map.computeIfAbsent(

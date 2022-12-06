@@ -262,7 +262,9 @@ public final class SFVertexFactory {
         }
     }
 
-    /** @return the Java class name that corresponds to the vertex with the given label. */
+    /**
+     * @return the Java class name that corresponds to the vertex with the given label.
+     */
     private static String getVertexClassName(String label) {
         return "com.salesforce.graph.vertex." + label + "Vertex";
     }

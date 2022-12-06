@@ -13,7 +13,9 @@ public abstract class CaseInsensitiveCacheKey implements VertexCache.CacheKey {
     private final String key;
     private final int hash;
 
-    /** @param key that was used to query the graph */
+    /**
+     * @param key that was used to query the graph
+     */
     protected CaseInsensitiveCacheKey(String key) {
         this.key = key.toLowerCase(Locale.ROOT);
         // IMPORTANT: This was modified to include the class

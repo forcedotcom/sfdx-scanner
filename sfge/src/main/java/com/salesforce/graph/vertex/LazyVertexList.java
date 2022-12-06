@@ -18,7 +18,9 @@ final class LazyVertexList<T extends BaseSFVertex> extends UncheckedLazyInitiali
     private final Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier;
     private final Object supplementalParam;
 
-    /** @param traversalSupplier a supplier that runs the desired gremlin query */
+    /**
+     * @param traversalSupplier a supplier that runs the desired gremlin query
+     */
     LazyVertexList(Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier) {
         this(traversalSupplier, null);
     }

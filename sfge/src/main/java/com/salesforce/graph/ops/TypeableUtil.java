@@ -148,7 +148,9 @@ public final class TypeableUtil {
                         canonicalNameOfDefiningType);
     }
 
-    /** @return true for custom objects but not for custom settings */
+    /**
+     * @return true for custom objects but not for custom settings
+     */
     public static boolean isCustomObject(String definingType) {
         return definingType
                         .toLowerCase(Locale.ROOT)
@@ -156,12 +158,16 @@ public final class TypeableUtil {
                 && !isCustomSetting(definingType);
     }
 
-    /** @return true if definingType is found to be a custom setting */
+    /**
+     * @return true if definingType is found to be a custom setting
+     */
     public static boolean isCustomSetting(String definingType) {
         return MetadataInfoProvider.get().isCustomSetting(definingType);
     }
 
-    /** @return true if the type's name ends with __mdt */
+    /**
+     * @return true if the type's name ends with __mdt
+     */
     public static boolean isMetadataObject(String definingType) {
         return definingType
                 .toLowerCase(Locale.ROOT)

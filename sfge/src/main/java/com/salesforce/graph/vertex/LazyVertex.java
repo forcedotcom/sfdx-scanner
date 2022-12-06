@@ -16,7 +16,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 final class LazyVertex<T extends BaseSFVertex> extends UncheckedLazyInitializer<T> {
     private final Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier;
 
-    /** @param traversalSupplier a supplier that runs the desired gremlin query */
+    /**
+     * @param traversalSupplier a supplier that runs the desired gremlin query
+     */
     LazyVertex(Supplier<GraphTraversal<Vertex, Vertex>> traversalSupplier) {
         this.traversalSupplier = traversalSupplier;
     }

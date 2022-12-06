@@ -29,7 +29,8 @@ public class SObjectTypeTest {
 
     @CsvSource({
         "Schema.getGlobalDescribe().get('Account'), ApexGlobalDescribeMapValue",
-        "Account.SObjectType," /*Empty column is converted to null*/
+        "Account.SObjectType,", /*Empty column is converted to null*/
+        "Schema.SObjectType.Account.SObjectType," /*Empty column is converted to null*/
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testGetDescribeWithResolvedObjectType(

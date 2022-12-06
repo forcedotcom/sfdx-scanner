@@ -18,7 +18,9 @@ import org.apache.commons.lang3.tuple.Pair;
  */
 @Deprecated
 public class ApexValueAccumulator extends AbstractAccumulator<ApexValue<?>> {
-    /** @param pairs of (MethodName, VariableName) to listen for. */
+    /**
+     * @param pairs of (MethodName, VariableName) to listen for.
+     */
     public ApexValueAccumulator(Pair<String, String>... pairs) {
         super(pairs);
     }

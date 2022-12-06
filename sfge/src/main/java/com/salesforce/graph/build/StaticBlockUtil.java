@@ -337,14 +337,18 @@ public final class StaticBlockUtil {
         traversal.next();
     }
 
-    /** @return true if given node represents <clinit>() */
+    /**
+     * @return true if given node represents <clinit>()
+     */
     private static boolean isClinitMethod(JorjeNode node) {
         return ASTConstants.NodeType.METHOD.equals(node.getLabel())
                 && MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME.equals(
                         node.getProperties().get(Schema.NAME));
     }
 
-    /** @return true if <clinit>() node contains any static block definitions */
+    /**
+     * @return true if <clinit>() node contains any static block definitions
+     */
     private static boolean containsStaticBlock(JorjeNode node) {
         for (JorjeNode childNode : node.getChildren()) {
             if (ASTConstants.NodeType.BLOCK_STATEMENT.equals(childNode.getLabel())) {

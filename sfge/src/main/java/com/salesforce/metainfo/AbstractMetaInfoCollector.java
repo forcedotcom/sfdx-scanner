@@ -30,7 +30,9 @@ public abstract class AbstractMetaInfoCollector implements MetaInfoCollector {
         this.collectedMetaInfo = CollectionUtil.newTreeSet();
     }
 
-    /** @return Accepted file extensions of the project files */
+    /**
+     * @return Accepted file extensions of the project files
+     */
     protected abstract TreeSet<String> getAcceptedExtensions();
 
     /** Process file to collect meta info from non-apex project file */

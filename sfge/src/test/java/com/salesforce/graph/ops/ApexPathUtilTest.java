@@ -479,7 +479,8 @@ public class ApexPathUtilTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.FULL_METHOD_NAME, "System.debug"));
         List<ApexPath> paths = ApexPathUtil.getReversePaths(g, methodCallExpression);
         MatcherAssert.assertThat(paths, hasSize(IsEqual.equalTo(1)));
@@ -540,7 +541,8 @@ public class ApexPathUtilTest {
         MethodCallExpressionVertex methodCallExpression =
                 SFVertexFactory.load(
                         g,
-                        g.V().hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
+                        g.V()
+                                .hasLabel(ASTConstants.NodeType.METHOD_CALL_EXPRESSION)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .has(Schema.FULL_METHOD_NAME, "System.debug"));
         List<ApexPath> paths = ApexPathUtil.getReversePaths(g, methodCallExpression);

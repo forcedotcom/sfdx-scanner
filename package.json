@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "3.6.2",
+	"version": "3.7.0",
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -74,6 +74,7 @@
 		"@types/tmp": "^0.2.3",
 		"@types/uuid": "^8.3.4",
 		"chai": "^4",
+		"cross-env": "^7.0.3",
 		"eslint": "^8.10.0",
 		"mocha": "^9",
 		"mocha-junit-reporter": "^2.0.0",
@@ -133,13 +134,14 @@
 		"build": "./gradlew build -x test",
 		"prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
 		"postpack": "rm -f oclif.manifest.json",
-		"lint": "eslint ./src --ext .ts",
+		"lint-typescript": "eslint ./src --ext .ts --max-warnings 0",
 		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
+		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-cli-messaging": "./gradlew cli-messaging:test",
-		"test-pmd-cataloger": "./gradlew pmd-cataloger:test",
-		"test-sfge": "./gradlew sfge:test",
-		"test-ts": "nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
-		"coverage": "nyc report --reporter text",
+		"test-pmd-cataloger": "./gradlew pmd-cataloger:test pmd-cataloger:jacocoTestCoverageVerification",
+		"test-sfge": "./gradlew sfge:test sfge:jacocoTestCoverageVerification",
+		"test-sfge-quiet": "cross-env SFGE_LOGGING=false ./gradlew sfge:test sfge:jacocoTestCoverageVerification",
+		"test-typescript": "nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"version": "oclif-dev readme && git add README.md"
 	}
 }

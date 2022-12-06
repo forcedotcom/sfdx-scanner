@@ -16,7 +16,9 @@ public class MethodBasedSanitization {
      */
     public interface SanitizableValue {
 
-        /** @return true if the ApexValue has been sanitized by the given mechanism */
+        /**
+         * @return true if the ApexValue has been sanitized by the given mechanism
+         */
         boolean isSanitized(SanitizerMechanism sanitizerMechanism, SanitizerAccessType accessType);
     }
 
@@ -25,7 +27,9 @@ public class MethodBasedSanitization {
      * interface.
      */
     public interface SanitizerDecision {
-        /** @return the {@link SanitizerAccessType} that this SanitizerDecision guards */
+        /**
+         * @return the {@link SanitizerAccessType} that this SanitizerDecision guards
+         */
         Optional<SanitizerAccessType> getAccessType();
     }
 

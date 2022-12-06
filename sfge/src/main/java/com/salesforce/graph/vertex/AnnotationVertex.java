@@ -48,7 +48,9 @@ public class AnnotationVertex extends BaseSFVertex implements NamedVertex {
                                 .hasLabel(ASTConstants.NodeType.ANNOTATION_PARAMETER));
     }
 
-    /** @return the value after the @ sign. @TestVisible will return 'TestVisible' */
+    /**
+     * @return the value after the @ sign. @TestVisible will return 'TestVisible'
+     */
     @Override
     public String getName() {
         return getString(Schema.NAME);

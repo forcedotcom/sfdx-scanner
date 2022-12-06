@@ -2,7 +2,7 @@ plugins {
 	java
 	application
 	jacoco
-	id("com.diffplug.spotless") version "6.3.0"
+	id("com.diffplug.spotless") version "6.11.0"
 }
 
 repositories {
@@ -16,8 +16,8 @@ dependencies {
 	implementation("org.apache.tinkerpop:tinkergraph-gremlin:3.5.1")
 	implementation("org.apache.tinkerpop:gremlin-driver:3.5.1")
 	implementation("org.antlr:antlr-runtime:3.5.2")
-	implementation("org.apache.logging.log4j:log4j-api:2.17.0")
-	implementation("org.apache.logging.log4j:log4j-core:2.17.0")
+	implementation("org.apache.logging.log4j:log4j-api:2.17.1")
+	implementation("org.apache.logging.log4j:log4j-core:2.17.1")
 	implementation("com.google.code.gson:gson:2.8.8")
 	implementation("com.google.guava:guava:26.0-jre")
 	implementation("com.google.code.findbugs:jsr305:3.0.2")
@@ -72,8 +72,8 @@ tasks.test {
 	systemProperty("junit.jupiter.extensions.autodetection.enabled", true)
 	testLogging {
 		events("passed", "skipped", "failed")
-		// Show log4j output during tests
-		showStandardStreams = true
+		// Show log4j output during tests, unless env-var to disable them is set.
+		showStandardStreams = (System.getenv("SFGE_LOGGING") != "false")
 		// Show extra expected info when there is a failure
 		exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
 	}

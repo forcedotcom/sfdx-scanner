@@ -73,7 +73,8 @@ public class JustInTimeGraphTest {
                         final List<UserClassVertex> vertices =
                                 SFVertexFactory.loadVertices(
                                         g,
-                                        g.V().hasLabel(NodeType.USER_CLASS)
+                                        g.V()
+                                                .hasLabel(NodeType.USER_CLASS)
                                                 .has(Schema.IS_STANDARD, true));
                         MatcherAssert.assertThat(vertices, hasSize(equalTo(21)));
 

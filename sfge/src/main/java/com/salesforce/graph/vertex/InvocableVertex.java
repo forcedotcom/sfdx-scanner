@@ -21,7 +21,9 @@ public interface InvocableVertex {
      */
     Optional<InvocableVertex> getNext();
 
-    /** @return the last vertex in the chain. returns the vertex itself if not part of a chain. */
+    /**
+     * @return the last vertex in the chain. returns the vertex itself if not part of a chain.
+     */
     InvocableVertex getLast();
 
     /**
@@ -30,7 +32,9 @@ public interface InvocableVertex {
      */
     List<InvocableVertex> firstToList();
 
-    /** @return the vertices that represent the parameters passed to the invocable. */
+    /**
+     * @return the vertices that represent the parameters passed to the invocable.
+     */
     List<ChainedVertex> getParameters();
 
     /**

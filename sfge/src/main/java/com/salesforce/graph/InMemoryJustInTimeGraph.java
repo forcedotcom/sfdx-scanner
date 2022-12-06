@@ -88,7 +88,9 @@ public final class InMemoryJustInTimeGraph implements JustInTimeGraph {
         }
     }
 
-    /** @return a traversal that is used to load the vertex identified by {@code userClassName} */
+    /**
+     * @return a traversal that is used to load the vertex identified by {@code userClassName}
+     */
     private static GraphTraversal<Vertex, Vertex> getUserClassTraversal(
             GraphTraversalSource graph, String userClassName) {
         return graph.V()

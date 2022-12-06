@@ -1,80 +1,176 @@
 import { expect } from "chai";
-import { verifyPRTitleForBugId } from "../src/verifyPrTitle";
-import { verifyPRTitleForBadTitle } from "../src/verifyPrTitle";
-import { verifyPRTitleForBaseBranch } from "../src/verifyPrTitle";
+import { verifyDevBranchPrTitle, verifyReleaseBranchPrTitle } from "../src/verifyPrTitle";
 
-describe("Positive Tests", () => {
-	it("work item only", () => {
-		expect(verifyPRTitleForBugId("@W-1234@")).to.equal(true);
+describe("#verifyDevBranchPrTitle()", () => {
+	describe("Positive Tests", () => {
+		describe("Allow valid type values", () => {
+			it("Type value: NEW", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): @W-1111@: This is a message.")).to.equal(true);
+			});
+
+			it("Type value: CHANGE", () => {
+				expect(verifyDevBranchPrTitle("CHANGE (PMD): @W-1111@: beep boop bop.")).to.equal(true);
+			});
+
+			it("Type value: FIX", () => {
+				expect(verifyDevBranchPrTitle("FIX (PMD): @W-1111@: beep boop bop.")).to.equal(true);
+			});
+		});
+
+		describe("Allow multiple scopes", () => {
+			it("Scopes: PMD + ESLint", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD|ESLint): @W-1111@: beep boop bop.")).to.equal(true);
+			});
+
+			it("Scopes: PMD + ESLint + RetireJS", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD|ESLint|RetireJS): @W-1111@: beep boop bop.")).to.equal(true);
+			});
+		});
+
+		describe("Be flexible with input", () => {
+			it("Be case-insensitive", () => {
+				expect(verifyDevBranchPrTitle("nEw (PmD): @W-1111@: beep boop bop.")).to.equal(true);
+			});
+
+			it("Allow excessive spacing", () => {
+				expect(verifyDevBranchPrTitle("   NEW   (    PMD   |    ESLint  | RetireJS   )  :    @W-1111@  :    beep boop bop.")).to.equal(true);
+			});
+
+			it("Allow no spacing", () => {
+				expect(verifyDevBranchPrTitle("NEW(PMD):@W-1111@:beep boop bop.")).to.equal(true);
+			});
+		})
 	});
 
-	it("work item at start of title", () => {
-		expect(verifyPRTitleForBugId("@W-1234@ fix")).to.equal(true);
-	});
+	describe("Negative Tests", () => {
+		it("Empty PR title", () => {
+			expect(verifyDevBranchPrTitle("")).to.equal(false);
+		});
 
-	it("work item at end of title", () => {
-		expect(verifyPRTitleForBugId("Fixes @W-1234@")).to.equal(true);
-	});
+		it("Improperly-ordered PR title", () => {
+			expect(verifyDevBranchPrTitle("(PMD) NEW: @W-1111@: beep boop bop.")).to.equal(false);
+		});
 
-	it("work item in middle of title", () => {
-		expect(verifyPRTitleForBugId("Fixes @W-1234@ - something")).to.equal(true);
-	});
+		describe("Problems with PR type", () => {
+			it("Invalid PR type", () => {
+				expect(verifyDevBranchPrTitle("MEW (PMD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
 
-	it("work item minium range", () => {
-		expect(verifyPRTitleForBugId("@W-0000@")).to.equal(true);
-	});
+			it("Multiple PR types", () => {
+				expect(verifyDevBranchPrTitle("NEW CHANGE (PMD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
 
-	it("work item maximum range", () => {
-		expect(verifyPRTitleForBugId("@W-99999999@")).to.equal(true);
-	});
+			it("Missing PR type", () => {
+				expect(verifyDevBranchPrTitle("(PMD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
+		});
 
-	it("Title does not start with invalid tokens d/W or r/W", () => {
-		expect(verifyPRTitleForBadTitle("@W-12345678")).to.equal(true);
-	});
+		describe("Problems with PR scope", () => {
+			it("Invalid PR scope", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMQ): @W-1111@: beep boop bop.")).to.equal(false);
+			});
 
-	it("Branch is dev and title has version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has the version indicator [2.x]", "dev")).to.equal(true);
-	});
+			it("Missing PR scope", () => {
+				expect(verifyDevBranchPrTitle("NEW : @W-1111@: beep boop bop.")).to.equal(false);
+			});
 
-	it("Branch is not dev and title lacks version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has version indicator [3.x]", "release")).to.equal(true);
+			it("Empty PR scope", () => {
+				expect(verifyDevBranchPrTitle("NEW (): @W-1111@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Improperly-delimited PR scopes (comma instead of pipe)", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD,CPD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Improperly-delimited PR scopes (missing pipe)", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMDCPD): @W-1111@: beep boop bop.")).to.equal(false);
+			});
+		});
+
+		describe("Problems with PR work number", () => {
+			it("Work item below minimum range", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): @W-999@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Work item above maximum range", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): @W-100000000@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Work item contains letters", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): @W-1003a00@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Work item missing leading @-symbol", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): W-1000@: beep boop bop.")).to.equal(false);
+			});
+
+			it("Work item missing trailing @-symbol", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): @W-1000: beep boop bop.")).to.equal(false);
+			});
+
+			it("Work item missing", () => {
+				expect(verifyDevBranchPrTitle("NEW (PMD): beep boop bop.")).to.equal(false);
+			});
+		});
 	});
 });
+describe("#verifyReleaseBranchPrTitle()", () => {
+	describe("Positive tests", () => {
+		it("Happy path", () => {
+			expect(verifyReleaseBranchPrTitle("RELEASE: @W-1111@: Releasing v3.6.2.")).to.equal(true);
+		});
 
-describe("Negative Tests", () => {
-		it("work item out of minimum range", () => {
-		expect(verifyPRTitleForBugId("@W-999@")).to.equal(false);
+		describe("Be flexible with input", () => {
+			it("Be case-insensitive", () => {
+				expect(verifyReleaseBranchPrTitle("ReLeAsE: @w-1111@: Releasing v3.6.2")).to.equal(true);
+			});
+
+			it("Allow excessive spacing", () => {
+				expect(verifyReleaseBranchPrTitle("     RELEASE    :    @W-1111@    :    Releasing v3.6.2")).to.equal(true);
+			});
+
+			it("Allow no spacing", () => {
+				expect(verifyReleaseBranchPrTitle("RELEASE:@W-1111@:Releasingv3.6.2")).to.equal(true);
+			});
+		});
 	});
+	describe("Negative tests", () => {
+		it("Improperly-ordered PR title", () => {
+			expect(verifyReleaseBranchPrTitle("@W-1111@: RELEASE: Releasing v3.6.2")).to.equal(false);
+		});
 
-	it("work item out of maximum range", () => {
-		expect(verifyPRTitleForBugId("@W-000000000@")).to.equal(false);
-	});
+		it("Scope wrongfully included", () => {
+			expect(verifyReleaseBranchPrTitle("RELEASE (PMD): @W-1111@: Releasing v3.6.2")).to.equal(false);
+		});
 
-	it("work item missing leading @ sign", () => {
-		expect(verifyPRTitleForBugId("W-1234@")).to.equal(false);
-	});
+		it("Disallowed type portion", () => {
+			expect(verifyReleaseBranchPrTitle("REEEELEASE: @W-1111@: Releasing v3.6.2")).to.equal(false);
+		});
 
-	it("work item missing trailing @ sign", () => {
-		expect(verifyPRTitleForBugId("@W-1234")).to.equal(false);
-	});
+		describe("Problems with PR work number", () => {
+			it("Work item below minimum range", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: @W-999@: Releasing v3.6.2.")).to.equal(false);
+			});
 
-	it("work item invalid format", () => {
-		expect(verifyPRTitleForBugId("@W-1234ab@")).to.equal(false);
-	});
+			it("Work item above maximum range", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: @W-1000000000@: Releasing v3.6.2.")).to.equal(false);
+			});
 
-	it("Title starts with invalid token d/W", () => {
-		expect(verifyPRTitleForBadTitle("d/W")).to.equal(false);
-	});
+			it("Work item contains letters", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: @W-1003a00@: Releasing v3.6.2.")).to.equal(false);
+			});
 
-	it("Title starts with invalid token r/W", () => {
-		expect(verifyPRTitleForBadTitle("r/W")).to.equal(false);
-	});
+			it("Work item missing leading @-symbol", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: W-1000@: Releasing v3.6.2.")).to.equal(false);
+			});
 
-	it("Branch is dev and title lacks version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("no version indicator here", "dev")).to.equal(false);
-	});
+			it("Work item missing trailing @-symbol", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: @W-1000: Releasing v3.6.2.")).to.equal(false);
+			});
 
-	it("Branch is not dev and title has version indicator", () => {
-		expect(verifyPRTitleForBaseBranch("this title has version indicator [2.x]", "release")).to.equal(false);
+			it("Work item missing", () => {
+				expect(verifyDevBranchPrTitle("RELEASE: beep boop bop.")).to.equal(false);
+			});
+		});
 	});
 });

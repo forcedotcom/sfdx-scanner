@@ -22,6 +22,8 @@ public interface MetadataInfo {
      */
     boolean isCustomSetting(String name);
 
-    /** @return an {@link ApexEnum} if {@code name} refers to an Enum */
+    /**
+     * @return an {@link ApexEnum} if {@code name} refers to an Enum
+     */
     Optional<ApexEnum> getEnum(String name);
 }
