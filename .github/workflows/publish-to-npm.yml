@@ -91,6 +91,9 @@ jobs:
     needs: rc-test
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/sfdx-scanner@latest-rc latest
+          npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest
