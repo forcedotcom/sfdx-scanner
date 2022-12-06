@@ -48,7 +48,7 @@ jobs:
       ctc: false # We've been told we don't have to care about this until someone makes us care.
       sign: true
       tag: latest-rc # Publish as a release candidate, so we can do our validations against it.
-      github-tag: ${{ github.event.release.tag_name || inputs.tag }}
+      githubTag: ${{ github.event.release.tag_name || inputs.tag }}
     secrets: inherit
   # Step 3: Run smoke tests against the release candidate.
   rc-test:
