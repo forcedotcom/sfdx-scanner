@@ -23,11 +23,14 @@ public class Schema {
     public static final String FIRST_CHILD = "FirstChild";
     public static final String FULL_METHOD_NAME = "FullMethodName";
     public static final String GLOBAL = "Global";
+    public static final String HANDLE_INBOUND_EMAIL = "handleInboundEmail";
     public static final String HAS_GETTER_METHOD_BLOCK = "HasGetterMethodBlock";
     public static final String HAS_SETTER_METHOD_BLOCK = "HasSetterMethodBlock";
     public static final String IDENTIFIER = "Identifier";
     public static final String IMPLEMENTATION_OF = "ImplementationOf";
     public static final String IMPLEMENTED_BY = "ImplementedBy";
+    public static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
+    public static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
     public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
     public static final String INVOCABLE_METHOD = "InvocableMethod";
@@ -49,6 +52,7 @@ public class Schema {
     public static final String NAMESPACE_ACCESSIBLE = "NamespaceAccessible";
     public static final String OPERATOR = "Operator";
     public static final String OVERRIDE = "Override";
+    public static final String PAGE_REFERENCE = "PageReference";
     public static final String REFERENCE_TYPE = "ReferenceType";
     public static final String REMOTE_ACTION = "RemoteAction";
     public static final String RETURN_TYPE = "ReturnType";
