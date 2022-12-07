@@ -178,11 +178,8 @@ public class CustomerApexVertexBuilderTest {
                                 .hasLabel(NodeType.METHOD)
                                 .has(Schema.DEFINING_TYPE, "MyClass")
                                 .not(has(Schema.CONSTRUCTOR, true))
-                                .not(
-                                        has(
-                                                Schema.NAME,
-                                                MethodUtil.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
-                                .not(has(Schema.NAME, MethodUtil.STATIC_CONSTRUCTOR_CANONICAL_NAME))
+                                .not(has(Schema.NAME, Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                .not(has(Schema.NAME, Schema.STATIC_CONSTRUCTOR_CANONICAL_NAME))
                                 .not(has(Schema.NAME, "clone"))
                                 .not(has(Schema.IS_STANDARD, true))
                                 .order(Scope.global)

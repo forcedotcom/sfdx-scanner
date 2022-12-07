@@ -31,6 +31,7 @@ public class Schema {
     public static final String IMPLEMENTED_BY = "ImplementedBy";
     public static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
     public static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
+    public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
     public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
     public static final String INVOCABLE_METHOD = "InvocableMethod";
@@ -58,6 +59,7 @@ public class Schema {
     public static final String RETURN_TYPE = "ReturnType";
     public static final String RULE_NAMES = "RulesNames";
     public static final String STATIC = "Static";
+    public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
     public static final String SUPER_CLASS_NAME = "SuperClassName";
     public static final String SUPER_INTERFACE_NAME = "SuperInterfaceName";
     public static final String TYPE = "Type";
