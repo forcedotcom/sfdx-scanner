@@ -12,6 +12,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
+/**
+ * A helper class for {@link com.salesforce.rules.UnusedMethodRule}, which tracks various elements
+ * of state as the rule executes.
+ */
 public class RuleStateTracker {
     private final GraphTraversalSource g;
     /**
@@ -44,30 +48,22 @@ public class RuleStateTracker {
         this.subclassesByDefiningType = CollectionUtil.newTreeMap();
     }
 
-    /**
-     * Mark the provided method vertex as a candidate for rule analysis.
-     */
+    /** Mark the provided method vertex as a candidate for rule analysis. */
     public void trackEligibleMethod(MethodVertex methodVertex) {
         eligibleMethods.add(methodVertex);
     }
 
-    /**
-     * Mark the provided method as unused.
-     */
+    /** Mark the provided method as unused. */
     public void trackUnusedMethod(MethodVertex methodVertex) {
         unusedMethods.add(methodVertex);
     }
 
-    /**
-     * Get all of the methods that were found to be unused.
-     */
+    /** Get all of the methods that were found to be unused. */
     public Set<MethodVertex> getUnusedMethods() {
         return unusedMethods;
     }
 
-    /**
-     * Get the total number of methods deemed eligible for analysis.
-     */
+    /** Get the total number of methods deemed eligible for analysis. */
     public int getEligibleMethodCount() {
         return eligibleMethods.size();
     }

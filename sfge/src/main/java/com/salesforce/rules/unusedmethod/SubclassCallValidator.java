@@ -4,9 +4,13 @@ import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.vertex.*;
 import java.util.List;
 
-public final class SubclassCallValidator extends CallValidator {
+/**
+ * Helper class for {@link com.salesforce.rules.UnusedMethodRule}. Used for determining whether a
+ * method is called in within a subclass of its host class. E.g., `this.method()` if not overridden,
+ * or `super.method()` if overridden.
+ */
+public final class SubclassCallValidator extends AbstractCallValidator {
     /**
-     *
      * @param targetMethod - The method for which we're trying to find usages
      * @param ruleStateTracker - Helper object provided by the rule
      */

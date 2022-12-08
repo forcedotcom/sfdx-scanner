@@ -2,9 +2,12 @@ package com.salesforce.rules.unusedmethod;
 
 import com.salesforce.graph.vertex.MethodVertex;
 
-public final class InnerClassCallValidator extends CallValidator {
+/**
+ * Helper class for {@link com.salesforce.rules.UnusedMethodRule}. Used for determining whether a
+ * method is called by an inner/sibling class.
+ */
+public final class InnerClassCallValidator extends AbstractCallValidator {
     /**
-     *
      * @param targetMethod - The method for which we're trying to find usages
      * @param ruleStateTracker - Helper object provided by the rule
      */

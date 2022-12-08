@@ -6,9 +6,12 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ThisMethodCallExpressionVertex;
 import java.util.List;
 
-public final class InternalCallValidator extends CallValidator {
+/**
+ * Helper class for {@link com.salesforce.rules.UnusedMethodRule}. Used for determining whether a
+ * method is called in within the context of its host class. E.g., `this.method()` or `method()`.
+ */
+public final class InternalCallValidator extends AbstractCallValidator {
     /**
-     *
      * @param targetMethod - The method for which we're trying to find usages
      * @param ruleStateTracker - Helper object provided by the rule
      */
@@ -17,8 +20,8 @@ public final class InternalCallValidator extends CallValidator {
     }
 
     /**
-     * Returns true if the validator's target method could plausibly called within the class where
-     * it's defined. E.g., as `this.method()` or simply `method()`.
+     * Returns true if the validator's target method could plausibly be called within the class
+     * where it's defined. E.g., as `this.method()` or simply `method()`.
      */
     public boolean methodUsedInternally() {
         // Get every method call in the class where the target method is defined.

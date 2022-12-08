@@ -22,9 +22,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
     private static final String VIOLATION_TEMPLATE = "Method %s in class %s is never invoked";
 
     GraphTraversalSource g;
-    /**
-     * A helper object used to track state and caching as the rule executes.
-     */
+    /** A helper object used to track state and caching as the rule executes. */
     RuleStateTracker ruleStateTracker;
 
     private UnusedMethodRule() {
@@ -74,9 +72,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return convertMethodsToViolations();
     }
 
-    /**
-     * Reset the rule's state to prepare for a subsequent execution.
-     */
+    /** Reset the rule's state to prepare for a subsequent execution. */
     private void reset(GraphTraversalSource g) {
         this.g = g;
         this.ruleStateTracker = new RuleStateTracker(g);
@@ -93,8 +89,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
     }
 
     /**
-     * Seek an invocation of each provided method, unless the method is deemed to be ineligible
-     * for analysis. Eligible and unused methods are tracked in {@link #ruleStateTracker}.
+     * Seek an invocation of each provided method, unless the method is deemed to be ineligible for
+     * analysis. Eligible and unused methods are tracked in {@link #ruleStateTracker}.
      */
     private void seekMethodUsages(List<MethodVertex> candidateVertices) {
         for (MethodVertex candidateVertex : candidateVertices) {
