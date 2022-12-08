@@ -2,19 +2,12 @@ package com.salesforce.rules;
 
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
-import com.salesforce.collections.CollectionUtil;
-import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
-import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
-import com.salesforce.graph.vertex.UserClassVertex;
-import com.salesforce.rules.unusedmethod.CallValidator;
-import com.salesforce.rules.unusedmethod.InternalCallValidator;
-import com.salesforce.rules.unusedmethod.SubclassCallValidator;
+import com.salesforce.rules.unusedmethod.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -29,29 +22,11 @@ public class UnusedMethodRule extends AbstractStaticRule {
     private static final String VIOLATION_TEMPLATE = "Method %s in class %s is never invoked";
 
     GraphTraversalSource g;
-
-    /**
-     * The set of methods on which analysis was performed. Helps us know whether a method returned
-     * no violations because it was inspected and an invocation was found, or if it was simply never
-     * inspected in the first place.
-     */
-    private final Set<MethodVertex> eligibleMethods;
-    /**
-     * The set of methods for which no invocation was found. At the end of execution, we'll generate
-     * violations from each method in this set.
-     */
-    private final Set<MethodVertex> unusedMethods;
-    /**
-     * A map used to cache every method call expression in a given class. Minimizing redundant
-     * queries is a very high priority for this rule.
-     */
-    private final Map<String, List<InvocableWithParametersVertex>> methodCallsByDefiningType;
+    /** A helper object used to track state and caching as the rule executes. */
+    RuleStateTracker ruleStateTracker;
 
     private UnusedMethodRule() {
         super();
-        this.eligibleMethods = new HashSet<>();
-        this.unusedMethods = new HashSet<>();
-        this.methodCallsByDefiningType = CollectionUtil.newTreeMap();
     }
 
     public static UnusedMethodRule getInstance() {
@@ -84,8 +59,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return false;
     }
 
-    public Set<MethodVertex> getEligibleMethods() {
-        return this.eligibleMethods;
+    public RuleStateTracker getRuleStateTracker() {
+        return ruleStateTracker;
     }
 
     @Override
@@ -97,11 +72,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return convertMethodsToViolations();
     }
 
+    /** Reset the rule's state to prepare for a subsequent execution. */
     private void reset(GraphTraversalSource g) {
         this.g = g;
-        this.eligibleMethods.clear();
-        this.unusedMethods.clear();
-        this.methodCallsByDefiningType.clear();
+        this.ruleStateTracker = new RuleStateTracker(g);
     }
 
     /**
@@ -116,9 +90,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     /**
      * Seek an invocation of each provided method, unless the method is deemed to be ineligible for
-     * analysis. As a side effect, adds each method for which analysis was attempted to {@link
-     * #eligibleMethods} and each method for which no invocation was found to {@link
-     * #unusedMethods}.
+     * analysis. Eligible and unused methods are tracked in {@link #ruleStateTracker}.
      */
     private void seekMethodUsages(List<MethodVertex> candidateVertices) {
         for (MethodVertex candidateVertex : candidateVertices) {
@@ -133,49 +105,56 @@ public class UnusedMethodRule extends AbstractStaticRule {
                 continue;
             }
 
-            // If the method was determined as eligible, add it to the set of eligible methods.
-            eligibleMethods.add(candidateVertex);
+            // If the method was determined as eligible, track it as such.
+            ruleStateTracker.trackEligibleMethod(candidateVertex);
 
             // Check first for internal usage of the method.
-            if (methodUsedInternally(candidateVertex)) {
+            InternalCallValidator internalCallValidator =
+                    new InternalCallValidator(candidateVertex, ruleStateTracker);
+            if (internalCallValidator.methodUsedInternally()) {
                 continue;
             }
 
             // Next, check for uses of the method by subclasses,
             // if the method is invocable in this way.
-            if (methodVisibleToSubclasses(candidateVertex)
-                    && methodUsedBySubclass(candidateVertex)) {
+            SubclassCallValidator subclassCallValidator =
+                    new SubclassCallValidator(candidateVertex, ruleStateTracker);
+            if (subclassCallValidator.methodUsedBySubclass()) {
                 continue;
             }
 
             // Next, check for invocations of the method by a superclass,
             // if the method is invocable in this way.
-            if (methodVisibleToSuperClasses(candidateVertex)
-                    && methodUsedBySuperclass(candidateVertex)) {
+            SuperclassCallValidator superclassCallValidator =
+                    new SuperclassCallValidator(candidateVertex, ruleStateTracker);
+            if (superclassCallValidator.methodUsedBySuperclass()) {
                 continue;
             }
 
             // Next, check for invocations of the method by an inner/outer class,
             // if the method is invocable in this way.
-            if (methodVisibleToInnerClasses(candidateVertex)
-                    && methodUsedByInnerClass(candidateVertex)) {
+            InnerClassCallValidator innerClassCallValidator =
+                    new InnerClassCallValidator(candidateVertex, ruleStateTracker);
+            if (innerClassCallValidator.methodUsedByInnerClass()) {
                 continue;
             }
 
             // Finally, check for external invocations of the method, if the method
             // is invocable in this way.
-            if (methodVisibleExternally(candidateVertex) && methodUsedExternally(candidateVertex)) {
+            ExternalCallValidator externalCallValidator =
+                    new ExternalCallValidator(candidateVertex, ruleStateTracker);
+            if (externalCallValidator.methodUsedExternally()) {
                 continue;
             }
 
-            // If we found no usage of the method, then we should add it to the final set.
-            unusedMethods.add(candidateVertex);
+            // If we found no usage of the method, then we should track it as unused.
+            ruleStateTracker.trackUnusedMethod(candidateVertex);
         }
     }
 
-    /** Convert every method in {@link #unusedMethods} to a violation, and return them in a list. */
+    /** Convert every known unused method to a violation, and return them in a list. */
     private List<Violation> convertMethodsToViolations() {
-        return unusedMethods.stream()
+        return ruleStateTracker.getUnusedMethods().stream()
                 .map(
                         m ->
                                 new Violation.StaticRuleViolation(
@@ -228,145 +207,10 @@ public class UnusedMethodRule extends AbstractStaticRule {
             return true;
         }
 
-        // Path entry points should be skipped, because they're definitionally publicly accessible
-        // and therefore we must assume that they're used somewhere or other.
-        if (PathEntryPointUtil.isPathEntryPoint(vertex)) {
-            return true;
-        }
-
-        // If none of the above conditions were satisfied, this vertex is eligible for analysis by
-        // the rule.
-        return false;
-    }
-
-    /**
-     * Seeks invocations of the provided method that occur within the class where it's defined.
-     * E.g., `this.method()` or `method()`, etc.
-     *
-     * @return - True if such an invocation is found, otherwise false.
-     */
-    private boolean methodUsedInternally(MethodVertex methodVertex) {
-        // Instantiate a visitor to use for checking internal calls.
-        InternalCallValidator visitor = new InternalCallValidator(methodVertex);
-        // Get every method call in the class containing the method.
-        List<InvocableWithParametersVertex> potentialInternalCallers =
-                getMethodCalls(methodVertex.getDefiningType());
-        return validatorDetectsUsage(visitor, potentialInternalCallers);
-    }
-
-    /**
-     * @return True if this method is visible to subclasses of the class where it's defined.
-     */
-    private boolean methodVisibleToSubclasses(MethodVertex methodVertex) {
-        // If a method is private, it's not visible to subclasses.
-        if (methodVertex.isPrivate()) {
-            return false;
-        }
-        // Otherwise, the method is visible to subclasses as long as subclasses can actually exist,
-        // which is the case when the class is either abstract or virtual.
-        UserClassVertex classVertex =
-                methodVertex
-                        .getParentClass()
-                        .orElseThrow(() -> new UnexpectedException(methodVertex));
-        return classVertex.isAbstract() || classVertex.isVirtual();
-    }
-
-    /**
-     * Seeks invocations of the provided method that occur within subclasses of the class where it's
-     * defined. E.g., `this.method()` if not overridden, or `super.method()` if overridden.
-     *
-     * @return - True if such an invocation is found, else false. TODO: Consider optimizing this
-     *     method to handle entire classes isntead of individual methods.
-     */
-    private boolean methodUsedBySubclass(MethodVertex methodVertex) {
-        // Instantiate a visitor to use for checking subclass calls.
-        SubclassCallValidator visitor = new SubclassCallValidator(methodVertex);
-        // Get a list of each subclass of the method's host class.
-        List<String> subclasses = getSubclasses(methodVertex.getDefiningType());
-        // Put the check in a loop so we can recursively process subclasses if needed.
-        while (!subclasses.isEmpty()) {
-            // For each of the subclasses...
-            for (String subclass : subclasses) {
-                // Get every method call in that class.
-                List<InvocableWithParametersVertex> potentialSubclassCallers =
-                        getMethodCalls(subclass);
-                // If the validator detects a usage in the subclass, then we're good.
-                if (validatorDetectsUsage(visitor, potentialSubclassCallers)) {
-                    return true;
-                }
-            }
-            // If we're here, then we've checked all subclasses at this level of inheritance.
-            if (methodVertex.isConstructor()) {
-                // If the target method is a constructor, we're done, since constructors are only
-                // visible to immediate children.
-                break;
-            } else {
-                // For non-constructor methods, nested calls are possible, so we should get every
-                // subclass of the subclasses and keep going.
-                subclasses = getSubclasses(subclasses.toArray(new String[] {}));
-            }
-        }
-        // If we're here, then we analyzed the entire subclass inheritance tree and found no
-        // potential invocations.
-        return false;
-    }
-
-    /**
-     * @return - True if the provided method is visible to superclasses of the class where it's
-     *     defined. E.g., as an implementation of an inherited abstract method.
-     */
-    private boolean methodVisibleToSuperClasses(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
-    }
-
-    /**
-     * Seeks invocations of the provided method that occur within superclasses of the class where
-     * it's defined. E.g., the parent class declares the method as abstract and then another method
-     * invokes it.
-     *
-     * @return true if such an invocation could be found, else false.
-     */
-    private boolean methodUsedBySuperclass(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
-    }
-
-    /**
-     * @return - true if the provided method is visible to inner classes of the class where it's
-     *     defined. E.g., if it's a static method.
-     */
-    private boolean methodVisibleToInnerClasses(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
-    }
-
-    /**
-     * Seeks invocations of the provided method by inner classes of its host class.
-     *
-     * @return - True if such invocations could be found, else false.
-     */
-    private boolean methodUsedByInnerClass(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
-    }
-
-    /**
-     * @return - True if this method is visible externally, e.g., it's a public method.
-     */
-    private boolean methodVisibleExternally(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
-    }
-
-    /**
-     * Seeks invocations of the provided method in a context wholly external to its host class.
-     *
-     * @return - True if such an invocation could be found. Else false.
-     */
-    private boolean methodUsedExternally(MethodVertex methodVertex) {
-        // TODO: IMPLEMENT THIS METHOD.
-        return false;
+        // Finally, path entry points should be skipped, because they're definitionally publicly
+        // accessible, and therefore we must assume that they're used somewhere or other.
+        // But if the method isn't a path entry point, then it's eligible.
+        return PathEntryPointUtil.isPathEntryPoint(vertex);
     }
 
     /**
@@ -382,59 +226,6 @@ public class UnusedMethodRule extends AbstractStaticRule {
             }
         }
         return false;
-    }
-
-    /** Return a list of every method call occurring in the specified class. */
-    private List<InvocableWithParametersVertex> getMethodCalls(String definingType) {
-        // First, check if we've already got anything for the desired type.
-        // If so, we can just return that.
-        if (this.methodCallsByDefiningType.containsKey(definingType)) {
-            return this.methodCallsByDefiningType.get(definingType);
-        }
-        // Otherwise, we need to do a query.
-        // Any node with one of these labels is a method call.
-        List<String> targetLabels =
-                Arrays.asList(
-                        NodeType.METHOD_CALL_EXPRESSION,
-                        NodeType.THIS_METHOD_CALL_EXPRESSION,
-                        NodeType.SUPER_METHOD_CALL_EXPRESSION);
-        List<InvocableWithParametersVertex> methodCalls =
-                SFVertexFactory.loadVertices(
-                        g, g.V().where(H.has(targetLabels, Schema.DEFINING_TYPE, definingType)));
-        // Cache and return the results.
-        this.methodCallsByDefiningType.put(definingType, methodCalls);
-        return methodCalls;
-    }
-
-    private boolean validatorDetectsUsage(
-            CallValidator validator, List<InvocableWithParametersVertex> potentialCalls) {
-        // For each call...
-        for (InvocableWithParametersVertex potentialCall : potentialCalls) {
-            // Use our visitor to determine whether this invocation is of the target method.
-            if (validator.isValidCall(potentialCall)) {
-                // If our checks are satisfied, then this method call appears to be an invocation of
-                // the target method.
-                return true;
-            }
-        }
-        // If we're here, then we exited the loop without finding a call.
-        return false;
-    }
-
-    /** Get all immediate subclasses of the provided classes. */
-    private List<String> getSubclasses(String... definingTypes) {
-        // Start with each UserClassVertex for the defining types.
-        List<UserClassVertex> subclassVertices =
-                SFVertexFactory.loadVertices(
-                        g,
-                        g.V()
-                                .where(
-                                        H.hasWithin(
-                                                NodeType.USER_CLASS,
-                                                Schema.DEFINING_TYPE,
-                                                definingTypes))
-                                .out(Schema.EXTENDED_BY));
-        return subclassVertices.stream().map(UserClassVertex::getName).collect(Collectors.toList());
     }
 
     private static final class LazyHolder {
