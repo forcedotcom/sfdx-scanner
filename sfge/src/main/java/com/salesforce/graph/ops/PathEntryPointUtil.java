@@ -7,8 +7,16 @@ import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Util class for identifying and interacting with path entry points. A path entry point being
+ * defined as a point with which an external actor can interact, thus starting code execution.
+ */
 public final class PathEntryPointUtil {
 
+    /**
+     * Indicates whether a method vertex is a path entry point, e.g., a point where path analysis
+     * can begin.
+     */
     public static boolean isPathEntryPoint(MethodVertex methodVertex) {
         // Global methods are entry points.
         if (methodVertex.getModifierNode().isGlobal()) {

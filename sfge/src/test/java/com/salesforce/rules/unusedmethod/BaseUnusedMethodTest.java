@@ -4,13 +4,11 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.salesforce.TestUtil;
-import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.AbstractStaticRule;
 import com.salesforce.rules.UnusedMethodRule;
 import com.salesforce.rules.Violation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
@@ -111,8 +109,7 @@ public class BaseUnusedMethodTest {
         List<Violation> violations = rule.run(g);
 
         MatcherAssert.assertThat(violations, empty());
-        Set<MethodVertex> eligibleMethods = rule.getEligibleMethods();
-        assertEquals(eligibleMethods.size(), eligibleMethodCount);
+        assertEquals(eligibleMethodCount, rule.getRuleStateTracker().getEligibleMethodCount());
     }
 
     /* ============== ASSERT NO ANALYSIS ATTEMPT ============== */
@@ -126,6 +123,6 @@ public class BaseUnusedMethodTest {
         List<Violation> violations = rule.run(g);
 
         MatcherAssert.assertThat(violations, empty());
-        MatcherAssert.assertThat(rule.getEligibleMethods(), empty());
+        assertEquals(0, rule.getRuleStateTracker().getEligibleMethodCount());
     }
 }
