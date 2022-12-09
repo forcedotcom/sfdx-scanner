@@ -137,7 +137,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files with an @AuraEnabled annotation. An empty list
      * implicitly includes all files.
      */
-    static List<MethodVertex> getAuraEnabledMethods(
+    private static List<MethodVertex> getAuraEnabledMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return getMethodsWithAnnotation(g, targetFiles, Schema.AURA_ENABLED);
     }
@@ -146,7 +146,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files with a @NamespaceAccessible annotation. An empty
      * list implicitly includes all files.
      */
-    static List<MethodVertex> getNamespaceAccessibleMethods(
+    private static List<MethodVertex> getNamespaceAccessibleMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return getMethodsWithAnnotation(g, targetFiles, Schema.NAMESPACE_ACCESSIBLE);
     }
@@ -155,7 +155,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files with a @RemoteAction annotation. An empty list
      * implicitly includes all files.
      */
-    static List<MethodVertex> getRemoteActionMethods(
+    private static List<MethodVertex> getRemoteActionMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return getMethodsWithAnnotation(g, targetFiles, Schema.REMOTE_ACTION);
     }
@@ -164,7 +164,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files with an @InvocableMethod annotation. An empty
      * list implicitly includes all files.
      */
-    static List<MethodVertex> getInvocableMethodMethods(
+    private static List<MethodVertex> getInvocableMethodMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return getMethodsWithAnnotation(g, targetFiles, Schema.INVOCABLE_METHOD);
     }
@@ -222,8 +222,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files whose modifier scope is `global`. An empty list
      * implicitly includes all files.
      */
-    public static List<MethodVertex> getGlobalMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
+    static List<MethodVertex> getGlobalMethods(GraphTraversalSource g, List<String> targetFiles) {
         // Get all methods in the target files.
         return SFVertexFactory.loadVertices(
                 g,
@@ -246,7 +245,7 @@ public final class PathEntryPointUtil {
                                         __.not(__.has(Schema.IS_STANDARD, true)))));
     }
 
-    public static List<MethodVertex> getInboundEmailHandlerMethods(
+    static List<MethodVertex> getInboundEmailHandlerMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return SFVertexFactory.loadVertices(
                 g,
@@ -278,7 +277,7 @@ public final class PathEntryPointUtil {
      * @param targetFiles
      * @return
      */
-    public static List<MethodVertex> getExposedControllerMethods(
+    static List<MethodVertex> getExposedControllerMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         Set<String> referencedVfControllers =
                 MetaInfoCollectorProvider.getVisualForceHandler().getMetaInfoCollected();
