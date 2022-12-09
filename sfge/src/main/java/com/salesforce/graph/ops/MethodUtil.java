@@ -2,7 +2,6 @@ package com.salesforce.graph.ops;
 
 import static com.salesforce.apex.jorje.ASTConstants.PROPERTY_METHOD_PREFIX;
 import static com.salesforce.graph.ops.TypeableUtil.NOT_A_MATCH;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 
 import com.salesforce.apex.jorje.ASTConstants;
@@ -55,22 +54,18 @@ import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
-import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
-import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
@@ -79,13 +74,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 @SuppressWarnings("PMD") // Heavily used and risky to fix at the moment
 public final class MethodUtil {
     private static final Logger LOGGER = LogManager.getLogger(MethodUtil.class);
-
-    private static final String PAGE_REFERENCE = "PageReference";
-    private static final String INBOUND_EMAIL_HANDLER = "Messaging.InboundEmailHandler";
-    private static final String HANDLE_INBOUND_EMAIL = "handleInboundEmail";
-    private static final String INBOUND_EMAIL_RESULT = "Messaging.InboundEmailResult";
-    public static final String INSTANCE_CONSTRUCTOR_CANONICAL_NAME = "<init>";
-    public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
 
     public static List<MethodVertex> getTargetedMethods(
             GraphTraversalSource g, List<RuleRunnerTarget> targets) {
@@ -161,175 +149,6 @@ public final class MethodUtil {
                                 targetMethod);
             }
         }
-    }
-
-    /**
-     * Returns non-test methods in the target files with an @AuraEnabled annotation. An empty list
-     * implicitly includes all files.
-     */
-    public static List<MethodVertex> getAuraEnabledMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return getMethodsWithAnnotation(g, targetFiles, Schema.AURA_ENABLED);
-    }
-
-    /**
-     * Returns non-test methods in the target files with a @NamespaceAccessible annotation. An empty
-     * list implicitly includes all files.
-     */
-    public static List<MethodVertex> getNamespaceAccessibleMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return getMethodsWithAnnotation(g, targetFiles, Schema.NAMESPACE_ACCESSIBLE);
-    }
-
-    /**
-     * Returns non-test methods in the target files with a @RemoteAction annotation. An empty list
-     * implicitly includes all files.
-     */
-    public static List<MethodVertex> getRemoteActionMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return getMethodsWithAnnotation(g, targetFiles, Schema.REMOTE_ACTION);
-    }
-
-    /**
-     * Returns non-test methods in the target files with an @InvocableMethod annotation. An empty
-     * list implicitly includes all files.
-     */
-    public static List<MethodVertex> getInvocableMethodMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return getMethodsWithAnnotation(g, targetFiles, Schema.INVOCABLE_METHOD);
-    }
-
-    static List<MethodVertex> getMethodsWithAnnotation(
-            GraphTraversalSource g, List<String> targetFiles, String annotation) {
-        return SFVertexFactory.loadVertices(
-                g,
-                rootMethodTraversal(g, targetFiles)
-                        .where(
-                                out(Schema.CHILD)
-                                        .hasLabel(NodeType.MODIFIER_NODE)
-                                        .out(Schema.CHILD)
-                                        .where(H.has(NodeType.ANNOTATION, Schema.NAME, annotation)))
-                        .order(Scope.global)
-                        .by(Schema.DEFINING_TYPE, Order.asc)
-                        .by(Schema.NAME, Order.asc));
-    }
-
-    /**
-     * Returns non-test methods in the target files whose return type is a PageReference. An empty
-     * list implicitly includes all files.
-     */
-    public static List<MethodVertex> getPageReferenceMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return SFVertexFactory.loadVertices(
-                g,
-                rootMethodTraversal(g, targetFiles)
-                        .where(H.has(NodeType.METHOD, Schema.RETURN_TYPE, PAGE_REFERENCE))
-                        .order(Scope.global)
-                        .by(Schema.DEFINING_TYPE, Order.asc)
-                        .by(Schema.NAME, Order.asc));
-    }
-
-    private static GraphTraversal<Vertex, Vertex> rootMethodTraversal(
-            GraphTraversalSource g, List<String> targetFiles) {
-        // Only look at UserClass vertices. Not interested in Enums, Interfaces, or Triggers
-        final String[] labels = new String[] {NodeType.USER_CLASS};
-        return TraversalUtil.fileRootTraversal(g, labels, targetFiles)
-                .not(has(Schema.IS_TEST, true))
-                .repeat(__.out(Schema.CHILD))
-                .until(__.hasLabel(NodeType.METHOD))
-                .not(has(Schema.IS_TEST, true));
-    }
-
-    /**
-     * Returns non-test methods in the target files whose modifier scope is `global`. An empty list
-     * implicitly includes all files.
-     */
-    public static List<MethodVertex> getGlobalMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        // Get all methods in the target files.
-        return SFVertexFactory.loadVertices(
-                g,
-                rootMethodTraversal(g, targetFiles)
-                        .filter(
-                                __.and(
-                                        // If a method has at least one block statement, then it is
-                                        // definitely actually declared, as
-                                        // opposed to being an implicit method.
-                                        out(Schema.CHILD)
-                                                .hasLabel(NodeType.BLOCK_STATEMENT)
-                                                .count()
-                                                .is(P.gte(1)),
-                                        // We only want global methods.
-                                        out(Schema.CHILD)
-                                                .hasLabel(NodeType.MODIFIER_NODE)
-                                                .has(Schema.GLOBAL, true),
-                                        // Ignore any standard methods, otherwise will get a ton of
-                                        // extra results.
-                                        __.not(__.has(Schema.IS_STANDARD, true)))));
-    }
-
-    public static List<MethodVertex> getInboundEmailHandlerMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        return SFVertexFactory.loadVertices(
-                g,
-                // Get any target class that implements the email handler interface.
-                TraversalUtil.traverseImplementationsOf(g, targetFiles, INBOUND_EMAIL_HANDLER)
-                        // Get every implementation of the handle email method.
-                        .out(Schema.CHILD)
-                        .where(H.has(NodeType.METHOD, Schema.NAME, HANDLE_INBOUND_EMAIL))
-                        // Filter the results by return type and arity to limit the possibility of
-                        // getting unnecessary results.
-                        .where(H.has(NodeType.METHOD, Schema.RETURN_TYPE, INBOUND_EMAIL_RESULT))
-                        .has(Schema.ARITY, 2));
-    }
-
-    /**
-     * Returns all non-test public- and global-scoped methods in controllers referenced by
-     * VisualForce pages, filtered by target file list. An empty list implicitly includes all files.
-     *
-     * @param g
-     * @param targetFiles
-     * @return
-     */
-    public static List<MethodVertex> getExposedControllerMethods(
-            GraphTraversalSource g, List<String> targetFiles) {
-        Set<String> referencedVfControllers =
-                MetaInfoCollectorProvider.getVisualForceHandler().getMetaInfoCollected();
-        // If none of the VF files referenced an Apex class, we can just return an empty list.
-        if (referencedVfControllers.isEmpty()) {
-            return new ArrayList<>();
-        }
-        List<MethodVertex> allControllerMethods =
-                SFVertexFactory.loadVertices(
-                        g,
-                        TraversalUtil.fileRootTraversal(g, targetFiles)
-                                // Only outer classes can be VF controllers, so we should restrict
-                                // our query to UserClasses.
-                                .where(
-                                        H.hasWithin(
-                                                NodeType.USER_CLASS,
-                                                Schema.DEFINING_TYPE,
-                                                referencedVfControllers))
-                                .repeat(__.out(Schema.CHILD))
-                                .until(__.hasLabel(NodeType.METHOD))
-                                .not(has(Schema.IS_TEST, true))
-                                // We want to ignore constructors.
-                                .where(
-                                        __.not(
-                                                H.hasWithin(
-                                                        NodeType.METHOD,
-                                                        Schema.NAME,
-                                                        INSTANCE_CONSTRUCTOR_CANONICAL_NAME,
-                                                        STATIC_CONSTRUCTOR_CANONICAL_NAME))));
-        // Gremlin isn't sophisticated enough to perform this kind of filtering in the actual query.
-        // So we'll just do it
-        // manually here.
-        return allControllerMethods.stream()
-                .filter(
-                        methodVertex ->
-                                methodVertex.getModifierNode().isPublic()
-                                        || methodVertex.getModifierNode().isGlobal())
-                .collect(Collectors.toList());
     }
 
     public static Optional<MethodVertex> getInvoked(
@@ -439,7 +258,7 @@ public final class MethodUtil {
                                             H.has(
                                                     NodeType.METHOD,
                                                     Schema.NAME,
-                                                    INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                                    Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                                     .has(Schema.CONSTRUCTOR, true)
                                     .has(Schema.ARITY, vertex.getParameters().size()));
 
@@ -464,7 +283,7 @@ public final class MethodUtil {
                                         H.has(
                                                 NodeType.METHOD,
                                                 Schema.NAME,
-                                                INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                                Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                                 .has(Schema.CONSTRUCTOR, true)
                                 .has(Schema.ARITY, 0)));
     }
@@ -482,7 +301,7 @@ public final class MethodUtil {
                                 H.has(
                                         NodeType.METHOD,
                                         Schema.NAME,
-                                        INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                        Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                         .has(Schema.CONSTRUCTOR, true)
                         // User defined constructors have a block statement
                         .where(out(Schema.CHILD).hasLabel(NodeType.BLOCK_STATEMENT)));
@@ -513,7 +332,7 @@ public final class MethodUtil {
                                             H.has(
                                                     NodeType.METHOD,
                                                     Schema.NAME,
-                                                    INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                                    Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                                     .has(Schema.CONSTRUCTOR, true)
                                     .has(Schema.ARITY, vertex.getParameters().size()));
             if (methods.isEmpty()) {
@@ -541,7 +360,7 @@ public final class MethodUtil {
                                         H.has(
                                                 NodeType.METHOD,
                                                 Schema.NAME,
-                                                INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
+                                                Schema.INSTANCE_CONSTRUCTOR_CANONICAL_NAME))
                                 .has(Schema.CONSTRUCTOR, true)
                                 .has(Schema.ARITY, vertex.getParameters().size()));
 
