@@ -7,7 +7,6 @@ import {Messages, SfdxError} from '@salesforce/core';
 import {CUSTOM_CONFIG} from '../../../Constants';
 import {SfgeConfig} from '../../../types';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
-import {OUTPUT_FORMAT} from '../../../lib/RuleManager';
 import {FileHandler} from '../../../lib/util/FileHandler';
 
 // Initialize Messages with the current plugin directory
@@ -39,8 +38,11 @@ export default class Dfa extends ScannerRunCommand {
 	// because the command currently supports only a single engine with a single rule. So no such flags are currently
 	// needed. If, at some point, we add additional rules or engines to this command, those flags will need to be added.
 	protected static flagsConfig = {
-		verbose: flags.builtin(),
+		// Include all common flags from the super class.
+		...ScannerRunCommand.flagsConfig,
 		// BEGIN: Flags for targeting files.
+		// NOTE: All run commands have a `--target` flag, but they have differing functionalities,
+		// and therefore different descriptions, so each command defines this flag separately.
 		target: flags.array({
 			char: 't',
 			description: messages.getMessage('flags.targetDescription'),
@@ -56,31 +58,6 @@ export default class Dfa extends ScannerRunCommand {
 			required: true
 		}),
 		// END: Flags for targeting files.
-		// BEGIN: Flags for result processing.
-		format: flags.enum({
-			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
-		}),
-		outfile: flags.string({
-			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
-		}),
-		'severity-threshold': flags.integer({
-			char: 's',
-			description: messages.getMessage('flags.sevthresholdDescription'),
-			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
-			exclusive: ['json'],
-			min: 1,
-			max: 3
-		}),
-		'normalize-severity': flags.boolean({
-			description: messages.getMessage('flags.normalizesevDescription'),
-			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
-		}),
-		// END: Flags for result processing.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': flags.integer({
 			description: messages.getMessage('flags.rulethreadcountDescription'),

@@ -1,3 +1,4 @@
+import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
@@ -13,11 +14,45 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
 
 export abstract class ScannerRunCommand extends ScannerCommand {
+
+	/**
+	 * There are flags that are common to all variants of the run command. We can define those flags
+	 * here to avoid duplicate code.
+	 * @protected
+	 */
+	protected static flagsConfig = {
+		verbose: flags.builtin(),
+		// BEGIN: Flags related to results processing.
+		format: flags.enum({
+			char: 'f',
+			description: messages.getMessage('flags.formatDescription'),
+			longDescription: messages.getMessage('flags.formatDescriptionLong'),
+			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
+		}),
+		outfile: flags.string({
+			char: 'o',
+			description: messages.getMessage('flags.outfileDescription'),
+			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+		}),
+		'severity-threshold': flags.integer({
+			char: 's',
+			description: messages.getMessage('flags.sevthresholdDescription'),
+			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
+			exclusive: ['json'],
+			min: 1,
+			max: 3
+		}),
+		'normalize-severity': flags.boolean({
+			description: messages.getMessage('flags.normalizesevDescription'),
+			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
+		})
+		// END: Flags related to results processing.
+	};
 
 	async runInternal(): Promise<AnyJson> {
 		// First, do any validations that can't be handled with out-of-the-box stuff.
@@ -94,7 +129,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.cannotWriteTableToFile', []);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.cannotWriteTableToFile', []);
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.

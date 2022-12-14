@@ -3,7 +3,6 @@ import {Messages, SfdxError} from '@salesforce/core';
 import {LooseObject} from '../../types';
 import {PathlessEngineFilters} from '../../Constants';
 import {CUSTOM_CONFIG} from '../../Constants';
-import {OUTPUT_FORMAT} from '../../lib/RuleManager';
 import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
 import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
 import untildify = require('untildify');
@@ -14,7 +13,7 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -29,9 +28,9 @@ export default class Run extends ScannerRunCommand {
 
 	// This defines the flags accepted by this command.
 	protected static flagsConfig = {
-		verbose: flags.builtin(),
-		// BEGIN: Flags consumed by ScannerCommand#buildRuleFilters
-		// These flags are how you choose which rules you're running.
+		// Include all common flags from the super class.
+		...ScannerRunCommand.flagsConfig,
+		// BEGIN: Filter-related flags.
 		category: flags.array({
 			char: 'c',
 			description: messages.getMessage('flags.categoryDescription'),
@@ -51,26 +50,16 @@ export default class Run extends ScannerRunCommand {
 			longDescription: messages.getMessage('flags.engineDescriptionLong'),
 			options: [...PathlessEngineFilters]
 		}),
-		// END: Flags consumed by ScannerCommand#buildRuleFilters
-		// These flags are how you choose which files you're targeting.
+		// END: Filter-related flags.
+		// BEGIN: Targeting-related flags.
 		target: flags.array({
 			char: 't',
 			description: messages.getMessage('flags.targetDescription'),
 			longDescription: messages.getMessage('flags.targetDescriptionLong'),
 			required: true
 		}),
-		// These flags modify how the process runs, rather than what it consumes.
-		format: flags.enum({
-			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
-		}),
-		outfile: flags.string({
-			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
-		}),
+		// END: Targeting-related flags.
+		// BEGIN: Engine config flags.
 		tsconfig: flags.string({
 			description: messages.getMessage('flags.tsconfigDescription'),
 			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
@@ -92,27 +81,18 @@ export default class Run extends ScannerRunCommand {
 				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
-		'severity-threshold': flags.integer({
-            char: 's',
-            description: messages.getMessage('flags.stDescription'),
-            longDescription: messages.getMessage('flags.stDescriptionLong'),
-			exclusive: ['json'],
-			min: 1,
-			max: 3
-        }),
-		"normalize-severity": flags.boolean({
-			description: messages.getMessage('flags.nsDescription'),
-			longDescription: messages.getMessage('flags.nsDescriptionLong')
-		}),
+		// END: Engine config flags.
+		// BEGIN: Flags related to results processing.
 		"verbose-violations": flags.boolean({
 			description: messages.getMessage('flags.verboseViolationsDescription'),
 			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
-		}),
+		})
+		// END: Flags related to results processing.
 	};
 
 	protected validateCommandFlags(): Promise<void> {
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.tsConfigEslintConfigExclusive', []);
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'run-pathless', 'validations.tsConfigEslintConfigExclusive', []);
 		}
 
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
@@ -121,7 +101,7 @@ export default class Run extends ScannerRunCommand {
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (this.flags.target as string[])) {
 			if (target.indexOf('#') > -1) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.methodLevelTargetingDisallowed', [target]);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-pathless', 'validations.methodLevelTargetingDisallowed', [target]);
 			}
 		}
 		return Promise.resolve();
