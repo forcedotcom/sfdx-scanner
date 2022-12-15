@@ -1,7 +1,4 @@
-import path = require('path');
 import globby = require('globby');
-import normalize = require('normalize-path');
-import untildify = require('untildify');
 import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {CUSTOM_CONFIG} from '../../../Constants';
@@ -49,14 +46,6 @@ export default class Dfa extends ScannerRunCommand {
 			longDescription: messages.getMessage('flags.targetDescriptionLong'),
 			required: true
 		}),
-		projectdir:  flags.array({
-			char: 'p',
-			description: messages.getMessage('flags.projectdirDescription'),
-			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			map: d => normalize(untildify(d)),
-			required: true
-		}),
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': flags.integer({
@@ -83,17 +72,13 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Config-overrideable engine flags.
 	};
 
-	protected async validateCommandFlags(): Promise<void> {
+	protected async validateVariantFlags(): Promise<void> {
 		const fh = new FileHandler();
-		// Entries in the projectdir array must be non-glob paths to existing directories.
-		for (const dir of (this.flags.projectdir as string[])) {
-			if (globby.hasMagic(dir)) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirCannotBeGlob', []);
-			} else if (!(await fh.exists(dir))) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustExist', []);
-			} else if (!(await fh.stats(dir)).isDirectory()) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirMustBeDir', []);
-			}
+		// The superclass will validate that --projectdir is well-formed,
+		// but doesn't require that the flag actually be present.
+		// So we should make sure it exists here.
+		if (!this.flags.projectdir || (this.flags.projectdir as string[]).length === 0) {
+			throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirIsRequired', []);
 		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
 		for (const target of (this.flags.target as string[])) {
@@ -111,15 +96,14 @@ export default class Dfa extends ScannerRunCommand {
 	}
 
 	/**
-	 * Gather a map of options that will be passed to the RuleManager without validation.
-	 * @private
+	 * Gather engine options that are unique to each sub-variant.
+	 * @protected
+	 * @override
 	 */
-	protected gatherEngineOptions(): Map<string,string> {
-		const options: Map<string,string> = new Map();
-		const sfgeConfig: SfgeConfig = {
-			projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
-		};
-
+	protected mergeVariantEngineOptions(options: Map<string,string>): void {
+		// The flags have been validated by now, meaning --projectdir is confirmed as present,
+		// meaning we can assume the existence of a GraphEngine config in the common options.
+		const sfgeConfig: SfgeConfig = JSON.parse(options.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
 		if (this.flags['rule-thread-count'] != null) {
 			sfgeConfig.ruleThreadCount = this.flags['rule-thread-count'] as number;
 		}
@@ -131,7 +115,6 @@ export default class Dfa extends ScannerRunCommand {
 		}
 		sfgeConfig.ruleDisableWarningViolation = this.getBooleanEngineOption(RULE_DISABLE_WARNING_VIOLATION_FLAG);
 		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
-		return options;
 	}
 
 	/**

@@ -90,7 +90,7 @@ export default class Run extends ScannerRunCommand {
 		// END: Flags related to results processing.
 	};
 
-	protected validateCommandFlags(): Promise<void> {
+	protected validateVariantFlags(): Promise<void> {
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
 			throw SfdxError.create('@salesforce/sfdx-scanner', 'run-pathless', 'validations.tsConfigEslintConfigExclusive', []);
 		}
@@ -108,10 +108,9 @@ export default class Run extends ScannerRunCommand {
 	}
 
 	/**
-	 * Gather a map of options that will be passed to the RuleManager without validation.
+	 * Gather engine options that are unique to each sub-variant.
 	 */
-	protected gatherEngineOptions(): Map<string, string> {
-		const options: Map<string,string> = new Map();
+	protected mergeVariantEngineOptions(options: Map<string,string>): void {
 		if (this.flags.tsconfig) {
 			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
 			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
@@ -144,9 +143,6 @@ export default class Run extends ScannerRunCommand {
 		if (this.flags["verbose-violations"]) {
 			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
 		}
-
-
-		return options;
 	}
 
 	protected pathBasedEngines(): boolean {

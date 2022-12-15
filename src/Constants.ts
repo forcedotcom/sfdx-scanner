@@ -69,6 +69,7 @@ export const PathlessEngineFilters = [
 	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS,
+	ENGINE.SFGE,
 	ENGINE.CPD
 ]
 

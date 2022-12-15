@@ -73,7 +73,9 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 	/**
 	 * Returns the name of the engine as referenced everywhere within the code.
 	 * NOTE: By defining this at the abstract class, all engines in this family
-	 * will share the same name and everything that comes with it (e.g., config).
+	 *       will share the same name and everything that comes with it (e.g., config).
+	 *       As such, the user experiences a single unified engine whose catalog includes
+	 *       both DFA and non-DFA rules, instead of two discrete engines.
 	 * @override
 	 */
 	public getName(): string {
@@ -164,9 +166,23 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 	 */
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string,string>): boolean {
-		// If the engine wasn't filtered out, there's no reason not to run it.
-		// TODO: WE MAY WANT TO RE-ASSESS THIS.
-		return true;
+		// By now, the thing to check is whether we have the necessary engineOptions information to actually
+		// run the engine.
+		// - For DFA, this should always be true, since the command itself requires the appropriate flags.
+		// - For non-DFA, this information may have been omitted either mistakenly or intentionally.
+		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
+			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
+			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {
+				// If the engineOptions entry exists and has a non-empty projectDirs, then we're good.
+				return true;
+			}
+		}
+		// TODO: To minimize test failures, we're just skipping GraphEngine if it's missing config info.
+		//       Upcoming story W-111533367 pertains to properly configuring pathless GraphEngine, and
+		//       during that story we can change this to either throw an error and halt, or log a warning/info
+		//       and skip the engine.
+		this.logger.info('GraphEngine missing critical parameters, skipping its execution');
+		return false;
 	}
 
 	/**

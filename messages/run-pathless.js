@@ -78,5 +78,13 @@ This example uses --normalize-severity to output normalized severity and engine-
 
 This example uses --severity-threshold to throw a non-zero exit code when rule violations of normalized severity 2 or greater are found. If any violations with the specified severity (or greater) are found, the exit code equals the severity of the most severe violation.
 	$ sfdx scanner:run --target "/some-project/" --severity-threshold 2
+
+The paths specified for --projectdir must contain all files specified through --target cumulatively.
+	$ sfdx scanner:run --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
+	$ sfdx scanner:run --target "./**/*.cls" --projectdir "./"
+	$ sfdx scanner:run --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
+
+This example fails because the set of files included in --target is larger than that contained in --projectdir:
+	$ sfdx scanner:run --target "./**/*.cls" --projectdir "./myproject/"
 `
 };

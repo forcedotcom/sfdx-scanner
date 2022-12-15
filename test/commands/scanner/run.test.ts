@@ -756,12 +756,13 @@ describe('scanner:run', function () {
 				// there are five retries in addition to the initial run.
 				// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
 				// The following categories are implicitly included:
-				// - 11 PMD categories
+				// - 8 PMD categories
 				// - 3 ESLint categories
 				// - 3 ESLint-Typescript categories
 				// - 1 RetireJS category
-				// For a total of 18
-				expect(implicitMessages || []).to.have.lengthOf(18, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// - 2 Salesforce Graph Engine categories
+				// For a total of 17
+				expect(implicitMessages || []).to.have.lengthOf(17, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});
 	});

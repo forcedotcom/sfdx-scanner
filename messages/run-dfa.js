@@ -3,8 +3,6 @@ module.exports = {
 	"commandDescriptionLong": `Scans codebase with all DFA rules by default.
 	Specify the format of output and print results directly or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
-		"projectdirDescription": "provide root directory of project",
-		"projectdirDescriptionLong": "Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.",
 		"ruledisablewarningviolationDescription": "disable warning violations from Salesforce Graph Engine. Alternatively, set value using environment variable `SFGE_RULE_DISABLE_WARNING_VIOLATION`",
 		"ruledisablewarningviolationDescriptionLong": "Disables warning violations, such as those on StripInaccessible READ access, to get only high-severity violations (default: false). Inherits value from SFGE_RULE_DISABLE_WARNING_VIOLATION env-var if set.",
 		"rulethreadcountDescription": "specify number of threads that evaluate DFA rules. Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`. Default is 4",
@@ -19,12 +17,10 @@ module.exports = {
 	"validations": {
 		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
 		"methodLevelTargetMustBeRealFile": "Method-level target %s must be a real file",
-		"projectdirCannotBeGlob": "--projectdir cannot specify globs",
-		"projectdirMustBeDir": "--projectdir must specify directories",
-		"projectdirMustExist": "--projectdir must specify existing paths"
+		"projectdirIsRequired": "--projectdir is required for this command",
 	},
 	"examples": `The paths specified for --projectdir must contain all files specified through --target cumulatively.
-	$ sfdx sacnner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
+	$ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
 	$ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./"
 	$ sfdx scanner:run:dfa --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
 This example fails because the set of files included in --target is larger than that contained in --projectdir:
