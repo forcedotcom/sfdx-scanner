@@ -10,6 +10,7 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
+import com.salesforce.messaging.CliMessager;
 import com.salesforce.metainfo.MetaInfoCollectorTestProvider;
 import com.salesforce.metainfo.VisualForceHandlerImpl;
 import com.salesforce.rules.AbstractRuleRunner;
@@ -19,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +33,12 @@ public class PathEntryPointUtilTest {
     @BeforeEach
     public void setup() {
         this.g = TestUtil.getGraph();
+        CliMessager.getInstance().resetMessages();
+    }
+
+    @AfterEach
+    public void teardown() {
+        CliMessager.getInstance().resetMessages();
     }
 
     @ValueSource(
