@@ -36,6 +36,12 @@ export enum RuleType {
 	DFA = "dfa"
 }
 
+export enum MissingOptionsBehavior {
+	HALT = 'halt',
+	WARN = 'warn',
+	SKIP = 'skip'
+}
+
 /**
  * Main engine types that have more than one variation
  */

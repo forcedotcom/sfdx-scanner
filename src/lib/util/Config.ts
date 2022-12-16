@@ -1,10 +1,10 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, Messages, SfdxError} from '@salesforce/core';
-import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
+import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE, MissingOptionsBehavior} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import { uxEvents, EVENTS } from '../ScannerEvents';
-import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
+import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard, stringTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
 Messages.importMessagesDirectory(__dirname);
@@ -25,6 +25,7 @@ export type EngineConfigContent = {
 	targetPatterns: string[];
 	supportedLanguages?: string[];
 	minimumTokens?: number;
+	missingOptionsBehavior?: MissingOptionsBehavior;
 }
 
 const DEFAULT_CONFIG: ConfigContent = {
@@ -88,7 +89,8 @@ const DEFAULT_CONFIG: ConfigContent = {
 				"**/*.cls",
 				"**/*.trigger"
 			],
-			disabled: false
+			disabled: false,
+			missingOptionsBehavior: MissingOptionsBehavior.WARN
 		}
 	]
 };
@@ -206,6 +208,15 @@ export class Config {
 		return this.getNumberConfigValue('minimumTokens', engine);
 	}
 
+	public getMissingOptionsBehavior(engine: ENGINE): Promise<MissingOptionsBehavior> {
+		// The enum is serialized as a string.
+		return this.getStringEnumConfigValue('missingOptionsBehavior', engine, Object.values(MissingOptionsBehavior))
+			.then(option => {
+				// Convert the value from a string back into the enum.
+				return option as MissingOptionsBehavior;
+			})
+	}
+
 	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
 		return this.getConfigValue<boolean>(propertyName, engine, booleanTypeGuard, 'InvalidBooleanValue');
 	}
@@ -216,6 +227,24 @@ export class Config {
 
 	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {
 		return this.getConfigValue<string[]>(propertyName, engine, stringArrayTypeGuard, 'InvalidStringArrayValue');
+	}
+
+	protected getStringConfigValue(propertyName: string, engine: ENGINE): Promise<string> {
+		return this.getConfigValue<string>(propertyName, engine, stringTypeGuard, 'InvalidStringValue');
+	}
+
+	protected getStringEnumConfigValue(propertyName: string, engine: ENGINE, enumOptions: string[]): Promise<string> {
+		return this.getStringConfigValue(propertyName, engine)
+			.then(enumValue => {
+				if (enumOptions.includes(enumValue)) {
+					return enumValue;
+				} else {
+					throw SfdxError.create('@salesforce/sfdx-scanner',
+						'Config',
+						'InvalidStringEnumValue',
+						[propertyName, this.configFilePath, engine.valueOf(), enumOptions.join("|"), enumValue]);
+				}
+			});
 	}
 
 	private async getConfigValue<T>(propertyName: string, engine: ENGINE, typeChecker: GenericTypeGuard<T>, errTemplate: string): Promise<T> {

@@ -81,8 +81,8 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	public startSpinner(): void {
 		uxEvents.emit(
 			EVENTS.START_SPINNER,
-			messages.getMessage("spinnerStart", [this.logFilePath]),
-			messages.getMessage("pleaseWait")
+			messages.getMessage("messages.spinnerStart", [this.logFilePath]),
+			messages.getMessage("messages.pleaseWait")
 		);
 
 		// TODO: This timer logic should ideally live inside waitOnSpinner()
