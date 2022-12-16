@@ -44,8 +44,15 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 			case MissingOptionsBehavior.HALT:
 				throw SfdxError.create('@salesforce/sfdx-scanner', 'SfgeEngine', 'errors.failedWithoutProjectDir', []);
 			case MissingOptionsBehavior.WARN:
-				const msg = messages.getMessage('warnings.skippedWithoutProjectDir', [this.getName(), 'missingOptionsBehavior', MissingOptionsBehavior.WARN, this.config.getConfigFilePath()]);
-				uxEvents.emit(EVENTS.WARNING_ALWAYS, msg);
+				uxEvents.emit(
+					EVENTS.WARNING_ALWAYS,
+					messages.getMessage('warnings.skippedWithoutProjectDir', [
+						this.getName(),
+						'missingOptionsBehavior',
+						MissingOptionsBehavior.WARN,
+						this.config.getConfigFilePath()
+					]
+				));
 				return false;
 			default:
 				// We know the enum is valid, so the only other option is SKIP, which just means we skip silently.
