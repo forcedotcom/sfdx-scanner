@@ -13,6 +13,16 @@ function getSfdxScannerPath(): string {
 	return Controller.getSfdxScannerPath();
 }
 
+/**
+ * scanner:rule:remove typically prompts the user to confirm that they actually
+ * want to remove the rules in question.
+ * For these tests, this constant will indicate a number of milliseconds that
+ * we should wait before simulating a user's response to that prompt.
+ * It's important to wait, because if we send the input too early, it will be
+ * missed by the test, which will eventually just time out and fail.
+ */
+const waitTime = 5000;
+
 // NOTE: The relative paths are relative to the root of the project instead of to the location of this file,
 // because the root is the working directory during test evaluation.
 const parentFolderForJars = path.resolve('test', 'test-jars', 'apex');
@@ -53,7 +63,7 @@ describe('scanner:rule:remove', () => {
 			describe('Test Case: Removing a single PMD JAR', () => {
 				removeTest
 					// We'll wait a few seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 5000)
+					.stdin('y\n', waitTime)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar1
@@ -75,7 +85,7 @@ describe('scanner:rule:remove', () => {
 			describe('Test Case: Removing multiple PMD JARs', () => {
 				removeTest
 					// We'll wait a few seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 5000)
+					.stdin('y\n', waitTime)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
 						'--path', [pathToApexJar1, pathToApexJar2].join(',')
@@ -97,7 +107,7 @@ describe('scanner:rule:remove', () => {
 			describe('Test Case: Removing an entire folder of PMD JARs', () => {
 				removeTest
 					// We'll wait a few seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 5000)
+					.stdin('y\n', waitTime)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
 						'--path', parentFolderForJars
@@ -119,7 +129,7 @@ describe('scanner:rule:remove', () => {
 			describe('Edge Case: Provided path is not registered as a custom rule', () => {
 				removeTest
 					// We'll wait a few seconds then send in a 'y', to simulate the user confirming the request.
-					.stdin('y\n', 5000)
+					.stdin('y\n', waitTime)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar4
@@ -134,7 +144,7 @@ describe('scanner:rule:remove', () => {
 			describe('Test Case: User chooses to abort transaction instead of confirming', () => {
 				removeTest
 					// We'll wait a few seconds and then send in a 'n', to simulate the user aborting the request.
-					.stdin('n\n', 5000)
+					.stdin('n\n', waitTime)
 					.timeout(10000)
 					.command(['scanner:rule:remove',
 						'--path', pathToApexJar1
