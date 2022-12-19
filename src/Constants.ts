@@ -31,6 +31,11 @@ export enum ENGINE {
 	SFGE = 'sfge'
 }
 
+export enum RuleType {
+	PATHLESS = "pathless",
+	DFA = "dfa"
+}
+
 /**
  * Main engine types that have more than one variation
  */

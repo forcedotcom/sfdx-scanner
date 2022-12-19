@@ -10,6 +10,7 @@ import com.google.common.collect.Lists;
 import com.salesforce.cli.CliArgParser;
 import com.salesforce.cli.Result;
 import com.salesforce.config.UserFacingMessages;
+import com.salesforce.messaging.CliMessager;
 import com.salesforce.rules.RuleRunner;
 import com.salesforce.rules.Violation;
 import com.salesforce.testutils.DummyVertex;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,6 +68,12 @@ public class MainTest {
 
         Mockito.lenient().when(dependencies.createExecuteArgParser()).thenReturn(executeArgParser);
         Mockito.lenient().when(dependencies.getGraph()).thenReturn(g);
+        CliMessager.getInstance().resetMessages();
+    }
+
+    @AfterEach
+    void teardown() {
+        CliMessager.getInstance().resetMessages();
     }
 
     @Test

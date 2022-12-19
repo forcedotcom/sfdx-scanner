@@ -17,7 +17,6 @@ import com.salesforce.metainfo.MetaInfoCollectorProvider;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.AbstractRuleRunner;
 import com.salesforce.rules.RuleRunner;
-import com.salesforce.rules.RuleUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.Arrays;
@@ -28,30 +27,28 @@ import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /**
- * The main class, invoked by sfdx-scanner. `catalog` flow lists all of the available rules in a
- * standardized format.
- *
- * <p>The `execute` flow accepts as a parameter the name of a file whose contents are a JSON with
- * the following structure:
+ * The main class, invoked by sfdx-scanner. The first arg should be either `catalog` or `execute`,
+ * and determines which flow runs. <br>
+ * For `catalog`, the second arg should be either `pathless` or `dfa`. Enabled rules matching that
+ * type will be logged as a JSON. No meaningful environment variables exist for this flow. Exit code
+ * 0 means success. Any other exit code means failure. <br>
+ * For `execute`, the second arg should be the path to a JSON file whose contents are structured as:
  *
  * <ol>
- *   <li>rulesToRun: An array of rule names.
- *   <li>projectDirs: An array of directories from which the graph should be built.
- *   <li>targets: An array of objects with a `targetFile` property indicating the file to be
- *       analyzed and a `targetMethods` property indicating individual methods.
+ *   <li>rulesToRun: an array of rule names.
+ *   <li>projectDirs: an array of directories from which the graph should be built.
+ *   <li>targets: an array of objects with a `targetFile` property indicating the file to be
+ *       analyzed and a `targetMethods` property that may optionally indicate individual methods
+ *       within that file.
  * </ol>
  *
- * <p>Exit codes:
+ * The following exit codes are possible:
  *
- * <ul>
- *   <li>Negative numbers indicate an internal error.
- *   <li>0 indicates a successful run with * no violations.
- *   <li>Positive numbers indicate a successful run with exit-code-many violations.
- * </ul>
- *
- * <p>Usage: mvn exec:java -Dexec.mainClass=com.salesforce.Main -Dexec.args="catalog" OR mvn
- * exec:java -Dexec.mainClass=com.salesforce.Main -Dexec.args="execute [path to file listing
- * targets] [path to file listing sources] [comma-separated rules]"
+ * <ol>
+ *   <li>0: Successful run without violations.
+ *   <li>1: Internal error with no violations.
+ *   <li>4: Successful run with violations.5: Internal error with some violations.>
+ * </ol>
  */
 @SuppressWarnings(
         "PMD.SystemPrintln") // Since println is currently used to communicate to outer layer
@@ -97,7 +94,7 @@ public class Main {
 
         switch (action) {
             case CATALOG:
-                return catalog();
+                return catalog(args);
             case EXECUTE:
                 return execute(args);
             default:
@@ -105,11 +102,14 @@ public class Main {
         }
     }
 
-    private int catalog() {
+    /** Expectations for args documented in class header above. */
+    private int catalog(String... args) {
         LOGGER.info("Invoked CATALOG flow");
+        CliArgParser.CatalogArgParser cap = new CliArgParser.CatalogArgParser();
         List<AbstractRule> rules;
         try {
-            rules = RuleUtil.getEnabledRules();
+            cap.parseArgs(args);
+            rules = cap.getSelectedRules();
         } catch (SfgeException | SfgeRuntimeException ex) {
             dependencies.printError(ex.getMessage());
             return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
@@ -119,6 +119,7 @@ public class Main {
         return EXIT_GOOD_RUN_NO_VIOLATIONS;
     }
 
+    /** Expectations for args documented in class header above. */
     private int execute(String... args) {
         LOGGER.info("Invoked EXECUTE flow");
         // Parse the arguments with our delegate class.

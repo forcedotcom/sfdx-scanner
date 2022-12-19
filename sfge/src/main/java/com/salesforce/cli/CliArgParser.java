@@ -41,6 +41,52 @@ public class CliArgParser {
         }
     }
 
+    public static class CatalogArgParser {
+        private static final int ARG_COUNT = 2;
+        // NOTE: This value must match the one for the RuleType enum declared in Constants.ts.
+        private static final String PATHLESS = "pathless";
+        // NOTE: This value must match the one for the RuleType enum declared in Constants.ts.
+        private static final String DFA = "dfa";
+
+        private List<AbstractRule> selectedRules;
+
+        public CatalogArgParser() {
+            selectedRules = new ArrayList<>();
+        }
+
+        /**
+         * See the documentation of {@link com.salesforce.Main} for information about the
+         * expectations for args.
+         */
+        public void parseArgs(String... args) throws RuleUtil.RuleNotFoundException {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("CLI args received: " + Arrays.toString(args));
+            }
+            // Make sure we have the right number of arguments.
+            if (args.length != ARG_COUNT) {
+                throw new InvocationException(
+                        String.format(
+                                "Wrong number of arguments. Expected %d; received %d",
+                                ARG_COUNT, args.length));
+            }
+            switch (args[1]) {
+                case PATHLESS:
+                    selectedRules = RuleUtil.getEnabledStaticRules();
+                    break;
+                case DFA:
+                    selectedRules = RuleUtil.getEnabledPathBasedRules();
+                    break;
+                default:
+                    selectedRules = RuleUtil.getEnabledRules();
+                    break;
+            }
+        }
+
+        public List<AbstractRule> getSelectedRules() {
+            return selectedRules;
+        }
+    }
+
     public static class ExecuteArgParser {
         private static int ARG_COUNT = 2;
 
@@ -62,6 +108,10 @@ public class CliArgParser {
             this.dependencies = dependencies;
         }
 
+        /**
+         * See the documentation of {@link com.salesforce.Main} for information about the
+         * expectations for args.
+         */
         public void parseArgs(String... args) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("CLI args received: " + Arrays.toString(args));
@@ -90,28 +140,6 @@ public class CliArgParser {
 
         public List<AbstractRule> getSelectedRules() {
             return selectedRules;
-        }
-
-        private void identifyProjectDirs(String inputFile) {
-            try {
-                projectDirs.addAll(readFile(inputFile));
-            } catch (IOException ex) {
-                throw new InvocationException(
-                        "Could not read source-list file " + inputFile + ": " + ex.getMessage(),
-                        ex);
-            }
-        }
-
-        private void identifyTargetFiles(String inputFile) {
-            try {
-                String targetJson = String.join("\n", readFile(inputFile));
-                Gson gson = new Gson();
-                targets.addAll(Arrays.asList(gson.fromJson(targetJson, RuleRunnerTarget[].class)));
-            } catch (IOException ex) {
-                throw new InvocationException(
-                        "Could not read target-list file " + inputFile + ": " + ex.getMessage(),
-                        ex);
-            }
         }
 
         private ExecuteInput readInputFile(String fileName) {
