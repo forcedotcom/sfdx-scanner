@@ -54,6 +54,10 @@ public class CliArgParser {
             selectedRules = new ArrayList<>();
         }
 
+        /**
+         * See the documentation of {@link com.salesforce.Main} for information about the
+         * expectations for args.
+         */
         public void parseArgs(String... args) throws RuleUtil.RuleNotFoundException {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("CLI args received: " + Arrays.toString(args));
@@ -104,6 +108,10 @@ public class CliArgParser {
             this.dependencies = dependencies;
         }
 
+        /**
+         * See the documentation of {@link com.salesforce.Main} for information about the
+         * expectations for args.
+         */
         public void parseArgs(String... args) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("CLI args received: " + Arrays.toString(args));
