@@ -3,22 +3,12 @@ module.exports = {
 	"commandDescriptionLong": `Scans codebase with all DFA rules by default.
 	Specify the format of output and print results directly or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
-		"formatDescription": "specify results output format",
-		"formatDescriptionLong": "Specifies results output format written directly to the console.",
-		"normalizesevDescription": "return normalized severity in addition to the engine-specific severity",
-		"normalizesevDescriptionLong": "Returns normalized severity 1 (high), 2 (moderate), and 3 (low) and the engine-specific severity. For the html option, normalized severity is displayed instead of the engine severity.",
-		"outfileDescription": "write output to a file",
-		"outfileDescriptionLong": "Writes output to a file.",
-		"projectdirDescription": "provide root directory of project",
-		"projectdirDescriptionLong": "Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.",
 		"ruledisablewarningviolationDescription": "disable warning violations from Salesforce Graph Engine. Alternatively, set value using environment variable `SFGE_RULE_DISABLE_WARNING_VIOLATION`",
 		"ruledisablewarningviolationDescriptionLong": "Disables warning violations, such as those on StripInaccessible READ access, to get only high-severity violations (default: false). Inherits value from SFGE_RULE_DISABLE_WARNING_VIOLATION env-var if set.",
 		"rulethreadcountDescription": "specify number of threads that evaluate DFA rules. Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`. Default is 4",
 		"rulethreadcountDescriptionLong": "Specifies number of rule evaluation threads, or how many entrypoints can be evaluated concurrently. Inherits value from SFGE_RULE_THREAD_COUNT env-var, if set. Default is 4.",
 		"rulethreadtimeoutDescription": "specify timeout for individual rule threads in milliseconds. Alternatively, set the timeout value using environment variable `SFGE_RULE_THREAD_TIMEOUT`. Default: 90000 ms",
 		"rulethreadtimeoutDescriptionLong": "Specifies time limit for evaluating a single entrypoint in milliseconds. Inherits value from SFGE_RULE_THREAD_TIMEOUT env-var if set. Default is 900,000 ms, or 15 minutes.",
-		"sevthresholdDescription": "throw an error when violations of specific or higher severity are detected, and invoke --normalize-severity",
-		"sevthresholdDescriptionLong": "Throws an error when violations are found with equal or greater severity than provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag.",
 		"sfgejvmargsDescription": "specify Java Virtual Machine (JVM) arguments to optimize Salesforce Graph Engine execution to your system (optional)",
 		"sfgejvmargsDescriptionLong": "Specifies Java Virtual Machine arguments to override system defaults while executing Salesforce Graph Engine. For multiple arguments, add them to the same string separated by space.",
 		"targetDescription": "return location of source code",
@@ -27,12 +17,10 @@ module.exports = {
 	"validations": {
 		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
 		"methodLevelTargetMustBeRealFile": "Method-level target %s must be a real file",
-		"projectdirCannotBeGlob": "--projectdir cannot specify globs",
-		"projectdirMustBeDir": "--projectdir must specify directories",
-		"projectdirMustExist": "--projectdir must specify existing paths"
+		"projectdirIsRequired": "--projectdir is required for this command",
 	},
 	"examples": `The paths specified for --projectdir must contain all files specified through --target cumulatively.
-	$ sfdx sacnner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
+	$ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
 	$ sfdx scanner:run:dfa --target "./**/*.cls" --projectdir "./"
 	$ sfdx scanner:run:dfa --target "./dir1/file1.cls,./dir2/file2.cls" --projectdir "./dir1/,./dir2/"
 This example fails because the set of files included in --target is larger than that contained in --projectdir:

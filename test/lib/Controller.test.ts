@@ -15,30 +15,32 @@ describe('Controller.ts tests', () => {
 
 	it('getAllEngines returns enabled/disabled engines', async() => {
 		const engines: RuleEngine[] = await Controller.getAllEngines();
-		const names: string[] = engines.map(e => e.getName());
+		const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length, names + '').to.equal(9);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_LWC);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.CPD);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(engines.length, names + '').to.equal(10);
+		expect(names).to.contain('JavascriptEslintEngine');
+		expect(names).to.contain('LWCEslintEngine');
+		expect(names).to.contain('TypescriptEslintEngine');
+		expect(names).to.contain('CustomEslintEngine');
+		expect(names).to.contain('PmdEngine');
+		expect(names).to.contain('CustomPmdEngine');
+		expect(names).to.contain('RetireJsEngine');
+		expect(names).to.contain('CpdEngine');
+		expect(names).to.contain('SfgeDfaEngine');
+		expect(names).to.contain('SfgePathlessEngine');
 	});
 
 	it('getEnabledEngines returns only non-custom enabled engines when engineOptions is empty', async() => {
 		const engines: RuleEngine[] = await Controller.getEnabledEngines();
-		const names: string[] = engines.map(e => e.getName());
+		const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length).to.equal(5);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(engines.length).to.equal(6);
+		expect(names).to.contain('JavascriptEslintEngine');
+		expect(names).to.contain('TypescriptEslintEngine');
+		expect(names).to.contain('PmdEngine');
+		expect(names).to.contain('RetireJsEngine');
+		expect(names).to.contain('SfgeDfaEngine');
+		expect(names).to.contain('SfgePathlessEngine');
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM when engineOptions contains pmdconfig', async () => {
@@ -47,14 +49,15 @@ describe('Controller.ts tests', () => {
 		]);
 
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
+		const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length).to.equal(5);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(engines.length).to.equal(6);
+		expect(names).to.contain('JavascriptEslintEngine');
+		expect(names).to.contain('TypescriptEslintEngine');
+		expect(names).to.contain('CustomPmdEngine');
+		expect(names).to.contain('RetireJsEngine');
+		expect(names).to.contain('SfgeDfaEngine');
+		expect(names).to.contain('SfgePathlessEngine');
 	});
 
 	it('getEnabledEngines returns ESLINT_CUSTOM when engineOptions contains eslintconfig', async () => {
@@ -63,13 +66,14 @@ describe('Controller.ts tests', () => {
 		]);
 
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
+		const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length).to.equal(4);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(engines.length).to.equal(5);
+		expect(names).to.contain('CustomEslintEngine');
+		expect(names).to.contain('PmdEngine');
+		expect(names).to.contain('RetireJsEngine');
+		expect(names).to.contain('SfgeDfaEngine');
+		expect(names).to.contain('SfgePathlessEngine');
 	});
 
 	it('getEnabledEngines returns PMD_CUSTOM, ESLINT_CUSTOM when engineOptions contains pmdconfig and eslintconfig', async () => {
@@ -79,13 +83,14 @@ describe('Controller.ts tests', () => {
 		]);
 
 		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
+		const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length).to.equal(4);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+		expect(engines.length).to.equal(5);
+		expect(names).to.contain('CustomEslintEngine');
+		expect(names).to.contain('CustomPmdEngine');
+		expect(names).to.contain('RetireJsEngine');
+		expect(names).to.contain('SfgeDfaEngine');
+		expect(names).to.contain('SfgePathlessEngine');
 	});
 
 	it('getFilteredEngines filters and includes disabled', async() => {
