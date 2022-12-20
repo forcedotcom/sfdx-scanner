@@ -1,8 +1,7 @@
-import {SfdxError, Messages} from '@salesforce/core';
+import {Messages} from '@salesforce/core';
 import {AbstractSfgeEngine, SfgeViolation} from "./AbstractSfgeEngine";
 import {Rule, RuleGroup, RuleTarget, RuleViolation, SfgeConfig} from '../../types';
 import {CUSTOM_CONFIG, MissingOptionsBehavior, RuleType} from '../../Constants';
-import {uxEvents, EVENTS} from '../ScannerEvents';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'SfgeEngine');
@@ -40,24 +39,14 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 				return true;
 			}
 		}
-		switch (this.missingOptionsBehavior) {
-			case MissingOptionsBehavior.HALT:
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'SfgeEngine', 'errors.failedWithoutProjectDir', []);
-			case MissingOptionsBehavior.WARN:
-				uxEvents.emit(
-					EVENTS.WARNING_ALWAYS,
-					messages.getMessage('warnings.skippedWithoutProjectDir', [
-						this.getName(),
-						'missingOptionsBehavior',
-						MissingOptionsBehavior.WARN,
-						this.config.getConfigFilePath()
-					]
-				));
-				return false;
-			default:
-				// We know the enum is valid, so the only other option is SKIP, which just means we skip silently.
-				return false;
-		}
+		const haltString = messages.getMessage('errors.failedWithoutProjectDir', []);
+		const warnString = messages.getMessage('warnings.skippedWithoutProjectDir', [
+			this.getName(),
+			'missingOptionsBehavior',
+			MissingOptionsBehavior.WARN,
+			this.config.getConfigFilePath()
+		]);
+		return this.handleMissingOptionsBehavior(this.missingOptionsBehavior, haltString, warnString);
 	}
 
 	protected getSubVariantName(): string {

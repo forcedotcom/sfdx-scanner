@@ -236,7 +236,7 @@ export class Config {
 	protected getStringEnumConfigValue(propertyName: string, engine: ENGINE, enumOptions: string[]): Promise<string> {
 		return this.getStringConfigValue(propertyName, engine)
 			.then(enumValue => {
-				if (enumOptions.includes(enumValue)) {
+				if (enumOptions.includes(enumValue.toLowerCase().trim())) {
 					return enumValue;
 				} else {
 					throw SfdxError.create('@salesforce/sfdx-scanner',
