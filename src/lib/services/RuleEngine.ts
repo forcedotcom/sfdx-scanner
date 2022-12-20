@@ -1,5 +1,7 @@
-import {Severity} from '../../Constants';
+import {SfdxError} from '@salesforce/core';
+import {MissingOptionsBehavior, Severity} from '../../Constants';
 import {Catalog, EngineExecutionDescriptor, Rule, RuleGroup, RuleResult, RuleTarget, TargetPattern} from '../../types';
+import {uxEvents, EVENTS} from '../ScannerEvents';
 
 export interface RuleEngine {
 
@@ -90,6 +92,18 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 			for (const violation of result.violations) {
 				violation.normalizedSeverity = this.getNormalizedSeverity(violation.severity);
 			}
+		}
+	}
+
+	protected handleMissingOptionsBehavior(behavior: MissingOptionsBehavior, haltMessage: string, warnMessage: string): false {
+		switch (behavior) {
+			case MissingOptionsBehavior.HALT:
+				throw new SfdxError(haltMessage);
+			case MissingOptionsBehavior.WARN:
+				uxEvents.emit(EVENTS.WARNING_ALWAYS, warnMessage);
+				return false;
+			default:
+				return false;
 		}
 	}
 }

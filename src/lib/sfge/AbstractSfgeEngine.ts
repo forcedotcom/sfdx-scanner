@@ -41,11 +41,11 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 	protected static ENGINE_ENUM: ENGINE = ENGINE.SFGE;
 	protected static ENGINE_NAME: string = ENGINE.SFGE.valueOf();
 
-	private logger: Logger;
-	private config: Config;
+	protected logger: Logger;
+	protected config: Config;
+	protected initialized: boolean;
 	private eventCreator: EventCreator;
 	private catalog: Catalog;
-	private initialized: boolean;
 
 	protected abstract convertViolation(sfgeViolation: SfgeViolation): RuleViolation;
 
@@ -157,32 +157,6 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 			// Graph Engine does not use rulesets.
 			rulesets: []
 		};
-	}
-
-	/**
-	 * Helps make decision to run an engine or not based on the Rules, Target paths, and the Engine Options selected per
-	 * run. At this point, filtering should have already happened.
-	 * @override
-	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string,string>): boolean {
-		// By now, the thing to check is whether we have the necessary engineOptions information to actually
-		// run the engine.
-		// - For DFA, this should always be true, since the command itself requires the appropriate flags.
-		// - For non-DFA, this information may have been omitted either mistakenly or intentionally.
-		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
-			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
-			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {
-				// If the engineOptions entry exists and has a non-empty projectDirs, then we're good.
-				return true;
-			}
-		}
-		// TODO: To minimize test failures, we're just skipping GraphEngine if it's missing config info.
-		//       Upcoming story W-111533367 pertains to properly configuring pathless GraphEngine, and
-		//       during that story we can change this to either throw an error and halt, or log a warning/info
-		//       and skip the engine.
-		this.logger.info('GraphEngine missing critical parameters, skipping its execution');
-		return false;
 	}
 
 	/**

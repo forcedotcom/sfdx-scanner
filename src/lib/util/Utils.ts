@@ -22,8 +22,12 @@ const numberTypeGuard = (object): object is number => {
 	return typeof object === 'number';
 }
 
+const stringTypeGuard = (object): object is string => {
+	return typeof object === 'string';
+}
+
 const isPathlessViolation = (v: RuleViolation): v is PathlessRuleViolation => {
 	return 'line' in v;
 }
 
-export { booleanTypeGuard, deepCopy, numberTypeGuard, stringArrayTypeGuard, isPathlessViolation };
+export { booleanTypeGuard, deepCopy, numberTypeGuard, stringArrayTypeGuard, stringTypeGuard, isPathlessViolation };
