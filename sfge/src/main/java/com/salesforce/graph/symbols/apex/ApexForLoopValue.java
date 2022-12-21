@@ -131,7 +131,7 @@ public final class ApexForLoopValue extends ApexPropertiesValue<ApexForLoopValue
                     valueToAdd = optApplied.get();
                 } else {
                     // TODO: path expander needs to expand on this method call and return a value
-                    valueToAdd = deepClone(); // TODO: this is unhelpful
+                    valueToAdd = apexValue.deepClone(); // TODO: this is unhelpful
                 }
 
                 if (valueToAdd != null) {

@@ -118,9 +118,7 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        ApexValueBuilder builder =
-            ApexValueBuilder.get(symbols)
-                .returnedFrom(this, vertex);
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
         String methodName = vertex.getMethodName();
         return _applyMethod(vertex, builder, methodName);
     }
@@ -139,13 +137,16 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
         return _applyMethod(invocableExpression, builder, methodName);
     }
 
-    private Optional<ApexValue<?>> _applyMethod(InvocableWithParametersVertex invocableExpression, ApexValueBuilder builder, String methodName) {
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_DESCRIBE.equalsIgnoreCase(methodName)) {
             if (associatedObjectType != null && fieldName != null) {
                 DescribeSObjectResult describeSObjectResult =
                         builder.deepClone().buildDescribeSObjectResult(associatedObjectType);
                 return Optional.of(
-                    builder.buildDescribeFieldResult(describeSObjectResult, fieldName));
+                        builder.buildDescribeFieldResult(describeSObjectResult, fieldName));
             } else {
                 return Optional.empty();
             }

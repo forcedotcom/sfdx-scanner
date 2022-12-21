@@ -28,19 +28,19 @@ public class FieldSetTest {
     }
 
     @ValueSource(
-        strings = {"fs.getDescription()", "fs.getLabel()", "fs.getName()", "fs.getNamespace()"})
+            strings = {"fs.getDescription()", "fs.getLabel()", "fs.getName()", "fs.getNamespace()"})
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testIndeterminantStringMethods(String methodName) {
         String sourceCode =
-            "public class MyClass {\n"
-                + "    public static void doSomething(String x) {\n"
-                + "       FieldSet fs = SObjectType.Account.fieldSets.getMap().get('theName');\n"
-                + "       System.debug(fs);\n"
-                + "       System.debug("
-                + methodName
-                + ");\n"
-                + "    }\n"
-                + "}";
+                "public class MyClass {\n"
+                        + "    public static void doSomething(String x) {\n"
+                        + "       FieldSet fs = SObjectType.Account.fieldSets.getMap().get('theName');\n"
+                        + "       System.debug(fs);\n"
+                        + "       System.debug("
+                        + methodName
+                        + ");\n"
+                        + "    }\n"
+                        + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -56,14 +56,14 @@ public class FieldSetTest {
     @Test
     public void testFieldSetsDotGetMap() {
         String sourceCode =
-            "public class MyClass {\n"
-                + "    public static void doSomething(String obj, String fieldSetName) {\n"
-                + "       Schema.SObjectType objType = Schema.getGlobalDescribe().get(obj);\n"
-                + "       Schema.DescribeSObjectResult dr = objType.getDescribe();\n"
-                + "       Schema.FieldSet fs = dr.fieldSets.getMap().get(fieldSetName);\n"
-                + "       System.debug(fs);\n"
-                + "    }\n"
-                + "}";
+                "public class MyClass {\n"
+                        + "    public static void doSomething(String obj, String fieldSetName) {\n"
+                        + "       Schema.SObjectType objType = Schema.getGlobalDescribe().get(obj);\n"
+                        + "       Schema.DescribeSObjectResult dr = objType.getDescribe();\n"
+                        + "       Schema.FieldSet fs = dr.fieldSets.getMap().get(fieldSetName);\n"
+                        + "       System.debug(fs);\n"
+                        + "    }\n"
+                        + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -80,12 +80,12 @@ public class FieldSetTest {
     @Test
     public void testGetFields() {
         String sourceCode =
-            "public class MyClass {\n"
-                + "    public static void doSomething(String x) {\n"
-                + "       FieldSet fs = SObjectType.Account.fieldSets.getMap().get('theName');\n"
-                + "       System.debug(fs.getFields());\n"
-                + "    }\n"
-                + "}";
+                "public class MyClass {\n"
+                        + "    public static void doSomething(String x) {\n"
+                        + "       FieldSet fs = SObjectType.Account.fieldSets.getMap().get('theName');\n"
+                        + "       System.debug(fs.getFields());\n"
+                        + "    }\n"
+                        + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -100,15 +100,19 @@ public class FieldSetTest {
         "getSObjectType,com.salesforce.graph.symbols.apex.schema.SObjectType"
     })
     @ParameterizedTest
-    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType) throws ClassNotFoundException {
-        String sourceCode = "public class MyClass {\n" +
-            "   void doSomething() {\n" +
-            "       List<FieldSet> myFieldSets = new List<FieldSet>{SObjectType.Account.fieldSets.getMap().get('theName')};\n" +
-            "       for (FieldSet myFieldSet: myFieldSets) {\n" +
-            "           System.debug(myFieldSet." + methodName + "());\n" +
-            "       }\n" +
-            "   }\n" +
-            "}\n";
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<FieldSet> myFieldSets = new List<FieldSet>{SObjectType.Account.fieldSets.getMap().get('theName')};\n"
+                        + "       for (FieldSet myFieldSet: myFieldSets) {\n"
+                        + "           System.debug(myFieldSet."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();

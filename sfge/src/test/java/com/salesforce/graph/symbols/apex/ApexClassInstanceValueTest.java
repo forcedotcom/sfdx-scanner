@@ -9,13 +9,9 @@ import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import com.salesforce.matchers.TestRunnerMatcher;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApexClassInstanceValueTest {
     private GraphTraversalSource g;
@@ -163,26 +159,25 @@ public class ApexClassInstanceValueTest {
     // TODO: Test what happens if there is inline assignment and the class is deserialized, which
     // one wins, is it an error?
 
-
     @Test
     public void testMethodCallOnDeterminant() {
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "	void doSomething() {\n"
-                + "		Bean myBean = new Bean('hi');\n"
-                + "		System.debug(myBean);\n"
-                + "		System.debug(myBean.getValue());\n"
-                + "	}\n"
-                + "}\n",
+                    + "	void doSomething() {\n"
+                    + "		Bean myBean = new Bean('hi');\n"
+                    + "		System.debug(myBean);\n"
+                    + "		System.debug(myBean.getValue());\n"
+                    + "	}\n"
+                    + "}\n",
             "public class Bean {\n"
-                + "private String value;\n"
-                + "public Bean(String val1) {\n"
-                + "	this.value = val1;\n"
-                + "}\n"
-                + "public String getValue() {\n"
-                + "	return this.value;\n"
-                + "}\n"
-                + "}\n"
+                    + "private String value;\n"
+                    + "public Bean(String val1) {\n"
+                    + "	this.value = val1;\n"
+                    + "}\n"
+                    + "public String getValue() {\n"
+                    + "	return this.value;\n"
+                    + "}\n"
+                    + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
@@ -195,26 +190,26 @@ public class ApexClassInstanceValueTest {
         MatcherAssert.assertThat(TestUtil.apexValueToString(methodCallValue), equalTo("hi"));
     }
 
-
     @Test
-    @Disabled // TODO: In this case, class instance gets translated into an ApexSingleValue instead of ApexClassInstanceValue
+    @Disabled // TODO: Indeterminant class value should be treated
+    //  as an ApexClassInstanceValue instead of ApexSingleValue
     public void testMethodCallOnIndeterminantInstance() {
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "	void doSomething(Bean bean) {\n"
-                + "		System.debug(bean);\n"
-                + "		System.debug(bean.getValue());\n"
-                + "	}\n"
-                + "}\n",
+                    + "	void doSomething(Bean bean) {\n"
+                    + "		System.debug(bean);\n"
+                    + "		System.debug(bean.getValue());\n"
+                    + "	}\n"
+                    + "}\n",
             "public class Bean {\n"
-                + "private String value;\n"
-                + "public Bean(String val1) {\n"
-                + "	this.value = val1;\n"
-                + "}\n"
-                + "public String getValue() {\n"
-                + "	return this.value;\n"
-                + "}\n"
-                + "}\n"
+                    + "private String value;\n"
+                    + "public Bean(String val1) {\n"
+                    + "	this.value = val1;\n"
+                    + "}\n"
+                    + "public String getValue() {\n"
+                    + "	return this.value;\n"
+                    + "}\n"
+                    + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
@@ -226,6 +221,5 @@ public class ApexClassInstanceValueTest {
 
         ApexStringValue methodCallValue = visitor.getResult(1);
         MatcherAssert.assertThat(methodCallValue.isIndeterminant(), equalTo(true));
-
     }
 }

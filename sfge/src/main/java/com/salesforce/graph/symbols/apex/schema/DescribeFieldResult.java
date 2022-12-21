@@ -116,16 +116,13 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         final String methodName = vertex.getMethodName();
-        ApexValueBuilder builder = ApexValueBuilder.get(symbols)
-            .returnedFrom(this, vertex);
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
 
         ApexValue<?> apexValue;
         if (SystemNames.DML_FIELD_ACCESS_METHODS.contains(methodName)) {
-            apexValue = builder
-                    .withStatus(ValueStatus.INDETERMINANT)
-                    .buildBoolean();
+            apexValue = builder.withStatus(ValueStatus.INDETERMINANT).buildBoolean();
         } else {
-            apexValue = _apply(vertex, builder, methodName).orElse(null);
+            apexValue = _applyMethod(vertex, builder, methodName).orElse(null);
         }
         return Optional.ofNullable(apexValue);
     }
@@ -142,17 +139,20 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
                         .methodVertex(method);
         String methodName = method.getName();
 
-        Optional<ApexValue<?>> optApexValue = _apply(invocableExpression, builder, methodName);
+        Optional<ApexValue<?>> optApexValue =
+                _applyMethod(invocableExpression, builder, methodName);
 
         if (!optApexValue.isPresent()) {
             optApexValue = Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
         }
 
         return optApexValue;
-
     }
 
-    private Optional<ApexValue<?>> _apply(InvocableWithParametersVertex invocableExpression, ApexValueBuilder builder, String methodName) {
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_NAME.equalsIgnoreCase(methodName)) {
             if (fieldName != null && fieldName.isDeterminant()) {
                 if (fieldName instanceof ApexStringValue) {
@@ -174,11 +174,11 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
         } else if (METHOD_GET_S_OBJECT_FIELD.equalsIgnoreCase(methodName)) {
             if (fieldName instanceof SObjectField) {
                 return Optional.of(
-                    ((SObjectField) fieldName).deepCloneForReturn(this, invocableExpression));
+                        ((SObjectField) fieldName).deepCloneForReturn(this, invocableExpression));
             } else {
                 return Optional.of(
-                    builder.buildSObjectField(
-                        describeSObjectResult.getSObjectType().get(), fieldName));
+                        builder.buildSObjectField(
+                                describeSObjectResult.getSObjectType().get(), fieldName));
             }
         }
         return Optional.empty();

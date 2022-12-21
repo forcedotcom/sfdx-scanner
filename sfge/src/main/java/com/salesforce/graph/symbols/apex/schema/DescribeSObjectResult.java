@@ -84,7 +84,8 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
                 if (sObjectType != null) {
                     apexValue = builder.buildApexFieldDescribeMapValue(sObjectType);
                 } else {
-                    apexValue = builder.buildApexFieldDescribeMapValue(
+                    apexValue =
+                            builder.buildApexFieldDescribeMapValue(
                                     builder.deepClone().buildSObjectType());
                 }
                 // objectDescribe.fieldSets.getMap()
@@ -93,7 +94,8 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
                 if (sObjectType != null) {
                     apexValue = builder.buildApexFieldSetDescribeMapValue(sObjectType);
                 } else {
-                    apexValue = builder.buildApexFieldSetDescribeMapValue(
+                    apexValue =
+                            builder.buildApexFieldSetDescribeMapValue(
                                     builder.deepClone().buildSObjectType());
                 }
             } else {
@@ -119,7 +121,8 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
                         .methodVertex(method);
         String methodName = method.getName();
 
-        Optional<ApexValue<?>> optApexValue = _applyMethod(invocableExpression, builder, methodName);
+        Optional<ApexValue<?>> optApexValue =
+                _applyMethod(invocableExpression, builder, methodName);
 
         if (!optApexValue.isPresent()) {
             optApexValue = Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
@@ -127,7 +130,10 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
         return optApexValue;
     }
 
-    private Optional<ApexValue<?>> _applyMethod(InvocableWithParametersVertex invocableExpression, ApexValueBuilder builder, String methodName) {
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_NAME.equalsIgnoreCase(methodName)) {
             if (sObjectType != null && ApexValueUtil.isDeterminant(sObjectType.getType())) {
                 ApexValue<?> value = sObjectType.getType().get();
@@ -162,9 +168,7 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
                 return Optional.of(builder.buildSObjectType());
             }
         } else if (SystemNames.DML_OBJECT_ACCESS_METHODS.contains(methodName)) {
-            return Optional.of(builder
-                .withStatus(ValueStatus.INDETERMINANT)
-                .buildBoolean());
+            return Optional.of(builder.withStatus(ValueStatus.INDETERMINANT).buildBoolean());
         }
         return Optional.empty();
     }

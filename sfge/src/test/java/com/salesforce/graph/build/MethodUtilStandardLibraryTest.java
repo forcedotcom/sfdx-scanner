@@ -51,6 +51,8 @@ public class MethodUtilStandardLibraryTest {
         String[] sourceCode = {
             "public class MyClass {\n"
                     + "   public static doSomething() {\n"
+                    // Schema.SObjectType.Account is of DescribeSObjectResult type
+                    // unlike Account.SObjectType, which is of SObjectType type.
                     + "       callMethod(Schema.SObjectType.Account);\n"
                     + "   }\n"
                     + "   static void callMethod(DescribeSObjectResult myObj) {\n"
@@ -73,6 +75,7 @@ public class MethodUtilStandardLibraryTest {
                     + "       callMethod(objList);\n"
                     + "   }\n"
                     + "   static void callMethod(List<SObjectType> myObj) {\n"
+                    // Method parameter is discarded
                     + "       System.debug('hello');\n"
                     + "   }\n"
                     + "}\n"

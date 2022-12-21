@@ -107,15 +107,19 @@ public class FieldSetMemberTest {
         "getSObjectField,com.salesforce.graph.symbols.apex.schema.SObjectField"
     }) // Leaving this parameterized so that we can add future methods we support here.
     @ParameterizedTest
-    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType) throws ClassNotFoundException {
-        String sourceCode = "public class MyClass {\n" +
-            "   void doSomething() {\n" +
-            "       List<FieldSetMember> myFieldMembers = new List<SObjectField>{SObjectType.Account.fieldSets.getMap().get('theName').getFields().get(0)};\n" +
-            "       for (FieldSetMember myFieldMember: myFieldMembers) {\n" +
-            "           System.debug(myFieldMember." + methodName + "());\n" +
-            "       }\n" +
-            "   }\n" +
-            "}\n";
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<FieldSetMember> myFieldMembers = new List<SObjectField>{SObjectType.Account.fieldSets.getMap().get('theName').getFields().get(0)};\n"
+                        + "       for (FieldSetMember myFieldMember: myFieldMembers) {\n"
+                        + "           System.debug(myFieldMember."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();

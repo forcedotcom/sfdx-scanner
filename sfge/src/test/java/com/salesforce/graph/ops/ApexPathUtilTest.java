@@ -16,7 +16,6 @@ import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
 import com.salesforce.graph.ops.expander.ApexPathExpanderUtil;
 import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.symbols.apex.ApexForLoopValue;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.symbols.apex.schema.SObjectType;

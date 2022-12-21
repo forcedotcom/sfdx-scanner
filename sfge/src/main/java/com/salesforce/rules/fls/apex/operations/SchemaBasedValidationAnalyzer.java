@@ -22,7 +22,6 @@ import com.salesforce.graph.vertex.LiteralExpressionVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
 import com.salesforce.rules.fls.apex.operations.FlsConstants.FlsValidationType;
-
 import java.util.*;
 
 /**
@@ -74,14 +73,15 @@ public class SchemaBasedValidationAnalyzer {
         ApexValue<?> apexValue = apexValueOptional.get();
         List<ApexBooleanValue> apexBooleanValues = getDerivedApexValue(parent, vertex, apexValue);
 
-        for (ApexBooleanValue booleanValue: apexBooleanValues) {
+        for (ApexBooleanValue booleanValue : apexBooleanValues) {
             results.addAll(convert(booleanValue));
         }
 
         return results;
     }
 
-    private List<ApexBooleanValue> getDerivedApexValue(BaseSFVertex parent, BaseSFVertex vertex, ApexValue<?> apexValue) {
+    private List<ApexBooleanValue> getDerivedApexValue(
+            BaseSFVertex parent, BaseSFVertex vertex, ApexValue<?> apexValue) {
         if (!(apexValue instanceof ApexBooleanValue)
                 && !(apexValue instanceof ApexCustomValue)
                 && !(apexValue instanceof ApexForLoopValue)
@@ -110,7 +110,7 @@ public class SchemaBasedValidationAnalyzer {
 
         if (apexValue instanceof ApexForLoopValue) {
             List<ApexValue<?>> forLoopValues = ((ApexForLoopValue) apexValue).getForLoopValues();
-            for (ApexValue<?> value: forLoopValues) {
+            for (ApexValue<?> value : forLoopValues) {
                 if (value instanceof ApexBooleanValue) {
                     apexValues.add((ApexBooleanValue) value);
                 } else {

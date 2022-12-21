@@ -19,6 +19,7 @@ public final class UserFacingMessages {
     // format: filename,defined type, line number
     public static final String UNREACHABLE_CODE =
             "Remove unreachable code to proceed with the analysis: %s,%s:%d";
+
     public static final String VARIABLE_DECLARED_MULTIPLE_TIMES =
             "Rename or remove reused variable to proceed with analysis: %s,%s:%d";
 

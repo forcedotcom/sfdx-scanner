@@ -235,17 +235,22 @@ public class DescribeFieldResultTest {
         "getName,com.salesforce.graph.symbols.apex.ApexStringValue",
         "getPicklistValues,com.salesforce.graph.symbols.apex.ApexListValue",
         "getReferenceTo,com.salesforce.graph.symbols.apex.ApexListValue",
-        "getSObjectField,com.salesforce.graph.symbols.apex.schema.SObjectField"})
+        "getSObjectField,com.salesforce.graph.symbols.apex.schema.SObjectField"
+    })
     @ParameterizedTest
-    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType) throws ClassNotFoundException {
-        String sourceCode = "public class MyClass {\n" +
-            "   void doSomething() {\n" +
-            "       List<SObjectField> fields = new List<SObjectField>{Account.Name, Contact.Phone};\n" +
-            "       for (SObjectField myField: fields) {\n" +
-            "           System.debug(myField.getDescribe()." + methodName +"());\n" +
-            "       }\n" +
-            "   }\n" +
-            "}\n";
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<SObjectField> fields = new List<SObjectField>{Account.Name, Contact.Phone};\n"
+                        + "       for (SObjectField myField: fields) {\n"
+                        + "           System.debug(myField.getDescribe()."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();

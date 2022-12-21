@@ -1592,8 +1592,11 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         final String key = vertex.getName();
         if (apexValueStack.peek().containsKey(key)) {
             // The variable was defined multiple times
-            throw new UserActionException(UserFacingMessages.VARIABLE_DECLARED_MULTIPLE_TIMES,
-                vertex.getFileName(), vertex.getDefiningType(), vertex.getBeginLine());
+            throw new UserActionException(
+                    UserFacingMessages.VARIABLE_DECLARED_MULTIPLE_TIMES,
+                    vertex.getFileName(),
+                    vertex.getDefiningType(),
+                    vertex.getBeginLine());
         }
 
         ChainedVertex rhs = vertex.getRhs().orElse(null);
@@ -1647,7 +1650,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         trackVisited(vertex);
         String key = vertex.getName();
         ApexValue<?> apexValue = getApexValue(key).get();
-        // TODO: somehow clone ApexStringValue and add IterationItemInfo
+
         ApexValue<?> newValue =
                 ApexValueBuilder.get(this)
                         .declarationVertex(apexValue.getTypeVertex().get())

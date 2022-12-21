@@ -332,15 +332,19 @@ public class DescribeSObjectResultTest {
         "getSObjectType,com.salesforce.graph.symbols.apex.schema.SObjectType"
     })
     @ParameterizedTest
-    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType) throws ClassNotFoundException {
-        String sourceCode = "public class MyClass {\n" +
-            "   void doSomething() {\n" +
-            "       List<SObjectType> types = new List<SObjectType>{MyObject__c.SObjectType, Account.SObjectType};\n" +
-            "       for (SObjectType myType: types) {\n" +
-            "           System.debug(myType.getDescribe()." + methodName +"());\n" +
-            "       }\n" +
-            "   }\n" +
-            "}\n";
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<SObjectType> types = new List<SObjectType>{MyObject__c.SObjectType, Account.SObjectType};\n"
+                        + "       for (SObjectType myType: types) {\n"
+                        + "           System.debug(myType.getDescribe()."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();

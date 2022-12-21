@@ -459,8 +459,8 @@ public class ApexForLoopValueTest {
                         + "	void doSomething() {\n"
                         + "		List<Schema.SObjectField> fields = new List<Schema.SObjectFields>{Schema.Account.fields.Name,Schema.Account.fields.Phone};\n"
                         + "		for (Schema.SObjectField field: fields) {\n"
-                        + "			System.debug(field.getDescribe());\n" +
-                    "       System.debug(field.getDescribe().isCreateable());\n"
+                        + "			System.debug(field.getDescribe());\n"
+                        + "       System.debug(field.getDescribe().isCreateable());\n"
                         + "		}\n"
                         + "	}\n"
                         + "}\n";
@@ -470,23 +470,28 @@ public class ApexForLoopValueTest {
 
         ApexForLoopValue forLoopValue1 = visitor.getResult(0);
         List<ApexValue<?>> describeForLoopValues = forLoopValue1.getForLoopValues();
-        List<String> fieldNames = describeForLoopValues.stream()
-            .map(apexValue -> TestUtil.apexValueToString(((DescribeFieldResult) apexValue).getFieldName()))
-            .collect(Collectors.toList());
+        List<String> fieldNames =
+                describeForLoopValues.stream()
+                        .map(
+                                apexValue ->
+                                        TestUtil.apexValueToString(
+                                                ((DescribeFieldResult) apexValue).getFieldName()))
+                        .collect(Collectors.toList());
 
         MatcherAssert.assertThat(fieldNames, containsInAnyOrder("Name", "Phone"));
 
         ApexForLoopValue forLoopValue2 = visitor.getResult(1);
         List<ApexValue<?>> isCreateableValues = forLoopValue2.getForLoopValues();
-        isCreateableValues.forEach(value -> {
-            MatcherAssert.assertThat(value, Matchers.instanceOf(ApexBooleanValue.class));
-            MatcherAssert.assertThat(value.isIndeterminant(), equalTo(true));
-        });
-
+        isCreateableValues.forEach(
+                value -> {
+                    MatcherAssert.assertThat(value, Matchers.instanceOf(ApexBooleanValue.class));
+                    MatcherAssert.assertThat(value.isIndeterminant(), equalTo(true));
+                });
     }
 
     @Test
-    @Disabled // TODO: apply() method on ApexClassInstanceValue should have the capability to match the method call and convert to ApexValue
+    @Disabled // TODO: apply() method on ApexClassInstanceValue should have the capability to match
+    // the method call and convert to ApexValue
     public void testMethodCallOnForLoopVariable() {
         String[] sourceCode = {
             "public class MyClass {\n"
@@ -520,33 +525,36 @@ public class ApexForLoopValueTest {
 
         ApexForLoopValue derivedValue = visitor.getResult(1);
         List<ApexValue<?>> derivedForLoopValues = derivedValue.getForLoopValues();
-        List<String> valueStrings = derivedForLoopValues.stream().map(apexValue -> TestUtil.apexValueToString(apexValue)).collect(Collectors.toList());
+        List<String> valueStrings =
+                derivedForLoopValues.stream()
+                        .map(apexValue -> TestUtil.apexValueToString(apexValue))
+                        .collect(Collectors.toList());
         MatcherAssert.assertThat(valueStrings, Matchers.containsInAnyOrder("hi", "hello"));
     }
 
-
     @Test
-    @Disabled // TODO: Method invocation on indeterminant forLoop values should lead to indeterminant return values
+    @Disabled // TODO: Method invocation on indeterminant forLoop values should lead to
+    // indeterminant return values
     public void testMethodCallOnIndeterminantForLoopVariable() {
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "	void doSomething(List<Bean> beans) {\n" +
-                "       System.debug(beans);\n"
-                + "		for (Bean myBean: beans) {\n"
-                + "			System.debug(myBean);\n"
-                + "			System.debug(myBean.getValue());\n"
-                + "		}\n"
-                + "	}\n"
-                + "}\n",
+                    + "	void doSomething(List<Bean> beans) {\n"
+                    + "       System.debug(beans);\n"
+                    + "		for (Bean myBean: beans) {\n"
+                    + "			System.debug(myBean);\n"
+                    + "			System.debug(myBean.getValue());\n"
+                    + "		}\n"
+                    + "	}\n"
+                    + "}\n",
             "public class Bean {\n"
-                + "private String value;\n"
-                + "public Bean(String val1) {\n"
-                + "	this.value = val1;\n"
-                + "}\n"
-                + "public String getValue() {\n"
-                + "	return this.value;\n"
-                + "}\n"
-                + "}\n"
+                    + "private String value;\n"
+                    + "public Bean(String val1) {\n"
+                    + "	this.value = val1;\n"
+                    + "}\n"
+                    + "public String getValue() {\n"
+                    + "	return this.value;\n"
+                    + "}\n"
+                    + "}\n"
         };
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
@@ -558,12 +566,15 @@ public class ApexForLoopValueTest {
         ApexForLoopValue value = visitor.getResult(1);
         List<ApexValue<?>> forLoopValues = value.getForLoopValues();
         MatcherAssert.assertThat(value.isIndeterminant(), equalTo(true));
-        MatcherAssert.assertThat(forLoopValues, hasSize(1));// TODO: should this be a single indeterminant value?
+        MatcherAssert.assertThat(
+                forLoopValues, hasSize(1)); // TODO: should this be a single indeterminant value?
         MatcherAssert.assertThat(value.getDeclaredType().get(), equalTo("Bean"));
 
         ApexForLoopValue derivedValue = visitor.getResult(2);
         List<ApexValue<?>> derivedForLoopValues = derivedValue.getForLoopValues();
         MatcherAssert.assertThat(derivedValue.isIndeterminant(), equalTo(true));
-        MatcherAssert.assertThat(derivedForLoopValues, hasSize(1));// TODO: should this be a single indeterminant value?
+        MatcherAssert.assertThat(
+                derivedForLoopValues,
+                hasSize(1)); // TODO: should this be a single indeterminant value?
     }
 }
