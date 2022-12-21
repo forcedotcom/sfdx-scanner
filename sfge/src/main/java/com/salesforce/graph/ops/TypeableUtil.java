@@ -22,9 +22,13 @@ public final class TypeableUtil {
 
     private static final Logger LOGGER = LogManager.getLogger(TypeableUtil.class);
 
-    private static final String LIST_PATTERN_STR = "List<(.*)>";
+    private static final String LIST_PATTERN_STR = "list<\\s*([^\\s]*)\\s*>";
     private static final Pattern LIST_PATTERN =
             Pattern.compile(LIST_PATTERN_STR, Pattern.CASE_INSENSITIVE);
+
+    private static final String SET_PATTERN_STR = "set<\\s*([^\\s]*)\\s*>";
+    private static final Pattern SET_PATTERN =
+            Pattern.compile(SET_PATTERN_STR, Pattern.CASE_INSENSITIVE);
 
     private TypeableUtil() {}
 
@@ -111,9 +115,23 @@ public final class TypeableUtil {
      *     string
      */
     public static Optional<String> getListSubType(String definingType) {
-        final Matcher listPatternMatcher = LIST_PATTERN.matcher(definingType);
-        if (listPatternMatcher.find()) {
-            return Optional.of(listPatternMatcher.group(1));
+        return getSubType(LIST_PATTERN, definingType, 1);
+    }
+
+    public static Optional<String> getSetSubType(String definingType) {
+        return getSubType(SET_PATTERN, definingType, 1);
+    }
+
+    private static Optional<String> getSubType(
+            Pattern subTypePattern, String definingType, int groupCountExpected) {
+        final Matcher subTypeMatcher = subTypePattern.matcher(definingType);
+
+        if (subTypeMatcher.find()) {
+            if (subTypeMatcher.groupCount() != groupCountExpected) {
+                throw new UnexpectedException(
+                        "Expected to find only one Type in declaration: " + definingType);
+            }
+            return Optional.of(subTypeMatcher.group(1));
         }
         return Optional.empty();
     }

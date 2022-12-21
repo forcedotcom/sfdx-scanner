@@ -17,6 +17,7 @@ import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -153,5 +154,20 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
         } else {
             throw new TodoException(invocableExpression);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SObjectField that = (SObjectField) o;
+        return Objects.equals(associatedObjectType, that.associatedObjectType)
+                && Objects.equals(fieldName, that.fieldName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), associatedObjectType, fieldName);
     }
 }

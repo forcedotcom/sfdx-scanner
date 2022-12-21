@@ -7,12 +7,14 @@ import static org.hamcrest.Matchers.hasSize;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
+import com.salesforce.graph.symbols.apex.schema.DescribeFieldResult;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class ApexSetValueTest {
@@ -359,5 +361,91 @@ public class ApexSetValueTest {
                 (ApexBooleanValue) visitor.getResults(className, lineNumber).get(0).get();
         MatcherAssert.assertThat(value.isIndeterminant(), equalTo(isIndeterminant));
         MatcherAssert.assertThat(value.getValue().isPresent(), equalTo(isPresent));
+    }
+
+    @Test
+    public void testForEachWithSet() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void doSomething() {\n"
+                        + "       Set<String> fieldsToCheck = new Set<String>{'Name', 'Phone'};\n"
+                        + "       for (String fieldToCheck : fieldsToCheck) {\n"
+                        + "           System.debug(fieldToCheck);\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue value = visitor.getSingletonResult();
+        List<String> values =
+                value.getForLoopValues().stream()
+                        .map(a -> TestUtil.apexValueToString(a))
+                        .collect(Collectors.toList());
+        MatcherAssert.assertThat(values.isEmpty(), equalTo(false));
+        MatcherAssert.assertThat(values, containsInAnyOrder("Name", "Phone"));
+    }
+
+    @Test
+    public void testStdMethodCallOnForLoopVariableWithSet() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "	void doSomething() {\n"
+                        + "		Set<Schema.SObjectField> fields = new Set<Schema.SObjectFields>{Schema.Account.fields.Name,Schema.Account.fields.Phone};\n"
+                        + "		for (Schema.SObjectField myField: fields) {\n"
+                        + "			System.debug(myField.getDescribe());\n"
+                        + "		}\n"
+                        + "	}\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue value = visitor.getSingletonResult();
+        List<String> fieldNames =
+                value.getForLoopValues().stream()
+                        .map(
+                                item ->
+                                        TestUtil.apexValueToString(
+                                                ((DescribeFieldResult) item).getFieldName()))
+                        .collect(Collectors.toList());
+
+        MatcherAssert.assertThat(fieldNames, containsInAnyOrder("Name", "Phone"));
+    }
+
+    @Test
+    @Disabled // TODO: Handle method invocations on ApexClassInstanceValue
+    public void testMethodCallOnForLoopVariableWithSet() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "	void doSomething() {\n"
+                    + "		Set<Bean> beans = new Set<Bean>{new Bean('hi'),new Bean('hello')};\n"
+                    + "		for (Bean bean: beans) {\n"
+                    + "			String myValue = bean.getValue();\n"
+                    + "			System.debug(myValue);\n"
+                    + "		}\n"
+                    + "	}\n"
+                    + "}\n",
+            "public class Bean {\n"
+                    + "private String value;\n"
+                    + "public Bean(String val1) {\n"
+                    + "	this.value = val1;\n"
+                    + "}\n"
+                    + "public String getValue() {\n"
+                    + "	return this.value;\n"
+                    + "}\n"
+                    + "}\n"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue value = visitor.getSingletonResult();
+        List<String> valueList =
+                value.getForLoopValues().stream()
+                        .map(item -> TestUtil.apexValueToString(item))
+                        .collect(Collectors.toList());
+        MatcherAssert.assertThat(valueList, containsInAnyOrder("hi", "hello"));
     }
 }
