@@ -17,7 +17,7 @@ module.exports = {
 	"validations": {
 		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
 		"methodLevelTargetMustBeRealFile": "Method-level target %s must be a real file",
-		"projectdirIsRequired": "--projectdir is required for this command",
+		"projectdirIsRequired": "--projectdir is required for this command.",
 	},
 	"examples": `The paths specified for --projectdir must contain all files specified through --target cumulatively.
 	$ sfdx scanner:run:dfa --target "./myproject/main/default/classes/*.cls" --projectdir "./myproject/"
