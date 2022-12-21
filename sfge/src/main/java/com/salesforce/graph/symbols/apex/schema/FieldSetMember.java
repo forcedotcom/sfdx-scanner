@@ -14,6 +14,7 @@ import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -98,5 +99,19 @@ public final class FieldSetMember extends ApexStandardValue<FieldSetMember>
                     builder.buildSObjectField(fieldSet.getSObjectType().get(), fieldName));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FieldSetMember that = (FieldSetMember) o;
+        return Objects.equals(fieldSet, that.fieldSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), fieldSet);
     }
 }

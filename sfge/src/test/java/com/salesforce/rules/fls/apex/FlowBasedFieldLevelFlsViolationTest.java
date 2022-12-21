@@ -1787,6 +1787,38 @@ public class FlowBasedFieldLevelFlsViolationTest extends BaseFlsTest {
         assertNoViolation(rule, sourceCode);
     }
 
+    @MethodSource("input")
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSetOfSObjectFields(
+            String operationName,
+            AbstractPathBasedRule rule,
+            FlsValidationType validationType,
+            String validationCheck,
+            String dmlOperationLine,
+            String dmlOperationWithTwoFields,
+            String dmlOperationAnotherObj) {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        Set<Schema.SObjectField> fields = new Set<Schema.SObjectFields>{Schema.Account.fields.Name,Schema.Account.fields.Phone};\n"
+                        + "        checkValidation(fields);\n"
+                        + "    "
+                        + dmlOperationWithTwoFields
+                        + "    }\n"
+                        + "	public void checkValidation(Set<Schema.SObjectField> fields) {\n"
+                        + "		for (Schema.SObjectField field: fields) {\n"
+                        + "			if (!field.getDescribe()."
+                        + validationCheck
+                        + "()) {\n"
+                        + "				throw new AccessException();\n"
+                        + "			}\n"
+                        + "		}\n"
+                        + "	}\n"
+                        + "}\n";
+
+        assertNoViolation(rule, sourceCode);
+    }
+
     @Test
     public void testCopyOfIndeterminantSObject() {
         String sourceCode =

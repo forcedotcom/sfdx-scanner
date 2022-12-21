@@ -16,6 +16,7 @@ import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SyntheticTypedVertex;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepCloneable<FieldSet> {
@@ -140,5 +141,20 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FieldSet fieldSet = (FieldSet) o;
+        return Objects.equals(sObjectType, fieldSet.sObjectType)
+                && Objects.equals(fieldSetName, fieldSet.fieldSetName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), sObjectType, fieldSetName);
     }
 }
