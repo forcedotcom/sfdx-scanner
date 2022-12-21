@@ -1757,7 +1757,6 @@ public class FlowBasedFieldLevelFlsViolationTest extends BaseFlsTest {
 
     @MethodSource("input")
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled // TODO: Handle method invocation on forloop values
     public void testListOfSObjectFields(
             String operationName,
             AbstractPathBasedRule rule,

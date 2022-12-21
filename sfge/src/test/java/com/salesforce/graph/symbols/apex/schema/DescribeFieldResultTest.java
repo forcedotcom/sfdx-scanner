@@ -5,11 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
-import com.salesforce.graph.symbols.apex.ApexBooleanValue;
-import com.salesforce.graph.symbols.apex.ApexEnumValue;
-import com.salesforce.graph.symbols.apex.ApexListValue;
-import com.salesforce.graph.symbols.apex.ApexStringValue;
-import com.salesforce.graph.symbols.apex.SystemNames;
+import com.salesforce.graph.symbols.apex.*;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -18,6 +14,7 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -231,5 +228,35 @@ public class DescribeFieldResultTest {
         MatcherAssert.assertThat(
                 TestUtil.apexValueToString(describeSObjectResult.getSObjectType()),
                 equalTo("Account"));
+    }
+
+    @CsvSource({
+        "isCreateable,com.salesforce.graph.symbols.apex.ApexBooleanValue",
+        "getName,com.salesforce.graph.symbols.apex.ApexStringValue",
+        "getPicklistValues,com.salesforce.graph.symbols.apex.ApexListValue",
+        "getReferenceTo,com.salesforce.graph.symbols.apex.ApexListValue",
+        "getSObjectField,com.salesforce.graph.symbols.apex.schema.SObjectField"
+    })
+    @ParameterizedTest
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<SObjectField> fields = new List<SObjectField>{Account.Name, Contact.Phone};\n"
+                        + "       for (SObjectField myField: fields) {\n"
+                        + "           System.debug(myField.getDescribe()."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue forLoopValue = visitor.getSingletonResult();
+        ApexValue<?> value = forLoopValue.getForLoopValues().get(0);
+        MatcherAssert.assertThat(value, Matchers.instanceOf(Class.forName(apexValueType)));
     }
 }

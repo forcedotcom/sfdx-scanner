@@ -6,12 +6,7 @@ import com.salesforce.graph.ops.ApexStandardLibraryUtil;
 import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.CloneUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.symbols.apex.ApexStandardValue;
-import com.salesforce.graph.symbols.apex.ApexStringValue;
-import com.salesforce.graph.symbols.apex.ApexValue;
-import com.salesforce.graph.symbols.apex.ApexValueBuilder;
-import com.salesforce.graph.symbols.apex.ApexValueVisitor;
-import com.salesforce.graph.symbols.apex.ValueStatus;
+import com.salesforce.graph.symbols.apex.*;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
@@ -79,34 +74,40 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
         String methodName = vertex.getMethodName();
         List<String> chainedNames = vertex.getChainedNames();
 
+        ApexValue<?> apexValue = null;
+
         if (METHOD_GET_MAP.equalsIgnoreCase(methodName) && !chainedNames.isEmpty()) {
             String mapType = chainedNames.get(chainedNames.size() - 1);
             // objectDescribe.fields.getMap()
             if (FIELDS.equalsIgnoreCase(mapType)) {
                 validateParameterSize(vertex, 0);
                 if (sObjectType != null) {
-                    return Optional.of(builder.buildApexFieldDescribeMapValue(sObjectType));
+                    apexValue = builder.buildApexFieldDescribeMapValue(sObjectType);
                 } else {
-                    return Optional.of(
+                    apexValue =
                             builder.buildApexFieldDescribeMapValue(
-                                    builder.deepClone().buildSObjectType()));
+                                    builder.deepClone().buildSObjectType());
                 }
                 // objectDescribe.fieldSets.getMap()
             } else if (FIELD_SETS.equalsIgnoreCase(mapType)) {
                 validateParameterSize(vertex, 0);
                 if (sObjectType != null) {
-                    return Optional.of(builder.buildApexFieldSetDescribeMapValue(sObjectType));
+                    apexValue = builder.buildApexFieldSetDescribeMapValue(sObjectType);
                 } else {
-                    return Optional.of(
+                    apexValue =
                             builder.buildApexFieldSetDescribeMapValue(
-                                    builder.deepClone().buildSObjectType()));
+                                    builder.deepClone().buildSObjectType());
                 }
             } else {
                 throw new UnexpectedException(vertex);
             }
         }
 
-        return Optional.empty();
+        if (apexValue == null) {
+            apexValue = _applyMethod(vertex, builder, methodName).orElse(null);
+        }
+
+        return Optional.ofNullable(apexValue);
     }
 
     @Override
@@ -120,6 +121,19 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
                         .methodVertex(method);
         String methodName = method.getName();
 
+        Optional<ApexValue<?>> optApexValue =
+                _applyMethod(invocableExpression, builder, methodName);
+
+        if (!optApexValue.isPresent()) {
+            optApexValue = Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
+        }
+        return optApexValue;
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_NAME.equalsIgnoreCase(methodName)) {
             if (sObjectType != null && ApexValueUtil.isDeterminant(sObjectType.getType())) {
                 ApexValue<?> value = sObjectType.getType().get();
@@ -153,9 +167,10 @@ public final class DescribeSObjectResult extends ApexStandardValue<DescribeSObje
             } else {
                 return Optional.of(builder.buildSObjectType());
             }
-        } else {
-            return Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
+        } else if (SystemNames.DML_OBJECT_ACCESS_METHODS.contains(methodName)) {
+            return Optional.of(builder.withStatus(ValueStatus.INDETERMINANT).buildBoolean());
         }
+        return Optional.empty();
     }
 
     @Override

@@ -5,13 +5,7 @@ import com.salesforce.graph.ops.ApexStandardLibraryUtil;
 import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.CloneUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.symbols.apex.ApexForLoopValue;
-import com.salesforce.graph.symbols.apex.ApexSingleValue;
-import com.salesforce.graph.symbols.apex.ApexStandardValue;
-import com.salesforce.graph.symbols.apex.ApexStringValue;
-import com.salesforce.graph.symbols.apex.ApexValue;
-import com.salesforce.graph.symbols.apex.ApexValueBuilder;
-import com.salesforce.graph.symbols.apex.ApexValueVisitor;
+import com.salesforce.graph.symbols.apex.*;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
@@ -121,7 +115,16 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        final String methodName = vertex.getMethodName();
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
+
+        ApexValue<?> apexValue;
+        if (SystemNames.DML_FIELD_ACCESS_METHODS.contains(methodName)) {
+            apexValue = builder.withStatus(ValueStatus.INDETERMINANT).buildBoolean();
+        } else {
+            apexValue = _applyMethod(vertex, builder, methodName).orElse(null);
+        }
+        return Optional.ofNullable(apexValue);
     }
 
     @Override
@@ -136,6 +139,20 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
                         .methodVertex(method);
         String methodName = method.getName();
 
+        Optional<ApexValue<?>> optApexValue =
+                _applyMethod(invocableExpression, builder, methodName);
+
+        if (!optApexValue.isPresent()) {
+            optApexValue = Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
+        }
+
+        return optApexValue;
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_NAME.equalsIgnoreCase(methodName)) {
             if (fieldName != null && fieldName.isDeterminant()) {
                 if (fieldName instanceof ApexStringValue) {
@@ -163,9 +180,8 @@ public final class DescribeFieldResult extends ApexStandardValue<DescribeFieldRe
                         builder.buildSObjectField(
                                 describeSObjectResult.getSObjectType().get(), fieldName));
             }
-        } else {
-            return Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
         }
+        return Optional.empty();
     }
 
     @Override

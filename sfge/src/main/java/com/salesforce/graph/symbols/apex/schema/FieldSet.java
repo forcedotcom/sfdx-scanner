@@ -98,7 +98,10 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
+        final String methodName = vertex.getMethodName();
+
+        return _applyMethod(vertex, builder, methodName);
     }
 
     @Override
@@ -113,6 +116,19 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
 
         String methodName = method.getName();
 
+        ApexValue<?> apexValue =
+                _applyMethod(invocableExpression, builder, methodName).orElse(null);
+
+        if (apexValue == null) {
+            apexValue = ApexValueUtil.synthesizeReturnedValue(builder, method);
+        }
+        return Optional.ofNullable(apexValue);
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_FIELDS.equalsIgnoreCase(methodName)) {
             builder.declarationVertex(SyntheticTypedVertex.get(FieldSetMember.TYPE));
             return Optional.of(builder.buildFieldSetList(this));
@@ -122,8 +138,7 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
             } else {
                 return Optional.of(builder.buildSObjectType());
             }
-        } else {
-            return Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
         }
+        return Optional.empty();
     }
 }

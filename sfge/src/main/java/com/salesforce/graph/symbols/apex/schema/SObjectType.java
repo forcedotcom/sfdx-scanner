@@ -101,7 +101,10 @@ public final class SObjectType extends ApexStandardValue<SObjectType>
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        final String methodName = vertex.getMethodName();
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
+
+        return _applyMethod(vertex, builder, methodName);
     }
 
     @Override
@@ -115,6 +118,13 @@ public final class SObjectType extends ApexStandardValue<SObjectType>
                         .methodVertex(method);
         String methodName = method.getName();
 
+        return _applyMethod(invocableExpression, builder, methodName);
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_DESCRIBE.equalsIgnoreCase(methodName)) {
             return Optional.of(builder.buildDescribeSObjectResult(this));
         } else if (METHOD_NEW_S_OBJECT.equalsIgnoreCase(methodName)) {

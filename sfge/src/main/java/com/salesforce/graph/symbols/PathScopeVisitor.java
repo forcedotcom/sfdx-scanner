@@ -2,24 +2,16 @@ package com.salesforce.graph.symbols;
 
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.ops.ApexClassUtil;
 import com.salesforce.graph.ops.ApexStandardLibraryUtil;
 import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.CloneUtil;
 import com.salesforce.graph.ops.MethodUtil;
-import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
-import com.salesforce.graph.symbols.apex.ApexForLoopValue;
-import com.salesforce.graph.symbols.apex.ApexListValue;
-import com.salesforce.graph.symbols.apex.ApexSingleValue;
-import com.salesforce.graph.symbols.apex.ApexSoqlValue;
-import com.salesforce.graph.symbols.apex.ApexStandardValue;
-import com.salesforce.graph.symbols.apex.ApexStringValue;
-import com.salesforce.graph.symbols.apex.ApexValue;
-import com.salesforce.graph.symbols.apex.ApexValueBuilder;
-import com.salesforce.graph.symbols.apex.ComplexAssignable;
-import com.salesforce.graph.symbols.apex.ValueStatus;
+import com.salesforce.graph.symbols.apex.*;
 import com.salesforce.graph.vertex.ArrayLoadExpressionVertex;
 import com.salesforce.graph.vertex.AssignmentExpressionVertex;
 import com.salesforce.graph.vertex.BaseSFVertex;
@@ -1600,7 +1592,11 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         final String key = vertex.getName();
         if (apexValueStack.peek().containsKey(key)) {
             // The variable was defined multiple times
-            throw new UnexpectedException(vertex);
+            throw new UserActionException(
+                    UserFacingMessages.VARIABLE_DECLARED_MULTIPLE_TIMES,
+                    vertex.getFileName(),
+                    vertex.getDefiningType(),
+                    vertex.getBeginLine());
         }
 
         ChainedVertex rhs = vertex.getRhs().orElse(null);
@@ -1654,6 +1650,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         trackVisited(vertex);
         String key = vertex.getName();
         ApexValue<?> apexValue = getApexValue(key).get();
+
         ApexValue<?> newValue =
                 ApexValueBuilder.get(this)
                         .declarationVertex(apexValue.getTypeVertex().get())
