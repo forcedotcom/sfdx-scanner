@@ -136,7 +136,10 @@ public final class ApexForLoopValue extends ApexPropertiesValue<ApexForLoopValue
                     valueToAdd = optApplied.get();
                 } else {
                     // TODO: path expander needs to expand on this method call and return a value
-                    valueToAdd = apexValue.deepClone(); // TODO: this is unhelpful
+                    // For now, we clone the same apexValue as a temporary bandage
+                    // to handle cases where we don't know what value a method call returns.
+                    // NOTE: The returned value is incorrect until we fix this.
+                    valueToAdd = apexValue.deepClone();
                 }
 
                 if (valueToAdd != null) {

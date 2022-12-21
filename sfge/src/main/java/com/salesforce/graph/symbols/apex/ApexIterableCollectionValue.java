@@ -4,9 +4,7 @@ import com.salesforce.graph.vertex.Typeable;
 import java.util.Collection;
 import java.util.Optional;
 
-/**
- * Represents ApexValues that hold an iterable collection of values.
- */
+/** Represents ApexValues that hold an iterable collection of values. */
 public interface ApexIterableCollectionValue {
     /**
      * @return values that the collection holds
