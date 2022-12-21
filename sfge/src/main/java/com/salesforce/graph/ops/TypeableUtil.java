@@ -129,7 +129,9 @@ public final class TypeableUtil {
         if (subTypeMatcher.find()) {
             if (subTypeMatcher.groupCount() != groupCountExpected) {
                 throw new UnexpectedException(
-                        "Expected to find only one Type in declaration: " + definingType);
+                        String.format(
+                                "Unexpected number of subtypes in %s. Expected: %d, Actual: %d",
+                                definingType, groupCountExpected, subTypeMatcher.groupCount()));
             }
             return Optional.of(subTypeMatcher.group(1));
         }
