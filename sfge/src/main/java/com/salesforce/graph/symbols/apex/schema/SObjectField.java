@@ -122,7 +122,7 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
             ApexValueBuilder.get(symbols)
                 .returnedFrom(this, vertex);
         String methodName = vertex.getMethodName();
-        return handleMethod(vertex, builder, methodName);
+        return _applyMethod(vertex, builder, methodName);
     }
 
     @Override
@@ -136,10 +136,10 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
                         .methodVertex(method);
         String methodName = method.getName();
 
-        return handleMethod(invocableExpression, builder, methodName);
+        return _applyMethod(invocableExpression, builder, methodName);
     }
 
-    private Optional<ApexValue<?>> handleMethod(InvocableWithParametersVertex invocableExpression, ApexValueBuilder builder, String methodName) {
+    private Optional<ApexValue<?>> _applyMethod(InvocableWithParametersVertex invocableExpression, ApexValueBuilder builder, String methodName) {
         if (METHOD_GET_DESCRIBE.equalsIgnoreCase(methodName)) {
             if (associatedObjectType != null && fieldName != null) {
                 DescribeSObjectResult describeSObjectResult =

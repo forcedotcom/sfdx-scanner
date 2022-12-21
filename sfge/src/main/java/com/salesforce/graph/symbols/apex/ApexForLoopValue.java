@@ -125,10 +125,18 @@ public final class ApexForLoopValue extends ApexPropertiesValue<ApexForLoopValue
                 // This will check for null access and throw an exception if this would never
                 // continue in production
                 apexValue.checkForNullAccess(vertex, symbols);
-                ApexValue<?> applied = apexValue.apply(vertex, symbols).orElse(null);
-                final ApexValue<?> valueToAdd = applied != null ? applied : apexValue.deepClone();
+                Optional<ApexValue<?>> optApplied = apexValue.apply(vertex, symbols);
+                ApexValue<?> valueToAdd;
+                if (optApplied.isPresent()) {
+                    valueToAdd = optApplied.get();
+                } else {
+                    // TODO: path expander needs to expand on this method call and return a value
+                    valueToAdd = deepClone(); // TODO: this is unhelpful
+                }
 
-                result.items.add(valueToAdd);
+                if (valueToAdd != null) {
+                    result.items.add(valueToAdd);
+                }
             }
         }
 

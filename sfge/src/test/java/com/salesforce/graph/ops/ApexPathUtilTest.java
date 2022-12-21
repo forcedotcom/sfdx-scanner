@@ -16,6 +16,7 @@ import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
 import com.salesforce.graph.ops.expander.ApexPathExpanderUtil;
 import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
 import com.salesforce.graph.symbols.SymbolProvider;
+import com.salesforce.graph.symbols.apex.ApexForLoopValue;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.symbols.apex.schema.SObjectType;
@@ -1163,27 +1164,5 @@ public class ApexPathUtilTest {
         List<TestRunner.Result<SystemDebugAccumulator>> results =
                 TestRunner.walkPaths(g, sourceCode);
         MatcherAssert.assertThat(results, hasSize(equalTo(3)));
-    }
-
-    @Test
-    public void testSimpleForEachLoopMethodCall() {
-        String sourceCode =
-                "public class MyClass {\n"
-                        + "   public void doSomething() {\n"
-                        + "       String[] myStrings = new String[]{'hi','hello'};\n"
-                        + "       for (String myString: myList) {\n"
-                        + "           debug1(myString);\n"
-                        + "       }\n"
-                        + "   }\n"
-                        + "   public void debug1(String s) {\n"
-                        + "       System.debug(s);\n"
-                        + "   }\n"
-                        + "}\n";
-
-        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
-        SystemDebugAccumulator visitor = result.getVisitor();
-
-        ApexStringValue value = visitor.getSingletonResult();
-        MatcherAssert.assertThat(value.getValue().get(), equalTo("hi"));
     }
 }

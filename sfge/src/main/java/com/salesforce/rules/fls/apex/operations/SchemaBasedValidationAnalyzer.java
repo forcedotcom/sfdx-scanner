@@ -22,8 +22,8 @@ import com.salesforce.graph.vertex.LiteralExpressionVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
 import com.salesforce.rules.fls.apex.operations.FlsConstants.FlsValidationType;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 
 /**
  * Checks if a given vertex is a Schema-based validation such as:
@@ -58,8 +58,9 @@ public class SchemaBasedValidationAnalyzer {
         }
 
         // Literals absolutely can't have validations.
+        HashSet<FlsValidationRepresentation.Info> results = Sets.newHashSet();
         if (vertex instanceof LiteralExpressionVertex) {
-            return Sets.newHashSet();
+            return results;
         }
 
         final Optional<ApexValue<?>> apexValueOptional =
@@ -67,10 +68,20 @@ public class SchemaBasedValidationAnalyzer {
 
         if (!apexValueOptional.isPresent()) {
             // If standard condition does not resolve to an ApexValue, there isn't much we can do
-            return Sets.newHashSet();
+            return results;
         }
 
         ApexValue<?> apexValue = apexValueOptional.get();
+        List<ApexBooleanValue> apexBooleanValues = getDerivedApexValue(parent, vertex, apexValue);
+
+        for (ApexBooleanValue booleanValue: apexBooleanValues) {
+            results.addAll(convert(booleanValue));
+        }
+
+        return results;
+    }
+
+    private List<ApexBooleanValue> getDerivedApexValue(BaseSFVertex parent, BaseSFVertex vertex, ApexValue<?> apexValue) {
         if (!(apexValue instanceof ApexBooleanValue)
                 && !(apexValue instanceof ApexCustomValue)
                 && !(apexValue instanceof ApexForLoopValue)
@@ -84,20 +95,35 @@ public class SchemaBasedValidationAnalyzer {
                             + vertex);
         }
 
+        List<ApexBooleanValue> apexValues = new ArrayList<>();
+
         // Handle cases such as
         // if (myObject) { /*Do Something*/ }
+
+        if (apexValue instanceof ApexBooleanValue) {
+            apexValues.add((ApexBooleanValue) apexValue);
+        }
         // Convert the value to a boolean that represents if the object was initialized
         if (apexValue instanceof ApexCustomValue) {
-            apexValue = ApexValueBuilder.getWithoutSymbolProvider().buildBoolean();
+            apexValues.add(ApexValueBuilder.getWithoutSymbolProvider().buildBoolean());
+        }
+
+        if (apexValue instanceof ApexForLoopValue) {
+            List<ApexValue<?>> forLoopValues = ((ApexForLoopValue) apexValue).getForLoopValues();
+            for (ApexValue<?> value: forLoopValues) {
+                if (value instanceof ApexBooleanValue) {
+                    apexValues.add((ApexBooleanValue) value);
+                } else {
+                    apexValues.addAll(getDerivedApexValue(parent, vertex, value));
+                }
+            }
         }
 
         // Convert the value to a boolean that represents if the object was initialized
-        // TODO: This might need to be more specific
-        if (apexValue instanceof ApexForLoopValue || apexValue instanceof ApexSingleValue) {
-            apexValue = ApexValueBuilder.getWithoutSymbolProvider().buildBoolean();
+        if (apexValue instanceof ApexSingleValue) {
+            apexValues.add(ApexValueBuilder.getWithoutSymbolProvider().buildBoolean());
         }
-
-        return convert((ApexBooleanValue) apexValue);
+        return apexValues;
     }
 
     private Set<FlsValidationRepresentation.Info> convert(ApexBooleanValue apexBooleanValue) {

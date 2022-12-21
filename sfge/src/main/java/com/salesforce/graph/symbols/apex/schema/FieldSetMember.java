@@ -64,7 +64,12 @@ public final class FieldSetMember extends ApexStandardValue<FieldSetMember>
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        ApexValueBuilder builder =
+            ApexValueBuilder.get(symbols)
+                .returnedFrom(this, vertex);
+        final String methodName = vertex.getMethodName();
+
+        return _applyMethod(builder, methodName);
     }
 
     @Override
@@ -79,13 +84,21 @@ public final class FieldSetMember extends ApexStandardValue<FieldSetMember>
 
         String methodName = method.getName();
 
+        ApexValue<?> apexValue = _applyMethod(builder, methodName).orElse(null);
+
+        if (apexValue == null) {
+            apexValue = ApexValueUtil.synthesizeReturnedValue(builder, method);
+        }
+        return Optional.ofNullable(apexValue);
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(ApexValueBuilder builder, String methodName) {
         if (methodName.equalsIgnoreCase(METHOD_GET_S_OBJECT_FIELD)) {
             // We don't know the field name, create an indeterminant string
             ApexStringValue fieldName = builder.deepClone().buildString();
             return Optional.of(
-                    builder.buildSObjectField(fieldSet.getSObjectType().get(), fieldName));
-        } else {
-            return Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
+                builder.buildSObjectField(fieldSet.getSObjectType().get(), fieldName));
         }
+        return Optional.empty();
     }
 }

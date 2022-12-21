@@ -8,11 +8,13 @@ import static org.hamcrest.Matchers.nullValue;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
+import com.salesforce.graph.symbols.apex.ApexForLoopValue;
 import com.salesforce.graph.symbols.apex.ApexSingleValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,17 +36,17 @@ public class SObjectTypeTest {
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testGetDescribeWithResolvedObjectType(
-            String initializer, String sObjectTypeReturnedFrom) {
+        String initializer, String sObjectTypeReturnedFrom) {
         String sourceCode =
-                "public class MyClass {\n"
-                        + "    public static void doSomething() {\n"
-                        + "       SObjectType sObjType = "
-                        + initializer
-                        + ";\n"
-                        + "       System.debug(sObjType);\n"
-                        + "       System.debug(sObjType.getDescribe());\n"
-                        + "    }\n"
-                        + "}";
+            "public class MyClass {\n"
+                + "    public static void doSomething() {\n"
+                + "       SObjectType sObjType = "
+                + initializer
+                + ";\n"
+                + "       System.debug(sObjType);\n"
+                + "       System.debug(sObjType.getDescribe());\n"
+                + "    }\n"
+                + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -54,35 +56,35 @@ public class SObjectTypeTest {
         SObjectType sObjectType = (SObjectType) visitor.getAllResults().get(0).get();
         MatcherAssert.assertThat(sObjectType.isIndeterminant(), equalTo(false));
         MatcherAssert.assertThat(
-                TestUtil.apexValueToString(sObjectType.getType()), equalTo("Account"));
+            TestUtil.apexValueToString(sObjectType.getType()), equalTo("Account"));
         ApexValue<?> returnedFrom = sObjectType.getReturnedFrom().orElse(null);
         if (sObjectTypeReturnedFrom == null) {
             MatcherAssert.assertThat(returnedFrom, is(nullValue()));
         } else {
             MatcherAssert.assertThat(
-                    returnedFrom.getClass().getSimpleName(), equalTo(sObjectTypeReturnedFrom));
+                returnedFrom.getClass().getSimpleName(), equalTo(sObjectTypeReturnedFrom));
         }
 
         // sObjType.getDescribe()
         DescribeSObjectResult describeSObjectResult =
-                (DescribeSObjectResult) visitor.getAllResults().get(1).get();
+            (DescribeSObjectResult) visitor.getAllResults().get(1).get();
         MatcherAssert.assertThat(describeSObjectResult.isIndeterminant(), equalTo(false));
         MatcherAssert.assertThat(
-                TestUtil.apexValueToString(describeSObjectResult.getSObjectType()),
-                equalTo("Account"));
+            TestUtil.apexValueToString(describeSObjectResult.getSObjectType()),
+            equalTo("Account"));
         MatcherAssert.assertThat(
-                describeSObjectResult.getReturnedFrom().get(), instanceOf(SObjectType.class));
+            describeSObjectResult.getReturnedFrom().get(), instanceOf(SObjectType.class));
     }
 
     @Test
     public void testGlobalDescribeGetDescribedWithUnresolvedObjectType() {
         String sourceCode =
-                "public class MyClass {\n"
-                        + "    public static void doSomething(SObjectType sObjType) {\n"
-                        + "       System.debug(sObjType);\n"
-                        + "       System.debug(sObjType.getDescribe());\n"
-                        + "    }\n"
-                        + "}";
+            "public class MyClass {\n"
+                + "    public static void doSomething(SObjectType sObjType) {\n"
+                + "       System.debug(sObjType);\n"
+                + "       System.debug(sObjType.getDescribe());\n"
+                + "    }\n"
+                + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -96,26 +98,26 @@ public class SObjectTypeTest {
 
         // sObjType.getDescribe()
         DescribeSObjectResult describeSObjectResult =
-                (DescribeSObjectResult) visitor.getAllResults().get(1).get();
+            (DescribeSObjectResult) visitor.getAllResults().get(1).get();
         MatcherAssert.assertThat(describeSObjectResult.isIndeterminant(), equalTo(false));
         MatcherAssert.assertThat(
-                describeSObjectResult.getSObjectType().get(), equalTo(sObjectType));
+            describeSObjectResult.getSObjectType().get(), equalTo(sObjectType));
         MatcherAssert.assertThat(
-                describeSObjectResult.getReturnedFrom().get(), instanceOf(SObjectType.class));
+            describeSObjectResult.getReturnedFrom().get(), instanceOf(SObjectType.class));
     }
 
     @ValueSource(strings = {"Schema.getGlobalDescribe().get('Account')", "Account.SObjectType"})
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNewSObjectWithResolvedObjectType(String initializer) {
         String sourceCode =
-                "public class MyClass {\n"
-                        + "    public static void doSomething() {\n"
-                        + "       SObjectType sObjType = "
-                        + initializer
-                        + ";\n"
-                        + "       System.debug(sObjType.newSObject());\n"
-                        + "    }\n"
-                        + "}";
+            "public class MyClass {\n"
+                + "    public static void doSomething() {\n"
+                + "       SObjectType sObjType = "
+                + initializer
+                + ";\n"
+                + "       System.debug(sObjType.newSObject());\n"
+                + "    }\n"
+                + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -124,21 +126,21 @@ public class SObjectTypeTest {
         ApexSingleValue apexSingleValue = visitor.getSingletonResult();
         MatcherAssert.assertThat(apexSingleValue.isIndeterminant(), equalTo(false));
         MatcherAssert.assertThat(
-                apexSingleValue.getReturnedFrom().get(), instanceOf(SObjectType.class));
+            apexSingleValue.getReturnedFrom().get(), instanceOf(SObjectType.class));
 
         SObjectType sObjectType = (SObjectType) apexSingleValue.getReturnedFrom().get();
         MatcherAssert.assertThat(
-                TestUtil.apexValueToString(sObjectType.getType()), equalTo("Account"));
+            TestUtil.apexValueToString(sObjectType.getType()), equalTo("Account"));
     }
 
     @Test
     public void testNewSObjectWithUnresolvedObjectType() {
         String sourceCode =
-                "public class MyClass {\n"
-                        + "    public static void doSomething(SObjectType sObjType) {\n"
-                        + "       System.debug(sObjType.newSObject());\n"
-                        + "    }\n"
-                        + "}";
+            "public class MyClass {\n"
+                + "    public static void doSomething(SObjectType sObjType) {\n"
+                + "       System.debug(sObjType.newSObject());\n"
+                + "    }\n"
+                + "}";
 
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
@@ -147,11 +149,34 @@ public class SObjectTypeTest {
         ApexSingleValue apexSingleValue = visitor.getSingletonResult();
         MatcherAssert.assertThat(apexSingleValue.isIndeterminant(), equalTo(false));
         MatcherAssert.assertThat(
-                apexSingleValue.getReturnedFrom().get(), instanceOf(SObjectType.class));
+            apexSingleValue.getReturnedFrom().get(), instanceOf(SObjectType.class));
 
         SObjectType sObjectType = (SObjectType) apexSingleValue.getReturnedFrom().get();
         MatcherAssert.assertThat(sObjectType.isIndeterminant(), equalTo(true));
         MatcherAssert.assertThat(sObjectType.getType().isPresent(), equalTo(false));
         MatcherAssert.assertThat(sObjectType.getReturnedFrom().isPresent(), equalTo(false));
+    }
+
+    @CsvSource({
+        "getDescribe,com.salesforce.graph.symbols.apex.schema.DescribeSObjectResult",
+        "newSObject,com.salesforce.graph.symbols.apex.ApexSingleValue"
+    })
+    @ParameterizedTest
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType) throws ClassNotFoundException {
+        String sourceCode = "public class MyClass {\n" +
+            "   void doSomething() {\n" +
+            "       List<SObjectType> myTypes = new List<SObjectType>{Account.SObjectType};\n" +
+            "       for (SObjectType myType: myTypes) {\n" +
+            "           System.debug(myType." + methodName + "());\n" +
+            "       }\n" +
+            "   }\n" +
+            "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue forLoopValue = visitor.getSingletonResult();
+        ApexValue<?> value = forLoopValue.getForLoopValues().get(0);
+        MatcherAssert.assertThat(value, Matchers.instanceOf(Class.forName(apexValueType)));
     }
 }
