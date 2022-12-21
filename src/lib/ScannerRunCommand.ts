@@ -1,11 +1,16 @@
+import {flags} from '@salesforce/command';
 import {Messages, SfdxError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
-import {RecombinedRuleResults} from '../types';
+import {RecombinedRuleResults, SfgeConfig} from '../types';
 import {RunOutputProcessor} from './util/RunOutputProcessor';
 import {Controller} from '../Controller';
+import {CUSTOM_CONFIG} from '../Constants';
 import {OUTPUT_FORMAT, RunOptions} from './RuleManager';
+import {FileHandler} from './util/FileHandler';
 import untildify = require('untildify');
+import globby = require('globby');
+import path = require('path');
 import normalize = require('normalize-path');
 
 // Initialize Messages with the current plugin directory
@@ -13,11 +18,54 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
 
 export abstract class ScannerRunCommand extends ScannerCommand {
+
+	/**
+	 * There are flags that are common to all variants of the run command. We can define those flags
+	 * here to avoid duplicate code.
+	 * @protected
+	 */
+	protected static flagsConfig = {
+		verbose: flags.builtin(),
+		// BEGIN: Flags related to results processing.
+		format: flags.enum({
+			char: 'f',
+			description: messages.getMessage('flags.formatDescription'),
+			longDescription: messages.getMessage('flags.formatDescriptionLong'),
+			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
+		}),
+		outfile: flags.string({
+			char: 'o',
+			description: messages.getMessage('flags.outfileDescription'),
+			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+		}),
+		'severity-threshold': flags.integer({
+			char: 's',
+			description: messages.getMessage('flags.sevthresholdDescription'),
+			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
+			exclusive: ['json'],
+			min: 1,
+			max: 3
+		}),
+		'normalize-severity': flags.boolean({
+			description: messages.getMessage('flags.normalizesevDescription'),
+			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
+		}),
+		// END: Flags related to results processing.
+		// BEGIN: Flags related to targeting.
+		projectdir: flags.array({
+			char: 'p',
+			description: messages.getMessage('flags.projectdirDescription'),
+			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			map: d => normalize(untildify(d))
+		}),
+		// END: Flags related to targeting.
+	};
 
 	async runInternal(): Promise<AnyJson> {
 		// First, do any validations that can't be handled with out-of-the-box stuff.
@@ -66,11 +114,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	}
 
 	private async validateFlags(): Promise<void> {
-		// First, perform any validation of the command's specific flags.
-		await this.validateCommandFlags();
+		// First, validate the flags specific to the sub-variant.
+		await this.validateVariantFlags();
 
-		// The output flags are common between subclasses. Validate those too.
-		this.validateOutputFlags();
+		// Then, validate the flags that are common to all variants.
+		await this.validateCommonFlags();
 	}
 
 	/**
@@ -78,14 +126,24 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 * @protected
 	 * @abstract
 	 */
-	protected abstract validateCommandFlags(): Promise<void>
+	protected abstract validateVariantFlags(): Promise<void>
 
-	/**
-	 * Validate the output-related flags, which are common to all implementations of {@link ScannerRunCommand} and share
-	 * the same constraints.
-	 * @private
-	 */
-	private validateOutputFlags(): void {
+
+	private async validateCommonFlags(): Promise<void> {
+		const fh = new FileHandler();
+		// If there's a --projectdir flag, its entries must be non-glob paths pointing
+		// to existing directories.
+		if (this.flags.projectdir) {
+			for (const dir of (this.flags.projectdir as string[])) {
+				if (globby.hasMagic(dir)) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirCannotBeGlob', []);
+				} else if (!(await fh.exists(dir))) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustExist', []);
+				} else if (!(await fh.stats(dir)).isDirectory()) {
+					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustBeDir', []);
+				}
+			}
+		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
 		if (this.flags.format && this.flags.outfile) {
 			const inferredOutfileFormat = this.inferFormatFromOutfile();
@@ -94,7 +152,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run', 'validations.cannotWriteTableToFile', []);
+				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.cannotWriteTableToFile', []);
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
@@ -145,9 +203,35 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	/**
 	 * Gather a map of options that will be passed to the RuleManager without validation.
 	 * @protected
+	 */
+	protected gatherEngineOptions(): Map<string, string> {
+		const options: Map<string,string> = this.gatherCommonEngineOptions();
+		this.mergeVariantEngineOptions(options);
+		return options;
+	}
+
+	/**
+	 * Gather engine options that are shared across sub-variants.
+	 * @private
+	 */
+	private gatherCommonEngineOptions(): Map<string,string> {
+		const options: Map<string,string> = new Map();
+		// We should only add a GraphEngine config if we were given a --projectdir flag.
+		if (this.flags.projectdir && (this.flags.projectdir as string[]).length > 0) {
+			const sfgeConfig: SfgeConfig = {
+				projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
+			};
+			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
+		}
+		return options;
+	}
+
+	/**
+	 * Gather engine options that are unique to each sub-variant.
+	 * @protected
 	 * @abstract
 	 */
-	protected abstract gatherEngineOptions(): Map<string, string>;
+	protected abstract mergeVariantEngineOptions(commonOptions: Map<string,string>): void;
 
 	protected abstract pathBasedEngines(): boolean;
 }

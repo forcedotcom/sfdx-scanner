@@ -55,8 +55,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     @Override
     protected boolean isEnabled() {
-        // TODO: ENABLE THIS RULE WHEN READY.
-        return false;
+        return true;
     }
 
     public RuleStateTracker getRuleStateTracker() {

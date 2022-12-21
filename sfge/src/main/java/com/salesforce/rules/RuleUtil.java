@@ -18,6 +18,18 @@ import org.reflections.Reflections;
 public final class RuleUtil {
     private static final Logger LOGGER = LogManager.getLogger(RuleUtil.class);
 
+    public static List<AbstractRule> getEnabledStaticRules() throws RuleNotFoundException {
+        return getEnabledRules().stream()
+                .filter(rule -> rule instanceof AbstractStaticRule)
+                .collect(Collectors.toList());
+    }
+
+    public static List<AbstractRule> getEnabledPathBasedRules() throws RuleNotFoundException {
+        return getEnabledRules().stream()
+                .filter(rule -> rule instanceof AbstractPathBasedRule)
+                .collect(Collectors.toList());
+    }
+
     public static List<AbstractRule> getEnabledRules() throws RuleNotFoundException {
         final List<AbstractRule> allRules = getAllRules();
         return allRules.stream().filter(rule -> rule.isEnabled()).collect(Collectors.toList());

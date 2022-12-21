@@ -2,6 +2,7 @@ import path = require('path');
 import {Messages, Logger} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../../Controller';
+import {RuleType} from '../../Constants';
 import * as JreSetupManager from '../JreSetupManager';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import {Rule, SfgeConfig, RuleTarget} from '../../types';
@@ -13,8 +14,8 @@ import {FileHandler} from '../util/FileHandler';
 const SFGE_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'sfge', 'lib');
 
 const MAIN_CLASS = "com.salesforce.Main";
-const EXEC_COMMAND = "execute";
-const CATALOG_COMMAND = "catalog";
+const EXEC_ACTION = "execute";
+const CATALOG_ACTION = "catalog";
 const SFGE_LOG_FILE = 'sfge.log';
 
 // Initialize Messages with the current plugin directory
@@ -33,13 +34,20 @@ const EXIT_NO_VIOLATIONS = 0;
  */
 const EXIT_WITH_VIOLATIONS = 4;
 
-interface SfgeWrapperOptions {
+type SfgeWrapperOptions = {
+	action: string;
+	spinnerManager: SpinnerManager;
+	jvmArgs?: string;
+}
+
+type SfgeCatalogOptions = SfgeWrapperOptions & {
+	ruleType: RuleType;
+}
+
+type SfgeExecuteOptions = SfgeWrapperOptions & {
 	targets: RuleTarget[];
 	projectDirs: string[];
-	command: string;
 	rules: Rule[];
-	spinnerManager: SpinnerManager;
-	jvmArgs?: string,
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;
@@ -73,8 +81,8 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	public startSpinner(): void {
 		uxEvents.emit(
 			EVENTS.START_SPINNER,
-			messages.getMessage("spinnerStart", [this.logFilePath]),
-			messages.getMessage("pleaseWait")
+			messages.getMessage("messages.spinnerStart", [this.logFilePath]),
+			messages.getMessage("messages.pleaseWait")
 		);
 
 		// TODO: This timer logic should ideally live inside waitOnSpinner()
@@ -89,32 +97,20 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	}
 }
 
-export class SfgeWrapper extends CommandLineSupport {
-	private logger: Logger;
-	private initialized: boolean;
-	private fh: FileHandler;
-	private targets: RuleTarget[];
-	private projectDirs: string[];
-	private command: string;
-	private rules: Rule[];
+abstract class AbstractSfgeWrapper extends CommandLineSupport {
+	protected logger: Logger;
+	protected initialized: boolean;
+	protected fh: FileHandler;
+	private action: string;
 	private logFilePath: string;
 	private spinnerManager: SpinnerManager;
 	private jvmArgs: string;
-	private ruleThreadCount: number;
-	private ruleThreadTimeout: number;
-	private ruleDisableWarningViolation: boolean;
 
-	constructor(options: SfgeWrapperOptions) {
+	protected constructor(options: SfgeWrapperOptions) {
 		super(options);
-		this.targets = options.targets;
-		this.projectDirs = options.projectDirs;
-		this.command = options.command;
-		this.rules = options.rules;
+		this.action = options.action;
 		this.spinnerManager = options.spinnerManager;
 		this.jvmArgs = options.jvmArgs;
-		this.ruleThreadCount = options.ruleThreadCount;
-		this.ruleThreadTimeout = options.ruleThreadTimeout;
-		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
 	}
 
 	protected async init(): Promise<void> {
@@ -122,7 +118,7 @@ export class SfgeWrapper extends CommandLineSupport {
 			return;
 		}
 		await super.init();
-		this.logger = await Logger.child('SfgeWrapper');
+		this.logger = await Logger.child(this.constructor.name);
 		this.fh = new FileHandler();
 		this.logFilePath = path.join(Controller.getSfdxScannerPath(), SFGE_LOG_FILE);
 		this.initialized = true;
@@ -130,12 +126,6 @@ export class SfgeWrapper extends CommandLineSupport {
 
 	protected buildClasspath(): Promise<string[]> {
 		return Promise.resolve([`${SFGE_LIB}/*`]);
-	}
-
-	private async createInputFile(input: SfgeInput): Promise<string> {
-		const inputFile = await this.fh.tmpFileWithCleanup();
-		await this.fh.writeFile(inputFile, JSON.stringify(input));
-		return inputFile;
 	}
 
 	protected isSuccessfulExitCode(code: number): boolean {
@@ -146,12 +136,13 @@ export class SfgeWrapper extends CommandLineSupport {
 	 * While handling unsuccessful executions, include stdout
 	 * and stderr information.
 	 * @param args contains information on the outcome of execution
+	 * @override
 	 */
 	protected handleResults(args: ResultHandlerArgs) {
 		if (args.isSuccess) {
 			args.res(args.stdout);
 		} else {
-			// Pass in both stdout and stderr so that results can be salvaged
+			// Pass in both stdout and stderr so any partial results can be salvaged.
 			args.rej(args.stdout + ' ' + args.stderr);
 		}
 	}
@@ -171,45 +162,89 @@ export class SfgeWrapper extends CommandLineSupport {
 		const command = path.join(javaHome, 'bin', 'java');
 		const classpath = await this.buildClasspath();
 
+		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
+		if (this.jvmArgs != null) {
+			args.push(this.jvmArgs);
+		}
+		args.push(...this.getSupplementalFlags(), MAIN_CLASS, this.action, ...(await this.getSupplementalArgs()));
+		this.logger.trace(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
+		return [command, args];
+	}
+	protected async execute(): Promise<string> {
+		return super.runCommand();
+	}
+
+	protected abstract getSupplementalFlags(): string[];
+
+	protected abstract getSupplementalArgs(): Promise<string[]>;
+}
+
+export class SfgeCatalogWrapper extends AbstractSfgeWrapper {
+	private ruleType: RuleType;
+
+	constructor(options: SfgeCatalogOptions) {
+		super(options);
+		this.ruleType = options.ruleType;
+	}
+
+	protected getSupplementalArgs(): Promise<string[]> {
+		return Promise.resolve([this.ruleType]);
+	}
+
+	protected getSupplementalFlags(): string[] {
+		return [];
+	}
+
+	public static async getCatalog(ruleType: RuleType): Promise<string> {
+		const wrapper = await SfgeCatalogWrapper.create({
+			action: CATALOG_ACTION,
+			ruleType,
+			// Cataloging shouldn't take very long, so no need for a functional spinner.
+			spinnerManager: new NoOpSpinnerManager()
+		});
+		return wrapper.execute();
+	}
+}
+
+export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
+	private targets: RuleTarget[];
+	private projectDirs: string[];
+	private rules: Rule[];
+	private ruleThreadCount: number;
+	private ruleThreadTimeout: number;
+	private ruleDisableWarningViolation: boolean;
+
+	constructor(options: SfgeExecuteOptions) {
+		super(options);
+		this.targets = options.targets;
+		this.projectDirs = options.projectDirs;
+		this.rules = options.rules;
+		this.ruleThreadCount = options.ruleThreadCount;
+		this.ruleThreadTimeout = options.ruleThreadTimeout;
+		this.ruleDisableWarningViolation = options.ruleDisableWarningViolation;
+	}
+
+	protected getSupplementalFlags(): string[] {
+		const flags: string[] = [];
+		if (this.ruleThreadCount != null) {
+			flags.push(`-DSFGE_RULE_THREAD_COUNT=${this.ruleThreadCount}`);
+		}
+		if (this.ruleThreadTimeout != null) {
+			flags.push(`-DSFGE_RULE_THREAD_TIMEOUT=${this.ruleThreadTimeout}`);
+		}
+		if (this.ruleDisableWarningViolation != null) {
+			flags.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
+		}
+		return flags;
+	}
+
+	protected async getSupplementalArgs(): Promise<string[]> {
 		const inputObject: SfgeInput = this.createInputJson();
 		const inputFile = await this.createInputFile(inputObject);
 
 		this.logger.trace(`Stored the names of ${this.targets.length} targeted files and ${this.projectDirs.length} source directories in ${inputFile}`);
 		this.logger.trace(`Rules to be executed: ${JSON.stringify(inputObject.rulesToRun)}`);
-
-		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
-		if (this.jvmArgs != null) {
-			args.push(this.jvmArgs);
-		}
-		if (this.ruleThreadCount != null) {
-			args.push(`-DSFGE_RULE_THREAD_COUNT=${this.ruleThreadCount}`);
-		}
-		if (this.ruleThreadTimeout != null) {
-			args.push(`-DSFGE_RULE_THREAD_TIMEOUT=${this.ruleThreadTimeout}`);
-		}
-		if (this.ruleDisableWarningViolation != null) {
-			args.push(`-DSFGE_RULE_DISABLE_WARNING_VIOLATION=${this.ruleDisableWarningViolation.toString()}`);
-		}
-		args.push(MAIN_CLASS, this.command, inputFile);
-
-		this.logger.trace(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
-		return [command, args];
-	}
-
-	private async execute(): Promise<string> {
-		return super.runCommand();
-	}
-
-	public static async getCatalog() {
-		const wrapper = await SfgeWrapper.create({
-			targets: [],
-			projectDirs: [],
-			command: CATALOG_COMMAND,
-			rules: [],
-			// Cataloging shouldn't take very long, so no need for a functional spinner here.
-			spinnerManager: new NoOpSpinnerManager()
-		});
-		return wrapper.execute();
+		return [inputFile];
 	}
 
 	private createInputJson(): SfgeInput {
@@ -242,11 +277,17 @@ export class SfgeWrapper extends CommandLineSupport {
 		return inputJson;
 	}
 
+	private async createInputFile(input: SfgeInput): Promise<string> {
+		const inputFile = await this.fh.tmpFileWithCleanup();
+		await this.fh.writeFile(inputFile, JSON.stringify(input));
+		return inputFile;
+	}
+
 	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
-		const wrapper = await SfgeWrapper.create({
+		const wrapper = await SfgeExecuteWrapper.create({
 			targets,
 			projectDirs: sfgeConfig.projectDirs,
-			command: EXEC_COMMAND,
+			action: EXEC_ACTION,
 			rules: rules,
 			// Running rules could take quite a while, so we should use a functional spinner.
 			spinnerManager: await SfgeSpinnerManager.create({}),

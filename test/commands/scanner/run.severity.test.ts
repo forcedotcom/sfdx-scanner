@@ -5,7 +5,7 @@ import path = require('path');
 
 
 Messages.importMessagesDirectory(__dirname);
-const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 
 describe('scanner:run', function () {
 
@@ -20,8 +20,8 @@ describe('scanner:run', function () {
 					'--severity-threshold', '3'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-					expect(ctx.stderr).to.not.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stderr).to.not.contain(processorMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 
 			setupCommandTest
@@ -40,7 +40,7 @@ describe('scanner:run', function () {
                         }
                     }
 
-                    expect(ctx.stderr).not.to.contain(runMessages.getMessage('output.sevThresholdSummary', ['1']));
+                    expect(ctx.stderr).not.to.contain(processorMessages.getMessage('output.sevThresholdSummary', ['1']));
 
 				});
 
@@ -59,7 +59,7 @@ describe('scanner:run', function () {
                             expect(output[i].violations[j].normalizedSeverity).to.equal(3);
                         }
                     }
-                    expect(ctx.stderr).to.contain(runMessages.getMessage('output.sevThresholdSummary', ['3']));
+                    expect(ctx.stderr).to.contain(processorMessages.getMessage('output.sevThresholdSummary', ['3']));
 
 				});
 

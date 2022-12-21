@@ -15,7 +15,7 @@ import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
 import {RuleEngine} from '../../src/lib/services/RuleEngine';
 
 import {RetireJsEngine} from '../../src/lib/retire-js/RetireJsEngine';
-import {SfgeEngine} from '../../src/lib/sfge/SfgeEngine';
+import {SfgeDfaEngine} from '../../src/lib/sfge/SfgeDfaEngine';
 
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
@@ -261,7 +261,9 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					Sinon.assert.callCount(uxSpy, 0);
+					// Because the engine options is empty, and based on our default settings,
+					// we expect a minimum of one UX event, namely the warning that GraphEngine couldn't evaluate.
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -407,7 +409,10 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					// Because the engine options are empty, and based on our settings, we expect
+					// 2 ux events. The first being that GraphEngine couldn't run, and the second
+					// being that a target didn't match.
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -422,7 +427,10 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					// Because the engine options are empty, and based on our settings, we expect
+					// 2 ux events. The first being that GraphEngine couldn't run, and the second
+					// being that a target didn't match.
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -436,7 +444,10 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					Sinon.assert.callCount(uxSpy, 1);
+					// Because the engine options are empty, and based on our settings, we expect
+					// 2 ux events. The first being that GraphEngine couldn't run, and the second
+					// being that a target didn't match.
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -456,7 +467,10 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					Sinon.assert.callCount(uxSpy, 1);
+					// Because the engine options are empty, and based on our settings, we expect
+					// 2 ux events. The first being that GraphEngine couldn't run, and the second
+					// being that a target didn't match.
+					Sinon.assert.callCount(uxSpy, 2);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -552,7 +566,7 @@ describe('RuleManager', () => {
 
 			it('Positive method-level targets are properly matched', async () => {
 				// All tests will use the SFGE engine, since method-level targeting is intended for that engine anyway.
-				const engine = new SfgeEngine();
+				const engine = new SfgeDfaEngine();
 				await engine.init();
 
 				// Targets are all going to be normalized Unix paths, some of which also specify individual methods.
