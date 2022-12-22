@@ -73,16 +73,16 @@ Graph Engine ran into an error while walking this path. Manually verify that you
 
 ## UnusedMethodsRule
 
-UnusedMethodsRule detects methods contained in your code that aren’t used, such as:
+UnusedMethodsRule detects methods contained in your code that aren’t invoked, such as:
 
-- private or protected constructors and private instance methods that are never invoked
+- private or protected constructors and private instance methods
 - methods run through scanner:run, not scanner:run:dfa
 
-To invoke UnusedMethodsRule, you must provide `--projectdir/-p` to `scanner:run`. 
+To invoke UnusedMethodsRule, you must provide `--projectdir/-p` on `scanner:run`. 
 
 ### Definition
 
-Unlike ApexFlsRule, UnusedMethodRule doesn't use sources or sinks. Instead, UnusedMethodRule is a traditional static analysis rule. A violation occurs at a point in the code where the unused method is declared. UnusedMethodRule has a layer of Graph-based intelligence on top of the traditional AST-hierarchy to understand a bigger picture of the code.
+Unlike ApexFlsRule, UnusedMethodRule doesn't use sources or sinks. Instead, UnusedMethodRule is a traditional static analysis rule. A violation occurs at a point in the code where the unused method is declared. UnusedMethodRule has a layer of graph-based intelligence on top of the traditional Abstract Syntax Tree (AST) hierarchy to understand a bigger picture of the code.
 
 ### Interpreting UnusedMethodsRule Results
 
