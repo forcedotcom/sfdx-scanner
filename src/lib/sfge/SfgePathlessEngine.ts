@@ -1,25 +1,25 @@
-import {Messages} from '@salesforce/core';
+import {SfdxError} from '@salesforce/core';
 import {AbstractSfgeEngine, SfgeViolation} from "./AbstractSfgeEngine";
 import {Rule, RuleGroup, RuleTarget, RuleViolation, SfgeConfig} from '../../types';
-import {CUSTOM_CONFIG, MissingOptionsBehavior, RuleType} from '../../Constants';
+import {CUSTOM_CONFIG, RuleType} from '../../Constants';
+import * as EngineUtils from "../util/CommonEngineUtils";
 
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'SfgeEngine');
 
 export class SfgePathlessEngine extends AbstractSfgeEngine {
-	private missingOptionsBehavior: MissingOptionsBehavior;
-
 	/**
-	 * Invokes sync/async initialization required for the engine.
+	 * Helps decide if an instance of this engine should be included in a run/cataloging based on the values
+	 * provided in the --engine filter and Engine Options.
 	 * @override
 	 */
-	public async init(): Promise<void> {
-		if (this.initialized) {
-			return;
-		}
-		await super.init();
-		this.missingOptionsBehavior = await this.config.getMissingOptionsBehavior(SfgePathlessEngine.ENGINE_ENUM);
-		this.initialized = true;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	public isEngineRequested(filterValues: string[], engineOptions: Map<string,string>): boolean {
+		// The non-DFA variant must be explicitly requested via `--engine sfge`. Otherwise,
+		// it should be excluded from cataloging and running.
+		// NOTE: This was an intentional divergence from the DFA variant's behavior, as a consequence
+		//       of the in-progress nature of many/most non-DFA rules. When we're more confident
+		//       in the state of the engine, this method should be changed so the engine counts
+		//       as requested-by-default the way its DFA cousin does.
+		return EngineUtils.isValueInFilter(this.getName(), filterValues);
 	}
 
 	/**
@@ -39,14 +39,9 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 				return true;
 			}
 		}
-		const haltString = messages.getMessage('errors.failedWithoutProjectDir', []);
-		const warnString = messages.getMessage('warnings.skippedWithoutProjectDir', [
-			this.getName(),
-			'missingOptionsBehavior',
-			MissingOptionsBehavior.WARN,
-			this.config.getConfigFilePath()
-		]);
-		return this.handleMissingOptionsBehavior(this.missingOptionsBehavior, haltString, warnString);
+		// If we're here, it's because we're missing the necessary info to run this engine.
+		// We should throw an error indicating this.
+		throw SfdxError.create('@salesforce/sfdx-scanner', 'SfgeEngine', 'errors.failedWithoutProjectDir', []);
 	}
 
 	protected getSubVariantName(): string {

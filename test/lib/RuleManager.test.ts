@@ -261,9 +261,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					// Because the engine options is empty, and based on our default settings,
-					// we expect a minimum of one UX event, namely the warning that GraphEngine couldn't evaluate.
-					Sinon.assert.callCount(uxSpy, 1);
+					Sinon.assert.callCount(uxSpy, 0);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -409,10 +407,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					// Because the engine options are empty, and based on our settings, we expect
-					// 2 ux events. The first being that GraphEngine couldn't run, and the second
-					// being that a target didn't match.
-					Sinon.assert.callCount(uxSpy, 2);
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -427,10 +422,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					// Because the engine options are empty, and based on our settings, we expect
-					// 2 ux events. The first being that GraphEngine couldn't run, and the second
-					// being that a target didn't match.
-					Sinon.assert.callCount(uxSpy, 2);
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -444,10 +436,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('');
-					// Because the engine options are empty, and based on our settings, we expect
-					// 2 ux events. The first being that GraphEngine couldn't run, and the second
-					// being that a target didn't match.
-					Sinon.assert.callCount(uxSpy, 2);
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -467,10 +456,7 @@ describe('RuleManager', () => {
 						parsedRes = JSON.parse(results);
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
-					// Because the engine options are empty, and based on our settings, we expect
-					// 2 ux events. The first being that GraphEngine couldn't run, and the second
-					// being that a target didn't match.
-					Sinon.assert.callCount(uxSpy, 2);
+					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
