@@ -99,7 +99,7 @@ Because no invocations of the indicated method were found, the method is unneces
 ### UnusedMethodsRule Limitations
 
 - UnusedMethodsRule works on private or protected constructors and private instance methods.
-- These methods are constructors aren’t supported, are excluded from analysis, and may produce false negatives:
+- These methods and constructors aren’t supported, are excluded from analysis, and may produce false negatives:
     - public or global constructors
     - protected, public, or global instance methods
     - static methods of any visibility aren't currently supported
