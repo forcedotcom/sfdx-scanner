@@ -5,7 +5,6 @@ import {CUSTOM_CONFIG, ENGINE, RuleType, Severity} from '../../Constants';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, SfgeConfig, TargetPattern} from '../../types';
 import {Config} from '../util/Config';
-import * as EngineUtils from '../util/CommonEngineUtils';
 import {EventCreator} from '../util/EventCreator';
 
 const CATALOG_START = 'CATALOG_START';
@@ -41,9 +40,9 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 	protected static ENGINE_ENUM: ENGINE = ENGINE.SFGE;
 	protected static ENGINE_NAME: string = ENGINE.SFGE.valueOf();
 
-	protected logger: Logger;
-	protected config: Config;
-	protected initialized: boolean;
+	private logger: Logger;
+	private config: Config;
+	private initialized: boolean;
 	private eventCreator: EventCreator;
 	private catalog: Catalog;
 
@@ -241,18 +240,6 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 	 */
 	public async isEnabled(): Promise<boolean> {
 		return await this.config.isEngineEnabled(AbstractSfgeEngine.ENGINE_ENUM);
-	}
-
-	/**
-	 * Helps decide if an instance of this engine should be included in a run based on the values
-	 * provided in the --engine filter and Engine Options.
-	 * @override
-	 */
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	public isEngineRequested(filterValues: string[], engineOptions: Map<string,string>): boolean {
-		// If `sfge` is requested or there are no engine filters at all, then all GraphEngine sub-variants
-		// should be treated as requested. This way, they can all be cataloged together.
-		return EngineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
 	private static processStderr(output: string): string {

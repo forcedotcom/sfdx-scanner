@@ -760,9 +760,8 @@ describe('scanner:run', function () {
 				// - 3 ESLint categories
 				// - 3 ESLint-Typescript categories
 				// - 1 RetireJS category
-				// - 2 Salesforce Graph Engine categories
-				// For a total of 17
-				expect(implicitMessages || []).to.have.lengthOf(17, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// For a total of 15
+				expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});
 	});
