@@ -71,12 +71,21 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 
 Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](./en/v3.x/release-information/) for more info.
 
+#### See Also
+
+- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
+- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
+- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
+- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
+- [Frequently Asked Questions](./en/v3.x/faq/)
+
 ## UnusedMethodRule
 
-UnusedMethodRule detects methods contained in your code that aren’t invoked, such as:
+UnusedMethodRule detects methods contained in your code that aren’t invoked. At this stage, it detects:
 
-- private or protected constructors and private instance methods
-- methods run through scanner:run, not scanner:run:dfa
+- unused private instance methods
+- unused private constructors
+- unused protected constructors
 
 To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`. 
 
@@ -102,15 +111,7 @@ Because no invocations of the indicated method were found, the method is unneces
 - These methods and constructors aren’t supported, are excluded from analysis, and may produce false negatives:
     - public or global constructors
     - protected, public, or global instance methods
-    - static methods of any visibility aren't currently supported
-
-#### See Also
-
-- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
-- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
-- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
-- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
-- [Frequently Asked Questions](./en/v3.x/faq/)
+    - static methods of any visibility
 
 ## Roadmap
 
