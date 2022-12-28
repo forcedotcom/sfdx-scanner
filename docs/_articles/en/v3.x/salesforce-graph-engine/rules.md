@@ -69,22 +69,22 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 
 > Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path. Then, add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace. After we fix this issue, check the Code Analyzer release notes for more info. Error and stacktrace: [details]
 
-Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/release-information/) for more info.
+Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](./en/v3.x/release-information/) for more info.
 
-## UnusedMethodsRule
+## UnusedMethodRule
 
-UnusedMethodsRule detects methods contained in your code that aren’t invoked, such as:
+UnusedMethodRule detects methods contained in your code that aren’t invoked, such as:
 
 - private or protected constructors and private instance methods
 - methods run through scanner:run, not scanner:run:dfa
 
-To invoke UnusedMethodsRule, you must provide `--projectdir/-p` on `scanner:run`. 
+To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`. 
 
 ### Definition
 
 Unlike ApexFlsRule, UnusedMethodRule doesn't use sources or sinks. Instead, UnusedMethodRule is a traditional static analysis rule. A violation occurs at a point in the code where the unused method is declared. UnusedMethodRule has a layer of graph-based intelligence on top of the traditional Abstract Syntax Tree (AST) hierarchy to understand a bigger picture of the code.
 
-### Interpreting UnusedMethodsRule Results
+### Interpreting UnusedMethodRule Results
 
 Match any violation message that you receive with this case to understand more about the violation.
 
@@ -96,9 +96,9 @@ Parameter Explanation:
 
 Because no invocations of the indicated method were found, the method is unnecessary and can be deleted.
 
-### UnusedMethodsRule Limitations
+### UnusedMethodRule Limitations
 
-- UnusedMethodsRule works on private or protected constructors and private instance methods.
+- UnusedMethodRule works on private or protected constructors and private instance methods.
 - These methods and constructors aren’t supported, are excluded from analysis, and may produce false negatives:
     - public or global constructors
     - protected, public, or global instance methods
