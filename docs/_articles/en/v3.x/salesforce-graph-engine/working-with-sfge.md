@@ -1,5 +1,5 @@
 ---
-title: 'Working with SFGE'
+title: 'Working with Salesforce Graph Engine'
 lang: en
 ---
 
