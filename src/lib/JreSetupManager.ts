@@ -16,7 +16,7 @@ const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
 // Exported only to be used by tests
 export class JreSetupManagerDependencies {
-	async autoDetectJavaHome(): Promise<string | void> {
+	async autoDetectJavaHome(): Promise<string> {
 		return new Promise<string>((resolve) => {
 			// Returning a void to show that we don't need to handle reject in this case.
 			// If this gets rejected, we'll simply move on to the next step.
