@@ -17,6 +17,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 public class UnusedMethodRule extends AbstractStaticRule {
+    private static final String URL =
+        "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String DESCRIPTION = "Identifies methods that are not invoked";
     private static final String VIOLATION_TEMPLATE = "Method %s in class %s is never invoked";
@@ -35,7 +37,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     @Override
     protected int getSeverity() {
-        return SEVERITY.LOW.code; // TODO: VERIFY THIS CHOICE
+        return SEVERITY.LOW.code;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     @Override
     protected String getUrl() {
-        return "TODO"; // TODO: WE NEED TO CREATE DOCS AND ADD A URL HERE.
+        return URL;
     }
 
     @Override
