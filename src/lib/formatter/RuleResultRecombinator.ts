@@ -1,7 +1,7 @@
 import {SfdxError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
-import {DfaEngineFilters, ENGINE} from '../../Constants';
+import {ENGINE} from '../../Constants';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
 import {FileHandler} from '../util/FileHandler';
@@ -42,10 +42,10 @@ export class RuleResultRecombinator {
 		let formattedResults: string | {columns; rows} = null;
 		switch (format) {
 			case OUTPUT_FORMAT.CSV:
-				formattedResults = await this.constructCsv(results, executedEngines);
+				formattedResults = await this.constructCsv(results);
 				break;
 			case OUTPUT_FORMAT.HTML:
-				formattedResults = await this.constructHtml(results, executedEngines, verboseViolations);
+				formattedResults = await this.constructHtml(results, verboseViolations);
 				break;
 			case OUTPUT_FORMAT.JSON:
 				formattedResults = this.constructJson(results, verboseViolations);
@@ -57,7 +57,7 @@ export class RuleResultRecombinator {
 				formattedResults = await constructSarif(results, executedEngines);
 				break;
 			case OUTPUT_FORMAT.TABLE:
-				formattedResults = this.constructTable(results, executedEngines);
+				formattedResults = this.constructTable(results);
 				break;
 			case OUTPUT_FORMAT.XML:
 				formattedResults = this.constructXml(results);
@@ -278,16 +278,12 @@ URL: ${url}`;
 		return `${header}\n${body}\n${footer}`;
 	}
 
-	private static constructTable(results: RuleResult[], executedEngines: Set<string>): RecombinedData {
+	private static constructTable(results: RuleResult[]): RecombinedData {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
-
-		// If any of the engines are DFA engines, we should use the DFA columns. Otherwise, we should use the static columns.
-		// NOTE: This code is predicated on the assumption that DFA and Pathless engines will not be run concurrently.
-		// If that assumption is ever invalidated, then this code has to change.
-		const columns = DfaEngineFilters.some(e => executedEngines.has(e))
+		const columns = this.violationsAreDfa(results)
 			? ['Source Location', 'Sink Location', 'Description', 'Category', 'URL']
 			: ['Location', 'Description', 'Category', 'URL'];
 
@@ -363,18 +359,17 @@ URL: ${url}`;
 			}
 			return JSON.stringify(resultsVerbose.filter(r => r.violations.length > 0));
 		}
-		
 		return JSON.stringify(results.filter(r => r.violations.length > 0));
 	}
 
-	private static async constructHtml(results: RuleResult[], executedEngines: Set<string>, verboseViolations = false): Promise<string> {
+	private static async constructHtml(results: RuleResult[], verboseViolations = false): Promise<string> {
 		// If the results were just an empty string, we can return it.
 		if (results.length === 0) {
 			return '';
 		}
 
 		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined);
-		const isDfa = DfaEngineFilters.some(e => executedEngines.has(e));
+		const isDfa = this.violationsAreDfa(results);
 
 
 		const violations = [];
@@ -438,12 +433,12 @@ URL: ${url}`;
 		return Mustache.render(template, templateData);
 	}
 
-	private static async constructCsv(results: RuleResult[], executedEngines: Set<string>): Promise<string> {
-		// If the results were just an empty string, we can return it.
+	private static async constructCsv(results: RuleResult[]): Promise<string> {
+		// If the results were just an empty list, we can return an empty string
 		if (results.length === 0) {
 			return '';
 		}
-		const isDfa = DfaEngineFilters.some(e => executedEngines.has(e));
+		const isDfa: boolean = this.violationsAreDfa(results);
 		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
 
 		const csvRows = [];
@@ -496,5 +491,27 @@ URL: ${url}`;
 				resolve(output);
 			});
 		});
+	}
+
+	/**
+	 * For now, either all violations are DFA or all violations are non-DFA. This method
+	 * indicates which is the case.
+	 * NOTE: This method is predicated on the assumption that DFA and non-DFA engines cannot
+	 * run concurrently. If that assumption is ever invalidated, this method must change.
+	 * @param results
+	 * @private
+	 */
+	private static violationsAreDfa(results: RuleResult[]): boolean {
+		for (const result of results) {
+			if (result.violations.length > 0) {
+				return !isPathlessViolation(result.violations[0]);
+			}
+		}
+		// Theoretically, it should be impossible to reach this point, because
+		// it means there are either no results or no violations, and those cases
+		// should have been handled elsewhere. But in the event this somehow happens,
+		// we'll treat this null case as being pathless, so we display the pathless columns.
+		// Note that this decision is entirely arbitrary.
+		return false;
 	}
 }
