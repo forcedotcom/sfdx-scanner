@@ -18,7 +18,7 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 public class UnusedMethodRule extends AbstractStaticRule {
     private static final String URL =
-        "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
+            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String DESCRIPTION = "Identifies methods that are not invoked";
     private static final String VIOLATION_TEMPLATE = "Method %s in class %s is never invoked";

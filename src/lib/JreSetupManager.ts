@@ -3,7 +3,7 @@ import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../Controller';
 
 import process = require('process');
-import findJavaHome = require('find-java-home');
+import * as findJavaHome from 'find-java-home';
 import childProcess = require('child_process');
 import path = require('path');
 import {FileHandler} from './util/FileHandler';
@@ -16,9 +16,11 @@ const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
 // Exported only to be used by tests
 export class JreSetupManagerDependencies {
-	autoDetectJavaHome(): Promise<string> {
+	async autoDetectJavaHome(): Promise<string | void> {
 		return new Promise<string>((resolve) => {
-			findJavaHome({allowJre: true}, (err, home) => {
+			// Returning a void to show that we don't need to handle reject in this case.
+			// If this gets rejected, we'll simply move on to the next step.
+			void findJavaHome({allowJre: true}, (err, home) => {
 				resolve(err || (typeof home != 'string') ? null : home);
 			});
 		});
