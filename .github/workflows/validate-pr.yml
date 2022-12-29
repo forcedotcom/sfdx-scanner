@@ -16,5 +16,15 @@ jobs:
         uses: ./github-actions/verify-pr-title
         id: verify_pr_title
   # Separately, we also need to run all of our tests.
-  run_tests:
-    uses: ./.github/workflows/run-tests.yml
+#  run_tests:
+#    uses: ./.github/workflows/run-tests.yml
+  summarize_fake_results:
+    runs-on: ubuntu-latest
+    name: Summarize some fake results we made up
+    steps:
+      - name: Add warning
+        run: echo "::warning ::This is a test warning"
+      - name: Add error
+        run: echo "::error ::This is a test error"
+      - name: Add a summary
+        run: echo "### Hello world! :rocket:" >> $GITHUB_STEP_SUMMARY
