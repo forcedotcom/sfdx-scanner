@@ -24,7 +24,12 @@ jobs:
     steps:
       - name: Add warning
         run: echo "::warning ::This is a test warning"
+      - name: Use new action
+        uses: ./github-actions/summarize-errors
+        id: summarize_errors
+        with:
+          location: "$GITHUB_WORKSPACE/sfge/build/reports/tests/test"
       - name: Add error
-        run: echo "::error file=sfge/src/test/java/com/salesforce/rules/fls/apex/CheckBasedFieldLevelFlsViolationTest.java::This is another test error"
+        run: echo "::error ::This is another test error"
       - name: Add a summary
         run: echo "### Hello world! :rocket:" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,9 @@
+name: 'Summarize errors'
+description: 'Add information about test failures to GHA report'
+inputs:
+  location:
+    description: 'Location of results directory'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
