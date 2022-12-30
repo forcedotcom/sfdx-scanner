@@ -94,60 +94,12 @@ jobs:
       - name: SFGE Tests And Coverage
         id: sfge-tests
         if: ${{ always() }}
-        run: yarn test-sfge-quiet
-      #    4. Typescript project.
-      - name: Typescript Tests And Coverage
-        id: typescript-tests
-        if: ${{ always() }}
-        run: yarn test-typescript --reporter mocha-junit-reporter --reporter-option mochaFile=typescript-test-results/mocha/test-results.xml
-      - name: Typescript Linting
-        id: typescript-linting
-        if: ${{ always() }}
-        run: yarn lint-typescript -f junit -o typescript-test-results/eslint/lint-results.xml
-      # Upload the test results and coverage as an artifact
-      - name: Upload artifact
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        run: ./gradlew sfge-test-quiet --tests CheckBasedFieldLevelFlsViolationTest --tests RuleRunnerTest --tests ViolationTest
+      - name: Summarize failures
+        if: ${{ failure() }}
+        uses: ./github-actions/summarize-errors
         with:
-          name: test-results-${{ runner.os }}-jvm-${{ matrix.java }}-node-${{ matrix.node.artifact }}
-          path: |
-            ./typescript-test-results
-            ./pmd-cataloger/build/reports
-            ./pmd-cataloger/build/test-results
-            ./sfge/build/reports
-            ./sfge/build/test-results
-            ./cli-messaging/build/reports
-            ./cli-messaging/build/test-results
-      # If any of the steps failed, we need to report that.
-      # TODO: In the future, we could replace this step with a JS-based one that uses `core.setFailed()` to set a failure
-      #       message in the annotations.
-      - name: Report failures
-        if: ${{ failure() || cancelled() }}
-        shell: bash
-        env:
-          CLI_MESSAGING_FAILED: ${{ steps.cli-messaging-tests.outcome == 'failure' }}
-          PMD_CATALOGER_FAILED: ${{ steps.pmd-cataloger-tests.outcome == 'failure' }}
-          SFGE_FAILED: ${{ steps.sfge-tests.outcome == 'failure' }}
-          TYPESCRIPT_TESTS_FAILED: ${{ steps.typescript-tests.outcome == 'failure' }}
-          TYPESCRIPT_LINTING_FAILED: ${{ steps.typescript-linting.outcome == 'failure' }}
-        run: |
-          if [[ ${{ env.CLI_MESSAGING_FAILED }} == true ]]; then
-            echo "cli-messaging had test failures"
-          fi
-          if [[ ${{ env.PMD_CATALOGER_FAILED }} == true ]]; then
-            echo "pmd-cataloger had test failures and/or insufficient code coverage"
-          fi
-          if [[ ${{ env.SFGE_FAILED }} == true ]]; then
-            echo "sfge had test failures and/or insufficient code coverage"
-          fi
-          if [[ ${{ env.TYPESCRIPT_TESTS_FAILED }} == true ]]; then
-            echo "typescript had test failures and/or insufficient code coverage"
-          fi
-          if [[ ${{ env.TYPESCRIPT_LINTING_FAILED }} == true ]]; then
-            echo "typescript had linting issues"
-          fi
-          echo "For more information, consult the failed steps' logs and the artifact for this run"
-          exit 1
+          location: "$GITHUB_WORKSPACE/sfge/build/reports/tests/test"
   # Step 2B: Run the smoke tests
   smoke-tests:
     strategy:
