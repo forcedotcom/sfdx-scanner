@@ -25,6 +25,6 @@ jobs:
       - name: Add warning
         run: echo "::warning ::This is a test warning"
       - name: Add error
-        run: echo "::error file=sfge/src/test/java/com/salesforce/rules/fls/apex/CheckBasedFieldLevelFlsViolationTest.java,line=1::This is a test error"
+        run: echo "::error file=sfge/src/test/java/com/salesforce/rules/fls/apex/CheckBasedFieldLevelFlsViolationTest.java::This is another test error"
       - name: Add a summary
         run: echo "### Hello world! :rocket:" >> $GITHUB_STEP_SUMMARY
