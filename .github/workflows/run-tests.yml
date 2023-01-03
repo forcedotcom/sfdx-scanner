@@ -94,7 +94,7 @@ jobs:
       - name: SFGE Tests And Coverage
         id: sfge-tests
         if: ${{ always() }}
-        run: ./gradlew sfge-test-quiet --tests CheckBasedFieldLevelFlsViolationTest --tests RuleRunnerTest --tests ViolationTest
+        run: ./gradlew sfge:test --tests CheckBasedFieldLevelFlsViolationTest --tests RuleRunnerTest --tests ViolationTest
       - name: Summarize failures
         if: ${{ failure() }}
         uses: ./github-actions/summarize-errors
