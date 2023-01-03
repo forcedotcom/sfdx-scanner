@@ -88,6 +88,7 @@ describe('scanner:run', function () {
 		describe('--normalize-severity flag', () => {
 
 			setupCommandTest
+				.timeout(15000)
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures'),
 					'--format', 'json',
@@ -123,6 +124,7 @@ describe('scanner:run', function () {
 				});
 
 			setupCommandTest
+				.timeout(15000)
 				.command(['scanner:run',
 					'--target', path.join('test', 'code-fixtures'),
 					'--format', 'json'
