@@ -1,0 +1,1767 @@
+[
+    {
+        "type": "element",
+        "tagName": "!doctype",
+        "attributes": [
+            {
+                "key": "html",
+                "value": null
+            }
+        ],
+        "children": []
+    },
+    {
+        "type": "text",
+        "content": "\n"
+    },
+    {
+        "type": "element",
+        "tagName": "html",
+        "attributes": [],
+        "children": [
+            {
+                "type": "text",
+                "content": "\n"
+            },
+            {
+                "type": "element",
+                "tagName": "head",
+                "attributes": [],
+                "children": [
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "meta",
+                        "attributes": [
+                            {
+                                "key": "http-equiv",
+                                "value": "Content-Type"
+                            },
+                            {
+                                "key": "content",
+                                "value": "text/html; charset=utf-8"
+                            }
+                        ],
+                        "children": []
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "meta",
+                        "attributes": [
+                            {
+                                "key": "http-equiv",
+                                "value": "x-ua-compatible"
+                            },
+                            {
+                                "key": "content",
+                                "value": "IE=edge"
+                            }
+                        ],
+                        "children": []
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "title",
+                        "attributes": [],
+                        "children": [
+                            {
+                                "type": "text",
+                                "content": "Test results - RuleRunnerTest"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "link",
+                        "attributes": [
+                            {
+                                "key": "href",
+                                "value": "../css/base-style.css"
+                            },
+                            {
+                                "key": "rel",
+                                "value": "stylesheet"
+                            },
+                            {
+                                "key": "type",
+                                "value": "text/css"
+                            }
+                        ],
+                        "children": []
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "link",
+                        "attributes": [
+                            {
+                                "key": "href",
+                                "value": "../css/style.css"
+                            },
+                            {
+                                "key": "rel",
+                                "value": "stylesheet"
+                            },
+                            {
+                                "key": "type",
+                                "value": "text/css"
+                            }
+                        ],
+                        "children": []
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n\t"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "script",
+                        "attributes": [
+                            {
+                                "key": "src",
+                                "value": "../js/report.js"
+                            },
+                            {
+                                "key": "type",
+                                "value": "text/javascript"
+                            }
+                        ],
+                        "children": []
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "content": "\n"
+            },
+            {
+                "type": "element",
+                "tagName": "body",
+                "attributes": [],
+                "children": [
+                    {
+                        "type": "text",
+                        "content": "\n"
+                    },
+                    {
+                        "type": "element",
+                        "tagName": "div",
+                        "attributes": [
+                            {
+                                "key": "id",
+                                "value": "content"
+                            }
+                        ],
+                        "children": [
+                            {
+                                "type": "text",
+                                "content": "\n\t"
+                            },
+                            {
+                                "type": "element",
+                                "tagName": "h1",
+                                "attributes": [],
+                                "children": [
+                                    {
+                                        "type": "text",
+                                        "content": "RuleRunnerTest"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "content": "\n\t"
+                            },
+                            {
+                                "type": "element",
+                                "tagName": "div",
+                                "attributes": [
+                                    {
+                                        "key": "class",
+                                        "value": "breadcrumbs"
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "a",
+                                        "attributes": [
+                                            {
+                                                "key": "href",
+                                                "value": "../index.html"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "all"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": " &gt;\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "a",
+                                        "attributes": [
+                                            {
+                                                "key": "href",
+                                                "value": "../packages/com.salesforce.rules.html"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "com.salesforce.rules"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": " &gt; RuleRunnerTest\n\t"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "content": "\n\t"
+                            },
+                            {
+                                "type": "element",
+                                "tagName": "div",
+                                "attributes": [
+                                    {
+                                        "key": "id",
+                                        "value": "summary"
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "table",
+                                        "attributes": [],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "tr",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "td",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "div",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "summaryGroup"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "table",
+                                                                        "attributes": [],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "\n\t\t\t\t\t\t\t"
+                                                                            },
+                                                                            {
+                                                                                "type": "element",
+                                                                                "tagName": "tr",
+                                                                                "attributes": [],
+                                                                                "children": [
+                                                                                    {
+                                                                                        "type": "text",
+                                                                                        "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "element",
+                                                                                        "tagName": "td",
+                                                                                        "attributes": [],
+                                                                                        "children": [
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "element",
+                                                                                                "tagName": "div",
+                                                                                                "attributes": [
+                                                                                                    {
+                                                                                                        "key": "class",
+                                                                                                        "value": "infoBox"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "key": "id",
+                                                                                                        "value": "tests"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "children": [
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "div",
+                                                                                                        "attributes": [
+                                                                                                            {
+                                                                                                                "key": "class",
+                                                                                                                "value": "counter"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "4"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "p",
+                                                                                                        "attributes": [],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "tests"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "text",
+                                                                                        "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "element",
+                                                                                        "tagName": "td",
+                                                                                        "attributes": [],
+                                                                                        "children": [
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "element",
+                                                                                                "tagName": "div",
+                                                                                                "attributes": [
+                                                                                                    {
+                                                                                                        "key": "class",
+                                                                                                        "value": "infoBox"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "key": "id",
+                                                                                                        "value": "failures"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "children": [
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "div",
+                                                                                                        "attributes": [
+                                                                                                            {
+                                                                                                                "key": "class",
+                                                                                                                "value": "counter"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "1"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "p",
+                                                                                                        "attributes": [],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "failures"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "text",
+                                                                                        "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "element",
+                                                                                        "tagName": "td",
+                                                                                        "attributes": [],
+                                                                                        "children": [
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "element",
+                                                                                                "tagName": "div",
+                                                                                                "attributes": [
+                                                                                                    {
+                                                                                                        "key": "class",
+                                                                                                        "value": "infoBox"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "key": "id",
+                                                                                                        "value": "ignored"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "children": [
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "div",
+                                                                                                        "attributes": [
+                                                                                                            {
+                                                                                                                "key": "class",
+                                                                                                                "value": "counter"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "0"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "p",
+                                                                                                        "attributes": [],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "ignored"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "text",
+                                                                                        "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "element",
+                                                                                        "tagName": "td",
+                                                                                        "attributes": [],
+                                                                                        "children": [
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "element",
+                                                                                                "tagName": "div",
+                                                                                                "attributes": [
+                                                                                                    {
+                                                                                                        "key": "class",
+                                                                                                        "value": "infoBox"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "key": "id",
+                                                                                                        "value": "duration"
+                                                                                                    }
+                                                                                                ],
+                                                                                                "children": [
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "div",
+                                                                                                        "attributes": [
+                                                                                                            {
+                                                                                                                "key": "class",
+                                                                                                                "value": "counter"
+                                                                                                            }
+                                                                                                        ],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "16.230s"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t\t"
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "element",
+                                                                                                        "tagName": "p",
+                                                                                                        "attributes": [],
+                                                                                                        "children": [
+                                                                                                            {
+                                                                                                                "type": "text",
+                                                                                                                "content": "duration"
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        "type": "text",
+                                                                                                        "content": "\n\t\t\t\t\t\t\t\t\t"
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                "type": "text",
+                                                                                                "content": "\n\t\t\t\t\t\t\t\t"
+                                                                                            }
+                                                                                        ]
+                                                                                    },
+                                                                                    {
+                                                                                        "type": "text",
+                                                                                        "content": "\n\t\t\t\t\t\t\t"
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "\n\t\t\t\t\t\t"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "td",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "div",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "infoBox failures"
+                                                                    },
+                                                                    {
+                                                                        "key": "id",
+                                                                        "value": "successRate"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "div",
+                                                                        "attributes": [
+                                                                            {
+                                                                                "key": "class",
+                                                                                "value": "percent"
+                                                                            }
+                                                                        ],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "75%"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "p",
+                                                                        "attributes": [],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "successful"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "content": "\n\t"
+                            },
+                            {
+                                "type": "element",
+                                "tagName": "div",
+                                "attributes": [
+                                    {
+                                        "key": "id",
+                                        "value": "tabs"
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "ul",
+                                        "attributes": [
+                                            {
+                                                "key": "class",
+                                                "value": "tabLinks"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "li",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "a",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "href",
+                                                                "value": "#tab0"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Failed tests"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "li",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "a",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "href",
+                                                                "value": "#tab1"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Tests"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "li",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "a",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "href",
+                                                                "value": "#tab2"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Standard output"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "li",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "a",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "href",
+                                                                "value": "#tab3"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Standard error"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "div",
+                                        "attributes": [
+                                            {
+                                                "key": "id",
+                                                "value": "tab0"
+                                            },
+                                            {
+                                                "key": "class",
+                                                "value": "tab"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "h2",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "Failed tests"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "div",
+                                                "attributes": [
+                                                    {
+                                                        "key": "class",
+                                                        "value": "test"
+                                                    }
+                                                ],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "a",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "name",
+                                                                "value": "properlyRunsStaticRule()"
+                                                            }
+                                                        ],
+                                                        "children": []
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "h3",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "class",
+                                                                "value": "failures"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "properlyRunsStaticRule()"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "span",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "class",
+                                                                "value": "code"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "pre",
+                                                                "attributes": [],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "org.opentest4j.AssertionFailedError: expected: &lt;0&gt; but was: &lt;1&gt;\n\tat app//org.junit.jupiter.api.AssertionUtils.fail(AssertionUtils.java:55)\n\tat app//org.junit.jupiter.api.AssertionUtils.failNotEqual(AssertionUtils.java:62)\n\tat app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)\n\tat app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)\n\tat app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:510)\n\tat app//com.salesforce.rules.RuleRunnerTest.properlyRunsStaticRule(RuleRunnerTest.java:63)\n\tat java.base@12.0.2/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base@12.0.2/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base@12.0.2/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base@12.0.2/java.lang.reflect.Method.invoke(Method.java:567)\n\tat app//org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:688)\n\tat app//org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)\n\tat app//org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)\n\tat app//org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:149)\n\tat app//org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:140)\n\tat app//org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:84)\n\tat app//org.junit.jupiter.engine.execution.ExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(ExecutableInvoker.java:115)\n\tat app//org.junit.jupiter.engine.execution.ExecutableInvoker.lambda$invoke$0(ExecutableInvoker.java:105)\n\tat app//org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)\n\tat app//org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)\n\tat app//org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)\n\tat app//org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)\n\tat app//org.junit.jupiter.engine.execution.ExecutableInvoker.invoke(ExecutableInvoker.java:104)\n\tat app//org.junit.jupiter.engine.execution.ExecutableInvoker.invoke(ExecutableInvoker.java:98)\n\tat app//org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$6(TestMethodTestDescriptor.java:210)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:206)\n\tat app//org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:131)\n\tat app//org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:65)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$5(NodeTestTask.java:139)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$7(NodeTestTask.java:129)\n\tat app//org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:127)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:126)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:84)\n\tat java.base@12.0.2/java.util.ArrayList.forEach(ArrayList.java:1540)\n\tat app//org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:38)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$5(NodeTestTask.java:143)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$7(NodeTestTask.java:129)\n\tat app//org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:127)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:126)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:84)\n\tat java.base@12.0.2/java.util.ArrayList.forEach(ArrayList.java:1540)\n\tat app//org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:38)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$5(NodeTestTask.java:143)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$7(NodeTestTask.java:129)\n\tat app//org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:127)\n\tat app//org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:126)\n\tat app//org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:84)\n\tat app//org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:32)\n\tat app//org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)\n\tat app//org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:51)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:108)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:88)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:54)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:67)\n\tat org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:52)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:96)\n\tat org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:75)\n\tat org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.processAllTestClasses(JUnitPlatformTestClassProcessor.java:99)\n\tat org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor$CollectAllTestClassesExecutor.access$000(JUnitPlatformTestClassProcessor.java:79)\n\tat org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformTestClassProcessor.stop(JUnitPlatformTestClassProcessor.java:75)\n\tat org.gradle.api.internal.tasks.testing.SuiteTestClassProcessor.stop(SuiteTestClassProcessor.java:61)\n\tat java.base@12.0.2/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)\n\tat java.base@12.0.2/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n\tat java.base@12.0.2/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)\n\tat java.base@12.0.2/java.lang.reflect.Method.invoke(Method.java:567)\n\tat org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:36)\n\tat org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:24)\n\tat org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)\n\tat org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:94)\n\tat com.sun.proxy.$Proxy5.stop(Unknown Source)\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker$3.run(TestWorker.java:193)\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:129)\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:100)\n\tat org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:60)\n\tat org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)\n\tat org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:133)\n\tat org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:71)\n\tat app//worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)\n\tat app//worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)\n"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "div",
+                                        "attributes": [
+                                            {
+                                                "key": "id",
+                                                "value": "tab1"
+                                            },
+                                            {
+                                                "key": "class",
+                                                "value": "tab"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "h2",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "Tests"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "table",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "thead",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "tr",
+                                                                "attributes": [],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "th",
+                                                                        "attributes": [],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "Test"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "th",
+                                                                        "attributes": [],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "Duration"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t\t"
+                                                                    },
+                                                                    {
+                                                                        "type": "element",
+                                                                        "tagName": "th",
+                                                                        "attributes": [],
+                                                                        "children": [
+                                                                            {
+                                                                                "type": "text",
+                                                                                "content": "Result"
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "\n\t\t\t\t"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "tr",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "filtersViolationsFromNontargetedFiles()"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "13.999s"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "passed"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "tr",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "failures"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "properlyRunsStaticRule()"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "failures"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "0.154s"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "failures"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "failed"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "tr",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "runsPathBasedRulesOnAuraMethods()"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "0.801s"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "passed"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "tr",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "runsPathBasedRulesOnPageReferenceMethods()"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "1.276s"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "td",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "class",
+                                                                        "value": "success"
+                                                                    }
+                                                                ],
+                                                                "children": [
+                                                                    {
+                                                                        "type": "text",
+                                                                        "content": "passed"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "div",
+                                        "attributes": [
+                                            {
+                                                "key": "id",
+                                                "value": "tab2"
+                                            },
+                                            {
+                                                "key": "class",
+                                                "value": "tab"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "h2",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "Standard output"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "span",
+                                                "attributes": [
+                                                    {
+                                                        "key": "class",
+                                                        "value": "code"
+                                                    }
+                                                ],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "pre",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "2023-01-03 09:59:04  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeFieldResult.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/RecordTypeInfo.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeIconResult.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/SObjectType.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/ChildRelationship.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/SObjectField.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DisplayType.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/SoapType.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeTabSetResult.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeTabResult.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeDataCategoryGroupResult.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DataCategory.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/FieldSetMember.cls\n2023-01-03 09:59:07  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/FieldSet.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/FilteredLookupInfo.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeDataCategoryGroupStructureResult.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeSObjectResult.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DataCategoryGroupSobjectTypePair.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/PicklistEntry.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/Schema/DescribeColorResult.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/System/AccessType.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/System/UserInfo.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/System/SObjectAccessDecision.cls\n2023-01-03 09:59:08  INFO  StandardLibraryLoader:162 - Path=/Users/jfeingold/Code/sfdx-scanner/sfge/build/resources/main/StandardApexLibrary/System/Schema.cls\n2023-01-03 09:59:13  INFO  SfgeTestExtension:31 - beforeTestExecution name=filtersViolationsFromNontargetedFiles()\n2023-01-03 09:59:13  WARN  Util:30 - Ignoring. builder=com.salesforce.graph.build.ApexStandardLibraryVertexBuilder@1062710e\n2023-01-03 09:59:13  INFO  Util:37 - Starting CustomerApexVertexBuilder\n2023-01-03 09:59:13  INFO  Util:41 - Finished CustomerApexVertexBuilder, time(seconds)=0\n2023-01-03 09:59:13  INFO  Util:37 - Starting InheritanceInformationBuilder\n2023-01-03 09:59:14  INFO  Util:41 - Finished InheritanceInformationBuilder, time(seconds)=0\n2023-01-03 09:59:14  INFO  AbstractMetadataInfoImpl:81 - Loading [] as known custom settings. Thread: Thread[Test worker,5,main]\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode1&quot; Name=&quot;MyClass2&quot; Name_CaseSafe=&quot;myclass2&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;bar2&quot; Name_CaseSafe=&quot;bar2&quot; ReturnType=&quot;PageReference&quot; ReturnType_CaseSafe=&quot;pagereference&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;30&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;4&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;3&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;NULL&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;6&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;baz2&quot; Name_CaseSafe=&quot;baz2&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;6&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;24&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;8&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;7&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;7&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass2&quot; ReturnType_CaseSafe=&quot;myclass2&quot; childIdx=&quot;4&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;5&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass2&quot; DefiningType_CaseSafe=&quot;myclass2&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode2&quot; Name=&quot;MyClass3&quot; Name_CaseSafe=&quot;myclass3&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;bar3&quot; Name_CaseSafe=&quot;bar3&quot; ReturnType=&quot;PageReference&quot; ReturnType_CaseSafe=&quot;pagereference&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;30&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;4&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;3&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;NULL&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;6&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;baz3&quot; Name_CaseSafe=&quot;baz3&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;6&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;24&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;8&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;7&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;7&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass3&quot; ReturnType_CaseSafe=&quot;myclass3&quot; childIdx=&quot;4&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;5&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass3&quot; DefiningType_CaseSafe=&quot;myclass3&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode0&quot; Name=&quot;MyClass1&quot; Name_CaseSafe=&quot;myclass1&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;bar1&quot; Name_CaseSafe=&quot;bar1&quot; ReturnType=&quot;PageReference&quot; ReturnType_CaseSafe=&quot;pagereference&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;30&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;4&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;3&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;NULL&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;6&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;baz1&quot; Name_CaseSafe=&quot;baz1&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;6&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;24&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;8&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;7&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;7&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass1&quot; ReturnType_CaseSafe=&quot;myclass1&quot; childIdx=&quot;4&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;5&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n2023-01-03 09:59:15  INFO  ThreadableRuleExecutor:98 - Queued 2 path-based rule executions\n2023-01-03 09:59:15  INFO  ThreadableRuleExecutor:49 - Beginning wait #1\n2023-01-03 09:59:16 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 INFO  InMemoryJustInTimeGraph:115 - Importing. definingType=MyClass1, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=1646238421\n2023-01-03 09:59:16 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 INFO  InMemoryJustInTimeGraph:115 - Importing. definingType=MyClass2, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=221002645\n2023-01-03 09:59:16 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 INFO  InMemoryJustInTimeGraph:151 - Importing UserClassName=MyClass2, id=106555, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=221002645\n2023-01-03 09:59:16 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 INFO  InMemoryJustInTimeGraph:151 - Importing UserClassName=MyClass1, id=106055, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=1646238421\n2023-01-03 09:59:17 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 INFO  InMemoryJustInTimeGraph:163 - Imported UserClassName=MyClass1, id=106055, ruleGraph=graphtraversalsource[tinkergraph[vertices:3660 edges:9088], standard], hc=1646238421\n2023-01-03 09:59:17 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 INFO  InMemoryJustInTimeGraph:163 - Imported UserClassName=MyClass2, id=106555, ruleGraph=graphtraversalsource[tinkergraph[vertices:3660 edges:9088], standard], hc=221002645\n2023-01-03 09:59:17 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 WARN  ApexPathExpanderUtil:219 - expand-Finished.\n2023-01-03 09:59:17 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 WARN  ApexPathExpanderUtil:219 - expand-Finished.\n2023-01-03 09:59:17 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 INFO  ApexPathExpanderUtil:307 - Path info. completedApexPathExpanders=1\n2023-01-03 09:59:17 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 INFO  ApexPathExpanderUtil:307 - Path info. completedApexPathExpanders=1\n2023-01-03 09:59:17 8ddc98b9-f08d-48ac-b1a9-72d910d5db98 INFO  PathBasedRuleRunner:61 - EntryPoint=MyClass1:bar1:2; Violations=[PathBasedRuleViolation{message='Hard-coded path violation', sourceLineNumber=3, sinkLineNumber=3}]\n2023-01-03 09:59:17 4c781cbe-1ebe-4c54-ba75-a875ae69bdf4 INFO  PathBasedRuleRunner:61 - EntryPoint=MyClass2:bar2:2; Violations=[PathBasedRuleViolation{message='Hard-coded path violation', sourceLineNumber=3, sinkLineNumber=3}]\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:214 - Finished. method=MyClass1:bar1:2\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:214 - Finished. method=MyClass2:bar2:2\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:116 - Future returned after 2592 ms\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:56 - Wait #1 finished, adding 1 new entries\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:49 - Beginning wait #2\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:116 - Future returned after 0 ms\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:56 - Wait #2 finished, adding 1 new entries\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:66 - Finishing waiting for futures\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:67 - Shutting down\n2023-01-03 09:59:17  INFO  ThreadableRuleExecutor:71 - Finished shutdown\n2023-01-03 09:59:17  INFO  SfgeTestExtension:46 - preDestroyTestInstance name=filtersViolationsFromNontargetedFiles()\n2023-01-03 09:59:17  INFO  SfgeTestExtension:31 - beforeTestExecution name=runsPathBasedRulesOnPageReferenceMethods()\n2023-01-03 09:59:18  WARN  Util:30 - Ignoring. builder=com.salesforce.graph.build.ApexStandardLibraryVertexBuilder@440d2cc8\n2023-01-03 09:59:18  INFO  Util:37 - Starting CustomerApexVertexBuilder\n2023-01-03 09:59:18  INFO  Util:41 - Finished CustomerApexVertexBuilder, time(seconds)=0\n2023-01-03 09:59:18  INFO  Util:37 - Starting InheritanceInformationBuilder\n2023-01-03 09:59:18  INFO  Util:41 - Finished InheritanceInformationBuilder, time(seconds)=0\n2023-01-03 09:59:18  INFO  AbstractMetadataInfoImpl:81 - Loading [] as known custom settings. Thread: Thread[Test worker,5,main]\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode0&quot; Name=&quot;MyClass&quot; Name_CaseSafe=&quot;myclass&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;bar2&quot; Name_CaseSafe=&quot;bar2&quot; ReturnType=&quot;PageReference&quot; ReturnType_CaseSafe=&quot;pagereference&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;30&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;4&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;3&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;NULL&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;6&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;baz2&quot; Name_CaseSafe=&quot;baz2&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;6&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;24&quot; BeginLine=&quot;6&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;8&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;7&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;7&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass&quot; ReturnType_CaseSafe=&quot;myclass&quot; childIdx=&quot;4&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;5&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n2023-01-03 09:59:18  INFO  ThreadableRuleExecutor:98 - Queued 1 path-based rule executions\n2023-01-03 09:59:18  INFO  ThreadableRuleExecutor:49 - Beginning wait #1\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b INFO  InMemoryJustInTimeGraph:115 - Importing. definingType=MyClass, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=398274291\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b INFO  InMemoryJustInTimeGraph:151 - Importing UserClassName=MyClass, id=107555, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=398274291\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b INFO  InMemoryJustInTimeGraph:163 - Imported UserClassName=MyClass, id=107555, ruleGraph=graphtraversalsource[tinkergraph[vertices:3660 edges:9088], standard], hc=398274291\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b WARN  ApexPathExpanderUtil:219 - expand-Finished.\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b INFO  ApexPathExpanderUtil:307 - Path info. completedApexPathExpanders=1\n2023-01-03 09:59:19 ac470398-bc56-498b-aa1a-0dd93d53432b INFO  PathBasedRuleRunner:61 - EntryPoint=MyClass:bar2:2; Violations=[PathBasedRuleViolation{message='Hard-coded path violation', sourceLineNumber=3, sinkLineNumber=3}]\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:214 - Finished. method=MyClass:bar2:2\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:116 - Future returned after 799 ms\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:56 - Wait #1 finished, adding 1 new entries\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:66 - Finishing waiting for futures\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:67 - Shutting down\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:71 - Finished shutdown\n2023-01-03 09:59:19  INFO  SfgeTestExtension:46 - preDestroyTestInstance name=runsPathBasedRulesOnPageReferenceMethods()\n2023-01-03 09:59:19  INFO  SfgeTestExtension:31 - beforeTestExecution name=properlyRunsStaticRule()\n2023-01-03 09:59:19  WARN  Util:30 - Ignoring. builder=com.salesforce.graph.build.ApexStandardLibraryVertexBuilder@64ad8c92\n2023-01-03 09:59:19  INFO  Util:37 - Starting CustomerApexVertexBuilder\n2023-01-03 09:59:19  INFO  Util:41 - Finished CustomerApexVertexBuilder, time(seconds)=0\n2023-01-03 09:59:19  INFO  Util:37 - Starting InheritanceInformationBuilder\n2023-01-03 09:59:19  INFO  Util:41 - Finished InheritanceInformationBuilder, time(seconds)=0\n2023-01-03 09:59:19  INFO  AbstractMetadataInfoImpl:81 - Loading [] as known custom settings. Thread: Thread[Test worker,5,main]\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode0&quot; Name=&quot;MyClass1&quot; Name_CaseSafe=&quot;myclass1&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;2&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;foo&quot; Name_CaseSafe=&quot;foo&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;23&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;4&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;3&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass1&quot; ReturnType_CaseSafe=&quot;myclass1&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;4&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass1&quot; DefiningType_CaseSafe=&quot;myclass1&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n2023-01-03 09:59:19  INFO  SfgeTestExtension:46 - preDestroyTestInstance name=properlyRunsStaticRule()\n2023-01-03 09:59:19  INFO  SfgeTestExtension:31 - beforeTestExecution name=runsPathBasedRulesOnAuraMethods()\n2023-01-03 09:59:19  WARN  Util:30 - Ignoring. builder=com.salesforce.graph.build.ApexStandardLibraryVertexBuilder@6cfcb42f\n2023-01-03 09:59:19  INFO  Util:37 - Starting CustomerApexVertexBuilder\n2023-01-03 09:59:19  INFO  Util:41 - Finished CustomerApexVertexBuilder, time(seconds)=0\n2023-01-03 09:59:19  INFO  Util:37 - Starting InheritanceInformationBuilder\n2023-01-03 09:59:19  INFO  Util:41 - Finished InheritanceInformationBuilder, time(seconds)=0\n2023-01-03 09:59:19  INFO  AbstractMetadataInfoImpl:81 - Loading [] as known custom settings. Thread: Thread[Test worker,5,main]\n&lt;UserClass BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FileName=&quot;TestCode0&quot; Name=&quot;MyClass&quot; Name_CaseSafe=&quot;myclass&quot;&gt;\n    &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;3&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;3&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;foo&quot; Name_CaseSafe=&quot;foo&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;1&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;3&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;&gt;\n            &lt;Annotation BeginColumn=&quot;2&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;AuraEnabled&quot; Name_CaseSafe=&quot;auraenabled&quot; childIdx=&quot;0&quot;&gt;\n                &lt;AnnotationParameter BeginColumn=&quot;2&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;2&quot; FirstChild=&quot;true&quot; LastChild=&quot;false&quot; Value=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n                &lt;AnnotationParameter BeginColumn=&quot;2&quot; BeginLine=&quot;2&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;2&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; Value=&quot;false&quot; childIdx=&quot;1&quot;/&gt;\n            &lt;/Annotation&gt;\n        &lt;/ModifierNode&gt;\n        &lt;BlockStatement BeginColumn=&quot;23&quot; BeginLine=&quot;3&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;5&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;4&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;4&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;4&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;4&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;7&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;7&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;baz&quot; Name_CaseSafe=&quot;baz&quot; ReturnType=&quot;Boolean&quot; ReturnType_CaseSafe=&quot;boolean&quot; childIdx=&quot;2&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;17&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;7&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;false&quot; Modifiers=&quot;1&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;BlockStatement BeginColumn=&quot;23&quot; BeginLine=&quot;7&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;9&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;1&quot;&gt;\n            &lt;ReturnStatement BeginColumn=&quot;3&quot; BeginLine=&quot;8&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;8&quot; EndScopes=&quot;[BlockStatement]&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; childIdx=&quot;0&quot;&gt;\n                &lt;LiteralExpression BeginColumn=&quot;10&quot; BeginLine=&quot;8&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;8&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; LiteralType=&quot;TRUE&quot; Value=&quot;true&quot; childIdx=&quot;0&quot;/&gt;\n            &lt;/ReturnStatement&gt;\n        &lt;/BlockStatement&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;&amp;lt;clinit&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;clinit&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;3&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;false&quot; LastChild=&quot;true&quot; Modifiers=&quot;8&quot; Override=&quot;false&quot; Static=&quot;true&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;false&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;false&quot; Name=&quot;clone&quot; Name_CaseSafe=&quot;clone&quot; ReturnType=&quot;MyClass&quot; ReturnType_CaseSafe=&quot;myclass&quot; childIdx=&quot;4&quot;&gt;\n        &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n    &lt;/Method&gt;\n    &lt;UserClassMethods BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;false&quot; LastChild=&quot;true&quot; childIdx=&quot;5&quot;&gt;\n        &lt;Method Arity=&quot;0&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; Constructor=&quot;true&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; LastChild=&quot;true&quot; Name=&quot;&amp;lt;init&amp;gt;&quot; Name_CaseSafe=&quot;&amp;lt;init&amp;gt;&quot; ReturnType=&quot;void&quot; ReturnType_CaseSafe=&quot;void&quot; childIdx=&quot;0&quot;&gt;\n            &lt;ModifierNode Abstract=&quot;false&quot; BeginColumn=&quot;14&quot; BeginLine=&quot;1&quot; DefiningType=&quot;MyClass&quot; DefiningType_CaseSafe=&quot;myclass&quot; EndLine=&quot;1&quot; FirstChild=&quot;true&quot; Global=&quot;true&quot; LastChild=&quot;true&quot; Modifiers=&quot;0&quot; Override=&quot;false&quot; Static=&quot;false&quot; Virtual=&quot;false&quot; childIdx=&quot;0&quot;/&gt;\n        &lt;/Method&gt;\n    &lt;/UserClassMethods&gt;\n&lt;/UserClass&gt;\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:98 - Queued 1 path-based rule executions\n2023-01-03 09:59:19  INFO  ThreadableRuleExecutor:49 - Beginning wait #1\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 INFO  InMemoryJustInTimeGraph:115 - Importing. definingType=MyClass, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=2117274919\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 INFO  InMemoryJustInTimeGraph:151 - Importing UserClassName=MyClass, id=108430, ruleGraph=graphtraversalsource[tinkergraph[vertices:3641 edges:9043], standard], hc=2117274919\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 INFO  InMemoryJustInTimeGraph:163 - Imported UserClassName=MyClass, id=108430, ruleGraph=graphtraversalsource[tinkergraph[vertices:3663 edges:9095], standard], hc=2117274919\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 WARN  ApexPathExpanderUtil:219 - expand-Finished.\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 INFO  ApexPathExpanderUtil:307 - Path info. completedApexPathExpanders=1\n2023-01-03 09:59:20 23555ac5-fce3-476e-9361-429eb900fd24 INFO  PathBasedRuleRunner:61 - EntryPoint=MyClass:foo:3; Violations=[PathBasedRuleViolation{message='Hard-coded path violation', sourceLineNumber=4, sinkLineNumber=4}]\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:214 - Finished. method=MyClass:foo:3\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:116 - Future returned after 535 ms\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:56 - Wait #1 finished, adding 1 new entries\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:66 - Finishing waiting for futures\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:67 - Shutting down\n2023-01-03 09:59:20  INFO  ThreadableRuleExecutor:71 - Finished shutdown\n2023-01-03 09:59:20  INFO  SfgeTestExtension:46 - preDestroyTestInstance name=runsPathBasedRulesOnAuraMethods()\n"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "div",
+                                        "attributes": [
+                                            {
+                                                "key": "id",
+                                                "value": "tab3"
+                                            },
+                                            {
+                                                "key": "class",
+                                                "value": "tab"
+                                            }
+                                        ],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "h2",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "Standard error"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "span",
+                                                "attributes": [
+                                                    {
+                                                        "key": "class",
+                                                        "value": "code"
+                                                    }
+                                                ],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "pre",
+                                                        "attributes": [],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Jan 03, 2023 9:59:05 AM apex.jorje.parser.impl.BaseApexLexer dedupe\nINFO: Deduped array ApexLexer.DFA22_transition. Found 7075528 shorts which is 13MB not including array overhead. Removed 6418975 shorts which is 12MB not counting array overhead. Took 9 ms.\n"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "content": "\n\t"
+                            },
+                            {
+                                "type": "element",
+                                "tagName": "div",
+                                "attributes": [
+                                    {
+                                        "key": "id",
+                                        "value": "footer"
+                                    }
+                                ],
+                                "children": [
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t\t"
+                                    },
+                                    {
+                                        "type": "element",
+                                        "tagName": "p",
+                                        "attributes": [],
+                                        "children": [
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "div",
+                                                "attributes": [],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t\t"
+                                                    },
+                                                    {
+                                                        "type": "element",
+                                                        "tagName": "label",
+                                                        "attributes": [
+                                                            {
+                                                                "key": "class",
+                                                                "value": "hidden"
+                                                            },
+                                                            {
+                                                                "key": "id",
+                                                                "value": "label-for-line-wrapping-toggle"
+                                                            },
+                                                            {
+                                                                "key": "for",
+                                                                "value": "line-wrapping-toggle"
+                                                            }
+                                                        ],
+                                                        "children": [
+                                                            {
+                                                                "type": "text",
+                                                                "content": "Wrap lines\n\t\t\t\t"
+                                                            },
+                                                            {
+                                                                "type": "element",
+                                                                "tagName": "input",
+                                                                "attributes": [
+                                                                    {
+                                                                        "key": "id",
+                                                                        "value": "line-wrapping-toggle"
+                                                                    },
+                                                                    {
+                                                                        "key": "type",
+                                                                        "value": "checkbox"
+                                                                    },
+                                                                    {
+                                                                        "key": "autocomplete",
+                                                                        "value": "off"
+                                                                    }
+                                                                ],
+                                                                "children": []
+                                                            },
+                                                            {
+                                                                "type": "text",
+                                                                "content": "\n\t\t\t"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "text",
+                                                        "content": "\n\t\t"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": "\n\t\tGenerated by\n\t\t"
+                                            },
+                                            {
+                                                "type": "element",
+                                                "tagName": "a",
+                                                "attributes": [
+                                                    {
+                                                        "key": "href",
+                                                        "value": "http://www.gradle.org"
+                                                    }
+                                                ],
+                                                "children": [
+                                                    {
+                                                        "type": "text",
+                                                        "content": "Gradle 7.2"
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "type": "text",
+                                                "content": " at Jan 3, 2023, 9:59:23 AM"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "type": "text",
+                                        "content": "\n\t"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "text",
+                                "content": "\n"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "text",
+                        "content": "\n"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "content": "\n"
+            }
+        ]
+    },
+    {
+        "type": "text",
+        "content": "\n"
+    }
+]
