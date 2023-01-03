@@ -2060,7 +2060,17 @@ function getFailuresFromClassFile(classJson) {
             }, {
                 type: "text"
             }]);
-        results.push(nameNode.content);
+        const messageNode = JUnitUtils.findChainedNode(failure.children, [{
+                type: "element",
+                tagName: "span",
+                class: "code"
+            }, {
+                type: "element",
+                tagName: "pre"
+            }, {
+                type: "text"
+            }]);
+        results.push(`${nameNode.content}\n\t${messageNode.content.split('\n').slice(0, 15).join('\n')}`);
     }
     return results;
 }

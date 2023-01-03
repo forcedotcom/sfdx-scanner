@@ -108,13 +108,23 @@ function getFailuresFromClassFile(classJson: JUnitUtils.Node[]): string[] {
 
 	const results: string[] = [];
 	for (const failure of failures) {
-		const nameNode: JUnitUtils.Node = JUnitUtils.findChainedNode(failure.children, [{
+		const nameNode: JUnitUtils.Text = JUnitUtils.findChainedNode(failure.children, [{
 			type: "element",
 			tagName: "h3",
 		}, {
 			type: "text"
-		}]);
-		results.push((nameNode as JUnitUtils.Text).content);
+		}]) as JUnitUtils.Text;
+		const messageNode: JUnitUtils.Text = JUnitUtils.findChainedNode(failure.children, [{
+			type: "element",
+			tagName: "span",
+			class: "code"
+		}, {
+			type: "element",
+			tagName: "pre"
+		}, {
+			type: "text"
+		}]) as JUnitUtils.Text;
+		results.push(`${nameNode.content}\n\t${messageNode.content.split('\n').slice(0, 15).join('\n')}`);
 	}
 	return results;
 }

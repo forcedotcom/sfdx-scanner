@@ -3,7 +3,8 @@ import {summarizeErrors} from "../lib/summarizeJUnitErrors";
 
 describe("#summarizeErrors", () => {
 	it('does the thing', async () => {
-		const t = summarizeErrors("/Users/jfeingold/Code/sfdx-scanner/sfge");
+		const t = await summarizeErrors("/Users/jfeingold/Code/sfdx-scanner/sfge");
+		console.log(t);
 		expect(t).to.exist;
 	});
 });
