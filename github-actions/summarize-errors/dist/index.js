@@ -1952,9 +1952,7 @@ function escapeProperty(s) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.summarizeErrors = void 0;
 const path = __webpack_require__(622);
-const core = __webpack_require__(470);
 const JUnitUtils = __webpack_require__(148);
-const fs = __webpack_require__(747);
 /**
  * This chain of node expectations gets us from the root of the HTML file
  * to the declaration of `tab0`, the leftmost tab in the file. If there are
@@ -1996,13 +1994,10 @@ async function summarizeErrors(projectFolder) {
     const indexPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'index.html');
     const indexJson = await JUnitUtils.getJunitJson(indexPath);
     const classesWithFailures = getFailingClassNamesFromIndexFile(indexJson);
-    core.warning(`Found failures in these files ${JSON.stringify(classesWithFailures)}`);
     const results = [];
     for (const cls of classesWithFailures) {
-        core.warning(`AAAclass is ${cls}`);
         const classPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, cls);
         const classJson = await JUnitUtils.getJunitJson(classPath);
-        core.warning(`BBBclass is ${cls}`);
         const failures = getFailuresFromClassFile(classJson);
         results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
     }
@@ -2045,7 +2040,6 @@ function getFailingClassNamesFromIndexFile(indexJson) {
 }
 function getFailuresFromClassFile(classJson) {
     // Get the tag for tab0, where failures will be if they exist at all.
-    fs.writeFileSync('/Users/jfeingold/code/sfdx-scanner/github-actions/summarize-errors/o4.json', JSON.stringify(classJson, null, 4));
     const tab0 = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS);
     // Make sure there are actually failures in this tab.
     if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {

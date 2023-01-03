@@ -1,7 +1,5 @@
 import path = require('path');
-import core = require("@actions/core");
 import * as JUnitUtils from './junitUtils';
-import fs = require('fs');
 
 /**
  * This chain of node expectations gets us from the root of the HTML file
@@ -48,13 +46,10 @@ export async function summarizeErrors(projectFolder: string): Promise<string[]> 
 	const indexPath: string = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'index.html');
 	const indexJson: JUnitUtils.Node[] = await JUnitUtils.getJunitJson(indexPath);
 	const classesWithFailures: string[] = getFailingClassNamesFromIndexFile(indexJson);
-	core.warning(`Found failures in these files ${JSON.stringify(classesWithFailures)}`);
 	const results: string[] = [];
 	for (const cls of classesWithFailures) {
-		core.warning(`AAAclass is ${cls}`);
 		const classPath: string = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, cls);
 		const classJson: JUnitUtils.Node[] = await JUnitUtils.getJunitJson(classPath);
-		core.warning(`BBBclass is ${cls}`);
 		const failures: string[] = getFailuresFromClassFile(classJson);
 		results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
 	}
@@ -98,7 +93,6 @@ function getFailingClassNamesFromIndexFile(indexJson: JUnitUtils.Node[]): string
 
 function getFailuresFromClassFile(classJson: JUnitUtils.Node[]): string[] {
 	// Get the tag for tab0, where failures will be if they exist at all.
-	fs.writeFileSync('/Users/jfeingold/code/sfdx-scanner/github-actions/summarize-errors/o4.json', JSON.stringify(classJson, null, 4));
 	const tab0: JUnitUtils.Element = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS) as JUnitUtils.Element;
 	// Make sure there are actually failures in this tab.
 	if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
