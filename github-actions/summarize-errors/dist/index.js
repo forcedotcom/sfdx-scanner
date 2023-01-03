@@ -1998,7 +1998,7 @@ async function summarizeErrors(projectFolder) {
     const classesWithFailures = getFailingClassNamesFromIndexFile(indexJson);
     const results = [];
     for (const cls of classesWithFailures) {
-        const classPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'classes', cls);
+        const classPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, cls);
         const classJson = await JUnitUtils.getJunitJson(classPath);
         const failures = getFailuresFromClassFile(classJson);
         results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
