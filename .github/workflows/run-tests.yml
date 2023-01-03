@@ -99,7 +99,7 @@ jobs:
         if: ${{ failure() }}
         uses: ./github-actions/summarize-errors
         with:
-          location: "${{github.workspace}}"
+          location: "${{github.workspace}}/sfge"
   # Step 2B: Run the smoke tests
   smoke-tests:
     strategy:
