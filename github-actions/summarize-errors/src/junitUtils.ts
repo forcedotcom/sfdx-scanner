@@ -82,23 +82,19 @@ export function findAllMatchingNodes(nodes: Node[], expectation: Expectation): N
 				continue;
 			}
 			// If we're looking for a matching class/id, we should do that.
-			const idMustMatch = expectation.id != null;
-			const classMustMatch = expectation.class != null;
-			if (idMustMatch || classMustMatch) {
-				let notMatch = false;
-				for (const attribute of element.attributes) {
-					if (idMustMatch && attribute.key === 'id' && attribute.value !== expectation.id) {
-						notMatch = true;
-						break;
-					}
-					if (classMustMatch && attribute.key === 'class' && attribute.value !== expectation.class) {
-						notMatch = true;
-						break;
-					}
+			let matchingIdFound = false;
+			let matchingClassFound = false;
+			for (const attribute of element.attributes) {
+				if (expectation.id && attribute.key === 'id' && attribute.value === expectation.id) {
+					matchingIdFound = true;
+				} else if (expectation.class && attribute.key === 'class' && attribute.value === expectation.class) {
+					matchingClassFound = true;
 				}
-				if (notMatch) {
-					continue;
-				}
+			}
+			if (expectation.id && !matchingIdFound) {
+				continue;
+			} else if (expectation.class && !matchingClassFound) {
+				continue;
 			}
 		} else if (node.type === 'text' && expectation.content) {
 			// Validate a text node by checking its content.
