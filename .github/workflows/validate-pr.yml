@@ -30,7 +30,7 @@ jobs:
         uses: ./github-actions/summarize-errors
         id: summarize_errors
         with:
-          location: "$GITHUB_WORKSPACE/sfge/build/reports/tests/test"
+          location: "${{github.workspace}}/sfge/build/reports/tests/test"
       - name: Add error
         run: echo "::error ::This is another test error"
       - name: Add a summary
