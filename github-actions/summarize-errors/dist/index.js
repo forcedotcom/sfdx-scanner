@@ -664,6 +664,103 @@ exports.debug = debug; // for test
 
 /***/ }),
 
+/***/ 148:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.findAllMatchingNodes = exports.findFirstMatchingNode = exports.verifyNodeDescent = exports.findChainedNode = exports.getJunitJson = void 0;
+const himalaya_1 = __webpack_require__(70);
+const fileUtils_1 = __webpack_require__(345);
+async function getJunitJson(file) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    return himalaya_1.parse(await fileUtils_1.readFile(file));
+}
+exports.getJunitJson = getJunitJson;
+function findChainedNode(nodes, expectations) {
+    let nextNode = null;
+    let candidateNodes = nodes;
+    for (const expectation of expectations) {
+        nextNode = findFirstMatchingNode(candidateNodes, expectation);
+        candidateNodes = nextNode.children;
+    }
+    return nextNode;
+}
+exports.findChainedNode = findChainedNode;
+function verifyNodeDescent(element, expectations) {
+    try {
+        findChainedNode(element.children, expectations);
+        // If we can find a node matching the expectations, we're good.
+        return true;
+    }
+    catch (_a) {
+        // If no node was found, an error will be thrown, meaning we're not good.
+        return false;
+    }
+}
+exports.verifyNodeDescent = verifyNodeDescent;
+function findFirstMatchingNode(nodes, expectation) {
+    const allMatches = findAllMatchingNodes(nodes, expectation);
+    if (allMatches.length === 0) {
+        // If we're here, we couldn't find a node matching expectations.
+        // Just throw an error.
+        throw new Error(`Could not find node matching expectation ${JSON.stringify(expectation)}`);
+    }
+    return allMatches[0];
+}
+exports.findFirstMatchingNode = findFirstMatchingNode;
+function findAllMatchingNodes(nodes, expectation) {
+    const matchingNodes = [];
+    for (const node of nodes) {
+        // Make sure the types match.
+        if (node.type !== expectation.type) {
+            continue;
+        }
+        // If it's an element, validate it appropriately.
+        if (node.type === 'element') {
+            const element = node;
+            // Make sure the tag name matches.
+            if (element.tagName !== expectation.tagName) {
+                continue;
+            }
+            // If we're looking for a matching class/id, we should do that.
+            const idMustMatch = expectation.id != null;
+            const classMustMatch = expectation.class != null;
+            if (idMustMatch || classMustMatch) {
+                let notMatch = false;
+                for (const attribute of element.attributes) {
+                    if (idMustMatch && attribute.key === 'id' && attribute.value !== expectation.id) {
+                        notMatch = true;
+                        break;
+                    }
+                    if (classMustMatch && attribute.key === 'class' && attribute.value !== expectation.class) {
+                        notMatch = true;
+                        break;
+                    }
+                }
+                if (notMatch) {
+                    continue;
+                }
+            }
+        }
+        else if (node.type === 'text' && expectation.content) {
+            // Validate a text node by checking its content.
+            const text = node;
+            if (text.content !== expectation.content) {
+                continue;
+            }
+        }
+        // If we're here, all appropriate checks were passed, so we can keep this node.
+        matchingNodes.push(node);
+    }
+    return matchingNodes;
+}
+exports.findAllMatchingNodes = findAllMatchingNodes;
+//# sourceMappingURL=junitUtils.js.map
+
+/***/ }),
+
 /***/ 177:
 /***/ (function(__unusedmodule, exports) {
 
@@ -1016,6 +1113,34 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _default = '00000000-0000-0000-0000-000000000000';
 exports.default = _default;
+
+/***/ }),
+
+/***/ 345:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.readFile = void 0;
+const fs_1 = __webpack_require__(747);
+async function fileExists(fileName) {
+    try {
+        await fs_1.promises.access(fileName, fs_1.constants.F_OK);
+        return true;
+    }
+    catch (_a) {
+        return false;
+    }
+}
+async function readFile(fileName) {
+    if (!await fileExists(fileName)) {
+        throw new Error(`Cannot summarize results. File ${fileName} does not exist.`);
+    }
+    return fs_1.promises.readFile(fileName, 'utf-8');
+}
+exports.readFile = readFile;
+//# sourceMappingURL=fileUtils.js.map
 
 /***/ }),
 
@@ -1827,10 +1952,9 @@ function escapeProperty(s) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.summarizeJUnitErrors = void 0;
+exports.summarizeErrors = void 0;
 const path = __webpack_require__(622);
-const himalaya_1 = __webpack_require__(70);
-const utils_1 = __webpack_require__(611);
+const JUnitUtils = __webpack_require__(148);
 /**
  * This chain of node expectations gets us from the root of the HTML file
  * to the declaration of `tab0`, the leftmost tab in the file. If there are
@@ -1866,113 +1990,81 @@ const H2_FAILED_TESTS_EXPECTATIONS = [{
         type: "text",
         content: "Failed tests"
     }];
-async function summarizeJUnitErrors(reportFolder) {
-    // We want the index file.
-    const indexPath = path.join(reportFolder, 'index.html');
-    const indexContents = await utils_1.readFile(indexPath);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const indexJson = himalaya_1.parse(indexContents);
-    return getFailingTestNames(indexJson);
+const PATH_TO_JUNIT_REPORTS = ['build', 'reports', 'tests', 'test'];
+async function summarizeErrors(projectFolder) {
+    // We want the index file for the JUnit run.
+    const indexPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'index.html');
+    const indexJson = await JUnitUtils.getJunitJson(indexPath);
+    const classesWithFailures = getFailingClassNamesFromIndexFile(indexJson);
+    const results = [];
+    for (const cls of classesWithFailures) {
+        const classPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'classes', cls);
+        const classJson = await JUnitUtils.getJunitJson(classPath);
+        const failures = getFailuresFromClassFile(classJson);
+        results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
+    }
+    return results;
 }
-exports.summarizeJUnitErrors = summarizeJUnitErrors;
-function getFailingTestNames(indexContents) {
+exports.summarizeErrors = summarizeErrors;
+function getFailingClassNamesFromIndexFile(indexJson) {
     // Get the tag for tab0, where failures will be if they exist at all.
-    const tab0 = findChainedNode(indexContents, TAB0_LOCATION_EXPECTATIONS);
+    const tab0 = JUnitUtils.findChainedNode(indexJson, TAB0_LOCATION_EXPECTATIONS);
     // Make sure there are actually failures in this tab.
-    if (!verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
+    if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
         // No errors to summarize, return empty list.
         return [];
     }
     // tab0 will have a `ul` child, with its own `li` children. Those are where the failures are.
-    const ul = findFirstMatchingNode(tab0.children, {
+    const ul = JUnitUtils.findFirstMatchingNode(tab0.children, {
         type: "element",
         tagName: "ul"
     });
-    const listItems = findAllMatchingNodes(ul.children, {
+    const listItems = JUnitUtils.findAllMatchingNodes(ul.children, {
         type: "element",
         tagName: "li"
     });
     // For each list item, we want the `href` value in its first `a` tag.
-    return listItems.map(li => {
-        const a = findFirstMatchingNode(li.children, {
+    // Use a set to guarantee uniqueness
+    const results = new Set();
+    listItems.forEach(li => {
+        const a = JUnitUtils.findFirstMatchingNode(li.children, {
             type: "element",
             tagName: "a"
         });
         for (const attribute of a.attributes) {
             if (attribute.key === 'href') {
-                return attribute.value;
+                results.add(attribute.value);
             }
         }
     });
+    // Convert the set into an array, for ease of iteration.
+    return [...results];
 }
-function findChainedNode(nodes, expectations) {
-    let nextNode = null;
-    let candidateNodes = nodes;
-    for (const expectation of expectations) {
-        nextNode = findFirstMatchingNode(candidateNodes, expectation);
-        candidateNodes = nextNode.children;
+function getFailuresFromClassFile(classJson) {
+    // Get the tag for tab0, where failures will be if they exist at all.
+    const tab0 = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS);
+    // Make sure there are actually failures in this tab.
+    if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
+        // No errors to summarize, return empty list.
+        return [];
     }
-    return nextNode;
-}
-function verifyNodeDescent(element, expectations) {
-    try {
-        findChainedNode(element.children, expectations);
-        // If we can find a node matching the expectations, we're good.
-        return true;
+    // tab0 will have at least one `div` chid whose class is `test`
+    const failures = JUnitUtils.findAllMatchingNodes(tab0.children, {
+        type: "element",
+        tagName: "div",
+        class: "test"
+    });
+    const results = [];
+    for (const failure of failures) {
+        const nameNode = JUnitUtils.findChainedNode(failure.children, [{
+                type: "element",
+                tagName: "h3",
+            }, {
+                type: "text"
+            }]);
+        results.push(nameNode.content);
     }
-    catch (_a) {
-        // If no node was found, an error will be thrown, meaning we're not good.
-        return false;
-    }
-}
-function findFirstMatchingNode(nodes, expectation) {
-    const allMatches = findAllMatchingNodes(nodes, expectation);
-    if (allMatches.length === 0) {
-        // If we're here, we couldn't find a node matching expectations.
-        // Just throw an error.
-        throw new Error(`Could not find node matching expectation ${JSON.stringify(expectation)}`);
-    }
-    return allMatches[0];
-}
-function findAllMatchingNodes(nodes, expectation) {
-    const matchingNodes = [];
-    for (const node of nodes) {
-        // Make sure the types match.
-        if (node.type !== expectation.type) {
-            continue;
-        }
-        // If it's an element, validate it appropriately.
-        if (node.type === 'element') {
-            const element = node;
-            // Make sure the tag name matches.
-            if (element.tagName !== expectation.tagName) {
-                continue;
-            }
-            // If ID provided, make sure that matches too.
-            if (expectation.id) {
-                let idMatches = false;
-                for (const attribute of element.attributes) {
-                    if (attribute.key === 'id' && attribute.value === expectation.id) {
-                        idMatches = true;
-                        break;
-                    }
-                }
-                if (!idMatches) {
-                    continue;
-                }
-            }
-        }
-        else if (node.type === 'text') {
-            // Validate a text node by checking its content.
-            const text = node;
-            if (text.content !== expectation.content) {
-                continue;
-            }
-        }
-        // If we're here, all appropriate checks were passed, so we can keep this node.
-        matchingNodes.push(node);
-    }
-    return matchingNodes;
+    return results;
 }
 //# sourceMappingURL=summarizeJUnitErrors.js.map
 
@@ -2377,9 +2469,9 @@ const summarizeJUnitErrors_1 = __webpack_require__(452);
 async function run() {
     try {
         const location = core.getInput('location');
-        const files = await summarizeJUnitErrors_1.summarizeJUnitErrors(location);
-        for (const file of files) {
-            core.error(`There was a failure in ${file}`);
+        const failures = await summarizeJUnitErrors_1.summarizeErrors(location);
+        for (const failure of failures) {
+            core.error(failure);
         }
     }
     catch (error) {
@@ -2553,34 +2645,6 @@ exports.toPlatformPath = toPlatformPath;
 /***/ (function(module) {
 
 module.exports = require("http");
-
-/***/ }),
-
-/***/ 611:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.readFile = void 0;
-const fs_1 = __webpack_require__(747);
-async function fileExists(fileName) {
-    try {
-        await fs_1.promises.access(fileName, fs_1.constants.F_OK);
-        return true;
-    }
-    catch (_a) {
-        return false;
-    }
-}
-async function readFile(fileName) {
-    if (!await fileExists(fileName)) {
-        throw new Error(`Cannot summarize results. File ${fileName} does not exist.`);
-    }
-    return fs_1.promises.readFile(fileName, 'utf-8');
-}
-exports.readFile = readFile;
-//# sourceMappingURL=utils.js.map
 
 /***/ }),
 

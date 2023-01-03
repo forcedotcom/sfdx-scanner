@@ -25,6 +25,7 @@ export interface Text extends Node {
 export interface Expectation {
 	type: string;
 	tagName?: string;
+	class?: string;
 	id?: string;
 	content?: string;
 }
@@ -80,20 +81,26 @@ export function findAllMatchingNodes(nodes: Node[], expectation: Expectation): N
 			if (element.tagName !== expectation.tagName) {
 				continue;
 			}
-			// If ID provided, make sure that matches too.
-			if (expectation.id) {
-				let idMatches = false;
+			// If we're looking for a matching class/id, we should do that.
+			const idMustMatch = expectation.id != null;
+			const classMustMatch = expectation.class != null;
+			if (idMustMatch || classMustMatch) {
+				let notMatch = false;
 				for (const attribute of element.attributes) {
-					if (attribute.key === 'id' && attribute.value === expectation.id) {
-						idMatches = true;
+					if (idMustMatch && attribute.key === 'id' && attribute.value !== expectation.id) {
+						notMatch = true;
+						break;
+					}
+					if (classMustMatch && attribute.key === 'class' && attribute.value !== expectation.class) {
+						notMatch = true;
 						break;
 					}
 				}
-				if (!idMatches) {
+				if (notMatch) {
 					continue;
 				}
 			}
-		} else if (node.type === 'text') {
+		} else if (node.type === 'text' && expectation.content) {
 			// Validate a text node by checking its content.
 			const text: Text = node as Text;
 			if (text.content !== expectation.content) {

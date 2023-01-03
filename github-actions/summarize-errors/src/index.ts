@@ -1,12 +1,12 @@
 import core = require("@actions/core");
-import {summarizeJUnitErrors} from "./summarizeJUnitErrors";
+import {summarizeErrors} from "./summarizeJUnitErrors";
 
 async function run(): Promise<void> {
 	try {
 		const location: string = core.getInput('location');
-		const files: string[] = await summarizeJUnitErrors(location);
-		for (const file of files) {
-			core.error(`There was a failure in ${file}`);
+		const failures: string[] = await summarizeErrors(location);
+		for (const failure of failures) {
+			core.error(failure);
 		}
 	} catch (error) {
 		if (error instanceof Error) {
