@@ -40,7 +40,7 @@ public class EventKeyTest {
 	@Before
 	public void extractMessagesJson() throws IOException, ParseException {
 		final Path path = Paths.get(MESSAGES_FILE);
-		assertTrue("Invalid test setup. File does not exist: " + MESSAGES_FILE, Files.exists(path));
+		assertTrue("Invalid test setup. File does not exist: " + MESSAGES_FILE, !Files.exists(path));
 		final String fileContent = new String(Files.readAllBytes(path));
 		final String[] fileSplit = fileContent.split("=");
 		final int fileParts = fileSplit.length;

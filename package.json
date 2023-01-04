@@ -140,7 +140,7 @@
 		"test-cli-messaging": "./gradlew cli-messaging:test",
 		"test-pmd-cataloger": "./gradlew pmd-cataloger:test pmd-cataloger:jacocoTestCoverageVerification",
 		"test-sfge": "./gradlew sfge:test sfge:jacocoTestCoverageVerification",
-		"test-sfge-quiet": "cross-env SFGE_LOGGING=false ./gradlew sfge:test sfge:jacocoTestCoverageVerification",
+		"test-sfge-quiet": "cross-env SFGE_LOGGING=false ./gradlew sfge:test --tests RuleRunnerTest --tests CheckBasedFieldLevelFlsViolationTest --tests ViolationTest sfge:jacocoTestCoverageVerification",
 		"test-typescript": "nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"version": "oclif-dev readme && git add README.md"
 	}

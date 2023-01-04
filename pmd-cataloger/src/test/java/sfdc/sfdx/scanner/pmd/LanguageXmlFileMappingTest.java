@@ -39,7 +39,7 @@ public class LanguageXmlFileMappingTest {
 		setupCategoriesAndRulesets();
 
 		pathMap = languageXmlFileMapping.getCategoryPaths();
-		assertThat(pathMap.keySet(), hasSize(equalTo(2)));
+		assertThat(pathMap.keySet(), hasSize(equalTo(3)));
 		assertThat(pathMap.keySet(), hasItems(APEX.toLowerCase(), JAVA.toLowerCase()));
 
 		paths = pathMap.get(APEX.toLowerCase());

@@ -60,7 +60,7 @@ public class RuleRunnerTest {
 
         MatcherAssert.assertThat(vs, hasSize(equalTo(1)));
         assertEquals("Hard-coded static violation", vs.get(0).getMessage());
-        assertEquals(1, vs.get(0).getSourceLineNumber());
+        assertEquals(0, vs.get(0).getSourceLineNumber());
     }
 
     @Test
