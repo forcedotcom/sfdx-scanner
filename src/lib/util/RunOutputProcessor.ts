@@ -8,7 +8,7 @@ import {OUTPUT_FORMAT} from '../RuleManager';
 
 Messages.importMessagesDirectory(__dirname);
 
-const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 const INTERNAL_ERROR_CODE = 1;
 
 export type RunOutputOptions = {
@@ -32,7 +32,7 @@ export class RunOutputProcessor {
 		// If the results are an empty string, it means no violations were found.
 		if (results === '') {
 			// Build an appropriate message...
-			const msg = runMessages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
+			const msg = messages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
 			// ...log it to the console...
 			this.ux.log(msg);
 			// ...and return it for use with the --json flag.
@@ -98,14 +98,14 @@ export class RunOutputProcessor {
 		if ((this.opts.format === OUTPUT_FORMAT.TABLE) || this.opts.outfile) {
 			const summaryMsgs = [...summaryMap.entries()]
 				.map(([engine, summary]) => {
-					return runMessages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
+					return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
 				});
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
 		// Summary to print with --severity-threshold flag
 		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
-			msgParts.push(runMessages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
+			msgParts.push(messages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
 		}
 
 		return msgParts;
@@ -122,7 +122,7 @@ export class RunOutputProcessor {
 			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
-		return runMessages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
+		return messages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
 	}
 
 	private writeToConsole(results: RecombinedData): string {
@@ -156,6 +156,6 @@ export class RunOutputProcessor {
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
-		return format === OUTPUT_FORMAT.TABLE ? runMessages.getMessage('output.writtenToConsole') : '';
+		return format === OUTPUT_FORMAT.TABLE ? messages.getMessage('output.writtenToConsole') : '';
 	}
 }

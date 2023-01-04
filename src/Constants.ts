@@ -31,6 +31,11 @@ export enum ENGINE {
 	SFGE = 'sfge'
 }
 
+export enum RuleType {
+	PATHLESS = "pathless",
+	DFA = "dfa"
+}
+
 /**
  * Main engine types that have more than one variation
  */
@@ -64,6 +69,7 @@ export const PathlessEngineFilters = [
 	ENGINE.ESLINT_TYPESCRIPT,
 	ENGINE.PMD,
 	ENGINE.RETIRE_JS,
+	ENGINE.SFGE,
 	ENGINE.CPD
 ]
 

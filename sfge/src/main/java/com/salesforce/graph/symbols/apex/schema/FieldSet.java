@@ -16,6 +16,7 @@ import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SyntheticTypedVertex;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepCloneable<FieldSet> {
@@ -98,7 +99,10 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
+        final String methodName = vertex.getMethodName();
+
+        return _applyMethod(vertex, builder, methodName);
     }
 
     @Override
@@ -113,6 +117,19 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
 
         String methodName = method.getName();
 
+        ApexValue<?> apexValue =
+                _applyMethod(invocableExpression, builder, methodName).orElse(null);
+
+        if (apexValue == null) {
+            apexValue = ApexValueUtil.synthesizeReturnedValue(builder, method);
+        }
+        return Optional.ofNullable(apexValue);
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_FIELDS.equalsIgnoreCase(methodName)) {
             builder.declarationVertex(SyntheticTypedVertex.get(FieldSetMember.TYPE));
             return Optional.of(builder.buildFieldSetList(this));
@@ -122,8 +139,22 @@ public final class FieldSet extends ApexStandardValue<FieldSet> implements DeepC
             } else {
                 return Optional.of(builder.buildSObjectType());
             }
-        } else {
-            return Optional.of(ApexValueUtil.synthesizeReturnedValue(builder, method));
         }
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        FieldSet fieldSet = (FieldSet) o;
+        return Objects.equals(sObjectType, fieldSet.sObjectType)
+                && Objects.equals(fieldSetName, fieldSet.fieldSetName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), sObjectType, fieldSetName);
     }
 }

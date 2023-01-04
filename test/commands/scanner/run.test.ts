@@ -8,7 +8,9 @@ import tildify = require('tildify');
 import events = require('../../../messages/EventKeyTemplates');
 
 Messages.importMessagesDirectory(__dirname);
-const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run');
+const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
+const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
 
 describe('scanner:run', function () {
 	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
@@ -56,7 +58,7 @@ describe('scanner:run', function () {
 						'--format', 'xml'
 					])
 					.it('When the file contains no violations, a message is logged to the console', ctx => {
-						expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+						expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					});
 			});
 
@@ -188,7 +190,7 @@ describe('scanner:run', function () {
 				if (expectSummary) {
 					expect(summary).to.not.equal(undefined, 'Expected summary to be not undefined');
 					expect(summary).to.not.equal(null, 'Expected summary to be not null');
-					expect(summary).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
+					expect(summary).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
 				}
 				// Since it's a CSV, the rows themselves are separated by newline chaacters, and there's a header row we
 				// need to discard.
@@ -232,9 +234,9 @@ describe('scanner:run', function () {
 				})
 				.it('Properly writes CSV to file', ctx => {
 					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
@@ -249,7 +251,7 @@ describe('scanner:run', function () {
 					'--format', 'csv'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -265,8 +267,8 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
 					expect(fs.existsSync('testout.csv')).to.be.false;
 				});
 		});
@@ -313,8 +315,8 @@ describe('scanner:run', function () {
 				})
 				.it('Properly writes HTML to file', ctx => {
 					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
@@ -329,7 +331,7 @@ describe('scanner:run', function () {
 					'--format', 'html'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -345,8 +347,8 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', [outputFile]));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
 					expect(fs.existsSync(outputFile)).to.be.false;
 				});
 		});
@@ -388,9 +390,9 @@ describe('scanner:run', function () {
 				})
 				.it('Properly writes JSON to file', ctx => {
 					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.json')).to.equal(true, 'The command should have created the expected output file');
@@ -405,7 +407,7 @@ describe('scanner:run', function () {
 					'--format', 'json'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -421,8 +423,8 @@ describe('scanner:run', function () {
 					}
 				})
 				.it('When --oufile is provided and no violations are detected, output file should not be created', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-					expect(ctx.stdout).to.not.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.json']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
 					expect(fs.existsSync('testout.json')).to.be.false;
 				});
 
@@ -453,7 +455,7 @@ describe('scanner:run', function () {
 					'--format', 'table'
 				])
 				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 		});
 
@@ -516,8 +518,8 @@ describe('scanner:run', function () {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should finish properly');
 					const result = output.result;
-					expect(result).to.contain(runMessages.getMessage('output.writtenToOutFile', ['testout.xml']));
-					expect(result).to.not.contain(runMessages.getMessage('output.noViolationsDetected', []));
+					expect(result).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.xml']));
+					expect(result).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
 					const fileContents = fs.readFileSync('testout.xml').toString();
@@ -541,7 +543,7 @@ describe('scanner:run', function () {
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.contain(runMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					expect(output.result).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 		});
 
@@ -616,19 +618,19 @@ describe('scanner:run', function () {
 			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
 				.it('Error thrown when output file is malformed', ctx => {
-					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeValid')}`);
+					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeValid')}`);
 				});
 
 			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
 				.it('Error thrown when output file is unsupported type', ctx => {
-					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${runMessages.getMessage('validations.outfileMustBeSupportedType')}`);
+					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeSupportedType')}`);
 				});
 
 			setupCommandTest
 				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
 				.it('Warning logged when output file format does not match format', ctx => {
-					expect(ctx.stdout).to.contain(runMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
+					expect(ctx.stdout).to.contain(commonMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
 				});
 		});
 	});
@@ -754,12 +756,12 @@ describe('scanner:run', function () {
 				// there are five retries in addition to the initial run.
 				// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
 				// The following categories are implicitly included:
-				// - 11 PMD categories
+				// - 8 PMD categories
 				// - 3 ESLint categories
 				// - 3 ESLint-Typescript categories
 				// - 1 RetireJS category
-				// For a total of 18
-				expect(implicitMessages || []).to.have.lengthOf(18, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+				// For a total of 15
+				expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 				// TODO: revisit test, should be improved because of issue above
 			});
 	});

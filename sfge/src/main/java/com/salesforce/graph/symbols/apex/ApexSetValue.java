@@ -8,13 +8,10 @@ import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.DeepCloneable;
 import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.CloneUtil;
+import com.salesforce.graph.ops.TypeableUtil;
 import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.vertex.ChainedVertex;
-import com.salesforce.graph.vertex.InvocableVertex;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.NewSetInitExpressionVertex;
-import com.salesforce.graph.vertex.NewSetLiteralExpressionVertex;
+import com.salesforce.graph.vertex.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +27,8 @@ import org.apache.commons.lang3.tuple.Pair;
 // constructor
 // invokes ApexListValue.getValues(). Since ApexListValue is final, the method can't be overriden.
 // Hence the violation is incorrect.
-public class ApexSetValue extends ApexValue<ApexSetValue> implements DeepCloneable<ApexSetValue> {
+public class ApexSetValue extends AbstractSanitizableValue<ApexSetValue>
+        implements DeepCloneable<ApexSetValue>, ApexIterableCollectionValue {
     private static final String METHOD_ADD = "add";
     private static final String METHOD_CLEAR = "clear";
     private static final String METHOD_CLONE = "clone";
@@ -39,17 +37,21 @@ public class ApexSetValue extends ApexValue<ApexSetValue> implements DeepCloneab
     protected static final String METHOD_SIZE = "size";
 
     private final NonNullHashSet<ApexValue<?>> values;
+    private final Typeable type;
 
     public ApexSetValue(ApexValueBuilder builder) {
         super(builder);
         this.values = CollectionUtil.newNonNullHashSet();
         setValue(builder.getValueVertex(), builder.getSymbolProvider());
+        final Typeable typeable = builder.getMostSpecificTypedVertex().orElse(null);
+        this.type = identifyType(typeable).orElse(null);
     }
 
     /** DeepCloneable#deepClone constructor */
     private ApexSetValue(ApexSetValue other) {
         super(other, other.getReturnedFrom().orElse(null), other.getInvocable().orElse(null));
         this.values = CloneUtil.cloneNonNullHashSet(other.values);
+        this.type = other.type;
     }
 
     /**
@@ -64,6 +66,7 @@ public class ApexSetValue extends ApexValue<ApexSetValue> implements DeepCloneab
             @Nullable InvocableVertex invocable) {
         super(other, returnedFrom, invocable);
         this.values = values;
+        this.type = other.type;
     }
 
     @Override
@@ -188,6 +191,7 @@ public class ApexSetValue extends ApexValue<ApexSetValue> implements DeepCloneab
         this.values.add(value);
     }
 
+    @Override
     public List<ApexValue<?>> getValues() {
         return Collections.unmodifiableList(values.stream().collect(Collectors.toList()));
     }
@@ -195,5 +199,25 @@ public class ApexSetValue extends ApexValue<ApexSetValue> implements DeepCloneab
     @Override
     public Optional<String> getDefiningType() {
         return Optional.empty();
+    }
+
+    // TODO: consolidate logic with ApexListValue
+    private static Optional<Typeable> identifyType(@Nullable Typeable typeable) {
+        if (typeable == null) {
+            return Optional.empty();
+        }
+
+        final Optional<String> optSubType = TypeableUtil.getSetSubType(typeable.getCanonicalType());
+        if (optSubType.isPresent()) {
+            return Optional.of(SyntheticTypedVertex.get(optSubType.get()));
+        }
+
+        // If we don't find a match, we are still okay.
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Typeable> getSubType() {
+        return Optional.ofNullable(this.type);
     }
 }

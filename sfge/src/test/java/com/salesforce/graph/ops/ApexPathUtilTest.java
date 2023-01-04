@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -123,6 +122,25 @@ public class ApexPathUtilTest {
                 methodsCalled.stream().map(v -> v.getBeginLine()).collect(Collectors.toList());
         MatcherAssert.assertThat(lineNumbers, contains(3, 4, 5));
         MatcherAssert.assertThat(recursiveCalls, hasSize(equalTo(0)));
+    }
+
+    @Test
+    public void testSimpleSingleMethodCall() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void doSomething() {\n"
+                        + "       debug1('hi');\n"
+                        + "   }\n"
+                        + "   public void debug1(String s) {\n"
+                        + "       System.debug(s);\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.get(g, sourceCode).walkPath();
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexStringValue value = visitor.getSingletonResult();
+        MatcherAssert.assertThat(value.getValue().get(), equalTo("hi"));
     }
 
     @Test
@@ -1005,12 +1023,12 @@ public class ApexPathUtilTest {
         Map<Integer, Optional<ApexValue<?>>> results;
 
         results = visitor.getSingleResultPerLineByName("a");
-        MatcherAssert.assertThat(results.keySet(), hasSize(Matchers.equalTo(1)));
+        MatcherAssert.assertThat(results.keySet(), hasSize(equalTo(1)));
         ApexValue<?> apexValue = results.get(7).get();
         MatcherAssert.assertThat(TestUtil.apexValueToString(apexValue), IsEqual.equalTo("Hello"));
 
         results = visitor.getSingleResultPerLineByName("sObjType");
-        MatcherAssert.assertThat(results.keySet(), hasSize(Matchers.equalTo(1)));
+        MatcherAssert.assertThat(results.keySet(), hasSize(equalTo(1)));
         SObjectType sObjectType = (SObjectType) results.get(8).get();
         MatcherAssert.assertThat(
                 TestUtil.apexValueToString(sObjectType.getType()), IsEqual.equalTo("MyObject__c"));

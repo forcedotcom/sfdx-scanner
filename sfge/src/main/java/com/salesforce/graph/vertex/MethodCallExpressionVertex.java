@@ -8,6 +8,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.SymbolProviderVertexVisitor;
 import com.salesforce.graph.visitor.PathVertexVisitor;
+import com.salesforce.graph.visitor.TypedVertexVisitor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -256,6 +257,11 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
         return (String) properties.get(Schema.METHOD_NAME);
     }
 
+    @Override
+    public <T> T accept(TypedVertexVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     /**
      * @return true if the method is qualified by a 'this' expression. i.e. Returns true for
      *     "this.aList.size();"
@@ -268,6 +274,14 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
         } else {
             return false;
         }
+    }
+
+    /**
+     * @return - True if the method is qualified by an empty reference expression. i.e., returns
+     *     true for `someMethod()` but not `this.someMethod()` or `a.someMethod()`.
+     */
+    public boolean isEmptyReference() {
+        return referenceExpression.get() instanceof EmptyReferenceExpressionVertex;
     }
 
     private LazyVertex<AbstractReferenceExpressionVertex> _getReferenceVertex() {

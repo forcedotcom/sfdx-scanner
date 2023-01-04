@@ -8,17 +8,13 @@ import static org.hamcrest.core.IsNot.not;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
-import com.salesforce.graph.symbols.apex.ApexBooleanValue;
-import com.salesforce.graph.symbols.apex.ApexGlobalDescribeMapValue;
-import com.salesforce.graph.symbols.apex.ApexListValue;
-import com.salesforce.graph.symbols.apex.ApexMapValue;
-import com.salesforce.graph.symbols.apex.ApexStringValue;
-import com.salesforce.graph.symbols.apex.SystemNames;
+import com.salesforce.graph.symbols.apex.*;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -325,5 +321,36 @@ public class DescribeSObjectResultTest {
 
         // If casting happens successfully, we should be good.
         ApexStringValue stringValue = visitor.getSingletonResult();
+    }
+
+    @CsvSource({
+        "isDeletable,com.salesforce.graph.symbols.apex.ApexBooleanValue",
+        "getName,com.salesforce.graph.symbols.apex.ApexStringValue",
+        "getRecordTypeInfos,com.salesforce.graph.symbols.apex.ApexListValue",
+        "getRecordTypeInfosByDeveloperName,com.salesforce.graph.symbols.apex.ApexMapValue",
+        "getRecordTypeInfosByName,com.salesforce.graph.symbols.apex.ApexMapValue",
+        "getSObjectType,com.salesforce.graph.symbols.apex.schema.SObjectType"
+    })
+    @ParameterizedTest
+    public void testSecondaryInvocationInForLoop(String methodName, String apexValueType)
+            throws ClassNotFoundException {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       List<SObjectType> types = new List<SObjectType>{MyObject__c.SObjectType, Account.SObjectType};\n"
+                        + "       for (SObjectType myType: types) {\n"
+                        + "           System.debug(myType.getDescribe()."
+                        + methodName
+                        + "());\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        ApexForLoopValue forLoopValue = visitor.getSingletonResult();
+        ApexValue<?> value = forLoopValue.getForLoopValues().get(0);
+        MatcherAssert.assertThat(value, Matchers.instanceOf(Class.forName(apexValueType)));
     }
 }

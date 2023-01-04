@@ -17,6 +17,7 @@ import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
+import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -118,7 +119,9 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        return Optional.empty();
+        ApexValueBuilder builder = ApexValueBuilder.get(symbols).returnedFrom(this, vertex);
+        String methodName = vertex.getMethodName();
+        return _applyMethod(vertex, builder, methodName);
     }
 
     @Override
@@ -132,6 +135,13 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
                         .methodVertex(method);
         String methodName = method.getName();
 
+        return _applyMethod(invocableExpression, builder, methodName);
+    }
+
+    private Optional<ApexValue<?>> _applyMethod(
+            InvocableWithParametersVertex invocableExpression,
+            ApexValueBuilder builder,
+            String methodName) {
         if (METHOD_GET_DESCRIBE.equalsIgnoreCase(methodName)) {
             if (associatedObjectType != null && fieldName != null) {
                 DescribeSObjectResult describeSObjectResult =
@@ -144,5 +154,20 @@ public final class SObjectField extends ApexStandardValue<SObjectField>
         } else {
             throw new TodoException(invocableExpression);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SObjectField that = (SObjectField) o;
+        return Objects.equals(associatedObjectType, that.associatedObjectType)
+                && Objects.equals(fieldName, that.fieldName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), associatedObjectType, fieldName);
     }
 }

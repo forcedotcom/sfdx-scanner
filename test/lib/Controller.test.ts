@@ -13,127 +13,147 @@ describe('Controller.ts tests', () => {
 		TestOverrides.initializeTestSetup();
 	});
 
-	it('getAllEngines returns enabled/disabled engines', async() => {
-		const engines: RuleEngine[] = await Controller.getAllEngines();
-		const names: string[] = engines.map(e => e.getName());
+	describe('#getAllEngines()', () => {
+		it('Returns literally all engines', async () => {
+			const engines: RuleEngine[] = await Controller.getAllEngines();
+			const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length, names + '').to.equal(9);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_LWC);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.CPD);
-		expect(names).to.contain(ENGINE.SFGE);
+			expect(engines.length, names + '').to.equal(10);
+			expect(names).to.contain('JavascriptEslintEngine');
+			expect(names).to.contain('LWCEslintEngine');
+			expect(names).to.contain('TypescriptEslintEngine');
+			expect(names).to.contain('CustomEslintEngine');
+			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('CustomPmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('CpdEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+			expect(names).to.contain('SfgePathlessEngine');
+		});
 	});
 
-	it('getEnabledEngines returns only non-custom enabled engines when engineOptions is empty', async() => {
-		const engines: RuleEngine[] = await Controller.getEnabledEngines();
-		const names: string[] = engines.map(e => e.getName());
+	describe('#getEnabledEngines()', () => {
+		it('When engineOptions is empty, returns only engines that are non-custom, enabled, and requested-by-default', async () => {
+			const engines: RuleEngine[] = await Controller.getEnabledEngines();
+			const names: string[] = engines.map(e => e.constructor.name);
 
-		expect(engines.length).to.equal(5);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
+			expect(engines.length).to.equal(5);
+			expect(names).to.contain('JavascriptEslintEngine');
+			expect(names).to.contain('TypescriptEslintEngine');
+			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+		});
+
+		it('When engineOptions includes custom pmd config, PmdCustomEngine is included', async () => {
+			const engineOptions = new Map<string, string>([
+				[CUSTOM_CONFIG.PmdConfig, "/some/path"]
+			]);
+
+			const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
+			const names: string[] = engines.map(e => e.constructor.name);
+
+			expect(engines.length).to.equal(5);
+			expect(names).to.contain('JavascriptEslintEngine');
+			expect(names).to.contain('TypescriptEslintEngine');
+			expect(names).to.contain('CustomPmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+		});
+
+		it('When engineOptions includes custom eslint config, CustomEslintEngine is included', async () => {
+			const engineOptions = new Map<string, string>([
+				[CUSTOM_CONFIG.EslintConfig, "/some/path"]
+			]);
+
+			const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
+			const names: string[] = engines.map(e => e.constructor.name);
+
+			expect(engines.length).to.equal(4);
+			expect(names).to.contain('CustomEslintEngine');
+			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+		});
+
+		it('When engineOptions includes both custom pmd and custom eslint configs, both custom engines are included', async () => {
+			const engineOptions = new Map<string, string>([
+				[CUSTOM_CONFIG.EslintConfig, "/some/path"],
+				[CUSTOM_CONFIG.PmdConfig, "/some/other/path"]
+			]);
+
+			const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
+			const names: string[] = engines.map(e => e.constructor.name);
+
+			expect(engines.length).to.equal(4);
+			expect(names).to.contain('CustomEslintEngine');
+			expect(names).to.contain('CustomPmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+		});
+
+		it('When no engines are found, error is thrown', async () => {
+			// Create a single mocked engine that is disabled
+			const mockedRuleEngine: RuleEngine = mock<RuleEngine>();
+			when(mockedRuleEngine.getName).thenReturn(() => 'fake-engine');
+			when(mockedRuleEngine.isEnabled).thenReturn(() => Promise.resolve(false));
+			const ruleEngine: RuleEngine = instance(mockedRuleEngine);
+
+			// Remove everything else from the container and register the mock engine
+			container.reset();
+			container.registerInstance(Services.RuleEngine, ruleEngine);
+
+			try {
+				await Controller.getEnabledEngines();
+				fail('getEnabledEngines should have thrown');
+			} catch (e) {
+				expect(e.message).to.equal('You must enable at least one engine. Your currently disabled engines are: fake-engine.');
+			}
+		});
 	});
 
-	it('getEnabledEngines returns PMD_CUSTOM when engineOptions contains pmdconfig', async () => {
-		const engineOptions = new Map<string, string>([
-			[CUSTOM_CONFIG.PmdConfig, "/some/path"]
-		]);
+	describe('#getFilteredEngines()', () => {
+		it('If no filtering is provided, only requested-by-default engines are returned', async () => {
+			const engines: RuleEngine[] = await Controller.getFilteredEngines([]);
+			const names: string[] = engines.map(e => e.constructor.name);
 
-		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
+			expect(engines.length).to.equal(6);
+			expect(names).to.contain('JavascriptEslintEngine');
+			expect(names).to.contain('LWCEslintEngine');
+			expect(names).to.contain('TypescriptEslintEngine');
+			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('RetireJsEngine');
+			expect(names).to.contain('SfgeDfaEngine');
+		})
 
-		expect(engines.length).to.equal(5);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_TYPESCRIPT);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
-	});
+		it('Even a disabled engine is included when explicitly requested', async () => {
+			const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.PMD]);
+			const names: string[] = engines.map(e => e.getName());
 
-	it('getEnabledEngines returns ESLINT_CUSTOM when engineOptions contains eslintconfig', async () => {
-		const engineOptions = new Map<string, string>([
-			[CUSTOM_CONFIG.EslintConfig, "/some/path"]
-		]);
+			expect(engines.length).to.equal(3);
+			expect(names).to.contain(ENGINE.ESLINT);
+			expect(names).to.contain(ENGINE.ESLINT_LWC);
+			expect(names).to.contain(ENGINE.PMD);
+		});
 
-		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
+		it('When custom config information is provided, the correct instance is returned', async () => {
+			const engineOptionsWithPmdCustom = new Map<string, string>([
+				[CUSTOM_CONFIG.PmdConfig, '/some/path/to/config']
+			]);
+			const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.PMD], engineOptionsWithPmdCustom);
+			const names: string[] = engines.map(e => e.getName());
 
-		expect(engines.length).to.equal(4);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
-	});
+			expect(engines.length).to.equal(1);
+			expect(names).to.contain(ENGINE.PMD_CUSTOM);
+		});
 
-	it('getEnabledEngines returns PMD_CUSTOM, ESLINT_CUSTOM when engineOptions contains pmdconfig and eslintconfig', async () => {
-		const engineOptions = new Map<string, string>([
-			[CUSTOM_CONFIG.EslintConfig, "/some/path"],
-			[CUSTOM_CONFIG.PmdConfig, "/some/other/path"]
-		]);
-
-		const engines: RuleEngine[] = await Controller.getEnabledEngines(engineOptions);
-		const names: string[] = engines.map(e => e.getName());
-
-		expect(engines.length).to.equal(4);
-		expect(names).to.contain(ENGINE.ESLINT_CUSTOM);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-		expect(names).to.contain(ENGINE.RETIRE_JS);
-		expect(names).to.contain(ENGINE.SFGE);
-	});
-
-	it('getFilteredEngines filters and includes disabled', async() => {
-		const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.ESLINT, ENGINE.ESLINT_LWC, ENGINE.PMD]);
-		const names: string[] = engines.map(e => e.getName());
-
-		expect(engines.length).to.equal(3);
-		expect(names).to.contain(ENGINE.ESLINT);
-		expect(names).to.contain(ENGINE.ESLINT_LWC);
-		expect(names).to.contain(ENGINE.PMD);
-	});
-
-	it('getFilteredEngines uses custom config information to choose the correct instance', async() => {
-		const engineOptionsWithPmdCustom = new Map<string, string>([
-			[CUSTOM_CONFIG.PmdConfig, '/some/path/to/config']
-		]);
-		const engines: RuleEngine[] = await Controller.getFilteredEngines([ENGINE.PMD], engineOptionsWithPmdCustom);
-		const names: string[] = engines.map(e => e.getName());
-
-		expect(engines.length).to.equal(1);
-		expect(names).to.contain(ENGINE.PMD_CUSTOM);
-	});
-
-	it('getEnabledEngines throws exception when no engines are found', async() => {
-		// Create a single mocked engine that is disabled
-		const mockedRuleEngine: RuleEngine = mock<RuleEngine>();
-		when(mockedRuleEngine.getName).thenReturn(() => 'fake-engine');
-		when(mockedRuleEngine.isEnabled).thenReturn(() => Promise.resolve(false));
-		const ruleEngine: RuleEngine = instance(mockedRuleEngine);
-
-		// Remove everything else from the container and register the mock engine
-		container.reset();
-		container.registerInstance(Services.RuleEngine, ruleEngine);
-
-		try {
-			await Controller.getEnabledEngines();
-			fail('getEnabledEngines should have thrown');
-		} catch (e) {
-			expect(e.message).to.equal('You must enable at least one engine. Your currently disabled engines are: fake-engine.');
-		}
-	});
-
-	it('getFilteredEngines throws exception when no engines are found', async() => {
-		try {
-			await Controller.getFilteredEngines(['invalid-engine']);
-			fail('getFilteredEngines should have thrown');
-		} catch (e) {
-			expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge.`);
-		}
+		it('When no engines are found, exception is thrown', async () => {
+			try {
+				await Controller.getFilteredEngines(['invalid-engine']);
+				fail('getFilteredEngines should have thrown');
+			} catch (e) {
+				expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge.`);
+			}
+		});
 	});
 });
