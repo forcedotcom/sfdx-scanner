@@ -12,6 +12,40 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.8.0) (01-04-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.8.0...v3.7.1)
+
+### Release Summary
+
+* NEW (Code Analyzer): `scanner:run` command executes graph-based rules from Graph Engine. Invoke the new rule by executing `scanner:run` command with `--engine sfge` and providing the `--projectdir` parameter. This behavior is different from path-based rules that are executed with `scanner:run:dfa`.
+* NEW (Graph Engine): We added a new graph-based rule, `UnusedMethodRule`. This rule detects methods contained in your code that aren’t invoked. See [UnusedMethodRule](./en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule) for more information.
+* NEW: We made some updates to the RetireJS vulnerability database.
+* FIX (Graph Engine): `ApexCrudFlsRule` now understands multiple levels of method invocations on Schema Standard Library objects within for-loops.
+* FIX (Graph Engine): `ApexCrudFlsRule` now understands for-each iterations on Set data types and acknowledges Schema-based checks within the loops.
+
+**Closed issues:**
+
+- \[BUG\] False positive FLS when using custom access utility class [\#862](https://github.com/forcedotcom/sfdx-scanner/issues/862)
+- \[BUG\] ERROR running scanner:run: Cannot read properties of undefined (reading 'getInstance') [\#891](https://github.com/forcedotcom/sfdx-scanner/issues/891)
+- \[BUG\] ENV variable is not working [\#920](https://github.com/forcedotcom/sfdx-scanner/issues/920)
+
+**Merged pull requests**
+
+- NEW (GraphEngine): @W-11999008@: Add UnusedMethodRule to GraphEngine in disabled state. [\#915](https://github.com/forcedotcom/sfdx-scanner/pull/915)
+- NEW (GraphEngine): @W-11999008@: Light refactor of UnusedMethodRule. [\#916](https://github.com/forcedotcom/sfdx-scanner/pull/916)
+- CHANGE (GraphEngine): @W-11999008@: Refactoring appropriate methods into PathEntryPointUtil. [\#917](https://github.com/forcedotcom/sfdx-scanner/pull/917)
+- CHANGE (CodeAnalyzer): @W-11999008@: Refactor DFA-based GraphEngine in preparation for enabling new rule. [\#918](https://github.com/forcedotcom/sfdx-scanner/pull/918)
+- NEW (CodeAnalyzer): @W-11999008@: scanner:run now accepts --engine sfge and includes UnusedMethodRule. [\#919](https://github.com/forcedotcom/sfdx-scanner/pull/919)
+- NEW (GraphEngine): @W-11533657@: New 'missingOptionsBehavior' config property allows control over what happens if GraphEngine lacks proper config. [\#921](https://github.com/forcedotcom/sfdx-scanner/pull/921)
+- FIX (GraphEngine): @W-12138734@: Method invocation on Schema library objects within a forloop are now translated correctly. [\#922](https://github.com/forcedotcom/sfdx-scanner/pull/922)
+- FIX (GraphEngine): @W-12138734@: Handles forEach loops executed on Set data type. [\#923](https://github.com/forcedotcom/sfdx-scanner/pull/923)
+- CHANGE (CodeAnalyzer): @W-11999008@: Messages now meet doc team standards. [\#924](https://github.com/forcedotcom/sfdx-scanner/pull/924)
+- CHANGE (CodeAnalyzer): @W-11533657@: Messages now meet doc team standards. [\#925](https://github.com/forcedotcom/sfdx-scanner/pull/925)
+- CHANGE (CodeAnalyzer): @W-11533657@: Removed config. SFGE runs if explicitly requested, otherwise skipped. [\#926](https://github.com/forcedotcom/sfdx-scanner/pull/926)
+- CHANGE (CodeAnalyzer): @W-12273138@: Updating find-java-home to latest to avoid MacOS Ventura error. [\#928](https://github.com/forcedotcom/sfdx-scanner/pull/928)
+- FIX (GraphEngine): @W-11999008@: UnusedMethodRule has correct URL, and displays correct columns. [\#929](https://github.com/forcedotcom/sfdx-scanner/pull/929)
+
 ## [v3.7.1](https://github.com/forcedotcom/sfdx-scanner/tree/v3.7.1) (12-06-2022)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.7.1...v3.6.2)
