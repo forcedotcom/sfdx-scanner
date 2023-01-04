@@ -1999,7 +1999,10 @@ async function summarizeErrors(projectFolder) {
         const classPath = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, cls);
         const classJson = await JUnitUtils.getJunitJson(classPath);
         const failures = getFailuresFromClassFile(classJson);
-        results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
+        results.push({
+            file: cls,
+            failures
+        });
     }
     return results;
 }
@@ -2070,7 +2073,10 @@ function getFailuresFromClassFile(classJson) {
             }, {
                 type: "text"
             }]);
-        results.push(`${nameNode.content}\n\t${messageNode.content.split('\n').slice(0, 15).join('\n')}`);
+        results.push({
+            test: nameNode.content,
+            failure: messageNode.content
+        });
     }
     return results;
 }
@@ -2474,13 +2480,16 @@ exports.default = _default;
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __webpack_require__(470);
 const summarizeJUnitErrors_1 = __webpack_require__(452);
+//const UNKNOWN_FAILURE_MESSAGE = `Something failed in the tests, but this action can't tell what.
+//Download the artifact and check manually. Make sure you check code coverage numbers; they're sneaky!`;
 async function run() {
     try {
         const location = core.getInput('location');
-        const failures = await summarizeJUnitErrors_1.summarizeErrors(location);
-        for (const failure of failures) {
-            core.error(failure);
-        }
+        const failingClasses = await summarizeJUnitErrors_1.summarizeErrors(location);
+        await core.summary
+            .addHeading(core.getInput('project-name'))
+            .addRaw(`We detected ${failingClasses.length} failing classes`)
+            .write();
     }
     catch (error) {
         if (error instanceof Error) {

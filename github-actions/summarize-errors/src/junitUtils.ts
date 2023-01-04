@@ -1,52 +1,24 @@
 import {parse} from 'himalaya';
+import {HimalayaNode, HimalayaElement, HimalayaExpectation, HimalayaText} from './types';
 import {readFile} from './fileUtils';
 
-export interface Node {
-	type: string;
-}
-
-export interface Attribute {
-	key: string;
-	value?: string;
-}
-
-export interface Element extends Node {
-	type: "element";
-	tagName: string;
-	children: Node[];
-	attributes: Attribute[];
-}
-
-export interface Text extends Node {
-	type: "text";
-	content: string;
-}
-
-export interface Expectation {
-	type: string;
-	tagName?: string;
-	class?: string;
-	id?: string;
-	content?: string;
-}
-
-export async function getJunitJson(file: string): Promise<Node[]> {
+export async function getJunitJson(file: string): Promise<HimalayaNode[]> {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-	return parse(await readFile(file)) as Node[];
+	return parse(await readFile(file)) as HimalayaNode[];
 }
 
 
-export function findChainedNode(nodes: Node[], expectations: Expectation[]): Node {
-	let nextNode: Element = null;
-	let candidateNodes: Node[] = nodes;
+export function findChainedNode(nodes: HimalayaNode[], expectations: HimalayaExpectation[]): HimalayaNode {
+	let nextNode: HimalayaElement = null;
+	let candidateNodes: HimalayaNode[] = nodes;
 	for (const expectation of expectations) {
-		nextNode = findFirstMatchingNode(candidateNodes, expectation) as Element;
+		nextNode = findFirstMatchingNode(candidateNodes, expectation) as HimalayaElement;
 		candidateNodes = nextNode.children;
 	}
 	return nextNode;
 }
 
-export function verifyNodeDescent(element: Element, expectations: Expectation[]): boolean {
+export function verifyNodeDescent(element: HimalayaElement, expectations: HimalayaExpectation[]): boolean {
 	try {
 		findChainedNode(element.children, expectations);
 		// If we can find a node matching the expectations, we're good.
@@ -57,7 +29,7 @@ export function verifyNodeDescent(element: Element, expectations: Expectation[])
 	}
 }
 
-export function findFirstMatchingNode(nodes: Node[], expectation: Expectation): Node {
+export function findFirstMatchingNode(nodes: HimalayaNode[], expectation: HimalayaExpectation): HimalayaNode {
 	const allMatches = findAllMatchingNodes(nodes, expectation);
 	if (allMatches.length === 0) {
 		// If we're here, we couldn't find a node matching expectations.
@@ -67,8 +39,8 @@ export function findFirstMatchingNode(nodes: Node[], expectation: Expectation): 
 	return allMatches[0];
 }
 
-export function findAllMatchingNodes(nodes: Node[], expectation: Expectation): Node[] {
-	const matchingNodes: Node[] = [];
+export function findAllMatchingNodes(nodes: HimalayaNode[], expectation: HimalayaExpectation): HimalayaNode[] {
+	const matchingNodes: HimalayaNode[] = [];
 	for (const node of nodes) {
 		// Make sure the types match.
 		if (node.type !== expectation.type) {
@@ -76,7 +48,7 @@ export function findAllMatchingNodes(nodes: Node[], expectation: Expectation): N
 		}
 		// If it's an element, validate it appropriately.
 		if (node.type === 'element') {
-			const element: Element = node as Element;
+			const element: HimalayaElement = node as HimalayaElement;
 			// Make sure the tag name matches.
 			if (element.tagName !== expectation.tagName) {
 				continue;
@@ -98,7 +70,7 @@ export function findAllMatchingNodes(nodes: Node[], expectation: Expectation): N
 			}
 		} else if (node.type === 'text' && expectation.content) {
 			// Validate a text node by checking its content.
-			const text: Text = node as Text;
+			const text: HimalayaText = node as HimalayaText;
 			if (text.content !== expectation.content) {
 				continue;
 			}

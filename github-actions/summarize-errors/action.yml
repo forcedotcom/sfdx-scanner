@@ -4,6 +4,9 @@ inputs:
   location:
     description: 'Location of results directory'
     required: true
+  project-name:
+    description: 'Name by which project should be displayed'
+    required: true
 runs:
   using: 'node16'
   main: 'dist/index.js'

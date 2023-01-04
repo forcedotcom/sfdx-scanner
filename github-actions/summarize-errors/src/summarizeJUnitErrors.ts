@@ -1,4 +1,5 @@
 import path = require('path');
+import {HimalayaNode, HimalayaElement, HimalayaExpectation, HimalayaText, ClassDescriptor, TestDescriptor} from './types';
 import * as JUnitUtils from './junitUtils';
 
 /**
@@ -6,7 +7,7 @@ import * as JUnitUtils from './junitUtils';
  * to the declaration of `tab0`, the leftmost tab in the file. If there are
  * any failures, that's where they'll be.
  */
-const TAB0_LOCATION_EXPECTATIONS: JUnitUtils.Expectation[] = [{
+const TAB0_LOCATION_EXPECTATIONS: HimalayaExpectation[] = [{
 	type: "element",
 	tagName: "html"
 }, {
@@ -30,7 +31,7 @@ const TAB0_LOCATION_EXPECTATIONS: JUnitUtils.Expectation[] = [{
  * If tab0 actually holds any failures, then it will have a descendent meeting these
  * expectations.
  */
-const H2_FAILED_TESTS_EXPECTATIONS: JUnitUtils.Expectation[] = [{
+const H2_FAILED_TESTS_EXPECTATIONS: HimalayaExpectation[] = [{
 	type: "element",
 	tagName: "h2"
 }, {
@@ -41,38 +42,41 @@ const H2_FAILED_TESTS_EXPECTATIONS: JUnitUtils.Expectation[] = [{
 
 const PATH_TO_JUNIT_REPORTS = ['build', 'reports', 'tests', 'test'];
 
-export async function summarizeErrors(projectFolder: string): Promise<string[]> {
+export async function summarizeErrors(projectFolder: string): Promise<ClassDescriptor[]> {
 	// We want the index file for the JUnit run.
 	const indexPath: string = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'index.html');
-	const indexJson: JUnitUtils.Node[] = await JUnitUtils.getJunitJson(indexPath);
+	const indexJson: HimalayaNode[] = await JUnitUtils.getJunitJson(indexPath);
 	const classesWithFailures: string[] = getFailingClassNamesFromIndexFile(indexJson);
-	const results: string[] = [];
+	const results: ClassDescriptor[] = [];
 	for (const cls of classesWithFailures) {
 		const classPath: string = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, cls);
-		const classJson: JUnitUtils.Node[] = await JUnitUtils.getJunitJson(classPath);
-		const failures: string[] = getFailuresFromClassFile(classJson);
-		results.push(`failures in ${cls}:\n${JSON.stringify(failures)}`);
+		const classJson: HimalayaNode[] = await JUnitUtils.getJunitJson(classPath);
+		const failures: TestDescriptor[] = getFailuresFromClassFile(classJson);
+		results.push({
+			file: cls,
+			failures
+		});
 	}
 	return results;
 }
 
-function getFailingClassNamesFromIndexFile(indexJson: JUnitUtils.Node[]): string[] {
+function getFailingClassNamesFromIndexFile(indexJson: HimalayaNode[]): string[] {
 	// Get the tag for tab0, where failures will be if they exist at all.
-	const tab0: JUnitUtils.Element = JUnitUtils.findChainedNode(indexJson, TAB0_LOCATION_EXPECTATIONS) as JUnitUtils.Element;
+	const tab0: HimalayaElement = JUnitUtils.findChainedNode(indexJson, TAB0_LOCATION_EXPECTATIONS) as HimalayaElement;
 	// Make sure there are actually failures in this tab.
 	if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
 		// No errors to summarize, return empty list.
 		return [];
 	}
 	// tab0 will have a `ul` child, with its own `li` children. Those are where the failures are.
-	const ul: JUnitUtils.Element = JUnitUtils.findFirstMatchingNode(tab0.children, {
+	const ul: HimalayaElement = JUnitUtils.findFirstMatchingNode(tab0.children, {
 		type: "element",
 		tagName: "ul"
-	}) as JUnitUtils.Element;
-	const listItems: JUnitUtils.Element[] = JUnitUtils.findAllMatchingNodes(ul.children, {
+	}) as HimalayaElement;
+	const listItems: HimalayaElement[] = JUnitUtils.findAllMatchingNodes(ul.children, {
 		type: "element",
 		tagName: "li"
-	}) as JUnitUtils.Element[];
+	}) as HimalayaElement[];
 	// For each list item, we want the `href` value in its first `a` tag.
 	// Use a set to guarantee uniqueness
 	const results: Set<string> = new Set();
@@ -80,7 +84,7 @@ function getFailingClassNamesFromIndexFile(indexJson: JUnitUtils.Node[]): string
 		const a = JUnitUtils.findFirstMatchingNode(li.children, {
 			type: "element",
 			tagName: "a"
-		}) as JUnitUtils.Element;
+		}) as HimalayaElement;
 		for (const attribute of a.attributes) {
 			if (attribute.key === 'href') {
 				results.add(attribute.value);
@@ -91,30 +95,30 @@ function getFailingClassNamesFromIndexFile(indexJson: JUnitUtils.Node[]): string
 	return [...results];
 }
 
-function getFailuresFromClassFile(classJson: JUnitUtils.Node[]): string[] {
+function getFailuresFromClassFile(classJson: HimalayaNode[]): TestDescriptor[] {
 	// Get the tag for tab0, where failures will be if they exist at all.
-	const tab0: JUnitUtils.Element = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS) as JUnitUtils.Element;
+	const tab0: HimalayaElement = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS) as HimalayaElement;
 	// Make sure there are actually failures in this tab.
 	if (!JUnitUtils.verifyNodeDescent(tab0, H2_FAILED_TESTS_EXPECTATIONS)) {
 		// No errors to summarize, return empty list.
 		return [];
 	}
 	// tab0 will have at least one `div` chid whose class is `test`
-	const failures: JUnitUtils.Element[] = JUnitUtils.findAllMatchingNodes(tab0.children, {
+	const failures: HimalayaElement[] = JUnitUtils.findAllMatchingNodes(tab0.children, {
 		type: "element",
 		tagName: "div",
 		class: "test"
-	}) as JUnitUtils.Element[];
+	}) as HimalayaElement[];
 
-	const results: string[] = [];
+	const results: TestDescriptor[] = [];
 	for (const failure of failures) {
-		const nameNode: JUnitUtils.Text = JUnitUtils.findChainedNode(failure.children, [{
+		const nameNode: HimalayaText = JUnitUtils.findChainedNode(failure.children, [{
 			type: "element",
 			tagName: "h3",
 		}, {
 			type: "text"
-		}]) as JUnitUtils.Text;
-		const messageNode: JUnitUtils.Text = JUnitUtils.findChainedNode(failure.children, [{
+		}]) as HimalayaText;
+		const messageNode: HimalayaText = JUnitUtils.findChainedNode(failure.children, [{
 			type: "element",
 			tagName: "span",
 			class: "code"
@@ -123,8 +127,11 @@ function getFailuresFromClassFile(classJson: JUnitUtils.Node[]): string[] {
 			tagName: "pre"
 		}, {
 			type: "text"
-		}]) as JUnitUtils.Text;
-		results.push(`${nameNode.content}\n\t${messageNode.content.split('\n').slice(0, 15).join('\n')}`);
+		}]) as HimalayaText;
+		results.push({
+			test: nameNode.content,
+			failure: messageNode.content
+		});
 	}
 	return results;
 }
