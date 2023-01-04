@@ -2480,16 +2480,26 @@ exports.default = _default;
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __webpack_require__(470);
 const summarizeJUnitErrors_1 = __webpack_require__(452);
-//const UNKNOWN_FAILURE_MESSAGE = `Something failed in the tests, but this action can't tell what.
-//Download the artifact and check manually. Make sure you check code coverage numbers; they're sneaky!`;
+const UNKNOWN_FAILURE_MESSAGE = `Something failed in the tests, but this action can't tell what.
+Download the artifact and check manually. Make sure you check code coverage numbers; they're sneaky!`;
 async function run() {
     try {
         const location = core.getInput('location');
         const failingClasses = await summarizeJUnitErrors_1.summarizeErrors(location);
-        await core.summary
-            .addHeading(core.getInput('project-name'))
-            .addRaw(`We detected ${failingClasses.length} failing classes`)
-            .write();
+        const summary = core.summary
+            .addHeading(core.getInput('project-name'));
+        if (failingClasses.length === 0) {
+            summary.addRaw(UNKNOWN_FAILURE_MESSAGE);
+        }
+        else {
+            for (const failingClass of failingClasses) {
+                summary.addHeading(failingClass.file, 2);
+                for (const failingTest of failingClass.failures) {
+                    summary.addDetails(failingTest.test, failingTest.failure);
+                }
+            }
+        }
+        await summary.write();
     }
     catch (error) {
         if (error instanceof Error) {
