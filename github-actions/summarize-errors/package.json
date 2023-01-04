@@ -1,0 +1,31 @@
+{
+	"name": "summarize-errors",
+	"version": "0.0.0",
+	"private": true,
+	"description": "Adds errors to summary for GHA run",
+	"main": "lib/index.js",
+	"scripts": {
+		"build": "tsc",
+		"lint": "eslint src/**/*.ts",
+		"package": "ncc build",
+		"test": "mocha \"./test/**/*.test.ts\"",
+		"all": "npm run build && npm run lint && npm test && npm run package"
+	},
+	"dependencies": {
+		"@actions/core": "^1.2.4",
+		"@actions/github": "^5.0.0",
+		"himalaya": "^1.1.0"
+	},
+	"devDependencies": {
+		"@salesforce/dev-config": "1.5.0",
+		"@types/chai": "^4",
+		"@types/mocha": "^7.0.2",
+		"@types/node": "^14.0.25",
+		"@typescript-eslint/parser": "^3.7.0",
+		"@zeit/ncc": "^0.22.3",
+		"eslint": "^7.5.0",
+		"mocha": "^7.2.0",
+		"mocha-junit-reporter": "^1.23.3",
+		"typescript": "^3.8.2"
+	}
+}
