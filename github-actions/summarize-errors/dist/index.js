@@ -2075,7 +2075,7 @@ function getFailuresFromClassFile(classJson) {
             }]);
         results.push({
             test: nameNode.content,
-            failure: messageNode.content
+            failure: `<code><pre>${messageNode.content}</pre></code>`
         });
     }
     return results;

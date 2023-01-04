@@ -130,7 +130,7 @@ function getFailuresFromClassFile(classJson: HimalayaNode[]): TestDescriptor[] {
 		}]) as HimalayaText;
 		results.push({
 			test: nameNode.content,
-			failure: messageNode.content
+			failure: `<code><pre>${messageNode.content}</pre></code>`
 		});
 	}
 	return results;
