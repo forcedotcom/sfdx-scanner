@@ -85,13 +85,13 @@ jobs:
         if: ${{ always() }}
         id: cli-messaging-tests
         run: yarn test-cli-messaging
-      - if: ${{ failure() || steps.cli-messaging-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.cli-messaging-tests.outcome != 'success' }}
         uses: ./github-actions/summarize-errors
         with:
           location: "${{github.workspace}}/cli-messaging"
           project-name: "cli-messaging"
           artifact-name: cli-messaging-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
-      - if: ${{ failure() || steps.cli-messaging-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.cli-messaging-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: cli-messaging-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
@@ -103,13 +103,13 @@ jobs:
         id: pmd-cataloger-tests
         if: ${{ always() }}
         run: yarn test-pmd-cataloger
-      - if: ${{ failure() || steps.pmd-cataloger-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.pmd-cataloger-tests.outcome != 'success' }}
         uses: ./github-actions/summarize-errors
         with:
           location: "${{github.workspace}}/pmd-cataloger"
           project-name: "pmd-cataloger"
           artifact-name: pmd-cataloger-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
-      - if: ${{ failure() || steps.pmd-cataloger-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.pmd-cataloger-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: pmd-cataloger-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
@@ -121,13 +121,13 @@ jobs:
         id: sfge-tests
         if: ${{ always() }}
         run: yarn test-sfge-quiet
-      - if: ${{ failure() || steps.sfge-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.sfge-tests.outcome != 'success' }}
         uses: ./github-actions/summarize-errors
         with:
           location: "${{github.workspace}}/sfge"
           project-name: "sfge"
           artifact-name: sfge-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
-      - if: ${{ failure() || steps.sfge-tests.outcome != 'success' }}
+      - if: ${{ failure() && steps.sfge-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: sfge-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
@@ -143,7 +143,7 @@ jobs:
         id: typescript-linting
         if: ${{ always() }}
         run: yarn lint-typescript -f junit -o typescript-test-results/eslint/lint-results.xml
-      - if: ${{ failure() || steps.typescript-tests.outcome != 'success' || steps.typescript-linting.outcome != 'success' }}
+      - if: ${{ failure() && (steps.typescript-tests.outcome != 'success' || steps.typescript-linting.outcome != 'success') }}
         uses: actions/upload-artifact@v3
         with:
           name: typescript-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
