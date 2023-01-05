@@ -91,6 +91,7 @@ jobs:
           location: "${{github.workspace}}/cli-messaging"
           project-name: "cli-messaging"
           artifact-name: cli-messaging-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
+          framework: "junit"
       - if: ${{ failure() && steps.cli-messaging-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
@@ -109,6 +110,7 @@ jobs:
           location: "${{github.workspace}}/pmd-cataloger"
           project-name: "pmd-cataloger"
           artifact-name: pmd-cataloger-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
+          framework: "junit"
       - if: ${{ failure() && steps.pmd-cataloger-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
@@ -127,6 +129,7 @@ jobs:
           location: "${{github.workspace}}/sfge"
           project-name: "sfge"
           artifact-name: sfge-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
+          framework: "junit"
       - if: ${{ failure() && steps.sfge-tests.outcome != 'success' }}
         uses: actions/upload-artifact@v3
         with:
@@ -143,6 +146,13 @@ jobs:
         id: typescript-linting
         if: ${{ always() }}
         run: yarn lint-typescript -f junit -o typescript-test-results/eslint/lint-results.xml
+      - if: ${{ failure() && (steps.typescript-tests.outcome != 'success' || steps.typescript-linting.outcome != 'success') }}
+        uses: ./github-actions/summarize-errors
+        with:
+          location: "${{github.workspace}}/typescript-test-results"
+          project-name: "typescript"
+          artifact-name: typescript-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
+          framework: "mocha"
       - if: ${{ failure() && (steps.typescript-tests.outcome != 'success' || steps.typescript-linting.outcome != 'success') }}
         uses: actions/upload-artifact@v3
         with:

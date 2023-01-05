@@ -2,12 +2,17 @@ import {parse} from 'himalaya';
 import {HimalayaNode, HimalayaElement, HimalayaExpectation, HimalayaText} from './types';
 import {readFile} from './fileUtils';
 
+/**
+ * Uses `himalaya` to get a JSON representing the JUnit HTML results file.
+ */
 export async function getJunitJson(file: string): Promise<HimalayaNode[]> {
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 	return parse(await readFile(file)) as HimalayaNode[];
 }
 
-
+/**
+ * Follows a chain of expectations to reach a node that is a deeply nested child of the provided one.
+ */
 export function findChainedNode(nodes: HimalayaNode[], expectations: HimalayaExpectation[]): HimalayaNode {
 	let nextNode: HimalayaElement = null;
 	let candidateNodes: HimalayaNode[] = nodes;
@@ -18,6 +23,9 @@ export function findChainedNode(nodes: HimalayaNode[], expectations: HimalayaExp
 	return nextNode;
 }
 
+/**
+ * Uses a chain of expectations to verify that a node has the expected deeply nested child.
+ */
 export function verifyNodeDescent(element: HimalayaElement, expectations: HimalayaExpectation[]): boolean {
 	try {
 		findChainedNode(element.children, expectations);
@@ -29,6 +37,9 @@ export function verifyNodeDescent(element: HimalayaElement, expectations: Himala
 	}
 }
 
+/**
+ * Find the first direct child of the provided node that matches the provided expectation.
+ */
 export function findFirstMatchingNode(nodes: HimalayaNode[], expectation: HimalayaExpectation): HimalayaNode {
 	const allMatches = findAllMatchingNodes(nodes, expectation);
 	if (allMatches.length === 0) {
@@ -39,6 +50,9 @@ export function findFirstMatchingNode(nodes: HimalayaNode[], expectation: Himala
 	return allMatches[0];
 }
 
+/**
+ * Find all direct children of the provided node that match the provided expectation.
+ */
 export function findAllMatchingNodes(nodes: HimalayaNode[], expectation: HimalayaExpectation): HimalayaNode[] {
 	const matchingNodes: HimalayaNode[] = [];
 	for (const node of nodes) {
