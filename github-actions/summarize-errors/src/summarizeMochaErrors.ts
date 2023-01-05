@@ -96,5 +96,5 @@ function getMessageFromFailure(failure: Element): string {
 		}
 	}
 	// If we're here, we couldn't find a CDATA, so just use the failure tag's message.
-	return failure.attributes.message as string;
+	return `<code><pre>${failure.attributes.message as string}</pre></code>`;
 }

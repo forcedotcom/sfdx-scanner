@@ -3435,7 +3435,7 @@ function getMessageFromFailure(failure) {
         }
     }
     // If we're here, we couldn't find a CDATA, so just use the failure tag's message.
-    return failure.attributes.message;
+    return `<code><pre>${failure.attributes.message}</pre></code>`;
 }
 //# sourceMappingURL=summarizeMochaErrors.js.map
 
