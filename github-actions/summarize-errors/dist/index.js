@@ -3415,7 +3415,7 @@ function getFailuresFromTestSuite(testSuite) {
             }
             descriptors.push({
                 test: testCase.attributes.classname,
-                failure: getMessageFromFailure(failure)
+                failure: `<code><pre>${getMessageFromFailure(failure)}</pre></code>`
             });
         }
     }
@@ -3435,7 +3435,7 @@ function getMessageFromFailure(failure) {
         }
     }
     // If we're here, we couldn't find a CDATA, so just use the failure tag's message.
-    return `<code><pre>${failure.attributes.message}</pre></code>`;
+    return failure.attributes.message;
 }
 //# sourceMappingURL=summarizeMochaErrors.js.map
 

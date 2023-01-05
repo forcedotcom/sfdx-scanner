@@ -75,7 +75,7 @@ function getFailuresFromTestSuite(testSuite: Element): TestDescriptor[] {
 			}
 			descriptors.push({
 				test: testCase.attributes.classname as string,
-				failure: getMessageFromFailure(failure)
+				failure: `<code><pre>${getMessageFromFailure(failure)}</pre></code>`
 			});
 		}
 	}
@@ -96,5 +96,5 @@ function getMessageFromFailure(failure: Element): string {
 		}
 	}
 	// If we're here, we couldn't find a CDATA, so just use the failure tag's message.
-	return `<code><pre>${failure.attributes.message as string}</pre></code>`;
+	return failure.attributes.message as string;
 }
