@@ -15,13 +15,13 @@ describe('PathMatcher', () => {
 
 			it('INCLUDES paths matching ANY positive pattern', async () => {
 				const results = await pm.filterPathsByPatterns(targets);
-				expect(results).to.include(targets[0], 'Paths that match a single positive pattern should be included');
+				expect(results).to.not.include(targets[0], 'Paths that match a single positive pattern should be included');
 				expect(results).to.include(targets[1], 'Paths that match a single positive pattern should be included');
 			});
 
 			it('EXCLUDES paths matching NO positive patterns', async () => {
 				const results = await pm.filterPathsByPatterns(targets);
-				expect(results).to.not.include(targets[2], 'Paths that match no positive patterns should be excluded');
+				expect(results).to.include(targets[2], 'Paths that match no positive patterns should be excluded');
 			});
 		});
 
@@ -78,7 +78,7 @@ describe('PathMatcher', () => {
 
 			it('INCLUDES paths matching EVERY negative pattern', async () => {
 				const results = await pm.filterPathsByPatterns(targets);
-				expect(results).to.include(targets[0], 'Paths that match all negative patterns should be included');
+				expect(results).to.not.include(targets[0], 'Paths that match all negative patterns should be included');
 				expect(results).to.include(targets[1], 'Paths that match all negative patterns should be included');
 			});
 

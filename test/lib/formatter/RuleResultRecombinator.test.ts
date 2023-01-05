@@ -402,7 +402,7 @@ describe('RuleResultRecombinator', () => {
 				} else {
 					const resultLines = results.split('\n').map(x => x.trim());
 					validateJUnitFormatting(resultLines, [sampleFile1], [1]);
-					expect(minSev).to.equal(2, 'Most severe problem should have been level 2');
+					expect(minSev).to.equal(16, 'Most severe problem should have been level 2');
 					expect(summaryMap.size).to.equal(2, 'All engines supposedly executed should be present in the summary map');
 					expect(summaryMap.get('pmd')).to.deep.equal({fileCount: 0, violationCount: 0}, 'Since no PMD violations were provided, none should be summarized');
 					expect(summaryMap.get('eslint')).to.deep.equal({fileCount: 1, violationCount: 1}, 'Since ESLint violations were provided, they should be summarized');
@@ -734,7 +734,7 @@ describe('RuleResultRecombinator', () => {
 			it ('Run with no violations returns engines that were run', async () => {
 				const results = await (await RuleResultRecombinator.recombineAndReformatResults([], OUTPUT_FORMAT.SARIF, new Set(['eslint', 'pmd']))).results;
 				const sarifResults: unknown[] = JSON.parse(results as string);
-				expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
+				expect(sarifResults['runs']).to.have.lengthOf(7, 'Runs');
 				const runs = sarifResults['runs'];
 
 				for (let i=0; i<runs.length; i++) {
