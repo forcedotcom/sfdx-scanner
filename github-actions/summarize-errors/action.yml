@@ -10,6 +10,9 @@ inputs:
   artifact-name:
     description: 'Name of the artifact where target test results are stored'
     required: true
+  framework:
+    description: 'What test framework are we summarizing?'
+    required: true
 runs:
   using: 'node16'
   main: 'dist/index.js'

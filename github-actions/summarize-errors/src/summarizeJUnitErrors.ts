@@ -42,6 +42,11 @@ const H2_FAILED_TESTS_EXPECTATIONS: HimalayaExpectation[] = [{
 
 const PATH_TO_JUNIT_REPORTS = ['build', 'reports', 'tests', 'test'];
 
+/**
+ * Derive a descriptor for every class in the provided project folder that includes
+ * failing tests.
+ * @param projectFolder - The path to the root of a project tested with JUnit. Should contain a `build/reports/tests/test/index.html` file.
+ */
 export async function summarizeErrors(projectFolder: string): Promise<ClassDescriptor[]> {
 	// We want the index file for the JUnit run.
 	const indexPath: string = path.join(projectFolder, ...PATH_TO_JUNIT_REPORTS, 'index.html');
@@ -60,6 +65,9 @@ export async function summarizeErrors(projectFolder: string): Promise<ClassDescr
 	return results;
 }
 
+/**
+ * Given a JSON representing a project's `index.html` file, finds the name of every class with a failing test.
+ */
 function getFailingClassNamesFromIndexFile(indexJson: HimalayaNode[]): string[] {
 	// Get the tag for tab0, where failures will be if they exist at all.
 	const tab0: HimalayaElement = JUnitUtils.findChainedNode(indexJson, TAB0_LOCATION_EXPECTATIONS) as HimalayaElement;
@@ -95,6 +103,10 @@ function getFailingClassNamesFromIndexFile(indexJson: HimalayaNode[]): string[] 
 	return [...results];
 }
 
+/**
+ * Given a JSON representing an individual class's test execution, creates TestDescriptor objects for each failed test.
+ * @param classJson
+ */
 function getFailuresFromClassFile(classJson: HimalayaNode[]): TestDescriptor[] {
 	// Get the tag for tab0, where failures will be if they exist at all.
 	const tab0: HimalayaElement = JUnitUtils.findChainedNode(classJson, TAB0_LOCATION_EXPECTATIONS) as HimalayaElement;
