@@ -5,13 +5,13 @@ import {summarizeErrors} from "../src/summarizeJUnitErrors";
 
 describe("#summarizeErrors", () => {
 	it('When there are no failures, does nothing', async () => {
-		const pathToProject = path.resolve(path.join('code-fixtures', 'no-failures'));
+		const pathToProject = path.resolve(path.join('code-fixtures', 'junit', 'no-failures'));
 		const classDescriptors: ClassDescriptor[] = await summarizeErrors(pathToProject);
 		expect(classDescriptors.length).to.equal(0);
 	});
 
 	it('If one file has failures, one summary is added', async () => {
-		const pathToProject = path.resolve(path.join('code-fixtures', 'one-failing-file'));
+		const pathToProject = path.resolve(path.join('code-fixtures', 'junit', 'one-failing-file'));
 		const classDescriptors: ClassDescriptor[] = await summarizeErrors(pathToProject);
 		expect(classDescriptors.length).to.equal(1);
 		expect(classDescriptors[0].file).to.equal("classes/com.salesforce.rules.RuleRunnerTest.html");
@@ -20,7 +20,7 @@ describe("#summarizeErrors", () => {
 	});
 
 	it('When multiple files have failures, one summary per file is added', async () => {
-		const pathToProject = path.resolve(path.join('code-fixtures', 'multiple-failing-files'));
+		const pathToProject = path.resolve(path.join('code-fixtures', 'junit', 'multiple-failing-files'));
 		const classDescriptors: ClassDescriptor[] = await summarizeErrors(pathToProject);
 		expect(classDescriptors.length).to.equal(2);
 		expect(classDescriptors[0].file).to.equal("classes/com.salesforce.rules.RuleRunnerTest.html");
