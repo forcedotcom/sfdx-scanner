@@ -149,6 +149,19 @@ jobs:
           name: typescript-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
           path: |
             ./typescript-test-results
+      - name: Upload full artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: all-unit-tests-${{ runner.os }}-${{ matrix.java }}-${{ matrix.node.artifact }}
+          path: |
+            ./typescript-test-results
+            ./pmd-cataloger/build/reports
+            ./pmd-cataloger/build/test-results
+            ./sfge/build/reports
+            ./sfge/build/test-results
+            ./cli-messaging/build/reports
+            ./cli-messaging/build/test-results
   # Step 2B: Run the smoke tests
   smoke-tests:
     strategy:
