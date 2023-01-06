@@ -3415,7 +3415,7 @@ function getFailuresFromTestSuite(testSuite) {
             }
             descriptors.push({
                 test: testCase.attributes.classname,
-                failure: getMessageFromFailure(failure)
+                failure: `<code><pre>${getMessageFromFailure(failure)}</pre></code>`
             });
         }
     }
