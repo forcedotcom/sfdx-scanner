@@ -2396,10 +2396,10 @@ find-cache-dir@^3.2.0:
     make-dir "^3.0.2"
     pkg-dir "^4.1.0"
 
-find-java-home@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/find-java-home/-/find-java-home-2.0.0.tgz#9073a14df6f74b951f4f7c2af88cf005bc059737"
-  integrity sha512-m4Cf5WM5Y9UupofsLgcJuY5oFXVfVnfHx43pg3HJoVdtY2PN4Wfs7ex9svf7W7eLTP+6wmyBToaqGOCffHBHVA==
+find-java-home@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/find-java-home/-/find-java-home-1.2.2.tgz#8c5d82df57e48840da6625f61619026e4edafb0a"
+  integrity sha512-rN2LcQa+YDwfnPT0TQgn015eYqJkn3h3G/uVX5oOD2Ge7gKOuoJrntAJO4BiGb+K6lo6Mb+xJdoqbfzqaC75gw==
   dependencies:
     which "~1.0.5"
     winreg "~1.2.2"
@@ -3297,9 +3297,9 @@ json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.1:
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
 json5@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.1.tgz#779fb0018604fa854eacbf6252180d83543e3dbe"
-  integrity sha512-aKS4WQjPenRxiQsC93MNfjx+nbF4PAdYzmd/1JIj8HYzqfbu86beTuNgXDzPknWk0n0uARlyewZo4s++ES36Ow==
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-1.0.2.tgz#63d98d60f21b313b77c4d6da18bfa69d80e1d593"
+  integrity sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==
   dependencies:
     minimist "^1.2.0"
 
@@ -3648,9 +3648,9 @@ minimatch@^5.0.1:
     brace-expansion "^2.0.1"
 
 minimist@^1.2.0, minimist@^1.2.3, minimist@^1.2.5:
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
-  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.7.tgz#daa1c4d91f507390437c6a8bc01078e7000c4d18"
+  integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
 
 mkdirp-classic@^0.5.2:
   version "0.5.3"
