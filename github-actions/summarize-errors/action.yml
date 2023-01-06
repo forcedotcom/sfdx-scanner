@@ -1,0 +1,15 @@
+name: 'Summarize errors'
+description: 'Add information about test failures to GHA report'
+inputs:
+  location:
+    description: 'Location of results directory'
+    required: true
+  project-name:
+    description: 'Name by which project should be displayed'
+    required: true
+  artifact-name:
+    description: 'Name of the artifact where target test results are stored'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
