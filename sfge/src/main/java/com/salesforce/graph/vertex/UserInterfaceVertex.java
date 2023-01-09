@@ -1,5 +1,6 @@
 package com.salesforce.graph.vertex;
 
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.SymbolProviderVertexVisitor;
@@ -46,5 +47,12 @@ public class UserInterfaceVertex extends BaseSFVertex implements InheritableSFVe
         } else {
             return Optional.empty();
         }
+    }
+
+    /**
+     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}.
+     */
+    public boolean isGlobal() {
+        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isGlobal();
     }
 }

@@ -75,6 +75,13 @@ public class UserClassVertex extends BaseSFVertex implements InheritableSFVertex
         return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isVirtual();
     }
 
+    /**
+     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}.
+     */
+    public boolean isGlobal() {
+        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isGlobal();
+    }
+
     public boolean isTest() {
         return getBoolean(Schema.IS_TEST);
     }

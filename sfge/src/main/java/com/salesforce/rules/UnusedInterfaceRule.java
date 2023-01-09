@@ -2,8 +2,8 @@ package com.salesforce.rules;
 
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
+import com.salesforce.graph.vertex.UserInterfaceVertex;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -13,10 +13,19 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 public class UnusedInterfaceRule extends AbstractStaticRule {
-    private static UnusedInterfaceRule INSTANCE;
+    private static final String URL =
+            "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedInterfaceRule";
+    private static final String DESCRIPTION =
+            "Identifies interfaces that are declared but never implemented or extended";
+    private static final String VIOLATION_TEMPLATE =
+            "Implement or delete unimplemented interface %s";
 
     private UnusedInterfaceRule() {
         super();
+    }
+
+    public static UnusedInterfaceRule getInstance() {
+        return LazyHolder.INSTANCE;
     }
 
     @Override
@@ -24,7 +33,7 @@ public class UnusedInterfaceRule extends AbstractStaticRule {
             GraphTraversalSource g, GraphTraversal<Vertex, Vertex> eligibleVertices) {
         List<Violation> violations = new ArrayList<>();
 
-        List<BaseSFVertex> vertices =
+        List<UserInterfaceVertex> vertices =
                 SFVertexFactory.loadVertices(
                         g,
                         eligibleVertices
@@ -34,15 +43,24 @@ public class UnusedInterfaceRule extends AbstractStaticRule {
                                                 .count()
                                                 .is(P.eq(0))));
 
-        for (BaseSFVertex vertex : vertices) {
+        for (UserInterfaceVertex vertex : vertices) {
+            // Global interfaces should be considered used regardless, since their purpose
+            // is to be visible to other packages.
+            if (vertex.isGlobal()) {
+                continue;
+            }
             Violation v =
                     new Violation.StaticRuleViolation(
-                            "Interface " + vertex.getDefiningType() + " has no implementations",
-                            vertex);
+                            String.format(VIOLATION_TEMPLATE, vertex.getDefiningType()), vertex);
             violations.add(v);
         }
 
         return violations;
+    }
+
+    @Override
+    protected boolean isEnabled() {
+        return true;
     }
 
     @Override
@@ -52,18 +70,21 @@ public class UnusedInterfaceRule extends AbstractStaticRule {
 
     @Override
     protected String getDescription() {
-        return "Identifies interfaces that have neither implementations nor extensions";
+        return DESCRIPTION;
     }
 
     @Override
     protected String getCategory() {
-        return CATEGORY.BEST_PRACTICES.name;
+        return CATEGORY.PERFORMANCE.name;
     }
 
-    public static UnusedInterfaceRule getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new UnusedInterfaceRule();
-        }
-        return INSTANCE;
+    @Override
+    protected String getUrl() {
+        return URL;
+    }
+
+    private static final class LazyHolder {
+        // Postpone initialization until first use.
+        private static final UnusedInterfaceRule INSTANCE = new UnusedInterfaceRule();
     }
 }

@@ -1,20 +1,19 @@
 package com.salesforce.rules;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
-import java.util.List;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.*;
+import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class UnusedInterfaceRuleTest {
-    private static final Logger LOGGER = LogManager.getLogger(UnusedInterfaceRuleTest.class);
     private GraphTraversalSource g;
 
     @BeforeEach
@@ -22,187 +21,271 @@ public class UnusedInterfaceRuleTest {
         this.g = TestUtil.getGraph();
     }
 
-    @Test
-    public void testSimpleInterface() {
-        String unimplInterfaceSource =
-                "public interface UnimplInterface {\n"
-                        + "	boolean boolMethod();\n"
-                        + "	integer intMethod();\n"
-                        + "}";
-        String implInterfaceSource =
-                "public interface ImplInterface {\n"
-                        + "	boolean boolMethod();\n"
-                        + "	integer intMethod();\n"
-                        + "}";
-        String interfaceUserSource =
-                "public class InterfaceUser implements ImplInterface{\n"
-                        + "	public boolean boolMethod() {\n"
-                        + "		return true;\n"
-                        + "	}\n"
-                        + "	private integer intMethod() {\n"
-                        + "		return 16;\n"
-                        + "	}\n"
-                        + "}";
+    @MethodSource("paramProvider_testOuterInterface")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testOuterInterfaceImplementation(String scope, Set<String> expectedDefiningTypes) {
+        // This interface is never used by anything.
+        String unusedInterfaceSource = scope + " interface UnusedInterface {}";
+        // This interface is used.
+        String usedInterfaceSource = scope + " interface UsedInterface {}";
+        // This is where the interface is used.
+        String interfaceUserSource = "global class InterfaceUser implements UsedInterface {}";
 
-        TestUtil.buildGraph(
-                g,
-                new String[] {unimplInterfaceSource, implInterfaceSource, interfaceUserSource},
-                false);
-
+        TestUtil.buildGraph(g, unusedInterfaceSource, usedInterfaceSource, interfaceUserSource);
         StaticRule rule = UnusedInterfaceRule.getInstance();
         List<Violation> violations = rule.run(g);
 
-        MatcherAssert.assertThat(violations, hasSize(equalTo(1)));
-        Violation.RuleViolation violation = (Violation.RuleViolation) violations.get(0);
-        assertEquals("UnimplInterface", violation.getSourceVertex().getDefiningType());
-    }
-
-    @Test
-    public void testExtendedInterface() {
-        // This should not count as unused, because it's extended by another interface.
-        String parentInterfaceSource =
-                "public interface ParentInterface {\n"
-                        + "	boolean boolMethod();\n"
-                        + "	integer intMethod();\n"
-                        + "}";
-
-        // This should count as unused, because nothing extends or implements it.
-        String unimplChildInterfaceSource =
-                "public interface UnimplChildInterface extends ParentInterface {\n"
-                        + "	boolean boolMethod2();\n"
-                        + "	integer intMethod2();\n"
-                        + "}";
-
-        // This should not count as unused, because it's implemented by another class.
-        String implChildInterfaceSource =
-                "public interface ImplChildInterface extends ParentInterface {\n"
-                        + "	boolean boolMethod2();\n"
-                        + "	integer intMethod2();\n"
-                        + "}";
-
-        String interfaceUserSource =
-                "public class InterfaceUser implements ImplChildInterface {\n"
-                        + "	public boolean boolMethod() {\n"
-                        + "		return true;\n"
-                        + "	}\n"
-                        + "	public boolean boolMethod2() {\n"
-                        + "		return true;\n"
-                        + "	}\n"
-                        + "	public integer intMethod() {\n"
-                        + "		return 15;\n"
-                        + "	}\n"
-                        + "	public integer intMethod2() {\n"
-                        + "		return 17;\n"
-                        + "	}\n"
-                        + "}";
-
-        TestUtil.buildGraph(
-                g,
-                new String[] {
-                    parentInterfaceSource,
-                    unimplChildInterfaceSource,
-                    implChildInterfaceSource,
-                    interfaceUserSource
-                },
-                false);
-
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(violations, hasSize(equalTo(1)));
-        Violation.RuleViolation violation = (Violation.RuleViolation) violations.get(0);
-        assertEquals("UnimplChildInterface", violation.getSourceVertex().getDefiningType());
-    }
-
-    @Test
-    public void testInnerInterfaces() {
-        // This class declares four inner interfaces, and an inner class that implements one of
-        // them.
-        String innerInterfaceSource =
-                "public class HasInnerInterface {\n"
-                        + "\n"
-                        +
-                        // This interface is implemented later in this class.
-                        "	public interface UsedInnerInterface {\n"
-                        + "		boolean boolMethod1();\n"
-                        + "	}\n"
-                        + "\n"
-                        +
-                        // This interface is implemented in another class.
-                        "	public interface CrossClassInnerInterface {\n"
-                        + "		boolean boolMethod2();\n"
-                        + "	}\n"
-                        + "\n"
-                        +
-                        // This interface isn't implemented anywhere.
-                        "	public interface UnusedInnerInterface {\n"
-                        + "		boolean boolMethod3();\n"
-                        + "	}\n"
-                        + "\n"
-                        +
-                        // This interface has the same name as an outer interface declared
-                        // elsewhere. This one isn't used anywhere.
-                        "	public interface CollidingInterface {\n"
-                        + "		boolean boolMethod4();\n"
-                        + "	}\n"
-                        + "\n"
-                        +
-                        // This is the implementation of UsedInnerInterface.
-                        "	public class InnerInterfaceUser implements UsedInnerInterface {\n"
-                        + "		public boolean boolMethod1() {\n"
-                        + "			return true;\n"
-                        + "		}\n"
-                        + "	}\n"
-                        + "}";
-        // This class implements one of the inner interfaces from the previous class.
-        String crossClassImplementerSource =
-                "public class CrossClassImplementer implements HasInnerInterface.CrossClassInnerInterface {\n"
-                        + "	public boolean boolMethod2() {\n"
-                        + "		return true;\n"
-                        + "	}\n"
-                        + "}";
-        // This interface has the same name as one of the inner interfaces declared earlier. This
-        // one is used.
-        String collidingOuterInterfaceSource =
-                "public interface CollidingInterface {\n" + "	boolean boolMethod5();\n" + "}";
-        // This class implements the outer interface version of CollidingInterface.
-        String collidingImplementerSource =
-                "public class CollidingImplementer implements CollidingInterface {\n"
-                        + "	public boolean boolMethod5() {\n"
-                        + "		return true;\n"
-                        + "	}\n"
-                        + "}";
-
-        TestUtil.buildGraph(
-                g,
-                new String[] {
-                    innerInterfaceSource,
-                    crossClassImplementerSource,
-                    collidingOuterInterfaceSource,
-                    collidingImplementerSource
-                },
-                false);
-
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(violations, hasSize(equalTo(2)));
-        for (Violation violation : violations) {
-            Violation.RuleViolation ruleViolation = (Violation.RuleViolation) violation;
-            if (ruleViolation
-                    .getSourceVertex()
-                    .getDefiningType()
-                    .equals("HasInnerInterface.UnusedInnerInterface")) {
-                assertEquals(11, ruleViolation.getSourceLineNumber());
-            } else if (ruleViolation
-                    .getSourceVertex()
-                    .getDefiningType()
-                    .equals("HasInnerInterface.CollidingInterface")) {
-                assertEquals(15, ruleViolation.getSourceLineNumber());
-            } else {
-                // This only happens if we get an unexpected violation.
-                assertEquals(true, false);
-            }
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
         }
+    }
+
+    @MethodSource("paramProvider_testOuterInterface")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testOuterInterfaceExtension(String scope, Set<String> expectedDefiningTypes) {
+        // This interface is never used by anything.
+        String unusedInterfaceSource = scope + " interface UnusedInterface {}";
+        // This interface is used.
+        String usedInterfaceSource = scope + " interface UsedInterface {}";
+        // This is where the interface is used.
+        String interfaceUserSource = "global interface InterfaceExtender extends UsedInterface {}";
+
+        TestUtil.buildGraph(g, unusedInterfaceSource, usedInterfaceSource, interfaceUserSource);
+        StaticRule rule = UnusedInterfaceRule.getInstance();
+        List<Violation> violations = rule.run(g);
+
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
+        }
+    }
+
+    @MethodSource("paramProvider_testInnerInterface")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testInnerInterfaceImplementation(String scope, Set<String> expectedDefiningTypes) {
+        String innerInterfaceSource =
+                "global class HasInnerInterfaces {\n"
+                        // This interface is used by another inner class.
+                        + scope
+                        + " interface InternallyUsedInterface {}\n"
+                        + "\n"
+                        // This interface is used by an external class.
+                        + scope
+                        + " interface ExternallyUsedInterface {}\n"
+                        + "\n"
+                        // This interface is never used.
+                        + scope
+                        + " interface UnusedInterface {}\n"
+                        + "\n"
+                        + "global class InnerUser implements InternallyUsedInterface {}\n"
+                        + "}";
+        String externalUserSource =
+                "global class ExternalUser implements HasInnerInterfaces.ExternallyUsedInterface {}";
+        TestUtil.buildGraph(g, innerInterfaceSource, externalUserSource);
+
+        StaticRule rule = UnusedInterfaceRule.getInstance();
+        List<Violation> violations = rule.run(g);
+
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
+        }
+    }
+
+    @MethodSource("paramProvider_testInnerInterface")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testInnerInterfaceExtension(String scope, Set<String> expectedDefiningTypes) {
+        String innerInterfaceSource =
+                "global class HasInnerInterfaces {\n"
+                        // This interface is used by another inner class.
+                        + scope
+                        + " interface InternallyUsedInterface {}\n"
+                        + "\n"
+                        // This interface is used by an external class.
+                        + scope
+                        + " interface ExternallyUsedInterface {}\n"
+                        + "\n"
+                        // This interface is never used.
+                        + scope
+                        + " interface UnusedInterface {}\n"
+                        + "\n"
+                        + "global interface InnerUser extends InternallyUsedInterface {}\n"
+                        + "}";
+        String externalUserSource =
+                "global interface ExternalUser extends HasInnerInterfaces.ExternallyUsedInterface {}";
+        TestUtil.buildGraph(g, innerInterfaceSource, externalUserSource);
+
+        StaticRule rule = UnusedInterfaceRule.getInstance();
+        List<Violation> violations = rule.run(g);
+
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
+        }
+    }
+
+    @MethodSource("paramProvider_testCollidingName")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testCollidingNameImplementation(String scope, Set<String> expectedDefiningTypes) {
+        String innerInterfaceSource =
+                "global class HasInnerInterfaces {\n"
+                        // This name collides with an outer interface. This variant IS USED.
+                        + scope
+                        + " interface CollidingName1 {}\n"
+                        // This name collides with an outer interface. This variant IS USED.
+                        + scope
+                        + " interface CollidingName2 {}\n"
+                        // This name collides with an outer interface. This variant IS NOT USED.
+                        + scope
+                        + " interface CollidingName3 {}\n"
+                        // This is the usage of one of the inner interfaces.
+                        + "global class InnerImplementer implements CollidingName1 {}\n"
+                        + "}";
+        // This name collides with an inner interface. This variant IS NOT USED.
+        String outerInterfaceSource1 = scope + " interface CollidingName1 {}";
+        // This name collides with an inner interface. This variant IS NOT USED.
+        String outerInterfaceSource2 = scope + " interface CollidingName2 {}";
+        // This name collides with an inner interface. This variant IS USED.
+        String outerInterfaceSource3 = scope + " interface CollidingName3 {}";
+        // This is the usage of another inner interface.
+        String outerUserSource1 =
+                "global class OuterImplementer1 implements HasInnerInterfaces.CollidingName2 {}";
+        // This is the usage of an outer interface.
+        String outerUserSource2 = "global class OuterImplementer2 implements CollidingName3 {}";
+        TestUtil.buildGraph(
+                g,
+                innerInterfaceSource,
+                outerInterfaceSource1,
+                outerInterfaceSource2,
+                outerInterfaceSource3,
+                outerUserSource1,
+                outerUserSource2);
+        StaticRule rule = UnusedInterfaceRule.getInstance();
+        List<Violation> violations = rule.run(g);
+
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
+        }
+    }
+
+    @MethodSource("paramProvider_testCollidingName")
+    @ParameterizedTest(name = "{displayName}: Scope {0}")
+    public void testCollidingNameExtension(String scope, Set<String> expectedDefiningTypes) {
+        String innerInterfaceSource =
+                "global class HasInnerInterfaces {\n"
+                        // This name collides with an outer interface. This variant IS USED.
+                        + scope
+                        + " interface CollidingName1 {}\n"
+                        // This name collides with an outer interface. This variant IS USED.
+                        + scope
+                        + " interface CollidingName2 {}\n"
+                        // This name collides with an outer interface. This variant IS NOT USED.
+                        + scope
+                        + " interface CollidingName3 {}\n"
+                        // This is the usage of one of the inner interfaces.
+                        + "global interface InnerExtender extends CollidingName1 {}\n"
+                        + "}";
+        // This name collides with an inner interface. This variant IS NOT USED.
+        String outerInterfaceSource1 = scope + " interface CollidingName1 {}";
+        // This name collides with an inner interface. This variant IS NOT USED.
+        String outerInterfaceSource2 = scope + " interface CollidingName2 {}";
+        // This name collides with an inner interface. This variant IS USED.
+        String outerInterfaceSource3 = scope + " interface CollidingName3 {}";
+        // This is the usage of another inner interface.
+        String outerUserSource1 =
+                "global interface OuterExtender1 extends HasInnerInterfaces.CollidingName2 {}";
+        // This is the usage of an outer interface.
+        String outerUserSource2 = "global interface OuterExtender2 extends CollidingName3 {}";
+        TestUtil.buildGraph(
+                g,
+                innerInterfaceSource,
+                outerInterfaceSource1,
+                outerInterfaceSource2,
+                outerInterfaceSource3,
+                outerUserSource1,
+                outerUserSource2);
+        StaticRule rule = UnusedInterfaceRule.getInstance();
+        List<Violation> violations = rule.run(g);
+
+        MatcherAssert.assertThat(
+                "Wrong number of violations found",
+                violations,
+                hasSize(expectedDefiningTypes.size()));
+        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
+            String actual = (violations.get(i)).getSourceDefiningType();
+            assertTrue(
+                    expectedDefiningTypes.contains(actual),
+                    String.format("%s should not be unused", actual));
+        }
+    }
+
+    // ======= HELPER METHODS/PARAM PROVIDERS =======
+    private static Stream<Arguments> paramProvider_testOuterInterface() {
+        return Stream.of(
+                // Global interfaces should be excluded from consideration,
+                // since they're accessible to other packages.
+                Arguments.of("global", new HashSet<String>()),
+                // Public interfaces should be included in consideration.
+                Arguments.of(
+                        "public", new HashSet<>(Collections.singletonList("UnusedInterface"))));
+    }
+
+    private static Stream<Arguments> paramProvider_testInnerInterface() {
+        return Stream.of(
+                // Global interfaces should be excluded from consideration,
+                // since they're accessible to other packages.
+                Arguments.of("global", new HashSet<String>()),
+                // Public interfaces should be included in consideration.
+                Arguments.of(
+                        "public",
+                        new HashSet<>(
+                                Collections.singletonList("HasInnerInterfaces.UnusedInterface"))));
+    }
+
+    private static Stream<Arguments> paramProvider_testCollidingName() {
+        return Stream.of(
+                // Global interfaces should be excluded from consideration,
+                // since they're accessible to other packages.
+                Arguments.of("global", new HashSet<String>()),
+                // Public interfaces should be included in consideration.
+                Arguments.of(
+                        "public",
+                        new HashSet<>(
+                                Arrays.asList(
+                                        "HasInnerInterfaces.CollidingName3",
+                                        "CollidingName1",
+                                        "CollidingName2"))));
     }
 }
