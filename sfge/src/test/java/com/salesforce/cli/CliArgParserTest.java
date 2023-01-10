@@ -54,7 +54,7 @@ public class CliArgParserTest {
     @CsvSource({
         // As we add new DFA and non-DFA rules, the numbers in these tests
         // will increase.
-        "pathless, 1",
+        "pathless, 3",
         "dfa, 1"
     })
     @ParameterizedTest(name = "{displayName}: {0} rules")
