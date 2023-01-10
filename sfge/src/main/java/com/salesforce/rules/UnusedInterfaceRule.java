@@ -1,6 +1,7 @@
 package com.salesforce.rules;
 
 import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserInterfaceVertex;
@@ -15,10 +16,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 public class UnusedInterfaceRule extends AbstractStaticRule {
     private static final String URL =
             "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedInterfaceRule";
-    private static final String DESCRIPTION =
-            "Identifies interfaces that are declared but never implemented or extended";
-    private static final String VIOLATION_TEMPLATE =
-            "Implement or delete unimplemented interface %s";
 
     private UnusedInterfaceRule() {
         super();
@@ -51,7 +48,10 @@ public class UnusedInterfaceRule extends AbstractStaticRule {
             }
             Violation v =
                     new Violation.StaticRuleViolation(
-                            String.format(VIOLATION_TEMPLATE, vertex.getDefiningType()), vertex);
+                            String.format(
+                                    UserFacingMessages.RuleViolationTemplates.UNUSED_INTERFACE_RULE,
+                                    vertex.getDefiningType()),
+                            vertex);
             violations.add(v);
         }
 
@@ -70,7 +70,7 @@ public class UnusedInterfaceRule extends AbstractStaticRule {
 
     @Override
     protected String getDescription() {
-        return DESCRIPTION;
+        return UserFacingMessages.RuleDescriptions.UNUSED_INTERFACE_RULE;
     }
 
     @Override

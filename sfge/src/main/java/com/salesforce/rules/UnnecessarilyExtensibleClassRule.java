@@ -1,6 +1,7 @@
 package com.salesforce.rules;
 
 import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.UserClassVertex;
@@ -15,12 +16,6 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
     private static final String URL =
             "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnnecessarilyExtensibleClassRule";
-
-    private static final String DESCRIPTION =
-            "Identifies classes that are extensible but never extended";
-
-    private static final String VIOLATION_TEMPLATE =
-            "Remove keyword `%s` from the declaration of extensionless class %s";
 
     private static final String ABSTRACT = "abstract";
     private static final String VIRTUAL = "virtual";
@@ -53,7 +48,12 @@ public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
                 String keyword = vertex.isAbstract() ? ABSTRACT : VIRTUAL;
                 violations.add(
                         new Violation.StaticRuleViolation(
-                                String.format(VIOLATION_TEMPLATE, keyword, definingType), vertex));
+                                String.format(
+                                        UserFacingMessages.RuleViolationTemplates
+                                                .UNNECESSARILY_EXTENSIBLE_CLASS_RULE,
+                                        keyword,
+                                        definingType),
+                                vertex));
             }
         }
         return violations;
@@ -77,7 +77,7 @@ public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
 
     @Override
     protected String getDescription() {
-        return DESCRIPTION;
+        return UserFacingMessages.RuleDescriptions.UNNECESSARILY_EXTENSIBLE_CLASS_RULE;
     }
 
     @Override
