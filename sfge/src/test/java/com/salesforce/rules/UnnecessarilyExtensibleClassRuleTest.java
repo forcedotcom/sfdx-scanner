@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
@@ -23,7 +24,7 @@ public class UnnecessarilyExtensibleClassRuleTest {
 
     @MethodSource("paramProvider_testOuterClasses")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testOuterClasses(String scope, Set<String> expectedDefiningTypes) {
+    public void testOuterClasses(String scope, List<String> expectedDefiningTypes) {
         // This class is never extended.
         String unextendedSource = scope + " class UnextendedClass {}";
         // This class is extended.
@@ -31,26 +32,12 @@ public class UnnecessarilyExtensibleClassRuleTest {
         // This class does the extension.
         String extenderSource = "public class ExtenderClass extends ExtendedClass {}";
 
-        TestUtil.buildGraph(g, unextendedSource, extendedSource, extenderSource);
-
-        StaticRule rule = UnnecessarilyExtensibleClassRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = violations.get(i).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unextended", actual));
-        }
+        executeTest(expectedDefiningTypes, unextendedSource, extendedSource, extenderSource);
     }
 
     @MethodSource("paramProvider_testInnerClasses")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testInnerClasses(String scope, Set<String> expectedDefiningTypes) {
+    public void testInnerClasses(String scope, List<String> expectedDefiningTypes) {
         String innerClassSource =
                 "global class HasInnerClasses {\n"
                         + scope
@@ -63,26 +50,12 @@ public class UnnecessarilyExtensibleClassRuleTest {
                         + "}\n";
         String externalUserSource =
                 "public class ExternalUserClass extends HasInnerClasses.ExternallyUsedClass {}\n";
-        TestUtil.buildGraph(g, innerClassSource, externalUserSource);
-
-        StaticRule rule = UnnecessarilyExtensibleClassRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = violations.get(i).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unextended", actual));
-        }
+        executeTest(expectedDefiningTypes, innerClassSource, externalUserSource);
     }
 
     @MethodSource("paramProvider_testCollidingNames")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testCollidingNames(String scope, Set<String> expectedDefiningTypes) {
+    public void testCollidingNames(String scope, List<String> expectedDefiningTypes) {
         String innerClassSource =
                 "global class HasInnerClasses {\n"
                         // This name collides with an outer class. This variant IS USED.
@@ -108,81 +81,89 @@ public class UnnecessarilyExtensibleClassRuleTest {
                 "public class OuterExtender1 extends hasInnerClasses.CollidingName2 {}";
         // This is the usage of an outer class.
         String outerUserSource2 = "public class OuterExtender2 extends CollidingName3 {}";
-        TestUtil.buildGraph(
-                g,
+        executeTest(
+                expectedDefiningTypes,
                 innerClassSource,
                 outerClassSource1,
                 outerClassSource2,
                 outerClassSource3,
                 outerUserSource1,
                 outerUserSource2);
+    }
 
+    // ======= HELPER METHODS/PARAM PROVIDERS =======
+
+    private void executeTest(List<String> expectedDefiningTypes, String... sources) {
+        // Build the graph.
+        TestUtil.buildGraph(g, sources);
+        // Get and run the rule.
         StaticRule rule = UnnecessarilyExtensibleClassRule.getInstance();
         List<Violation> violations = rule.run(g);
 
+        // Make sure we got the expected number of violations.
         MatcherAssert.assertThat(
                 "Wrong number of violations found",
                 violations,
                 hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
+        // Turn the list of actual violations into a set of defining types mentioned by those
+        // violations.
+        Set<String> actualDefiningTypes =
+                violations.stream()
+                        .map(Violation::getSourceDefiningType)
+                        .collect(Collectors.toSet());
+        // Make sure each of the expected defining types is present in the set of actual defining
+        // types.
+        for (String expectedDefiningType : expectedDefiningTypes) {
             assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
+                    actualDefiningTypes.contains(expectedDefiningType),
+                    String.format(
+                            "Class %s did not throw expected violation", expectedDefiningType));
         }
     }
 
-    // ======= HELPER METHODS/PARAM PROVIDERS =======
     private static Stream<Arguments> paramProvider_testOuterClasses() {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new HashSet<String>()),
-                Arguments.of("global abstract", new HashSet<String>()),
+                Arguments.of("global virtual", new ArrayList<String>()),
+                Arguments.of("global abstract", new ArrayList<String>()),
                 // Public classes should be included in consideration.
-                Arguments.of(
-                        "public virtual",
-                        new HashSet<>(Collections.singletonList("UnextendedClass"))),
-                Arguments.of(
-                        "public abstract",
-                        new HashSet<>(Collections.singletonList("UnextendedClass"))));
+                Arguments.of("public virtual", Collections.singletonList("UnextendedClass")),
+                Arguments.of("public abstract", Collections.singletonList("UnextendedClass")));
     }
 
     private static Stream<Arguments> paramProvider_testInnerClasses() {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new HashSet<String>()),
-                Arguments.of("global abstract", new HashSet<String>()),
+                Arguments.of("global virtual", new ArrayList<String>()),
+                Arguments.of("global abstract", new ArrayList<String>()),
                 // Public classes should be included in consideration.
                 Arguments.of(
-                        "public virtual",
-                        new HashSet<>(Collections.singletonList("HasInnerClasses.UnusedClass"))),
+                        "public virtual", Collections.singletonList("HasInnerClasses.UnusedClass")),
                 Arguments.of(
                         "public abstract",
-                        new HashSet<>(Collections.singletonList("HasInnerClasses.UnusedClass"))));
+                        Collections.singletonList("HasInnerClasses.UnusedClass")));
     }
 
     private static Stream<Arguments> paramProvider_testCollidingNames() {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new HashSet<String>()),
-                Arguments.of("global abstract", new HashSet<String>()),
+                Arguments.of("global virtual", new ArrayList<String>()),
+                Arguments.of("global abstract", new ArrayList<String>()),
                 // Public classes should be included in consideration.
                 Arguments.of(
                         "public virtual",
-                        new HashSet<>(
-                                Arrays.asList(
-                                        "HasInnerClasses.CollidingName3",
-                                        "CollidingName1",
-                                        "CollidingName2"))),
+                        Arrays.asList(
+                                "HasInnerClasses.CollidingName3",
+                                "CollidingName1",
+                                "CollidingName2")),
                 Arguments.of(
                         "public abstract",
-                        new HashSet<>(
-                                Arrays.asList(
-                                        "HasInnerClasses.CollidingName3",
-                                        "CollidingName1",
-                                        "CollidingName2"))));
+                        Arrays.asList(
+                                "HasInnerClasses.CollidingName3",
+                                "CollidingName1",
+                                "CollidingName2")));
     }
 }

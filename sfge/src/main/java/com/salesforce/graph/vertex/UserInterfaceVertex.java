@@ -1,6 +1,5 @@
 package com.salesforce.graph.vertex;
 
-import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.SymbolProviderVertexVisitor;
@@ -9,7 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
-public class UserInterfaceVertex extends BaseSFVertex implements InheritableSFVertex, NamedVertex {
+public class UserInterfaceVertex extends FieldWithModifierVertex
+        implements InheritableSFVertex, NamedVertex {
     UserInterfaceVertex(Map<Object, Object> properties) {
         super(properties);
     }
@@ -47,12 +47,5 @@ public class UserInterfaceVertex extends BaseSFVertex implements InheritableSFVe
         } else {
             return Optional.empty();
         }
-    }
-
-    /**
-     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}.
-     */
-    public boolean isGlobal() {
-        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isGlobal();
     }
 }

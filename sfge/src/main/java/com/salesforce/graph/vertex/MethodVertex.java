@@ -54,10 +54,6 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         }
     }
 
-    public boolean isAbstract() {
-        return getModifierNode().isAbstract();
-    }
-
     public boolean isConstructor() {
         return getBoolean(Schema.CONSTRUCTOR);
     }

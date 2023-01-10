@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
@@ -23,7 +24,7 @@ public class UnusedInterfaceRuleTest {
 
     @MethodSource("paramProvider_testOuterInterface")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testOuterInterfaceImplementation(String scope, Set<String> expectedDefiningTypes) {
+    public void testOuterInterfaceImplementation(String scope, List<String> expectedDefiningTypes) {
         // This interface is never used by anything.
         String unusedInterfaceSource = scope + " interface UnusedInterface {}";
         // This interface is used.
@@ -31,25 +32,16 @@ public class UnusedInterfaceRuleTest {
         // This is where the interface is used.
         String interfaceUserSource = "global class InterfaceUser implements UsedInterface {}";
 
-        TestUtil.buildGraph(g, unusedInterfaceSource, usedInterfaceSource, interfaceUserSource);
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
-        }
+        executeTest(
+                expectedDefiningTypes,
+                unusedInterfaceSource,
+                usedInterfaceSource,
+                interfaceUserSource);
     }
 
     @MethodSource("paramProvider_testOuterInterface")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testOuterInterfaceExtension(String scope, Set<String> expectedDefiningTypes) {
+    public void testOuterInterfaceExtension(String scope, List<String> expectedDefiningTypes) {
         // This interface is never used by anything.
         String unusedInterfaceSource = scope + " interface UnusedInterface {}";
         // This interface is used.
@@ -57,25 +49,16 @@ public class UnusedInterfaceRuleTest {
         // This is where the interface is used.
         String interfaceUserSource = "global interface InterfaceExtender extends UsedInterface {}";
 
-        TestUtil.buildGraph(g, unusedInterfaceSource, usedInterfaceSource, interfaceUserSource);
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
-        }
+        executeTest(
+                expectedDefiningTypes,
+                unusedInterfaceSource,
+                usedInterfaceSource,
+                interfaceUserSource);
     }
 
     @MethodSource("paramProvider_testInnerInterface")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testInnerInterfaceImplementation(String scope, Set<String> expectedDefiningTypes) {
+    public void testInnerInterfaceImplementation(String scope, List<String> expectedDefiningTypes) {
         String innerInterfaceSource =
                 "global class HasInnerInterfaces {\n"
                         // This interface is used by another inner class.
@@ -94,26 +77,12 @@ public class UnusedInterfaceRuleTest {
                         + "}";
         String externalUserSource =
                 "global class ExternalUser implements HasInnerInterfaces.ExternallyUsedInterface {}";
-        TestUtil.buildGraph(g, innerInterfaceSource, externalUserSource);
-
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
-        }
+        executeTest(expectedDefiningTypes, innerInterfaceSource, externalUserSource);
     }
 
     @MethodSource("paramProvider_testInnerInterface")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testInnerInterfaceExtension(String scope, Set<String> expectedDefiningTypes) {
+    public void testInnerInterfaceExtension(String scope, List<String> expectedDefiningTypes) {
         String innerInterfaceSource =
                 "global class HasInnerInterfaces {\n"
                         // This interface is used by another inner class.
@@ -132,26 +101,12 @@ public class UnusedInterfaceRuleTest {
                         + "}";
         String externalUserSource =
                 "global interface ExternalUser extends HasInnerInterfaces.ExternallyUsedInterface {}";
-        TestUtil.buildGraph(g, innerInterfaceSource, externalUserSource);
-
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
-        }
+        executeTest(expectedDefiningTypes, innerInterfaceSource, externalUserSource);
     }
 
     @MethodSource("paramProvider_testCollidingName")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testCollidingNameImplementation(String scope, Set<String> expectedDefiningTypes) {
+    public void testCollidingNameImplementation(String scope, List<String> expectedDefiningTypes) {
         String innerInterfaceSource =
                 "global class HasInnerInterfaces {\n"
                         // This name collides with an outer interface. This variant IS USED.
@@ -177,32 +132,19 @@ public class UnusedInterfaceRuleTest {
                 "global class OuterImplementer1 implements HasInnerInterfaces.CollidingName2 {}";
         // This is the usage of an outer interface.
         String outerUserSource2 = "global class OuterImplementer2 implements CollidingName3 {}";
-        TestUtil.buildGraph(
-                g,
+        executeTest(
+                expectedDefiningTypes,
                 innerInterfaceSource,
                 outerInterfaceSource1,
                 outerInterfaceSource2,
                 outerInterfaceSource3,
                 outerUserSource1,
                 outerUserSource2);
-        StaticRule rule = UnusedInterfaceRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(
-                "Wrong number of violations found",
-                violations,
-                hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
-            assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
-        }
     }
 
     @MethodSource("paramProvider_testCollidingName")
     @ParameterizedTest(name = "{displayName}: Scope {0}")
-    public void testCollidingNameExtension(String scope, Set<String> expectedDefiningTypes) {
+    public void testCollidingNameExtension(String scope, List<String> expectedDefiningTypes) {
         String innerInterfaceSource =
                 "global class HasInnerInterfaces {\n"
                         // This name collides with an outer interface. This variant IS USED.
@@ -228,64 +170,75 @@ public class UnusedInterfaceRuleTest {
                 "global interface OuterExtender1 extends HasInnerInterfaces.CollidingName2 {}";
         // This is the usage of an outer interface.
         String outerUserSource2 = "global interface OuterExtender2 extends CollidingName3 {}";
-        TestUtil.buildGraph(
-                g,
+        executeTest(
+                expectedDefiningTypes,
                 innerInterfaceSource,
                 outerInterfaceSource1,
                 outerInterfaceSource2,
                 outerInterfaceSource3,
                 outerUserSource1,
                 outerUserSource2);
+    }
+
+    // ======= HELPER METHODS/PARAM PROVIDERS =======
+    private void executeTest(List<String> expectedDefiningTypes, String... sources) {
+        // Build the graph.
+        TestUtil.buildGraph(g, sources);
+        // Get and run the rule.
         StaticRule rule = UnusedInterfaceRule.getInstance();
         List<Violation> violations = rule.run(g);
 
+        // Make sure we got the expected number of violations.
         MatcherAssert.assertThat(
                 "Wrong number of violations found",
                 violations,
                 hasSize(expectedDefiningTypes.size()));
-        for (int i = 0; i < expectedDefiningTypes.size(); i++) {
-            String actual = (violations.get(i)).getSourceDefiningType();
+        // Turn the list of actual violations into a set of defining types mentioned by those
+        // violations.
+        Set<String> actualDefiningTypes =
+                violations.stream()
+                        .map(Violation::getSourceDefiningType)
+                        .collect(Collectors.toSet());
+        // Make sure each of the expected defining types is present in the set of actual defining
+        // types.
+        for (String expectedDefiningType : expectedDefiningTypes) {
             assertTrue(
-                    expectedDefiningTypes.contains(actual),
-                    String.format("%s should not be unused", actual));
+                    actualDefiningTypes.contains(expectedDefiningType),
+                    String.format(
+                            "Class %s did not throw expected violation", expectedDefiningType));
         }
     }
 
-    // ======= HELPER METHODS/PARAM PROVIDERS =======
     private static Stream<Arguments> paramProvider_testOuterInterface() {
         return Stream.of(
                 // Global interfaces should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global", new HashSet<String>()),
+                Arguments.of("global", new ArrayList<String>()),
                 // Public interfaces should be included in consideration.
-                Arguments.of(
-                        "public", new HashSet<>(Collections.singletonList("UnusedInterface"))));
+                Arguments.of("public", Collections.singletonList("UnusedInterface")));
     }
 
     private static Stream<Arguments> paramProvider_testInnerInterface() {
         return Stream.of(
                 // Global interfaces should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global", new HashSet<String>()),
+                Arguments.of("global", new ArrayList<String>()),
                 // Public interfaces should be included in consideration.
                 Arguments.of(
-                        "public",
-                        new HashSet<>(
-                                Collections.singletonList("HasInnerInterfaces.UnusedInterface"))));
+                        "public", Collections.singletonList("HasInnerInterfaces.UnusedInterface")));
     }
 
     private static Stream<Arguments> paramProvider_testCollidingName() {
         return Stream.of(
                 // Global interfaces should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global", new HashSet<String>()),
+                Arguments.of("global", new ArrayList<String>()),
                 // Public interfaces should be included in consideration.
                 Arguments.of(
                         "public",
-                        new HashSet<>(
-                                Arrays.asList(
-                                        "HasInnerInterfaces.CollidingName3",
-                                        "CollidingName1",
-                                        "CollidingName2"))));
+                        Arrays.asList(
+                                "HasInnerInterfaces.CollidingName3",
+                                "CollidingName1",
+                                "CollidingName2")));
     }
 }
