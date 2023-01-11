@@ -14,7 +14,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-public class UnnecessarilyExtensibleClassRuleTest {
+public class UnextendedAbstractClassRuleTest {
     private GraphTraversalSource g;
 
     @BeforeEach
@@ -26,9 +26,9 @@ public class UnnecessarilyExtensibleClassRuleTest {
     @ParameterizedTest(name = "{displayName}: Scope {0}")
     public void testOuterClasses(String scope, List<String> expectedDefiningTypes) {
         // This class is never extended.
-        String unextendedSource = scope + " class UnextendedClass {}";
+        String unextendedSource = scope + " abstract class UnextendedClass {}";
         // This class is extended.
-        String extendedSource = scope + " class ExtendedClass {}";
+        String extendedSource = scope + " abstract class ExtendedClass {}";
         // This class does the extension.
         String extenderSource = "public class ExtenderClass extends ExtendedClass {}";
 
@@ -41,11 +41,11 @@ public class UnnecessarilyExtensibleClassRuleTest {
         String innerClassSource =
                 "global class HasInnerClasses {\n"
                         + scope
-                        + " class InternallyUsedClass {}\n"
+                        + " abstract class InternallyUsedClass {}\n"
                         + scope
-                        + " class ExternallyUsedClass {}\n"
+                        + " abstract class ExternallyUsedClass {}\n"
                         + scope
-                        + " class UnusedClass {}\n"
+                        + " abstract class UnusedClass {}\n"
                         + "public class InternalUserClass extends InternallyUsedClass {}\n"
                         + "}\n";
         String externalUserSource =
@@ -60,22 +60,22 @@ public class UnnecessarilyExtensibleClassRuleTest {
                 "global class HasInnerClasses {\n"
                         // This name collides with an outer class. This variant IS USED.
                         + scope
-                        + " class CollidingName1 {}\n"
+                        + " abstract class CollidingName1 {}\n"
                         // This name collides with an outer class. This variant IS USED.
                         + scope
-                        + " class CollidingName2 {}\n"
+                        + " abstract class CollidingName2 {}\n"
                         // This name collides with an outer class. This variant IS NOT USED.
                         + scope
-                        + " class CollidingName3 {}\n"
+                        + " abstract class CollidingName3 {}\n"
                         // This is the usage of one of the inner classes.
                         + "global class InnerExtender extends CollidingName1 {}\n"
                         + "}";
         // This name collides with an inner class. This variant IS NOT USED.
-        String outerClassSource1 = scope + " class CollidingName1 {}";
+        String outerClassSource1 = scope + " abstract class CollidingName1 {}";
         // This name collides with an inner class. This variant IS NOT USED.
-        String outerClassSource2 = scope + " class CollidingName2 {}";
+        String outerClassSource2 = scope + " abstract class CollidingName2 {}";
         // This name collides with an inner class. This variant IS USED.
-        String outerClassSource3 = scope + " class CollidingName3 {}";
+        String outerClassSource3 = scope + " abstract class CollidingName3 {}";
         // This is the usage of another inner class.
         String outerUserSource1 =
                 "public class OuterExtender1 extends hasInnerClasses.CollidingName2 {}";
@@ -97,7 +97,7 @@ public class UnnecessarilyExtensibleClassRuleTest {
         // Build the graph.
         TestUtil.buildGraph(g, sources);
         // Get and run the rule.
-        StaticRule rule = UnnecessarilyExtensibleClassRule.getInstance();
+        StaticRule rule = UnextendedAbstractClassRule.getInstance();
         List<Violation> violations = rule.run(g);
 
         // Make sure we got the expected number of violations.
@@ -125,10 +125,8 @@ public class UnnecessarilyExtensibleClassRuleTest {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new ArrayList<String>()),
                 Arguments.of("global abstract", new ArrayList<String>()),
                 // Public classes should be included in consideration.
-                Arguments.of("public virtual", Collections.singletonList("UnextendedClass")),
                 Arguments.of("public abstract", Collections.singletonList("UnextendedClass")));
     }
 
@@ -136,31 +134,19 @@ public class UnnecessarilyExtensibleClassRuleTest {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new ArrayList<String>()),
-                Arguments.of("global abstract", new ArrayList<String>()),
+                Arguments.of("global", new ArrayList<String>()),
                 // Public classes should be included in consideration.
-                Arguments.of(
-                        "public virtual", Collections.singletonList("HasInnerClasses.UnusedClass")),
-                Arguments.of(
-                        "public abstract",
-                        Collections.singletonList("HasInnerClasses.UnusedClass")));
+                Arguments.of("public", Collections.singletonList("HasInnerClasses.UnusedClass")));
     }
 
     private static Stream<Arguments> paramProvider_testCollidingNames() {
         return Stream.of(
                 // Global classes should be excluded from consideration,
                 // since they're accessible to other packages.
-                Arguments.of("global virtual", new ArrayList<String>()),
-                Arguments.of("global abstract", new ArrayList<String>()),
+                Arguments.of("global", new ArrayList<String>()),
                 // Public classes should be included in consideration.
                 Arguments.of(
-                        "public virtual",
-                        Arrays.asList(
-                                "HasInnerClasses.CollidingName3",
-                                "CollidingName1",
-                                "CollidingName2")),
-                Arguments.of(
-                        "public abstract",
+                        "public",
                         Arrays.asList(
                                 "HasInnerClasses.CollidingName3",
                                 "CollidingName1",

@@ -1,17 +1,17 @@
 package com.salesforce.config;
 
 /**
- * Contains error message constants that will be displayed to users.
- * TODO: move all other user-facing messages here.
- * TODO: Reorganize these messages into a layered system like in {@link com.salesforce.apex.jorje.ASTConstants}
+ * Contains error message constants that will be displayed to users. TODO: move all other
+ * user-facing messages here. TODO: Reorganize these messages into a layered system like in {@link
+ * com.salesforce.apex.jorje.ASTConstants}
  */
 public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
-        public static final String UNNECESSARILY_EXTENSIBLE_CLASS_RULE =
-                "Identifies classes that are extensible but never extended";
+        public static final String UNEXTENDED_ABSTRACT_CLASS_RULE =
+                "Identifies non-global abstract classes that are never extended";
         public static final String UNUSED_INTERFACE_RULE =
-                "Identifies interfaces that are declared but never implemented or extended";
+                "Identifies non-global interfaces that never implemented or extended";
     }
 
     public static final class RuleViolationTemplates {
@@ -19,9 +19,9 @@ public final class UserFacingMessages {
         // format: "CRUD" or "FLS", DML operation, Object type, Field information
         public static final String MISSING_CRUD_FLS_CHECK =
                 "%1$s validation is missing for [%2$s] operation on [%3$s]%4$s.";
-        // Format: First %s is either "abstract" or "virtual". Second %s is the name of a class.
-        public static final String UNNECESSARILY_EXTENSIBLE_CLASS_RULE =
-                "Remove keyword `%s` from the declaration of extensionless class %s";
+        // Format: %s is the name of a class.
+        public static final String UNEXTENDED_ABSTRACT_CLASS_RULE =
+                "Extend or delete unextended abstract class %s";
         // Format: %s is the name of an interface.
         public static final String UNUSED_INTERFACE_RULE =
                 "Implement or delete unimplemented interface %s";

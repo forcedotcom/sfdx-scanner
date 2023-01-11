@@ -13,18 +13,15 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
+public class UnextendedAbstractClassRule extends AbstractStaticRule {
     private static final String URL =
-            "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnnecessarilyExtensibleClassRule";
+            "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnextendedAbstractClassRule";
 
-    private static final String ABSTRACT = "abstract";
-    private static final String VIRTUAL = "virtual";
-
-    private UnnecessarilyExtensibleClassRule() {
+    private UnextendedAbstractClassRule() {
         super();
     }
 
-    public static UnnecessarilyExtensibleClassRule getInstance() {
+    public static UnextendedAbstractClassRule getInstance() {
         return LazyHolder.INSTANCE;
     }
 
@@ -41,18 +38,15 @@ public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
                                 .hasLabel(ASTConstants.NodeType.USER_CLASS)
                                 .where(__.out(Schema.EXTENDED_BY).count().is(P.eq(0))));
         for (UserClassVertex vertex : vertices) {
-            if (classViolatesRule(vertex)) {
-                String definingType = vertex.getDefiningType();
-                // `virtual` and `abstract` are mutually exclusive, so
-                // if it's not one then it's definitely the other.
-                String keyword = vertex.isAbstract() ? ABSTRACT : VIRTUAL;
+            if (!vertex.isGlobal() && vertex.isAbstract()) {
+                // If the class is non-global and abstract, then it's a dead class and violates this
+                // rule.
                 violations.add(
                         new Violation.StaticRuleViolation(
                                 String.format(
                                         UserFacingMessages.RuleViolationTemplates
-                                                .UNNECESSARILY_EXTENSIBLE_CLASS_RULE,
-                                        keyword,
-                                        definingType),
+                                                .UNEXTENDED_ABSTRACT_CLASS_RULE,
+                                        vertex.getDefiningType()),
                                 vertex));
             }
         }
@@ -77,7 +71,7 @@ public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.UNNECESSARILY_EXTENSIBLE_CLASS_RULE;
+        return UserFacingMessages.RuleDescriptions.UNEXTENDED_ABSTRACT_CLASS_RULE;
     }
 
     @Override
@@ -92,7 +86,7 @@ public class UnnecessarilyExtensibleClassRule extends AbstractStaticRule {
 
     private static final class LazyHolder {
         // Postpone initialization until first use.
-        private static final UnnecessarilyExtensibleClassRule INSTANCE =
-                new UnnecessarilyExtensibleClassRule();
+        private static final UnextendedAbstractClassRule INSTANCE =
+                new UnextendedAbstractClassRule();
     }
 }
