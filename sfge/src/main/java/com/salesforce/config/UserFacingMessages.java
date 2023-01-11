@@ -8,10 +8,8 @@ package com.salesforce.config;
 public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
-        public static final String UNEXTENDED_ABSTRACT_CLASS_RULE =
-                "Identifies non-global abstract classes that are never extended";
-        public static final String UNUSED_INTERFACE_RULE =
-                "Identifies non-global interfaces that never implemented or extended";
+        public static final String UNIMPLEMENTED_TYPE_RULE =
+                "Identifies non-global interfaces/abstract classes without implementations";
     }
 
     public static final class RuleViolationTemplates {
@@ -19,12 +17,9 @@ public final class UserFacingMessages {
         // format: "CRUD" or "FLS", DML operation, Object type, Field information
         public static final String MISSING_CRUD_FLS_CHECK =
                 "%1$s validation is missing for [%2$s] operation on [%3$s]%4$s.";
-        // Format: %s is the name of a class.
-        public static final String UNEXTENDED_ABSTRACT_CLASS_RULE =
-                "Extend or delete unextended abstract class %s";
-        // Format: %s is the name of an interface.
-        public static final String UNUSED_INTERFACE_RULE =
-                "Implement or delete unimplemented interface %s";
+        // Format: First %s is either "abstract class" or "interface".
+        //         Second %s is the name of a class or interface.
+        public static final String UNIMPLEMENTED_TYPE_RULE = "Extend, implement, or delete %s %s";
     }
 
     /** Main args and process checks * */

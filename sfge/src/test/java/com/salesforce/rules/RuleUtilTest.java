@@ -27,7 +27,7 @@ public class RuleUtilTest {
     public void getAllRules_noExceptionThrown() {
         try {
             List<AbstractRule> allRules = RuleUtil.getEnabledRules();
-            MatcherAssert.assertThat(allRules, hasSize(4));
+            MatcherAssert.assertThat(allRules, hasSize(3));
             assertTrue(allRules.contains(ApexFlsViolationRule.getInstance()));
         } catch (Exception ex) {
             fail("Unexpected " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
@@ -37,7 +37,7 @@ public class RuleUtilTest {
     @Test
     public void getRule_RealRuleReturned() {
         try {
-            AbstractRule realRule = RuleUtil.getRule(UnusedInterfaceRule.class.getSimpleName());
+            AbstractRule realRule = RuleUtil.getRule(UnimplementedTypeRule.class.getSimpleName());
             MatcherAssert.assertThat(realRule, not(nullValue()));
         } catch (RuleUtil.RuleNotFoundException rnfe) {
             fail("No exception should be thrown when a real rule is requested");

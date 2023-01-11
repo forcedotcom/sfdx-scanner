@@ -49,6 +49,7 @@ application {
 spotless {
 	java {
 		googleJavaFormat().aosp().groupArtifact("com.google.googlejavaformat:google-java-format")
+		toggleOffOn()
 	}
 }
 
