@@ -18,5 +18,3 @@ jobs:
   # Separately, we also need to run all of our tests.
   run_tests:
     uses: ./.github/workflows/run-tests.yml
-  experimentation:
-    uses: ./.github/workflows/experimentation.yml
