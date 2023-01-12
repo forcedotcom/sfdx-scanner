@@ -1,0 +1,22 @@
+name: experimentation
+on:
+  workflow_call:
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: 'dev'
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+      - run: node tools/UpdateRetireJsVulns.js
+      - uses: peter-evans/create-pull-request@v4
+        with:
+          commit-message: "This is a commit"
+          branch: "experimental-branch"
+          base: "dev"
+          title: "experimental title"
+          
