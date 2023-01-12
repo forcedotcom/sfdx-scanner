@@ -8,6 +8,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          token: ${{ secrets.JF_SECRET }}
           ref: 'dev'
       - uses: actions/setup-node@v3
         with:
@@ -15,7 +16,7 @@ jobs:
       - run: node tools/UpdateRetireJsVulns.js
       - uses: peter-evans/create-pull-request@v4
         with:
-          #token: ${{ secrets.JF_SECRET }}
+          token: ${{ secrets.JF_SECRET }}
           commit-message: "This is a commit"
           branch: "experimental-branch"
           base: "dev"
