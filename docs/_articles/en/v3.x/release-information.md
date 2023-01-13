@@ -20,7 +20,6 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (Code Analyzer): `scanner:run` command executes graph-based rules from Graph Engine. Invoke the new rule by executing `scanner:run` command with `--engine sfge` and providing the `--projectdir` parameter. This behavior is different from path-based rules that are executed with `scanner:run:dfa`.
 * NEW (Graph Engine): We added a new graph-based rule, `UnusedMethodRule`. This rule detects methods contained in your code that aren’t invoked. See [UnusedMethodRule](./en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule) for more information.
-* NEW: We made some updates to the RetireJS vulnerability database.
 * FIX (Graph Engine): `ApexCrudFlsRule` now understands multiple levels of method invocations on Schema Standard Library objects within for-loops.
 * FIX (Graph Engine): `ApexCrudFlsRule` now understands for-each iterations on Set data types and acknowledges Schema-based checks within the loops.
 
