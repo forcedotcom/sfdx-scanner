@@ -3,6 +3,10 @@ on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   # We need to verify that the Pull Request's title matches the desired format.
   verify_pr_title:
