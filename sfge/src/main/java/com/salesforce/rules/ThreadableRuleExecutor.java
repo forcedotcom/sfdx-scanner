@@ -94,6 +94,7 @@ public class ThreadableRuleExecutor {
             completionService.submit(new CallableExecutor(submission, progressListener));
             submissionCount += 1;
         }
+        submissions.clear();
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Queued " + submissionCount + " path-based rule executions");
         }
