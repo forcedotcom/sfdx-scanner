@@ -1,4 +1,4 @@
-import {Logger, SfdxError, Messages} from '@salesforce/core';
+import {Logger, SfError, Messages} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../Controller';
 
@@ -11,6 +11,10 @@ import {Config} from './util/Config';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
+
+// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
+// or any library that is using the messages framework can also be loaded this way.
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'jreSetupManager');
 
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
@@ -79,7 +83,8 @@ class JreSetupManager extends AsyncCreatable {
 		// If we reach this point and we somehow still haven't found a javaHome, then we're pretty thoroughly hosed.
 		// So we'll just throw an error telling the user to set it themselves.
 		if (!javaHome) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'NoJavaHomeFound', []);
+			const errName = 'NoJavaHomeFound';
+			throw new SfError(messages.getMessage(errName, []), errName);
 		}
 
 		return javaHome;
@@ -108,7 +113,8 @@ class JreSetupManager extends AsyncCreatable {
 			await fileHandler.stats(javaHome);
 		} catch (e) {
 			const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidJavaHome', [javaHome, error.code]);
+			const errName = 'InvalidJavaHome';
+			throw new SfError(messages.getMessage(errName, [javaHome, error.code]), errName);
 		}
 	}
 
@@ -126,7 +132,7 @@ class JreSetupManager extends AsyncCreatable {
 
 		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
 		if (!matchedParts || matchedParts.length < 4) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'VersionNotFound', []);
+			throw new SfError(messages.getMessage('VersionNotFound', []));
 		}
 
 		const majorVersion = parseInt(matchedParts[1]);
@@ -144,7 +150,8 @@ class JreSetupManager extends AsyncCreatable {
 			version = `${majorVersion}.${minorVersion}`;
 		} else {
 			// Not matching what we are looking for
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'jreSetupManager', 'InvalidVersion', [version]);
+			const errName = 'InvalidVersion';
+			throw new SfError(messages.getMessage(errName, [version]), errName);
 		}
 
 		this.logger.trace(`Java version found as ${version}`);

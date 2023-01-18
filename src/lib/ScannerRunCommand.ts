@@ -1,5 +1,5 @@
 import {flags} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
 import {RecombinedRuleResults, SfgeConfig} from '../types';
@@ -102,7 +102,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		} catch (e) {
 			// Rethrow any errors as SFDX errors.
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 
 		return new RunOutputProcessor({
@@ -136,11 +136,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		if (this.flags.projectdir) {
 			for (const dir of (this.flags.projectdir as string[])) {
 				if (globby.hasMagic(dir)) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirCannotBeGlob', []);
+					throw new SfError(messages.getMessage('validations.projectdirCannotBeGlob', []));
 				} else if (!(await fh.exists(dir))) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustExist', []);
+					throw new SfError(messages.getMessage('validations.projectdirMustExist', []));
 				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.projectdirMustBeDir', []);
+					throw new SfError(messages.getMessage('validations.projectdirMustBeDir', []));
 				}
 			}
 		}
@@ -152,7 +152,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-common', 'validations.cannotWriteTableToFile', []);
+				throw new SfError(messages.getMessage('validations.cannotWriteTableToFile', []));
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
@@ -183,7 +183,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		const lastPeriod = outfile.lastIndexOf('.');
 		// If the outfile is malformed, we're already hosed.
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-			throw new SfdxError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 		} else {
 			// Look at the file extension, and infer a corresponding output format.
 			const fileExtension = outfile.slice(lastPeriod + 1).toLowerCase();
@@ -195,7 +195,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 				case OUTPUT_FORMAT.XML:
 					return fileExtension;
 				default:
-					throw new SfdxError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
+					throw new SfError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 	}

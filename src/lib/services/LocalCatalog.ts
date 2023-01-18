@@ -1,4 +1,4 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import * as path from 'path';
 import {injectable} from 'tsyringe';
 import {CATALOG_FILE} from '../../Constants';
@@ -84,7 +84,7 @@ export default class LocalCatalog implements RuleCatalog {
 			return rulesThatMatchCriteria;
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message);
+			throw new SfError(message);
 		}
 	}
 

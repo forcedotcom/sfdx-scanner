@@ -1,4 +1,4 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
@@ -158,7 +158,7 @@ export class DefaultRuleManager implements RuleManager {
 			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message);
+			throw new SfError(message);
 		}
 	}
 
@@ -167,11 +167,7 @@ export class DefaultRuleManager implements RuleManager {
 		const dfaEngines = runDescriptorList.filter(descriptor => descriptor.engine.isDfaEngine()).map(descriptor => descriptor.engine.getName());
 		const pathlessEngines = runDescriptorList.filter(descriptor => !(descriptor.engine.isDfaEngine())).map(descriptor => descriptor.engine.getName());
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner',
-				'DefaultRuleManager',
-				'error.cannotRunDfaAndNonDfaConcurrently',
-				[JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]
-			);
+			throw new SfError(messages.getMessage('error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
 		}
 	}
 

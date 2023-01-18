@@ -1,4 +1,4 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
@@ -154,7 +154,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`Pmd evaluation failed: ${message}`);
-			throw new SfdxError(this.processStdErr(message));
+			throw new SfError(this.processStdErr(message));
 		}
 	}
 
@@ -523,7 +523,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
 		const fileHandler = new FileHandler();
 		if (!(await fileHandler.exists(configFile))) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdEngine', 'ConfigNotFound', [configFile]);
+			throw new SfError(engineMessages.getMessage('ConfigNotFound', [configFile]));
 		}
 
 		return configFile;
