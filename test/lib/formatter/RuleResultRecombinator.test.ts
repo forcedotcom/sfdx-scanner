@@ -456,7 +456,7 @@ describe('RuleResultRecombinator', () => {
 				expect(driver['rules']).to.have.lengthOf(1, 'Rules');
 				const rule = driver['rules'][0];
 				expect(rule.id).to.equal('no-unused-vars');
-				expect(rule.shortDescription.text).to.equal('disallow unused variables');
+				expect(rule.shortDescription.text).to.equal('Disallow unused variables');
 				expect(rule.properties.category).to.equal('Variables');
 				expect(rule.properties.severity).to.equal(2);
 				if (normalizeSeverity) {

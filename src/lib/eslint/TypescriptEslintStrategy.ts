@@ -3,7 +3,7 @@ import { EslintStrategy } from "./BaseEslintEngine";
 import {FileHandler} from '../util/FileHandler';
 import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfigValue, ESRuleConfig, RuleViolation} from '../../types';
-import { Logger, Messages, SfdxError } from '@salesforce/core';
+import { Logger, Messages, SfError } from '@salesforce/core';
 import { OutputProcessor } from '../services/OutputProcessor';
 import {deepCopy} from '../util/Utils';
 import { rules } from '@typescript-eslint/eslint-plugin';
@@ -181,8 +181,8 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		return (fileName: string, ruleViolation: RuleViolation): void => {
 			const message: string = ruleViolation.message;
 
-			if (message.startsWith('Parsing error: "parserOptions.project" has been set for @typescript-eslint/parser.\nThe file does not match your project config') &&
-				message.endsWith('The file must be included in at least one of the projects provided.')) {
+			const inclusionRegex = /^Parsing error: ESLint was configured to run on `.*` using `parserOptions.project`:.*\nHowever, (that TSConfig does not|none of those TSConfigs) include this file./;
+			if (inclusionRegex.test(message)) {
 				ruleViolation.message = messages.getMessage('FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
 				ruleViolation.exception = true;
 			} else if (message.startsWith('Parsing error:')) {
@@ -203,8 +203,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		if (!foundTsConfig) {
 			const cwd = path.resolve();
 			// Not specified in engineOptions and not found in the current directory
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'MissingTsConfigFromCwd',
-				[TS_CONFIG, cwd, TS_CONFIG]);
+			throw new SfError(messages.getMessage('MissingTsConfigFromCwd', [TS_CONFIG, cwd, TS_CONFIG]));
 		}
 
 		this.logger.trace(`Using ${TS_CONFIG} from ${foundTsConfig}`);
@@ -223,12 +222,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		if (tsConfigFromOptions != null) {
 			if (!(await this.fileHandler.exists(tsConfigFromOptions))) {
 				// Specified in the engineOptions but it isn't a file
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'NotAFileTsConfigFromOptions',
-					[TS_CONFIG, tsConfigFromOptions]);
+				throw new SfError(messages.getMessage('NotAFileTsConfigFromOptions', [TS_CONFIG, tsConfigFromOptions]));
 			} else if (path.basename(tsConfigFromOptions).toLowerCase() !== TS_CONFIG) {
 				// Found the file, but it's not named tsconfig.json
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy', 'InvalidNameTsConfigFromOptions',
-					[tsConfigFromOptions, TS_CONFIG]);
+				throw new SfError(messages.getMessage('InvalidNameTsConfigFromOptions', [tsConfigFromOptions, TS_CONFIG]));
 			} else {
 				return tsConfigFromOptions;
 			}
