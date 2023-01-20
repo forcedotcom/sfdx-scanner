@@ -5,7 +5,6 @@ import Sinon = require('sinon');
 import {verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetupManager';
 import childProcess = require('child_process');
 import {Messages} from '@salesforce/core';
-import {before} from 'mocha';
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
@@ -27,7 +26,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 	describe('With valid javaHome path in Config and an accepted Java version', () => {
 
 		let setJavaHomeStub;
-		before(() => {
+		beforeEach(() => {
 			Sinon.createSandbox();
 			// Config file exists and has the valid path
 			Sinon.stub(Config.prototype, 'getJavaHome').returns(javaHomeValidPath);
@@ -40,7 +39,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, validVersion8);
 		});
 
-		after(() => {
+		afterEach(() => {
 			Sinon.restore();
 		});
 
@@ -60,7 +59,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 	describe('With no Config entry, but valid path in System variable', () => {
 		const env = process.env;
 
-		before(() => {
+		beforeEach(() => {
 			Sinon.createSandbox();
 			// Config file exists and has the valid path
 			Sinon.stub(Config.prototype, 'getJavaHome').returns('');
@@ -75,7 +74,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			Sinon.stub(Config.prototype, 'setJavaHome').resolves();
 		});
 
-		after(() => {
+		afterEach(() => {
 			Sinon.restore();
 			process.env = env;
 		});
@@ -113,7 +112,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 	describe('With no Config entry or System variable, but can auto detect a valid javaHome', () => {
 		const env = process.env;
-		before(() => {
+		beforeEach(() => {
 			Sinon.createSandbox();
 			// Config file exists and has the valid path
 			Sinon.stub(Config.prototype, 'getJavaHome').returns('');
@@ -131,7 +130,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			Sinon.stub(Config.prototype, 'setJavaHome').resolves();
 		});
 
-		after(() => {
+		afterEach(() => {
 			Sinon.restore();
 			process.env = env;
 		});
@@ -169,13 +168,13 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 	describe('With Config entry leading to different outcomes', () => {
 
-		before(() => {
+		beforeEach(() => {
 			Sinon.createSandbox();
 			// Stub the interactions with Config file
 			Sinon.stub(Config.prototype, 'setJavaHome').resolves();
 		});
 
-		after(() => {
+		afterEach(() => {
 			Sinon.restore();
 		});
 

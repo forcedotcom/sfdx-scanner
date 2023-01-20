@@ -65,7 +65,7 @@ describe('scanner:rule:describe', () => {
 					expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should be formatted correctly');
 
 					// Next, verify that there are rule descriptions that are distinctly identified.
-					const regex = /=== Rule #1\nname:\s+constructor-super(.*\n)*=== Rule #2\nname:\s+constructor-super(.*\n)*=== Rule #3\nname:\s+constructor-super/g;
+					const regex = /=== Rule #1\n\nname:\s+constructor-super(.*\n)*=== Rule #2\n\nname:\s+constructor-super(.*\n)*=== Rule #3\n\nname:\s+constructor-super/g;
 					expect(ctx.stdout).to.match(regex, 'Output should contain three rules named constructor-super for each eslint based engine');
 				});
 
@@ -93,7 +93,8 @@ describe('scanner:rule:describe', () => {
 			setupCommandTest
 				.command(['scanner:rule:describe'])
 				.it('Must input a rule name', ctx => {
-					expect(ctx.stderr).to.contain('ERROR running scanner:rule:describe:  Missing required flag:\n -n, --rulename RULENAME');
+					expect(ctx.stderr).to.contain(`ERROR running scanner:rule:describe:  The following error occurred:
+  Missing required flag rulename`);
 				});
 		});
 	});

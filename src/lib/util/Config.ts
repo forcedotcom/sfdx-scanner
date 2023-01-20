@@ -1,5 +1,5 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel, Messages, SfdxError} from '@salesforce/core';
+import {Logger, LoggerLevel, Messages, SfError} from '@salesforce/core';
 import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
@@ -163,11 +163,7 @@ export class Config {
 
 			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
 			if (upgradeErrorMessage) {
-				throw SfdxError.create('@salesforce/sfdx-scanner',
-					'Config',
-					'UpgradeFailureTroubleshooting',
-					[upgradeErrorMessage, backupFileName, this.configFilePath]
-				);
+				throw new SfError(configMessages.getMessage('UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
 			}
 		}
 	}
@@ -235,7 +231,7 @@ export class Config {
 			this.logger.trace(`Config property ${propertyName} for engine ${engine} has value ${String(propertyValue)}`);
 			return propertyValue;
 		} else {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'Config', errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]);
+			throw new SfError(configMessages.getMessage(errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
 		}
 	}
 

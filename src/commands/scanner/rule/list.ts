@@ -91,9 +91,9 @@ export default class List extends ScannerCommand {
 		// Map rule fields to the matching column
 		const transformedRule: Record<string, string|string[]> = {};
 		transformedRule[columns[0]] = rule.name;
-		transformedRule[columns[1]] = rule.languages;
-		transformedRule[columns[2]] = rule.categories;
-		transformedRule[columns[3]] = rule.rulesets;
+		transformedRule[columns[1]] = rule.languages.join(',');
+		transformedRule[columns[2]] = rule.categories.join(',');
+		transformedRule[columns[3]] = rule.rulesets.join(',');
 		transformedRule[columns[4]] = rule.engine;
 		return transformedRule;
 	}
