@@ -98,6 +98,7 @@ public class PmdCatalogRule {
 		m.put(JSON_DESCRIPTION, this.description);
 		m.put(JSON_SOURCEPACKAGE, this.sourceJar);
 		m.put(JSON_DEFAULTENABLED, true);
+        m.put(JSON_ISDFA, false);
 
 		// We want 'languages' to be represented as an array even though PMD rules only run against one language, because
 		// this way it's easier to integrate with the language-agnostic framework that we ultimately want.

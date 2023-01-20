@@ -17,8 +17,11 @@ module.exports = {
 		"languages": "languages",
 		"categories": "categories",
 		"rulesets": "rulesets [dep]",
+		"is-dfa": "is dfa",
 		"engine": "engine"
 	},
+	"yes": "Y",
+	"no": "N",
 	"examples": `
 This example invokes the command without filter criteria, which returns all rules.
 	$ sfdx scanner:rule:list

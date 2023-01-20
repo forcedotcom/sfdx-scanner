@@ -17,7 +17,10 @@ const columns = [messages.getMessage('columnNames.name'),
 				messages.getMessage('columnNames.languages'),
 				messages.getMessage('columnNames.categories'),
 				messages.getMessage('columnNames.rulesets'),
-				messages.getMessage('columnNames.engine')];
+				messages.getMessage('columnNames.engine'),
+				messages.getMessage('columnNames.is-dfa')];
+const DFA_YES = messages.getMessage('yes');
+const DFA_NO = messages.getMessage('no');
 
 export default class List extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
@@ -95,6 +98,7 @@ export default class List extends ScannerCommand {
 		transformedRule[columns[2]] = rule.categories.join(',');
 		transformedRule[columns[3]] = rule.rulesets.join(',');
 		transformedRule[columns[4]] = rule.engine;
+		transformedRule[columns[5]] = rule.isDfa ? DFA_YES : DFA_NO;
 		return transformedRule;
 	}
 

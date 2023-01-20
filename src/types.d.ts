@@ -10,6 +10,7 @@ export type Rule = {
 	rulesets: string[];
 	languages: string[];
 	defaultEnabled: boolean;
+	isDfa: boolean;
 	// The expectation is that default configurations for other engines will be defined as their own types, which will
 	// be OR'd together in this property.
 	defaultConfig?: ESRuleConfigValue;
