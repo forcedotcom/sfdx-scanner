@@ -33,6 +33,7 @@ function createRule(): {rule: Rule; expectedRuleString: string} {
 		rulesets: ["Ruleset1", "Ruleset2"],
 		languages: ["apex", "javascript"],
 		engine: "pmd",
+		isDfa: false,
 		sourcepackage: "/some/path/to/a/package.jar",
 		defaultEnabled: true
 	};

@@ -27,6 +27,7 @@ const retireJsCatalog: Catalog = {
 		categories: ['Insecure Dependencies'],
 		rulesets: [],
 		languages: ['javascript'],
+		isDfa: false,
 		defaultEnabled: true
 	}],
 	categories: [{
