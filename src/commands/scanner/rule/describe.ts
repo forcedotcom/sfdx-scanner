@@ -5,6 +5,8 @@ import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {deepCopy} from '../../../lib/util/Utils';
+import Run from '../run';
+import Dfa from '../run/dfa';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -79,7 +81,7 @@ export default class Describe extends ScannerCommand {
 		return rules.map(r => {
 			const styledRule: DescribeStyledRule = {
 				...r,
-				runWith: r.isDfa ? 'scanner:run:dfa' : 'scanner:run',
+				runWith: r.isDfa ? Dfa.id : Run.id,
 				enabled: enabledEngineNames.has(r.engine)
 			};
 			// Strip any whitespace off of the description.
