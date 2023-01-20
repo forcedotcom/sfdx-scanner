@@ -46,6 +46,9 @@ public final class SoqlParserUtil {
     private static final String WITH_SECURITY_ENFORCED_PATTERN_STR = "WITH\\s+SECURITY_ENFORCED";
     private static final Pattern WITH_SECURITY_ENFORCED_PATTERN =
             Pattern.compile(WITH_SECURITY_ENFORCED_PATTERN_STR, Pattern.CASE_INSENSITIVE);
+    private static final String WITH_USER_MODE_PATTERN_STR = "WITH\\s+USER_MODE";
+    private static final Pattern WITH_USER_MODE_PATTERN =
+            Pattern.compile(WITH_USER_MODE_PATTERN_STR, Pattern.CASE_INSENSITIVE);
     private static final String COUNT_PATTERN_STR = "COUNT\\(\\s*\\)";
     private static final Pattern COUNT_PATTERN =
             Pattern.compile(COUNT_PATTERN_STR, Pattern.CASE_INSENSITIVE);
@@ -138,7 +141,7 @@ public final class SoqlParserUtil {
         final HashSet<SoqlQueryInfo> queryInfos = new HashSet<>();
         String outerQuery = cleanupQuery(uncleanQuery);
 
-        queryInfos.addAll(getInnerQueries(outerQuery, true, false));
+        queryInfos.addAll(getInnerQueries(outerQuery, true, false, false));
         return regroupByObject(queryInfos);
     }
 
@@ -157,7 +160,7 @@ public final class SoqlParserUtil {
     }
 
     private static HashSet<SoqlQueryInfo> getInnerQueries(
-            String query, boolean isOutermost, boolean isSecurityEnforced) {
+            String query, boolean isOutermost, boolean isSecurityEnforced, boolean isUserMode) {
         final HashSet<SoqlQueryInfo> queryInfos = new HashSet<>();
         String updatedQuery = query;
 
@@ -180,12 +183,15 @@ public final class SoqlParserUtil {
                     // recursively parse inner query to detect next level inner queries
                     queryInfos.addAll(
                             getInnerQueries(
-                                    innerQueryStr, false, isSecurityEnforced(updatedQuery)));
+                                    innerQueryStr,
+                                    false,
+                                    isSecurityEnforced(updatedQuery),
+                                    isUserMode(updatedQuery)));
                 }
             }
         }
         final SoqlQueryInfo soqlQueryInfo =
-                getSoqlQueryInfo(updatedQuery, isOutermost, isSecurityEnforced);
+                getSoqlQueryInfo(updatedQuery, isOutermost, isSecurityEnforced, isUserMode);
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Adding soqlQueryInfo: " + soqlQueryInfo);
@@ -198,14 +204,19 @@ public final class SoqlParserUtil {
     }
 
     private static SoqlQueryInfo getSoqlQueryInfo(
-            String query, boolean isOutermost, boolean outerIsSecurityEnforced) {
+            String query,
+            boolean isOutermost,
+            boolean outerIsSecurityEnforced,
+            boolean outerIsUserMode) {
         final TreeSet<String> fields = parseFields(query);
         final String objectName = getObjectName(query, fields);
 
         // WITH SECURITY_ENFORCED clause at outer level is applicable to inner level as well,
-        // there's not sufficient documentation to state if the other way is true.
+        // there's insufficient documentation to state if the other way is true.
         // To be more restrictive, we won't count WITH SECURITY_ENFORCED clause for an inner query
         // as a protection to outer query.
+        // WITH USER_MODE clause is only available at outer level, and is applicable to inner levels
+        // as well.
         return new SoqlQueryInfo(
                 query,
                 objectName,
@@ -215,7 +226,8 @@ public final class SoqlParserUtil {
                 isLimit1(query),
                 // Use securityEnforced value of outer query if inner query doesn't have the clause
                 outerIsSecurityEnforced || isSecurityEnforced(query),
-                isOutermost);
+                isOutermost,
+                outerIsUserMode || isUserMode(query));
     }
 
     private static String getObjectName(String query, TreeSet<String> fields) {
@@ -449,6 +461,10 @@ public final class SoqlParserUtil {
     private static boolean isSecurityEnforced(String query) {
         // TODO: evaluate where the phrase occurs
         return WITH_SECURITY_ENFORCED_PATTERN.matcher(query).find();
+    }
+
+    private static boolean isUserMode(String query) {
+        return WITH_USER_MODE_PATTERN.matcher(query).find();
     }
 
     private static List<String> determineFieldsInOrderBy(String query) {

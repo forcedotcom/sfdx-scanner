@@ -215,12 +215,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true));
+                        true,
+                        false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
                         "Account",
                         CollectionUtil.newTreeSetOf("Name"),
+                        false,
                         false,
                         false,
                         false,
@@ -244,12 +246,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true));
+                        true,
+                        false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
                         "Contact",
                         CollectionUtil.newTreeSetOf("Status__c"),
+                        false,
                         false,
                         false,
                         false,
@@ -278,12 +282,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true));
+                        true,
+                        false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
                         "Account",
                         CollectionUtil.newTreeSetOf("Name"),
+                        false,
                         false,
                         false,
                         false,
@@ -294,6 +300,7 @@ public class ObjectFieldUtilTest {
                         "queryStr3",
                         "Contact",
                         CollectionUtil.newTreeSetOf("Status__c"),
+                        false,
                         false,
                         false,
                         false,
@@ -331,12 +338,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true));
+                        true,
+                        false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
                         "Account",
                         CollectionUtil.newTreeSetOf("Name"),
+                        false,
                         false,
                         false,
                         false,
@@ -351,12 +360,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
+                        false,
                         false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr4",
                         "Contact",
                         CollectionUtil.newTreeSetOf("AnotherField"),
+                        false,
                         false,
                         false,
                         false,
@@ -394,12 +405,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true));
+                        true,
+                        false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
                         "Account",
                         CollectionUtil.newTreeSetOf("Name"),
+                        false,
                         false,
                         false,
                         false,
@@ -414,6 +427,7 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
+                        false,
                         false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
@@ -424,12 +438,14 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
+                        false,
                         false));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr5",
                         "Account",
                         CollectionUtil.newTreeSetOf("Description"),
+                        false,
                         false,
                         false,
                         false,

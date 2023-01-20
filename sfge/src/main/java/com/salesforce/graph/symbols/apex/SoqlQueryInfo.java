@@ -11,7 +11,8 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
     private final String queryStr; // Only for debugging purposes
     private final boolean count;
     private final boolean limit1;
-    private boolean securityEnforced;
+    private final boolean securityEnforced;
+    private final boolean userMode;
     private final boolean outermost;
 
     public SoqlQueryInfo(
@@ -22,13 +23,15 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
             boolean isCount,
             boolean isLimit1,
             boolean isSecurityEnforced,
-            boolean isOutermost) {
+            boolean isOutermost,
+            boolean isUserMode) {
         super(objectName, fields, isAllFields);
         this.queryStr = queryStr;
         this.count = isCount;
         this.limit1 = isLimit1;
         this.securityEnforced = isSecurityEnforced;
         this.outermost = isOutermost;
+        this.userMode = isUserMode;
     }
 
     SoqlQueryInfo(SoqlQueryInfo other) {
@@ -38,6 +41,7 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
         this.limit1 = other.limit1;
         this.securityEnforced = other.securityEnforced;
         this.outermost = other.outermost;
+        this.userMode = other.userMode;
     }
 
     /**
@@ -70,6 +74,7 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 // query
                 this.securityEnforced
                         && other.securityEnforced, // Both portions need to be security enforced
+                this.userMode && other.userMode, // Both portions need to be user mode
                 this.outermost || other.outermost // Either can be outermost
                 );
     }
@@ -124,6 +129,14 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
     }
 
     /**
+     * @return true if the query has a WITH USER_MODE clause to filter out fields that are not
+     *     accessible. This inherently brings in FLS validation.
+     */
+    public boolean isUserMode() {
+        return userMode;
+    }
+
+    /**
      * @return true if the query information is the outermost in a complex query with one or more
      *     sub queries.
      */
@@ -150,6 +163,7 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 && limit1 == queryInfo.limit1
                 && securityEnforced == queryInfo.securityEnforced
                 && outermost == queryInfo.outermost
+                && userMode == queryInfo.userMode
                 && Objects.equal(objectName, queryInfo.objectName)
                 && Objects.equal(fields, queryInfo.fields);
     }
@@ -157,7 +171,14 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
     @Override
     public int hashCode() {
         return Objects.hashCode(
-                objectName, fields, allFields, count, limit1, securityEnforced, outermost);
+                objectName,
+                fields,
+                allFields,
+                count,
+                limit1,
+                securityEnforced,
+                outermost,
+                userMode);
     }
 
     @Override
@@ -181,6 +202,8 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 + securityEnforced
                 + ", isOutermost="
                 + outermost
+                + ", isUserMode="
+                + userMode
                 + '}';
     }
 }

@@ -29,6 +29,7 @@ public class SoqlParserUtilTest {
         assertThat(actualQueryInfo.isAllFields(), equalTo(false));
         assertThat(actualQueryInfo.isCount(), equalTo(false));
         assertThat(actualQueryInfo.isLimit1(), equalTo(false));
+        assertThat(actualQueryInfo.isUserMode(), equalTo(false));
     }
 
     @Test
@@ -84,6 +85,17 @@ public class SoqlParserUtilTest {
         final SoqlQueryInfo actualQueryInfo = getQueryInfo(query);
 
         assertThat(actualQueryInfo.isSecurityEnforced(), equalTo(true));
+        assertThat(actualQueryInfo.getFields(), Matchers.empty());
+        assertThat(actualQueryInfo.isAllFields(), equalTo(true));
+    }
+
+    @Test
+    public void testSelectAllStandardFieldsWithUserMode() {
+        String query = "SELECT fields(Standard) FROM Contact WITH USER_MODE";
+
+        final SoqlQueryInfo actualQueryInfo = getQueryInfo(query);
+
+        assertThat(actualQueryInfo.isUserMode(), equalTo(true));
         assertThat(actualQueryInfo.getFields(), Matchers.empty());
         assertThat(actualQueryInfo.isAllFields(), equalTo(true));
     }
@@ -305,6 +317,24 @@ public class SoqlParserUtilTest {
     }
 
     @Test
+    public void testUserModeOnSimpleInnerQuery() {
+        String query = "SELECT Name, (SELECT FirstName FROM Contact) from Account WITH USER_MODE";
+
+        final Set<SoqlQueryInfo> queryInfos = SoqlParserUtil.parseQuery(query);
+        assertThat(queryInfos, hasSize(2));
+        final Iterator<SoqlQueryInfo> infoIterator =
+                ObjectFieldTestHelper.getSortedIterator(queryInfos);
+
+        final SoqlQueryInfo outerQuery = infoIterator.next();
+        assertThat(outerQuery.getObjectName(), equalToIgnoringCase("Account"));
+        assertThat(outerQuery.isUserMode(), equalTo(true));
+
+        final SoqlQueryInfo innerQuery = infoIterator.next();
+        assertThat(innerQuery.getObjectName(), equalToIgnoringCase("Contact"));
+        assertThat(outerQuery.isUserMode(), equalTo(true));
+    }
+
+    @Test
     public void testSecurityEnforced2LevelNestedQueries() {
         String query =
                 "SELECT Id, Name, (SELECT FirstName, (SELECT Description FROM Opportunity) FROM Contact WITH SECURITY_ENFORCED) FROM Account\n";
@@ -331,18 +361,9 @@ public class SoqlParserUtilTest {
     @Test
     public void testSecurityEnforcedInComplexQuery() {
         String query =
-                "SELECT Id, "
-                        + "Name, "
-                        + "StageName, "
-                        + "Amount, "
-                        + "(SELECT Id, "
-                        + "Field1__c "
-                        + "FROM Relational__r "
-                        + "WHERE Field2__c = false) "
-                        + "FROM Opportunity "
-                        + "WHERE AccountId = :param "
-                        + "AND IsClosed = false "
-                        + "WITH SECURITY_ENFORCED";
+                "SELECT Id, Name, StageName, Amount, "
+                        + "(SELECT Id, Field1__c FROM Relational__r WHERE Field2__c = false) "
+                        + "FROM Opportunity WHERE AccountId = :param AND IsClosed = false WITH SECURITY_ENFORCED";
 
         final Set<SoqlQueryInfo> queryInfos = SoqlParserUtil.parseQuery(query);
         assertThat(queryInfos, hasSize(2));
@@ -355,6 +376,26 @@ public class SoqlParserUtilTest {
 
         final SoqlQueryInfo queryInfo2 = iterator.next();
         assertThat(queryInfo2.isSecurityEnforced(), equalTo(true));
+    }
+
+    @Test
+    public void testUserModeInComplexQuery() {
+        String query =
+                "SELECT Id, Name, StageName, Amount, "
+                        + "(SELECT Id, Field1__c FROM Relational__r WHERE Field2__c = false) "
+                        + "FROM Opportunity WHERE AccountId = :param AND IsClosed = false WITH USER_MODE";
+
+        final Set<SoqlQueryInfo> queryInfos = SoqlParserUtil.parseQuery(query);
+        assertThat(queryInfos, hasSize(2));
+
+        final Iterator<SoqlQueryInfo> iterator =
+                ObjectFieldTestHelper.getSortedIterator(queryInfos);
+
+        final SoqlQueryInfo queryInfo1 = iterator.next();
+        assertThat(queryInfo1.isUserMode(), equalTo(true));
+
+        final SoqlQueryInfo queryInfo2 = iterator.next();
+        assertThat(queryInfo2.isUserMode(), equalTo(true));
     }
 
     @Test
