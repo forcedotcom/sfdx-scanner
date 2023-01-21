@@ -79,11 +79,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
     /** Graph which owns the path */
     private final GraphTraversalSource g;
 
-    /**
-     * Object which maintains state about all ApexPathExpanders that are related to the first path
-     * which is being expanded.
-     */
-    private final ApexPathCollapser apexPathCollapser;
+    /** Id that represents the path expansion group that this ApexPathExpander is a part of. */
+    private Long pathExpansionId;
 
     /** Dynamically generated id used to establish object equality */
     private final Long id;
@@ -177,13 +174,13 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
 
     ApexPathExpander(
             GraphTraversalSource g,
-            ApexPathCollapser apexPathCollapser,
+            Long pathExpansionId,
             ApexPath topMostPath,
             ApexPathExpanderConfig config) {
         this.id = ID_GENERATOR.incrementAndGet();
         this.hash = Objects.hashCode(this.id);
         this.g = g;
-        this.apexPathCollapser = apexPathCollapser;
+        this.pathExpansionId = pathExpansionId;
         this.forkEvents = new LinkedHashMap<>();
         this.forkResults = new HashMap<>();
         this.topMostPath = new Stack<>();
@@ -202,6 +199,9 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.engineDirectiveContext = new EngineDirectiveContext();
         this.currentlyInitializingStaticClasses = CollectionUtil.newTreeSet();
         this.alreadyInitializedStaticClasses = CollectionUtil.newTreeSet();
+
+        // Register the newly created ApexPathExpander
+        PathExpansionRegistry.registerApexPathExpander(this);
     }
 
     /**
@@ -215,7 +215,7 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.id = ID_GENERATOR.incrementAndGet();
         this.hash = Objects.hashCode(this.id);
         this.g = other.g;
-        this.apexPathCollapser = other.apexPathCollapser;
+        this.pathExpansionId = other.pathExpansionId;
         this.forkEvents = CloneUtil.cloneHashMap(other.forkEvents);
         PathVertex pathVertex = ex.getForkEvent().getPathVertex();
         this.forkEvents.put(pathVertex, ex.getForkEvent());
@@ -281,6 +281,9 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                 CloneUtil.cloneTreeSet(other.currentlyInitializingStaticClasses);
         this.alreadyInitializedStaticClasses =
                 CloneUtil.cloneTreeSet(other.alreadyInitializedStaticClasses);
+
+        // Register the newly created ApexPathExpander
+        PathExpansionRegistry.registerApexPathExpander(this);
     }
 
     /**
@@ -299,6 +302,11 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.engineDirectiveContext.clear();
         // TODO: Add clear method
         this.startScope = null;
+        //        this.forkEvents.clear();
+        //        this.forkResults.clear();
+
+        // Deregister the current ApexPathExpander instance
+        PathExpansionRegistry.deregisterApexPathExpander(this.id);
     }
 
     /** Get a static class scope. Reuse any existing ones in order to maintain state. */
@@ -678,6 +686,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                         throw new UnexpectedException(
                                 "Duplicated return result. vertex=" + pathVertex);
                     }
+                    final ApexPathCollapser apexPathCollapser =
+                            PathExpansionRegistry.lookupPathCollapser(pathExpansionId);
                     apexPathCollapser.resultReturned(
                             this, forkEvents.get(pathVertex), lastReturnValue);
                 }

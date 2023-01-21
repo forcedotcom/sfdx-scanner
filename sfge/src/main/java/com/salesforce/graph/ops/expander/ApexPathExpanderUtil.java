@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -67,18 +68,21 @@ public final class ApexPathExpanderUtil {
         }
     }
 
-    /**
-     * The {@code ApexPathCollapser} that keeps track of all paths and attempts to collapse them
-     * whenever a forked method has returned a result.
-     */
-    private final ApexPathCollapser apexPathCollapser;
+    /** Used to give each object a unique id */
+    private static final AtomicLong ID_GENERATOR = new AtomicLong();
+
+    private final Long pathExpansionId;
 
     private ApexPathExpanderUtil(ApexPathExpanderConfig config) {
+        this.pathExpansionId = ID_GENERATOR.incrementAndGet();
+        final ApexPathCollapser apexPathCollapser;
         if (config.getDynamicCollapsers().isEmpty()) {
-            this.apexPathCollapser = NoOpApexPathCollapser.getInstance();
+            apexPathCollapser = NoOpApexPathCollapser.getInstance();
         } else {
-            this.apexPathCollapser = new ApexPathCollapserImpl(config.getDynamicCollapsers());
+            apexPathCollapser = new ApexPathCollapserImpl(config.getDynamicCollapsers());
         }
+
+        PathExpansionRegistry.registerPathCollapser(pathExpansionId, apexPathCollapser);
     }
 
     private List<ApexPath> _expand(
@@ -120,19 +124,19 @@ public final class ApexPathExpanderUtil {
         final String className = method.getDefiningType();
         if (method.isStatic()) {
             final ApexPathExpander apexPathExpander =
-                    new ApexPathExpander(g, apexPathCollapser, path, config);
+                    new ApexPathExpander(g, pathExpansionId, path, config);
             apexPathExpanders.push(apexPathExpander);
         } else {
             if (method instanceof MethodVertex.ConstructorVertex) {
                 final ApexPathExpander apexPathExpander =
-                        new ApexPathExpander(g, apexPathCollapser, path, config);
+                        new ApexPathExpander(g, pathExpansionId, path, config);
                 apexPathExpanders.push(apexPathExpander);
             } else {
                 final List<MethodVertex.ConstructorVertex> constructors =
                         MethodUtil.getNonDefaultConstructors(g, className);
                 if (constructors.isEmpty()) {
                     final ApexPathExpander apexPathExpander =
-                            new ApexPathExpander(g, apexPathCollapser, path, config);
+                            new ApexPathExpander(g, pathExpansionId, path, config);
                     apexPathExpanders.push(apexPathExpander);
                 } else {
                     // Expand by number of constructors * number of paths
@@ -143,7 +147,7 @@ public final class ApexPathExpanderUtil {
                             final ApexPath clonedPath = path.deepClone();
                             clonedPath.setConstructorPath(constructorPath);
                             final ApexPathExpander apexPathExpander =
-                                    new ApexPathExpander(g, apexPathCollapser, clonedPath, config);
+                                    new ApexPathExpander(g, pathExpansionId, clonedPath, config);
                             apexPathExpanders.push(apexPathExpander);
                         }
                     }
@@ -156,6 +160,8 @@ public final class ApexPathExpanderUtil {
 
     private void expand(
             Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
+        final ApexPathCollapser apexPathCollapser =
+                PathExpansionRegistry.lookupPathCollapser(pathExpansionId);
         // Continue while there is work to do. This stack is updated as the path is forked.
         // Forked expanders are pushed to the front of the stack, causing the paths to be traversed
         // depth first in order
@@ -303,6 +309,9 @@ public final class ApexPathExpanderUtil {
                 }
             }
         }
+
+        // Clear ApexPathCollapser for this pathExpansion effort
+        PathExpansionRegistry.clear();
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Path info. completedApexPathExpanders=" + resultCollector.size());
         }
