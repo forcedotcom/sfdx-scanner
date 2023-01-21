@@ -1,5 +1,6 @@
 package com.salesforce.graph.ops.expander;
 
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.ApexPath;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ public final class PathExpansionRegistry {
 
     public static void registerPathCollapser(
             Long pathExpansionId, ApexPathCollapser pathCollapser) {
-        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().put(pathExpansionId, pathCollapser);
+        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().validateAndPut(pathExpansionId, pathCollapser);
     }
 
     public static ApexPathCollapser lookupPathCollapser(Long pathExpansionId) {
@@ -45,8 +46,12 @@ public final class PathExpansionRegistry {
         return PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().remove(pathExpansionId);
     }
 
+    public static void validatePathCollapser(ApexPathCollapser pathCollapser) {
+        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().validate(pathCollapser);
+    }
+
     public static void registerForkEvent(ForkEvent forkEvent) {
-        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().put(forkEvent.getId(), forkEvent);
+        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().validateAndPut(forkEvent.getId(), forkEvent);
     }
 
     public static ForkEvent lookupForkEvent(Long forkEventId) {
@@ -57,10 +62,14 @@ public final class PathExpansionRegistry {
         return FORK_EVENT_REGISTRY_THREAD_LOCAL.get().remove(forkEventId);
     }
 
+    public static void validateForkEvent(ForkEvent forkEvent) {
+        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().validate(forkEvent);
+    }
+
     public static void registerApexPathExpander(ApexPathExpander apexPathExpander) {
         APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL
                 .get()
-                .put(apexPathExpander.getId(), apexPathExpander);
+                .validateAndPut(apexPathExpander.getId(), apexPathExpander);
     }
 
     public static ApexPathExpander lookupApexPathExpander(Long apexPathExpanderId) {
@@ -69,6 +78,10 @@ public final class PathExpansionRegistry {
 
     public static ApexPathExpander deregisterApexPathExpander(Long apexPathExpanderId) {
         return APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().remove(apexPathExpanderId);
+    }
+
+    public static void validateApexPathExpander(ApexPathExpander apexPathExpander) {
+        APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().validate(apexPathExpander);
     }
 
     /**
@@ -84,8 +97,26 @@ public final class PathExpansionRegistry {
             idToInstance = new HashMap<>();
         }
 
+        void validateAndPut(Long id, T instance) {
+            if (hasKey(id)) {
+                throw new ProgrammingException("Id already exists on registry for " + instance);
+            }
+
+            if (hasValue(instance)) {
+                throw new ProgrammingException("Instance already exists on registry: " + instance);
+            }
+
+            put(id, instance);
+        }
+
         void put(Long id, T instance) {
             idToInstance.put(id, instance);
+        }
+
+        void validate(T instance) {
+            if (!idToInstance.containsValue(instance)) {
+                throw new ProgrammingException("Instance not found in the registry: " + instance);
+            }
         }
 
         T get(Long id) {
@@ -94,6 +125,14 @@ public final class PathExpansionRegistry {
 
         T remove(Long id) {
             return idToInstance.remove(id);
+        }
+
+        boolean hasKey(Long id) {
+            return idToInstance.containsKey(id);
+        }
+
+        boolean hasValue(T instance) {
+            return idToInstance.containsValue(instance);
         }
 
         void clear() {

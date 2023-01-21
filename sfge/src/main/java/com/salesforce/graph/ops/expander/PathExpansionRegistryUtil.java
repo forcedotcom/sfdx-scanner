@@ -27,7 +27,11 @@ public final class PathExpansionRegistryUtil {
             return new ArrayList<>();
         }
         return apexPathExpanders.stream()
-                .map(apexPathExpander -> apexPathExpander.getId())
+                .map(
+                        apexPathExpander -> {
+                            PathExpansionRegistry.validateApexPathExpander(apexPathExpander);
+                            return apexPathExpander.getId();
+                        })
                 .collect(Collectors.toList());
     }
 
@@ -44,6 +48,12 @@ public final class PathExpansionRegistryUtil {
         if (forkEvents.isEmpty()) {
             return new ArrayList<>();
         }
-        return forkEvents.stream().map(forkEvent -> forkEvent.getId()).collect(Collectors.toList());
+        return forkEvents.stream()
+                .map(
+                        forkEvent -> {
+                            PathExpansionRegistry.validateForkEvent(forkEvent);
+                            return forkEvent.getId();
+                        })
+                .collect(Collectors.toList());
     }
 }
