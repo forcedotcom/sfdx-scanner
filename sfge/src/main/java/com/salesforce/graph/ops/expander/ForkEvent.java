@@ -31,7 +31,11 @@ class ForkEvent implements DeepCloneable<ForkEvent> {
 
     private final int hash;
 
-    ForkEvent(Long apexPathExpanderId, PathVertex pathVertex, MethodVertex methodVertex) {
+    ForkEvent(
+            Long apexPathExpanderId,
+            PathVertex pathVertex,
+            MethodVertex methodVertex,
+            PathExpansionRegistry registry) {
         this.id = ID_GENERATOR.incrementAndGet();
         this.apexPathExpanderId = apexPathExpanderId;
         this.pathVertex = pathVertex;
@@ -39,7 +43,7 @@ class ForkEvent implements DeepCloneable<ForkEvent> {
         this.hash = Objects.hash(this.apexPathExpanderId, this.pathVertex, this.methodVertex);
 
         // Register the newly created ForkEvent
-        PathExpansionRegistry.registerForkEvent(this);
+        registry.registerForkEvent(this);
     }
 
     @Override

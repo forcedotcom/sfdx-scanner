@@ -15,73 +15,69 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * the next path.
  */
 public final class PathExpansionRegistry {
-    private PathExpansionRegistry() {}
 
-    private static final ThreadLocal<PathCollapserRegistry> PATH_COLLAPSER_REGISTRY_THREAD_LOCAL =
-            ThreadLocal.withInitial(() -> new PathCollapserRegistry());
+    private final PathCollapserRegistry pathCollapserRegistry;
+    private final ForkEventRegistry forkEventRegistry;
+    private final ApexPathExpanderRegistry apexPathExpanderRegistry;
 
-    private static final ThreadLocal<ForkEventRegistry> FORK_EVENT_REGISTRY_THREAD_LOCAL =
-            ThreadLocal.withInitial(() -> new ForkEventRegistry());
-
-    private static final ThreadLocal<ApexPathExpanderRegistry>
-            APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL =
-                    ThreadLocal.withInitial(() -> new ApexPathExpanderRegistry());
-
-    public static void clear() {
-        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().clear();
-        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().clear();
-        APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().clear();
+    public PathExpansionRegistry() {
+        pathCollapserRegistry = new PathCollapserRegistry();
+        forkEventRegistry = new ForkEventRegistry();
+        apexPathExpanderRegistry = new ApexPathExpanderRegistry();
     }
 
-    public static void registerPathCollapser(
-            Long pathExpansionId, ApexPathCollapser pathCollapser) {
-        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().validateAndPut(pathExpansionId, pathCollapser);
+    public void clear() {
+        pathCollapserRegistry.clear();
+        forkEventRegistry.clear();
+        apexPathExpanderRegistry.clear();
     }
 
-    public static ApexPathCollapser lookupPathCollapser(Long pathExpansionId) {
-        return PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().get(pathExpansionId);
+    public void registerPathCollapser(Long pathExpansionId, ApexPathCollapser pathCollapser) {
+        pathCollapserRegistry.validateAndPut(pathExpansionId, pathCollapser);
     }
 
-    public static ApexPathCollapser deregisterPathCollapser(Long pathExpansionId) {
-        return PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().remove(pathExpansionId);
+    public ApexPathCollapser lookupPathCollapser(Long pathExpansionId) {
+        return pathCollapserRegistry.get(pathExpansionId);
     }
 
-    public static void validatePathCollapser(ApexPathCollapser pathCollapser) {
-        PATH_COLLAPSER_REGISTRY_THREAD_LOCAL.get().validate(pathCollapser);
+    public ApexPathCollapser deregisterPathCollapser(Long pathExpansionId) {
+        return pathCollapserRegistry.remove(pathExpansionId);
     }
 
-    public static void registerForkEvent(ForkEvent forkEvent) {
-        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().validateAndPut(forkEvent.getId(), forkEvent);
+    public void validatePathCollapser(ApexPathCollapser pathCollapser) {
+        pathCollapserRegistry.validate(pathCollapser);
     }
 
-    public static ForkEvent lookupForkEvent(Long forkEventId) {
-        return FORK_EVENT_REGISTRY_THREAD_LOCAL.get().get(forkEventId);
+    public void registerForkEvent(ForkEvent forkEvent) {
+        forkEventRegistry.validateAndPut(forkEvent.getId(), forkEvent);
     }
 
-    public static ForkEvent deregisterForkEvent(Long forkEventId) {
-        return FORK_EVENT_REGISTRY_THREAD_LOCAL.get().remove(forkEventId);
+    public ForkEvent lookupForkEvent(Long forkEventId) {
+        return forkEventRegistry.get(forkEventId);
     }
 
-    public static void validateForkEvent(ForkEvent forkEvent) {
-        FORK_EVENT_REGISTRY_THREAD_LOCAL.get().validate(forkEvent);
+    public ForkEvent deregisterForkEvent(Long forkEventId) {
+        return forkEventRegistry.remove(forkEventId);
     }
 
-    public static void registerApexPathExpander(ApexPathExpander apexPathExpander) {
-        APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL
-                .get()
-                .validateAndPut(apexPathExpander.getId(), apexPathExpander);
+    public void validateForkEvent(ForkEvent forkEvent) {
+        forkEventRegistry.validate(forkEvent);
     }
 
-    public static ApexPathExpander lookupApexPathExpander(Long apexPathExpanderId) {
-        return APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().get(apexPathExpanderId);
+    public void registerApexPathExpander(ApexPathExpander apexPathExpander) {
+        apexPathExpanderRegistry.validateAndPut(apexPathExpander.getId(), apexPathExpander);
     }
 
-    public static ApexPathExpander deregisterApexPathExpander(Long apexPathExpanderId) {
-        return APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().remove(apexPathExpanderId);
+    public ApexPathExpander lookupApexPathExpander(Long apexPathExpanderId) {
+        return apexPathExpanderRegistry.get(apexPathExpanderId);
     }
 
-    public static void validateApexPathExpander(ApexPathExpander apexPathExpander) {
-        APEX_PATH_EXPANDER_REGISTRY_THREAD_LOCAL.get().validate(apexPathExpander);
+    public ApexPathExpander deregisterApexPathExpander(Long apexPathExpanderId) {
+        return apexPathExpanderRegistry.remove(apexPathExpanderId);
+    }
+
+    public void validateApexPathExpander(ApexPathExpander apexPathExpander) {
+        apexPathExpanderRegistry.validate(apexPathExpander);
     }
 
     /**

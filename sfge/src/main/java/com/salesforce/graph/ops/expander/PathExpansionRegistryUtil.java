@@ -12,46 +12,48 @@ public final class PathExpansionRegistryUtil {
     private PathExpansionRegistryUtil() {}
 
     public static List<ApexPathExpander> convertIdsToApexPathExpanders(
-            List<Long> apexPathExpanderIds) {
+            PathExpansionRegistry registry, List<Long> apexPathExpanderIds) {
         if (apexPathExpanderIds.isEmpty()) {
             return new ArrayList<>();
         }
         return apexPathExpanderIds.stream()
-                .map(id -> PathExpansionRegistry.lookupApexPathExpander(id))
+                .map(id -> registry.lookupApexPathExpander(id))
                 .collect(Collectors.toList());
     }
 
     public static List<Long> convertApexPathExpandersToIds(
-            List<ApexPathExpander> apexPathExpanders) {
+            PathExpansionRegistry registry, List<ApexPathExpander> apexPathExpanders) {
         if (apexPathExpanders.isEmpty()) {
             return new ArrayList<>();
         }
         return apexPathExpanders.stream()
                 .map(
                         apexPathExpander -> {
-                            PathExpansionRegistry.validateApexPathExpander(apexPathExpander);
+                            registry.validateApexPathExpander(apexPathExpander);
                             return apexPathExpander.getId();
                         })
                 .collect(Collectors.toList());
     }
 
-    public static List<ForkEvent> convertIdsToForkEvents(List<Long> forkEventIds) {
+    public static List<ForkEvent> convertIdsToForkEvents(
+            PathExpansionRegistry registry, List<Long> forkEventIds) {
         if (forkEventIds.isEmpty()) {
             return new ArrayList<>();
         }
         return forkEventIds.stream()
-                .map(id -> PathExpansionRegistry.lookupForkEvent(id))
+                .map(id -> registry.lookupForkEvent(id))
                 .collect(Collectors.toList());
     }
 
-    public static List<Long> convertForkEventsToIds(List<ForkEvent> forkEvents) {
+    public static List<Long> convertForkEventsToIds(
+            PathExpansionRegistry registry, List<ForkEvent> forkEvents) {
         if (forkEvents.isEmpty()) {
             return new ArrayList<>();
         }
         return forkEvents.stream()
                 .map(
                         forkEvent -> {
-                            PathExpansionRegistry.validateForkEvent(forkEvent);
+                            registry.validateForkEvent(forkEvent);
                             return forkEvent.getId();
                         })
                 .collect(Collectors.toList());

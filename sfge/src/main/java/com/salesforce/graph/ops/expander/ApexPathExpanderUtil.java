@@ -5,11 +5,7 @@ import com.salesforce.graph.ops.ApexPathUtil;
 import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.directive.EngineDirectiveCommand;
-import com.salesforce.graph.symbols.ClassInstanceScope;
-import com.salesforce.graph.symbols.ContextProviders;
-import com.salesforce.graph.symbols.DeepCloneContextProvider;
-import com.salesforce.graph.symbols.MethodInvocationScope;
-import com.salesforce.graph.symbols.SymbolProvider;
+import com.salesforce.graph.symbols.*;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
@@ -55,8 +51,12 @@ public final class ApexPathExpanderUtil {
             logFilteredOutPath(throwStatementVertex);
             return Collections.emptyList();
         } else {
-            ApexPathExpanderUtil apexPathExpanderUtil = new ApexPathExpanderUtil(config);
-            return apexPathExpanderUtil._expand(g, path, config);
+            final PathExpansionRegistry registry = new PathExpansionRegistry();
+            ApexPathExpanderUtil apexPathExpanderUtil = new ApexPathExpanderUtil(config, registry);
+            final List<ApexPath> apexPaths = apexPathExpanderUtil._expand(g, path, config);
+            // Clean up registry to remove any lingering references
+            registry.clear();
+            return apexPaths;
         }
     }
 
@@ -73,16 +73,21 @@ public final class ApexPathExpanderUtil {
 
     private final Long pathExpansionId;
 
-    private ApexPathExpanderUtil(ApexPathExpanderConfig config) {
+    private final PathExpansionRegistry registry;
+
+    private ApexPathExpanderUtil(ApexPathExpanderConfig config, PathExpansionRegistry registry) {
         this.pathExpansionId = ID_GENERATOR.incrementAndGet();
+        this.registry = registry;
+
+        // Create and register ApexPathCollapser
         final ApexPathCollapser apexPathCollapser;
         if (config.getDynamicCollapsers().isEmpty()) {
             apexPathCollapser = NoOpApexPathCollapser.getInstance();
         } else {
-            apexPathCollapser = new ApexPathCollapserImpl(config.getDynamicCollapsers());
+            apexPathCollapser = new ApexPathCollapserImpl(config.getDynamicCollapsers(), registry);
         }
 
-        PathExpansionRegistry.registerPathCollapser(pathExpansionId, apexPathCollapser);
+        registry.registerPathCollapser(pathExpansionId, apexPathCollapser);
     }
 
     private List<ApexPath> _expand(
@@ -124,19 +129,19 @@ public final class ApexPathExpanderUtil {
         final String className = method.getDefiningType();
         if (method.isStatic()) {
             final ApexPathExpander apexPathExpander =
-                    new ApexPathExpander(g, pathExpansionId, path, config);
+                    new ApexPathExpander(g, pathExpansionId, path, config, registry);
             apexPathExpanders.push(apexPathExpander);
         } else {
             if (method instanceof MethodVertex.ConstructorVertex) {
                 final ApexPathExpander apexPathExpander =
-                        new ApexPathExpander(g, pathExpansionId, path, config);
+                        new ApexPathExpander(g, pathExpansionId, path, config, registry);
                 apexPathExpanders.push(apexPathExpander);
             } else {
                 final List<MethodVertex.ConstructorVertex> constructors =
                         MethodUtil.getNonDefaultConstructors(g, className);
                 if (constructors.isEmpty()) {
                     final ApexPathExpander apexPathExpander =
-                            new ApexPathExpander(g, pathExpansionId, path, config);
+                            new ApexPathExpander(g, pathExpansionId, path, config, registry);
                     apexPathExpanders.push(apexPathExpander);
                 } else {
                     // Expand by number of constructors * number of paths
@@ -147,7 +152,8 @@ public final class ApexPathExpanderUtil {
                             final ApexPath clonedPath = path.deepClone();
                             clonedPath.setConstructorPath(constructorPath);
                             final ApexPathExpander apexPathExpander =
-                                    new ApexPathExpander(g, pathExpansionId, clonedPath, config);
+                                    new ApexPathExpander(
+                                            g, pathExpansionId, clonedPath, config, registry);
                             apexPathExpanders.push(apexPathExpander);
                         }
                     }
@@ -160,8 +166,7 @@ public final class ApexPathExpanderUtil {
 
     private void expand(
             Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
-        final ApexPathCollapser apexPathCollapser =
-                PathExpansionRegistry.lookupPathCollapser(pathExpansionId);
+        final ApexPathCollapser apexPathCollapser = registry.lookupPathCollapser(pathExpansionId);
         // Continue while there is work to do. This stack is updated as the path is forked.
         // Forked expanders are pushed to the front of the stack, causing the paths to be traversed
         // depth first in order
@@ -310,8 +315,6 @@ public final class ApexPathExpanderUtil {
             }
         }
 
-        // Clear ApexPathCollapser for this pathExpansion effort
-        PathExpansionRegistry.clear();
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Path info. completedApexPathExpanders=" + resultCollector.size());
         }
@@ -329,11 +332,11 @@ public final class ApexPathExpanderUtil {
                 continue;
             }
             // Establish a context so that objects passed by reference are only cloned once
-            DeepCloneContextProvider.establish();
+                        DeepCloneContextProvider.establish();
             try {
                 result.add(new ApexPathExpander(ex.getApexPathExpander(), ex, i));
             } finally {
-                DeepCloneContextProvider.release();
+                                DeepCloneContextProvider.release();
             }
         }
 
