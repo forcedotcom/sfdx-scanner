@@ -9,7 +9,7 @@ public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
         public static final String UNIMPLEMENTED_TYPE_RULE =
-                "Identifies non-global interfaces/abstract classes without implementations";
+                "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
     }
 
     public static final class RuleViolationTemplates {
