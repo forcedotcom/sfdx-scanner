@@ -393,7 +393,8 @@ public class ObjectFieldUtilTest {
         assertThat(contactQueryInfo.isOutermost(), equalTo(true));
     }
 
-    // TODO: In the fullness of time, turn this test and the others like it into one parameterized test.
+    // TODO: In the fullness of time, turn this test and the others like it into one parameterized
+    // test.
     @Test
     public void testRegroup_withMultipleDuplicatesInMultipleObject_isOutermost() {
         final HashSet<SoqlQueryInfo> inputQueryInfos = new HashSet<>();
@@ -472,71 +473,72 @@ public class ObjectFieldUtilTest {
         assertThat(contactQueryInfo.isOutermost(), equalTo(true));
     }
 
-    // TODO: In the fullness of time, turn this test and the others like it into one parameterized test.
+    // TODO: In the fullness of time, turn this test and the others like it into one parameterized
+    // test.
     @Test
     public void testRegroup_withMultipleDuplicatesInMultipleObject_isSecurityEnforced() {
         final HashSet<SoqlQueryInfo> inputQueryInfos = new HashSet<>();
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr1",
-                "Contact",
-                CollectionUtil.newTreeSetOf("FirstName", "LastName"),
-                false,
-                false,
-                false,
-                true,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr1",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("FirstName", "LastName"),
+                        false,
+                        false,
+                        false,
+                        true,
+                        false,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr2",
-                "Account",
-                CollectionUtil.newTreeSetOf("Name"),
-                false,
-                false,
-                false,
-                true,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr2",
+                        "Account",
+                        CollectionUtil.newTreeSetOf("Name"),
+                        false,
+                        false,
+                        false,
+                        true,
+                        false,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr3",
-                "Contact",
-                CollectionUtil.newTreeSetOf("Status__c"),
-                false,
-                false,
-                false,
-                true,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr3",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("Status__c"),
+                        false,
+                        false,
+                        false,
+                        true,
+                        false,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr4",
-                "Contact",
-                CollectionUtil.newTreeSetOf("AnotherField"),
-                false,
-                false,
-                false,
-                true,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr4",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("AnotherField"),
+                        false,
+                        false,
+                        false,
+                        true,
+                        false,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr5",
-                "Account",
-                CollectionUtil.newTreeSetOf("Description"),
-                false,
-                false,
-                false,
-                false,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr5",
+                        "Account",
+                        CollectionUtil.newTreeSetOf("Description"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false));
 
         final HashSet<SoqlQueryInfo> outputQueryInfos =
-            SoqlParserUtil.regroupByObject(inputQueryInfos);
+                SoqlParserUtil.regroupByObject(inputQueryInfos);
         assertThat(outputQueryInfos, hasSize(2));
         final Iterator<SoqlQueryInfo> infoIterator =
-            ObjectFieldTestHelper.getSortedIterator(outputQueryInfos);
+                ObjectFieldTestHelper.getSortedIterator(outputQueryInfos);
 
         final SoqlQueryInfo accountQueryInfo = infoIterator.next();
         assertThat(accountQueryInfo.getObjectName(), equalToIgnoringCase("Account"));
@@ -546,76 +548,77 @@ public class ObjectFieldUtilTest {
         final SoqlQueryInfo contactQueryInfo = infoIterator.next();
         assertThat(contactQueryInfo.getObjectName(), equalToIgnoringCase("Contact"));
         assertThat(
-            contactQueryInfo.getFields(),
-            containsInAnyOrder("FirstName", "LastName", "Status__c", "AnotherField"));
+                contactQueryInfo.getFields(),
+                containsInAnyOrder("FirstName", "LastName", "Status__c", "AnotherField"));
         assertThat(contactQueryInfo.isSecurityEnforced(), equalTo(true));
     }
 
-    // TODO: In the fullness of time, turn this test and the others like it into one parameterized test.
+    // TODO: In the fullness of time, turn this test and the others like it into one parameterized
+    // test.
     @Test
     public void testRegroup_withMultipleDuplicatesInMultipleObject_isUserMode() {
         final HashSet<SoqlQueryInfo> inputQueryInfos = new HashSet<>();
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr1",
-                "Contact",
-                CollectionUtil.newTreeSetOf("FirstName", "LastName"),
-                false,
-                false,
-                false,
-                false,
-                true,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr1",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("FirstName", "LastName"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        true,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr2",
-                "Account",
-                CollectionUtil.newTreeSetOf("Name"),
-                false,
-                false,
-                false,
-                false,
-                true,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr2",
+                        "Account",
+                        CollectionUtil.newTreeSetOf("Name"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        true,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr3",
-                "Contact",
-                CollectionUtil.newTreeSetOf("Status__c"),
-                false,
-                false,
-                false,
-                false,
-                true,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr3",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("Status__c"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        true,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr4",
-                "Contact",
-                CollectionUtil.newTreeSetOf("AnotherField"),
-                false,
-                false,
-                false,
-                false,
-                true,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr4",
+                        "Contact",
+                        CollectionUtil.newTreeSetOf("AnotherField"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        true,
+                        false));
         inputQueryInfos.add(
-            new SoqlQueryInfo(
-                "queryStr5",
-                "Account",
-                CollectionUtil.newTreeSetOf("Description"),
-                false,
-                false,
-                false,
-                false,
-                false,
-                false));
+                new SoqlQueryInfo(
+                        "queryStr5",
+                        "Account",
+                        CollectionUtil.newTreeSetOf("Description"),
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false));
 
         final HashSet<SoqlQueryInfo> outputQueryInfos =
-            SoqlParserUtil.regroupByObject(inputQueryInfos);
+                SoqlParserUtil.regroupByObject(inputQueryInfos);
         assertThat(outputQueryInfos, hasSize(2));
         final Iterator<SoqlQueryInfo> infoIterator =
-            ObjectFieldTestHelper.getSortedIterator(outputQueryInfos);
+                ObjectFieldTestHelper.getSortedIterator(outputQueryInfos);
 
         final SoqlQueryInfo accountQueryInfo = infoIterator.next();
         assertThat(accountQueryInfo.getObjectName(), equalToIgnoringCase("Account"));
@@ -625,8 +628,8 @@ public class ObjectFieldUtilTest {
         final SoqlQueryInfo contactQueryInfo = infoIterator.next();
         assertThat(contactQueryInfo.getObjectName(), equalToIgnoringCase("Contact"));
         assertThat(
-            contactQueryInfo.getFields(),
-            containsInAnyOrder("FirstName", "LastName", "Status__c", "AnotherField"));
+                contactQueryInfo.getFields(),
+                containsInAnyOrder("FirstName", "LastName", "Status__c", "AnotherField"));
         assertThat(contactQueryInfo.isUserMode(), equalTo(true));
     }
 }
