@@ -12,7 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 
-public class UserClassVertex extends BaseSFVertex implements InheritableSFVertex, NamedVertex {
+public class UserClassVertex extends FieldWithModifierVertex
+        implements InheritableSFVertex, NamedVertex {
     private final LazyVertexList<AnnotationVertex> annotations;
 
     UserClassVertex(Map<Object, Object> properties) {
@@ -58,21 +59,6 @@ public class UserClassVertex extends BaseSFVertex implements InheritableSFVertex
     // TODO: Treeset for case insensitivity
     public List<String> getInterfaceNames() {
         return getStrings(Schema.INTERFACE_NAMES);
-    }
-
-    /**
-     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}
-     */
-    public boolean isAbstract() {
-        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE))
-                .isAbstract();
-    }
-
-    /**
-     * TODO: Check whether this class can be safely made to extend {@link FieldWithModifierVertex}
-     */
-    public boolean isVirtual() {
-        return ((ModifierNodeVertex) getOnlyChild(ASTConstants.NodeType.MODIFIER_NODE)).isVirtual();
     }
 
     public boolean isTest() {

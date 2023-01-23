@@ -120,7 +120,7 @@ public class FlsViolationInfo extends ObjectFieldInfo<FlsViolationInfo> implemen
     }
 
     public String getMessageTemplate() {
-        return UserFacingMessages.VIOLATION_MESSAGE_TEMPLATE;
+        return UserFacingMessages.RuleViolationTemplates.MISSING_CRUD_FLS_CHECK;
     }
 
     @Override

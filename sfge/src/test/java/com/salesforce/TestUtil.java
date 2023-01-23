@@ -131,7 +131,7 @@ public final class TestUtil {
         buildGraphForFls(g, new String[] {sourceCode}, renderXml);
     }
 
-    public static void buildGraph(GraphTraversalSource g, String[] sourceCode) {
+    public static void buildGraph(GraphTraversalSource g, String... sourceCode) {
         buildGraph(Config.Builder.get(g, sourceCode).renderXml(RENDER_XML).build());
     }
 
