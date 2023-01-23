@@ -215,8 +215,8 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true,
-                        false));
+                        false,
+                        true));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
@@ -246,8 +246,8 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true,
-                        false));
+                        false,
+                        true));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
@@ -282,8 +282,8 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true,
-                        false));
+                        false,
+                        true));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
@@ -338,8 +338,8 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true,
-                        false));
+                        false,
+                        true));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",
@@ -405,8 +405,8 @@ public class ObjectFieldUtilTest {
                         false,
                         false,
                         false,
-                        true,
-                        false));
+                        false,
+                        true));
         inputQueryInfos.add(
                 new SoqlQueryInfo(
                         "queryStr2",

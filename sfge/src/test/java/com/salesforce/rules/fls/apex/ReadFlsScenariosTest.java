@@ -467,7 +467,6 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
         assertNoViolation(rule, sourceCode);
     }
 
-    /** NPSP test case from BGE_DataImportBatchEntry_CTRL#getOpportunitiesWithOppPayments */
     @CsvSource({"SECURITY_ENFORCED", "USER_MODE"})
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testSafeWithModeClauseInOuterQuery(String mode) {
@@ -476,20 +475,15 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                         + "    public void foo() {\n"
                         + "        String queryStr = 'SELECT Id, ' +\n"
                         + "                'Name, ' +\n"
-                        + "                'StageName, ' +\n"
-                        + "                'Amount, ' +\n"
+                        + "                'SomeField__c, ' +\n"
                         + "                    '(SELECT Id, ' +\n"
                         + "                    'Name, ' +\n"
-                        + "                    'npe01__Scheduled_Date__c, ' +\n"
-                        + "                    'npe01__Opportunity__r.Name, ' +\n"
-                        + "                    'npe01__Opportunity__c, ' +\n"
-                        + "                    'npe01__Payment_Amount__c,' +\n"
-                        + "                    'npe01__Paid__c, ' +\n"
-                        + "                    'npe01__Written_Off__c ' +\n"
-                        + "                    'FROM npe01__OppPayment__r ' +\n"
-                        + "                    'WHERE npe01__Written_Off__c = false) ' +\n"
+                        + "                    'SomeOtherField__c, ' +\n"
+                        + "                    'SomeRelatioship__r.Name, ' +\n"
+                        + "                    'FROM OppRelationship__r ' +\n"
+                        + "                    'WHERE SomeBooleanField__c = false) ' +\n"
                         + "                'FROM Opportunity ' +\n"
-                        + "                'WHERE AccountId = :donorId ' +\n"
+                        + "                'WHERE AccountId = :someId ' +\n"
                         + "                'AND IsClosed = false ' +\n"
                         + String.format("                'WITH %s';\n", mode)
                         + "			Database.query(queryStr);"
@@ -497,6 +491,40 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                         + "}\n";
 
         assertNoViolation(rule, sourceCode);
+    }
+
+    @Test
+    public void testUnsafeWithModeClauseInOuterQuery() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        String queryStr = 'SELECT Id, ' +\n"
+                        + "                'Name, ' +\n"
+                        + "                'SomeField__c, ' +\n"
+                        + "                    '(SELECT Id, ' +\n"
+                        + "                    'Name, ' +\n"
+                        + "                    'SomeOtherField__c, ' +\n"
+                        + "                    'SomeRelationship__r.Name, ' +\n"
+                        + "                    'FROM OppRelationship__r ' +\n"
+                        + "                    'WHERE SomeBooleanField__c = false) ' +\n"
+                        + "                'FROM Opportunity ' +\n"
+                        + "                'WHERE AccountId = :someId ' +\n"
+                        + "                'AND IsClosed = false ' +\n"
+                        + "                'WITH SYSTEM_MODE';\n"
+                        + "			Database.query(queryStr);"
+                        + "    }\n"
+                        + "}\n";
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(16, FlsConstants.FlsValidationType.READ, "Opportunity")
+                        .withFields("AccountId", "IsClosed", "Name", "SomeField__c"),
+                expect(16, FlsConstants.FlsValidationType.READ, "OppRelationship__r")
+                        .withFields(
+                                "Name",
+                                "SomeBooleanField__c",
+                                "SomeOtherField__c",
+                                "SomeRelationship__r.Name"));
     }
 
     @Test

@@ -23,8 +23,8 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
             boolean isCount,
             boolean isLimit1,
             boolean isSecurityEnforced,
-            boolean isOutermost,
-            boolean isUserMode) {
+            boolean isUserMode,
+            boolean isOutermost) {
         super(objectName, fields, isAllFields);
         this.queryStr = queryStr;
         this.count = isCount;
@@ -177,8 +177,8 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 count,
                 limit1,
                 securityEnforced,
-                outermost,
-                userMode);
+                userMode,
+                outermost);
     }
 
     @Override
@@ -200,10 +200,10 @@ public class SoqlQueryInfo extends ObjectFieldInfo<SoqlQueryInfo> {
                 + limit1
                 + ", isSecurityEnforced="
                 + securityEnforced
-                + ", isOutermost="
-                + outermost
                 + ", isUserMode="
                 + userMode
+                + ", isOutermost="
+                + outermost
                 + '}';
     }
 }

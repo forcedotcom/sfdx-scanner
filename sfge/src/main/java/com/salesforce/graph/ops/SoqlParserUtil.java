@@ -226,8 +226,8 @@ public final class SoqlParserUtil {
                 isLimit1(query),
                 // Use securityEnforced value of outer query if inner query doesn't have the clause
                 outerIsSecurityEnforced || isSecurityEnforced(query),
-                isOutermost,
-                outerIsUserMode || isUserMode(query));
+                outerIsUserMode || isUserMode(query),
+                isOutermost);
     }
 
     private static String getObjectName(String query, TreeSet<String> fields) {
