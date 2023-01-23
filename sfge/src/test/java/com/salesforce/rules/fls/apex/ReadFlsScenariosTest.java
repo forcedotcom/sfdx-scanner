@@ -5,6 +5,8 @@ import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.testutils.BaseFlsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class ReadFlsScenariosTest extends BaseFlsTest {
     private ApexFlsViolationRule rule;
@@ -192,17 +194,36 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                 expect(3, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
     }
 
-    // simple positive: query contains "with security_enforced" phrase
-    @Test
-    public void testSafeWithSecurityEnforced() {
+    // simple positive: query contains "with" phrases
+    @CsvSource({"SECURITY_ENFORCED", "USER_MODE"})
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSafeWithModeClause(String mode) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "    public void foo() {\n"
-                        + "        Contact c = [SELECT Status__c from Contact with security_enforced];\n"
+                        + String.format(
+                                "        Contact c = [SELECT Status__c from Contact with %s];\n",
+                                mode)
                         + "    }\n"
                         + "}\n";
 
         assertNoViolation(rule, sourceCode);
+    }
+
+    // simple negative: Query contains "with system_mode", which is de-facto unsafe.
+    @Test
+    public void testUnsafeWithSystemModeClause() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        Contact c = [SELECT Status__c from Contact with SYSTEM_MODE];\n"
+                        + "    }\n"
+                        + "}\n";
+
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(3, FlsConstants.FlsValidationType.READ, "Contact").withField("Status__c"));
     }
 
     @Test
@@ -446,35 +467,64 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
         assertNoViolation(rule, sourceCode);
     }
 
-    /** NPSP test case from BGE_DataImportBatchEntry_CTRL#getOpportunitiesWithOppPayments */
-    @Test
-    public void testSafeSecurityEnforcedInOuterQuery() {
+    @CsvSource({"SECURITY_ENFORCED", "USER_MODE"})
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSafeWithModeClauseInOuterQuery(String mode) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "    public void foo() {\n"
                         + "        String queryStr = 'SELECT Id, ' +\n"
                         + "                'Name, ' +\n"
-                        + "                'StageName, ' +\n"
-                        + "                'Amount, ' +\n"
+                        + "                'SomeField__c, ' +\n"
                         + "                    '(SELECT Id, ' +\n"
                         + "                    'Name, ' +\n"
-                        + "                    'npe01__Scheduled_Date__c, ' +\n"
-                        + "                    'npe01__Opportunity__r.Name, ' +\n"
-                        + "                    'npe01__Opportunity__c, ' +\n"
-                        + "                    'npe01__Payment_Amount__c,' +\n"
-                        + "                    'npe01__Paid__c, ' +\n"
-                        + "                    'npe01__Written_Off__c ' +\n"
-                        + "                    'FROM npe01__OppPayment__r ' +\n"
-                        + "                    'WHERE npe01__Written_Off__c = false) ' +\n"
+                        + "                    'SomeOtherField__c, ' +\n"
+                        + "                    'SomeRelatioship__r.Name, ' +\n"
+                        + "                    'FROM OppRelationship__r ' +\n"
+                        + "                    'WHERE SomeBooleanField__c = false) ' +\n"
                         + "                'FROM Opportunity ' +\n"
-                        + "                'WHERE AccountId = :donorId ' +\n"
+                        + "                'WHERE AccountId = :someId ' +\n"
                         + "                'AND IsClosed = false ' +\n"
-                        + "                'WITH SECURITY_ENFORCED';\n"
+                        + String.format("                'WITH %s';\n", mode)
                         + "			Database.query(queryStr);"
                         + "    }\n"
                         + "}\n";
 
         assertNoViolation(rule, sourceCode);
+    }
+
+    @Test
+    public void testUnsafeWithModeClauseInOuterQuery() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        String queryStr = 'SELECT Id, ' +\n"
+                        + "                'Name, ' +\n"
+                        + "                'SomeField__c, ' +\n"
+                        + "                    '(SELECT Id, ' +\n"
+                        + "                    'Name, ' +\n"
+                        + "                    'SomeOtherField__c, ' +\n"
+                        + "                    'SomeRelationship__r.Name, ' +\n"
+                        + "                    'FROM OppRelationship__r ' +\n"
+                        + "                    'WHERE SomeBooleanField__c = false) ' +\n"
+                        + "                'FROM Opportunity ' +\n"
+                        + "                'WHERE AccountId = :someId ' +\n"
+                        + "                'AND IsClosed = false ' +\n"
+                        + "                'WITH SYSTEM_MODE';\n"
+                        + "			Database.query(queryStr);"
+                        + "    }\n"
+                        + "}\n";
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(16, FlsConstants.FlsValidationType.READ, "Opportunity")
+                        .withFields("AccountId", "IsClosed", "Name", "SomeField__c"),
+                expect(16, FlsConstants.FlsValidationType.READ, "OppRelationship__r")
+                        .withFields(
+                                "Name",
+                                "SomeBooleanField__c",
+                                "SomeOtherField__c",
+                                "SomeRelationship__r.Name"));
     }
 
     @Test

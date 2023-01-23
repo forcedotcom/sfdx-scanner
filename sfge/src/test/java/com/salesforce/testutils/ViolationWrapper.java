@@ -123,7 +123,7 @@ public class ViolationWrapper {
             return this;
         }
 
-        public FlsViolationBuilder withFields(String[] fields) {
+        public FlsViolationBuilder withFields(String... fields) {
             this.fieldNames.addAll(Arrays.asList(fields));
             return this;
         }
