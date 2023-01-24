@@ -71,14 +71,6 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 
 Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](./en/v3.x/release-information/) for more info.
 
-#### See Also
-
-- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
-- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
-- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
-- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
-- [Frequently Asked Questions](./en/v3.x/faq/)
-
 ## UnusedMethodRule
 
 UnusedMethodRule detects methods contained in your code that aren’t invoked. At this stage, it detects:
@@ -113,6 +105,40 @@ Because no invocations of the indicated method were found, the method is unneces
     - protected, public, or global instance methods
     - static methods of any visibility
 
+## UnimplementedTypeRule
+
+UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
+
+To invoke UnimplementedTypeRule, provide `--engine sfge` and `--projectdir/-p` on `scanner:run`.
+
+### Definition
+
+UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
+
+### Interpreting UnimplementedTypeRule Results
+
+Match any violation message that you receive with this case to understand more about the violation.
+
+*Common Case*
+
+> Extend, implement, or delete %s %s
+
+Parameter Explanation:
+
+Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
+
+### UnimplementedTypeRule Limitations
+
+Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
+
 ## Roadmap
 
 We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).
+
+#### See Also
+
+- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
+- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
+- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
+- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
+- [Frequently Asked Questions](./en/v3.x/faq/)
