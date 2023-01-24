@@ -19,7 +19,8 @@ ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-
 |				 |`public`-scoped methods on Visualforce Controllers																|
 |				 |`global`-scoped methods on any class																			  	|
 |				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation																|
+|				 |Any method targeted during invocation			
+|				 |Entry points, not including triggers
 | **Sink**		 | 																													|
 | 		  	  	 |All DML operations and their Database.method() counterparts:   													|
 |				 |* delete																											|
