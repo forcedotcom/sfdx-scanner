@@ -1,8 +1,8 @@
 @echo off
-REM Auto-generated on Mon Jan 23 2023
-REM This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
-REM of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
-REM the plugin is approximately stable.
+REM Auto-generated on Wed Jan 25 2023
+REM This script smoke-tests the entire plug-in by running a series of commands that collectively capture a vertical slice
+REM of the plug-in, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
+REM the plug-in is approximately stable.
 REM DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/SmokeTestGenerator.js AND RERUN THAT SCRIPT
 REM FROM THE PROJECT ROOT!
 SET EXE_NAME=%1
@@ -23,9 +23,9 @@ echo "==== Run rules against a typescript file, which should run ESLint-Typescri
 call %EXE_NAME% scanner:run --format junit --target test\code-fixtures\projects\ts\src\simpleYetWrong.ts --tsconfig test\code-fixtures\projects\tsconfig.json --outfile smoke-test-results\run2.xml || exit /b 1
 echo "==== Run RetireJS against a folder ===="
 call %EXE_NAME% scanner:run --format junit --engine retire-js --target test\code-fixtures\projects\dep-test-app\folder-a --outfile smoke-test-results\run3.xml || exit /b 1
-echo "==== Run SFGE's non-DFA rules against a folder ===="
+echo "==== Run Salesforce Graph Engine's non-DFA rules against a folder ===="
 call %EXE_NAME% scanner:run --format junit --engine sfge --target test\code-fixtures\projects\sfge-smoke-app\src --projectdir test\code-fixtures\projects\sfge-smoke-app\src --outfile smoke-test-results\run4.xml || exit /b 1
-echo "=== Run SFGE's DFA rules against a folder ==="
+echo "=== Run Salesforce Graph Engine's DFA rules against a folder ==="
 call %EXE_NAME% scanner:run:dfa --format junit --target test\code-fixtures\projects\sfge-smoke-app\src --projectdir test\code-fixtures\projects\sfge-smoke-app\src --outfile smoke-test-results\run5.xml || exit /b 1
 echo "==== Add a JAR of custom rules ===="
 call %EXE_NAME% scanner:rule:add --language apex --path test\test-jars\apex\testjar1.jar || exit /b 1
