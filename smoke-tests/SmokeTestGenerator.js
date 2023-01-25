@@ -1,7 +1,7 @@
 /**
- * This script auto-generates bash/cmd scripts meant to test smoke test the entire plugin. These scripts will do so by
- * running a series of operations that collectively capture a vertical slice of the plugin, hitting every major piece
- * of functionality. If they all succeed, then we can conclude that the plugin is approximately stable.
+ * This script auto-generates bash/cmd scripts meant to test smoke test the entire plug-in. These scripts will do so by
+ * running a series of operations that collectively capture a vertical slice of the plug-in, hitting every major piece
+ * of functionality. If they all succeed, then we can conclude that the plug-in is approximately stable.
  * Invoke from the project root folder, e.g.
  * `node smoke-tests/SmokeTestGenerator.js`
  *
@@ -21,9 +21,9 @@ function generateScriptHeader(isBash) {
 
 	// All scripts should start with the same boilerplate disclaimer.
 	header += `${cmt} Auto-generated on ${new Date(Date.now()).toDateString()}
-${cmt} This script smoke-tests the entire plugin by running a series of commands that collectively capture a vertical slice
-${cmt} of the plugin, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
-${cmt} the plugin is approximately stable.
+${cmt} This script smoke-tests the entire plug-in by running a series of commands that collectively capture a vertical slice
+${cmt} of the plug-in, hitting every major piece of functionality. If they all succeed, then we can reasonably assume that
+${cmt} the plug-in is approximately stable.
 ${cmt} DO NOT EDIT THIS SCRIPT DIRECTLY! INSTEAD, MAKE CHANGES IN ./smoke-tests/SmokeTestGenerator.js AND RERUN THAT SCRIPT
 ${cmt} FROM THE PROJECT ROOT!\n`;
 
@@ -68,8 +68,10 @@ function generateScriptBody(isBash, delim) {
 		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'run2.xml'], delim)}`,
 		`echo "==== Run RetireJS against a folder ===="`,
 		`${exeName} scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'run3.xml'], delim)}`,
-		`echo "=== Run SFGE against a folder ==="`,
-		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}`,
+		`echo "==== Run Salesforce Graph Engine's non-DFA rules against a folder ===="`,
+		`${exeName} scanner:run --format junit --engine sfge --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'run4.xml'], delim)}`,
+		`echo "=== Run Salesforce Graph Engine's DFA rules against a folder ==="`,
+		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'run5.xml'], delim)}`,
 		`echo "==== Add a JAR of custom rules ===="`,
 		`${exeName} scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}`,
 		`echo "==== List the rules, including the custom ones ===="`,
@@ -77,14 +79,14 @@ function generateScriptBody(isBash, delim) {
 		`echo "==== Describe a custom rule ===="`,
 		`${exeName} scanner:rule:describe -n fakerule1`,
 		`echo "==== Run a custom rule ===="`,
-		`${exeName} scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run5.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'run6.xml'], delim)}`,
 		`echo "==== Remove a custom rule ===="`,
 		`${exeName} scanner:rule:remove --path ${buildPath(customRulePath, delim)} --force`,
 		`echo "==== List the rules a final time, to make sure nothing broke ===="`,
 		`${exeName} scanner:rule:list`
 	];
 
-	// In a cmd script, you need to prepend plugin commands with "call" in order to make sure that the script continues,
+	// In a cmd script, you need to prepend plug-in commands with "call" in order to make sure that the script continues,
 	// and you need to postfix it with another snippet to make it actually exit when an error is encountered.
 	if (!isBash) {
 		for (let i = 4; i < commands.length; i += 2) {
