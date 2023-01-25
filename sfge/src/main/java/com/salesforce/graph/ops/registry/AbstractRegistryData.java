@@ -5,10 +5,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Abstract class that individual types can implement to maintain an Id to Instance mapping to have
- * an outline of registry support.
+ * Represents data that can be stored in {@link Registry}. Any {@link Indexable} type can be
+ * maintained here.
  *
- * @param <T> type that requires the registry setup.
+ * <p>Internally, {@link AbstractRegistryData} holds a mapping of {@link Long} Id to instance of
+ * {@link Indexable} instance.
+ *
+ * <p>It provides methods to register an instance, lookup using its Id, and deregister when the
+ * instance is not needed anymore.
+ *
+ * @param <T> {@link Indexable} type that requires the registry setup.
  */
 public abstract class AbstractRegistryData<T extends Indexable> {
     private final Map<Long, Indexable> idToInstance;
@@ -17,6 +23,11 @@ public abstract class AbstractRegistryData<T extends Indexable> {
         idToInstance = new HashMap<>();
     }
 
+    /**
+     * Validates that the instance is already not in the registry before adding it.
+     *
+     * @param instance to be added to registry.
+     */
     public void validateAndPut(T instance) {
         if (hasKey(instance.getId())) {
             throw new ProgrammingException("Id already exists on registry for " + instance);
@@ -29,32 +40,40 @@ public abstract class AbstractRegistryData<T extends Indexable> {
         put(instance);
     }
 
-    public void put(T instance) {
+    private void put(T instance) {
         idToInstance.put(instance.getId(), instance);
     }
 
-    public void validate(T instance) {
+    /**
+     * Verifies that the instance is already in the registry.
+     *
+     * @param instance to verify
+     */
+    public void verifyExists(T instance) {
         if (!idToInstance.containsValue(instance)) {
             throw new ProgrammingException("Instance not found in the registry: " + instance);
         }
     }
 
+    /** Get {@link Indexable} instance given its Id. */
     public Indexable get(Long id) {
         return idToInstance.get(id);
     }
 
+    /** Removes {@link Indexable} instance from registry, given the Id. */
     public Indexable remove(Long id) {
         return idToInstance.remove(id);
     }
 
-    public boolean hasKey(Long id) {
+    private boolean hasKey(Long id) {
         return idToInstance.containsKey(id);
     }
 
-    public boolean hasValue(T instance) {
+    private boolean hasValue(T instance) {
         return idToInstance.containsValue(instance);
     }
 
+    /** Clears all the data. */
     public void clear() {
         idToInstance.clear();
     }

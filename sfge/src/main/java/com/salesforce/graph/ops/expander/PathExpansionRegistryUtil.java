@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 public final class PathExpansionRegistryUtil {
     private PathExpansionRegistryUtil() {}
 
+    /** Convert a list of ApexPathExpander Ids to a list of ApexPathExpander instances. */
     public static List<ApexPathExpander> convertIdsToApexPathExpanders(
             PathExpansionRegistry registry, List<Long> apexPathExpanderIds) {
         if (apexPathExpanderIds.isEmpty()) {
@@ -21,6 +22,7 @@ public final class PathExpansionRegistryUtil {
                 .collect(Collectors.toList());
     }
 
+    /** Convert a list of ApexPathExpander instances to a list of ApexPathExpander Ids. */
     public static List<Long> convertApexPathExpandersToIds(
             PathExpansionRegistry registry, List<ApexPathExpander> apexPathExpanders) {
         if (apexPathExpanders.isEmpty()) {
@@ -35,6 +37,7 @@ public final class PathExpansionRegistryUtil {
                 .collect(Collectors.toList());
     }
 
+    /** Convert a list of ForkEvent Ids to a list of ForkEvent instances. */
     public static List<ForkEvent> convertIdsToForkEvents(
             PathExpansionRegistry registry, List<Long> forkEventIds) {
         if (forkEventIds.isEmpty()) {
@@ -45,6 +48,7 @@ public final class PathExpansionRegistryUtil {
                 .collect(Collectors.toList());
     }
 
+    /** Convert a list of ForkEvent instances to a list of ForkEvent Ids. */
     public static List<Long> convertForkEventsToIds(
             PathExpansionRegistry registry, List<ForkEvent> forkEvents) {
         if (forkEvents.isEmpty()) {
