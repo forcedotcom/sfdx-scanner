@@ -8,6 +8,7 @@ import com.salesforce.TestUtil;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ops.ApexPathUtil;
 import com.salesforce.graph.symbols.ClassStaticScope;
+import com.salesforce.graph.symbols.apex.ApexBooleanValue;
 import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
@@ -19,6 +20,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -621,5 +623,68 @@ public class ApexPathExpanderTest {
                 TestRunner.walkPaths(g, sourceCode);
         MatcherAssert.assertThat(results, hasSize(equalTo(1)));
         MatcherAssert.assertThat(results, TestRunnerListMatcher.hasValuesAnyOrder("hello"));
+    }
+
+    @Disabled // TODO: Handle nested Maps and invocations of get() on the results of a get() on a nested Map.
+    @Test
+    public void testNullPointerExceptionInOptimization_moreComplex() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "    public static String doSomething() {\n"
+                + "        String output = RecordTypeUtil.getAccountRecordTypeID();\n"
+                + "       System.debug(output);\n"
+                + "    }\n"
+                + "}",
+            "public class RecordTypeUtil {\n"
+                + "    private static Map<String, Map<String, Id>> mapRecordTypes = new Map<String, Map<String, Id>>();\n"
+                + "    public static String getAccountRecordTypeID() {\n"
+                + "        String recTypeId = getRecordTypes('Account').get('Name');\n"
+                + "        return recTypeId;\n"
+                + "    }\n"
+                + "\n"
+                + "    public static Map<String, Id> getRecordTypes(String objectName) {\n"
+                + "        return mapRecordTypes.get(objectName);\n"
+                + "    }\n"
+                + "}"
+        };
+
+        List<TestRunner.Result<SystemDebugAccumulator>> results =
+            TestRunner.walkPaths(g, sourceCode);
+        MatcherAssert.assertThat(results, hasSize(equalTo(1)));
+    }
+
+    @Test
+    public void testMethodInvocationOnMethodInvocation() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "    public static String doSomething() {\n"
+                + "        boolean output = UTIL_Describe.getIsDeletable();\n"
+                + "       System.debug(output);\n"
+                + "    }\n"
+                + "}",
+            "public class UTIL_Describe {\n"
+                + "    private static Map<String, Schema.DescribeSObjectResult> objectToDescribeResult = new Map<String, Schema.DescribeSObjectResult>();\n"
+                + "    public static boolean getIsDeletable() {\n"
+                + "        boolean deletable = getSObjectDescribe('Account').isDeletable();\n"
+                + "        return deletable;\n"
+                + "    }\n"
+                + "\n"
+                + "    public static Schema.DescribeSObjectResult getSObjectDescribe(String objectName) {\n"
+                + "       if (!objectToDescribeResult.contains(objectName)) {\n"
+                + "           objectToDescribeResult.put(objectName, SObjectType.Account);\n" //Hard coding to keep the code simple
+                + "       }\n"
+                + "        return objectToDescribeResult.get(objectName);\n"
+                + "    }\n"
+                + "}"
+        };
+
+        List<TestRunner.Result<SystemDebugAccumulator>> results =
+            TestRunner.walkPaths(g, sourceCode);
+        MatcherAssert.assertThat(results, hasSize(equalTo(1)));
+
+        TestRunner.Result<SystemDebugAccumulator> systemDebugAccumulatorResult = results.get(0);
+        ApexBooleanValue boolValue = systemDebugAccumulatorResult.getVisitor().getSingletonResult();
+
+        MatcherAssert.assertThat(boolValue.isIndeterminant(), equalTo(true));
     }
 }

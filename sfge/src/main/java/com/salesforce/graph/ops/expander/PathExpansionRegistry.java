@@ -20,11 +20,15 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  *
  * <p>{@link PathExpansionRegistry} uses instances of {@link AbstractRegistryData} rather than
  * {@link ThreadLocal} so that these hashmaps only grow as needed per path expansion of an ApexPath.
- * Once cleared, all heap usage will be released back. This makes sure: 1. Registry data lives for a
- * shorted duration of time and doesn't move to Old Gen of heap space until later. This allows
- * earlier clean up from heap space when they are not used. 2. Internally-used HashMaps can start
- * with smaller sizes and can grow as needed, as opposed to starting with a much larger HashMap that
- * was needed in a previous path expansion.
+ * Once cleared, all heap usage will be released back. This makes sure:
+ * <ul>
+ *     <li>1. Registry data lives for a shorted duration of time and doesn't move to Old Gen of heap space until later. This allows
+ *  earlier clean up from heap space when they are not used.</li>
+ *     <li>2. Internally-used HashMaps can start
+ *  with smaller sizes and can grow as needed, as opposed to starting with a much larger HashMap that
+ *  was needed in a previous path expansion.</li>
+ * </ul>
+ *
  *
  * <p>Create a new instance of this registry when a path expansion for an ApexPath is initiated at
  * {@link ApexPathExpanderUtil#expand(GraphTraversalSource, ApexPath, ApexPathExpanderConfig)}.
