@@ -1,6 +1,7 @@
 package com.salesforce.graph.ops.expander;
 
 import com.salesforce.graph.DeepCloneable;
+import com.salesforce.graph.ops.registry.Indexable;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.visitor.PathVertex;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Represents a fork that occurred while an {@link ApexPathExpander} was walking a path. This event
  * is stored in the newly forked ApexPathExpanders and ties all future forks together.
  */
-class ForkEvent implements DeepCloneable<ForkEvent> {
+class ForkEvent implements DeepCloneable<ForkEvent>, Indexable {
     /** Used to give each object a unique id */
     private static final AtomicLong ID_GENERATOR = new AtomicLong();
 
@@ -52,7 +53,8 @@ class ForkEvent implements DeepCloneable<ForkEvent> {
         return this;
     }
 
-    Long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 

@@ -17,6 +17,7 @@ import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.directive.EngineDirectiveCommand;
 import com.salesforce.graph.ops.expander.switches.ApexPathCaseStatementExcluder;
+import com.salesforce.graph.ops.registry.Indexable;
 import com.salesforce.graph.symbols.AbstractClassScope;
 import com.salesforce.graph.symbols.ClassInstanceScope;
 import com.salesforce.graph.symbols.ClassStaticScope;
@@ -70,7 +71,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * into {@link ApexPathCollapser} in order to provide information which may also result in the
  * current path getting collapsed.
  */
-final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiveContextProvider {
+final class ApexPathExpander
+        implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Indexable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 
     /** Used to give each object a unique id */
@@ -457,7 +459,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         return symbolProviderVisitor;
     }
 
-    Long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
@@ -692,7 +695,7 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                                 "Duplicated return result. vertex=" + pathVertex);
                     }
                     final ApexPathCollapser apexPathCollapser =
-                            registry.lookupPathCollapser(pathExpansionId);
+                            registry.lookupApexPathCollapser(pathExpansionId);
                     apexPathCollapser.resultReturned(
                             this, forkEvents.get(pathVertex), lastReturnValue);
                 }

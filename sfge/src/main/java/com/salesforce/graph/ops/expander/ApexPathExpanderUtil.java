@@ -82,12 +82,14 @@ public final class ApexPathExpanderUtil {
         // Create and register ApexPathCollapser
         final ApexPathCollapser apexPathCollapser;
         if (config.getDynamicCollapsers().isEmpty()) {
-            apexPathCollapser = NoOpApexPathCollapser.getInstance();
+            apexPathCollapser = new NoOpApexPathCollapser(pathExpansionId);
         } else {
-            apexPathCollapser = new ApexPathCollapserImpl(config.getDynamicCollapsers(), registry);
+            apexPathCollapser =
+                    new ApexPathCollapserImpl(
+                            pathExpansionId, config.getDynamicCollapsers(), registry);
         }
 
-        registry.registerPathCollapser(pathExpansionId, apexPathCollapser);
+        registry.registerApexPathCollapser(apexPathCollapser);
     }
 
     private List<ApexPath> _expand(
@@ -166,7 +168,8 @@ public final class ApexPathExpanderUtil {
 
     private void expand(
             Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
-        final ApexPathCollapser apexPathCollapser = registry.lookupPathCollapser(pathExpansionId);
+        final ApexPathCollapser apexPathCollapser =
+                registry.lookupApexPathCollapser(pathExpansionId);
         // Continue while there is work to do. This stack is updated as the path is forked.
         // Forked expanders are pushed to the front of the stack, causing the paths to be traversed
         // depth first in order
@@ -332,11 +335,11 @@ public final class ApexPathExpanderUtil {
                 continue;
             }
             // Establish a context so that objects passed by reference are only cloned once
-                        DeepCloneContextProvider.establish();
+            DeepCloneContextProvider.establish();
             try {
                 result.add(new ApexPathExpander(ex.getApexPathExpander(), ex, i));
             } finally {
-                                DeepCloneContextProvider.release();
+                DeepCloneContextProvider.release();
             }
         }
 

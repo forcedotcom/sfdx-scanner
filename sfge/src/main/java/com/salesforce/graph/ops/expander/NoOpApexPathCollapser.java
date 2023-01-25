@@ -6,6 +6,17 @@ import java.util.Optional;
 
 /** Implementation used when path collasping is not required */
 final class NoOpApexPathCollapser implements ApexPathCollapser {
+    private final Long pathExpansionId;
+
+    public NoOpApexPathCollapser(Long pathExpansionId) {
+        this.pathExpansionId = pathExpansionId;
+    }
+
+    @Override
+    public Long getId() {
+        return pathExpansionId;
+    }
+
     @Override
     public void pathForked(
             ForkEvent forkEvent,
@@ -24,15 +35,4 @@ final class NoOpApexPathCollapser implements ApexPathCollapser {
     public List<ApexPathExpander> clearCollapsedExpanders() {
         return Collections.emptyList();
     }
-
-    public static ApexPathCollapser getInstance() {
-        return LazyHolder.INSTANCE;
-    }
-
-    private static final class LazyHolder {
-        // Postpone initialization until first use
-        private static final NoOpApexPathCollapser INSTANCE = new NoOpApexPathCollapser();
-    }
-
-    private NoOpApexPathCollapser() {}
 }
