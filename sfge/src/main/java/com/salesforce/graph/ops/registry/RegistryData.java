@@ -16,7 +16,7 @@ import java.util.Map;
  *
  * @param <T> {@link Indexable} type that requires the registry setup.
  */
-public class RegistryData<T extends Indexable> {
+public abstract class RegistryData<T extends Indexable> {
     private final Map<Long, Indexable> idToInstance;
 
     public RegistryData() {

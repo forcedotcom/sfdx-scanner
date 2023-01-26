@@ -40,13 +40,30 @@ public class PathExpansionRegistry extends Registry {
 
     private static final Map<Class<? extends Indexable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
-                    ApexPathCollapser.class, () -> new RegistryData<ApexPathCollapser>(),
-                    ForkEvent.class, () -> new RegistryData<ForkEvent>(),
-                    ApexPathExpander.class, () -> new RegistryData<ApexPathExpander>());
+                    ApexPathCollapser.class, () -> new PathCollapserRegistryData(),
+                    ForkEvent.class, () -> new ForkEventRegistryData(),
+                    ApexPathExpander.class, () -> new ApexPathExpanderRegistryData());
 
     @Override
     protected Map<Class<? extends Indexable>, Supplier> getRegistrySupplier() {
         return REGISTRY_SUPPLIER;
+    }
+
+    // Keeping these as concrete classes so that their names show up
+    // in performance profiler tools. This makes performance and heap usage analysis easier.
+    /** Registry data structure to hold {@link ApexPathCollapser}. */
+    private static class PathCollapserRegistryData extends RegistryData<ApexPathCollapser> {
+        // Nothing new to add
+    }
+
+    /** Registry data structure to hold {@link ForkEvent}. */
+    private static class ForkEventRegistryData extends RegistryData<ForkEvent> {
+        // Nothing new to add
+    }
+
+    /** Registry data structure to hold {@link ApexPathExpander}. */
+    private static class ApexPathExpanderRegistryData extends RegistryData<ApexPathExpander> {
+        // Nothing new to add
     }
 
     ///// ApexPathCollapser registry methods//////
