@@ -2,9 +2,8 @@ package com.salesforce.graph.ops.registry;
 
 /**
  * Represents a type that has an id and can be added to the registry. See {@link Registry} for more
- * information.
- * To add to the registry, the implementer needs to have a reference to their registry instance
- * and invoke the register() method probably from the constructor.
+ * information. To add to the registry, the implementer needs to have a reference to their registry
+ * instance and invoke the register() method probably from the constructor.
  */
 public interface Indexable {
     /**

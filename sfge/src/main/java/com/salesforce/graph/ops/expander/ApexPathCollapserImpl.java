@@ -58,8 +58,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
     @Override
     public List<ApexPathExpander> clearCollapsedExpanders() {
         List<ApexPathExpander> result =
-                PathExpansionRegistryUtil.convertIdsToApexPathExpanders(
-                        registry, collapsedApexPathExpanderIds);
+                registry.convertIdsToApexPathExpanders(collapsedApexPathExpanderIds);
         collapsedApexPathExpanderIds.clear();
         return result;
     }
@@ -106,8 +105,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
                 forkEventIdToApexExpanderIdsWithResults.computeIfAbsent(
                         forkEvent.getId(), k -> new ArrayList<>());
         final List<ApexPathExpander> apexPathExpanders =
-                PathExpansionRegistryUtil.convertIdsToApexPathExpanders(
-                        registry, apexPathExpanderIds);
+                registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
         apexPathExpanders.add(apexPathExpander);
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(
@@ -201,9 +199,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
                 forkEventIdToApexExpanderIdsWithResults.remove(forkEvent.getId());
             } else {
                 forkEventIdToApexExpanderIdsWithResults.put(
-                        forkEvent.getId(),
-                        PathExpansionRegistryUtil.convertApexPathExpandersToIds(
-                                registry, retained));
+                        forkEvent.getId(), registry.convertApexPathExpandersToIds(retained));
             }
 
             // Throw an exception if the collapsed item is the currently executing one
@@ -232,8 +228,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
 
             if (apexPathExpanderIds != null) {
                 final List<ApexPathExpander> apexPathExpanders =
-                        PathExpansionRegistryUtil.convertIdsToApexPathExpanders(
-                                registry, apexPathExpanderIds);
+                        registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
                 apexPathExpanders.remove(apexPathExpander);
                 if (apexPathExpanders.isEmpty()) {
                     // Remove the list if it is empty
@@ -256,8 +251,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
                                 forkEvent.getId(), k -> new ArrayList<>());
 
                 List<ApexPathExpander> apexPathExpanders =
-                        PathExpansionRegistryUtil.convertIdsToApexPathExpanders(
-                                registry, apexPathExpanderIds);
+                        registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
                 apexPathExpanders.add(newExpander);
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace(

@@ -309,8 +309,6 @@ final class ApexPathExpander
         this.engineDirectiveContext.clear();
         // TODO: Add clear method
         this.startScope = null;
-        //        this.forkEvents.clear();
-        //        this.forkResults.clear();
 
         // Deregister the current ApexPathExpander instance
         registry.deregisterApexPathExpander(this.id);

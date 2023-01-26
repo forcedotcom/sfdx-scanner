@@ -2,11 +2,14 @@ package com.salesforce.graph.ops.expander;
 
 import com.google.common.collect.ImmutableMap;
 import com.salesforce.graph.ApexPath;
-import com.salesforce.graph.ops.registry.AbstractRegistryData;
 import com.salesforce.graph.ops.registry.Indexable;
 import com.salesforce.graph.ops.registry.Registry;
+import com.salesforce.graph.ops.registry.RegistryData;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /**
@@ -18,17 +21,16 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * these types, can hold their {@link Long} Ids instead, and use the corresponding <code>lookup()
  * </code> method to fetch the instance from registry.
  *
- * <p>{@link PathExpansionRegistry} uses instances of {@link AbstractRegistryData} rather than
- * {@link ThreadLocal} so that these hashmaps only grow as needed per path expansion of an ApexPath.
- * Once cleared, all heap usage will be released back. This makes sure:
- * <ul>
- *     <li>1. Registry data lives for a shorted duration of time and doesn't move to Old Gen of heap space until later. This allows
- *  earlier clean up from heap space when they are not used.</li>
- *     <li>2. Internally-used HashMaps can start
- *  with smaller sizes and can grow as needed, as opposed to starting with a much larger HashMap that
- *  was needed in a previous path expansion.</li>
- * </ul>
+ * <p>{@link PathExpansionRegistry} uses instances of {@link RegistryData} rather than {@link
+ * ThreadLocal} so that these hashmaps only grow as needed per path expansion of an ApexPath. Once
+ * cleared, all heap usage will be released back. This makes sure:
  *
+ * <ul>
+ *   <li>1. Registry data lives for a shorted duration of time and doesn't move to Old Gen of heap
+ *       space until later. This allows earlier clean up from heap space when they are not used.
+ *   <li>2. Internally-used HashMaps can start with smaller sizes and can grow as needed, as opposed
+ *       to starting with a much larger HashMap that was needed in a previous path expansion.
+ * </ul>
  *
  * <p>Create a new instance of this registry when a path expansion for an ApexPath is initiated at
  * {@link ApexPathExpanderUtil#expand(GraphTraversalSource, ApexPath, ApexPathExpanderConfig)}.
@@ -38,29 +40,13 @@ public class PathExpansionRegistry extends Registry {
 
     private static final Map<Class<? extends Indexable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
-                    ApexPathCollapser.class, () -> new PathCollapserRegistryData(),
-                    ForkEvent.class, () -> new ForkEventRegistryData(),
-                    ApexPathExpander.class, () -> new ApexPathExpanderRegistryData());
+                    ApexPathCollapser.class, () -> new RegistryData<ApexPathCollapser>(),
+                    ForkEvent.class, () -> new RegistryData<ForkEvent>(),
+                    ApexPathExpander.class, () -> new RegistryData<ApexPathExpander>());
 
     @Override
     protected Map<Class<? extends Indexable>, Supplier> getRegistrySupplier() {
         return REGISTRY_SUPPLIER;
-    }
-
-    /** Registry data structure to hold {@link ApexPathCollapser}. */
-    private static class PathCollapserRegistryData extends AbstractRegistryData<ApexPathCollapser> {
-        // Nothing new to add
-    }
-
-    /** Registry data structure to hold {@link ForkEvent}. */
-    private static class ForkEventRegistryData extends AbstractRegistryData<ForkEvent> {
-        // Nothing new to add
-    }
-
-    /** Registry data structure to hold {@link ApexPathExpander}. */
-    private static class ApexPathExpanderRegistryData
-            extends AbstractRegistryData<ApexPathExpander> {
-        // Nothing new to add
     }
 
     ///// ApexPathCollapser registry methods//////
@@ -99,6 +85,30 @@ public class PathExpansionRegistry extends Registry {
         return (ApexPathExpander) deregister(ApexPathExpander.class, apexPathExpanderId);
     }
 
+    /** Convert a list of ApexPathExpander Ids to a list of ApexPathExpander instances. */
+    public List<ApexPathExpander> convertIdsToApexPathExpanders(List<Long> apexPathExpanderIds) {
+        if (apexPathExpanderIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return apexPathExpanderIds.stream()
+                .map(id -> lookupApexPathExpander(id))
+                .collect(Collectors.toList());
+    }
+
+    /** Convert a list of ApexPathExpander instances to a list of ApexPathExpander Ids. */
+    public List<Long> convertApexPathExpandersToIds(List<ApexPathExpander> apexPathExpanders) {
+        if (apexPathExpanders.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return apexPathExpanders.stream()
+                .map(
+                        apexPathExpander -> {
+                            validateApexPathExpander(apexPathExpander);
+                            return apexPathExpander.getId();
+                        })
+                .collect(Collectors.toList());
+    }
+
     ///// ForkEvent registry methods//////
 
     public void registerForkEvent(ForkEvent forkEvent) {
@@ -115,5 +125,27 @@ public class PathExpansionRegistry extends Registry {
 
     public ForkEvent deregisterForkEvent(Long forkEventId) {
         return (ForkEvent) deregister(ForkEvent.class, forkEventId);
+    }
+
+    /** Convert a list of ForkEvent Ids to a list of ForkEvent instances. */
+    public List<ForkEvent> convertIdsToForkEvents(List<Long> forkEventIds) {
+        if (forkEventIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return forkEventIds.stream().map(id -> lookupForkEvent(id)).collect(Collectors.toList());
+    }
+
+    /** Convert a list of ForkEvent instances to a list of ForkEvent Ids. */
+    public List<Long> convertForkEventsToIds(List<ForkEvent> forkEvents) {
+        if (forkEvents.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return forkEvents.stream()
+                .map(
+                        forkEvent -> {
+                            validateForkEvent(forkEvent);
+                            return forkEvent.getId();
+                        })
+                .collect(Collectors.toList());
     }
 }

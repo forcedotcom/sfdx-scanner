@@ -8,18 +8,18 @@ import java.util.Map;
  * Represents data that can be stored in {@link Registry}. Any {@link Indexable} type can be
  * maintained here.
  *
- * <p>Internally, {@link AbstractRegistryData} holds a mapping of {@link Long} Id to instance of
- * {@link Indexable} instance.
+ * <p>Internally, {@link RegistryData} holds a mapping of {@link Long} Id to instance of {@link
+ * Indexable} instance.
  *
  * <p>It provides methods to register an instance, lookup using its Id, and deregister when the
  * instance is not needed anymore.
  *
  * @param <T> {@link Indexable} type that requires the registry setup.
  */
-public abstract class AbstractRegistryData<T extends Indexable> {
+public class RegistryData<T extends Indexable> {
     private final Map<Long, Indexable> idToInstance;
 
-    protected AbstractRegistryData() {
+    public RegistryData() {
         idToInstance = new HashMap<>();
     }
 
