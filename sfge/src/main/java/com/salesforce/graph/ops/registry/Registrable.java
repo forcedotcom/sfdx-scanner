@@ -5,7 +5,7 @@ package com.salesforce.graph.ops.registry;
  * information. To add to the registry, the implementer needs to have a reference to their registry
  * instance and invoke the register() method probably from the constructor.
  */
-public interface Indexable {
+public interface Registrable {
     /**
      * @return unique identity of the instance. This can be either implemented using an {@link
      *     java.util.concurrent.atomic.AtomicLong} ID_GENERATOR or through the hash code if the

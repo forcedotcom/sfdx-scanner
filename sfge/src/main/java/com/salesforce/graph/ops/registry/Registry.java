@@ -11,7 +11,7 @@ import java.util.function.Supplier;
  * stored in collections, follow these steps:
  *
  * <ul>
- *   <li>1. Make the object implement {@link Indexable} and provide an Id form.
+ *   <li>1. Make the object implement {@link Registrable} and provide an Id form.
  *   <li>2. Extend {@link RegistryData} for this object type.
  *   <li>3. Extend {@link Registry} and provide a Supplier with a mapping of the object type to a
  *       method to create its {@link RegistryData} implementation.
@@ -27,17 +27,17 @@ public abstract class Registry {
 
     public Registry() {
         registryHolderMap = new HashMap<>();
-        for (Map.Entry<Class<? extends Indexable>, Supplier> entry :
+        for (Map.Entry<Class<? extends Registrable>, Supplier> entry :
                 this.getRegistrySupplier().entrySet()) {
             registryHolderMap.put(entry.getKey(), (RegistryData) entry.getValue().get());
         }
     }
 
     /**
-     * @return a Map of Class that implements {@link Indexable} to a Supplier to get an instance of
+     * @return a Map of Class that implements {@link Registrable} to a Supplier to get an instance of
      *     its corresponding implementation of {@link RegistryData}.
      */
-    protected abstract Map<Class<? extends Indexable>, Supplier> getRegistrySupplier();
+    protected abstract Map<Class<? extends Registrable>, Supplier> getRegistrySupplier();
 
     /** Clear all the data in registry. */
     public void clear() {
@@ -49,51 +49,51 @@ public abstract class Registry {
     }
 
     /**
-     * Register an Indexable instance.
+     * Register an instance.
      *
-     * @param indexableClass Class that the Indexable is registered with in {@link
+     * @param registrableClass Class that the Registrable is registered with in {@link
      *     #getRegistrySupplier()}.
-     * @param indexable instance to register.
+     * @param registrable instance to register.
      */
-    public void register(Class<? extends Indexable> indexableClass, Indexable indexable) {
-        registryHolderMap.get(indexableClass).validateAndPut(indexable);
+    public void register(Class<? extends Registrable> registrableClass, Registrable registrable) {
+        registryHolderMap.get(registrableClass).validateAndPut(registrable);
     }
 
     /**
      * Lookup an instance in the registry given its Id.
      *
-     * @param indexableClass Class that the Indexable is registered with in {@link
+     * @param registrableClass Class that the Registrable is registered with in {@link
      *     #getRegistrySupplier()}.
-     * @param id Long Id that the lookedup instance's {@link Indexable#getId()} would return.
-     * @return instance of Indexable that was previously registered.
+     * @param id Long Id that the lookedup instance's {@link Registrable#getId()} would return.
+     * @return instance of Registrable that was previously registered.
      */
-    public Indexable lookup(Class<? extends Indexable> indexableClass, Long id) {
-        return registryHolderMap.get(indexableClass).get(id);
+    public Registrable lookup(Class<? extends Registrable> registrableClass, Long id) {
+        return registryHolderMap.get(registrableClass).get(id);
     }
 
     /**
      * Removed registered instance from Registry.
      *
-     * @param indexableClass Class that the Indexable is registered with in {@link
+     * @param registrableClass Class that the Registrable is registered with in {@link
      *     #getRegistrySupplier()}.
-     * @param id Long Id that the lookedup instance's {@link Indexable#getId()} would return.
-     * @return instance of Indexable that was previously registered and now required to be
+     * @param id Long Id that the lookedup instance's {@link Registrable#getId()} would return.
+     * @return instance of Registrable that was previously registered and now required to be
      *     deregistered.
      */
-    public Indexable deregister(Class<? extends Indexable> indexableClass, Long id) {
-        return registryHolderMap.get(indexableClass).remove(id);
+    public Registrable deregister(Class<? extends Registrable> registrableClass, Long id) {
+        return registryHolderMap.get(registrableClass).remove(id);
     }
 
     /**
      * Verify that a given instance is in the Registry.
      *
-     * @param indexableClass Class that the Indexable is registered with in {@link
+     * @param registrableClass Class that the Registrable is registered with in {@link
      *     #getRegistrySupplier()}.
-     * @param indexableInstance instance of Indexable that we expect to have already been
+     * @param registrableInstance instance of Registrable that we expect to have already been
      *     registered.
      */
     public void verifyExists(
-            Class<? extends Indexable> indexableClass, Indexable indexableInstance) {
-        registryHolderMap.get(indexableClass).verifyExists(indexableInstance);
+        Class<? extends Registrable> registrableClass, Registrable registrableInstance) {
+        registryHolderMap.get(registrableClass).verifyExists(registrableInstance);
     }
 }

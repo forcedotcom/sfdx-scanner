@@ -5,19 +5,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Represents data that can be stored in {@link Registry}. Any {@link Indexable} type can be
+ * Represents data that can be stored in {@link Registry}. Any {@link Registrable} type can be
  * maintained here.
  *
  * <p>Internally, {@link RegistryData} holds a mapping of {@link Long} Id to instance of {@link
- * Indexable} instance.
+ * Registrable} instance.
  *
  * <p>It provides methods to register an instance, lookup using its Id, and deregister when the
  * instance is not needed anymore.
  *
- * @param <T> {@link Indexable} type that requires the registry setup.
+ * @param <T> {@link Registrable} type that requires the registry setup.
  */
-public abstract class RegistryData<T extends Indexable> {
-    private final Map<Long, Indexable> idToInstance;
+public abstract class RegistryData<T extends Registrable> {
+    private final Map<Long, Registrable> idToInstance;
 
     public RegistryData() {
         idToInstance = new HashMap<>();
@@ -55,13 +55,13 @@ public abstract class RegistryData<T extends Indexable> {
         }
     }
 
-    /** Get {@link Indexable} instance given its Id. */
-    public Indexable get(Long id) {
+    /** Get {@link Registrable} instance given its Id. */
+    public Registrable get(Long id) {
         return idToInstance.get(id);
     }
 
-    /** Removes {@link Indexable} instance from registry, given the Id. */
-    public Indexable remove(Long id) {
+    /** Removes {@link Registrable} instance from registry, given the Id. */
+    public Registrable remove(Long id) {
         return idToInstance.remove(id);
     }
 

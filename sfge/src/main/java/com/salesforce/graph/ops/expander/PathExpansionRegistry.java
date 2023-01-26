@@ -2,7 +2,7 @@ package com.salesforce.graph.ops.expander;
 
 import com.google.common.collect.ImmutableMap;
 import com.salesforce.graph.ApexPath;
-import com.salesforce.graph.ops.registry.Indexable;
+import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.ops.registry.Registry;
 import com.salesforce.graph.ops.registry.RegistryData;
 import java.util.ArrayList;
@@ -38,14 +38,14 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  */
 public class PathExpansionRegistry extends Registry {
 
-    private static final Map<Class<? extends Indexable>, Supplier> REGISTRY_SUPPLIER =
+    private static final Map<Class<? extends Registrable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
                     ApexPathCollapser.class, () -> new PathCollapserRegistryData(),
                     ForkEvent.class, () -> new ForkEventRegistryData(),
                     ApexPathExpander.class, () -> new ApexPathExpanderRegistryData());
 
     @Override
-    protected Map<Class<? extends Indexable>, Supplier> getRegistrySupplier() {
+    protected Map<Class<? extends Registrable>, Supplier> getRegistrySupplier() {
         return REGISTRY_SUPPLIER;
     }
 

@@ -17,7 +17,7 @@ import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.directive.EngineDirectiveCommand;
 import com.salesforce.graph.ops.expander.switches.ApexPathCaseStatementExcluder;
-import com.salesforce.graph.ops.registry.Indexable;
+import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.symbols.AbstractClassScope;
 import com.salesforce.graph.symbols.ClassInstanceScope;
 import com.salesforce.graph.symbols.ClassStaticScope;
@@ -72,7 +72,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * current path getting collapsed.
  */
 final class ApexPathExpander
-        implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Indexable {
+        implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Registrable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 
     /** Used to give each object a unique id */
