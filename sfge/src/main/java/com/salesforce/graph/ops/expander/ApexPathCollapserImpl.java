@@ -17,7 +17,6 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathCollapserImpl.class);
 
     private final PathExpansionRegistry registry;
-    private final Long pathExpansionId;
 
     /** This is the list of collapsers that the user has requested */
     private final List<ApexDynamicPathCollapser> dynamicPathCollapsers;
@@ -37,10 +36,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
     private final List<Long> collapsedApexPathExpanderIds;
 
     ApexPathCollapserImpl(
-            Long pathExpansionId,
-            List<ApexDynamicPathCollapser> dynamicPathCollapsers,
-            PathExpansionRegistry registry) {
-        this.pathExpansionId = pathExpansionId;
+            List<ApexDynamicPathCollapser> dynamicPathCollapsers, PathExpansionRegistry registry) {
         this.dynamicPathCollapsers = dynamicPathCollapsers;
         this.registry = registry;
         this.forkEventIdToApexExpanderIdsWithResults = new HashMap<>();
@@ -48,11 +44,6 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
         if (dynamicPathCollapsers.isEmpty()) {
             throw new UnexpectedException("Use NoOpApexPathCollapser");
         }
-    }
-
-    @Override
-    public Long getId() {
-        return pathExpansionId;
     }
 
     @Override

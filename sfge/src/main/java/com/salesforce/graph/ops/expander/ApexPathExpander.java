@@ -81,8 +81,11 @@ final class ApexPathExpander
     /** Graph which owns the path */
     private final GraphTraversalSource g;
 
-    /** Id that represents the path expansion group that this ApexPathExpander is a part of. */
-    private final Long pathExpansionId;
+    /**
+     * Object which maintains state about all ApexPathExpanders that are related to the first path
+     * which is being expanded.
+     */
+    private final ApexPathCollapser apexPathCollapser;
 
     private final PathExpansionRegistry registry;
 
@@ -178,14 +181,14 @@ final class ApexPathExpander
 
     ApexPathExpander(
             GraphTraversalSource g,
-            Long pathExpansionId,
+            ApexPathCollapser apexPathCollapser,
             ApexPath topMostPath,
             ApexPathExpanderConfig config,
             PathExpansionRegistry registry) {
         this.id = ID_GENERATOR.incrementAndGet();
         this.hash = Objects.hashCode(this.id);
         this.g = g;
-        this.pathExpansionId = pathExpansionId;
+        this.apexPathCollapser = apexPathCollapser;
         this.registry = registry;
         this.forkEvents = new LinkedHashMap<>();
         this.forkResults = new HashMap<>();
@@ -221,7 +224,7 @@ final class ApexPathExpander
         this.id = ID_GENERATOR.incrementAndGet();
         this.hash = Objects.hashCode(this.id);
         this.g = other.g;
-        this.pathExpansionId = other.pathExpansionId;
+        this.apexPathCollapser = other.apexPathCollapser;
         this.registry = other.registry;
         this.forkEvents = CloneUtil.cloneHashMap(other.forkEvents);
         PathVertex pathVertex = ex.getForkEvent().getPathVertex();
@@ -692,8 +695,6 @@ final class ApexPathExpander
                         throw new UnexpectedException(
                                 "Duplicated return result. vertex=" + pathVertex);
                     }
-                    final ApexPathCollapser apexPathCollapser =
-                            registry.lookupApexPathCollapser(pathExpansionId);
                     apexPathCollapser.resultReturned(
                             this, forkEvents.get(pathVertex), lastReturnValue);
                 }

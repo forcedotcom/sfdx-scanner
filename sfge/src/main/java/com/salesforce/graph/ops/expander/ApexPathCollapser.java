@@ -1,6 +1,5 @@
 package com.salesforce.graph.ops.expander;
 
-import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.vertex.MethodVertex;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,7 @@ import java.util.Optional;
  * ApexDynamicPathCollapser#collapse(MethodVertex, List)}. The list of ApexDynamicPathCollapsers is
  * retrieved from the
  */
-interface ApexPathCollapser extends Registrable {
+interface ApexPathCollapser {
     /**
      * Indicates that an ApexPathExpander has been forked. This will replace the original
      * ApexPathExpander with the new list

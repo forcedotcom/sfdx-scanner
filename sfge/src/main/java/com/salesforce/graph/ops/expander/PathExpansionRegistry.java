@@ -40,7 +40,6 @@ public class PathExpansionRegistry extends Registry {
 
     private static final Map<Class<? extends Registrable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
-                    ApexPathCollapser.class, () -> new PathCollapserRegistryData(),
                     ForkEvent.class, () -> new ForkEventRegistryData(),
                     ApexPathExpander.class, () -> new ApexPathExpanderRegistryData());
 
@@ -51,10 +50,6 @@ public class PathExpansionRegistry extends Registry {
 
     // Keeping these as concrete classes so that their names show up
     // in performance profiler tools. This makes performance and heap usage analysis easier.
-    /** Registry data structure to hold {@link ApexPathCollapser}. */
-    private static class PathCollapserRegistryData extends RegistryData<ApexPathCollapser> {
-        // Nothing new to add
-    }
 
     /** Registry data structure to hold {@link ForkEvent}. */
     private static class ForkEventRegistryData extends RegistryData<ForkEvent> {
@@ -64,24 +59,6 @@ public class PathExpansionRegistry extends Registry {
     /** Registry data structure to hold {@link ApexPathExpander}. */
     private static class ApexPathExpanderRegistryData extends RegistryData<ApexPathExpander> {
         // Nothing new to add
-    }
-
-    ///// ApexPathCollapser registry methods//////
-
-    public void registerApexPathCollapser(ApexPathCollapser apexPathCollapser) {
-        register(ApexPathCollapser.class, apexPathCollapser);
-    }
-
-    public void validateApexPathCollapser(ApexPathCollapser apexPathCollapser) {
-        verifyExists(ApexPathCollapser.class, apexPathCollapser);
-    }
-
-    public ApexPathCollapser lookupApexPathCollapser(Long pathCollapserId) {
-        return (ApexPathCollapser) lookup(ApexPathCollapser.class, pathCollapserId);
-    }
-
-    public ApexPathCollapser deregisterApexPathCollapser(Long pathCollapserId) {
-        return (ApexPathCollapser) deregister(ApexPathCollapser.class, pathCollapserId);
     }
 
     ///// ApexPathExpander registry methods//////
