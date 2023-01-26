@@ -44,7 +44,7 @@ class ForkEvent implements DeepCloneable<ForkEvent>, Registrable {
         this.hash = Objects.hash(this.apexPathExpanderId, this.pathVertex, this.methodVertex);
 
         // Register the newly created ForkEvent
-        registry.registerForkEvent(this);
+        registry.register(this);
     }
 
     @Override

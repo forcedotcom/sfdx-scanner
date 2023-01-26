@@ -210,7 +210,7 @@ final class ApexPathExpander
         this.alreadyInitializedStaticClasses = CollectionUtil.newTreeSet();
 
         // Register the newly created ApexPathExpander
-        registry.registerApexPathExpander(this);
+        registry.register(this);
     }
 
     /**
@@ -293,7 +293,7 @@ final class ApexPathExpander
                 CloneUtil.cloneTreeSet(other.alreadyInitializedStaticClasses);
 
         // Register the newly created ApexPathExpander
-        registry.registerApexPathExpander(this);
+        registry.register(this);
     }
 
     /**

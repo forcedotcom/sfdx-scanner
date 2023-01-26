@@ -63,14 +63,6 @@ public class PathExpansionRegistry extends Registry {
 
     ///// ApexPathExpander registry methods//////
 
-    public void registerApexPathExpander(ApexPathExpander apexPathExpander) {
-        register(ApexPathExpander.class, apexPathExpander);
-    }
-
-    public void validateApexPathExpander(ApexPathExpander apexPathExpander) {
-        verifyExists(ApexPathExpander.class, apexPathExpander);
-    }
-
     public ApexPathExpander lookupApexPathExpander(Long apexPathExpanderId) {
         return (ApexPathExpander) lookup(ApexPathExpander.class, apexPathExpanderId);
     }
@@ -97,21 +89,13 @@ public class PathExpansionRegistry extends Registry {
         return apexPathExpanders.stream()
                 .map(
                         apexPathExpander -> {
-                            validateApexPathExpander(apexPathExpander);
+                            verifyExists(apexPathExpander);
                             return apexPathExpander.getId();
                         })
                 .collect(Collectors.toList());
     }
 
     ///// ForkEvent registry methods//////
-
-    public void registerForkEvent(ForkEvent forkEvent) {
-        register(ForkEvent.class, forkEvent);
-    }
-
-    public void validateForkEvent(ForkEvent forkEvent) {
-        verifyExists(ForkEvent.class, forkEvent);
-    }
 
     public ForkEvent lookupForkEvent(Long forkEventId) {
         return (ForkEvent) lookup(ForkEvent.class, forkEventId);
@@ -137,7 +121,7 @@ public class PathExpansionRegistry extends Registry {
         return forkEvents.stream()
                 .map(
                         forkEvent -> {
-                            validateForkEvent(forkEvent);
+                            verifyExists(forkEvent);
                             return forkEvent.getId();
                         })
                 .collect(Collectors.toList());
