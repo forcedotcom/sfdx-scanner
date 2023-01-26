@@ -52,8 +52,8 @@ public final class ApexPathExpanderUtil {
             return Collections.emptyList();
         } else {
             final PathExpansionRegistry registry = new PathExpansionRegistry();
-            ApexPathExpanderUtil apexPathExpanderUtil = new ApexPathExpanderUtil(config, registry);
-            final List<ApexPath> apexPaths = apexPathExpanderUtil._expand(g, path, config);
+            ApexPathExpansionHandler handler = new ApexPathExpansionHandler(config, registry);
+            final List<ApexPath> apexPaths = handler._expand(g, path, config);
             // Clean up registry to remove any lingering references
             registry.clear();
             return apexPaths;
@@ -68,281 +68,290 @@ public final class ApexPathExpanderUtil {
         }
     }
 
-    /** Used to give each object a unique id */
-    private static final AtomicLong ID_GENERATOR = new AtomicLong();
+    private static class ApexPathExpansionHandler {
+        /** Used to give each object a unique id */
+        private static final AtomicLong ID_GENERATOR = new AtomicLong();
 
-    private final Long pathExpansionId;
+        private final Long pathExpansionId;
 
-    private final PathExpansionRegistry registry;
+        private final PathExpansionRegistry registry;
 
-    private ApexPathExpanderUtil(ApexPathExpanderConfig config, PathExpansionRegistry registry) {
-        this.pathExpansionId = ID_GENERATOR.incrementAndGet();
-        this.registry = registry;
+        private ApexPathExpansionHandler(
+                ApexPathExpanderConfig config, PathExpansionRegistry registry) {
+            this.pathExpansionId = ID_GENERATOR.incrementAndGet();
+            this.registry = registry;
 
-        // Create and register ApexPathCollapser
-        final ApexPathCollapser apexPathCollapser;
-        if (config.getDynamicCollapsers().isEmpty()) {
-            apexPathCollapser = new NoOpApexPathCollapser(pathExpansionId);
-        } else {
-            apexPathCollapser =
-                    new ApexPathCollapserImpl(
-                            pathExpansionId, config.getDynamicCollapsers(), registry);
-        }
-
-        registry.registerApexPathCollapser(apexPathCollapser);
-    }
-
-    private List<ApexPath> _expand(
-            GraphTraversalSource g, ApexPath path, ApexPathExpanderConfig config) {
-        ApexPathCollector pathCollector = new ApexPathCollector();
-        try {
-            expand(g, path, config, pathCollector);
-            return pathCollector.getResults();
-        } catch (RuntimeException ex) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error(
-                        "Incomplete. Current PathCollector size="
-                                + pathCollector.getResults().size(),
-                        ex);
+            // Create and register ApexPathCollapser
+            final ApexPathCollapser apexPathCollapser;
+            if (config.getDynamicCollapsers().isEmpty()) {
+                apexPathCollapser = new NoOpApexPathCollapser(pathExpansionId);
+            } else {
+                apexPathCollapser =
+                        new ApexPathCollapserImpl(
+                                pathExpansionId, config.getDynamicCollapsers(), registry);
             }
-            throw ex;
+
+            registry.registerApexPathCollapser(apexPathCollapser);
         }
-    }
 
-    /**
-     * Convert the {@code path} to one or more ApexPathExpanders. The number of ApexPathExpanders is
-     * dependent on the initial method that is used as an entry point.
-     *
-     * <ul>
-     *   <li>Static entry point: Single ApexPathExpander
-     *   <li>Constructor entry point: Single ApexPathExpander
-     *   <li>Instance entry point: Num Constructor Paths
-     * </ul>
-     */
-    private void expand(
-            GraphTraversalSource g,
-            ApexPath path,
-            ApexPathExpanderConfig config,
-            ResultCollector resultCollector) {
-        // Seed the stack with the initial paths
-        Stack<ApexPathExpander> apexPathExpanders = new Stack<>();
+        private List<ApexPath> _expand(
+                GraphTraversalSource g, ApexPath path, ApexPathExpanderConfig config) {
+            ApexPathCollector pathCollector = new ApexPathCollector();
+            try {
+                expand(g, path, config, pathCollector);
+                return pathCollector.getResults();
+            } catch (RuntimeException ex) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error(
+                            "Incomplete. Current PathCollector size="
+                                    + pathCollector.getResults().size(),
+                            ex);
+                }
+                throw ex;
+            }
+        }
 
-        final MethodVertex method = path.getMethodVertex().get();
-        final String className = method.getDefiningType();
-        if (method.isStatic()) {
-            final ApexPathExpander apexPathExpander =
-                    new ApexPathExpander(g, pathExpansionId, path, config, registry);
-            apexPathExpanders.push(apexPathExpander);
-        } else {
-            if (method instanceof MethodVertex.ConstructorVertex) {
+        /**
+         * Convert the {@code path} to one or more ApexPathExpanders. The number of
+         * ApexPathExpanders is dependent on the initial method that is used as an entry point.
+         *
+         * <ul>
+         *   <li>Static entry point: Single ApexPathExpander
+         *   <li>Constructor entry point: Single ApexPathExpander
+         *   <li>Instance entry point: Num Constructor Paths
+         * </ul>
+         */
+        private void expand(
+                GraphTraversalSource g,
+                ApexPath path,
+                ApexPathExpanderConfig config,
+                ResultCollector resultCollector) {
+            // Seed the stack with the initial paths
+            Stack<ApexPathExpander> apexPathExpanders = new Stack<>();
+
+            final MethodVertex method = path.getMethodVertex().get();
+            final String className = method.getDefiningType();
+            if (method.isStatic()) {
                 final ApexPathExpander apexPathExpander =
                         new ApexPathExpander(g, pathExpansionId, path, config, registry);
                 apexPathExpanders.push(apexPathExpander);
             } else {
-                final List<MethodVertex.ConstructorVertex> constructors =
-                        MethodUtil.getNonDefaultConstructors(g, className);
-                if (constructors.isEmpty()) {
+                if (method instanceof MethodVertex.ConstructorVertex) {
                     final ApexPathExpander apexPathExpander =
                             new ApexPathExpander(g, pathExpansionId, path, config, registry);
                     apexPathExpanders.push(apexPathExpander);
                 } else {
-                    // Expand by number of constructors * number of paths
-                    for (MethodVertex.ConstructorVertex constructor :
-                            MethodUtil.getNonDefaultConstructors(g, className)) {
-                        for (ApexPath constructorPath :
-                                ApexPathUtil.getForwardPaths(g, constructor, false)) {
-                            final ApexPath clonedPath = path.deepClone();
-                            clonedPath.setConstructorPath(constructorPath);
-                            final ApexPathExpander apexPathExpander =
-                                    new ApexPathExpander(
-                                            g, pathExpansionId, clonedPath, config, registry);
-                            apexPathExpanders.push(apexPathExpander);
+                    final List<MethodVertex.ConstructorVertex> constructors =
+                            MethodUtil.getNonDefaultConstructors(g, className);
+                    if (constructors.isEmpty()) {
+                        final ApexPathExpander apexPathExpander =
+                                new ApexPathExpander(g, pathExpansionId, path, config, registry);
+                        apexPathExpanders.push(apexPathExpander);
+                    } else {
+                        // Expand by number of constructors * number of paths
+                        for (MethodVertex.ConstructorVertex constructor :
+                                MethodUtil.getNonDefaultConstructors(g, className)) {
+                            for (ApexPath constructorPath :
+                                    ApexPathUtil.getForwardPaths(g, constructor, false)) {
+                                final ApexPath clonedPath = path.deepClone();
+                                clonedPath.setConstructorPath(constructorPath);
+                                final ApexPathExpander apexPathExpander =
+                                        new ApexPathExpander(
+                                                g, pathExpansionId, clonedPath, config, registry);
+                                apexPathExpanders.push(apexPathExpander);
+                            }
                         }
                     }
                 }
             }
+
+            expand(apexPathExpanders, resultCollector);
         }
 
-        expand(apexPathExpanders, resultCollector);
-    }
-
-    private void expand(
-            Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
-        final ApexPathCollapser apexPathCollapser =
-                registry.lookupApexPathCollapser(pathExpansionId);
-        // Continue while there is work to do. This stack is updated as the path is forked.
-        // Forked expanders are pushed to the front of the stack, causing the paths to be traversed
-        // depth first in order
-        // to keep the peak number of active expanders lower.
-        while (!apexPathExpanders.isEmpty()) {
-            ApexPathExpander apexPathExpander = apexPathExpanders.pop();
-            ContextProviders.CLASS_STATIC_SCOPE.push(apexPathExpander);
-            ContextProviders.ENGINE_DIRECTIVE_CONTEXT.push(apexPathExpander);
-            try {
-                // Configure all class instantiation paths before calling into the
-                // symbolProviderVisitor. This will
-                // ensure that the state is correct after any ForkedExceptions are thrown
-                final ApexPath topMostPath = apexPathExpander.getTopMostPath();
-                final MethodVertex method = topMostPath.getMethodVertex().get();
-                // Push any stack directives found on the initial method which is being traversed
-                final List<EngineDirective> engineDirectives =
-                        method.getEngineDirectives(EngineDirectiveCommand.DISABLE_STACK);
-                if (!engineDirectives.isEmpty()) {
-                    apexPathExpander.getEngineDirectiveContext().push(engineDirectives);
-                }
-
-                apexPathExpander.initializeClassStaticScope(method.getDefiningType());
-
-                SymbolProvider currentScope = apexPathExpander.start(topMostPath.firstVertex());
-                if (currentScope instanceof ClassInstanceScope) {
-                    final ClassInstanceScope classScope = (ClassInstanceScope) currentScope;
-                    final ApexPath initializationPath =
-                            topMostPath.getInstanceInitializationPath().orElse(null);
-                    if (initializationPath != null) {
-                        apexPathExpander.visit(initializationPath);
+        private void expand(
+                Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
+            final ApexPathCollapser apexPathCollapser =
+                    registry.lookupApexPathCollapser(pathExpansionId);
+            // Continue while there is work to do. This stack is updated as the path is forked.
+            // Forked expanders are pushed to the front of the stack, causing the paths to be
+            // traversed
+            // depth first in order
+            // to keep the peak number of active expanders lower.
+            while (!apexPathExpanders.isEmpty()) {
+                ApexPathExpander apexPathExpander = apexPathExpanders.pop();
+                ContextProviders.CLASS_STATIC_SCOPE.push(apexPathExpander);
+                ContextProviders.ENGINE_DIRECTIVE_CONTEXT.push(apexPathExpander);
+                try {
+                    // Configure all class instantiation paths before calling into the
+                    // symbolProviderVisitor. This will
+                    // ensure that the state is correct after any ForkedExceptions are thrown
+                    final ApexPath topMostPath = apexPathExpander.getTopMostPath();
+                    final MethodVertex method = topMostPath.getMethodVertex().get();
+                    // Push any stack directives found on the initial method which is being
+                    // traversed
+                    final List<EngineDirective> engineDirectives =
+                            method.getEngineDirectives(EngineDirectiveCommand.DISABLE_STACK);
+                    if (!engineDirectives.isEmpty()) {
+                        apexPathExpander.getEngineDirectiveContext().push(engineDirectives);
                     }
-                    final ApexPath constructorPath = topMostPath.getConstructorPath().orElse(null);
-                    if (constructorPath != null) {
-                        // Visit the constructor path by itself. This is a case where we are walking
-                        // the constructor
-                        // but don't know which values were passed to the constructor. Create an
-                        // indeterminant
-                        // MethodInvocationScope and push that onto the stack of ClassInstanceScope.
-                        final MethodInvocationScope methodInvocationScope =
-                                MethodUtil.getIndeterminantMethodInvocationScope(
-                                        constructorPath.getMethodVertex().get());
-                        classScope.pushMethodInvocationScope(methodInvocationScope);
-                        try {
-                            apexPathExpander.visit(constructorPath);
-                        } finally {
-                            classScope.popMethodInvocationScope(null);
+
+                    apexPathExpander.initializeClassStaticScope(method.getDefiningType());
+
+                    SymbolProvider currentScope = apexPathExpander.start(topMostPath.firstVertex());
+                    if (currentScope instanceof ClassInstanceScope) {
+                        final ClassInstanceScope classScope = (ClassInstanceScope) currentScope;
+                        final ApexPath initializationPath =
+                                topMostPath.getInstanceInitializationPath().orElse(null);
+                        if (initializationPath != null) {
+                            apexPathExpander.visit(initializationPath);
+                        }
+                        final ApexPath constructorPath =
+                                topMostPath.getConstructorPath().orElse(null);
+                        if (constructorPath != null) {
+                            // Visit the constructor path by itself. This is a case where we are
+                            // walking
+                            // the constructor
+                            // but don't know which values were passed to the constructor. Create an
+                            // indeterminant
+                            // MethodInvocationScope and push that onto the stack of
+                            // ClassInstanceScope.
+                            final MethodInvocationScope methodInvocationScope =
+                                    MethodUtil.getIndeterminantMethodInvocationScope(
+                                            constructorPath.getMethodVertex().get());
+                            classScope.pushMethodInvocationScope(methodInvocationScope);
+                            try {
+                                apexPathExpander.visit(constructorPath);
+                            } finally {
+                                classScope.popMethodInvocationScope(null);
+                            }
                         }
                     }
-                }
 
-                apexPathExpander.visit(topMostPath);
-                if (apexPathExpander.getTopMostPath().endsInException()) {
-                    // Filter out any paths in the original method that ends in an exception
-                    final ThrowStatementVertex throwStatementVertex =
-                            apexPathExpander.getTopMostPath().getThrowStatementVertex().get();
-                    logFilteredOutPath(throwStatementVertex);
-                } else {
-                    resultCollector.collect(apexPathExpander);
-                }
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("expand-Finished.");
-                }
-            } catch (PathExcludedException ex) {
-                apexPathCollapser.removeExistingExpander(apexPathExpander);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("expand-Excluded. ex=" + ex);
-                }
-            } catch (PathCollapsedException ex) {
-                apexPathCollapser.removeExistingExpander(apexPathExpander);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("expand-Collapsed. ex=" + ex);
-                }
-            } catch (ReturnValueInvalidCollapsedException ex) {
-                apexPathCollapser.removeExistingExpander(apexPathExpander);
-                ApexValue<?> returnValue = ex.getReturnValue().orElse(null);
-                if (ex.getPath().getMethodVertex().isPresent()) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(
-                                "expand-InvalidValue. pathMethod="
-                                        + ex.getPath().getMethodVertex().get().toSimpleString()
-                                        + ", returnValue="
-                                        + returnValue);
-                    }
-                } else {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug(
-                                "expand-InvalidValue. pathDefiningType="
-                                        + ex.getPath().firstVertex().getDefiningType()
-                                        + ", returnValue="
-                                        + returnValue);
-                    }
-                }
-            } catch (RecursionDetectedException ex) {
-                apexPathCollapser.removeExistingExpander(apexPathExpander);
-                resultCollector.collect(apexPathExpander);
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("expand-Recursion. ex=" + ex);
-                }
-            } catch (NullValueAccessedException ex) {
-                apexPathCollapser.removeExistingExpander(apexPathExpander);
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("expand-NullAccess. ex=" + ex);
-                }
-            } catch (MethodPathForkedException ex) {
-                List<ApexPathExpander> forkedPathExpanders = new ArrayList<>();
-                for (ApexPathExpander forkedApexPathExpander : getForkedExpanders(ex)) {
-                    if (forkedApexPathExpander.getTopMostPath().endsInException()) {
-                        // This happens when a path invokes a method that only throws an exception
-                        ThrowStatementVertex throwStatementVertex =
-                                forkedApexPathExpander
-                                        .getTopMostPath()
-                                        .getThrowStatementVertex()
-                                        .get();
+                    apexPathExpander.visit(topMostPath);
+                    if (apexPathExpander.getTopMostPath().endsInException()) {
+                        // Filter out any paths in the original method that ends in an exception
+                        final ThrowStatementVertex throwStatementVertex =
+                                apexPathExpander.getTopMostPath().getThrowStatementVertex().get();
                         logFilteredOutPath(throwStatementVertex);
                     } else {
-                        apexPathExpanders.push(forkedApexPathExpander);
-                        forkedPathExpanders.add(forkedApexPathExpander);
+                        resultCollector.collect(apexPathExpander);
                     }
-                }
-                apexPathCollapser.pathForked(
-                        ex.getForkEvent(), apexPathExpander, forkedPathExpanders);
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("expand-Forked. ex=" + ex);
-                }
-            } catch (RuntimeException ex) {
-                if (LOGGER.isErrorEnabled()) {
-                    LOGGER.error(
-                            "Incomplete. Current ApexPathExpanders size="
-                                    + apexPathExpanders.size(),
-                            ex);
-                }
-                throw ex;
-            } finally {
-                ContextProviders.CLASS_STATIC_SCOPE.pop();
-                ContextProviders.ENGINE_DIRECTIVE_CONTEXT.pop();
-            }
-
-            for (ApexPathExpander pathExpander : apexPathCollapser.clearCollapsedExpanders()) {
-                if (!apexPathExpanders.remove(pathExpander)
-                        && !resultCollector.remove(pathExpander)) {
-                    // TODO: Throw
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Unable to find apexPathExpander=" + pathExpander);
+                        LOGGER.warn("expand-Finished.");
+                    }
+                } catch (PathExcludedException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("expand-Excluded. ex=" + ex);
+                    }
+                } catch (PathCollapsedException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("expand-Collapsed. ex=" + ex);
+                    }
+                } catch (ReturnValueInvalidCollapsedException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    ApexValue<?> returnValue = ex.getReturnValue().orElse(null);
+                    if (ex.getPath().getMethodVertex().isPresent()) {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug(
+                                    "expand-InvalidValue. pathMethod="
+                                            + ex.getPath().getMethodVertex().get().toSimpleString()
+                                            + ", returnValue="
+                                            + returnValue);
+                        }
+                    } else {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug(
+                                    "expand-InvalidValue. pathDefiningType="
+                                            + ex.getPath().firstVertex().getDefiningType()
+                                            + ", returnValue="
+                                            + returnValue);
+                        }
+                    }
+                } catch (RecursionDetectedException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    resultCollector.collect(apexPathExpander);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("expand-Recursion. ex=" + ex);
+                    }
+                } catch (NullValueAccessedException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("expand-NullAccess. ex=" + ex);
+                    }
+                } catch (MethodPathForkedException ex) {
+                    List<ApexPathExpander> forkedPathExpanders = new ArrayList<>();
+                    for (ApexPathExpander forkedApexPathExpander : getForkedExpanders(ex)) {
+                        if (forkedApexPathExpander.getTopMostPath().endsInException()) {
+                            // This happens when a path invokes a method that only throws an
+                            // exception
+                            ThrowStatementVertex throwStatementVertex =
+                                    forkedApexPathExpander
+                                            .getTopMostPath()
+                                            .getThrowStatementVertex()
+                                            .get();
+                            logFilteredOutPath(throwStatementVertex);
+                        } else {
+                            apexPathExpanders.push(forkedApexPathExpander);
+                            forkedPathExpanders.add(forkedApexPathExpander);
+                        }
+                    }
+                    apexPathCollapser.pathForked(
+                            ex.getForkEvent(), apexPathExpander, forkedPathExpanders);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("expand-Forked. ex=" + ex);
+                    }
+                } catch (RuntimeException ex) {
+                    if (LOGGER.isErrorEnabled()) {
+                        LOGGER.error(
+                                "Incomplete. Current ApexPathExpanders size="
+                                        + apexPathExpanders.size(),
+                                ex);
+                    }
+                    throw ex;
+                } finally {
+                    ContextProviders.CLASS_STATIC_SCOPE.pop();
+                    ContextProviders.ENGINE_DIRECTIVE_CONTEXT.pop();
+                }
+
+                for (ApexPathExpander pathExpander : apexPathCollapser.clearCollapsedExpanders()) {
+                    if (!apexPathExpanders.remove(pathExpander)
+                            && !resultCollector.remove(pathExpander)) {
+                        // TODO: Throw
+                        if (LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("Unable to find apexPathExpander=" + pathExpander);
+                        }
                     }
                 }
             }
-        }
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Path info. completedApexPathExpanders=" + resultCollector.size());
-        }
-    }
-
-    /** Returns the number of ApexPathExpanders indicated by the exception */
-    private List<ApexPathExpander> getForkedExpanders(MethodPathForkedException ex) {
-        List<ApexPathExpander> result = new ArrayList<>();
-
-        // TODO: Efficiency. We could iterate to size() - 1 and reuse the existing path
-        for (int i = 0; i < ex.getPaths().size(); i++) {
-            ApexPath forkedPath = ex.getPaths().get(i);
-            if (forkedPath.endsInException()) {
-                logFilteredOutPath(forkedPath.getThrowStatementVertex().get());
-                continue;
-            }
-            // Establish a context so that objects passed by reference are only cloned once
-            DeepCloneContextProvider.establish();
-            try {
-                result.add(new ApexPathExpander(ex.getApexPathExpander(), ex, i));
-            } finally {
-                DeepCloneContextProvider.release();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Path info. completedApexPathExpanders=" + resultCollector.size());
             }
         }
 
-        return result;
+        /** Returns the number of ApexPathExpanders indicated by the exception */
+        private List<ApexPathExpander> getForkedExpanders(MethodPathForkedException ex) {
+            List<ApexPathExpander> result = new ArrayList<>();
+
+            // TODO: Efficiency. We could iterate to size() - 1 and reuse the existing path
+            for (int i = 0; i < ex.getPaths().size(); i++) {
+                ApexPath forkedPath = ex.getPaths().get(i);
+                if (forkedPath.endsInException()) {
+                    logFilteredOutPath(forkedPath.getThrowStatementVertex().get());
+                    continue;
+                }
+                // Establish a context so that objects passed by reference are only cloned once
+                DeepCloneContextProvider.establish();
+                try {
+                    result.add(new ApexPathExpander(ex.getApexPathExpander(), ex, i));
+                } finally {
+                    DeepCloneContextProvider.release();
+                }
+            }
+
+            return result;
+        }
     }
 }
