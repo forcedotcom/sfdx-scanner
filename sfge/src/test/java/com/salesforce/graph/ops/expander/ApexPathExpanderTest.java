@@ -8,6 +8,7 @@ import com.salesforce.TestUtil;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ops.ApexPathUtil;
 import com.salesforce.graph.symbols.ClassStaticScope;
+import com.salesforce.graph.symbols.apex.ApexBooleanValue;
 import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
@@ -621,5 +622,40 @@ public class ApexPathExpanderTest {
                 TestRunner.walkPaths(g, sourceCode);
         MatcherAssert.assertThat(results, hasSize(equalTo(1)));
         MatcherAssert.assertThat(results, TestRunnerListMatcher.hasValuesAnyOrder("hello"));
+    }
+
+    @Test
+    public void testMethodInvocationOnMethodInvocation() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "    public static String doSomething() {\n"
+                    + "        boolean output = UTIL_Describe.getIsDeletable();\n"
+                    + "       System.debug(output);\n"
+                    + "    }\n"
+                    + "}",
+            "public class UTIL_Describe {\n"
+                    + "    private static Map<String, Schema.DescribeSObjectResult> objectToDescribeResult = new Map<String, Schema.DescribeSObjectResult>();\n"
+                    + "    public static boolean getIsDeletable() {\n"
+                    + "        boolean deletable = getSObjectDescribe('Account').isDeletable();\n"
+                    + "        return deletable;\n"
+                    + "    }\n"
+                    + "\n"
+                    + "    public static Schema.DescribeSObjectResult getSObjectDescribe(String objectName) {\n"
+                    + "       if (!objectToDescribeResult.contains(objectName)) {\n"
+                    + "           objectToDescribeResult.put(objectName, SObjectType.Account);\n" // Hard coding to keep the code simple
+                    + "       }\n"
+                    + "        return objectToDescribeResult.get(objectName);\n"
+                    + "    }\n"
+                    + "}"
+        };
+
+        List<TestRunner.Result<SystemDebugAccumulator>> results =
+                TestRunner.walkPaths(g, sourceCode);
+        MatcherAssert.assertThat(results, hasSize(equalTo(1)));
+
+        TestRunner.Result<SystemDebugAccumulator> systemDebugAccumulatorResult = results.get(0);
+        ApexBooleanValue boolValue = systemDebugAccumulatorResult.getVisitor().getSingletonResult();
+
+        MatcherAssert.assertThat(boolValue.isIndeterminant(), equalTo(true));
     }
 }

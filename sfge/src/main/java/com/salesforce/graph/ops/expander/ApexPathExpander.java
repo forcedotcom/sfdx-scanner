@@ -17,6 +17,7 @@ import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.directive.EngineDirectiveCommand;
 import com.salesforce.graph.ops.expander.switches.ApexPathCaseStatementExcluder;
+import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.symbols.AbstractClassScope;
 import com.salesforce.graph.symbols.ClassInstanceScope;
 import com.salesforce.graph.symbols.ClassStaticScope;
@@ -70,7 +71,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * into {@link ApexPathCollapser} in order to provide information which may also result in the
  * current path getting collapsed.
  */
-final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiveContextProvider {
+final class ApexPathExpander
+        implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Registrable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 
     /** Used to give each object a unique id */
@@ -84,6 +86,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
      * which is being expanded.
      */
     private final ApexPathCollapser apexPathCollapser;
+
+    private final PathExpansionRegistry registry;
 
     /** Dynamically generated id used to establish object equality */
     private final Long id;
@@ -179,11 +183,13 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
             GraphTraversalSource g,
             ApexPathCollapser apexPathCollapser,
             ApexPath topMostPath,
-            ApexPathExpanderConfig config) {
+            ApexPathExpanderConfig config,
+            PathExpansionRegistry registry) {
         this.id = ID_GENERATOR.incrementAndGet();
         this.hash = Objects.hashCode(this.id);
         this.g = g;
         this.apexPathCollapser = apexPathCollapser;
+        this.registry = registry;
         this.forkEvents = new LinkedHashMap<>();
         this.forkResults = new HashMap<>();
         this.topMostPath = new Stack<>();
@@ -202,6 +208,9 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.engineDirectiveContext = new EngineDirectiveContext();
         this.currentlyInitializingStaticClasses = CollectionUtil.newTreeSet();
         this.alreadyInitializedStaticClasses = CollectionUtil.newTreeSet();
+
+        // Register the newly created ApexPathExpander
+        registry.register(this);
     }
 
     /**
@@ -216,6 +225,7 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.hash = Objects.hashCode(this.id);
         this.g = other.g;
         this.apexPathCollapser = other.apexPathCollapser;
+        this.registry = other.registry;
         this.forkEvents = CloneUtil.cloneHashMap(other.forkEvents);
         PathVertex pathVertex = ex.getForkEvent().getPathVertex();
         this.forkEvents.put(pathVertex, ex.getForkEvent());
@@ -281,6 +291,9 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                 CloneUtil.cloneTreeSet(other.currentlyInitializingStaticClasses);
         this.alreadyInitializedStaticClasses =
                 CloneUtil.cloneTreeSet(other.alreadyInitializedStaticClasses);
+
+        // Register the newly created ApexPathExpander
+        registry.register(this);
     }
 
     /**
@@ -299,6 +312,9 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         this.engineDirectiveContext.clear();
         // TODO: Add clear method
         this.startScope = null;
+
+        // Deregister the current ApexPathExpander instance
+        registry.deregisterApexPathExpander(this.id);
     }
 
     /** Get a static class scope. Reuse any existing ones in order to maintain state. */
@@ -444,7 +460,8 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
         return symbolProviderVisitor;
     }
 
-    Long getId() {
+    @Override
+    public Long getId() {
         return id;
     }
 
@@ -771,7 +788,7 @@ final class ApexPathExpander implements ClassStaticScopeProvider, EngineDirectiv
                                         + paths.size());
                     }
                     throw new MethodPathForkedException(
-                            this, path, topLevelVertex, invocable, paths);
+                            this, path, topLevelVertex, invocable, paths, registry);
                 } else {
                     // The path resolves to a method with a single path. Update the existing path to
                     // point to the
