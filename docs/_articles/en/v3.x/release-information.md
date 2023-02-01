@@ -12,6 +12,25 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.9.0) (02-07-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.9.0...v3.8.0)
+
+### Release Summary
+
+* NEW (GraphEngine): We added a new graph-based rule, `UnimplementedTypeRule`. This rule identifies abstract classes and interfaces that are non-global and are missing implementations or extensions. See [link: UnimplementedTypeRule] for more information.
+* NEW (CodeAnalyzer): We updated the PMD engine to version 6.53.0.
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): We added sample code to support the unused methods and unused classes and interfaces rules to `sfge-working-app`.
+* CHANGE (GraphEngine): We updated the `scanner:rule:describe` and `scanner:rule:list –engine` `sfge` commands to provide info on which Graph Engine rules run with scanner:run:dfa and which rules run with scanner:run.
+* FIX (GraphEngine): We optimized heap usage of Graph Engine which decreases the frequency of `OutOfMemory` error.
+* FIX (GraphEngine): In Winter ’23, Apex added a `WITH USER_MODE` keyword to SOQL queries. Graph Engine recognizes this keyword as secure.
+* FIX (CodeAnalyzer): We updated our internal dependencies on `@salesforce/core` and `@salesforce/command`, resulting in minor cosmetic changes to command output.
+
+**Closed issues:**
+
+**Merged pull requests**
+
 ## [v3.8.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.8.0) (01-04-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.8.0...v3.7.1)
