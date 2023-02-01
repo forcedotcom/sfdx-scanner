@@ -18,13 +18,13 @@ We publish the latest Code Analyzer monthly.
 
 ### Release Summary
 
-* NEW (GraphEngine): We added a new graph-based rule, `UnimplementedTypeRule`. This rule identifies abstract classes and interfaces that are non-global and are missing implementations or extensions. See [link: UnimplementedTypeRule] for more information.
+* NEW (GraphEngine): We added a new graph-based rule, `UnimplementedTypeRule`. This rule identifies abstract classes and interfaces that are non-global and are missing implementations or extensions. See [UnimplementedTypeRule](./en/v3.x/salesforce-graph-engine/rules/#UnimplementedTypeRule) for more information.
 * NEW (CodeAnalyzer): We updated the PMD engine to version 6.53.0.
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (GraphEngine): We added sample code to support the unused methods and unused classes and interfaces rules to `sfge-working-app`.
 * CHANGE (GraphEngine): We updated the `scanner:rule:describe` and `scanner:rule:list –engine` `sfge` commands to provide info on which Graph Engine rules run with scanner:run:dfa and which rules run with scanner:run.
 * FIX (GraphEngine): We optimized heap usage of Graph Engine which decreases the frequency of `OutOfMemory` error.
-* FIX (GraphEngine): In Winter ’23, Apex added a `WITH USER_MODE` keyword to SOQL queries. Graph Engine recognizes this keyword as secure.
+* FIX (GraphEngine): In Winter '23, Apex added a `WITH USER_MODE` keyword to SOQL queries. Graph Engine recognizes this keyword as secure.
 * FIX (CodeAnalyzer): We updated our internal dependencies on `@salesforce/core` and `@salesforce/command`, resulting in minor cosmetic changes to command output.
 
 **Closed issues:**
