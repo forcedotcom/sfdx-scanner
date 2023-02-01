@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## ApexFlsViolationRule
-ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
+ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To invoke ApexFlsViolationRule, run `scanner:run:dfa`.
 
 ### Definitions
 
@@ -80,7 +80,7 @@ UnusedMethodRule detects methods contained in your code that aren’t invoked. A
 - unused private constructors
 - unused protected constructors
 
-To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`. 
+To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`.
 
 ### Definition
 
