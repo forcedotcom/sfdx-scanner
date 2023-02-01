@@ -19,8 +19,7 @@ ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-
 |				 |`public`-scoped methods on Visualforce Controllers																|
 |				 |`global`-scoped methods on any class																			  	|
 |				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation			
-|				 |Entry points, not including triggers
+|				 |Any method targeted during invocation																				|
 | **Sink**		 | 																													|
 | 		  	  	 |All DML operations and their Database.method() counterparts:   													|
 |				 |* delete																											|
@@ -71,6 +70,10 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 > Graph Engine identified your source and sink, but you must manually verify that you have a sanitizer in this path. Then, add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace. After we fix this issue, check the Code Analyzer release notes for more info. Error and stacktrace: [details]
 
 Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](./en/v3.x/release-information/) for more info.
+
+### ApexFlsViolationRule Limitations
+
+- Triggers are currently unsupported.
 
 ## UnusedMethodRule
 

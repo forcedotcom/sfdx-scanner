@@ -18,7 +18,7 @@ We publish the latest Code Analyzer monthly.
 
 ### Release Summary
 
-* NEW (GraphEngine): We added a new graph-based rule, `UnimplementedTypeRule`. This rule identifies abstract classes and interfaces that are non-global and are missing implementations or extensions. See [UnimplementedTypeRule](./en/v3.x/salesforce-graph-engine/rules/#UnimplementedTypeRule) for more information.
+* NEW (GraphEngine): We added a new graph-based rule, `UnimplementedTypeRule`. This rule identifies abstract classes and interfaces that are non-global and are missing implementations or extensions. See [UnimplementedTypeRule](./en/v3.x/salesforce-graph-engine/rules/#unimplementedtyperule) for more information.
 * NEW (CodeAnalyzer): We updated the PMD engine to version 6.53.0.
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (GraphEngine): We added sample code to support the unused methods and unused classes and interfaces rules to `sfge-working-app`.
