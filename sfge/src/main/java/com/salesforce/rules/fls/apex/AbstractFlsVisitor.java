@@ -1,14 +1,8 @@
 package com.salesforce.rules.fls.apex;
 
-import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.exception.TodoException;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.graph.vertex.BooleanExpressionVertex;
-import com.salesforce.graph.vertex.DmlStatementVertex;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.PrefixExpressionVertex;
-import com.salesforce.graph.vertex.StandardConditionVertex;
+import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.fls.apex.operations.FlsConstants.FlsValidationType;
 import com.salesforce.rules.fls.apex.operations.FlsValidationCentral;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
@@ -126,31 +120,11 @@ public abstract class AbstractFlsVisitor extends BooleanStateDetectorVisitor {
             BooleanExpressionVertex booleanVertex = (BooleanExpressionVertex) vertex;
             BaseSFVertex lhs = booleanVertex.getLhs();
             BaseSFVertex rhs = booleanVertex.getRhs();
-            // TODO: This system is pretty simplistic, only working for satisfied ANDs and
-            // unsatisfied ORs. We may wish
-            //       to refactor it into something a bit more intelligent.
-            // If the vertex is an AND-expression that the path expects to be satisfied, then all
-            // component clauses must
-            // be satisfied. So we can recursively process both sides, skipping any side that
-            // contains only odd negation levels.
-            if (booleanVertex.getOperator().equals(ASTConstants.OPERATOR_AND)
-                    && expectingSatisfied) {
+            if (booleanExprRequiresRecursion(booleanVertex, expectingSatisfied)) {
                 if (includesNonNegatedClause(lhs)) {
                     recursivelyProcessConditionChildren(lhs, symbols, expectingSatisfied);
                 }
                 if (includesNonNegatedClause(rhs)) {
-                    recursivelyProcessConditionChildren(rhs, symbols, expectingSatisfied);
-                }
-                // If the vertex is an OR-expression that the path expects to be unsatisfied, then
-                // all component clauses must
-                // be unsatisfied. So we can recursively process both sides, skipping any side that
-                // contains only even negation levels.
-            } else if (booleanVertex.getOperator().equals(ASTConstants.OPERATOR_OR)
-                    && !expectingSatisfied) {
-                if (includesNegatedClause(lhs)) {
-                    recursivelyProcessConditionChildren(lhs, symbols, expectingSatisfied);
-                }
-                if (includesNegatedClause(rhs)) {
                     recursivelyProcessConditionChildren(rhs, symbols, expectingSatisfied);
                 }
             }
@@ -172,5 +146,71 @@ public abstract class AbstractFlsVisitor extends BooleanStateDetectorVisitor {
                         vertex.getParent(), vertex, symbols);
             }
         }
+    }
+
+    /**
+     * Indicates whether a boolean expression should be processed recursively, based on the nature
+     * of its operator, its children, and whether its satisfaction is expected for this path.
+     */
+    // TODO: This implementation is somewhat simplistic, and there are definitely
+    //       cases that it doesn't support. These cases will lead to false positives.
+    //       If unsupported edge cases crop up frequently in the wild, we should
+    //       enhance this to be more intelligent.
+    private boolean booleanExprRequiresRecursion(
+            BooleanExpressionVertex booleanExpressionVertex, boolean expectingSatisfied) {
+        BaseSFVertex lhs = booleanExpressionVertex.getLhs();
+        BaseSFVertex rhs = booleanExpressionVertex.getRhs();
+        if (booleanExpressionVertex.isOperatorAnd() && expectingSatisfied) {
+            // An AND expression expecting satisfaction should always be
+            // recursively processed, since it's only true if both sides are true.
+            return true;
+        } else if (booleanExpressionVertex.isOperatorOr()) {
+            // An OR expression should be recursively processed if it's not supposed
+            // to be satisfied (since that's only true if neither side is true),
+            // or if either side is literally false, since it requires the other
+            // side to be true.
+            return !expectingSatisfied || isLiterallyFalse(lhs) || isLiterallyFalse(rhs);
+        } else if (booleanExpressionVertex.isOperatorEquals()) {
+            // An EQUALS expression should be recursively processed if it's supposed
+            // to be satisfied and either side is literally true, or if it's not
+            // supposed to be satisfied and either side is literally false.
+            return (expectingSatisfied && (isLiterallyTrue(lhs) || isLiterallyTrue(rhs)))
+                    || (!expectingSatisfied && (isLiterallyFalse(lhs) || isLiterallyFalse(rhs)));
+        } else if (booleanExpressionVertex.isOperatorNotEquals()) {
+            // A NOT-EQUALS expression should be recursively processed if it's supposed
+            // to be satisfied and either side is false true, or if it's not
+            // supposed to be satisfied and either side is literally true.
+            return (!expectingSatisfied && (isLiterallyTrue(lhs) || isLiterallyTrue(rhs)))
+                    || (expectingSatisfied && (isLiterallyFalse(lhs) || isLiterallyFalse(rhs)));
+        } else {
+            // We can't say anything else for certain.
+            return false;
+        }
+    }
+
+    private boolean isLiterallyTrue(BaseSFVertex vertex) {
+        // We can drill down into a negation.
+        if (vertex instanceof PrefixExpressionVertex) {
+            PrefixExpressionVertex prefix = (PrefixExpressionVertex) vertex;
+            if (prefix.isOperatorNegation()) {
+                // If the inner vertex is literally false, its negation is literally true.
+                return isLiterallyFalse(prefix.getChild(0));
+            }
+        }
+        // For anything else, just check if it's an instance of TRUE.
+        return vertex instanceof LiteralExpressionVertex.True;
+    }
+
+    private boolean isLiterallyFalse(BaseSFVertex vertex) {
+        // We can drill down into a negation.
+        if (vertex instanceof PrefixExpressionVertex) {
+            PrefixExpressionVertex prefix = (PrefixExpressionVertex) vertex;
+            if (prefix.isOperatorNegation()) {
+                // If the inner vertex is literally true, its negation is literally false.
+                return isLiterallyTrue(prefix.getChild(0));
+            }
+        }
+        // For anything else, just check if it's an instance of false.
+        return vertex instanceof LiteralExpressionVertex.False;
     }
 }
