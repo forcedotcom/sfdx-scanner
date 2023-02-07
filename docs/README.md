@@ -79,11 +79,13 @@ For links the path is relative to the base path (i.e. `/tools/vscode/`). The url
 
 ## How to generate Change Log
 
-### Install github-changelog-generator
+### Option 1: github-changelog-generator
+If you have trouble getting this tool working, try option 2 instead.
+#### Install github-changelog-generator
 
 Instructions: https://github.com/github-changelog-generator/github-changelog-generator/blob/master/README.md
 
-### Commands
+#### Commands
 
 ```bash
 export CHANGELOG_GITHUB_TOKEN="<<Github Token>>"
@@ -91,8 +93,35 @@ github_changelog_generator -u forcedotcom -p sfdx-scanner -f %m-%d-%Y --no-autho
 
 ```
 
-### Note:
+#### Note:
 Copy the information for the release you are making to the top of the release-information.md
+
+### Option 2: pychangelog
+
+#### Prerequisites
+
+- Install [Python3](https://www.python.org/downloads/)
+- Install [Poetry](https://python-poetry.org/docs/#installation).
+  - If the `curl` script fails with an error about SSL certificate verification:
+    - If you're on OSX, you can resolve this by going to `~/Applications/Python 3.11` and running the `Install Certificates.command` located there.
+    - Haven't encountered this on Windows yet. If we do, a solution will go here.
+- Set up a [Github Access Token](https://github.com/settings/tokens).
+
+#### Using pychangelog
+
+Installation and general usage instructions are found [here](https://github.com/rero/pychangelog).
+
+You'll want to set the following values in the `config.ini` file that already exists in the pychangelog  repo when you clone it:
+- `user = forcedotcom`
+- `repo = sfdx-scanner`
+- `merging_branch = dev`
+- `from_tag = [tag used for last published version]`
+- `to_tag = [tag to be used for next planned version]`
+
+Running `pychangelog` as per its usage instructions will create a list of all the PRs/Issues that were merged/closed since the last release.
+They'll be in a single list, but they're properly ordered, so you can easily copy-paste them into the release notes' "Merged pull requests" and "Closed issues" sections.
+
+NOTE: PR's will have a `(by @author)` suffix. You'll want to delete that.
 
 ## Localization (NOT Supported Yet, Ignore this section)
 
