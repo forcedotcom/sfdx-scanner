@@ -111,15 +111,15 @@ Copy the information for the release you are making to the top of the release-in
 
 Installation and general usage instructions are found [here](https://github.com/rero/pychangelog).
 
-You'll want to set the following values in the `config.ini` file:
+You'll want to set the following values in the `config.ini` file that already exists in the pychangelog  repo when you clone it:
 - `user = forcedotcom`
 - `repo = sfdx-scanner`
 - `merging_branch = dev`
 - `from_tag = [tag used for last published version]`
 - `to_tag = [tag to be used for next planned version]`
 
-Running `pychangelog` will create a list of all the PRs/Issues that were merged/closed since the last release.
-They'll be in a single list, but they're properly ordered so you can easily copy-paste them into the release notes' "Merged pull requests" and "Closed issues" sections.
+Running `pychangelog` as per its usage instructions will create a list of all the PRs/Issues that were merged/closed since the last release.
+They'll be in a single list, but they're properly ordered, so you can easily copy-paste them into the release notes' "Merged pull requests" and "Closed issues" sections.
 
 NOTE: PR's will have a `(by @author)` suffix. You'll want to delete that.
 

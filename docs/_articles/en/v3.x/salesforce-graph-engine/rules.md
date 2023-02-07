@@ -71,9 +71,13 @@ The `stripInaccessible` warning is thrown for all `stripInaccessible` checks on 
 
 Graph Engine ran into an error while walking this path. Manually verify that you have a sanitizer on the path, and add an engine directive to skip the path. Next, create a GitHub issue for the Code Analyzer team that includes the error and stack trace so we can research and resolve it. After we determine a fix for the issue, check Code Analyzer [Release Information](./en/v3.x/release-information/) for more info.
 
-### ApexFlsViolationRule Limitations
+#### See Also
 
-- Triggers are currently unsupported.
+- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
+- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
+- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
+- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
+- [Frequently Asked Questions](./en/v3.x/faq/)
 
 ## UnusedMethodRule
 
@@ -138,11 +142,3 @@ Because UnimplementedType rule excludes `global` scoped classes from considerati
 ## Roadmap
 
 We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).
-
-#### See Also
-
-- [FAQ](./en/v3.x/faq/#questions-about-interpreting-apexflsviolationrule-results)
-- [Enforce Security With the stripInaccessible Method](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_stripInaccessible.htm)
-- [Enforcing Object and Field Permissions](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_perms_enforcing.htm)
-- [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
-- [Frequently Asked Questions](./en/v3.x/faq/)
