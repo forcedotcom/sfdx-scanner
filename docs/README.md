@@ -80,7 +80,7 @@ For links the path is relative to the base path (i.e. `/tools/vscode/`). The url
 ## How to generate Change Log
 
 ### Option 1: github-changelog-generator
-This tool is finnicky. If you can't get it working, try Option 2 instead.
+If you have trouble getting this tool working, try option 2 instead.
 #### Install github-changelog-generator
 
 Instructions: https://github.com/github-changelog-generator/github-changelog-generator/blob/master/README.md
