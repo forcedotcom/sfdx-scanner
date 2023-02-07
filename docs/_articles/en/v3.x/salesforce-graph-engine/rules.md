@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## ApexFlsViolationRule
-ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
+ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To invoke ApexFlsViolationRule, run `scanner:run:dfa`.
 
 ### Definitions
 
@@ -19,7 +19,7 @@ ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-
 |				 |`public`-scoped methods on Visualforce Controllers																|
 |				 |`global`-scoped methods on any class																			  	|
 |				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation																|
+|				 |Any method targeted during invocation																				|
 | **Sink**		 | 																													|
 | 		  	  	 |All DML operations and their Database.method() counterparts:   													|
 |				 |* delete																											|
@@ -87,7 +87,7 @@ UnusedMethodRule detects methods contained in your code that aren’t invoked. A
 - unused private constructors
 - unused protected constructors
 
-To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`. 
+To invoke UnusedMethodRule, you must provide `--engine sfge` and `--projectdir/-p` on `scanner:run`.
 
 ### Definition
 
@@ -112,6 +112,32 @@ Because no invocations of the indicated method were found, the method is unneces
     - public or global constructors
     - protected, public, or global instance methods
     - static methods of any visibility
+
+## UnimplementedTypeRule
+
+UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
+
+To invoke UnimplementedTypeRule, provide `--engine sfge` and `--projectdir/-p` on `scanner:run`.
+
+### Definition
+
+UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
+
+### Interpreting UnimplementedTypeRule Results
+
+Match any violation message that you receive with this case to understand more about the violation.
+
+*Common Case*
+
+> Extend, implement, or delete %s %s
+
+Parameter Explanation:
+
+Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
+
+### UnimplementedTypeRule Limitations
+
+Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
 
 ## Roadmap
 
