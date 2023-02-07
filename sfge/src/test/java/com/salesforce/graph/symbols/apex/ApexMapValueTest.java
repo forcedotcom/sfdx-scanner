@@ -9,7 +9,9 @@ import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.Map;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -292,5 +294,38 @@ public class ApexMapValueTest {
                 valuesEntry.getKey() == valuesCloneEntry.getKey(), equalTo(shallowClone));
         MatcherAssert.assertThat(
                 valuesEntry.getValue() == valuesCloneEntry.getValue(), equalTo(shallowClone));
+    }
+
+    @Disabled // TODO: Handle nested Maps and invocations of get() on the results of a get() on a
+    // nested Map.
+    @Test
+    public void testNestedMap() {
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                    + "    public static String doSomething() {\n"
+                    + "        String output = RecordTypeUtil.getAccountRecordTypeID();\n"
+                    + "       System.debug(output);\n"
+                    + "    }\n"
+                    + "}",
+            "public class RecordTypeUtil {\n"
+                    + "    private static Map<String, Map<String, Id>> mapRecordTypes = new Map<String, Map<String, Id>>();\n"
+                    + "    public static String getAccountRecordTypeID() {\n"
+                    + "        String recTypeId = getRecordTypes('Account').get('Name');\n"
+                    + "        return recTypeId;\n"
+                    + "    }\n"
+                    + "\n"
+                    + "    public static Map<String, Id> getRecordTypes(String objectName) {\n"
+                    + "       if (!mapRecordTypes.contains(objectName)) {\n"
+                    + "           mapRecordTypes.put(objectName, 'hi');\n"
+                    + "       }\n"
+                    + "        return mapRecordTypes.get(objectName);\n"
+                    + "    }\n"
+                    + "}"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+        ApexStringValue apexValue = visitor.getSingletonResult();
+        MatcherAssert.assertThat(TestUtil.apexValueToString(apexValue), Matchers.equalTo("hi"));
     }
 }

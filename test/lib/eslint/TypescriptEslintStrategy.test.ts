@@ -69,7 +69,12 @@ describe('TypescriptEslint Strategy', () => {
 				"line": null,
 				"column": null,
 				"severity": 2,
-				"message": "Parsing error: \"parserOptions.project\" has been set for @typescript-eslint/parser.\nThe file does not match your project config: test/code-fixtures/projects/ts/src/simpleYetWrong.ts.\nThe file must be included in at least one of the projects provided.",
+				"message": `Parsing error: ESLint was configured to run on \`this path should not matter\` using \`parserOptions.project\`: this part should not matter
+However, that TSConfig does not include this file. Either:
+- Change ESLint's list of included files to not include this file
+- Change that TSConfig to include this file
+- Create a new TSConfig that includes this file and include it in your parserOptions.project
+See the typescript-eslint docs for more info: https://typescript-eslint.io/linting/troubleshooting##i-get-errors-telling-me-eslint-was-configured-to-run--however-that-tsconfig-does-not--none-of-those-tsconfigs-include-this-file`,
 				"ruleName": null,
 				"category": "",
 				"url": ""

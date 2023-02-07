@@ -135,6 +135,8 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 				rulesets: [],
 				// Currently, all Graph Engine rules are Apex-specific.
 				languages: ["apex"],
+				// Graph Engine rules are DFA if the engine is DFA.
+				isDfa: this.isDfaEngine(),
 				// Currently, all Graph Engine rules are default-enabled.
 				defaultEnabled: true
 			});

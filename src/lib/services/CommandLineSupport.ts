@@ -81,15 +81,21 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 			cp.stdout.on('data', data => {
 				// eslint-disable-next-line @typescript-eslint/no-floating-promises
 				(async () => {
-					await this.outputProcessor.processRealtimeOutput(String(data));
-					stdout += data;
+					if (!await this.outputProcessor.processRealtimeOutput(String(data))) {
+						// hold onto data only if it was not processed
+						stdout += data;
+					}
+					
 				})();
 			});
 			cp.stderr.on('data', data => {
 				// eslint-disable-next-line @typescript-eslint/no-floating-promises
 				(async () => {
-					await this.outputProcessor.processRealtimeOutput(String(data));
-					stderr += data;
+					if (!await this.outputProcessor.processRealtimeOutput(String(data))) {
+						// hold onto data only if it was not processed
+						stderr += data;
+					}
+					
 				})();
 			});
 

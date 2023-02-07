@@ -5,6 +5,8 @@ import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {deepCopy} from '../../../lib/util/Utils';
+import Run from '../run';
+import Dfa from '../run/dfa';
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -14,6 +16,7 @@ Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
 
 type DescribeStyledRule = Rule & {
+	runWith: string;
 	enabled: boolean;
 };
 
@@ -78,6 +81,7 @@ export default class Describe extends ScannerCommand {
 		return rules.map(r => {
 			const styledRule: DescribeStyledRule = {
 				...r,
+				runWith: r.isDfa ? Dfa.id : Run.id,
 				enabled: enabledEngineNames.has(r.engine)
 			};
 			// Strip any whitespace off of the description.
@@ -87,6 +91,6 @@ export default class Describe extends ScannerCommand {
 	}
 
 	private logStyledRule(rule: DescribeStyledRule): void {
-		this.ux.styledObject(rule, ['name', 'engine', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
+		this.ux.styledObject(rule, ['name', 'engine', 'runWith', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
 	}
 }

@@ -1,4 +1,4 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {Controller} from '../../Controller';
 import {Config} from '../util/Config';
 import {AbstractRuleEngine} from '../services/RuleEngine';
@@ -27,6 +27,7 @@ const retireJsCatalog: Catalog = {
 		categories: ['Insecure Dependencies'],
 		rulesets: [],
 		languages: ['javascript'],
+		isDfa: false,
 		defaultEnabled: true
 	}],
 	categories: [{
@@ -197,7 +198,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 					});
 					break;
 				default:
-					throw new SfdxError(`Unexpected retire-js rule: ${rule.name}`);
+					throw new SfError(`Unexpected retire-js rule: ${rule.name}`);
 			}
 		}
 		return invocationArray;
@@ -230,7 +231,6 @@ export class RetireJsEngine extends AbstractRuleEngine {
 					// If RetireJS exits with code 13, then it ran successfully, but found at least one vulnerability.
 					// Convert the output into RuleResult objects and resolve to that.
 					res(this.processOutput(stdout, invocation.rule, verboseViolations));
-					
 				} else {
 					// If RetireJS exits with any other code, then it means something went wrong. The error could be
 					// contained in either stdout or stderr, so we'll send them both to a method for processing, and
@@ -311,7 +311,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		} catch (e) {
 			// Rethrow any errors as Sfdx errors.
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message);
+			throw new SfError(message);
 		}
 	}
 
@@ -331,8 +331,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 			vulnMessageItems.unshift(`severity: ${vuln.severity}`); // unshift after other identifiers so severity is first
 			vulnMessageItems.push(vuln.info.join(" ")); // list info elements separated by space
-			messageLines.push(`${vulnMessageItems.join("; ")}`)
-			
+			messageLines.push(`${vulnMessageItems.join("; ")}`);
 		}
 
 		return messageLines.join("\n");
@@ -347,7 +346,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			case 'high':
 				return 1;
 			default:
-				throw new SfdxError(`retire-js encountered unexpected severity value of ${sev}.`);
+				throw new SfError(`retire-js encountered unexpected severity value of ${sev}.`);
 		}
 	}
 
@@ -358,13 +357,13 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			outputJson = JSON.parse(output) as unknown;
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(`Could not parse RetireJS output: ${message}`);
+			throw new SfError(`Could not parse RetireJS output: ${message}`);
 		}
 		// If we were able to parse the object, we should then verify that it's actually a RetireJsOutput instance.
 		if (this.validateRetireJsOutput(outputJson)) {
 			return outputJson;
 		} else {
-			throw new SfdxError(`retire-js output did not match expected structure`);
+			throw new SfError(`retire-js output did not match expected structure`);
 		}
 	}
 
@@ -441,7 +440,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		} catch (e) {
 			// Catch any error and give it a slightly more informative header.
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(`RetireJS: ${message}`);
+			throw new SfError(`RetireJS: ${message}`);
 		}
 		// Finally, we can handle all of the ZIP files.
 		await this.extractZips();

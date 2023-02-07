@@ -1,5 +1,5 @@
 import {flags} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import {LooseObject} from '../../types';
 import {PathlessEngineFilters} from '../../Constants';
 import {CUSTOM_CONFIG} from '../../Constants';
@@ -92,7 +92,7 @@ export default class Run extends ScannerRunCommand {
 
 	protected validateVariantFlags(): Promise<void> {
 		if (this.flags.tsconfig && this.flags.eslintconfig) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'run-pathless', 'validations.tsConfigEslintConfigExclusive', []);
+			throw new SfError(messages.getMessage('validations.tsConfigEslintConfigExclusive'));
 		}
 
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
@@ -101,7 +101,7 @@ export default class Run extends ScannerRunCommand {
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (this.flags.target as string[])) {
 			if (target.indexOf('#') > -1) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'run-pathless', 'validations.methodLevelTargetingDisallowed', [target]);
+				throw new SfError(messages.getMessage('validations.methodLevelTargetingDisallowed', [target]));
 			}
 		}
 		return Promise.resolve();
@@ -123,7 +123,7 @@ export default class Run extends ScannerRunCommand {
 				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfdxError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
+				throw new SfError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 

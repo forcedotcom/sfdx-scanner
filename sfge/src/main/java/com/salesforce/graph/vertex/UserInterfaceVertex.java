@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
-public class UserInterfaceVertex extends BaseSFVertex implements InheritableSFVertex, NamedVertex {
+public class UserInterfaceVertex extends FieldWithModifierVertex
+        implements InheritableSFVertex, NamedVertex {
     UserInterfaceVertex(Map<Object, Object> properties) {
         super(properties);
     }

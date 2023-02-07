@@ -1,5 +1,5 @@
 import {flags} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
@@ -58,11 +58,11 @@ export default class Add extends ScannerCommand {
 
 	private validateFlags(): void {
 		if ((this.flags.language as string).length === 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.languageCannotBeEmpty', []);
+			throw new SfError(messages.getMessage('validations.languageCannotBeEmpty', []));
 		}
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (this.flags.path && stringArrayTypeGuard(this.flags.path) && (!this.flags.path.length || this.flags.path.includes(''))) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'add', 'validations.pathCannotBeEmpty', []);
+			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty', []));
 		}
 	}
 

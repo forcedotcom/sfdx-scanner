@@ -1,5 +1,5 @@
 import {flags} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {RuleFilter, SourcePackageFilter} from '../../../lib/RuleFilter';
@@ -60,7 +60,7 @@ export default class Remove extends ScannerCommand {
 			// If the --path flag was used, then we couldn't find any paths matching their criteria, and we should throw
 			// and error saying as much.
 			if (paths) {
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'errors.noMatchingPaths');
+				throw new SfError(messages.getMessage('errors.noMatchingPaths'));
 			} else {
 				// If the flag wasn't used, then they're just doing a dry run. We should still let them know that they
 				// don't have anything, but it should be surfaced as a log instead of an error.
@@ -106,7 +106,7 @@ export default class Remove extends ScannerCommand {
 	private validateFlags(): void {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (this.flags.path && stringArrayTypeGuard(this.flags.path) && (!this.flags.path.length || this.flags.path.includes(''))) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'remove', 'validations.pathCannotBeEmpty', []);
+			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty'));
 		}
 	}
 

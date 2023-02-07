@@ -1,4 +1,4 @@
-import {SfdxError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import * as path from 'path';
 import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
 import {ENGINE} from '../../Constants';
@@ -63,7 +63,7 @@ export class RuleResultRecombinator {
 				formattedResults = this.constructXml(results);
 				break;
 			default:
-				throw new SfdxError('Unrecognized output format.');
+				throw new SfError('Unrecognized output format.');
 		}
 		return {minSev: this.findMinSev(results), results: formattedResults, summaryMap: this.generateSummaryMap(results, executedEngines)};
 	}

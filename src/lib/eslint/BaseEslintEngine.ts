@@ -1,4 +1,4 @@
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import { Catalog, ESRuleConfig, ESRuleConfigValue, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata } from '../../types';
 import {ENGINE, Severity} from '../../Constants';
 import {OutputProcessor} from '../services/OutputProcessor';
@@ -152,19 +152,19 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 
 	private processRule(key: string, meta: ESRuleMetadata): Rule {
 		// Massage eslint rule into Catalog rule format
-		const rule = {
+		return {
 			engine: this.getName(),
 			sourcepackage: this.getName(),
 			name: key,
 			description: meta.docs.description,
 			categories: [meta.type],
 			rulesets: [meta.type],
+			isDfa: false,
 			languages: [...this.strategy.getLanguages()],
 			defaultEnabled: this.strategy.ruleDefaultEnabled(key),
 			defaultConfig: this.strategy.getDefaultConfig(key),
 			url: meta.docs.url
 		};
-		return rule;
 	}
 
 	shouldEngineRun(
@@ -254,7 +254,7 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 			return results;
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message);
+			throw new SfError(message);
 		}
 	}
 

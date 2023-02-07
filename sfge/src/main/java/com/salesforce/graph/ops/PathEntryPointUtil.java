@@ -137,7 +137,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files with an @AuraEnabled annotation. An empty list
      * implicitly includes all files.
      */
-    private static List<MethodVertex> getAuraEnabledMethods(
+    public static List<MethodVertex> getAuraEnabledMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return getMethodsWithAnnotation(g, targetFiles, Schema.AURA_ENABLED);
     }
@@ -192,7 +192,7 @@ public final class PathEntryPointUtil {
      * Returns non-test methods in the target files whose return type is a PageReference. An empty
      * list implicitly includes all files.
      */
-    static List<MethodVertex> getPageReferenceMethods(
+    public static List<MethodVertex> getPageReferenceMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         return SFVertexFactory.loadVertices(
                 g,
@@ -277,7 +277,7 @@ public final class PathEntryPointUtil {
      * @param targetFiles
      * @return
      */
-    static List<MethodVertex> getExposedControllerMethods(
+    public static List<MethodVertex> getExposedControllerMethods(
             GraphTraversalSource g, List<String> targetFiles) {
         Set<String> referencedVfControllers =
                 MetaInfoCollectorProvider.getVisualForceHandler().getMetaInfoCollected();

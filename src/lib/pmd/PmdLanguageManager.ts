@@ -1,9 +1,16 @@
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {LANGUAGE} from '../../Constants'
-import {Logger, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfError} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import { ENGINE } from '../../Constants';
+
+// Initialize Messages with the current plugin directory
+Messages.importMessagesDirectory(__dirname);
+
+// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
+// or any library that is using the messages framework can also be loaded this way.
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdLanguageManager');
 
 const VALID_LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['apex', 'apex'],
@@ -52,13 +59,13 @@ class PmdLanguageManager extends AsyncCreatable {
 			const lang = this.resolveLanguageAlias(alias);
 			if (lang) {
 				if (LANGUAGE.JAVASCRIPT === lang) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdCatalogWrapper', 'JavascriptNotSupported');
+					throw new SfError(messages.getMessage('JavascriptNotSupported'));
 				} else {
 					langs.push(lang);
 				}
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
-				throw SfdxError.create('@salesforce/sfdx-scanner', 'PmdLanguageManager', 'InvalidLanguageAlias', [this.config.getConfigFilePath(), alias]);
+				throw new SfError(messages.getMessage('InvalidLanguageAlias', [this.config.getConfigFilePath(), alias]));
 			}
 		}
 		return langs;

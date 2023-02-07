@@ -1,4 +1,4 @@
-import {SfdxError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {FileHandler} from './FileHandler';
 import {isBinaryFileSync} from 'isbinaryfile';
 import isZip = require('is-zip');
@@ -32,7 +32,7 @@ export class StaticResourceHandler {
 			// We'll throw an error here, because being unable to parse a static resource is definitely a problem that
 			// should be surfaced to the user.
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(`Could not read ${filename}: ${message}`);
+			throw new SfError(`Could not read ${filename}: ${message}`);
 		}
 
 		const fileType: StaticResourceType = this.identifyBufferType(buffer);

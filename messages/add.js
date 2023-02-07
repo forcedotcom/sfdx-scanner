@@ -11,11 +11,6 @@ module.exports = {
 		"languageCannotBeEmpty": "Specify a language",
     "pathCannotBeEmpty": "Specify a path"
 	},
-	"errors": {
-		"invalidFilePath": "We couldn't find a file or directory with path: %s.",
-		"readCustomRulePathFileFailed": "We couldn't read the custom rule path file: %s.",
-		"writeCustomRulePathFileFailed": "We couldn't write to the custom rule path file: %s."
-	},
 	"examples": `Bundle custom PMD rules in JAR files. Follow PMD conventions, such as defining the custom rules in XML files under a \`/category/\` directory.
 See PMD's documentation for more information on writing rules.
 

@@ -16,23 +16,31 @@ import org.apache.logging.log4j.Logger;
 final class ApexPathCollapserImpl implements ApexPathCollapser {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathCollapserImpl.class);
 
+    private final PathExpansionRegistry registry;
+
     /** This is the list of collapsers that the user has requested */
     private final List<ApexDynamicPathCollapser> dynamicPathCollapsers;
 
     /**
-     * Maps a ForkEvent to all of the ApexPathExpanders that have the same ForkEvent and returned a
-     * result. The ForkEvent passed to {@link #resultReturned(ApexPathExpander, ForkEvent,
-     * Optional)} are used to find all other ApexPathExpanders that might potentially be collapsed.
+     * Maps a ForkEvent Id to all of the ApexPathExpander Ids that have the same ForkEvent and
+     * returned a result. The ForkEvent passed to {@link #resultReturned(ApexPathExpander,
+     * ForkEvent, Optional)} are used to find all other ApexPathExpanders that might potentially be
+     * collapsed.
      */
-    private final Map<ForkEvent, List<ApexPathExpander>> forkEventToApexExpandersWithResults;
+    private final Map<Long, List<Long>> forkEventIdToApexExpanderIdsWithResults;
 
-    /** The list of all expanders that ApexPathExpanderUtil should remove on its next iteration */
-    private final List<ApexPathExpander> collapsedExpanders;
+    /**
+     * The list of Ids of all expanders that ApexPathExpanderUtil should remove on its next
+     * iteration
+     */
+    private final List<Long> collapsedApexPathExpanderIds;
 
-    ApexPathCollapserImpl(List<ApexDynamicPathCollapser> dynamicPathCollapsers) {
+    ApexPathCollapserImpl(
+            List<ApexDynamicPathCollapser> dynamicPathCollapsers, PathExpansionRegistry registry) {
         this.dynamicPathCollapsers = dynamicPathCollapsers;
-        this.forkEventToApexExpandersWithResults = new HashMap<>();
-        this.collapsedExpanders = new ArrayList<>();
+        this.registry = registry;
+        this.forkEventIdToApexExpanderIdsWithResults = new HashMap<>();
+        this.collapsedApexPathExpanderIds = new ArrayList<>();
         if (dynamicPathCollapsers.isEmpty()) {
             throw new UnexpectedException("Use NoOpApexPathCollapser");
         }
@@ -40,8 +48,9 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
 
     @Override
     public List<ApexPathExpander> clearCollapsedExpanders() {
-        List<ApexPathExpander> result = new ArrayList<>(collapsedExpanders);
-        collapsedExpanders.clear();
+        List<ApexPathExpander> result =
+                registry.convertIdsToApexPathExpanders(collapsedApexPathExpanderIds);
+        collapsedApexPathExpanderIds.clear();
         return result;
     }
 
@@ -50,7 +59,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
             ForkEvent forkEvent,
             ApexPathExpander originalExpander,
             List<ApexPathExpander> newExpanders) {
-        if (collapsedExpanders.contains(originalExpander)) {
+        if (collapsedApexPathExpanderIds.contains(originalExpander.getId())) {
             throw new UnexpectedException("Pending removal was forked");
         }
 
@@ -83,9 +92,11 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
         MethodVertex methodVertex = forkEvent.getMethodVertex();
 
         // Keep track of the result that was added
-        List<ApexPathExpander> apexPathExpanders =
-                forkEventToApexExpandersWithResults.computeIfAbsent(
-                        forkEvent, k -> new ArrayList<>());
+        final List<Long> apexPathExpanderIds =
+                forkEventIdToApexExpanderIdsWithResults.computeIfAbsent(
+                        forkEvent.getId(), k -> new ArrayList<>());
+        final List<ApexPathExpander> apexPathExpanders =
+                registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
         apexPathExpanders.add(apexPathExpander);
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(
@@ -176,9 +187,10 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
             }
             // Clean up
             if (retained.isEmpty()) {
-                forkEventToApexExpandersWithResults.remove(forkEvent);
+                forkEventIdToApexExpanderIdsWithResults.remove(forkEvent.getId());
             } else {
-                forkEventToApexExpandersWithResults.put(forkEvent, retained);
+                forkEventIdToApexExpanderIdsWithResults.put(
+                        forkEvent.getId(), registry.convertApexPathExpandersToIds(retained));
             }
 
             // Throw an exception if the collapsed item is the currently executing one
@@ -187,7 +199,7 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
                 if (collapsedPathExpander.equals(apexPathExpander)) {
                     needToThrow = true;
                 } else {
-                    collapsedExpanders.add(collapsedPathExpander);
+                    collapsedApexPathExpanderIds.add(collapsedPathExpander.getId());
                 }
                 removeExistingExpander(collapsedPathExpander);
             }
@@ -202,13 +214,16 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
     public void removeExistingExpander(ApexPathExpander apexPathExpander) {
         // Remove the apexPathExpander the list of all returned results
         for (ForkEvent forkEvent : apexPathExpander.getForkEvents().values()) {
-            List<ApexPathExpander> apexPathExpanders =
-                    forkEventToApexExpandersWithResults.get(forkEvent);
-            if (apexPathExpanders != null) {
+            final List<Long> apexPathExpanderIds =
+                    forkEventIdToApexExpanderIdsWithResults.get(forkEvent.getId());
+
+            if (apexPathExpanderIds != null) {
+                final List<ApexPathExpander> apexPathExpanders =
+                        registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
                 apexPathExpanders.remove(apexPathExpander);
                 if (apexPathExpanders.isEmpty()) {
                     // Remove the list if it is empty
-                    forkEventToApexExpandersWithResults.remove(forkEvent);
+                    forkEventIdToApexExpanderIdsWithResults.remove(forkEvent.getId());
                 }
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Removed apexPathExpander. newSize=" + apexPathExpanders.size());
@@ -221,9 +236,13 @@ final class ApexPathCollapserImpl implements ApexPathCollapser {
     private void addNewExpanders(List<ApexPathExpander> newExpanders) {
         for (ApexPathExpander newExpander : newExpanders) {
             for (ForkEvent forkEvent : newExpander.getForkEvents().values()) {
+
+                List<Long> apexPathExpanderIds =
+                        forkEventIdToApexExpanderIdsWithResults.computeIfAbsent(
+                                forkEvent.getId(), k -> new ArrayList<>());
+
                 List<ApexPathExpander> apexPathExpanders =
-                        forkEventToApexExpandersWithResults.computeIfAbsent(
-                                forkEvent, k -> new ArrayList<>());
+                        registry.convertIdsToApexPathExpanders(apexPathExpanderIds);
                 apexPathExpanders.add(newExpander);
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace(

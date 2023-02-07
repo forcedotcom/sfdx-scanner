@@ -1,6 +1,6 @@
 import globby = require('globby');
 import {flags} from '@salesforce/command';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import {CUSTOM_CONFIG} from '../../../Constants';
 import {SfgeConfig} from '../../../types';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
@@ -78,18 +78,18 @@ export default class Dfa extends ScannerRunCommand {
 		// but doesn't require that the flag actually be present.
 		// So we should make sure it exists here.
 		if (!this.flags.projectdir || (this.flags.projectdir as string[]).length === 0) {
-			throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.projectdirIsRequired', []);
+			throw new SfError(messages.getMessage('validations.projectdirIsRequired'));
 		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
 		for (const target of (this.flags.target as string[])) {
 			// The target specifies a method if it includes the `#` syntax.
 			if (target.indexOf('#') > -1) {
 				if( globby.hasMagic(target)) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.methodLevelTargetCannotBeGlob', []);
+					throw new SfError(messages.getMessage('validations.methodLevelTargetCannotBeGlob'));
 				}
 				const potentialFilePath = target.split('#')[0];
 				if (!(await fh.isFile(potentialFilePath))) {
-					throw SfdxError.create('@salesforce/sfdx-scanner', 'run-dfa', 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]);
+					throw new SfError(messages.getMessage('validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
 				}
 			}
 		}

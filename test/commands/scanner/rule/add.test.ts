@@ -149,7 +149,7 @@ describe('scanner:rule:add', () => {
 			setupCommandTest
 				.command(['scanner:rule:add', '--path', '/some/local/path'])
 				.it('should complain about missing --language flag', ctx => {
-					expect(ctx.stderr).contains(messages.getMessage('flags.languageDescription'));
+					expect(ctx.stderr).contains('Missing required flag language');
 				});
 
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
@@ -165,7 +165,7 @@ describe('scanner:rule:add', () => {
 			setupCommandTest
 				.command(['scanner:rule:add', '--language', 'apex'])
 				.it('should complain about missing --path flag', ctx => {
-					expect(ctx.stderr).contains('Missing required flag:\n -p, --path PATH');
+					expect(ctx.stderr).contains('Missing required flag path');
 				});
 
 			// Test for failure scenario doesn't need to do any special setup or cleanup.

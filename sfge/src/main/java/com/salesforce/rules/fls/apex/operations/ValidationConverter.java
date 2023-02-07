@@ -237,6 +237,15 @@ public class ValidationConverter {
                 continue;
             }
 
+            if (queryInfo.isUserMode()) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(
+                            "A query that has \"WITH USER_MODE\" clause is inherently protected",
+                            queryInfo);
+                }
+                continue;
+            }
+
             if (ObjectBasedCheckUtil.isSpecialObject(queryInfo.getObjectName())) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("A non-FLS object does not need FLS check", queryInfo);

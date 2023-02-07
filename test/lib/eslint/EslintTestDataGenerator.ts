@@ -15,6 +15,7 @@ export function getDummyRule(myEngineName = engineName): Rule {
 		categories: ["some category"],
 		languages: ["language"],
 		sourcepackage: "MySourcePackage",
+		isDfa: false,
 		rulesets: [],
 		defaultEnabled: true
 	}
@@ -155,6 +156,7 @@ export function getDummyEsResult(messages: Linter.LintMessage[] = [getDummyEsMes
 	return {
 		filePath: "filePath",
 		messages: messages,
+		suppressedMessages: [],
 		errorCount: 1,
 		fatalErrorCount: 1,
 		warningCount: 0,

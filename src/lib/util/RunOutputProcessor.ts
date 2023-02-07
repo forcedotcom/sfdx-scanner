@@ -1,6 +1,6 @@
 import {UX} from '@salesforce/command';
 import {AnyJson} from '@salesforce/ts-types';
-import {Messages, SfdxError} from '@salesforce/core';
+import {Messages, SfError} from '@salesforce/core';
 import fs = require('fs');
 
 import {RecombinedRuleResults, RecombinedData} from '../../types';
@@ -53,7 +53,7 @@ export class RunOutputProcessor {
 		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
 			// We want to throw an error when the highest severity (smallest num) is
 			// equal to or more severe (equal to or less than number-wise) than the inputted number
-			throw new SfdxError(msg, null, null, minSev);
+			throw new SfError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
 			this.ux.log(msg);
@@ -119,7 +119,7 @@ export class RunOutputProcessor {
 		} catch (e) {
 			// Rethrow any errors as SfdxErrors.
 			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfdxError(message, null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
 		return messages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
@@ -139,7 +139,7 @@ export class RunOutputProcessor {
 			case OUTPUT_FORMAT.XML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
-					throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
+					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
 				// We can just dump those giant strings to the console without anything special.
 				this.ux.log(results);
@@ -147,12 +147,12 @@ export class RunOutputProcessor {
 			case OUTPUT_FORMAT.TABLE:
 				// This format should be a JSON with a `columns` property and a `rows` property, i.e. NOT a string.
 				if (typeof results === 'string') {
-					throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
+					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
 				this.ux.table(results.rows, results.columns);
 				break;
 			default:
-				throw new SfdxError(msg, null, null, INTERNAL_ERROR_CODE);
+				throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.

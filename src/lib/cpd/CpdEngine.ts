@@ -1,4 +1,4 @@
-import {Logger, Messages, SfdxError} from '@salesforce/core';
+import {Logger, Messages, SfError} from '@salesforce/core';
 import {xml2js, Element} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
@@ -77,6 +77,7 @@ export class CpdEngine extends AbstractRuleEngine {
 				description: CpdRuleDescription,
 				categories: [CpdRuleCategory],
 				rulesets: [],
+				isDfa: false,
 				languages: CpdLanguagesSupported,
 				defaultEnabled: true
 			}],
@@ -168,12 +169,11 @@ export class CpdEngine extends AbstractRuleEngine {
 		this.logger.trace(`About to run CPD (${language}, ${this.minimumTokens}). Targets: ${targetPaths.length}`);
 		const selectedTargets = targetPaths.join(',');
 		try {
-			const stdout = CpdWrapper.execute(selectedTargets, language, this.minimumTokens);
-			return stdout;
+			return CpdWrapper.execute(selectedTargets, language, this.minimumTokens);
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			this.logger.trace(`Cpd (${language}) evaluation failed: ` + message || e);
-			throw new SfdxError(message);
+			throw new SfError(message);
 		}
 	}
 

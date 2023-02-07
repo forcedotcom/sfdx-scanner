@@ -5,6 +5,8 @@ import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.testutils.BaseFlsTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class ComplexQueryTest extends BaseFlsTest {
     private ApexFlsViolationRule rule;
@@ -46,12 +48,15 @@ public class ComplexQueryTest extends BaseFlsTest {
                 expect(3, FlsConstants.FlsValidationType.READ, "Account").withField("Name"));
     }
 
-    @Test
-    public void testSafeInnerQuery_SecurityEnforced() {
+    @CsvSource({"SECURITY_ENFORCED", "USER_MODE"})
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSafeInnerQuery_WithMode(String mode) {
         String sourceCode =
                 "public class MyClass {\n"
                         + "    public void foo() {\n"
-                        + "        [SELECT Id, Name, (SELECT FirstName from Contact) from Account WITH SECURITY_ENFORCED];\n"
+                        + String.format(
+                                "        [SELECT Id, Name, (SELECT FirstName from Contact) from Account WITH %s];\n",
+                                mode)
                         + "    }\n"
                         + "}\n";
 

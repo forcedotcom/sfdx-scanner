@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "3.8.0",
+	"version": "3.9.0",
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -11,8 +11,8 @@
 		"@oclif/command": "^1",
 		"@oclif/config": "^1",
 		"@oclif/errors": "^1",
-		"@salesforce/command": "^4",
-		"@salesforce/core": "^2.1.6",
+		"@salesforce/command": "^5",
+		"@salesforce/core": "^3",
 		"@salesforce/eslint-config-lwc": "^3.2.1",
 		"@salesforce/eslint-plugin-lightning": "^1.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
