@@ -30,6 +30,11 @@ public final class SfgeConfigImpl implements SfgeConfig {
         return EnvUtil.getProgressIncrements();
     }
 
+    @Override
+    public int getStackDepthLimit() {
+        return EnvUtil.getStackDepthLimit();
+    }
+
     static SfgeConfigImpl getInstance() {
         return SfgeConfigImpl.LazyHolder.INSTANCE;
     }

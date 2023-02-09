@@ -29,4 +29,9 @@ public class TestSfgeConfig implements SfgeConfig {
     public int getProgressIncrements() {
         return SfgeConfigImpl.getInstance().getProgressIncrements();
     }
+
+    @Override
+    public int getStackDepthLimit() {
+        return SfgeConfigImpl.getInstance().getStackDepthLimit();
+    }
 }

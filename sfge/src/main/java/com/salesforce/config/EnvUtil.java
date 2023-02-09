@@ -26,6 +26,8 @@ public final class EnvUtil {
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
     @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS = 10;
 
+    @VisibleForTesting static final int DEFAULT_STACK_DEPTH = 1000;
+
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
      * {@link #DEFAULT_RULE_THREAD_COUNT}. Should be used to set the number of threads that can be
@@ -74,6 +76,14 @@ public final class EnvUtil {
      */
     static int getProgressIncrements() {
         return getIntOrDefault(ENV_PROGRESS_INCREMENTS, DEFAULT_PROGRESS_INCREMENTS);
+    }
+
+    /**
+     * Returns stack depth limit that Apex's governor limits enforce.
+     * Cannot be overridden by a user-specified value.
+     */
+    static int getStackDepthLimit() {
+        return DEFAULT_STACK_DEPTH;
     }
 
     private static int getIntOrDefault(String name, int defaultValue) {

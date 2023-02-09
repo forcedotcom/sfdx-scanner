@@ -25,4 +25,9 @@ public interface SfgeConfig {
      * provided
      */
     int getProgressIncrements();
+
+    /**
+     * Stack depth that a path is allowed to grow.
+     */
+    int getStackDepthLimit();
 }

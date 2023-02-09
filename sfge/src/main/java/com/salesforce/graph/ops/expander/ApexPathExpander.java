@@ -2,6 +2,7 @@ package com.salesforce.graph.ops.expander;
 
 import com.salesforce.Collectible;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.SfgeInterruptedException;
 import com.salesforce.exception.UnexpectedException;
@@ -75,6 +76,11 @@ final class ApexPathExpander
         implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Registrable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 
+    /**
+     * Allowed stack depth limit
+     */
+    public final int stackDepthLimit;
+
     /** Used to give each object a unique id */
     private static final AtomicLong ID_GENERATOR = new AtomicLong();
 
@@ -91,6 +97,8 @@ final class ApexPathExpander
 
     /** Dynamically generated id used to establish object equality */
     private final Long id;
+
+    private int stackDepth;
 
     /**
      * The vertex that caused a {@link MethodPathForkedException} to be thrown and the ForkEvent
@@ -195,6 +203,8 @@ final class ApexPathExpander
         this.topMostPath = new Stack<>();
         this.topMostPath.push(topMostPath);
         this.config = config;
+        this.stackDepthLimit = SfgeConfigProvider.get().getStackDepthLimit();
+        this.stackDepth = 0;
         this.symbolProviderVisitor =
                 new DefaultSymbolProviderVertexVisitor(
                         g, config.instantiateClassScope(g).orElse(null));
@@ -241,6 +251,10 @@ final class ApexPathExpander
         // The clone map will allow us to correlate the old paths to the newly cloned paths
         this.topMostPath = CloneUtil.cloneStack(other.topMostPath);
         this.config = CloneUtil.cloneImmutable(other.config);
+
+        this.stackDepthLimit = SfgeConfigProvider.get().getStackDepthLimit();
+        // Reset stack depth
+        this.stackDepth = 0;
 
         // Find the method call that caused the fork and hook up the path
         BaseSFVertex topLevelVertex = ex.getTopLevelVertex();
@@ -641,12 +655,15 @@ final class ApexPathExpander
                 }
             }
 
+            incrementStackDepth(vertex);
             visit(methodPath);
+            decrementStackDepth(vertex);
 
             if (afterMethodCalled.add(pathInvocableCall)) {
                 Optional<ApexValue<?>> lastReturnValue =
                         symbolProviderVisitor.afterMethodCall(
                                 invocable, methodPath.getMethodVertex().get());
+
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace(
                             "lastReturnValue="
@@ -801,6 +818,35 @@ final class ApexPathExpander
         }
 
         return result;
+    }
+
+    private void incrementStackDepth(BaseSFVertex vertex) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                    "Incrementing stack depth (" + stackDepth + ") for vertex: " + vertex);
+        }
+        stackDepth++;
+        if (stackDepth > stackDepthLimit) {
+            throw new StackDepthLimitExceededException(stackDepth, vertex);
+        }
+    }
+
+    private void decrementStackDepth(BaseSFVertex vertex) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Decrementing stack depth (" + stackDepth + ")");
+        }
+        stackDepth--;
+        if (stackDepth < 0) {
+            throw new UnexpectedException("Stack depth cannot be less than 0. vertex=" + vertex);
+        }
+    }
+
+    private void resetStackDepth() {
+        // TODO: Should this be a decrement or a reset?
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Resetting stack depth.");
+        }
+        stackDepth = 0;
     }
 
     @Override
