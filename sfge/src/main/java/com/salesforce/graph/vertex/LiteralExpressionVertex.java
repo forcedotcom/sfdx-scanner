@@ -73,6 +73,24 @@ public abstract class LiteralExpressionVertex<T> extends ChainedVertex
         public Boolean getLiteral() {
             return value;
         }
+
+        protected static boolean isExpectedLiteral(
+                BaseSFVertex vertex,
+                Class<? extends BooleanLiteralExpressionVertex> expectation,
+                Class<? extends BooleanLiteralExpressionVertex> opposite) {
+            // If we're given a negation expression, we can check whether the thing being negated is
+            // the opposite of the value we expect.
+            // E.g., we can determine whether !X is literally false by checking if X is literally
+            // true.
+            if (vertex instanceof PrefixExpressionVertex) {
+                PrefixExpressionVertex prefix = (PrefixExpressionVertex) vertex;
+                if (prefix.isOperatorNegation()) {
+                    return isExpectedLiteral(prefix.getChild(0), opposite, expectation);
+                }
+            }
+            // For anything else, just check if it's an instance of the expected literal.
+            return expectation.isInstance(vertex);
+        }
     }
 
     public static final class False extends BooleanLiteralExpressionVertex {
@@ -99,6 +117,10 @@ public abstract class LiteralExpressionVertex<T> extends ChainedVertex
         public void afterVisit(SymbolProviderVertexVisitor visitor) {
             visitor.afterVisit(this);
         }
+
+        public static boolean isLiterallyFalse(BaseSFVertex vertex) {
+            return isExpectedLiteral(vertex, False.class, True.class);
+        }
     }
 
     public static final class True extends BooleanLiteralExpressionVertex {
@@ -124,6 +146,10 @@ public abstract class LiteralExpressionVertex<T> extends ChainedVertex
         @Override
         public void afterVisit(SymbolProviderVertexVisitor visitor) {
             visitor.afterVisit(this);
+        }
+
+        public static boolean isLiterallyTrue(BaseSFVertex vertex) {
+            return isExpectedLiteral(vertex, True.class, False.class);
         }
     }
 

@@ -186,14 +186,6 @@ public abstract class BaseSFVertex implements CollectibleObject, SFVertex {
         return getInteger(Schema.BEGIN_COLUMN);
     }
 
-    public boolean isFirsChild() {
-        return getBoolean(Schema.FIRST_CHILD);
-    }
-
-    public boolean isLastChild() {
-        return getBoolean(Schema.LAST_CHILD);
-    }
-
     public boolean isStandardType() {
         return getBoolean(Schema.IS_STANDARD);
     }
