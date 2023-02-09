@@ -26,6 +26,7 @@ public final class EnvUtil {
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
     @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS = 10;
 
+    /** Keeping default Apex governor limit enforced on stack depth */
     @VisibleForTesting static final int DEFAULT_STACK_DEPTH = 1000;
 
     /**
@@ -79,8 +80,8 @@ public final class EnvUtil {
     }
 
     /**
-     * Returns stack depth limit that Apex's governor limits enforce.
-     * Cannot be overridden by a user-specified value.
+     * Returns stack depth limit that Apex's governor limits enforce. Cannot be overridden by a
+     * user-specified value.
      */
     static int getStackDepthLimit() {
         return DEFAULT_STACK_DEPTH;

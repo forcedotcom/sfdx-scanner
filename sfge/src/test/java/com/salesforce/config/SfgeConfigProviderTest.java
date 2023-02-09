@@ -71,8 +71,7 @@ public class SfgeConfigProviderTest {
                     sfgeConfig.getProgressIncrements(),
                     equalTo(-1 * EnvUtil.getProgressIncrements()));
             MatcherAssert.assertThat(
-                sfgeConfig.getStackDepthLimit(),
-                equalTo(0.1 * EnvUtil.DEFAULT_STACK_DEPTH));
+                    sfgeConfig.getStackDepthLimit(), equalTo(0.1 * EnvUtil.DEFAULT_STACK_DEPTH));
         } finally {
             SfgeConfigTestProvider.remove();
         }
@@ -100,6 +99,6 @@ public class SfgeConfigProviderTest {
         MatcherAssert.assertThat(
                 sfgeConfig.getProgressIncrements(), equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS));
         MatcherAssert.assertThat(
-            sfgeConfig.getStackDepthLimit(), equalTo(EnvUtil.DEFAULT_STACK_DEPTH));
+                sfgeConfig.getStackDepthLimit(), equalTo(EnvUtil.DEFAULT_STACK_DEPTH));
     }
 }

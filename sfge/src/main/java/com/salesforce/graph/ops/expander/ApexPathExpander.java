@@ -76,9 +76,7 @@ final class ApexPathExpander
         implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Registrable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 
-    /**
-     * Allowed stack depth limit
-     */
+    /** Allowed stack depth limit */
     public final int stackDepthLimit;
 
     /** Used to give each object a unique id */
@@ -655,6 +653,7 @@ final class ApexPathExpander
                 }
             }
 
+            // Increment stack depth before visiting a method. Decrement stack depth when returning.
             incrementStackDepth(vertex);
             visit(methodPath);
             decrementStackDepth(vertex);
@@ -822,8 +821,7 @@ final class ApexPathExpander
 
     private void incrementStackDepth(BaseSFVertex vertex) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                    "Incrementing stack depth (" + stackDepth + ") for vertex: " + vertex);
+            LOGGER.debug("Incrementing stack depth (" + stackDepth + ") for vertex: " + vertex);
         }
         stackDepth++;
         if (stackDepth > stackDepthLimit) {
@@ -839,14 +837,6 @@ final class ApexPathExpander
         if (stackDepth < 0) {
             throw new UnexpectedException("Stack depth cannot be less than 0. vertex=" + vertex);
         }
-    }
-
-    private void resetStackDepth() {
-        // TODO: Should this be a decrement or a reset?
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Resetting stack depth.");
-        }
-        stackDepth = 0;
     }
 
     @Override
