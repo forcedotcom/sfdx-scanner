@@ -1,7 +1,9 @@
 package com.salesforce.graph.ops.expander;
 
 import com.google.common.collect.ImmutableMap;
+import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.ops.registry.PathExpansionLimitReachedException;
 import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.ops.registry.Registry;
 import com.salesforce.graph.ops.registry.RegistryData;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /**
@@ -37,6 +41,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * Clear the registry when the operation completes to avoid accidental memory leaks.
  */
 public class PathExpansionRegistry extends Registry {
+    private static final Logger LOGGER = LogManager.getLogger(PathExpansionRegistry.class);
 
     private static final Map<Class<? extends Registrable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
@@ -58,7 +63,23 @@ public class PathExpansionRegistry extends Registry {
 
     /** Registry data structure to hold {@link ApexPathExpander}. */
     private static class ApexPathExpanderRegistryData extends RegistryData<ApexPathExpander> {
-        // Nothing new to add
+        final int pathExpansionLimit;
+
+        ApexPathExpanderRegistryData() {
+            pathExpansionLimit = SfgeConfigProvider.get().getPathExpansionLimit();
+        }
+
+        @Override
+        public void validateAndPut(ApexPathExpander instance) {
+            final int currentSize = idToInstance.size();
+            LOGGER.warn("PathExpander size = " + currentSize + " limit = " + pathExpansionLimit);
+            if (currentSize > pathExpansionLimit) {
+                // Preemptively halt processing this path expansion so that
+                // OutOfMemory doesn't occur and the remaining paths can get processed.
+                throw new PathExpansionLimitReachedException(currentSize);
+            }
+            super.validateAndPut(instance);
+        }
     }
 
     ///// ApexPathExpander registry methods//////
@@ -125,5 +146,22 @@ public class PathExpansionRegistry extends Registry {
                             return forkEvent.getId();
                         })
                 .collect(Collectors.toList());
+    }
+
+
+    // TODO: move this to its own class
+    public static int calculateAllowedLimit() {
+        // Numbers derived through performance profiling
+        final long averageApexPathExpanderSize = 1284328L;
+        final long capacityLimit = 50/100; // Allow path expander registry to reach upto 50% of heap
+        final long heapMaxSize = Runtime.getRuntime().maxMemory();
+
+        final int allowedLimit = (int) ((heapMaxSize * capacityLimit) / averageApexPathExpanderSize);
+
+        if (LOGGER.isWarnEnabled()) {
+            LOGGER.warn("Path expansion limit set to %d based on max heap space %l", allowedLimit, heapMaxSize);
+        }
+
+        return allowedLimit;
     }
 }

@@ -34,4 +34,9 @@ public class TestSfgeConfig implements SfgeConfig {
     public int getStackDepthLimit() {
         return SfgeConfigImpl.getInstance().getStackDepthLimit();
     }
+
+    @Override
+    public int getPathExpansionLimit() {
+        return SfgeConfigImpl.getInstance().getPathExpansionLimit();
+    }
 }

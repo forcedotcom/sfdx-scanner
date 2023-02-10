@@ -5,6 +5,7 @@ import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.exception.SfgeRuntimeException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.ops.LogUtil;
+import com.salesforce.graph.ops.registry.PathExpansionLimitReachedException;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
@@ -162,11 +163,7 @@ public class ThreadableRuleExecutor {
                         };
                 timer.schedule(task, TIMEOUT);
                 violations.addAll(
-                        new PathBasedRuleRunner(
-                                        submission.getGraph(),
-                                        submission.getRules(),
-                                        submission.getPathEntry())
-                                .runRules());
+                    runRules(submission.getGraph(), submission.getRules(), submission.getPathEntry()));
                 timer.cancel();
             } catch (StackOverflowError | Exception ex) {
                 // We don't want the timer to interrupt any of our exception handling, so
@@ -215,6 +212,17 @@ public class ThreadableRuleExecutor {
                 LOGGER.info("Finished. method=" + submission.getPathEntry().toSimpleString());
             }
             submission.afterRun(violations);
+            return violations;
+        }
+
+        private Set<Violation> runRules(GraphTraversalSource graph, List<AbstractPathBasedRule> rules, MethodVertex pathEntry) {
+            Set<Violation> violations = new HashSet<>();
+            final PathBasedRuleRunner pathBasedRuleRunner = new PathBasedRuleRunner(graph, rules, pathEntry);
+            try {
+                violations.addAll(pathBasedRuleRunner.runRules());
+            } catch (PathExpansionLimitReachedException ex) {
+                violations.add(new Violation.LimitReachedViolation(ex.getMessage(), pathEntry));
+            }
             return violations;
         }
     }

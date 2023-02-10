@@ -17,7 +17,7 @@ import java.util.Map;
  * @param <T> {@link Registrable} type that requires the registry setup.
  */
 public abstract class RegistryData<T extends Registrable> {
-    private final Map<Long, Registrable> idToInstance;
+    protected final Map<Long, Registrable> idToInstance;
 
     public RegistryData() {
         idToInstance = new HashMap<>();
