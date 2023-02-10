@@ -49,7 +49,7 @@ public class SfgeConfigProviderTest {
 
                         @Override
                         public int getStackDepthLimit() {
-                            return (int) (0.1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS);
+                            return -1 * EnvUtil.DEFAULT_STACK_DEPTH;
                         }
                     });
 
@@ -71,7 +71,7 @@ public class SfgeConfigProviderTest {
                     sfgeConfig.getProgressIncrements(),
                     equalTo(-1 * EnvUtil.getProgressIncrements()));
             MatcherAssert.assertThat(
-                    sfgeConfig.getStackDepthLimit(), equalTo(0.1 * EnvUtil.DEFAULT_STACK_DEPTH));
+                    sfgeConfig.getStackDepthLimit(), equalTo(-1 * EnvUtil.DEFAULT_STACK_DEPTH));
         } finally {
             SfgeConfigTestProvider.remove();
         }
