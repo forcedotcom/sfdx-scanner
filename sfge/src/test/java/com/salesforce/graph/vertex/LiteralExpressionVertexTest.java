@@ -26,7 +26,6 @@ public class LiteralExpressionVertexTest {
     @BeforeEach
     public void setup() {
         g = TestUtil.getGraph();
-        System.out.println("pre");
     }
 
     @Nested

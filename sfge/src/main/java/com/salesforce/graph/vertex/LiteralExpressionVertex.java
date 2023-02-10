@@ -118,6 +118,10 @@ public abstract class LiteralExpressionVertex<T> extends ChainedVertex
             visitor.afterVisit(this);
         }
 
+        /**
+         * Return true if the provided vertex is equivalent to the literal False.
+         * E.g., `false`, `!true`, `!!false`.
+         */
         public static boolean isLiterallyFalse(BaseSFVertex vertex) {
             return isExpectedLiteral(vertex, False.class, True.class);
         }
@@ -148,6 +152,10 @@ public abstract class LiteralExpressionVertex<T> extends ChainedVertex
             visitor.afterVisit(this);
         }
 
+        /**
+         * Return true if the provided vertex is equivalent to the literal True.
+         * E.g., `true`, `!false`, `!!true`.
+         */
         public static boolean isLiterallyTrue(BaseSFVertex vertex) {
             return isExpectedLiteral(vertex, True.class, False.class);
         }

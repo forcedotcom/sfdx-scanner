@@ -76,38 +76,51 @@ public final class StandardConditionDecomposer {
         List<BaseSFVertex> results = new ArrayList<>();
         BaseSFVertex lhs = vertex.getLhs();
         BaseSFVertex rhs = vertex.getRhs();
+        // We care about whether either side of the expression is literally true
+        // or literally false.
+        // E.g., `(X && true)` or `(X && false)`.
         boolean eitherSideTrue = True.isLiterallyTrue(lhs) || True.isLiterallyTrue(rhs);
         boolean eitherSideFalse = False.isLiterallyFalse(lhs) || False.isLiterallyFalse(rhs);
         // If we're expecting an AND expression to be satisfied, then by extension we're also
         // seeking for both sides to be satisfied.
+        // E.g., when (value && Y) is satisfied, it decomposes into value and Y.
         boolean expectingSatisfiedAnd = vertex.isOperatorAnd() && seekingSatisfied;
         // If we're expecting an OR expression to be satisfied and either side is equivalent to
         // a literal false, then the other side must be satisfied.
+        // E.g., when (value || false) is satisfied, it decomposes into value and false.
         boolean expectingSatisfiedOrFalse =
                 vertex.isOperatorOr() && seekingSatisfied && eitherSideFalse;
         // If we're expecting an OR expression to be unsatisfied, then by extension we're
         // also expecting each side to be unsatisfied.
+        // E.g., when (value || Y) is unsatisfied, it decomposes into value and Y.
         boolean expectingUnsatisfiedOr = vertex.isOperatorOr() && !seekingSatisfied;
         // If we're expecting an EQUALS expression to be satisfied and either side is true,
         // the other side must be true.
+        // E.g., when (value == true) is satisfied, it decomposes into value and true.
         boolean expectingSatisfiedEqualsTrue =
                 vertex.isOperatorEquals() && seekingSatisfied && eitherSideTrue;
         // If we're expecting an EQUALS expression to be unsatisfied and either side is false,
         // then the other side must be true.
+        // E.g., when (value == false) is unsatisfied, it decomposes into value and false.
         boolean expectingUnsatisfiedEqualsFalse =
                 vertex.isOperatorEquals() && !seekingSatisfied && eitherSideFalse;
         // If we're expecting a NOT-EQUALS expression to be satisfied and either side is false,
         // then the other side must be true.
+        // E.g., when (value != false) is satisfied, it decomposes into value and false.
         boolean expectingSatisfiedNotEqualsFalse =
                 vertex.isOperatorNotEquals() && seekingSatisfied && eitherSideFalse;
         // If we're expecting a NOT-EQUALS expression to be unsatisfied and either side is true,
         // then the other side must also be true.
+        // E.g., when (value != true) is unsatisfied, it decomposes into value and true.
         boolean expectingUnsatisfiedNotEqualsTrue =
                 vertex.isOperatorNotEquals() && !seekingSatisfied && eitherSideTrue;
 
-        // TODO: This system is a little bit naive, and there are definitely some edge cases
-        //       that it won't support. In the fullness of time, we may wish to rework
-        //       this (and the code that uses it) into something a bit more intelligent.
+        // TODO: This system is a little bit naive, and there are likely some edge cases
+        //       that it won't support. E.g., a more thorough system could probably identify
+        //       clauses that are satisfied on both sides of an OR
+        //       (such as X in ((X && Y) || (X && Z))). As is, this clause gets ignored.
+        //       In the fullness of time, we may wish to rework this (and the code that uses it)
+        //       into something a bit more intelligent.
         if (expectingSatisfiedAnd
                 || expectingSatisfiedOrFalse
                 || expectingSatisfiedEqualsTrue
