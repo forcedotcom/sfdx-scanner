@@ -83,8 +83,9 @@ public final class NegationContainmentUtil {
                             isEffectiveNegation ? level + 1 : level));
             return negationLevels;
         } else {
-            // Any other vertex type is a base case, and we should just return a singleton list of
-            // the current negation level.
+            // Any other vertex type is a base case, i.e. an expression that
+            // (as far as we can tell) has no further negation in it.
+            // E.g., `someVariable`, `someMethod()`, `6`.
             return Collections.singletonList(level);
         }
     }
