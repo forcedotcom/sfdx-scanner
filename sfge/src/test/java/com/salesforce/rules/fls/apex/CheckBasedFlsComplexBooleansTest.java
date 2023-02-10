@@ -617,6 +617,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                         + "    }\n"
                         + "}";
         // spotless:on
+        // Checking `x == false` is equivalent to checking `!x`, so the operation inside the IF is unsafe.
         assertViolations(rule, sourceCode, expect(4, validationType, "Account").withField("Name"));
     }
 
@@ -639,6 +640,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                         + "    }\n"
                         + "}";
         // spotless:on
+        // Checking `x != true` is equivalent to `!x`, so the operation inside the IF is unsafe.
         assertViolations(rule, sourceCode, expect(4, validationType, "Account").withField("Name"));
     }
 
@@ -661,6 +663,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                         + "    }\n"
                         + "}";
         // spotless:on
+        // Checking `x != false` is equivalent to `== true`, so the one outside the IF is unsafe.
         assertViolations(rule, sourceCode, expect(7, validationType, "Account").withField("Name"));
     }
 }

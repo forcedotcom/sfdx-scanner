@@ -95,6 +95,9 @@ public final class StandardConditionDecomposer {
         boolean expectingUnsatisfiedNotEqualsTrue =
                 vertex.isOperatorNotEquals() && !seekingSatisfied && eitherSideTrue;
 
+        // TODO: This system is a little bit naive, and there are definitely some edge cases
+        //       that it won't support. In the fullness of time, we may wish to rework
+        //       this (and the code that uses it) into something a bit more intelligent.
         if (expectingSatisfiedAnd
                 || expectingSatisfiedOrFalse
                 || expectingSatisfiedEqualsTrue
