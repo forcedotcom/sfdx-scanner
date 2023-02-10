@@ -1,10 +1,9 @@
 package com.salesforce.rules.fls.apex.operations;
 
 import com.salesforce.exception.TodoException;
-import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.graph.vertex.BooleanExpressionVertex;
-import com.salesforce.graph.vertex.PrefixExpressionVertex;
-import com.salesforce.graph.vertex.StandardConditionVertex;
+import com.salesforce.graph.vertex.*;
+import com.salesforce.graph.vertex.LiteralExpressionVertex.False;
+import com.salesforce.graph.vertex.LiteralExpressionVertex.True;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,11 +47,24 @@ public final class NegationContainmentUtil {
             // For boolean expressions, combine the negation results from each side into one array.
             // E.g., (!!!x && !y) => [3, 1].
             BooleanExpressionVertex booleanExpressionVertex = (BooleanExpressionVertex) vertex;
+            BaseSFVertex lhs = booleanExpressionVertex.getLhs();
+            BaseSFVertex rhs = booleanExpressionVertex.getRhs();
             List<Integer> negationLevels = new ArrayList<>();
+            // If the expression is `x == false` or `x != true`, then increment the negation level
+            // by one, since those expressions are equivalent to `!x`.
+            boolean isEffectiveNegation =
+                    (booleanExpressionVertex.isOperatorEquals()
+                                    && (False.isLiterallyFalse(lhs) || False.isLiterallyFalse(rhs)))
+                            || (booleanExpressionVertex.isOperatorNotEquals()
+                                    && (True.isLiterallyTrue(lhs) || True.isLiterallyTrue(rhs)));
             negationLevels.addAll(
-                    getContainedNegationLevels(booleanExpressionVertex.getLhs(), level));
+                    getContainedNegationLevels(
+                            booleanExpressionVertex.getLhs(),
+                            isEffectiveNegation ? level + 1 : level));
             negationLevels.addAll(
-                    getContainedNegationLevels(booleanExpressionVertex.getRhs(), level));
+                    getContainedNegationLevels(
+                            booleanExpressionVertex.getRhs(),
+                            isEffectiveNegation ? level + 1 : level));
             return negationLevels;
         } else {
             // Any other vertex type is a base case, and we should just return a singleton list of

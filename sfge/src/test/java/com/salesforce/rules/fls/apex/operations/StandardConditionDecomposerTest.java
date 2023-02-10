@@ -27,7 +27,7 @@ public class StandardConditionDecomposerTest {
         g = TestUtil.getGraph();
     }
 
-    // spotless off
+    // spotless:off
     private static final String SOURCE_CODE =
             "public class Foo {\n"
                     + "    public boolean bar(boolean b) {\n"
@@ -37,7 +37,7 @@ public class StandardConditionDecomposerTest {
                     + "        return false;\n"
                     + "    }\n"
                     + "}";
-    // spotless on
+    // spotless:on
     private static final Map<String, Boolean[]> VARIANTS_MAP =
             Stream.of(
                             new Object[][] {

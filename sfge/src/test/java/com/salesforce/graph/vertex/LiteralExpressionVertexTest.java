@@ -14,14 +14,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 public class LiteralExpressionVertexTest {
     private GraphTraversalSource g;
 
-    // spotless off
+    // spotless:off
     private final String isLiterallyXSourceTemplate =
             "public with sharing class Beep {\n"
                     + "    public void doNothing() {\n"
                     + "        %s\n"
                     + "    }\n"
                     + "}";
-    // spotless on
+    // spotless:on
 
     @BeforeEach
     public void setup() {
