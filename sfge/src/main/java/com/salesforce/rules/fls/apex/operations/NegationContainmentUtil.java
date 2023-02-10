@@ -8,15 +8,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Util class for checking the negation depth of a given vertex.
+ * By "negation depth", we mean the amount of times a given clause is negated either implicitly or explicitly.
+ */
 public final class NegationContainmentUtil {
     private NegationContainmentUtil() {}
 
+    /**
+     * Returns true if this vertex represents or contains a non-negated clause.
+     * E.g., in the expressions `X`, `(!!X || !Y)`, and `(X == true)`, `X` is a non-negated clause.
+     * @param vertex
+     * @return
+     */
     public static boolean includesNonNegatedClause(BaseSFVertex vertex) {
         // !!x == x, so if any of the clauses within this vertex have an even negation level, then
         // such a clause is effectively non-negated.
         return getContainedNegationLevels(vertex, 0).stream().anyMatch(i -> i % 2 == 0);
     }
 
+    /**
+     * Returns true if this vertex represents or contains a negated clause.
+     * E.g., in the expressions `!X`, `(!!!X || Y)`, and `(X == false), `X` is a negated clause.
+     * @param vertex
+     * @return
+     */
     public static boolean includesNegatedClause(BaseSFVertex vertex) {
         // !!!x == !x, so if any of the clauses within this vertex have an odd negation level, then
         // such a clause is effectively negated.

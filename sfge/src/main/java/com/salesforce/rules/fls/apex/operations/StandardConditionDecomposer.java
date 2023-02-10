@@ -8,10 +8,20 @@ import com.salesforce.graph.vertex.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Util class for decomposing {@link StandardConditionVertex} objects into components that can
+ * be evaluated by a path-based rule.
+ */
 public final class StandardConditionDecomposer {
 
     private StandardConditionDecomposer() {}
 
+    /**
+     * Decompose a {@link StandardConditionVertex} into a list of {@link BaseSFVertex} objects
+     * that must be satisfied in order for the condition to be met.
+     * @param vertex - A {@link StandardConditionVertex.Positive} or {@link StandardConditionVertex.Negative}.
+     * @return List containing {@link BaseSFVertex} objects that must be satisfied for the condition to achieve its expected outcome.
+     */
     public static List<BaseSFVertex> decomposeStandardCondition(StandardConditionVertex vertex) {
         final List<BaseSFVertex> children = vertex.getChildren();
         if (children.size() > 1) {
