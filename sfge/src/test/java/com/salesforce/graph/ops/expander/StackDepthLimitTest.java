@@ -40,14 +40,12 @@ public class StackDepthLimitTest {
     }
 
     private static final String METHOD_NAME_BASE = "invokeLevel";
+    // spotless:off
     public static final String METHOD_INVOKE_LEVEL_TEMPLATE =
-            "  void "
-                    + METHOD_NAME_BASE
-                    + "%d() {\n"
-                    + "       "
-                    + METHOD_NAME_BASE
-                    + "%d();\n"
-                    + "   }\n";
+        "  void " + METHOD_NAME_BASE + "%d() {\n"
+                + "       " + METHOD_NAME_BASE + "%d();\n"
+                + "   }\n";
+    // spotless:on
 
     @CsvSource({
         "ExceedsLimit, " + (STACK_DEPTH_LIMIT_OVERRIDE + 2) + ", false",
@@ -59,24 +57,22 @@ public class StackDepthLimitTest {
         // Since we already create two methods other than the dynamic ones, subtract them from
         // required count
         final int depthCountToAdd = stackDepthToCreate - 2;
+
+        // spotless:off
         final String sourceCode =
                 "public class MyClass {\n"
                         + "   public void doSomething() {\n"
-                        + "       "
-                        + METHOD_NAME_BASE
-                        + depthCountToAdd
-                        + "();\n"
+                        + "       " + METHOD_NAME_BASE + depthCountToAdd + "();\n"
                         + "   }\n"
                         + getInvocationDepthSource(depthCountToAdd)
-                        + "   void "
-                        + METHOD_NAME_BASE
-                        + "1() {\n"
+                        + "   void " + METHOD_NAME_BASE + "1() {\n"
                         + "       printData();\n"
                         + "   }\n"
                         + "   public void printData() {\n"
                         + "       System.debug('hi');\n"
                         + "   }\n"
                         + "}\n";
+        // spotless:on
 
         if (expectToReachSystemDebug) {
             final TestRunner.Result<SystemDebugAccumulator> result =
@@ -109,12 +105,11 @@ public class StackDepthLimitTest {
         String selfReferenceMethodName = "level";
         int count = STACK_DEPTH_LIMIT_OVERRIDE + 2;
 
+        // spotless:off
         String sourceCode =
                 "public class MyClass {\n"
                         + "   public void doSomething() {\n"
-                        + "       String myString = "
-                        + getSelfReferenceMethodCalls(selfReferenceMethodName, count)
-                        + "getValue();\n"
+                        + "       String myString = " + getSelfReferenceMethodCalls(selfReferenceMethodName, count) + "getValue();\n"
                         + "       System.debug(myString);\n"
                         + "   }\n"
                         + "   public String getValue() {\n"
@@ -122,6 +117,8 @@ public class StackDepthLimitTest {
                         + "   }\n"
                         + getSelfReferenceMethods(selfReferenceMethodName, count)
                         + "}\n";
+
+        // spotless:on
 
         final TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         final SystemDebugAccumulator visitor = result.getVisitor();
