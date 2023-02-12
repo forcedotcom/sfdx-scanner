@@ -46,6 +46,11 @@ public class SfgeConfigProviderTest {
                         public int getProgressIncrements() {
                             return -1 * EnvUtil.DEFAULT_PROGRESS_INCREMENTS;
                         }
+
+                        @Override
+                        public int getStackDepthLimit() {
+                            return -1 * EnvUtil.DEFAULT_STACK_DEPTH;
+                        }
                     });
 
             final SfgeConfig sfgeConfig = SfgeConfigProvider.get();
@@ -65,6 +70,8 @@ public class SfgeConfigProviderTest {
             MatcherAssert.assertThat(
                     sfgeConfig.getProgressIncrements(),
                     equalTo(-1 * EnvUtil.getProgressIncrements()));
+            MatcherAssert.assertThat(
+                    sfgeConfig.getStackDepthLimit(), equalTo(-1 * EnvUtil.DEFAULT_STACK_DEPTH));
         } finally {
             SfgeConfigTestProvider.remove();
         }
@@ -91,5 +98,7 @@ public class SfgeConfigProviderTest {
                 equalTo(EnvUtil.DEFAULT_LOG_WARNINGS_ON_VERBOSE));
         MatcherAssert.assertThat(
                 sfgeConfig.getProgressIncrements(), equalTo(EnvUtil.DEFAULT_PROGRESS_INCREMENTS));
+        MatcherAssert.assertThat(
+                sfgeConfig.getStackDepthLimit(), equalTo(EnvUtil.DEFAULT_STACK_DEPTH));
     }
 }
