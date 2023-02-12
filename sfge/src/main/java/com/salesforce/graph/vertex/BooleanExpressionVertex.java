@@ -61,10 +61,6 @@ public class BooleanExpressionVertex extends TODO_FIX_HIERARCHY_ChainedVertex
         return getString(Schema.OPERATOR);
     }
 
-    public boolean isOr() {
-        return ASTConstants.OPERATOR_OR.equals(getOperator());
-    }
-
     public boolean isOperatorAnd() {
         return ASTConstants.OPERATOR_AND.equals(getOperator());
     }
