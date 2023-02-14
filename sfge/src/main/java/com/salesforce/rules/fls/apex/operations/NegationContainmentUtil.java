@@ -9,15 +9,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Util class for checking the negation depth of a given vertex.
- * By "negation depth", we mean the amount of times a given clause is negated either implicitly or explicitly.
+ * Util class for checking the negation depth of a given vertex. By "negation depth", we mean the
+ * amount of times a given clause is negated either implicitly or explicitly.
  */
 public final class NegationContainmentUtil {
     private NegationContainmentUtil() {}
 
     /**
-     * Returns true if this vertex represents or contains a non-negated clause.
-     * E.g., in the expressions `X`, `(!!X || !Y)`, and `(X == true)`, `X` is a non-negated clause.
+     * Returns true if this vertex represents or contains a non-negated clause. E.g., in the
+     * expressions `X`, `(!!X || !Y)`, and `(X == true)`, `X` is a non-negated clause.
+     *
      * @param vertex
      * @return
      */
@@ -28,8 +29,9 @@ public final class NegationContainmentUtil {
     }
 
     /**
-     * Returns true if this vertex represents or contains a negated clause.
-     * E.g., in the expressions `!X`, `(!!!X || Y)`, and `(X == false), `X` is a negated clause.
+     * Returns true if this vertex represents or contains a negated clause. E.g., in the expressions
+     * `!X`, `(!!!X || Y)`, and `(X == false), `X` is a negated clause.
+     *
      * @param vertex
      * @return
      */
