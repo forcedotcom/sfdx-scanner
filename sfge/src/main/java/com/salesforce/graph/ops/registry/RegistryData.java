@@ -65,6 +65,10 @@ public abstract class RegistryData<T extends Registrable> {
         return idToInstance.remove(id);
     }
 
+    public int size() {
+        return idToInstance.size();
+    }
+
     private boolean hasKey(Long id) {
         return idToInstance.containsKey(id);
     }

@@ -1,8 +1,7 @@
 package com.salesforce.config;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.salesforce.graph.ops.expander.PathExpansionRegistry;
-
+import com.salesforce.graph.ops.registry.RegistryDataLimitCalculator;
 import java.util.concurrent.TimeUnit;
 
 public final class EnvUtil {
@@ -32,8 +31,9 @@ public final class EnvUtil {
     /** Artificial stack depth limit to keep path expansion under control. */
     @VisibleForTesting static final int DEFAULT_STACK_DEPTH_LIMIT = 450;
 
-//    @VisibleForTesting static final int DEFAULT_PATH_EXPANSION_LIMIT = 22000;
-    @VisibleForTesting static final int DEFAULT_PATH_EXPANSION_LIMIT = PathExpansionRegistry.calculateAllowedLimit();
+    @VisibleForTesting
+    static final int DEFAULT_PATH_EXPANSION_LIMIT =
+            RegistryDataLimitCalculator.getApexPathExpanderRegistryLimit();
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else

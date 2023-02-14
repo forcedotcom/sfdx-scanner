@@ -306,11 +306,17 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
     public static final class LimitReachedViolation extends Violation {
 
         /**
-         * @param message - The value to be inserted into the violation's {@link #message} attribute.
+         * @param message - The value to be inserted into the violation's {@link #message}
+         *     attribute.
          * @param vertex
          */
         public LimitReachedViolation(String message, SFVertex vertex) {
-            super(String.format(UserFacingMessages.RuleViolationTemplates.LIMIT_REACHED_VIOLATION_MESSAGE, message), vertex);
+            super(
+                    String.format(
+                            UserFacingMessages.RuleViolationTemplates
+                                    .LIMIT_REACHED_VIOLATION_MESSAGE,
+                            message),
+                    vertex);
 
             // TODO: reconsider the name and category. We want users to take followup action.
             this.ruleName = "LimitReached";
@@ -322,7 +328,6 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             // release.
             this.url = ApexFlsViolationRule.URL;
         }
-
     }
 
     /**

@@ -163,7 +163,10 @@ public class ThreadableRuleExecutor {
                         };
                 timer.schedule(task, TIMEOUT);
                 violations.addAll(
-                    runRules(submission.getGraph(), submission.getRules(), submission.getPathEntry()));
+                        runRules(
+                                submission.getGraph(),
+                                submission.getRules(),
+                                submission.getPathEntry()));
                 timer.cancel();
             } catch (StackOverflowError | Exception ex) {
                 // We don't want the timer to interrupt any of our exception handling, so
@@ -215,9 +218,13 @@ public class ThreadableRuleExecutor {
             return violations;
         }
 
-        private Set<Violation> runRules(GraphTraversalSource graph, List<AbstractPathBasedRule> rules, MethodVertex pathEntry) {
+        private Set<Violation> runRules(
+                GraphTraversalSource graph,
+                List<AbstractPathBasedRule> rules,
+                MethodVertex pathEntry) {
             Set<Violation> violations = new HashSet<>();
-            final PathBasedRuleRunner pathBasedRuleRunner = new PathBasedRuleRunner(graph, rules, pathEntry);
+            final PathBasedRuleRunner pathBasedRuleRunner =
+                    new PathBasedRuleRunner(graph, rules, pathEntry);
             try {
                 violations.addAll(pathBasedRuleRunner.runRules());
             } catch (PathExpansionLimitReachedException ex) {

@@ -41,6 +41,9 @@ public final class UserFacingMessages {
     public static final String VARIABLE_DECLARED_MULTIPLE_TIMES =
             "Rename or remove reused variable to proceed with analysis: %s,%s:%d";
 
+    public static final String INSUFFICIENT_HEAP_SPACE =
+            "Insufficient heap space (%d bytes) to execute Graph Engine. Increase heap space using --sfgejvmargs option and retry.";
+
     public static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
             "For stripInaccessible checks on READ operation, Salesforce Graph Engine can't verify that only sanitized data is used after the check. Discard unsanitized data for [%2$s].";
 
@@ -57,5 +60,6 @@ public final class UserFacingMessages {
 
     public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
 
-    public static final String PATH_EXPANSION_LIMIT_REACHED = "Reached path expansion upper limit (%d)";
+    public static final String PATH_EXPANSION_LIMIT_REACHED =
+            "Reached path expansion upper limit (%d)";
 }

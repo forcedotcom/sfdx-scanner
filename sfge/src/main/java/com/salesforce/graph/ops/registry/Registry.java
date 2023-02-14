@@ -106,4 +106,11 @@ public abstract class Registry {
             Class<? extends Registrable> registrableClass, Registrable registrableInstance) {
         registryHolderMap.get(registrableClass).verifyExists(registrableInstance);
     }
+
+    /**
+     * @return number of items of given type stored in registry.
+     */
+    public int size(Class<? extends Registrable> registrableClass) {
+        return registryHolderMap.get(registrableClass).size();
+    }
 }
