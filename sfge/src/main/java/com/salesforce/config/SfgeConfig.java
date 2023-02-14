@@ -26,6 +26,6 @@ public interface SfgeConfig {
      */
     int getProgressIncrements();
 
-    /** Stack depth that a path is allowed to grow. */
+    /** Stack depth upto which Graph Engine attempts to walk. */
     int getStackDepthLimit();
 }

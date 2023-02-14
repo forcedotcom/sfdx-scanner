@@ -617,7 +617,8 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                         + "    }\n"
                         + "}";
         // spotless:on
-        // Checking `x == false` is equivalent to checking `!x`, so the operation inside the IF is unsafe.
+        // Checking `x == false` is equivalent to checking `!x`, so the operation inside the IF is
+        // unsafe.
         assertViolations(rule, sourceCode, expect(4, validationType, "Account").withField("Name"));
     }
 
