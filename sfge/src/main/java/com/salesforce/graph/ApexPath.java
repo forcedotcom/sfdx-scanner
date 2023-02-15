@@ -39,7 +39,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  */
 @NotThreadSafe
 @SuppressWarnings("PMD.NullAssignment")
-public final class ApexPath implements DeepCloneable<ApexPath>, Collectible<ApexPath> {
+public class ApexPath implements DeepCloneable<ApexPath>, Collectible<ApexPath> {
     public static final NullCollectible<ApexPath> NULL_VALUE =
             new NullCollectible<>(ApexPath.class);
 

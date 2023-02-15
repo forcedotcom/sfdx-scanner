@@ -72,7 +72,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * into {@link ApexPathCollapser} in order to provide information which may also result in the
  * current path getting collapsed.
  */
-final class ApexPathExpander
+class ApexPathExpander
         implements ClassStaticScopeProvider, EngineDirectiveContextProvider, Registrable {
     private static final Logger LOGGER = LogManager.getLogger(ApexPathExpander.class);
 

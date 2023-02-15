@@ -17,7 +17,7 @@ import java.util.Map;
  * @param <T> {@link Registrable} type that requires the registry setup.
  */
 public abstract class RegistryData<T extends Registrable> {
-    private final Map<Long, Registrable> idToInstance;
+    protected final Map<Long, Registrable> idToInstance;
 
     public RegistryData() {
         idToInstance = new HashMap<>();
@@ -63,6 +63,10 @@ public abstract class RegistryData<T extends Registrable> {
     /** Removes {@link Registrable} instance from registry, given the Id. */
     public Registrable remove(Long id) {
         return idToInstance.remove(id);
+    }
+
+    public int size() {
+        return idToInstance.size();
     }
 
     private boolean hasKey(Long id) {

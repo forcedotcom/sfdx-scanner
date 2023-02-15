@@ -1,7 +1,9 @@
 package com.salesforce.graph.ops.expander;
 
 import com.google.common.collect.ImmutableMap;
+import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.ops.registry.PathExpansionLimitReachedException;
 import com.salesforce.graph.ops.registry.Registrable;
 import com.salesforce.graph.ops.registry.Registry;
 import com.salesforce.graph.ops.registry.RegistryData;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /**
@@ -37,6 +41,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * Clear the registry when the operation completes to avoid accidental memory leaks.
  */
 public class PathExpansionRegistry extends Registry {
+    private static final Logger LOGGER = LogManager.getLogger(PathExpansionRegistry.class);
 
     private static final Map<Class<? extends Registrable>, Supplier> REGISTRY_SUPPLIER =
             ImmutableMap.of(
@@ -56,9 +61,34 @@ public class PathExpansionRegistry extends Registry {
         // Nothing new to add
     }
 
-    /** Registry data structure to hold {@link ApexPathExpander}. */
+    /**
+     * Registry data structure to hold {@link ApexPathExpander}. See {@link
+     * com.salesforce.graph.ops.registry.RegistryDataLimitCalculator} for more information on how
+     * limit is set.
+     */
     private static class ApexPathExpanderRegistryData extends RegistryData<ApexPathExpander> {
-        // Nothing new to add
+        final int pathExpansionLimit;
+        final boolean isPathExpansionLimitSet;
+
+        ApexPathExpanderRegistryData() {
+            pathExpansionLimit = SfgeConfigProvider.get().getPathExpansionLimit();
+            isPathExpansionLimitSet = pathExpansionLimit > 0;
+        }
+
+        @Override
+        public void validateAndPut(ApexPathExpander instance) {
+            // Check path expansion limit values only if it is set
+            if (isPathExpansionLimitSet) {
+                final int currentSize = idToInstance.size();
+
+                if (currentSize >= pathExpansionLimit) {
+                    // Preemptively halt processing this path expansion so that
+                    // OutOfMemory doesn't occur and the remaining paths can get processed.
+                    throw new PathExpansionLimitReachedException(currentSize);
+                }
+            }
+            super.validateAndPut(instance);
+        }
     }
 
     ///// ApexPathExpander registry methods//////
