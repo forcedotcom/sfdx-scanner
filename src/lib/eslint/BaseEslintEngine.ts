@@ -251,6 +251,7 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 				this.helper.addRuleResultsFromReport(this.strategy.getEngine(), results, esResults, rulesMap, this.strategy.processRuleViolation());
 			}
 
+			
 			return results;
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
