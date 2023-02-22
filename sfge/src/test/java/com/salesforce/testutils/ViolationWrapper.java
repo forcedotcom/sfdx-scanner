@@ -2,6 +2,7 @@ package com.salesforce.testutils;
 
 import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
@@ -52,11 +53,9 @@ public class ViolationWrapper {
         this.violationMsg = builder.violationMsg;
     }
 
-    private ViolationWrapper(FlsViolationBuilder builder) {
+    private ViolationWrapper(ViolationBuilder builder) {
         this.line = builder.line;
-        // Create new instance of FlsViolationInfo based on the type of violation
-        final FlsViolationInfo violationInfo = builder.violationType.createInstance(builder);
-        this.violationMsg = FlsViolationMessageUtil.constructMessage(violationInfo);
+        this.violationMsg = builder.getMessage();
     }
 
     @Override
@@ -84,23 +83,75 @@ public class ViolationWrapper {
                 + '}';
     }
 
-    public static class FlsViolationBuilder {
-        private final int line;
+    public abstract static class ViolationBuilder {
+        private int line;
+        private int sourceLine;
+        private String fileName;
+        private String definingType;
+        private String definingMethod;
+
+        private ViolationBuilder(int line) {
+            this.line = line;
+        }
+
+        public ViolationBuilder withSourceLine(int sourceLine) {
+            this.sourceLine = sourceLine;
+            return this;
+        }
+
+        public ViolationBuilder withFileName(String fileName) {
+            this.fileName = fileName;
+            return this;
+        }
+
+        public ViolationBuilder withDefiningType(String definingType) {
+            this.definingType = definingType;
+            return this;
+        }
+
+        public ViolationBuilder withDefiningMethod(String definingMethod) {
+            this.definingMethod = definingMethod;
+            return this;
+        }
+
+        public ViolationWrapper build() {
+            return new ViolationWrapper(this);
+        }
+
+        public abstract String getMessage();
+    }
+
+    public static class NullPointerViolationBuilder extends ViolationBuilder {
+        private final String operation;
+
+        private NullPointerViolationBuilder(int line, String operation) {
+            super(line);
+            this.operation = operation;
+        }
+
+        public static NullPointerViolationBuilder get(int line, String operation) {
+            return new NullPointerViolationBuilder(line, operation);
+        }
+
+        @Override
+        public String getMessage() {
+            return String.format(
+                    UserFacingMessages.RuleViolationTemplates.APEX_NULL_POINTER_EXCEPTION_RULE,
+                    operation);
+        }
+    }
+
+    public static class FlsViolationBuilder extends ViolationBuilder {
         private final FlsConstants.FlsValidationType validationType;
         private final String objectName;
         private final TreeSet<String> fieldNames;
         private boolean allFields;
 
-        private String fileName;
-        private int sourceLine;
-        private String definingType;
-        private String definingMethod;
-
         private FlsViolationType violationType;
 
         private FlsViolationBuilder(
                 int line, FlsConstants.FlsValidationType validationType, String objectName) {
-            this.line = line;
+            super(line);
             this.validationType = validationType;
             this.objectName = objectName;
             this.fieldNames = CollectionUtil.newTreeSet();
@@ -133,33 +184,16 @@ public class ViolationWrapper {
             return this;
         }
 
-        public FlsViolationBuilder withFileName(String fileName) {
-            this.fileName = fileName;
-            return this;
-        }
-
-        public FlsViolationBuilder withSourceLine(int sourceLine) {
-            this.sourceLine = sourceLine;
-            return this;
-        }
-
-        public FlsViolationBuilder withDefiningType(String definingType) {
-            this.definingType = definingType;
-            return this;
-        }
-
-        public FlsViolationBuilder withDefiningMethod(String definingMethod) {
-            this.definingMethod = definingMethod;
-            return this;
-        }
-
         public FlsViolationBuilder forViolationType(FlsViolationType violationType) {
             this.violationType = violationType;
             return this;
         }
 
-        public ViolationWrapper build() {
-            return new ViolationWrapper(this);
+        @Override
+        public String getMessage() {
+            // Create new instance of FlsViolationInfo based on the type of violation
+            final FlsViolationInfo violationInfo = this.violationType.createInstance(this);
+            return FlsViolationMessageUtil.constructMessage(violationInfo);
         }
     }
 
