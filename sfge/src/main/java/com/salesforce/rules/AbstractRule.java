@@ -3,6 +3,7 @@ package com.salesforce.rules;
 public abstract class AbstractRule {
     public enum CATEGORY {
         BEST_PRACTICES("Best Practices"),
+        ERROR_PRONE("Error Prone"),
         INTERNAL_DEBUGGING("Internal Debugging"),
         INTERNAL_TESTING("Internal Testing"),
         PERFORMANCE("Performance"),
