@@ -44,7 +44,7 @@ import com.salesforce.graph.vertex.VertexPredicate;
 import com.salesforce.graph.vertex.WhenBlockVertex;
 import com.salesforce.graph.visitor.PathVertex;
 import com.salesforce.graph.visitor.VertexPredicateVisitor;
-import com.salesforce.rules.AbstractPathBasedRule;
+import com.salesforce.rules.AbstractPathTraversalRule;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -531,7 +531,7 @@ class ApexPathExpander
                                                 }
 
                                                 @Override
-                                                public void visit(AbstractPathBasedRule rule) {
+                                                public void visit(AbstractPathTraversalRule rule) {
                                                     if (EngineDirectiveUtil.isRuleEnabled(
                                                             vertex, rule)) {
                                                         apexPathVertexMetaInfo.addVertex(

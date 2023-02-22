@@ -195,7 +195,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
         }
     }
 
-    /** Violations associated with a {@link PathBasedRule} */
+    /** Violations associated with an {@link AbstractPathBasedRule} */
     public static final class PathBasedRuleViolation extends RuleViolation {
         /**
          * The "sink" vertex is the vertex at which the violation occurs, as contrasted with the

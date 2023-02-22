@@ -88,8 +88,8 @@ public class PathBasedRuleRunner {
                 // Iterate over all vertices in the path...
                 for (ApexPathVertexMetaInfo.PredicateMatch predicateMatch :
                         path.getApexPathMetaInfo().get().getAllMatches()) {
-                    AbstractPathBasedRule rule =
-                            (AbstractPathBasedRule) predicateMatch.getPredicate();
+                    AbstractPathTraversalRule rule =
+                            (AbstractPathTraversalRule) predicateMatch.getPredicate();
                     BaseSFVertex vertex = predicateMatch.getPathVertex().getVertex();
                     List<RuleThrowable> ruleThrowables = rule.run(g, path, vertex);
                     for (RuleThrowable ruleThrowable : ruleThrowables) {
@@ -164,7 +164,10 @@ public class PathBasedRuleRunner {
         ApexPathExpanderConfig.Builder expanderConfigBuilder =
                 ApexPathUtil.getFullConfiguredPathExpanderConfigBuilder();
         for (AbstractPathBasedRule rule : rules) {
-            expanderConfigBuilder = expanderConfigBuilder.withVertexPredicate(rule);
+            if (rule instanceof AbstractPathTraversalRule) {
+                expanderConfigBuilder =
+                        expanderConfigBuilder.withVertexPredicate((AbstractPathTraversalRule) rule);
+            }
         }
         ApexPathExpanderConfig expanderConfig = expanderConfigBuilder.build();
         return expanderConfig;

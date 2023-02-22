@@ -79,7 +79,7 @@ public class RuleRunnerTest {
 
         TestUtil.buildGraph(g, sourceCode, true);
         List<AbstractRule> rules = new ArrayList<>();
-        rules.add(new PathBasedTestRule());
+        rules.add(new PathTraversalTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         final Result result = rr.runRules(rules);
@@ -105,7 +105,7 @@ public class RuleRunnerTest {
 
         TestUtil.buildGraph(g, sourceCode, true);
         List<AbstractRule> rules = new ArrayList<>();
-        rules.add(new PathBasedTestRule());
+        rules.add(new PathTraversalTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         final Result result = rr.runRules(rules);
@@ -154,7 +154,7 @@ public class RuleRunnerTest {
         TestUtil.buildGraph(g, new String[] {sourceCode1, sourceCode2, sourceCode3}, true);
         List<AbstractRule> rules = new ArrayList<>();
         rules.add(new StaticTestRule());
-        rules.add(new PathBasedTestRule());
+        rules.add(new PathTraversalTestRule());
 
         AbstractRuleRunner rr = new TestRuleRunner(g, VertexCacheProvider.get());
         List<RuleRunnerTarget> targets = new ArrayList<>();
@@ -232,7 +232,7 @@ public class RuleRunnerTest {
         }
     }
 
-    private static class PathBasedTestRule extends AbstractPathBasedRule {
+    private static class PathTraversalTestRule extends AbstractPathTraversalRule {
         @Override
         protected List<RuleThrowable> _run(
                 GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
@@ -268,13 +268,13 @@ public class RuleRunnerTest {
                     && vertex.getParentClass().get().getDefiningType().startsWith("MyClass");
         }
 
-        public static PathBasedTestRule getInstance() {
+        public static PathTraversalTestRule getInstance() {
             return LazyHolder.INSTANCE;
         }
 
         private static final class LazyHolder {
             // Postpone initialization until first use.
-            private static final PathBasedTestRule INSTANCE = new PathBasedTestRule();
+            private static final PathTraversalTestRule INSTANCE = new PathTraversalTestRule();
         }
     }
 
