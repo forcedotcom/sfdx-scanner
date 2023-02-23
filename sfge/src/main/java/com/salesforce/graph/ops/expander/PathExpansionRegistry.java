@@ -83,7 +83,7 @@ public class PathExpansionRegistry extends Registry {
                                     + Runtime.getRuntime().maxMemory()
                                     + " bytes.");
                 } else {
-                    LOGGER.info("Path Expansion limit has been removed.");
+                    LOGGER.info("Path expansion limit has been removed.");
                 }
             }
         }
