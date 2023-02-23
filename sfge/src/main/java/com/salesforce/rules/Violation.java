@@ -323,10 +323,7 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
             this.category = INTERNAL_ERROR_CATEGORY;
             this.description = "";
             this.severity = AbstractRule.SEVERITY.LOW.code;
-            // NOTE: For now, we're hardcoding the URL to the URL for the Apex FLS violation rule,
-            // since that's the only rule that can throw this violation. This may change in a future
-            // release.
-            this.url = ApexFlsViolationRule.URL;
+            this.url = "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/";
         }
     }
 

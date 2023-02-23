@@ -51,6 +51,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class MethodPathBuilderTest {
@@ -2734,6 +2735,59 @@ public class MethodPathBuilderTest {
                         + "    }\n"
                         + "    public static Integer getInteger() {\n"
                         + "    	return 1;\n"
+                        + "    }\n"
+                        + "}\n";
+
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
+        // There are 3 paths since #walkPaths does not use any excluders
+        MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
+    }
+
+    @Disabled // TODO: Allow Switch statements to lookup array load values.
+    @Test
+    public void testArraySwitchStatement() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public static void doSomething() {\n"
+                        + "		List <String> strList = new String[] {'A','B','C'};\n"
+                        + "       switch on strList[0] {\n"
+                        + "       	when 'A', 'B' {\n"
+                        + "           	System.debug('A or B');\n"
+                        + "           }\n"
+                        + "       	when null {\n"
+                        + "           	System.debug('null');\n"
+                        + "           }\n"
+                        + "       	when else {\n"
+                        + "           	System.debug('unknown');\n"
+                        + "           }\n"
+                        + "       }\n"
+                        + "    }\n"
+                        + "}\n";
+
+        GraphBuildTestUtil.buildGraph(g, sourceCode);
+        List<ApexPath> paths = GraphBuildTestUtil.walkAllPaths(g, "doSomething");
+        // There are 3 paths since #walkPaths does not use any excluders
+        MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
+    }
+
+    @Test
+    public void testSObjectSwitchStatement() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public static void doSomething() {\n"
+                        + "		SObject acc1 = new Account(Name = 'Acme Inc');\n"
+                        + "       switch on acc {\n"
+                        + "       	when Account acc {\n"
+                        + "           	System.debug('Account');\n"
+                        + "           }\n"
+                        + "       	when null {\n"
+                        + "           	System.debug('null');\n"
+                        + "           }\n"
+                        + "       	when else {\n"
+                        + "           	System.debug('unknown');\n"
+                        + "           }\n"
+                        + "       }\n"
                         + "    }\n"
                         + "}\n";
 

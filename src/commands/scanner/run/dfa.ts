@@ -68,6 +68,11 @@ export default class Dfa extends ScannerRunCommand {
 			description: messages.getMessage('flags.sfgejvmargsDescription'),
 			longDescription: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
 			env: 'SFGE_JVM_ARGS'
+		}),
+		'pathexplimit': flags.integer({
+			description: messages.getMessage('flags.pathexplimitDescription'),
+			longDescription: messages.getMessage('flags.pathexplimitDescriptionLong'),
+			env: 'SFGE_PATH_EXPANSION_LIMIT'
 		})
 		// END: Config-overrideable engine flags.
 	};
@@ -112,6 +117,9 @@ export default class Dfa extends ScannerRunCommand {
 		}
 		if (this.flags['sfgejvmargs'] != null) {
 			sfgeConfig.jvmArgs = this.flags['sfgejvmargs'] as string;
+		}
+		if (this.flags['pathexplimit'] != null) {
+			sfgeConfig.pathexplimit = this.flags['pathexplimit'] as number;
 		}
 		sfgeConfig.ruleDisableWarningViolation = this.getBooleanEngineOption(RULE_DISABLE_WARNING_VIOLATION_FLAG);
 		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));

@@ -73,6 +73,19 @@ public class PathExpansionRegistry extends Registry {
         ApexPathExpanderRegistryData() {
             pathExpansionLimit = SfgeConfigProvider.get().getPathExpansionLimit();
             isPathExpansionLimitSet = pathExpansionLimit > 0;
+
+            if (LOGGER.isInfoEnabled()) {
+                if (isPathExpansionLimitSet) {
+                    LOGGER.info(
+                            "Path expansion limit has been set to "
+                                    + pathExpansionLimit
+                                    + " based on max allocated heap space "
+                                    + Runtime.getRuntime().maxMemory()
+                                    + " bytes.");
+                } else {
+                    LOGGER.info("Path expansion limit has been removed.");
+                }
+            }
         }
 
         @Override

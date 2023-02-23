@@ -48,12 +48,9 @@ public class RegistryDataLimitCalculator {
 
         final int allowedLimit = (int) ((heapMaxSize * CAPACITY_LIMIT) / averageItemSize);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                    String.format(
-                            "Path expansion limit set to %d based on max heap space %d",
-                            allowedLimit, heapMaxSize));
-        }
+        // TODO: Ideally, a log line here would be helpful, but since this method gets invoked
+        // before logs are initialized,
+        //  this never gets printed.
 
         return allowedLimit;
     }
