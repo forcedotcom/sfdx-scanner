@@ -140,7 +140,7 @@ If Graph Engine’s execution is interrupted, it returns results from the portio
 #### How Does Graph Engine Determine That a Path Is Too Complex?
 When Graph Engine traverses a path, it creates instances of `ApexPathExpander`. The more complex the path, the more instances of `ApexPathExpander` it creates.
 
-Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to limit the number of `ApexPathExpander` instances that are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
+Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to cap the number of `ApexPathExpander` instances that are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
 
 #### How Can You Control This Limit?
 Modify the path expansion limit using either of these methods.
