@@ -12,6 +12,16 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.10.0) (03-01-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.10.0...v3.9.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We updated the PMD engine to version 6.54.0.
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* FIX (GraphEngine): We added a configurable upper limit variable, `SFGE_PATH_EXPANSION_LIMIT`, that lets you define the number of instances of a class in the registry. This variable reduces the number of OutOfMemory errors produced. For more information, check out our [documentation]().
+
 ## [v3.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.9.0) (02-07-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.9.0...v3.8.0)
