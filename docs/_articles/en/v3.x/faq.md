@@ -128,7 +128,7 @@ Since #1 and #2 exist, you may still want to manually make sure your code is sec
 
 ### Questions About `OutOfMemory` Errors
 
-#### What Factors Contribute to an `OutOfMemory` Error?
+#### What factors contribute to an `OutOfMemory` error?
 
 Several factors can degrade Graph Engine’s efficiency and increase the probability of encountering an `OutOfMemory` error.
 
@@ -137,12 +137,12 @@ Several factors can degrade Graph Engine’s efficiency and increase the probabi
 
 If Graph Engine’s execution is interrupted, it returns results from the portion of source code that it analyzed. We recommend that you add the `--outfile` parameter to capture your results in your own separate file.
 
-#### How Does Graph Engine Determine That a Path Is Too Complex?
+#### How does Graph Engine determine that a path is too complex?
 When Graph Engine traverses a path, it creates instances of `ApexPathExpander`. The more complex the path, the more instances of `ApexPathExpander` it creates.
 
 Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to cap the number of `ApexPathExpander` instances that are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
 
-#### How Can You Control This Limit?
+#### How can you control this limit?
 Modify the path expansion limit using either of these methods.
 
 * Increase the heap space using `--sfgejvmargs "-Xmx<size>"`
@@ -150,7 +150,7 @@ Modify the path expansion limit using either of these methods.
 
 Note: If `--pathexplimit` is set to -1, there’s no upper limit check made on the registry.
 
-#### How is the Path Expansion Limit Calculated?
+#### How is the path expansion limit calculated?
 By default, four threads execute within Graph Engine. Based on our analysis, we predict that an `OutOfMemory` occurs when one of the threads approaches 50% of the allotted heap space. The majority of this 50% is occupied by instances of `ApexPathExpander` in the registry.
 
 Using this information, the formula to calculate the limit placed by default on `ApexPathExpander` registry is:
