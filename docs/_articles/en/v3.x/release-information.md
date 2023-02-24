@@ -20,7 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We updated the PMD engine to version 6.54.0.
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
-* FIX (GraphEngine): We added a configurable upper limit variable, `SFGE_PATH_EXPANSION_LIMIT`, that lets you define the number of instances of a class in the registry. This variable reduces the number of OutOfMemory errors produced. For more information, check out our [documentation]().
+* FIX (GraphEngine): We added a configurable upper limit variable, `SFGE_PATH_EXPANSION_LIMIT`, that lets you define the number of instances of a class in the registry. This variable reduces the number of `OutOfMemory` errors produced. For more information, check out our [documentation](en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-errors).
 
 ## [v3.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.9.0) (02-07-2023)
 
