@@ -135,12 +135,12 @@ Several factors can degrade Graph Engine’s efficiency and increase the probabi
 * With every conditional or method invocation in your code, the number of paths Graph Engine creates increases exponentially.
 * Your OS type, Java setup, and other processes running on your machine can influence the heap space assigned by Java Virtual Machine (JVM).
 
-If Graph Engine’s execution is interrupted, it returns results from the portion of source code that it analyzed. We recommend that you add the `--outfile` parameter to your results in your own separate file.
+If Graph Engine’s execution is interrupted, it returns results from the portion of source code that it analyzed. We recommend that you add the `--outfile` parameter to capture your results in your own separate file.
 
 #### How Does Graph Engine Determine That a Path Is Too Complex?
 When Graph Engine traverses a path, it creates instances of `ApexPathExpander`. The more complex the path, the more instances of `ApexPathExpander` it creates.
 
-Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to limit the number of `ApexPathExpander` instances are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
+Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to limit the number of `ApexPathExpander` instances that are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
 
 #### How Can You Control This Limit?
 Modify the path expansion limit using either of these methods.
@@ -155,6 +155,4 @@ By default, four threads execute within Graph Engine. Based on our analysis, we 
 
 Using this information, the formula to calculate the limit placed by default on `ApexPathExpander` registry is:
 
-	`ApexPathExpander` registry limit = 50% of Max Heap Space / Average size of `ApexPathExpander` instance
-
-
+	````ApexPathExpander` registry limit = 50% of Max Heap Space / Average size of `ApexPathExpander` instance```
