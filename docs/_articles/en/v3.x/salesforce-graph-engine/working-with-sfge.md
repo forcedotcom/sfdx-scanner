@@ -82,7 +82,7 @@ Example:
 /* sfge-disable ApexFlsViolationRule */
 public class MyClass {
 ```
-## OutOfMemory Error
+## Understand OutOfMemory Errors
 
 When Graph Engine analyzes highly complex code, it runs out of heap space, which  results in an `OutOfMemory` error. To decrease the occurrence of `OutOfMemory` errors and to complete as much analysis as possible within a shorter period, we added processing limits on Graph Engine. These limits help Graph Engine to fail fast when a path’s analysis is approaching an `OutOfMemory` error. This fail-fast process includes preemptively aborting a path analysis when Graph Engine encounters a path that’s too complex.
 
