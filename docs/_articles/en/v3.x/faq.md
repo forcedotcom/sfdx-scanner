@@ -155,4 +155,4 @@ By default, four threads execute within Graph Engine. Based on our analysis, we 
 
 Using this information, the formula to calculate the limit placed by default on `ApexPathExpander` registry is:
 
-	````ApexPathExpander` registry limit = 50% of Max Heap Space / Average size of `ApexPathExpander` instance```
+	``ApexPathExpander` registry limit = 50% of Max Heap Space / Average size of `ApexPathExpander` instance`
