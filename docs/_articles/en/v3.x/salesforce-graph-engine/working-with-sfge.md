@@ -134,9 +134,9 @@ To maximize your heap space balance with Graph Engine performance, follow these 
 #### Set complexity-handling-limit Using`--pathexplimit` Parameter
 Heap space allocated for a `scanner:run:dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up earlier.
 
-Override your path expansion limit using the `--pathexplimit` parameter. Or remove the limit by passing in this value as “-1”.
+Override your path expansion limit using the `--pathexplimit` parameter. Or remove the limit by passing in this value as -1.
 
-Refer to the `OutOfMemory Error` section in the [FAQ]((./en/v3.x/faq/#out-of-memory-error)) to find more information about path expansion limits.
+Refer to the `OutOfMemory Error` section in the [FAQ](./en/v3.x/faq/#out-of-memory-error) to find more information about path expansion limits.
 
 ## Limitations of Salesforce Graph Engine
 
