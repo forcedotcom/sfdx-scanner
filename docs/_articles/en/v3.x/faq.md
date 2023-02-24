@@ -110,18 +110,51 @@ Graph Engine builds up the context of the source code in its entirety before it 
 
 To learn how, read about [Engine Directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
 
-## Questions about Interpreting ApexFlsViolationRule results
+### Questions about Interpreting ApexFlsViolationRule results
 
 #### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
-If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
+If you determine that the CRUD operation in question is protected by a sanitizer that Graph Engine doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let Graph Engine know that the CRUD operation _is_ in fact safe.
 
 #### Q: I didn’t get any violations. Does this mean my code is secure?
 
 If you didn’t get any violations, one these is a possibility:
 
-1. SFGE did not identify any entry points
-2. SFGE ran into errors for all the entry points identified
+1. Graph Engine did not identify any entry points
+2. Graph Engine ran into errors for all the entry points identified
 3. Your code is actually secure
 
 Since #1 and #2 exist, you may still want to manually make sure your code is secure.
+
+### Questions About `OutOfMemory` Errors
+
+#### What Factors Contribute to an `OutOfMemory` Error?
+
+Several factors can degrade Graph Engine’s efficiency and increase the probability of encountering an `OutOfMemory` error.
+
+* With every conditional or method invocation in your code, the number of paths Graph Engine creates increases exponentially.
+* Your OS type, Java setup, and other processes running on your machine can influence the heap space assigned by Java Virtual Machine (JVM).
+
+If Graph Engine’s execution is interrupted, it returns results from the portion of source code that it analyzed. We recommend that you add the `--outfile` parameter to your results in your own separate file.
+
+#### How Does Graph Engine Determine That a Path Is Too Complex?
+When Graph Engine traverses a path, it creates instances of `ApexPathExpander`. The more complex the path, the more instances of `ApexPathExpander` it creates.
+
+Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to limit the number of `ApexPathExpander` instances are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
+
+#### How Can You Control This Limit?
+Modify the path expansion limit using either of these methods.
+
+* Increase the heap space using `--sfgejvmargs "-Xmx<size>"`
+* Modify path expansion limit using `--pathexplimit <new_limit_number>`
+
+Note: If `--pathexplimit` is set to -1, there’s no upper limit check made on the registry.
+
+#### How is the Path Expansion Limit Calculated?
+By default, four threads execute within Graph Engine. Based on our analysis, we predict that an `OutOfMemory` occurs when one of the threads approaches 50% of the allotted heap space. The majority of this 50% is occupied by instances of `ApexPathExpander` in the registry.
+
+Using this information, the formula to calculate the limit placed by default on `ApexPathExpander` registry is:
+
+	`ApexPathExpander` registry limit = 50% of Max Heap Space / Average size of `ApexPathExpander` instance
+
+
