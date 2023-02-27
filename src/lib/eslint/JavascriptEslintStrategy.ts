@@ -3,8 +3,8 @@ import {ENGINE, LANGUAGE, HARDCODED_RULES} from '../../Constants';
 import {ESRule, ESRuleConfigValue, ESRuleConfig, RuleViolation} from '../../types';
 import { Logger } from '@salesforce/core';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
-import path = require('path');
 import {ESLint} from 'eslint';
+import {configs} from '@eslint/js';
 
 const ES_CONFIG: ESLint.Options = {
 	"baseConfig": {},
@@ -41,8 +41,8 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		// When we're building our catalog, we'll want to get any bonus configuration straight from the horse's mouth.
 		// This lets us do that.
-		const pathToRecommendedConfig = require.resolve('eslint').replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
-		this.recommendedConfig = (await import(pathToRecommendedConfig)) as ESRuleConfig;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		this.recommendedConfig = configs.recommended as ESRuleConfig;
 		this.initialized = true;
 	}
 

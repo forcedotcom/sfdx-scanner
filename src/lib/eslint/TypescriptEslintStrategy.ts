@@ -9,6 +9,7 @@ import {deepCopy} from '../util/Utils';
 import { rules } from '@typescript-eslint/eslint-plugin';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import {ESLint} from 'eslint';
+import {configs} from '@eslint/js';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
@@ -61,9 +62,8 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		this.fileHandler = new FileHandler();
 		this.outputProcessor = await OutputProcessor.create({});
-		const pathToBaseConfig = require.resolve('eslint')
-			.replace(path.join('lib', 'api.js'), path.join('conf', 'eslint-recommended.js'));
-		this.baseEslintConfig = (await import(pathToBaseConfig)) as ESRuleConfig;
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		this.baseEslintConfig = configs.recommended as ESRuleConfig;
 
 		const pathToExtendedBaseConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
