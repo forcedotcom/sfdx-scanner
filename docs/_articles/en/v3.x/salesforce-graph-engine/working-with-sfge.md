@@ -82,36 +82,61 @@ Example:
 /* sfge-disable ApexFlsViolationRule */
 public class MyClass {
 ```
+## Understand OutOfMemory Errors
 
-## Understand OutOfMemory: Java heap space Error
+When Graph Engine analyzes highly complex code, it runs out of heap space, which  results in an `OutOfMemory` error. To decrease the occurrence of `OutOfMemory` errors and to complete as much analysis as possible within a shorter period, we added processing limits on Graph Engine. These limits help Graph Engine to fail fast when a path’s analysis is approaching an `OutOfMemory` error. This fail-fast process includes preemptively aborting a path analysis when Graph Engine encounters a path that’s too complex.
 
-A number of factors can degrade Graph Engine’s efficiency and increase the probability of encountering an OutOfMemory error. 
+### Recommended Steps to Reduce OutOfMemory Error Occurrences
+To proactively reduce the chances of an `OutOfMemory` error in your scans, take these steps.
 
-* With every conditional or method invocation in your code, the number of paths Graph Engine creates increases exponentially. 
-* Your OS type, Java setup, and other processes running on your machine can influence the heap space assigned by Java Virtual Machine (JVM).
-
-If Graph Engine’s execution is interrupted, it returns results from the portion of source code it has analyzed so far.
-
-To avoid an Out of Memory error:
-
-* Note your JVM's default max heap size, the `-Xmx` value. Then increase the max heap size assigned to Graph Engine's execution by providing an updated -Xmx value to either the sfgejvmargs parameter with scanner:run:dfa command or to the SFGE_JVM_ARGS environment variable.
-	Next, execute Graph Engine with a larger heap space than the default settings.
-
-	For example, to allocate 2 G heap space:
-
+1. Execute `scanner:run:dfa` with default heap space settings and collect the results to a file using the `--outfile` parameter. The output file contains the majority of the actionable items.
+2. Filter your output file on the `LimitReached` violation and group these violations into sets of targets. `LimitReached` violations are the more complex paths that need more heap space and time. 
+3. To determine your previous execution’s path expansion limit and maximum heap space allocated, search for this string in `/<home>/.sfdx-scanner/sfge.log`: “Path expansion limit”. You employ these values later to control the complexity Graph Engine can handle for your code.
+4. Execute `scanner:run:dfa` on each `LimitReached` target grouping that you created. 
+5. Run `scanner:run:dfa` iteratively with larger memory allocation each time to exclusively target complex areas. 
+	
+	Example: Sample command allocating max heap space of 20G
+ 
 	```
-	sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>
+	sfdx scanner:run:dfa --projectdir /path/to/full/project --target /path/to/a/source/file#optionalSpecificEntryMethod --sfgejvmargs "-Xmx20g" --outfile result_2.csv
 	```
-	or
-	```
-	export SFGE_JVM_ARGS="-Xmx2g"
-	sfdx scanner:run:dfa <rest of your parameters>
-	```
-	Because the heap space value depends on the complexity of the target codebase, there's no magic number. A very large heap space can degrade Graph Engine’s performance, so increase the heap space allocation in increments of 1 G. Experiment to see what works for your project.
+To optimize your `LimitReached` scans, follow these recommendations.
 
-* Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner:run:dfa` command while keeping the same `--projectdir` value. This approach reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
+* Use individual file names in `--target` parameter or names specific to the target method. 
+* Use the `--sfgejvmargs` parameter to define a larger heap space than the default.
 
-* Simplify your source code to avoid large IF/ELSE-IF/ELSE conditional trees, which helps bring down the number of paths created.
+If the same target row repeatedly reaches the limit, follow these steps.
+
+1. Remove the upper limit by passing in `--pathexplimit -1`.
+2. Decrease the number of parallel threads by setting the `--rule-thread-count` parameter to 2.
+3. Increase timeout by setting the `--rule-thread-timeout` parameter to 300000 ms.
+
+### Knobs to Control Graph Engine Execution
+Two Graph Engine parameters, `--sfgejvmargs` and `--pathexplimit`, act as knobs that turn the max heap size and the complexity of Graph Engine scans up or down. Use these knobs to fine-tune your code’s analysis and rate of `OutOfMemory` occurrences.
+
+#### Modify the Allocated Heap Space with `--sfgejvmargs`
+Use the `--sfgejvmargs` parameter to modify your Java Virtual Machine (JVM) default max heap size.
+
+1. Look up your JVM `-Xmx` value, which is your allocated heap size. 
+2. Use the `--sfgejvmargs` parameter to increase your `-Xmx` value on `scanner:run:dfa command`. 
+3. Execute Graph Engine with a larger heap space than the default settings.
+
+For example, to allocate 2 G heap space:
+
+	`sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>`
+
+To maximize your heap space balance with Graph Engine performance, follow these recommendations.
+
+* Because the heap space value depends on the complexity of the target codebase, there’s no magic number. A very large heap space can degrade Graph Engine’s performance, so increase the heap space allocation in increments of 1 G. Experiment to see what works for your project.
+* Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner:run:dfa`command while keeping the same `--projectdir` value. This approach reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
+* To avoid large IF/ELSE-IF/ELSE conditional trees, simplify your code, which helps bring down the number of paths created.
+
+#### Set complexity-handling-limit Using`--pathexplimit` Parameter
+Heap space allocated for a `scanner:run:dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up earlier.
+
+Override your path expansion limit using the `--pathexplimit` parameter. Or remove the limit by passing in this value as -1.
+
+Refer to the `OutOfMemory Error` section in the [FAQ](./en/v3.x/faq/#out-of-memory-error) to find more information about path expansion limits.
 
 ## Limitations of Salesforce Graph Engine
 

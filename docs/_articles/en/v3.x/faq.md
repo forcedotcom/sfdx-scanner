@@ -39,7 +39,7 @@ A: Use the `sfdx scanner:run` command in any scripts used by your CI/CD. We also
 * Keep an artifact of the results. Use the `-o | --outfile` flag to write your results to a file.
 * If any violations meet or exceed the provided value, use the `-s | --severity-threshold` flag,. The `-v | --violations-cause-error` flag has been deprecated.
 
-### Questions about Languages
+### Questions About Languages
 
 #### Q: What languages does Code Analyzer support?
 By default, Code Analyzer supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript. To add support for Lightning Web Components, invoke the `scanner:run` command with `--engine eslint-lwc`.
@@ -60,7 +60,7 @@ A: Currently, you can only add custom rules for PMD.
 
 If the language isn’t already supported, create an issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
 
-### Questions about Severity Thresholds and Normalization
+### Questions About Severity Thresholds and Normalization
 
 #### Q: How do I set a severity threshold for a Code Analyzer run?
 A: When you run Code Analyzer with the `-s | --severity-threshold` flag and a threshold value, Code Analyzer throws an error if violations are found with equal or greater severity than the provided value. Values are 1 (high), 2 (moderate), and 3 (low). The exit code equals the severity of the most severe violation detected. For example, if a violation of severity 2 is found and the threshold is 2 or 3, then the exit code is 2. Using this flag also implicitly invokes the `--normalize-severity` flag.
@@ -86,7 +86,7 @@ A: Severity is normalized across all engines using the values in this table.
 | 2 (Moderate)        | 2       | 1      | 1          | 1                 | 2         | 2      			       |
 | 3 (Low)             | 3, 4, 5 |        |            |                   | 3		  | 3					   |
 
-### Questions about CPD
+### Questions About CPD
 
 #### Q: What languages are supported by CPD in Code Analyzer?
 A: Code Analyzer supports Apex, Java, Visualforce, and XML in CPD.
@@ -110,18 +110,49 @@ Graph Engine builds up the context of the source code in its entirety before it 
 
 To learn how, read about [Engine Directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
 
-## Questions about Interpreting ApexFlsViolationRule results
+### Questions About Interpreting ApexFlsViolationRule Results
 
 #### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
-If you determine that the CRUD operation in question is protected by a sanitizer that SFGE doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let SFGE know that the CRUD operation _is_ in fact safe.
+If you determine that the CRUD operation in question is protected by a sanitizer that Graph Engine doesn’t recognize, you can add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to let Graph Engine know that the CRUD operation _is_ in fact safe.
 
 #### Q: I didn’t get any violations. Does this mean my code is secure?
 
 If you didn’t get any violations, one these is a possibility:
 
-1. SFGE did not identify any entry points
-2. SFGE ran into errors for all the entry points identified
+1. Graph Engine did not identify any entry points
+2. Graph Engine ran into errors for all the entry points identified
 3. Your code is actually secure
 
 Since #1 and #2 exist, you may still want to manually make sure your code is secure.
+
+### Questions About `OutOfMemory` Errors
+
+#### What factors contribute to an `OutOfMemory` error?
+
+Several factors can degrade Graph Engine’s efficiency and increase the probability of encountering an `OutOfMemory` error.
+
+* With every conditional or method invocation in your code, the number of paths Graph Engine creates increases exponentially.
+* Your OS type, Java setup, and other processes running on your machine can influence the heap space assigned by Java Virtual Machine (JVM).
+
+If Graph Engine’s execution is interrupted, it returns results from the portion of source code that it analyzed. We recommend that you add the `--outfile` parameter to capture your results in your own separate file.
+
+#### How does Graph Engine determine that a path is too complex?
+When Graph Engine traverses a path, it creates instances of `ApexPathExpander`. The more complex the path, the more instances of `ApexPathExpander` it creates.
+
+Based on the parameters that you provide in your execution, Graph Engine determines a path expansion limit to cap the number of `ApexPathExpander` instances that are created. When this limit is reached while analyzing a path, Graph Engine preemptively aborts the analysis on that path with a `LimitReached` violation. Graph Engine moves on to analyze the next path.
+
+#### How can you control this limit?
+Modify the path expansion limit using either of these methods.
+
+* Increase the heap space using `--sfgejvmargs "-Xmx<size>"`
+* Modify path expansion limit using `--pathexplimit <new_limit_number>`
+
+Note: If `--pathexplimit` is set to -1, there’s no upper limit check made on the registry.
+
+#### How is the path expansion limit calculated?
+By default, four threads execute within Graph Engine. Based on our analysis, we predict that an `OutOfMemory` occurs when one of the threads approaches 50% of the allotted heap space. The majority of this 50% is occupied by instances of `ApexPathExpander` in the registry.
+
+Using this information, the formula to calculate the limit placed by default on `ApexPathExpander` registry is:
+
+`ApexPathExpander registry limit = 50% of Max Heap Space / Average size of ApexPathExpander instance`
