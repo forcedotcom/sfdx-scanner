@@ -1,4 +1,4 @@
-scanner: '3.9.0'
+scanner: '3.10.0'
 releasedon: '02-27-2023'
 pmd: '6.54.0'
 eslint: '8.x'
