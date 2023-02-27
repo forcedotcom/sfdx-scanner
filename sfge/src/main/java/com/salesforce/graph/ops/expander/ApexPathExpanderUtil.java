@@ -274,6 +274,11 @@ public final class ApexPathExpanderUtil {
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("expand-NullAccess. ex=" + ex);
                     }
+                } catch (StackDepthLimitExceededException ex) {
+                    apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("expand-StackDepthLimit. ex=" + ex);
+                    }
                 } catch (MethodPathForkedException ex) {
                     List<ApexPathExpander> forkedPathExpanders = new ArrayList<>();
                     for (ApexPathExpander forkedApexPathExpander : getForkedExpanders(ex)) {

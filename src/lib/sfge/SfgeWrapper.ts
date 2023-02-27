@@ -38,6 +38,7 @@ type SfgeWrapperOptions = {
 	action: string;
 	spinnerManager: SpinnerManager;
 	jvmArgs?: string;
+	pathExpLimit?: number;
 }
 
 type SfgeCatalogOptions = SfgeWrapperOptions & {
@@ -105,12 +106,14 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 	private logFilePath: string;
 	private spinnerManager: SpinnerManager;
 	private jvmArgs: string;
+	private pathExpLimit: number;
 
 	protected constructor(options: SfgeWrapperOptions) {
 		super(options);
 		this.action = options.action;
 		this.spinnerManager = options.spinnerManager;
 		this.jvmArgs = options.jvmArgs;
+		this.pathExpLimit = options.pathExpLimit;
 	}
 
 	protected async init(): Promise<void> {
@@ -165,6 +168,9 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
 		if (this.jvmArgs != null) {
 			args.push(this.jvmArgs);
+		}
+		if (this.pathExpLimit != null) {
+			args.push(`-DSFGE_PATH_EXPANSION_LIMIT=${this.pathExpLimit}`);
 		}
 		args.push(...this.getSupplementalFlags(), MAIN_CLASS, this.action, ...(await this.getSupplementalArgs()));
 		this.logger.trace(`Preparing to execute sfge with command: "${command}", args: "${JSON.stringify(args)}"`);
@@ -292,6 +298,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 			// Running rules could take quite a while, so we should use a functional spinner.
 			spinnerManager: await SfgeSpinnerManager.create({}),
 			jvmArgs: sfgeConfig.jvmArgs,
+			pathExpLimit: sfgeConfig.pathexplimit,
 			ruleThreadCount: sfgeConfig.ruleThreadCount,
 			ruleThreadTimeout: sfgeConfig.ruleThreadTimeout,
 			ruleDisableWarningViolation: sfgeConfig.ruleDisableWarningViolation

@@ -178,4 +178,5 @@ export type SfgeConfig = {
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;
 	jvmArgs?: string;
+	pathexplimit?: number;
 };

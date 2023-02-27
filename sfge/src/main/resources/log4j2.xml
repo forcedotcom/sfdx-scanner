@@ -30,6 +30,9 @@
 		<Logger name="com.salesforce.graph.ops.expander.ApexPathExpanderUtil" level="WARN" additivity="false">
 			<AppenderRef ref="LogToFile"/>
 		</Logger>
+		<Logger name="com.salesforce.graph.ops.expander.PathExpansionRegistry" level="INFO" additivity="false">
+			<AppenderRef ref="LogToFile"/>
+		</Logger>
 		<Logger name="com.salesforce.graph.ops.GraphUtil" level="INFO" additivity="false">
 			<AppenderRef ref="LogToFile"/>
 		</Logger>

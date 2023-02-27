@@ -25,4 +25,10 @@ public interface SfgeConfig {
      * provided
      */
     int getProgressIncrements();
+
+    /** Stack depth upto which Graph Engine attempts to walk. */
+    int getStackDepthLimit();
+
+    /** Limit to control the growth of path expansion to help alleviate OutOfMemoryError. */
+    int getPathExpansionLimit();
 }

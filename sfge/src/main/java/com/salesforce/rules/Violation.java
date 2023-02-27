@@ -1,5 +1,6 @@
 package com.salesforce.rules;
 
+import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.NamedVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import java.util.Comparator;
@@ -299,6 +300,30 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
                     .thenComparing(PathBasedRuleViolation::getSinkLineNumber)
                     .thenComparing(PathBasedRuleViolation::getSinkColumnNumber)
                     .compare(this, (PathBasedRuleViolation) otherViolation);
+        }
+    }
+
+    public static final class LimitReachedViolation extends Violation {
+
+        /**
+         * @param message - The value to be inserted into the violation's {@link #message}
+         *     attribute.
+         * @param vertex
+         */
+        public LimitReachedViolation(String message, SFVertex vertex) {
+            super(
+                    String.format(
+                            UserFacingMessages.RuleViolationTemplates
+                                    .LIMIT_REACHED_VIOLATION_MESSAGE,
+                            message),
+                    vertex);
+
+            // TODO: reconsider the name and category. We want users to take followup action.
+            this.ruleName = "LimitReached";
+            this.category = INTERNAL_ERROR_CATEGORY;
+            this.description = "";
+            this.severity = AbstractRule.SEVERITY.LOW.code;
+            this.url = "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-errors";
         }
     }
 

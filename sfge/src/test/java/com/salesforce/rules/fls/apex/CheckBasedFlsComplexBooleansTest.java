@@ -13,23 +13,34 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
-    public static Stream<Arguments> input() {
+    public static Stream<Arguments> multipleFieldsInput() {
+        return input(
+                "Account a = [SELECT Name, Phone FROM Account];\n",
+                "insert new Account(Name = 'Acme inc.', Phone = '867-5309');\n",
+                "Account a = new Account();"
+                        + "a.Name = 'Acme inc';"
+                        + "a.Phone = '867-5309';"
+                        + "update a;\n");
+    }
+
+    public static Stream<Arguments> singleFieldInput() {
+        return input(
+                "Account a = [SELECT Name FROM Account];\n",
+                "insert new Account(Name = 'Acme inc.');\n",
+                "Account a = new Account();" + "a.Name = 'Acme inc';" + "update a;\n");
+    }
+
+    public static Stream<Arguments> input(
+            String readAction, String insertAction, String updateAction) {
         return Stream.of(
                 getArguments(
-                        FlsValidationType.READ,
-                        ApexFlsViolationRule.getInstance(),
-                        "Account a = [SELECT Name, Phone FROM Account];\n"),
+                        FlsValidationType.READ, ApexFlsViolationRule.getInstance(), readAction),
                 getArguments(
-                        FlsValidationType.INSERT,
-                        ApexFlsViolationRule.getInstance(),
-                        "insert new Account(Name = 'Acme inc.', Phone = '867-5309');\n"),
+                        FlsValidationType.INSERT, ApexFlsViolationRule.getInstance(), insertAction),
                 getArguments(
                         FlsValidationType.UPDATE,
                         ApexFlsViolationRule.getInstance(),
-                        "Account a = new Account();"
-                                + "a.Name = 'Acme inc';"
-                                + "a.Phone = '867-5309';"
-                                + "update a;\n"));
+                        updateAction));
     }
 
     private static Arguments getArguments(
@@ -45,7 +56,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
     }
 
     // ========== NO BOOLEANS ==========
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testPartialValidation(
             FlsValidationType validationType,
@@ -79,7 +90,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
 
     // ========== AND-EXPRESSIONS ==========
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testSimpleProperAndedValidation(
             FlsValidationType validationType,
@@ -109,7 +120,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testAndedValidationOfWrongFields(
             FlsValidationType validationType,
@@ -141,7 +152,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNegatedFullValidation(
             FlsValidationType validationType,
@@ -171,7 +182,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(4, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithTwiceNegatedAnd(
             FlsValidationType validationType,
@@ -201,7 +212,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Name").withField("Phone"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithTriplyNegatedAnd(
             FlsValidationType validationType,
@@ -232,7 +243,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(4, validationType, "Account").withField("Name").withField("Phone"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithInnerNegation(
             FlsValidationType validationType,
@@ -266,7 +277,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithInnerDoubleNegation(
             FlsValidationType validationType,
@@ -296,7 +307,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithInnerSingleAndDoubleNegation(
             FlsValidationType validationType,
@@ -332,7 +343,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
 
     // ========== OR-EXPRESSIONS ==========
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInsufficientOr(
             FlsValidationType validationType,
@@ -364,7 +375,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNegatedOr(
             FlsValidationType validationType,
@@ -396,7 +407,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNegativeValidationWithDeMorgansLaw(
             FlsValidationType validationType,
@@ -427,7 +438,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(4, validationType, "Account").withField("Name").withField("Phone"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testPositiveValidationWithDeMorgansLaw(
             FlsValidationType validationType,
@@ -460,7 +471,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
 
     // ========== MIXED OR'S AND AND'S ==========
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInsufficientOrWithinAnd(
             FlsValidationType validationType,
@@ -495,7 +506,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testFullValidationWithinInsufficientOr(
             FlsValidationType validationType,
@@ -530,7 +541,7 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 expect(7, validationType, "Account").withField("Phone").withField("Name"));
     }
 
-    @MethodSource("input")
+    @MethodSource("multipleFieldsInput")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNegatedValidationWithExtraneousOr(
             FlsValidationType validationType,
@@ -561,5 +572,99 @@ public class CheckBasedFlsComplexBooleansTest extends BaseFlsTest {
                 rule,
                 sourceCode,
                 expect(4, validationType, "Account").withField("Phone").withField("Name"));
+    }
+
+    // ========== EQUALITY/INEQUALITY TESTS ==========
+
+    @MethodSource("singleFieldInput")
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testValidationEqualsTrue(
+            FlsValidationType validationType,
+            String validationCheck,
+            AbstractPathBasedRule rule,
+            String dmlOperation) {
+        // spotless:off
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        if (Schema.sObjectType.Account.fields.Name." + validationCheck + "() == true) {\n"
+                        + "            " + dmlOperation
+                        + "            return;\n"
+                        + "        }\n"
+                        + "        " + dmlOperation
+                        + "    }\n"
+                        + "}";
+        // spotless:on
+        assertViolations(rule, sourceCode, expect(7, validationType, "Account").withField("Name"));
+    }
+
+    @MethodSource("singleFieldInput")
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testValidationEqualsFalse(
+            FlsValidationType validationType,
+            String validationCheck,
+            AbstractPathBasedRule rule,
+            String dmlOperation) {
+        // spotless:off
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        if (Schema.sObjectType.Account.fields.Name." + validationCheck + "() == false) {\n"
+                        + "            " + dmlOperation
+                        + "            return;\n"
+                        + "        }\n"
+                        + "        " + dmlOperation
+                        + "    }\n"
+                        + "}";
+        // spotless:on
+        // Checking `x == false` is equivalent to checking `!x`, so the operation inside the IF is
+        // unsafe.
+        assertViolations(rule, sourceCode, expect(4, validationType, "Account").withField("Name"));
+    }
+
+    @MethodSource("singleFieldInput")
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testValidationNotEqualsTrue(
+            FlsValidationType validationType,
+            String validationCheck,
+            AbstractPathBasedRule rule,
+            String dmlOperation) {
+        // spotless:off
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        if (Schema.sObjectType.Account.fields.Name." + validationCheck + "() != true) {\n"
+                        + "            " + dmlOperation
+                        + "            return;\n"
+                        + "        }\n"
+                        + "        " + dmlOperation
+                        + "    }\n"
+                        + "}";
+        // spotless:on
+        // Checking `x != true` is equivalent to `!x`, so the operation inside the IF is unsafe.
+        assertViolations(rule, sourceCode, expect(4, validationType, "Account").withField("Name"));
+    }
+
+    @MethodSource("singleFieldInput")
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testValidationNotEqualsFalse(
+            FlsValidationType validationType,
+            String validationCheck,
+            AbstractPathBasedRule rule,
+            String dmlOperation) {
+        // spotless:off
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "    public void foo() {\n"
+                        + "        if (Schema.sObjectType.Account.fields.Name." + validationCheck + "() != false) {\n"
+                        + "            " + dmlOperation
+                        + "            return;\n"
+                        + "        }\n"
+                        + "        " + dmlOperation
+                        + "    }\n"
+                        + "}";
+        // spotless:on
+        // Checking `x != false` is equivalent to `== true`, so the one outside the IF is unsafe.
+        assertViolations(rule, sourceCode, expect(7, validationType, "Account").withField("Name"));
     }
 }

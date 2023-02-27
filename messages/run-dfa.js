@@ -3,6 +3,8 @@ module.exports = {
 	"commandDescriptionLong": `Scans codebase with all DFA rules by default.
 	Specify the format of output and print results directly or as contents of a file that you provide with --outfile flag.`,
 	"flags": {
+		"pathexplimitDescription": "specify a path expansion  upper boundary to limit the complexity of code Graph Engine analyzes. Alternatively, set value using environment variable `SFGE_PATH_EXPANSION_LIMIT`",
+		"pathexplimitDescriptionLong": "Specifies a path expansion upper boundary to limit the complexity of code Graph Engine analyzes  before failing fast. Set value to -1 to remove any upper boundary. --pathexplimit inherits value from SFGE_PATH_EXPANSION_LIMIT env-var, if set. Its default value is derived from jvm heap space allocation.",
 		"ruledisablewarningviolationDescription": "disable warning violations from Salesforce Graph Engine. Alternatively, set value using environment variable `SFGE_RULE_DISABLE_WARNING_VIOLATION`",
 		"ruledisablewarningviolationDescriptionLong": "Disables warning violations, such as those on StripInaccessible READ access, to get only high-severity violations (default: false). Inherits value from SFGE_RULE_DISABLE_WARNING_VIOLATION env-var if set.",
 		"rulethreadcountDescription": "specify number of threads that evaluate DFA rules. Alternatively, set value using environment variable `SFGE_RULE_THREAD_COUNT`. Default is 4",

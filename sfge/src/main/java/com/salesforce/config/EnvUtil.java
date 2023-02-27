@@ -1,6 +1,7 @@
 package com.salesforce.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.salesforce.graph.ops.registry.RegistryDataLimitCalculator;
 import java.util.concurrent.TimeUnit;
 
 public final class EnvUtil {
@@ -11,6 +12,8 @@ public final class EnvUtil {
     private static final String ENV_IGNORE_PARSE_ERRORS = "SFGE_IGNORE_PARSE_ERRORS";
     private static final String ENV_LOG_WARNINGS_ON_VERBOSE = "SFGE_LOG_WARNINGS_ON_VERBOSE";
     private static final String ENV_PROGRESS_INCREMENTS = "SFGE_PROGRESS_INCREMENTS";
+    private static final String ENV_STACK_DEPTH_LIMIT = "SFGE_STACK_DEPTH_LIMIT";
+    private static final String ENV_PATH_EXPANSION_LIMIT = "SFGE_PATH_EXPANSION_LIMIT";
 
     // TODO: These should move to SfgeConfigImpl and this class should return Optionals
     @VisibleForTesting
@@ -22,9 +25,15 @@ public final class EnvUtil {
             TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES);
 
     @VisibleForTesting static final boolean DEFAULT_RULE_DISABLE_WARNING_VIOLATION = false;
-    @VisibleForTesting static final boolean DEFAULT_IGNORE_PARSE_ERRORS = false;
     @VisibleForTesting static final boolean DEFAULT_LOG_WARNINGS_ON_VERBOSE = false;
     @VisibleForTesting static final int DEFAULT_PROGRESS_INCREMENTS = 10;
+
+    /** Artificial stack depth limit to keep path expansion under control. */
+    @VisibleForTesting static final int DEFAULT_STACK_DEPTH_LIMIT = 450;
+
+    @VisibleForTesting
+    static final int DEFAULT_PATH_EXPANSION_LIMIT =
+            RegistryDataLimitCalculator.getApexPathExpanderRegistryLimit();
 
     /**
      * Returns the value of the {@link #ENV_RULE_THREAD_COUNT} environment variable if set, else
@@ -74,6 +83,22 @@ public final class EnvUtil {
      */
     static int getProgressIncrements() {
         return getIntOrDefault(ENV_PROGRESS_INCREMENTS, DEFAULT_PROGRESS_INCREMENTS);
+    }
+
+    /**
+     * Returns stack depth limit upto which Graph Engine attempts to dig. Depths beyond this have a
+     * high probability of throwing a StackOverFlow exception.
+     */
+    static int getStackDepthLimit() {
+        return getIntOrDefault(ENV_STACK_DEPTH_LIMIT, DEFAULT_STACK_DEPTH_LIMIT);
+    }
+
+    /**
+     * @return Maximum limit that items in registry can reach. Checks for env variable and returns
+     *     default when not set.
+     */
+    static int getPathExpansionLimit() {
+        return getIntOrDefault(ENV_PATH_EXPANSION_LIMIT, DEFAULT_PATH_EXPANSION_LIMIT);
     }
 
     private static int getIntOrDefault(String name, int defaultValue) {

@@ -34,8 +34,8 @@ public abstract class Registry {
     }
 
     /**
-     * @return a mapping from Class that implements {@link Registrable} to a Supplier to get an instance
-     *     of its corresponding implementation of {@link RegistryData}.
+     * @return a mapping from Class that implements {@link Registrable} to a Supplier to get an
+     *     instance of its corresponding implementation of {@link RegistryData}.
      */
     protected abstract Map<Class<? extends Registrable>, Supplier> getRegistrySupplier();
 
@@ -48,16 +48,12 @@ public abstract class Registry {
         registryHolderMap.clear();
     }
 
-    /**
-     * Register an instance.
-     */
+    /** Register an instance. */
     public void register(Registrable registrable) {
         register(registrable.getClass(), registrable);
     }
 
-    /**
-     * Validate if an instance has indeed been registered
-     */
+    /** Validate if an instance has indeed been registered */
     public void verifyExists(Registrable instance) {
         verifyExists(instance.getClass(), instance);
     }
@@ -109,5 +105,12 @@ public abstract class Registry {
     public void verifyExists(
             Class<? extends Registrable> registrableClass, Registrable registrableInstance) {
         registryHolderMap.get(registrableClass).verifyExists(registrableInstance);
+    }
+
+    /**
+     * @return number of items of given type stored in registry.
+     */
+    public int size(Class<? extends Registrable> registrableClass) {
+        return registryHolderMap.get(registrableClass).size();
     }
 }
