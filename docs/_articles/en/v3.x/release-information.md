@@ -23,6 +23,20 @@ We publish the latest Code Analyzer monthly.
 * FIX (CodeAnalyzer): We updated the reference to the `eslint-recommended` config to point to the updated ESLint dependency. This resolves the error received on new direct or CI/CD installs of Code Analyzer: ```ERROR Cannot find module '/home/runner/.local/share/sfdx/node_modules/eslint/conf/eslint-recommended.js```
 * FIX (GraphEngine): We added a new parameter, `--pathexplimit`, on `scanner:run:dfa` to customize Graph Engine's scans of complex codebases. `SFGE_PATH_EXPANSION_LIMIT` is an alternative environment variable to provide the same customization. These options reduce the number of `OutOfMemory` errors produced. For more information, check out our [documentation](en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-errors).
 
+**Closed issues:**
+* [BUG] ERROR Cannot find module '/home/runner/.local/share/sfdx/node_modules/eslint/conf/eslint-recommended.js' [\#986](https://github.com/forcedotcom/sfdx-scanner/issues/986)
+* [Azure DevOps Pipeline error \|\| Cannot find module - share/sfdx/node_modules/eslint/conf/eslint-recommended.js ] [\#987](https://github.com/forcedotcom/sfdx-scanner/issues/987)
+* naming convention [\#982](https://github.com/forcedotcom/sfdx-scanner/issues/982)
+* [BUG] Typescript ESlint throws "Cannot read properties of undefined (reading 'type')" error. [\#974](https://github.com/forcedotcom/sfdx-scanner/issues/974)
+
+**Merged pull requests**
+* CHANGE (PMD): @W-12576383@: Upgrades PMD to version 6.54.0. [\#983](https://github.com/forcedotcom/sfdx-scanner/pull/983)
+* CHANGE (CodeAnalyzer): @W-12439992@: Adds a new parameter to control path expansion limits. [\#977](https://github.com/forcedotcom/sfdx-scanner/pull/977)
+* CHANGE (GraphEngine): @W-12439992@: Applies limit on how far Path Expansion registry data can grow to prevent OutOfMemory error [\#971](https://github.com/forcedotcom/sfdx-scanner/pull/971)
+* CHANGE (GraphEngine): @W-12423302@: Decreasing stack depth to a more helpful value [\#972](https://github.com/forcedotcom/sfdx-scanner/pull/972)
+* CHANGE (GraphEngine): @W-12423302@: Excludes evaluating paths that have stack depth over the allowed Apex governor limit. [\#970](https://github.com/forcedotcom/sfdx-scanner/pull/970)
+* FIX (GraphEngine): @W-12138700@: Adds proper handling of boolean `== false` and `!= true` cases. [\#966](https://github.com/forcedotcom/sfdx-scanner/pull/966)
+
 ## [v3.9.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.9.0) (02-07-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.9.0...v3.8.0)
