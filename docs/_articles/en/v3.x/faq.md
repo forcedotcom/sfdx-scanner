@@ -39,7 +39,7 @@ A: Use the `sfdx scanner:run` command in any scripts used by your CI/CD. We also
 * Keep an artifact of the results. Use the `-o | --outfile` flag to write your results to a file.
 * If any violations meet or exceed the provided value, use the `-s | --severity-threshold` flag,. The `-v | --violations-cause-error` flag has been deprecated.
 
-### Questions about Languages
+### Questions About Languages
 
 #### Q: What languages does Code Analyzer support?
 By default, Code Analyzer supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript. To add support for Lightning Web Components, invoke the `scanner:run` command with `--engine eslint-lwc`.
@@ -60,7 +60,7 @@ A: Currently, you can only add custom rules for PMD.
 
 If the language isn’t already supported, create an issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
 
-### Questions about Severity Thresholds and Normalization
+### Questions About Severity Thresholds and Normalization
 
 #### Q: How do I set a severity threshold for a Code Analyzer run?
 A: When you run Code Analyzer with the `-s | --severity-threshold` flag and a threshold value, Code Analyzer throws an error if violations are found with equal or greater severity than the provided value. Values are 1 (high), 2 (moderate), and 3 (low). The exit code equals the severity of the most severe violation detected. For example, if a violation of severity 2 is found and the threshold is 2 or 3, then the exit code is 2. Using this flag also implicitly invokes the `--normalize-severity` flag.
@@ -86,7 +86,7 @@ A: Severity is normalized across all engines using the values in this table.
 | 2 (Moderate)        | 2       | 1      | 1          | 1                 | 2         | 2      			       |
 | 3 (Low)             | 3, 4, 5 |        |            |                   | 3		  | 3					   |
 
-### Questions about CPD
+### Questions About CPD
 
 #### Q: What languages are supported by CPD in Code Analyzer?
 A: Code Analyzer supports Apex, Java, Visualforce, and XML in CPD.
@@ -110,7 +110,7 @@ Graph Engine builds up the context of the source code in its entirety before it 
 
 To learn how, read about [Engine Directives](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives).
 
-### Questions about Interpreting ApexFlsViolationRule results
+### Questions About Interpreting ApexFlsViolationRule Results
 
 #### Q: My data operation is already protected though not through a CRUD/FLS check. I'm confident that a CRUD/FLS check is not needed. How do I make the violation go away?
 
