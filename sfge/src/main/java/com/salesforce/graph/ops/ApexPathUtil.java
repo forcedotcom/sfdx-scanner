@@ -48,9 +48,17 @@ public final class ApexPathUtil {
 
     public static List<ApexPath> getForwardPaths(
             GraphTraversalSource g, MethodVertex method, ApexPathExpanderConfig config) {
+        // We can get the path summary, and just return the accepted paths.
         return summarizeForwardPaths(g, method, config).getAcceptedPaths();
     }
 
+    /**
+     * Return all valid paths starting at the provided method, as well as the reasons that invalid paths were rejected.
+     * @param g
+     * @param method
+     * @param config
+     * @return
+     */
     public static ApexPathRetrievalSummary summarizeForwardPaths(
             GraphTraversalSource g, MethodVertex method, ApexPathExpanderConfig config) {
         BlockStatementVertex blockStatement =
@@ -184,14 +192,16 @@ public final class ApexPathUtil {
         }
 
         if (expanderConfig.getExpandMethodCalls()) {
+            // If we're expected to expand paths, add the results of each path expansion to the summary.
             ApexPathRetrievalSummary summary = new ApexPathRetrievalSummary();
             for (ApexPath path : results) {
                 summary.addExpansionResults(ApexPathExpanderUtil.expand(g, path, expanderConfig));
             }
             return summary;
+        } else {
+            // If we don't have to expand, then the paths we already have can be put into a summary and returned.
+            return new ApexPathRetrievalSummary(results);
         }
-
-        return new ApexPathRetrievalSummary(results);
     }
 
     /**
@@ -233,6 +243,9 @@ public final class ApexPathUtil {
         BACKWARD;
     }
 
+    /**
+     * Object generated during path retrieval. Includes information about all accepted paths, as well as all reasons that paths were rejected.
+     */
     public static final class ApexPathRetrievalSummary {
         private final List<ApexPath> acceptedPaths;
         private final List<PathExpansionException> rejectionReasons;
@@ -252,6 +265,10 @@ public final class ApexPathUtil {
             this.rejectionReasons = rejectionReasons;
         }
 
+        /**
+         * Add the results collected by the provided {@link ApexPathCollector} to this summary.
+         * @param collector
+         */
         private void addExpansionResults(ApexPathCollector collector) {
             this.acceptedPaths.addAll(collector.getAcceptedResults());
             this.rejectionReasons.addAll(collector.getRejectionReasons());
