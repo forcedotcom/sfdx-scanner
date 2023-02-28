@@ -53,7 +53,9 @@ public final class ApexPathUtil {
     }
 
     /**
-     * Return all valid paths starting at the provided method, as well as the reasons that invalid paths were rejected.
+     * Return all valid paths starting at the provided method, as well as the reasons that invalid
+     * paths were rejected.
+     *
      * @param g
      * @param method
      * @param config
@@ -192,14 +194,16 @@ public final class ApexPathUtil {
         }
 
         if (expanderConfig.getExpandMethodCalls()) {
-            // If we're expected to expand paths, add the results of each path expansion to the summary.
+            // If we're expected to expand paths, add the results of each path expansion to the
+            // summary.
             ApexPathRetrievalSummary summary = new ApexPathRetrievalSummary();
             for (ApexPath path : results) {
                 summary.addExpansionResults(ApexPathExpanderUtil.expand(g, path, expanderConfig));
             }
             return summary;
         } else {
-            // If we don't have to expand, then the paths we already have can be put into a summary and returned.
+            // If we don't have to expand, then the paths we already have can be put into a summary
+            // and returned.
             return new ApexPathRetrievalSummary(results);
         }
     }
@@ -244,7 +248,8 @@ public final class ApexPathUtil {
     }
 
     /**
-     * Object generated during path retrieval. Includes information about all accepted paths, as well as all reasons that paths were rejected.
+     * Object generated during path retrieval. Includes information about all accepted paths, as
+     * well as all reasons that paths were rejected.
      */
     public static final class ApexPathRetrievalSummary {
         private final List<ApexPath> acceptedPaths;
@@ -267,6 +272,7 @@ public final class ApexPathUtil {
 
         /**
          * Add the results collected by the provided {@link ApexPathCollector} to this summary.
+         *
          * @param collector
          */
         private void addExpansionResults(ApexPathCollector collector) {
