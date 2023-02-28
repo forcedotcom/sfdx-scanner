@@ -16,7 +16,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  * FLS Violation rule that uses forward-path approach to detect missing FLS checks on CRUD
  * operations.
  */
-public final class ApexFlsViolationRule extends AbstractPathBasedRule {
+public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
     private static final Logger LOGGER = LogManager.getLogger(ApexFlsViolationRule.class);
 
     /**
