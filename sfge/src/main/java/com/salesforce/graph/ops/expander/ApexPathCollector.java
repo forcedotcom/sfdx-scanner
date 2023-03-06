@@ -52,7 +52,6 @@ public final class ApexPathCollector {
     void collectRejected(ApexPathExpander pathExpander, PathExpansionException reason) {
         Long key = pathExpander.getId();
         expanderIdToRejectionReason.put(key, reason);
-        pathExpander.finished();
     }
 
     /**
