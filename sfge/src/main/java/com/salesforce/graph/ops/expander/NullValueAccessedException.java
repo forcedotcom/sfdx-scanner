@@ -27,6 +27,10 @@ public final class NullValueAccessedException extends ApexPathExpanderRuntimeExc
         this.vertex = vertex;
     }
 
+    public MethodCallExpressionVertex getVertex() {
+        return vertex;
+    }
+
     @Override
     public String toString() {
         return "NullValueAccessedException{"

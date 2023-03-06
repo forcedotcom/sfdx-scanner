@@ -86,7 +86,28 @@ public class PathBasedRuleRunner {
         return violations;
     }
 
-    private void executeRulesOnAnomalies(List<PathExpansionException> anomalies) {}
+    private void executeRulesOnAnomalies(List<PathExpansionException> anomalies) {
+        // If no anomalies were reported, we should log that information and just exit.
+        if (anomalies.isEmpty() && LOGGER.isInfoEnabled()) {
+            LOGGER.info("No anomalies found while expanding paths");
+            return;
+        }
+        for (AbstractPathAnomalyRule rule : anomalyRules) {
+            List<RuleThrowable> ruleThrowables = rule.run(g, methodVertex, anomalies);
+            for (RuleThrowable ruleThrowable : ruleThrowables) {
+                // TODO: This is fine for now, because there are no anomaly rules that return
+                //       incomplete RuleThrowables instead of violations. But if that ever
+                //       changes, it may be desirable to refactor this method and
+                //       `executeRulesOnPaths()` to use a common method that processes
+                //       throwables. At the very least, an else-branch will be required here.
+                if (ruleThrowable instanceof Violation.RuleViolation) {
+                    Violation.RuleViolation violation = (Violation.RuleViolation) ruleThrowable;
+                    violation.setPropertiesFromRule(rule);
+                    violations.add(violation);
+                }
+            }
+        }
+    }
 
     private void executeRulesOnPaths(List<ApexPath> paths) {
         boolean foundVertex = false;

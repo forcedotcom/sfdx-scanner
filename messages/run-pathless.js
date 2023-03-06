@@ -2,8 +2,6 @@ module.exports = {
 	"commandDescription": "scan a codebase with a selection of rules",
 	"commandDescriptionLong": `Scans a codebase with a selection of rules. You can scan the codebase with all the rules in the registry, or use parameters to filter the rules based on rulename, category, or ruleset. You can specify the format of the output, such as XML or JUnit. You can print the output to the console (default) or to a file using the --outfile parameter.`,
 	"flags": {
-		"categoryDescription": "one or more categories of rules to run",
-		"categoryDescriptionLong": "One or more categories of rules to run. Specify multiple values as a comma-separated list.",
 		"rulesetDescription": "[deprecated] rulesets to run",
 		"rulesetDescriptionLong": "[deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.",
 		"targetDescription": "source code location",

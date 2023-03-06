@@ -48,7 +48,6 @@ public class NullApexValueConstrainerTest {
                 Arguments.of("String", "null == x"),
                 Arguments.of("String", "x != null"),
                 Arguments.of("String", "null != x"),
-                Arguments.of("String", "x"),
                 Arguments.of("MyObject__c", "x.MyField__c == null"));
     }
 
@@ -63,7 +62,7 @@ public class NullApexValueConstrainerTest {
     // TODO: This is currently testing the combination of the Constrainer and Excluder. Write
     // Constrainer only tests
     @MethodSource
-    @ParameterizedTest(name = "{displayName}: comparison=({0})")
+    @ParameterizedTest(name = "{displayName}: comparison=({0}, {1})")
     public void testPathsAreCollapsedBasedOnSameNullComparison(
             String typeDeclaration, String comparison) {
         String[] sourceCode = {

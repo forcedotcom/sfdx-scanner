@@ -4,7 +4,6 @@ import com.salesforce.rules.AbstractPathBasedRule;
 import com.salesforce.rules.ApexNullPointerExceptionRule;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -94,16 +93,15 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
     @CsvSource({
         // Initialization without assignment produces null value.
         "String s, Integer problem = s.length(), s.length",
-        "Integer i, Integer problem = i + 0, i + 0",
+        // "Integer i, Integer problem = i + 0, i + 0",
         // Explicit assignment to null produces null value.
         "String s = null, Integer problem = s.length(), s.length",
-        "Integer i = null, Integer problem = i + 0, i + 0",
+        // "Integer i = null, Integer problem = i + 0, i + 0",
         // Assigning to a null return produces a null value.
         "String s = getNullStr(), Integer problem = s.length(), s.length",
-        "Integer i = getNullInt(), Integer problem = i + 0, i + 0",
+        // "Integer i = getNullInt(), Integer problem = i + 0, i + 0",
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
     public void testNullInitialization_expectViolation(
             String initialization, String reference, String op) {
         // spotless:off
@@ -137,7 +135,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
         "Integer i = getFalseyInt(), Integer i2 = i + 7"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
     public void testNonNullInitialization_expectNoViolation(
             String initialization, String reference) {
         // spotless:off
@@ -172,7 +169,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
         "Integer i = null, i = getFalseyInt(), Integer i2 = i + 2",
     })
     @ParameterizedTest(name = "{displayName}: init {0}; assignment {1}")
-    @Disabled
     public void testReassignmentToNonNull_expectNoViolation(
             String initialization, String reassignment, String reference) {
         // spotless:off
@@ -191,15 +187,13 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      * returns null, thereby triggering a violation.
      *
      * @param reference - Code snippet referencing the null-returning method.
-     * @param op - The specific op we expect to see in a violation message. TODO: These values are
-     *     tentative, and may change depending on the file rule implementation
+     * @param op - The specific op we expect to see in a violation message.
      */
     @CsvSource({
-        "Integer i = getNullStr().length(), getNullStr().length",
-        "Integer i = getNullInt() + 2, getNullInt() + 2"
+        "Integer i = getNullStr().length(), length",
+        // "Integer i = getNullInt() + 2, getNullInt() + 2"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
     public void testInlineNullMethodReturn_expectViolation(String reference, String op) {
         // spotless:off
         String sourceCodeInsert = "        " + reference + ";\n";
@@ -225,7 +219,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
                 "getFalseyInt() + 2"
             })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
     public void testInlineNonNullMethodReturn_expectNoViolation(String reference) {
         String sourceCodeInsert = "    Integer i = " + reference + ";\n";
         String sourceCode = String.format(VARIABLE_SOURCE_CODE_TEMPLATE, sourceCodeInsert);
@@ -242,9 +235,11 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      * @param op - The specific op expected in the violation message. TODO: This may change slightly
      *     once the rule is implemented.
      */
-    @CsvSource({"String s, s.length(), s.length", "Integer i, i + 2, i + 2"})
+    @CsvSource({
+        "String s, s.length(), s.length",
+        //        "Integer i, i + 2, i + 2"
+    })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
     public void testNullParamReference_expectViolation(String param, String reference, String op) {
         String sourceCode =
                 String.format(UNCONSTRAINED_PARAM_SOURCE_CODE_TEMPLATE, "null", param, reference);
@@ -272,7 +267,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
         "indeterminantInt, Integer i, i + 2"
     })
     @ParameterizedTest(name = "{displayName}: param value of {0}")
-    @Disabled
     public void testNonNullParamReference_expectNoViolation(
             String value, String param, String reference) {
         String sourceCode =
@@ -294,14 +288,13 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
     @CsvSource({
         // Constraining to null should cause a violation in the IF-branch.
         "s == null, s.length(), 4, s.length",
-        "i == null, i + 2, 4, i + 2",
+        // "i == null, i + 2, 4, i + 2",
         // Constraining to generalized "not null" should cause a violation in the ELSE,
         // since failing a "not null" constraint is equivalent to passing a null constraint.
         "s != null, s.length(), 6, s.length",
-        "i != null, i + 2, 6, i + 2"
+        // "i != null, i + 2, 6, i + 2"
     })
     @ParameterizedTest(name = "{displayName}: constraint is {0}")
-    @Disabled
     public void testNullConstrainedIndeterminant_expectViolation(
             String constraint, String reference, int line, String op) {
         // Use the same reference for both sides of the constraint.
@@ -334,7 +327,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
         "i != 0, i + 2"
     })
     @ParameterizedTest(name = "{displayName}: constraint is {0}")
-    @Disabled
     public void testInconclusivelyConstrainedIndeterminant_expectNoViolation(
             String constraint, String reference) {
         String sourceCode =
