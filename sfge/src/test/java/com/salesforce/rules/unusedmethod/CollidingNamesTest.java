@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/** A collection of tests for weird edge cases. */
-public class EdgeCaseTest extends BaseUnusedMethodTest {
+/**
+ * There are a bunch of weird edge cases that can happen when class names, variable names, and
+ * method names collide. These tests validate those. They are complicated enough to justify being
+ * their own file.
+ */
+public class CollidingNamesTest extends BaseUnusedMethodTest {
     /**
      * If an outer class has a static method, and its inner class has an instance method with the
      * same name, then invoking that method without the `this` keyword should still count as using
