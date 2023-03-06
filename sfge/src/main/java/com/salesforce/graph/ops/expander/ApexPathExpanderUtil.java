@@ -10,7 +10,6 @@ import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 import org.apache.logging.log4j.LogManager;
@@ -40,22 +39,23 @@ public final class ApexPathExpanderUtil {
      *   <li>Recursion is detected
      * </ul>
      *
-     * @return A list of paths that represent all possible combinations of execution
+     * @return A collection of paths that were accepted, and reasons the rest were rejected
      */
-    public static List<ApexPath> expand(
+    public static ApexPathCollector expand(
             GraphTraversalSource g, ApexPath path, ApexPathExpanderConfig config) {
         if (path.endsInException()) {
             // Filter out any paths in the original method that ends in an exception
             ThrowStatementVertex throwStatementVertex = path.getThrowStatementVertex().get();
             logFilteredOutPath(throwStatementVertex);
-            return Collections.emptyList();
+            // Return an empty results collection.
+            return new ApexPathCollector();
         } else {
             final PathExpansionRegistry registry = new PathExpansionRegistry();
             ApexPathExpansionHandler handler = new ApexPathExpansionHandler(config, registry);
-            final List<ApexPath> apexPaths = handler._expand(g, path, config);
+            final ApexPathCollector results = handler._expand(g, path, config);
             // Clean up registry to remove any lingering references
             registry.clear();
-            return apexPaths;
+            return results;
         }
     }
 
@@ -89,17 +89,17 @@ public final class ApexPathExpanderUtil {
             }
         }
 
-        private List<ApexPath> _expand(
+        private ApexPathCollector _expand(
                 GraphTraversalSource g, ApexPath path, ApexPathExpanderConfig config) {
             ApexPathCollector pathCollector = new ApexPathCollector();
             try {
                 expand(g, path, config, pathCollector);
-                return pathCollector.getResults();
+                return pathCollector;
             } catch (RuntimeException ex) {
                 if (LOGGER.isErrorEnabled()) {
                     LOGGER.error(
                             "Incomplete. Current PathCollector size="
-                                    + pathCollector.getResults().size(),
+                                    + pathCollector.getAcceptedResults().size(),
                             ex);
                 }
                 throw ex;
@@ -120,7 +120,7 @@ public final class ApexPathExpanderUtil {
                 GraphTraversalSource g,
                 ApexPath path,
                 ApexPathExpanderConfig config,
-                ResultCollector resultCollector) {
+                ApexPathCollector resultCollector) {
             // Seed the stack with the initial paths
             Stack<ApexPathExpander> apexPathExpanders = new Stack<>();
 
@@ -164,7 +164,7 @@ public final class ApexPathExpanderUtil {
         }
 
         private void expand(
-                Stack<ApexPathExpander> apexPathExpanders, ResultCollector resultCollector) {
+                Stack<ApexPathExpander> apexPathExpanders, ApexPathCollector resultCollector) {
 
             // Continue while there is work to do. This stack is updated as the path is forked.
             // Forked expanders are pushed to the front of the stack, causing the paths to be
@@ -228,23 +228,29 @@ public final class ApexPathExpanderUtil {
                                 apexPathExpander.getTopMostPath().getThrowStatementVertex().get();
                         logFilteredOutPath(throwStatementVertex);
                     } else {
-                        resultCollector.collect(apexPathExpander);
+                        resultCollector.collectAccepted(apexPathExpander);
                     }
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("expand-Finished.");
                     }
                 } catch (PathExcludedException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    // Excluding a path rejects it.
+                    resultCollector.collectRejected(apexPathExpander, ex);
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("expand-Excluded. ex=" + ex);
                     }
                 } catch (PathCollapsedException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    // Collapsing a path rejects it.
+                    resultCollector.collectRejected(apexPathExpander, ex);
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("expand-Collapsed. ex=" + ex);
                     }
                 } catch (ReturnValueInvalidCollapsedException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    // Paths with invalid returns are rejected.
+                    resultCollector.collectRejected(apexPathExpander, ex);
                     ApexValue<?> returnValue = ex.getReturnValue().orElse(null);
                     if (ex.getPath().getMethodVertex().isPresent()) {
                         if (LOGGER.isDebugEnabled()) {
@@ -265,17 +271,21 @@ public final class ApexPathExpanderUtil {
                     }
                 } catch (RecursionDetectedException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
-                    resultCollector.collect(apexPathExpander);
+                    resultCollector.collectAccepted(apexPathExpander);
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("expand-Recursion. ex=" + ex);
                     }
                 } catch (NullValueAccessedException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    // Paths terminated for NullPointerExceptions are rejected.
+                    resultCollector.collectRejected(apexPathExpander, ex);
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("expand-NullAccess. ex=" + ex);
                     }
                 } catch (StackDepthLimitExceededException ex) {
                     apexPathCollapser.removeExistingExpander(apexPathExpander);
+                    // Paths exceeding stack depth limit are rejected.
+                    resultCollector.collectRejected(apexPathExpander, ex);
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("expand-StackDepthLimit. ex=" + ex);
                     }
@@ -316,7 +326,7 @@ public final class ApexPathExpanderUtil {
 
                 for (ApexPathExpander pathExpander : apexPathCollapser.clearCollapsedExpanders()) {
                     if (!apexPathExpanders.remove(pathExpander)
-                            && !resultCollector.remove(pathExpander)) {
+                            && !resultCollector.removeAccepted(pathExpander)) {
                         // TODO: Throw
                         if (LOGGER.isWarnEnabled()) {
                             LOGGER.warn("Unable to find apexPathExpander=" + pathExpander);
@@ -326,7 +336,11 @@ public final class ApexPathExpanderUtil {
             }
 
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Path info. completedApexPathExpanders=" + resultCollector.size());
+                LOGGER.info(
+                        "Path info. completedApexPathExpanders="
+                                + resultCollector.acceptedSize()
+                                + "; rejectedApexPathExpanders="
+                                + resultCollector.rejectedSize());
             }
         }
 

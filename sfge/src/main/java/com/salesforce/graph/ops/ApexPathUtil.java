@@ -8,12 +8,7 @@ import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
-import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
-import com.salesforce.graph.ops.expander.ApexPathExpanderUtil;
-import com.salesforce.graph.ops.expander.BooleanValuePathConditionExcluder;
-import com.salesforce.graph.ops.expander.NullApexValueConstrainer;
-import com.salesforce.graph.ops.expander.ReturnResultPathCollapser;
-import com.salesforce.graph.ops.expander.SyntheticResultReturnValuePathCollapser;
+import com.salesforce.graph.ops.expander.*;
 import com.salesforce.graph.ops.expander.switches.ApexPathCaseStatementExcluder;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.BlockStatementVertex;
@@ -53,6 +48,21 @@ public final class ApexPathUtil {
 
     public static List<ApexPath> getForwardPaths(
             GraphTraversalSource g, MethodVertex method, ApexPathExpanderConfig config) {
+        // We can get the path summary, and just return the accepted paths.
+        return summarizeForwardPaths(g, method, config).getAcceptedPaths();
+    }
+
+    /**
+     * Return all valid paths starting at the provided method, as well as the reasons that invalid
+     * paths were rejected.
+     *
+     * @param g
+     * @param method
+     * @param config
+     * @return
+     */
+    public static ApexPathRetrievalSummary summarizeForwardPaths(
+            GraphTraversalSource g, MethodVertex method, ApexPathExpanderConfig config) {
         BlockStatementVertex blockStatement =
                 method.getOnlyChildOrNull(ASTConstants.NodeType.BLOCK_STATEMENT);
         if (blockStatement == null) {
@@ -65,7 +75,7 @@ public final class ApexPathUtil {
             map.put(Schema.END_SCOPES, ASTConstants.NodeType.BLOCK_STATEMENT);
             blockStatement = new BlockStatementVertex(map);
             apexPath.addVertices(Collections.singletonList(blockStatement));
-            return Collections.singletonList(apexPath);
+            return new ApexPathRetrievalSummary(Collections.singletonList(apexPath));
         } else {
             return getPaths(g, method, blockStatement, Direction.FORWARD, config);
         }
@@ -90,7 +100,8 @@ public final class ApexPathUtil {
                         .orElseThrow(() -> new UnexpectedException(startingVertex));
 
         MethodVertex method = topLevelVertex.getParentMethod().get();
-        List<ApexPath> paths = getPaths(g, method, topLevelVertex, Direction.BACKWARD, config);
+        List<ApexPath> paths =
+                getPaths(g, method, topLevelVertex, Direction.BACKWARD, config).getAcceptedPaths();
 
         // Filter out paths that end in exceptions.
         if (startingVertex instanceof ThrowStatementVertex) {
@@ -110,7 +121,7 @@ public final class ApexPathUtil {
         return paths;
     }
 
-    private static List<ApexPath> getPaths(
+    private static ApexPathRetrievalSummary getPaths(
             GraphTraversalSource g,
             MethodVertex method,
             BaseSFVertex startingVertex,
@@ -183,14 +194,18 @@ public final class ApexPathUtil {
         }
 
         if (expanderConfig.getExpandMethodCalls()) {
-            List<ApexPath> expandedPaths = new ArrayList<>();
+            // If we're expected to expand paths, add the results of each path expansion to the
+            // summary.
+            ApexPathRetrievalSummary summary = new ApexPathRetrievalSummary();
             for (ApexPath path : results) {
-                expandedPaths.addAll(ApexPathExpanderUtil.expand(g, path, expanderConfig));
+                summary.addExpansionResults(ApexPathExpanderUtil.expand(g, path, expanderConfig));
             }
-            return expandedPaths;
+            return summary;
+        } else {
+            // If we don't have to expand, then the paths we already have can be put into a summary
+            // and returned.
+            return new ApexPathRetrievalSummary(results);
         }
-
-        return results;
     }
 
     /**
@@ -230,6 +245,48 @@ public final class ApexPathUtil {
     private enum Direction {
         FORWARD,
         BACKWARD;
+    }
+
+    /**
+     * Object generated during path retrieval. Includes information about all accepted paths, as
+     * well as all reasons that paths were rejected.
+     */
+    public static final class ApexPathRetrievalSummary {
+        private final List<ApexPath> acceptedPaths;
+        private final List<PathExpansionException> rejectionReasons;
+
+        private ApexPathRetrievalSummary() {
+            this.acceptedPaths = new ArrayList<>();
+            this.rejectionReasons = new ArrayList<>();
+        }
+
+        private ApexPathRetrievalSummary(List<ApexPath> acceptedPaths) {
+            this(acceptedPaths, new ArrayList<>());
+        }
+
+        private ApexPathRetrievalSummary(
+                List<ApexPath> acceptedPaths, List<PathExpansionException> rejectionReasons) {
+            this.acceptedPaths = acceptedPaths;
+            this.rejectionReasons = rejectionReasons;
+        }
+
+        /**
+         * Add the results collected by the provided {@link ApexPathCollector} to this summary.
+         *
+         * @param collector
+         */
+        private void addExpansionResults(ApexPathCollector collector) {
+            this.acceptedPaths.addAll(collector.getAcceptedResults());
+            this.rejectionReasons.addAll(collector.getRejectionReasons());
+        }
+
+        public List<ApexPath> getAcceptedPaths() {
+            return acceptedPaths;
+        }
+
+        public List<PathExpansionException> getRejectionReasons() {
+            return rejectionReasons;
+        }
     }
 
     private ApexPathUtil() {}

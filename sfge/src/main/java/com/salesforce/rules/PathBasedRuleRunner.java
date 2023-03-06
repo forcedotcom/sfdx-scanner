@@ -4,7 +4,9 @@ import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ApexPathVertexMetaInfo;
 import com.salesforce.graph.ops.ApexPathUtil;
+import com.salesforce.graph.ops.ApexPathUtil.ApexPathRetrievalSummary;
 import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
+import com.salesforce.graph.ops.expander.PathExpansionException;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
@@ -12,10 +14,7 @@ import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -25,7 +24,8 @@ public class PathBasedRuleRunner {
     private static final Logger LOGGER = LogManager.getLogger(PathBasedRuleRunner.class);
 
     private final GraphTraversalSource g;
-    private final List<AbstractPathBasedRule> rules;
+    private final List<AbstractPathAnomalyRule> anomalyRules;
+    private final List<AbstractPathTraversalRule> traversalRules;
     private final MethodVertex methodVertex;
     /** Set that holds the violations found by this rule execution. */
     private final Set<Violation> violations;
@@ -35,7 +35,15 @@ public class PathBasedRuleRunner {
     public PathBasedRuleRunner(
             GraphTraversalSource g, List<AbstractPathBasedRule> rules, MethodVertex methodVertex) {
         this.g = g;
-        this.rules = rules;
+        this.anomalyRules = new ArrayList<>();
+        this.traversalRules = new ArrayList<>();
+        for (AbstractPathBasedRule rule : rules) {
+            if (rule instanceof AbstractPathTraversalRule) {
+                this.traversalRules.add((AbstractPathTraversalRule) rule);
+            } else if (rule instanceof AbstractPathAnomalyRule) {
+                this.anomalyRules.add((AbstractPathAnomalyRule) rule);
+            }
+        }
         this.methodVertex = methodVertex;
         this.violations = new HashSet<>();
         this.progressListener = ProgressListenerProvider.get();
@@ -51,10 +59,13 @@ public class PathBasedRuleRunner {
         final ApexPathExpanderConfig expanderConfig = getApexPathExpanderConfig();
 
         // Get all the paths that originate in the entry point
-        final List<ApexPath> paths = getPaths(expanderConfig);
+        final ApexPathRetrievalSummary pathSummary = getPathSummary(expanderConfig);
+
+        // Execute rules on the paths rejected
+        executeRulesOnAnomalies(pathSummary.getRejectionReasons());
 
         // Execute rules on the paths found
-        executeRulesOnPaths(paths);
+        executeRulesOnPaths(pathSummary.getAcceptedPaths());
 
         if (!violations.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
@@ -70,10 +81,12 @@ public class PathBasedRuleRunner {
             }
         }
 
-        progressListener.finishedAnalyzingEntryPoint(paths, violations);
+        progressListener.finishedAnalyzingEntryPoint(pathSummary.getAcceptedPaths(), violations);
 
         return violations;
     }
+
+    private void executeRulesOnAnomalies(List<PathExpansionException> anomalies) {}
 
     private void executeRulesOnPaths(List<ApexPath> paths) {
         boolean foundVertex = false;
@@ -155,19 +168,15 @@ public class PathBasedRuleRunner {
         }
     }
 
-    private List<ApexPath> getPaths(ApexPathExpanderConfig expanderConfig) {
-        List<ApexPath> paths = ApexPathUtil.getForwardPaths(g, methodVertex, expanderConfig);
-        return paths;
+    private ApexPathRetrievalSummary getPathSummary(ApexPathExpanderConfig expanderConfig) {
+        return ApexPathUtil.summarizeForwardPaths(g, methodVertex, expanderConfig);
     }
 
     private ApexPathExpanderConfig getApexPathExpanderConfig() {
         ApexPathExpanderConfig.Builder expanderConfigBuilder =
                 ApexPathUtil.getFullConfiguredPathExpanderConfigBuilder();
-        for (AbstractPathBasedRule rule : rules) {
-            if (rule instanceof AbstractPathTraversalRule) {
-                expanderConfigBuilder =
-                        expanderConfigBuilder.withVertexPredicate((AbstractPathTraversalRule) rule);
-            }
+        for (AbstractPathTraversalRule rule : traversalRules) {
+            expanderConfigBuilder = expanderConfigBuilder.withVertexPredicate(rule);
         }
         ApexPathExpanderConfig expanderConfig = expanderConfigBuilder.build();
         return expanderConfig;
