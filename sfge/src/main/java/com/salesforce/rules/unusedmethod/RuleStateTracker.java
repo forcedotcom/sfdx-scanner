@@ -2,12 +2,10 @@ package com.salesforce.rules.unusedmethod;
 
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
+import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
-import com.salesforce.graph.vertex.InvocableWithParametersVertex;
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.graph.vertex.SFVertexFactory;
-import com.salesforce.graph.vertex.UserClassVertex;
+import com.salesforce.graph.vertex.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -30,10 +28,32 @@ public class RuleStateTracker {
      */
     private final Set<MethodVertex> unusedMethods;
     /**
-     * A map used to cache every method call expression in a given class. Minimizing redundant
+     * A Set used to track every DefiningType for which we've cached values. Minimizing redundant
      * queries is a very high priority for this rule.
      */
-    private final Map<String, List<InvocableWithParametersVertex>> methodCallsByDefiningType;
+    private final Set<String> cachedDefiningTypes;
+    /**
+     * A map used to cache every {@link MethodCallExpressionVertex} in a given class. Minimizing
+     * redundant queries is a very high priority for this rule. <br>
+     * Note: Expressions of this type represent invocations of non-constructor methods.
+     */
+    private final Map<String, List<MethodCallExpressionVertex>> methodCallExpressionsByDefiningType;
+    /**
+     * A map used to cache every {@link ThisMethodCallExpressionVertex} in a given class. Minimizing
+     * redundant queries is a very high priority for this rule. <br>
+     * Note: Expressions of this type represent invocations of the {@code this()} constructor
+     * pattern.
+     */
+    private final Map<String, List<ThisMethodCallExpressionVertex>>
+            thisMethodCallExpressionsByDefiningType;
+    /**
+     * A map used to cache every {@link SuperMethodCallExpressionVertex} in a given class.
+     * Minimizing redundant queries is a very high priority for this rule. <br>
+     * Note: Expressions of this type represent invocations of the {@code super()} constructor
+     * pattern.
+     */
+    private final Map<String, List<SuperMethodCallExpressionVertex>>
+            superMethodCallExpressionsByDefiningType;
     /**
      * A map used to cache every subclass of a given class. Minimizing redundant queries is a very
      * high priority for this rule.
@@ -44,7 +64,10 @@ public class RuleStateTracker {
         this.g = g;
         this.eligibleMethods = new HashSet<>();
         this.unusedMethods = new HashSet<>();
-        this.methodCallsByDefiningType = CollectionUtil.newTreeMap();
+        this.cachedDefiningTypes = new HashSet<>();
+        this.methodCallExpressionsByDefiningType = CollectionUtil.newTreeMap();
+        this.thisMethodCallExpressionsByDefiningType = CollectionUtil.newTreeMap();
+        this.superMethodCallExpressionsByDefiningType = CollectionUtil.newTreeMap();
         this.subclassesByDefiningType = CollectionUtil.newTreeMap();
     }
 
@@ -68,12 +91,53 @@ public class RuleStateTracker {
         return eligibleMethods.size();
     }
 
-    /** Return a list of every method call occurring in the specified class. */
-    List<InvocableWithParametersVertex> getMethodCallsByDefiningType(String definingType) {
-        // First, check if we've already got anything for the desired type.
-        // If so, we can just return that.
-        if (this.methodCallsByDefiningType.containsKey(definingType)) {
-            return this.methodCallsByDefiningType.get(definingType);
+    /**
+     * Get every {@link MethodCallExpressionVertex} occurring in the class represented by {@code
+     * definingType}.
+     *
+     * @param definingType
+     * @return
+     */
+    List<MethodCallExpressionVertex> getMethodCallExpressionsByDefiningType(String definingType) {
+        populateCachesForDefiningType(definingType);
+        return this.methodCallExpressionsByDefiningType.get(definingType);
+    }
+
+    /**
+     * Get every {@link ThisMethodCallExpressionVertex} occurring in the class represented by {@code
+     * definingType}.
+     *
+     * @param definingType
+     * @return
+     */
+    List<ThisMethodCallExpressionVertex> getThisMethodCallExpressionsByDefiningType(
+            String definingType) {
+        populateCachesForDefiningType(definingType);
+        return this.thisMethodCallExpressionsByDefiningType.get(definingType);
+    }
+
+    /**
+     * Get every {@link SuperMethodCallExpressionVertex} occurring in the class represented by
+     * {@code definingType}.
+     *
+     * @param definingType
+     * @return
+     */
+    List<SuperMethodCallExpressionVertex> getSuperMethodCallExpressionsByDefiningType(
+            String definingType) {
+        populateCachesForDefiningType(definingType);
+        return this.superMethodCallExpressionsByDefiningType.get(definingType);
+    }
+
+    /**
+     * Populate the various method call caches for the class represented by {@code definingType}.
+     *
+     * @param definingType
+     */
+    private void populateCachesForDefiningType(String definingType) {
+        // If we've already populated the caches for this defining type, there's nothing to do.
+        if (this.cachedDefiningTypes.contains(definingType)) {
+            return;
         }
         // Otherwise, we need to do a query.
         // Any node with one of these labels is a method call.
@@ -85,9 +149,27 @@ public class RuleStateTracker {
         List<InvocableWithParametersVertex> methodCalls =
                 SFVertexFactory.loadVertices(
                         g, g.V().where(H.has(targetLabels, Schema.DEFINING_TYPE, definingType)));
-        // Cache and return the results.
-        this.methodCallsByDefiningType.put(definingType, methodCalls);
-        return methodCalls;
+        // Sort the results by type and cache them appropriately.
+        List<MethodCallExpressionVertex> methodCallExpressions = new ArrayList<>();
+        List<ThisMethodCallExpressionVertex> thisMethodCallExpressions = new ArrayList<>();
+        List<SuperMethodCallExpressionVertex> superMethodCallExpressions = new ArrayList<>();
+        for (InvocableWithParametersVertex invocable : methodCalls) {
+            if (invocable instanceof MethodCallExpressionVertex) {
+                methodCallExpressions.add((MethodCallExpressionVertex) invocable);
+            } else if (invocable instanceof ThisMethodCallExpressionVertex) {
+                thisMethodCallExpressions.add((ThisMethodCallExpressionVertex) invocable);
+            } else if (invocable instanceof SuperMethodCallExpressionVertex) {
+                superMethodCallExpressions.add((SuperMethodCallExpressionVertex) invocable);
+            } else {
+                throw new UnexpectedException(
+                        "Unexpected InvocableWithParametersVertex implementation "
+                                + invocable.getClass());
+            }
+        }
+        methodCallExpressionsByDefiningType.put(definingType, methodCallExpressions);
+        thisMethodCallExpressionsByDefiningType.put(definingType, thisMethodCallExpressions);
+        superMethodCallExpressionsByDefiningType.put(definingType, superMethodCallExpressions);
+        cachedDefiningTypes.add(definingType);
     }
 
     /** Get all immediate subclasses of the provided classes. */
