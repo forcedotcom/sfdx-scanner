@@ -31,11 +31,6 @@ export default class Run extends ScannerRunCommand {
 		// Include all common flags from the super class.
 		...ScannerRunCommand.flagsConfig,
 		// BEGIN: Filter-related flags.
-		category: flags.array({
-			char: 'c',
-			description: messages.getMessage('flags.categoryDescription'),
-			longDescription: messages.getMessage('flags.categoryDescriptionLong')
-		}),
 		ruleset: flags.array({
 			char: 'r',
 			deprecated: {

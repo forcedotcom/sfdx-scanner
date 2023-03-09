@@ -1,5 +1,7 @@
 module.exports = {
 	"flags": {
+		"categoryDescription": "one or more categories of rules to run",
+		"categoryDescriptionLong": "One or more categories of rules to run. Specify multiple values as a comma-separated list.",
 		"formatDescription": "specify results output format",
 		"formatDescriptionLong": "Specifies results output format written directly to the console.",
 		"normalizesevDescription": "return normalized severity 1 (high), 2 (moderate), and 3 (low), and the engine-specific severity",

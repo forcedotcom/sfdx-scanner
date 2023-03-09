@@ -31,6 +31,12 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 */
 	protected static flagsConfig = {
 		verbose: flags.builtin(),
+		// BEGIN: Filter-related flags.
+		category: flags.array({
+			char: 'c',
+			description: messages.getMessage('flags.categoryDescription'),
+			longDescription: messages.getMessage('flags.categoryDescriptionLong')
+		}),
 		// BEGIN: Flags related to results processing.
 		format: flags.enum({
 			char: 'f',

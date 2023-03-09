@@ -1,6 +1,15 @@
 package com.salesforce.rules;
 
 import com.salesforce.config.UserFacingMessages;
+import com.salesforce.graph.ops.expander.NullValueAccessedException;
+import com.salesforce.graph.ops.expander.PathExpansionException;
+import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import com.salesforce.graph.vertex.MethodVertex;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /** */
 public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule {
@@ -15,10 +24,38 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
         return LazyHolder.INSTANCE;
     }
 
-    // TODO: ENABLE THIS RULE.
+    @Override
+    public List<RuleThrowable> run(
+            GraphTraversalSource g,
+            MethodVertex methodVertex,
+            List<PathExpansionException> anomalies) {
+        List<RuleThrowable> violations = new ArrayList<>();
+        // Use a Set to track each vertex that causes a violation, so we can avoid duplicates.
+        Set<Long> vertexIds = new HashSet<>();
+        for (PathExpansionException anomaly : anomalies) {
+            if (!(anomaly instanceof NullValueAccessedException)) {
+                continue;
+            }
+            MethodCallExpressionVertex mcev = ((NullValueAccessedException) anomaly).getVertex();
+            if (vertexIds.contains(mcev.getId())) {
+                continue;
+            }
+            violations.add(
+                    new Violation.PathBasedRuleViolation(
+                            String.format(
+                                    UserFacingMessages.RuleViolationTemplates
+                                            .APEX_NULL_POINTER_EXCEPTION_RULE,
+                                    mcev.getFullMethodName()),
+                            methodVertex,
+                            mcev));
+            vertexIds.add(mcev.getId());
+        }
+        return violations;
+    }
+
     @Override
     protected boolean isEnabled() {
-        return false;
+        return true;
     }
 
     @Override
