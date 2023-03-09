@@ -88,8 +88,10 @@ public class PathBasedRuleRunner {
 
     private void executeRulesOnAnomalies(List<PathExpansionException> anomalies) {
         // If no anomalies were reported, we should log that information and just exit.
-        if (anomalies.isEmpty() && LOGGER.isInfoEnabled()) {
-            LOGGER.info("No anomalies found while expanding paths");
+        if (anomalies.isEmpty()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("No anomalies found while expanding paths");
+            }
             return;
         }
         for (AbstractPathAnomalyRule rule : anomalyRules) {
