@@ -223,6 +223,8 @@ public abstract class ApexValue<T extends ApexValue> implements DeepCloneable<T>
         if (ValueStatus.UNINITIALIZED.equals(status)) {
             // Uninitialized values are initialized to null by the compiler
             return true;
+        } else if (ValueStatus.INDETERMINANT.equals(status)) {
+            return false;
         }
 
         return valueVertex instanceof LiteralExpressionVertex.Null
