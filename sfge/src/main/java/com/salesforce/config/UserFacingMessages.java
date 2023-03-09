@@ -8,11 +8,15 @@ package com.salesforce.config;
 public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
+        public static final String APEX_NULL_POINTER_EXCEPTION_RULE =
+                "Identifies operations with a high likelihood of throwing a NullPointerException";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
     }
 
     public static final class RuleViolationTemplates {
+        public static final String APEX_NULL_POINTER_EXCEPTION_RULE =
+                "Operation [%s] is likely to throw a NullPointerException";
         /** CRUD/FLS Violation messages */
         // format: "CRUD" or "FLS", DML operation, Object type, Field information
         public static final String MISSING_CRUD_FLS_CHECK =

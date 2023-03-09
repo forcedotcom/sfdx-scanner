@@ -1,8 +1,8 @@
 package com.salesforce.graph.visitor;
 
 import com.salesforce.graph.vertex.VertexPredicate;
-import com.salesforce.rules.AbstractPathBasedRule;
-import com.salesforce.rules.PathBasedRule;
+import com.salesforce.rules.AbstractPathTraversalRule;
+import com.salesforce.rules.PathTraversalRule;
 
 /** Use this class to avoid "instanceof" pattern */
 public class VertexPredicateVisitor {
@@ -14,11 +14,11 @@ public class VertexPredicateVisitor {
         defaultVisit(predicate);
     }
 
-    public void visit(PathBasedRule rule) {
+    public void visit(PathTraversalRule rule) {
         defaultVisit(rule);
     }
 
-    public void visit(AbstractPathBasedRule rule) {
+    public void visit(AbstractPathTraversalRule rule) {
         defaultVisit(rule);
     }
 }
