@@ -21,6 +21,6 @@ Instructions [here](CONTRIBUTING.md).
 
 # Usage
 
-Here is the information on [How to Install the plugin](https://forcedotcom.github.io/sfdx-scanner/en/getting-started/install/)
+Here is the information on [How to Install the plugin](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/getting-started/install/)
 
-Please check out the [Salesforce CLI Scanner Plug-In Command Reference](https://forcedotcom.github.io/sfdx-scanner/en/scanner-commands/run/) for usage and demo of the plugin. 
+Please check out the [Salesforce CLI Scanner Plug-In Command Reference](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/scanner-commands/run/) for usage and demo of the plugin. 
