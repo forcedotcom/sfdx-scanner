@@ -2,7 +2,7 @@ package com.salesforce.rules.unusedmethod;
 
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.exception.UnexpectedException;
+import com.salesforce.exception.TodoException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.vertex.*;
@@ -161,7 +161,7 @@ public class RuleStateTracker {
             } else if (invocable instanceof SuperMethodCallExpressionVertex) {
                 superMethodCallExpressions.add((SuperMethodCallExpressionVertex) invocable);
             } else {
-                throw new UnexpectedException(
+                throw new TodoException(
                         "Unexpected InvocableWithParametersVertex implementation "
                                 + invocable.getClass());
             }
