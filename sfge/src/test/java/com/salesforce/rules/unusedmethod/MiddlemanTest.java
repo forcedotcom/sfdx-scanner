@@ -1,67 +1,14 @@
 package com.salesforce.rules.unusedmethod;
 
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * Tests for methods called on classes that are wholly unrelated to the class where they're defined.
+ * Tests for instance methods that are called via middlemen on other objects. These tests are
+ * complicated enough to justify having their own class.
  */
-public class ExternalCallsTest extends BaseUnusedMethodTest {
-    /* =============== SECTION 1: STATIC METHODS =============== */
-    /**
-     * If a class has static methods, and those methods are invoked by another class, then they
-     * count as used.
-     */
-    @Test
-    @Disabled
-    public void staticMethodCalledExternallyWithinMethod_expectNoViolation() {
-        String[] sourceCodes = {
-            "global class DefiningClass {\n"
-                    + "    public static boolean someMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokingClass {\n"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                    + "    public boolean anotherMethod() {\n"
-                    + "        return DefiningClass.someMethod();\n"
-                    + "    }\n"
-                    + "}\n"
-        };
-        assertNoViolations(sourceCodes, 1);
-    }
-
-    /**
-     * If a class has static methods, and those methods are invoked to set properties on another
-     * class, then they count as used.
-     */
-    @Test
-    @Disabled
-    public void staticMethodCalledExternallyByProperty_expectNoViolation() {
-        String[] sourceCodes = {
-            "global class DefiningClass {\n"
-                    + "    public static boolean someMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    + "    public static boolean someOtherMethod() {\n"
-                    + "        return true;\n"
-                    + "    }\n"
-                    + "}\n",
-            "global class InvokingClass {\n"
-                    // Reference one method with a static property and the other with an instance
-                    // property.
-                    + "    public static boolean b1 = DefiningClass.someMethod();\n"
-                    + "    public boolean b2 = DefiningClass.someOtherMethod();\n"
-                    + "}\n"
-        };
-        assertNoViolations(sourceCodes, 2);
-    }
-
-    /* =============== SECTION 2: INSTANCE METHODS =============== */
+public class MiddlemanTest extends BaseUnusedMethodTest {
 
     /**
      * If a class has instance methods, and those methods are invoked on an instance of the object,
@@ -142,34 +89,6 @@ public class ExternalCallsTest extends BaseUnusedMethodTest {
                     + "        DefiningClass directVariable = new DefiningClass();\n"
                     + "        MiddlemanClass middlemanVariable = new MiddlemanClass();\n"
                     + String.format("        return %s.testedMethod();\n", objectInstance)
-                    + "    }\n"
-                    + "}\n"
-        };
-        assertNoViolations(sourceCodes, 1);
-    }
-
-    /* =============== SECTION 3: CONSTRUCTOR METHODS =============== */
-
-    /**
-     * If a class has constructors, and those constructors are invoked by other classes, then they
-     * count as used. (Note: Test cases for both explicitly declared 0-arity and 1-arity
-     * constructor.)
-     */
-    @CsvSource({"(),  ()", "(boolean b),  (false)"})
-    @ParameterizedTest(name = "{displayName}: {0}/{1}")
-    @Disabled
-    public void constructorInvokedExternally_expectNoViolation(
-            String definingParams, String invokingParams) {
-        String[] sourceCodes = {
-            "global class DefiningClass {\n"
-                    + "    public boolean prop = false;\n"
-                    + String.format("    public DefiningClass%s {\n", definingParams)
-                    + "    }\n",
-            "global class InvokingClass {\n"
-                    // Use the engine directive to prevent this method from tripping the rule.
-                    + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                    + "    public boolean someMethod() {\n"
-                    + String.format("        return new DefiningClass%s.prop;\n", invokingParams)
                     + "    }\n"
                     + "}\n"
         };

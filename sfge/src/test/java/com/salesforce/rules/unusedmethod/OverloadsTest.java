@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-/** Tests for distinguishing between different overloads of the same method. */
+/**
+ * Tests for distinguishing between different overloads of the same method. These tests are
+ * complicated enough to justify being their own file.
+ */
 public class OverloadsTest extends BaseUnusedMethodTest {
 
     /* =============== SECTION 1: INSTANCE METHODS =============== */
