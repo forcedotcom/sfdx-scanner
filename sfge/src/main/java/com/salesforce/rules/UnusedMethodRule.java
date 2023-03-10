@@ -109,47 +109,19 @@ public class UnusedMethodRule extends AbstractStaticRule {
             // If the method was determined as eligible, track it as such.
             ruleStateTracker.trackEligibleMethod(candidateVertex);
 
-            // Check first for internal usage of the method.
-            InternalCallValidator internalCallValidator =
-                    new InternalCallValidator(candidateVertex, ruleStateTracker);
-            if (internalCallValidator.methodUsedInternally()) {
-                continue;
+            // Depending on the kind of method, we should instantiate a different call validator.
+            BaseMethodCallValidator validator;
+            if (candidateVertex.isStatic()) {
+                validator = new StaticMethodCallValidator(candidateVertex, ruleStateTracker);
+            } else if (candidateVertex.isConstructor()) {
+                validator = new ConstructorMethodCallValidator(candidateVertex, ruleStateTracker);
+            } else {
+                validator = new InstanceMethodCallValidator(candidateVertex, ruleStateTracker);
             }
-
-            // Next, check for uses of the method by subclasses,
-            // if the method is invocable in this way.
-            SubclassCallValidator subclassCallValidator =
-                    new SubclassCallValidator(candidateVertex, ruleStateTracker);
-            if (subclassCallValidator.methodUsedBySubclass()) {
-                continue;
+            // If the validator can't find any usage, then we should add the method as unused.
+            if (!validator.usageDetected()) {
+                ruleStateTracker.trackUnusedMethod(candidateVertex);
             }
-
-            // Next, check for invocations of the method by a superclass,
-            // if the method is invocable in this way.
-            SuperclassCallValidator superclassCallValidator =
-                    new SuperclassCallValidator(candidateVertex, ruleStateTracker);
-            if (superclassCallValidator.methodUsedBySuperclass()) {
-                continue;
-            }
-
-            // Next, check for invocations of the method by an inner/outer class,
-            // if the method is invocable in this way.
-            InnerClassCallValidator innerClassCallValidator =
-                    new InnerClassCallValidator(candidateVertex, ruleStateTracker);
-            if (innerClassCallValidator.methodUsedByInnerClass()) {
-                continue;
-            }
-
-            // Finally, check for external invocations of the method, if the method
-            // is invocable in this way.
-            ExternalCallValidator externalCallValidator =
-                    new ExternalCallValidator(candidateVertex, ruleStateTracker);
-            if (externalCallValidator.methodUsedExternally()) {
-                continue;
-            }
-
-            // If we found no usage of the method, then we should track it as unused.
-            ruleStateTracker.trackUnusedMethod(candidateVertex);
         }
     }
 
