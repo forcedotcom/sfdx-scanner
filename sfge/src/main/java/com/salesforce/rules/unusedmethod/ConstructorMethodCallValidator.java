@@ -2,7 +2,6 @@ package com.salesforce.rules.unusedmethod;
 
 import com.salesforce.graph.vertex.*;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Helper class for {@link com.salesforce.rules.UnusedMethodRule}. Used for determining whether a
@@ -42,20 +41,12 @@ public class ConstructorMethodCallValidator extends BaseMethodCallValidator {
             }
         }
 
-        // Before checking subclasses, verify that it even makes sense to do so.
-        // A private constructor cannot be called by a subclass.
-        if (targetMethod.isPrivate()) {
+        // If the constructor isn't heritable, we're done.
+        if (!methodIsHeritable()) {
             return false;
         }
-        // If the parent class is neither virtual nor abstract, it can't have any subclasses.
-        Optional<UserClassVertex> classOptional = targetMethod.getParentClass();
-        if (!classOptional.isPresent()) {
-            return false;
-        } else if (!classOptional.get().isAbstract() && !classOptional.get().isVirtual()) {
-            return false;
-        }
-        // If it's possible for this constructor to be called in a subclass, get those subclasses
-        // and check for calls.
+        // If the constructor is heritable, then we have to check for usage by subclasses via
+        // `super()`.
         List<String> subclassNames = ruleStateTracker.getSubclasses(targetMethod.getDefiningType());
         for (String subclassName : subclassNames) {
             List<SuperMethodCallExpressionVertex> subclassPotentialCalls =

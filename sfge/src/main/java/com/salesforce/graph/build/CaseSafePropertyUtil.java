@@ -180,6 +180,17 @@ public class CaseSafePropertyUtil {
             }
         }
 
+        public static GraphTraversal<Object, Object> hasStartingWith(
+                String nodeType, String property, String value) {
+            String caseSafeVariant = toCaseSafeProperty(property).orElse(null);
+            if (caseSafeVariant != null) {
+                return __.has(
+                        nodeType, caseSafeVariant, TextP.startingWith(toCaseSafeValue(value)));
+            } else {
+                return __.has(nodeType, property, TextP.startingWith(value));
+            }
+        }
+
         public static GraphTraversal<Object, Object> hasEndingWith(
                 String nodeType, String property, String value) {
             if (property.equalsIgnoreCase(Schema.DEFINING_TYPE)) {

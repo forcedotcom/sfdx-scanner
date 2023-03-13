@@ -2,7 +2,6 @@ package com.salesforce.rules.unusedmethod;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,7 +24,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
                 "private"
             })
     @ParameterizedTest(name = "{displayName}: {0} static")
-    @Disabled
     public void staticWithoutInvocation_expectViolation(String visibility) {
         String sourceCode =
                 String.format(SIMPLE_UNUSED_OUTER_METHOD_SOURCE, visibility + " static");
@@ -57,7 +55,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         "private, public, MyClass.method1()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static called by {1} as {2}")
-    @Disabled
     public void staticInvokedByOwnClass_expectNoViolation(
             String testedVisibility, String callerScope, String invocation) {
         // The tested method is always static.
@@ -84,7 +81,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         "private, MyClass.testedMethod()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static invoked as {1}")
-    @Disabled
     public void staticInvokedByInnerClass_expectNoViolation(
             String testedVisibility, String invocation) {
         // spotless:off
@@ -139,7 +135,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         "public, grandchild, GrandchildClass.methodOnParent()",
     })
     @ParameterizedTest(name = "{displayName}: Called by {0} in {1} as {2}")
-    @Disabled
     public void staticInvokedBySubclass_expectNoViolation(
             String callerScope, String callerClass, String invocation) {
         // The tested method is always public static. No need for private/protected, since private
@@ -170,7 +165,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
     @ValueSource(
             strings = {"testedMethod()", "ParentClass.testedMethod()", "ChildClass.testedMethod()"})
     @ParameterizedTest(name = "{displayName}: Invoked as {0}")
-    @Disabled
     public void staticInvokedByInnerOfSubclass_expectNoViolation(String invocation) {
         // spotless:off
         String[] sourceCodes = new String[]{
@@ -212,7 +206,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
                 "OuterClass.ChildClass.testedMethod()"
             })
     @ParameterizedTest(name = "{displayName}: Invoked as {0}")
-    @Disabled
     public void staticInnerInvokedByOuter_expectNoViolation(String invocation) {
         // spotless:off
         String[] sourceCodes = new String[]{
@@ -269,7 +262,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         "private, private, MyClass.testedMethod()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static invoked by {1} property as {2}")
-    @Disabled
     public void staticInvokedViaOwnProperty_expectNoViolation(
             String methodVisibility, String propScope, String invocation) {
         String sourceCode =
@@ -292,7 +284,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      */
     @ValueSource(strings = {"methodFromInnerClass", "methodFromParentClass", "methodFromInterface"})
     @ParameterizedTest(name = "{displayName}: Collision with {0}")
-    @Disabled
     public void internalReferenceSyntaxCollision_expectViolation(String collidingMethod) {
         // spotless:off
         String[] sourceCodes = new String[]{
@@ -349,7 +340,6 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      */
     @ValueSource(strings = {"instanceProp", "staticProp", "methodParam", "variable", "InnerClass"})
     @ParameterizedTest(name = "{displayName}: Collides with {0}")
-    @Disabled
     public void externalReferenceSyntaxCollision_expectViolation(String collidingName) {
         // spotless:off
         String[] sourceCodes = new String[]{
@@ -385,6 +375,13 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public boolean causeCollision(InstanceCollider methodParam) {\n"
           + "        InstanceCollider variable = new InstanceCollider();\n"
+          + "        Integer variable2 = 15;\n"
+          + "        variable2 += 2;\n"
+          + "        InstanceCollider variable3 = new InstanceCollider();\n"
+          + "        InstanceCollider variable4 = new InstanceCollider();\n"
+          + "        InstanceCollider variable5 = new InstanceCollider();\n"
+          + "        InstanceCollider variable6 = new InstanceCollider();\n"
+          + "        InstanceCollider variable7 = new InstanceCollider();\n"
           + "        return " + collidingName + ".getBoolean();\n"
           + "    }\n"
           + "}"

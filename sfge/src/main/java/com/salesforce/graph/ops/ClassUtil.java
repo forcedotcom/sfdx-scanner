@@ -13,6 +13,7 @@ import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.graph.vertex.Typeable;
 import com.salesforce.graph.vertex.UserClassVertex;
+import java.util.List;
 import java.util.Optional;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
@@ -150,6 +151,21 @@ public final class ClassUtil {
                             }
                             return result != null ? result : BaseSFVertex.NULL_VALUE;
                         });
+    }
+
+    /** Finds any inner classes declared within {@code definingType}. */
+    public static List<UserClassVertex> getInnerClassesOf(
+            GraphTraversalSource g, String definingType) {
+        return SFVertexFactory.loadVertices(
+                g,
+                g.V()
+                        .where(
+                                H.has(
+                                        ASTConstants.NodeType.USER_CLASS,
+                                        Schema.DEFINING_TYPE,
+                                        definingType))
+                        .out(Schema.CHILD)
+                        .hasLabel(ASTConstants.NodeType.USER_CLASS));
     }
 
     private ClassUtil() {}
