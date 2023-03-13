@@ -296,8 +296,6 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
         // "i != null, i + 2, 6, i + 2"
     })
     @ParameterizedTest(name = "{displayName}: constraint is {0}")
-    // TODO: FIX THIS TEST.
-    @Disabled
     public void testNullConstrainedIndeterminant_expectViolation(
             String constraint, String reference, int line, String op) {
         // Use the same reference for both sides of the constraint.
