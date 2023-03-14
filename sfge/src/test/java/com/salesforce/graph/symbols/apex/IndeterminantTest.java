@@ -146,24 +146,26 @@ public class IndeterminantTest {
         value.getTypeVertex().get().getCanonicalType().equals(variableType);
     }
 
+    // spotless:off
     @CsvSource({
-        //        "IF Conditional equals Null,str == null,true,false", //TODO: ApexPathWalker should
-        // also place null constraints
+        // TODO: ApexPathWalker should also place null constraints
+        // "IF Conditional equals Null,str == null,true,false",
         "IF Conditional NOT equals Null,str != null,false,true"
     })
+    // spotless:on
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNullConstraintOnIndeterminant_IfBranch(
             String name, String conditional, boolean isNull, boolean isIndeterminant) {
+        // spotless:off
         String sourceCode =
                 "public class MyClass {\n"
                         + "   public void doSomething(String str) {\n"
-                        + "       if ("
-                        + conditional
-                        + ") {\n"
+                        + "       if (" + conditional + ") {\n"
                         + "           System.debug(str);\n"
                         + "       }\n"
                         + "   }\n"
                         + "}\n";
+        // spotless:on
 
         List<TestRunner.Result<SystemDebugAccumulator>> results =
                 TestRunner.walkPaths(g, sourceCode);
@@ -181,14 +183,17 @@ public class IndeterminantTest {
         }
     }
 
+    // spotless:off
     @CsvSource({
+        // TODO: ApexPathWalker should also place null constraints
         "Else part of IF Conditional equals Null,str == null,false,true",
-        //        "Else part of IF Conditional NOT equals Null,str != null,true,false" //TODO:
-        // ApexPathWalker should also place null constraints
+        // "Else part of IF Conditional NOT equals Null,str != null,true,false"
     })
+    // spotless:on
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNullConstraintOnIndeterminant_ElseBranch(
             String name, String conditional, boolean isNull, boolean isIndeterminant) {
+        // spotless: off
         String sourceCode =
                 "public class MyClass {\n"
                         + "   public void doSomething(String str) {\n"
@@ -201,6 +206,7 @@ public class IndeterminantTest {
                         + "       }\n"
                         + "   }\n"
                         + "}\n";
+        // spotless: on
 
         List<TestRunner.Result<SystemDebugAccumulator>> results =
                 TestRunner.walkPaths(g, sourceCode);
