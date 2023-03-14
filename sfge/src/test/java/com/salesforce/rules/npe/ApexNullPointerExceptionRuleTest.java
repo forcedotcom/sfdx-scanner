@@ -4,7 +4,6 @@ import com.salesforce.rules.AbstractPathBasedRule;
 import com.salesforce.rules.ApexNullPointerExceptionRule;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -93,14 +92,14 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      */
     @CsvSource({
         // Initialization without assignment produces null value.
-        "String s, Integer problem = s.length(), s.length",
-        // "Integer i, Integer problem = i + 0, i + 0",
+        "String s, Integer problem = s.length(), Method call [s.length]",
+        "Integer i, Integer problem = i + 0, Operator [+]",
         // Explicit assignment to null produces null value.
-        "String s = null, Integer problem = s.length(), s.length",
-        // "Integer i = null, Integer problem = i + 0, i + 0",
+        "String s = null, Integer problem = s.length(), Method call [s.length]",
+        "Integer i = null, Integer problem = i + 0, Operator [+]",
         // Assigning to a null return produces a null value.
-        "String s = getNullStr(), Integer problem = s.length(), s.length",
-        // "Integer i = getNullInt(), Integer problem = i + 0, i + 0",
+        "String s = getNullStr(), Integer problem = s.length(), Method call [s.length]",
+        "Integer i = getNullInt(), Integer problem = i + 0, Operator [+]",
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNullInitialization_expectViolation(
@@ -191,8 +190,8 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      * @param op - The specific op we expect to see in a violation message.
      */
     @CsvSource({
-        "Integer i = getNullStr().length(), length",
-        // "Integer i = getNullInt() + 2, getNullInt() + 2"
+        "Integer i = getNullStr().length(), Method call [length]",
+        "Integer i = getNullInt() + 2, Operator [+]"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInlineNullMethodReturn_expectViolation(String reference, String op) {
@@ -236,10 +235,7 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      * @param op - The specific op expected in the violation message. TODO: This may change slightly
      *     once the rule is implemented.
      */
-    @CsvSource({
-        "String s, s.length(), s.length",
-        //        "Integer i, i + 2, i + 2"
-    })
+    @CsvSource({"String s, s.length(), Method call [s.length]", "Integer i, i + 2, Operator [+]"})
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNullParamReference_expectViolation(String param, String reference, String op) {
         String sourceCode =
@@ -288,12 +284,12 @@ public class ApexNullPointerExceptionRuleTest extends BasePathBasedRuleTest {
      */
     @CsvSource({
         // Constraining to null should cause a violation in the IF-branch.
-        "s == null, s.length(), 4, s.length",
-        // "i == null, i + 2, 4, i + 2",
+        "s == null, s.length(), 4, Method call [s.length]",
+        "i == null, i + 2, 4, Operator [+]",
         // Constraining to generalized "not null" should cause a violation in the ELSE,
         // since failing a "not null" constraint is equivalent to passing a null constraint.
-        "s != null, s.length(), 6, s.length",
-        // "i != null, i + 2, 6, i + 2"
+        "s != null, s.length(), 6, Method call [s.length]",
+        "i != null, i + 2, 6, Operator [+]"
     })
     @ParameterizedTest(name = "{displayName}: constraint is {0}")
     public void testNullConstrainedIndeterminant_expectViolation(

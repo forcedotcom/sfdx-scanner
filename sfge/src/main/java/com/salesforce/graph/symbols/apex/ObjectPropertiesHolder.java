@@ -167,7 +167,7 @@ public final class ObjectPropertiesHolder
              * <p>SObject sObj = new Account(); String keyName = null; for (some iteration) { if
              * (some comparison) { keyName = 'field1'; } } sObj.put(keyName, 'value');
              */
-            throw new NullValueAccessedException(key, null);
+            throw new NullValueAccessedException(key, (MethodCallExpressionVertex) null);
         }
 
         String stringKey = getKeyForCaseInsensitiveMap(key).orElse(null);

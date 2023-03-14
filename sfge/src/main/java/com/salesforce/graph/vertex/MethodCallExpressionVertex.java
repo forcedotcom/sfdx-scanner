@@ -20,7 +20,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 
-public class MethodCallExpressionVertex extends InvocableWithParametersVertex implements KeyVertex {
+public class MethodCallExpressionVertex extends InvocableWithParametersVertex
+        implements KeyVertex, NullAccessCheckedVertex {
     private static final Consumer<GraphTraversal<Vertex, Vertex>> TRAVERSAL_CONSUMER =
             traversal ->
                     traversal
@@ -29,6 +30,7 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
                             .not(has(Schema.FIRST_CHILD, true))
                             .order(Scope.global)
                             .by(Schema.CHILD_INDEX, Order.asc);
+    private static final String DISPLAY_TEMPLATE = "Method call [%s]";
 
     private final LazyVertex<AbstractReferenceExpressionVertex> referenceExpression;
     // TODO: This might need to move back into InvocableWithParametersVertex for situations
@@ -162,6 +164,11 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex im
      */
     public MethodCallExpressionVertex getFirst() {
         return firstInitializer.get();
+    }
+
+    @Override
+    public String getDisplayName() {
+        return String.format(DISPLAY_TEMPLATE, this.getFullMethodName());
     }
 
     /** Thread safe initializer. This doesn't use LazyVertex since it is more complex. */

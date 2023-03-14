@@ -52,6 +52,20 @@ public class ApexValueUtilTest {
     }
 
     @Test
+    public void testApplyBinaryExpressionWithNullValue() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "	public void doSomething() {\n"
+                        + "		String input = null;"
+                        + "		System.debug('hello' + input);\n"
+                        + "	}\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        assertThat(result, TestRunnerMatcher.hasValue("hellonull"));
+    }
+
+    @Test
     @Disabled // TODO: handle apex value for binary expressions with indeterminant portions
     public void testApplyBinaryExpressionWithIndeterminant() {
         String sourceCode =
