@@ -3,7 +3,9 @@ package com.salesforce.rules.unusedmethod;
 import com.salesforce.graph.vertex.ChainedVertex;
 import com.salesforce.graph.vertex.InvocableWithParametersVertex;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.UserClassVertex;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Abstract base class for validating that a given method is actually invoked. Used as a helper
@@ -62,5 +64,17 @@ public abstract class BaseMethodCallValidator {
         //       COUNT.
         List<ChainedVertex> parameters = vertex.getParameters();
         return parameters.size() == targetMethod.getArity();
+    }
+
+    /** Indicates whether {@link #targetMethod} can be inherited by subclasses. */
+    protected boolean methodIsHeritable() {
+        Optional<UserClassVertex> classOptional = targetMethod.getParentClass();
+        // A method is heritable if the following criteria are met:
+        return
+        // The method is non-private...
+        !targetMethod.isPrivate()
+                // ...and the host class is extensible (virtual or abstract).
+                && classOptional.isPresent()
+                && (classOptional.get().isAbstract() || classOptional.get().isVirtual());
     }
 }

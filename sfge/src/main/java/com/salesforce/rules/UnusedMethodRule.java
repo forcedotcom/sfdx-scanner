@@ -144,10 +144,21 @@ public class UnusedMethodRule extends AbstractStaticRule {
      * for filtering the list of all possible candidates into just the eligible ones.
      */
     private boolean methodIsIneligible(MethodVertex vertex) {
-        // TODO: At this time, only private instance methods and private/protected constructors are
-        //       supported. This limit will be loosened over time, and eventually removed entirely.
-        if (!(vertex.isPrivate() || (vertex.isProtected() && vertex.isConstructor()))
-                || vertex.isStatic()) {
+        // TODO: At this time, only static methods, private instance methods, and private/protected
+        //       constructors are supported. This limit will be loosened over time, and eventually
+        //       removed entirely.
+        if (!vertex.isStatic()
+                && !(vertex.isPrivate() || (vertex.isProtected() && vertex.isConstructor()))) {
+            return true;
+        }
+
+        // Test methods are ineligible.
+        if (vertex.isTest()) {
+            return true;
+        }
+
+        // The "<clinit>" method is inherently ineligible.
+        if (vertex.getName().equalsIgnoreCase("<clinit>")) {
             return true;
         }
 

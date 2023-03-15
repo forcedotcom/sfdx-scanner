@@ -136,5 +136,49 @@ public final class TraversalUtil {
         }
     }
 
+    /**
+     * Returns a traversal containing every invocation of {@code method} on something named {@code
+     * reference} in any file in {@code targetFiles}.
+     *
+     * @param targetFiles - Files to target. An empty array implicitly targets the whole graph.
+     */
+    public static GraphTraversal<Vertex, Vertex> traverseInvocationsOf(
+            GraphTraversalSource g, List<String> targetFiles, String reference, String method) {
+        // We want to traverse all instances of `reference.method()` occurring in the target files.
+        GraphTraversal<Vertex, Vertex> traversal =
+                g.V()
+                        // Starting with `hasLabel()` saves us a ton of time.
+                        .hasLabel(NodeType.METHOD_CALL_EXPRESSION)
+                        // Filter for invocations of the desired method name.
+                        .where(H.has(NodeType.METHOD_CALL_EXPRESSION, Schema.METHOD_NAME, method))
+                        // Filter for references to the desired host.
+                        .where(
+                                __.out(Schema.CHILD)
+                                        .where(
+                                                H.has(
+                                                        NodeType.REFERENCE_EXPRESSION,
+                                                        Schema.NAME,
+                                                        reference))
+                                        .count()
+                                        .is(P.gte(1)));
+
+        // If there are no target files, we're clear to return this traversal, since it has
+        // everything we want.
+        if (targetFiles.isEmpty()) {
+            return traversal;
+        } else {
+            // Otherwise, we need to filter for classes in the target files, which we can do via
+            // this traversal.
+            Object[] targetIds =
+                    fileRootTraversal(g, targetFiles)
+                            .union(__.identity(), __.repeat(__.out(Schema.CHILD)).emit())
+                            .hasLabel(NodeType.USER_CLASS)
+                            .id()
+                            .toList()
+                            .toArray();
+            return traversal.hasId(targetIds);
+        }
+    }
+
     private TraversalUtil() {}
 }

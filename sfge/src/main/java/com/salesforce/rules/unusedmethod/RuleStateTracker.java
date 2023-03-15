@@ -3,12 +3,18 @@ package com.salesforce.rules.unusedmethod;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.TodoException;
+import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
+import com.salesforce.graph.ops.ApexClassUtil;
+import com.salesforce.graph.ops.ClassUtil;
+import com.salesforce.graph.ops.MethodUtil;
+import com.salesforce.graph.ops.TraversalUtil;
 import com.salesforce.graph.vertex.*;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 
 /**
  * A helper class for {@link com.salesforce.rules.UnusedMethodRule}, which tracks various elements
@@ -59,6 +65,11 @@ public class RuleStateTracker {
      * high priority for this rule.
      */
     private final Map<String, List<String>> subclassesByDefiningType;
+    /**
+     * A map used to cache every inner class of a given class. Minimizing redundant queries is a
+     * very high priority for this rule.
+     */
+    private final Map<String, List<UserClassVertex>> innerClassesByDefiningType;
 
     public RuleStateTracker(GraphTraversalSource g) {
         this.g = g;
@@ -69,6 +80,7 @@ public class RuleStateTracker {
         this.thisMethodCallExpressionsByDefiningType = CollectionUtil.newTreeMap();
         this.superMethodCallExpressionsByDefiningType = CollectionUtil.newTreeMap();
         this.subclassesByDefiningType = CollectionUtil.newTreeMap();
+        this.innerClassesByDefiningType = CollectionUtil.newTreeMap();
     }
 
     /** Mark the provided method vertex as a candidate for rule analysis. */
@@ -99,7 +111,7 @@ public class RuleStateTracker {
      * @return
      */
     List<MethodCallExpressionVertex> getMethodCallExpressionsByDefiningType(String definingType) {
-        populateCachesForDefiningType(definingType);
+        populateMethodCallCachesForDefiningType(definingType);
         return this.methodCallExpressionsByDefiningType.get(definingType);
     }
 
@@ -112,7 +124,7 @@ public class RuleStateTracker {
      */
     List<ThisMethodCallExpressionVertex> getThisMethodCallExpressionsByDefiningType(
             String definingType) {
-        populateCachesForDefiningType(definingType);
+        populateMethodCallCachesForDefiningType(definingType);
         return this.thisMethodCallExpressionsByDefiningType.get(definingType);
     }
 
@@ -125,16 +137,18 @@ public class RuleStateTracker {
      */
     List<SuperMethodCallExpressionVertex> getSuperMethodCallExpressionsByDefiningType(
             String definingType) {
-        populateCachesForDefiningType(definingType);
+        populateMethodCallCachesForDefiningType(definingType);
         return this.superMethodCallExpressionsByDefiningType.get(definingType);
     }
 
     /**
-     * Populate the various method call caches for the class represented by {@code definingType}.
+     * Populate the various method call caches for the class represented by {@code definingType}. Do
+     * all of them in the same method because it's exceedingly likely that we'll need all of them at
+     * one point or another.
      *
      * @param definingType
      */
-    private void populateCachesForDefiningType(String definingType) {
+    private void populateMethodCallCachesForDefiningType(String definingType) {
         // If we've already populated the caches for this defining type, there's nothing to do.
         if (this.cachedDefiningTypes.contains(definingType)) {
             return;
@@ -196,11 +210,165 @@ public class RuleStateTracker {
                                     .out(Schema.EXTENDED_BY));
             List<String> subclassNames =
                     subclassVertices.stream()
-                            .map(UserClassVertex::getName)
+                            .map(UserClassVertex::getDefiningType)
                             .collect(Collectors.toList());
             this.subclassesByDefiningType.put(definingType, subclassNames);
             results.addAll(subclassNames);
         }
         return results;
+    }
+
+    /** Get any inner classes that reside in {@code definingType}. */
+    List<UserClassVertex> getInnerClasses(String definingType) {
+        if (!this.innerClassesByDefiningType.containsKey(definingType)) {
+            this.innerClassesByDefiningType.put(
+                    definingType, ClassUtil.getInnerClassesOf(g, definingType));
+        }
+        return this.innerClassesByDefiningType.get(definingType);
+    }
+
+    /**
+     * Indicates whether the specified class has/inherits a method with the specified signature
+     *
+     * @param definingType - A class name
+     * @param signature - The signature of a method
+     * @return True if class has method, else false
+     */
+    boolean classInheritsMatchingMethod(String definingType, String signature) {
+        return MethodUtil.getMethodWithSignature(g, definingType, signature, true).isPresent();
+    }
+
+    /**
+     * Get all {@link MethodCallExpressionVertex} instances representing invocations of a method
+     * named {@code methodName} on a thing called {@code referencedType}.
+     */
+    List<MethodCallExpressionVertex> getInvocationsOnType(
+            String referencedType, String methodName) {
+        // Start off with all MethodCallExpressionVertex instances whose contained
+        // ReferenceExpression matches the referenced type.
+        List<MethodCallExpressionVertex> results =
+                SFVertexFactory.loadVertices(
+                        g,
+                        TraversalUtil.traverseInvocationsOf(
+                                g, new ArrayList<>(), referencedType, methodName));
+
+        // Inner types can be referenced by their outer/sibling types by just their inner name
+        // rather than the full name. This means we need to do more, but what that "more" is
+        // depends on whether we're looking an inner or outer type.
+        boolean typeIsInner = referencedType.contains(".");
+        if (typeIsInner) {
+            // If the type is inner, then we need to add inner-name-only references occurring in
+            // other classes.
+            String[] portions = referencedType.split("\\.");
+            String outerType = portions[0];
+            String innerType = portions[1];
+            List<MethodCallExpressionVertex> additionalResults =
+                    SFVertexFactory.loadVertices(
+                            g,
+                            TraversalUtil.traverseInvocationsOf(
+                                            g, new ArrayList<>(), innerType, methodName)
+                                    .where(
+                                            __.or(
+                                                    H.has(
+                                                            NodeType.METHOD_CALL_EXPRESSION,
+                                                            Schema.DEFINING_TYPE,
+                                                            outerType),
+                                                    H.hasStartingWith(
+                                                            NodeType.METHOD_CALL_EXPRESSION,
+                                                            Schema.DEFINING_TYPE,
+                                                            outerType + "."))));
+            results.addAll(additionalResults);
+        } else {
+            // If the type isn't an inner type, then it's possible some of the references we found
+            // are actually inner-name-only references to inner types. So we need to remove those.
+            results =
+                    results.stream()
+                            .filter(
+                                    v -> {
+                                        // Convert the result's definingType into an outer type by
+                                        // getting everything before the first period.
+                                        String outerType = v.getDefiningType().split("\\.")[0];
+                                        // Get any inner classes for the outer type and cast their
+                                        // names to lowercase.
+                                        Set<String> innerClassNames =
+                                                getInnerClasses(outerType).stream()
+                                                        .map(i -> i.getName().toLowerCase())
+                                                        .collect(Collectors.toSet());
+                                        // If the set lacks an entry for our referenced type, then
+                                        // there's no conflicting inner class and we can keep this
+                                        // result.
+                                        return !innerClassNames.contains(
+                                                referencedType.toLowerCase());
+                                    })
+                            .collect(Collectors.toList());
+        }
+        return results;
+    }
+
+    /**
+     * Returns the {@link BaseSFVertex} where the value referenced in the specified method call is
+     * declared. <br>
+     * E.g., for {@code someObject.someMethod()}, returns the declaration of {@code someObject}.
+     */
+    Optional<BaseSFVertex> getDeclarationOfReferencedValue(MethodCallExpressionVertex methodCall) {
+        // Step 1: Get the name of the thing being referenced.
+        List<String> referenceNameList = methodCall.getReferenceExpression().getNames();
+        // Step 2: The method call must happen in the context of another method, a field
+        // declaration, or both. Determine which.
+        Optional<MethodVertex> parentMethodOptional = methodCall.getParentMethod();
+        Optional<FieldDeclarationVertex> parentFieldDeclarationOptional =
+                methodCall.getFieldDeclaration();
+        // Theoretically one or both of those optionals should be present. If not, throw an
+        // exception.
+        if (!parentMethodOptional.isPresent() && !parentFieldDeclarationOptional.isPresent()) {
+            throw new UnexpectedException(
+                    "Cannot determine context for method call " + methodCall.toMinimalString());
+        }
+        // Step 3: If we're in a method, check for variables and parameters.
+        if (parentMethodOptional.isPresent()) {
+            MethodVertex parentMethod = parentMethodOptional.get();
+            // Step 3A: Check for variables.
+            List<VariableDeclarationVertex> declaredVariables =
+                    MethodUtil.getVariableDeclarations(g, parentMethod);
+            for (VariableDeclarationVertex declaredVariable : declaredVariables) {
+                // NOTE: A known bug exists here. We merely check that the variable exists,
+                //       without verifying that its declaration occurs before the method call.
+                //       So `SomeClass someClass = SomeClass.getInstance();` will incorrectly
+                //       pass this if-check.
+                if (declaredVariable.getName().equalsIgnoreCase(referenceNameList.get(0))) {
+                    return Optional.of(declaredVariable);
+                }
+            }
+
+            // Step 3B: Check whether any of the method's parameters match the first referenced
+            //          name.
+            List<ParameterVertex> params = parentMethod.getParameters();
+            for (ParameterVertex param : params) {
+                if (param.getName().equalsIgnoreCase(referenceNameList.get(0))) {
+                    return Optional.of(param);
+                }
+            }
+        }
+
+        // Step 4: Check whether any properties on the class match the first referenced name.
+        Optional<FieldVertex> fieldOptional =
+                ApexClassUtil.getField(g, methodCall.getDefiningType(), referenceNameList.get(0));
+        // If there's a property, we need to make sure it's visible to our current context.
+        if (fieldOptional.isPresent()) {
+            // Determine whether we're in a static context or an instance context.
+            boolean isContextStatic =
+                    parentMethodOptional
+                            .map(FieldWithModifierVertex::isStatic)
+                            .orElseGet(() -> parentFieldDeclarationOptional.get().isStatic());
+            // Instance context has access to both static and instance properties, while static
+            // context only has access to static properties.
+            if (!isContextStatic || fieldOptional.get().isStatic()) {
+                return Optional.of(fieldOptional.get());
+            }
+        }
+
+        // Step 5: If, after all of that, we still haven't found anything, just return an empty
+        // Optional and let the caller figure out what to do with it.
+        return Optional.empty();
     }
 }

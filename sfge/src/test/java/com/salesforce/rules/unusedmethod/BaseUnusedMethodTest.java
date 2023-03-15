@@ -224,7 +224,7 @@ public class BaseUnusedMethodTest {
      */
     protected void assertViolations(
             String[] sourceCodes, Consumer<Violation.RuleViolation>... assertions) {
-        TestUtil.buildGraph(g, sourceCodes, true);
+        TestUtil.buildGraph(g, sourceCodes);
 
         AbstractStaticRule rule = UnusedMethodRule.getInstance();
         List<Violation> violations = rule.run(g);
@@ -252,7 +252,7 @@ public class BaseUnusedMethodTest {
      * @param sourceCodes - An array of source files
      */
     protected void assertNoViolations(String[] sourceCodes, int eligibleMethodCount) {
-        TestUtil.buildGraph(g, sourceCodes, true);
+        TestUtil.buildGraph(g, sourceCodes);
 
         UnusedMethodRule rule = UnusedMethodRule.getInstance();
         List<Violation> violations = rule.run(g);
