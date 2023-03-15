@@ -218,12 +218,7 @@ public class RuleStateTracker {
         return results;
     }
 
-    /**
-     * Get any inner classes that reside in {@code definingType}.
-     *
-     * @param definingType
-     * @return
-     */
+    /** Get any inner classes that reside in {@code definingType}. */
     List<UserClassVertex> getInnerClasses(String definingType) {
         if (!this.innerClassesByDefiningType.containsKey(definingType)) {
             this.innerClassesByDefiningType.put(
@@ -246,10 +241,6 @@ public class RuleStateTracker {
     /**
      * Get all {@link MethodCallExpressionVertex} instances representing invocations of a method
      * named {@code methodName} on a thing called {@code referencedType}.
-     *
-     * @param referencedType
-     * @param methodName
-     * @return
      */
     List<MethodCallExpressionVertex> getInvocationsOnType(
             String referencedType, String methodName) {
