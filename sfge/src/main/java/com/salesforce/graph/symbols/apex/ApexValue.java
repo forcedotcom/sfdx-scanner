@@ -220,16 +220,22 @@ public abstract class ApexValue<T extends ApexValue> implements DeepCloneable<T>
      * null or it is a an uninitialized variable which will be initialized to null by the system.
      */
     public boolean isNull() {
-        if (ValueStatus.UNINITIALIZED.equals(status)) {
-            // Uninitialized values are initialized to null by the compiler
-            return true;
-        } else if (ValueStatus.INDETERMINANT.equals(status)) {
-            return false;
+        boolean returnValue =
+                valueVertex instanceof LiteralExpressionVertex.Null
+                        // A null constraint could also indicate that the value is null
+                        || (positiveConstraints.contains(Constraint.Null)
+                                && !negativeConstraints.contains(Constraint.Null));
+
+        if (!returnValue) {
+            if (ValueStatus.UNINITIALIZED.equals(status)) {
+                // Uninitialized values are initialized to null by the compiler
+                returnValue = true;
+            } else if (ValueStatus.INDETERMINANT.equals(status)) {
+                returnValue = false;
+            }
         }
 
-        return valueVertex instanceof LiteralExpressionVertex.Null
-                // A null constraint could also indicate that the value is null
-                || positiveConstraints.contains(Constraint.Null);
+        return returnValue;
     }
 
     /**

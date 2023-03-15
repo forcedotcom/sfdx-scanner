@@ -5,6 +5,7 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.CircularReferenceException;
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.graph.ops.expander.NullValueAccessedException;
 import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.apex.ApexForLoopValue;
@@ -33,15 +34,15 @@ import org.apache.logging.log4j.Logger;
 
 public final class ApexValueUtil {
     private static final Logger LOGGER = LogManager.getLogger(ApexValueUtil.class);
+    private static final String UNKNOWN = "UNKNOWN";
 
     /** Currently concatenates string values. TODO: Expand to other operations on Integers etc. */
     public static Optional<ApexValue<?>> applyBinaryExpression(
             BinaryExpressionVertex vertex, SymbolProvider symbols) {
-        if (!vertex.getOperator().equalsIgnoreCase(ASTConstants.OPERATOR_ADDITION)) {
-            return Optional.empty();
-        }
 
         ApexValue<?> lhs = ScopeUtil.resolveToApexValue(symbols, vertex.getLhs()).orElse(null);
+        checkNullAccess(lhs, vertex);
+
         ApexValue<?> rhs;
 
         if (vertex.getRhs() instanceof BinaryExpressionVertex) {
@@ -51,28 +52,57 @@ public final class ApexValueUtil {
         } else {
             rhs = ApexValueBuilder.get(symbols).valueVertex(vertex.getRhs()).build();
         }
+        checkNullAccess(rhs, vertex);
 
-        if (lhs instanceof ApexStringValue
-                && lhs.isValuePresent()
-                && rhs instanceof ApexStringValue
-                && rhs.isValuePresent()) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Applying: lhs=" + lhs + ", rhs=" + rhs);
+        if (vertex.getOperator().equalsIgnoreCase(ASTConstants.OPERATOR_ADDITION)
+                && lhs instanceof ApexStringValue
+                && rhs instanceof ApexStringValue) {
+            return performStringConcatenation(
+                    (ApexStringValue) lhs, (ApexStringValue) rhs, vertex, symbols);
+        }
+
+        // TODO: Handle more binary expression scenarios
+
+        if (LOGGER.isDebugEnabled()) {
+            // This can be because either the binary expression has not been resolved or the are
+            // non-strings
+            LOGGER.debug("Unable to apply binary expression. vertex=" + vertex);
+        }
+        return Optional.empty();
+    }
+
+    private static void checkNullAccess(ApexValue<?> apexValue, BinaryExpressionVertex vertex) {
+        // String value get represented by "null" when used in a concatenation scenario.
+        //  Therefore, we exclude String values from null access checks.
+        if (apexValue != null && !(apexValue instanceof ApexStringValue)) {
+            if (apexValue.isNull()) {
+                throw new NullValueAccessedException(apexValue, vertex);
             }
+        }
+    }
+
+    private static Optional<ApexValue<?>> performStringConcatenation(
+            ApexStringValue lhs,
+            ApexStringValue rhs,
+            BinaryExpressionVertex vertex,
+            SymbolProvider symbols) {
+        final String lhsValue =
+                lhs.isValuePresent() ? lhs.getValue().get() : lhs.isNull() ? "null" : UNKNOWN;
+        final String rhsValue =
+                rhs.isValuePresent() ? rhs.getValue().get() : rhs.isNull() ? "null" : UNKNOWN;
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Applying: lhs=" + lhs + ", rhs=" + rhs);
+        }
+
+        if (!lhsValue.equals(UNKNOWN) && !rhsValue.equals(UNKNOWN)) {
             return Optional.of(
                     ApexValueBuilder.get(symbols)
                             .valueVertex(vertex)
-                            .buildString(
-                                    ((ApexStringValue) lhs).getValue().get()
-                                            + ((ApexStringValue) rhs).getValue().get()));
-        } else {
-            if (LOGGER.isDebugEnabled()) {
-                // This can be because either the binary expression has not been resolved or the are
-                // non-strings
-                LOGGER.debug("Unable to apply binary expression. vertex=" + vertex);
-            }
-            return Optional.empty();
+                            .buildString(lhsValue + rhsValue));
         }
+
+        return Optional.empty();
     }
 
     public static boolean isDeterminant(Optional<ApexValue<?>> apexValue) {

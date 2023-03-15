@@ -16,7 +16,7 @@ public final class UserFacingMessages {
 
     public static final class RuleViolationTemplates {
         public static final String APEX_NULL_POINTER_EXCEPTION_RULE =
-                "Operation [%s] is likely to throw a NullPointerException";
+                "%s is likely to throw a NullPointerException";
         /** CRUD/FLS Violation messages */
         // format: "CRUD" or "FLS", DML operation, Object type, Field information
         public static final String MISSING_CRUD_FLS_CHECK =

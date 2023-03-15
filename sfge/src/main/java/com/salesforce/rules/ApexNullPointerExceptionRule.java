@@ -3,8 +3,7 @@ package com.salesforce.rules;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.expander.NullValueAccessedException;
 import com.salesforce.graph.ops.expander.PathExpansionException;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,19 +35,21 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
             if (!(anomaly instanceof NullValueAccessedException)) {
                 continue;
             }
-            MethodCallExpressionVertex mcev = ((NullValueAccessedException) anomaly).getVertex();
-            if (vertexIds.contains(mcev.getId())) {
+            final NullAccessCheckedVertex affectedVertex =
+                    ((NullValueAccessedException) anomaly).getVertex();
+            if (vertexIds.contains(affectedVertex.getId())) {
                 continue;
             }
+            final String operationName = affectedVertex.getDisplayName();
             violations.add(
                     new Violation.PathBasedRuleViolation(
                             String.format(
                                     UserFacingMessages.RuleViolationTemplates
                                             .APEX_NULL_POINTER_EXCEPTION_RULE,
-                                    mcev.getFullMethodName()),
+                                    operationName),
                             methodVertex,
-                            mcev));
-            vertexIds.add(mcev.getId());
+                            (SFVertex) affectedVertex));
+            vertexIds.add(affectedVertex.getId());
         }
         return violations;
     }

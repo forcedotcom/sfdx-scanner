@@ -11,9 +11,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public class BinaryExpressionVertex extends TODO_FIX_HIERARCHY_ChainedVertex
-        implements OperatorVertex {
+        implements OperatorVertex, NullAccessCheckedVertex {
     private final ChainedVertex lhs;
     private final ChainedVertex rhs;
+
+    private static final String DISPLAY_TEMPLATE = "Operator [%s]";
 
     BinaryExpressionVertex(Map<Object, Object> properties) {
         this(properties, null);
@@ -83,5 +85,10 @@ public class BinaryExpressionVertex extends TODO_FIX_HIERARCHY_ChainedVertex
     @Override
     public String getOperator() {
         return getString(Schema.OPERATOR);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return String.format(DISPLAY_TEMPLATE, getOperator());
     }
 }
