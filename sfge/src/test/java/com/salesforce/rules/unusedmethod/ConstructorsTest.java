@@ -171,8 +171,8 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      *
      * @param constructor - The way the constructor is invoked.
      */
-    @CsvSource({"OuterClass.InnerClass", "InnerClass"})
-    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {1}()")
+    @ValueSource(strings = {"OuterClass.InnerClass", "InnerClass"})
+    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {0}()")
     public void innerConstructorUsedByOuter_expectNoViolation(String constructor) {
         // spotless:off
         String sourceCode =
@@ -196,8 +196,8 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      *
      * @param constructor - The way the constructor is invoked.
      */
-    @CsvSource({"OuterClass.InnerClass", "InnerClass"})
-    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {1}()")
+    @ValueSource(strings = {"OuterClass.InnerClass", "InnerClass"})
+    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {0}()")
     public void innerConstructorUsedBySiblingInner_expectNoViolation(String constructor) {
         // spotless:off
         String sourceCode =
