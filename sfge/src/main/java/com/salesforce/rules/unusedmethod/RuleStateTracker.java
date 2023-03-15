@@ -239,6 +239,63 @@ public class RuleStateTracker {
     }
 
     /**
+     * Get all {@link NewObjectExpressionVertex} instances representing instantiations of an object
+     * whose type is {@code constructedType}.
+     */
+    List<NewObjectExpressionVertex> getConstructionsOfType(String constructedType) {
+        // Start off with all NewObjectExpressionVertex instances whose declared type references the
+        // desired type.
+        List<NewObjectExpressionVertex> results =
+                SFVertexFactory.loadVertices(
+                        g,
+                        g.V()
+                                .where(
+                                        H.has(
+                                                NodeType.NEW_OBJECT_EXPRESSION,
+                                                Schema.TYPE,
+                                                constructedType)));
+
+        // Inner types can be referenced by outer/sibling types by just the inner name rather than
+        // the full name.
+        // This means we need to do more, but what that "more" is depends on whether we're looking
+        // at an inner or outer type.
+        boolean typeIsInner = constructedType.contains(".");
+        if (typeIsInner) {
+            // If the type is inner, then we need to add inner-name-only references occurring in
+            // other classes.
+            String[] portions = constructedType.split("\\.");
+            String outerType = portions[0];
+            String innerType = portions[1];
+            List<NewObjectExpressionVertex> additionalResults =
+                    SFVertexFactory.loadVertices(
+                            g,
+                            g.V()
+                                    .where(
+                                            H.has(
+                                                    NodeType.NEW_OBJECT_EXPRESSION,
+                                                    Schema.TYPE,
+                                                    innerType))
+                                    .where(
+                                            __.or(
+                                                    H.has(
+                                                            NodeType.NEW_OBJECT_EXPRESSION,
+                                                            Schema.DEFINING_TYPE,
+                                                            outerType),
+                                                    H.hasStartingWith(
+                                                            NodeType.NEW_OBJECT_EXPRESSION,
+                                                            Schema.DEFINING_TYPE,
+                                                            outerType + "."))));
+            results.addAll(additionalResults);
+        } else {
+            // If the type isn't an inner type, then it's possible that some of the references we
+            // found are actually
+            // inner-name-only references to inner types. So we need to remove those.
+            results = removeInnerTypeCollisions(results, constructedType);
+        }
+        return results;
+    }
+
+    /**
      * Get all {@link MethodCallExpressionVertex} instances representing invocations of a method
      * named {@code methodName} on a thing called {@code referencedType}.
      */
@@ -281,26 +338,7 @@ public class RuleStateTracker {
         } else {
             // If the type isn't an inner type, then it's possible some of the references we found
             // are actually inner-name-only references to inner types. So we need to remove those.
-            results =
-                    results.stream()
-                            .filter(
-                                    v -> {
-                                        // Convert the result's definingType into an outer type by
-                                        // getting everything before the first period.
-                                        String outerType = v.getDefiningType().split("\\.")[0];
-                                        // Get any inner classes for the outer type and cast their
-                                        // names to lowercase.
-                                        Set<String> innerClassNames =
-                                                getInnerClasses(outerType).stream()
-                                                        .map(i -> i.getName().toLowerCase())
-                                                        .collect(Collectors.toSet());
-                                        // If the set lacks an entry for our referenced type, then
-                                        // there's no conflicting inner class and we can keep this
-                                        // result.
-                                        return !innerClassNames.contains(
-                                                referencedType.toLowerCase());
-                                    })
-                            .collect(Collectors.toList());
+            results = removeInnerTypeCollisions(results, referencedType);
         }
         return results;
     }
@@ -370,5 +408,36 @@ public class RuleStateTracker {
         // Step 5: If, after all of that, we still haven't found anything, just return an empty
         // Optional and let the caller figure out what to do with it.
         return Optional.empty();
+    }
+
+    /**
+     * If an inner class shares the name of an outer class, then references to the inner class that
+     * occur in its outer/sibling classes can resemble references to the outer class. This class
+     * filters such false positives from the results of a query.
+     *
+     * @param unfilteredResults - The results, pre-filtering
+     * @param referencedType - The outer type with which inner types may collide
+     * @return - {@code unfilteredResults}, with all colliding references removed
+     */
+    private <T extends BaseSFVertex> List<T> removeInnerTypeCollisions(
+            List<T> unfilteredResults, String referencedType) {
+        return unfilteredResults.stream()
+                .filter(
+                        v -> {
+                            // Convert the result's definingType into an outer type by getting
+                            // everything before the first period.
+                            String outerType = v.getDefiningType().split("\\.")[0];
+                            // Get any inner classes belonging to this outer type in a
+                            // case-insensitive set.
+                            Set<String> innerClassNames =
+                                    CollectionUtil.newTreeSetOf(
+                                            getInnerClasses(outerType).stream()
+                                                    .map(UserClassVertex::getName)
+                                                    .collect(Collectors.toList()));
+                            // If the set lacks an entry for our referenced type, then there's no
+                            // conflicting inner class, and we can keep this result.
+                            return !innerClassNames.contains(referencedType);
+                        })
+                .collect(Collectors.toList());
     }
 }

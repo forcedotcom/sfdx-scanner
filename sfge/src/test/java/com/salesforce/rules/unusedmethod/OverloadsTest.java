@@ -232,7 +232,6 @@ public class OverloadsTest extends BaseUnusedMethodTest {
         "private,  'new MyClass(true, true)',  1"
     })
     @ParameterizedTest(name = "{displayName}: {0} constructor {1}")
-    @Disabled
     public void callConstructorViaNewWithDifferentArityOverloads_expectViolation(
             String scope, String constructor, int arity) {
         String sourceCode =
@@ -298,14 +297,13 @@ public class OverloadsTest extends BaseUnusedMethodTest {
      * If there's different overloads of a constructor, then only the ones that are actually invoked
      * count as used. Specific case: Methods with different arities, invoked via the `this` keyword.
      */
-    // TODO: Enable subsequent tests as we implement functionality.
     @CsvSource({
         // Use the arity of the constructor that ISN'T being called,
         // and have one variant per visibility scope.
-        //        "public,  this(true),  2",
+        "public,  this(true),  2",
         "protected,  this(true),  2",
         "private,  this(true),  2",
-        //        "public,  'this(true, true)', 1",
+        "public,  'this(true, true)', 1",
         "protected,  'this(true, true)', 1",
         "private,  'this(true, true)', 1"
     })
@@ -319,7 +317,7 @@ public class OverloadsTest extends BaseUnusedMethodTest {
                         + String.format("    %s MyClass(boolean b, boolean c) {\n", scope)
                         + "    }\n"
                         // Use the engine directive to prevent this method from tripping the rule.
-                        + "    /* sfge-disable-stack UnusedMethodRule */"
+                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
                         + "    public MyClass() {\n"
                         + String.format("        %s;\n", constructor)
                         + "    }\n"
