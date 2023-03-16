@@ -13,8 +13,10 @@ import com.salesforce.graph.ops.TraversalUtil;
 import com.salesforce.graph.vertex.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 
 /**
  * A helper class for {@link com.salesforce.rules.UnusedMethodRule}, which tracks various elements
@@ -266,25 +268,10 @@ public class RuleStateTracker {
             String[] portions = constructedType.split("\\.");
             String outerType = portions[0];
             String innerType = portions[1];
+            GraphTraversal<Vertex, Vertex> traversal =
+                    g.V().where(H.has(NodeType.NEW_OBJECT_EXPRESSION, Schema.TYPE, innerType));
             List<NewObjectExpressionVertex> additionalResults =
-                    SFVertexFactory.loadVertices(
-                            g,
-                            g.V()
-                                    .where(
-                                            H.has(
-                                                    NodeType.NEW_OBJECT_EXPRESSION,
-                                                    Schema.TYPE,
-                                                    innerType))
-                                    .where(
-                                            __.or(
-                                                    H.has(
-                                                            NodeType.NEW_OBJECT_EXPRESSION,
-                                                            Schema.DEFINING_TYPE,
-                                                            outerType),
-                                                    H.hasStartingWith(
-                                                            NodeType.NEW_OBJECT_EXPRESSION,
-                                                            Schema.DEFINING_TYPE,
-                                                            outerType + "."))));
+                    getAliasedInnerTypeUsages(outerType, NodeType.NEW_OBJECT_EXPRESSION, traversal);
             results.addAll(additionalResults);
         } else {
             // If the type isn't an inner type, then it's possible that some of the references we
@@ -319,21 +306,12 @@ public class RuleStateTracker {
             String[] portions = referencedType.split("\\.");
             String outerType = portions[0];
             String innerType = portions[1];
+            GraphTraversal<Vertex, Vertex> traversal =
+                    TraversalUtil.traverseInvocationsOf(
+                            g, new ArrayList<>(), innerType, methodName);
             List<MethodCallExpressionVertex> additionalResults =
-                    SFVertexFactory.loadVertices(
-                            g,
-                            TraversalUtil.traverseInvocationsOf(
-                                            g, new ArrayList<>(), innerType, methodName)
-                                    .where(
-                                            __.or(
-                                                    H.has(
-                                                            NodeType.METHOD_CALL_EXPRESSION,
-                                                            Schema.DEFINING_TYPE,
-                                                            outerType),
-                                                    H.hasStartingWith(
-                                                            NodeType.METHOD_CALL_EXPRESSION,
-                                                            Schema.DEFINING_TYPE,
-                                                            outerType + "."))));
+                    getAliasedInnerTypeUsages(
+                            outerType, NodeType.METHOD_CALL_EXPRESSION, traversal);
             results.addAll(additionalResults);
         } else {
             // If the type isn't an inner type, then it's possible some of the references we found
@@ -408,6 +386,30 @@ public class RuleStateTracker {
         // Step 5: If, after all of that, we still haven't found anything, just return an empty
         // Optional and let the caller figure out what to do with it.
         return Optional.empty();
+    }
+
+    /**
+     * An inner class's sibling/outer classes can reference it by its inner type alone. This method
+     * accepts a traversal containing all potential references to the inner name, and filters for
+     * those that occur in the sibling/outer classes and therefore refer to the inner type.
+     *
+     * @param outerType - The name of the outer class.
+     * @param nodeType - The node type being targeted.
+     * @param initialTraversal - A traversal containing all nodes of {@code nodeType} that
+     *     potentially reference the inner type.
+     * @return - A list of {@link BaseSFVertex} instances representing the subset of {@code
+     *     initialTraversal} that are aliased inner type references.
+     * @param <T> - An extension of {@link BaseSFVertex}.
+     */
+    private <T extends BaseSFVertex> List<T> getAliasedInnerTypeUsages(
+            String outerType, String nodeType, GraphTraversal<Vertex, Vertex> initialTraversal) {
+        return SFVertexFactory.loadVertices(
+                g,
+                initialTraversal.where(
+                        __.or(
+                                H.has(nodeType, Schema.DEFINING_TYPE, outerType),
+                                H.hasStartingWith(
+                                        nodeType, Schema.DEFINING_TYPE, outerType + "."))));
     }
 
     /**

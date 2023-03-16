@@ -169,18 +169,24 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
     /**
      * Tests for cases where an inner class's constructor is called in the outer class.
      *
+     * @param variable - The way the variable is declared.
      * @param constructor - The way the constructor is invoked.
      */
-    @ValueSource(strings = {"OuterClass.InnerClass", "InnerClass"})
-    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {0}()")
-    public void innerConstructorUsedByOuter_expectNoViolation(String constructor) {
+    @CsvSource({
+        "OuterClass.InnerClass, OuterClass.InnerClass",
+        "OuterClass.InnerClass, InnerClass",
+        "InnerClass, OuterClass.InnerClass",
+        "InnerClass, InnerClass"
+    })
+    @ParameterizedTest(name = "{displayName}: Declared as {0}, constructed as new {1}()")
+    public void innerConstructorUsedByOuter_expectNoViolation(String variable, String constructor) {
         // spotless:off
         String sourceCode =
             "global class OuterClass {\n"
             // Declare a method in the outer class to call the inner constructor, annotated to not trip the rule.
           + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public void invoker() {\n"
-          + "        InnerClass obj = new " + constructor + "(false);\n"
+          + "        " + variable + " obj = new " + constructor + "(false);\n"
           + "    }\n"
           + "    global class InnerClass {\n"
             // Declare a constructor for the inner class
@@ -194,11 +200,18 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
     /**
      * Tests for cases where an inner class's constructor is called by a sibling inner class.
      *
+     * @param variable - The way the variable is declared.
      * @param constructor - The way the constructor is invoked.
      */
-    @ValueSource(strings = {"OuterClass.InnerClass", "InnerClass"})
-    @ParameterizedTest(name = "{displayName}: OuterClass.InnerClass constructed as new {0}()")
-    public void innerConstructorUsedBySiblingInner_expectNoViolation(String constructor) {
+    @CsvSource({
+        "OuterClass.InnerClass, OuterClass.InnerClass",
+        "OuterClass.InnerClass, InnerClass",
+        "InnerClass, OuterClass.InnerClass",
+        "InnerClass, InnerClass"
+    })
+    @ParameterizedTest(name = "{displayName}: Declared as {0}, constructed as new {1}()")
+    public void innerConstructorUsedBySiblingInner_expectNoViolation(
+            String variable, String constructor) {
         // spotless:off
         String sourceCode =
             "global class OuterClass {\n"
@@ -211,7 +224,7 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
             // Declare a method on the sibling inner class that instantiates the tested one.
           + "        /* sfge-disable-stack UnusedMethodRule */\n"
           + "        public void invoker() {\n"
-          + "            OuterClass.InnerClass obj = new " + constructor + "(false);\n"
+          + "            " + variable + " obj = new " + constructor + "(false);\n"
           + "        }\n"
           + "    }\n"
           + "}";
