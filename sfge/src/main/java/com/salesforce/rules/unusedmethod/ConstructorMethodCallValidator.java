@@ -68,7 +68,16 @@ public class ConstructorMethodCallValidator extends BaseMethodCallValidator {
      */
     @Override
     protected boolean externalUsageDetected() {
-        // TODO: IMPLEMENT THIS METHOD
+        // Get all `new Whatever()` calls for the defining type.
+        List<NewObjectExpressionVertex> potentialExternalCalls =
+                ruleStateTracker.getConstructionsOfType(targetMethod.getDefiningType());
+        // Test each one to see whether its parameters match.
+        for (NewObjectExpressionVertex potentialExternalCall : potentialExternalCalls) {
+            if (parametersAreValid(potentialExternalCall)) {
+                return true;
+            }
+        }
+        // If we're here, it's because we couldn't find any matches.
         return false;
     }
 }
