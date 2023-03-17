@@ -85,7 +85,7 @@ public class Main {
         }
         if (args.length == 0) {
             // No args means we can't do anything productive.
-            dependencies.printError(UserFacingMessages.REQUIRES_AT_LEAST_ONE_ARGUMENT);
+            dependencies.printError(UserFacingMessages.InvocationErrors.REQUIRES_AT_LEAST_ONE_ARGUMENT);
             return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 
@@ -222,7 +222,7 @@ public class Main {
         return ERROR_PREFIX
                 + (error.getCause() != null
                         ? String.format(
-                                UserFacingMessages.EXCEPTION_FORMAT_TEMPLATE,
+                                UserFacingMessages.CompilationErrors.EXCEPTION_FORMAT_TEMPLATE,
                                 error.getMessage(),
                                 error.getCause().getMessage())
                         : error.getMessage());

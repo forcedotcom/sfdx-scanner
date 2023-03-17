@@ -133,14 +133,14 @@ public final class FlsViolationMessageUtil {
         // Populate field information only if we have anything
         if (!"".equals(fieldString)) {
             fieldInformation =
-                    String.format(UserFacingMessages.FIELDS_MESSAGE_TEMPLATE, fieldString);
+                    String.format(UserFacingMessages.CrudFlsTemplates.FIELDS_MESSAGE_TEMPLATE, fieldString);
         }
 
         // Add field notice if we have segments that may not have been parsed correctly
         if (!complexSegments.isEmpty()) {
             fieldInformation +=
                     String.format(
-                            UserFacingMessages.FIELD_HANDLING_NOTICE,
+                            UserFacingMessages.CrudFlsTemplates.FIELD_HANDLING_NOTICE,
                             Joiner.on(FIELD_NAME_SEPARATOR).join(complexSegments));
         }
         return fieldInformation;

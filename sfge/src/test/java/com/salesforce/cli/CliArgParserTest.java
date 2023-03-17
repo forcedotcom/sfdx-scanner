@@ -48,7 +48,7 @@ public class CliArgParserTest {
         assertThrows(
                 CliArgParser.InvocationException.class,
                 () -> parser.getCliAction("notARealAction"),
-                String.format(UserFacingMessages.UNRECOGNIZED_ACTION, "notARealAction"));
+                String.format(UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, "notARealAction"));
     }
 
     @CsvSource({

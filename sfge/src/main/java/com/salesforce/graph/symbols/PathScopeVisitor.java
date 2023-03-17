@@ -1593,7 +1593,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         if (apexValueStack.peek().containsKey(key)) {
             // The variable was defined multiple times
             throw new UserActionException(
-                    UserFacingMessages.VARIABLE_DECLARED_MULTIPLE_TIMES,
+                    UserFacingMessages.UserActionMessage.VARIABLE_DECLARED_MULTIPLE_TIMES,
                     vertex.getFileName(),
                     vertex.getDefiningType(),
                     vertex.getBeginLine());

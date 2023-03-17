@@ -25,46 +25,51 @@ public final class UserFacingMessages {
         //         Second %s is the name of a class or interface.
         public static final String UNIMPLEMENTED_TYPE_RULE = "Extend, implement, or delete %s %s";
         public static final String LIMIT_REACHED_VIOLATION_MESSAGE =
-                "%s. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine targeting this entry method with a larger heap space.";
+                "%s. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine and target this entry method with a larger heap space.";
     }
 
     /** Main args and process checks * */
-    public static final String REQUIRES_AT_LEAST_ONE_ARGUMENT =
-            "SFGE invocation requires at least one argument.";
-
-    public static final String UNRECOGNIZED_ACTION = "Unrecognized action to invoke SFGE: %s.";
-    public static final String INCORRECT_ARGUMENT_COUNT =
-            "Wrong number of arguments. Expected %d; received %d";
+    public static final class InvocationErrors {
+        public static final String REQUIRES_AT_LEAST_ONE_ARGUMENT =
+                "SFGE invocation requires at least one argument.";
+        public static final String UNRECOGNIZED_ACTION = "Unrecognized action to invoke SFGE: %s.";
+        public static final String INCORRECT_ARGUMENT_COUNT =
+                "Wrong number of arguments. Expected %d; received %d";
+    }
 
     /** UserActionException * */
+    public static final class UserActionMessage {
+        // format: filename,defined type, line number
+        public static final String UNREACHABLE_CODE =
+                "Remove unreachable code to proceed with the analysis: %s,%s:%d";
+        public static final String VARIABLE_DECLARED_MULTIPLE_TIMES =
+                "Rename or delete this reused variable to proceed with the analysis: %s,%s:%d";
+    }
 
-    // format: filename,defined type, line number
-    public static final String UNREACHABLE_CODE =
-            "Remove unreachable code to proceed with the analysis: %s,%s:%d";
+    public static final class PathExpansionTemplates {
+        public static final String INSUFFICIENT_HEAP_SPACE =
+                "There's insufficient heap space (%d bytes) to execute Graph Engine. Increase heap space using the --sfgejvmargs option and retry.";
+        public static final String PATH_EXPANSION_LIMIT_REACHED =
+                "Graph Engine reached the path expansion upper limit (%d).";
+    }
 
-    public static final String VARIABLE_DECLARED_MULTIPLE_TIMES =
-            "This variable is reused. Rename or delete it to proceed with the analysis: %s,%s:%d";
+    public static final class CrudFlsTemplates {
 
-    public static final String INSUFFICIENT_HEAP_SPACE =
-            "There's insufficient heap space (%d bytes) to execute Graph Engine. Increase heap space using --sfgejvmargs option and retry.";
+        public static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
+                "For stripInaccessible checks on READ operation, Salesforce Graph Engine can't verify that only sanitized data is used after the check. Discard unsanitized data for [%2$s].";
+        public static final String UNRESOLVED_CRUD_FLS_TEMPLATE =
+                "Salesforce Graph Engine couldn't resolve the parameter passed to [%2$s] operation%4$s. Confirm that this operation has the necessary %1$s checks.";
+        public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
+        public static final String FIELD_HANDLING_NOTICE =
+                ". Confirm that the objects and fields involved in these segments have FLS checks: [%s]";
+    }
 
-    public static final String STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE =
-            "For stripInaccessible checks on READ operation, Salesforce Graph Engine can't verify that only sanitized data is used after the check. Discard unsanitized data for [%2$s].";
+    public static final class CompilationErrors {
 
-    public static final String UNRESOLVED_CRUD_FLS_TEMPLATE =
-            "Salesforce Graph Engine couldn't resolve the parameter passed to [%2$s] operation%4$s. Confirm that this operation has the necessary %1$s checks.";
+        public static final String INVALID_SYNTAX_TEMPLATE = "Invalid syntax at %d:%d. (%s)";
+        public static final String FIX_COMPILATION_ERRORS =
+                "Graph engine encountered compilation errors. Fix the errors in %s and retry.";
+        public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
+    }
 
-    public static final String FIELDS_MESSAGE_TEMPLATE = " with field(s) [%s]";
-    public static final String FIELD_HANDLING_NOTICE =
-            ". Confirm that the objects and fields involved in these segments have FLS checks: [%s]";
-
-    public static final String INVALID_SYNTAX_TEMPLATE = "Invalid syntax at %d:%d. (%s)";
-
-    public static final String FIX_COMPILATION_ERRORS =
-            "Graph engine encountered compilation errors. Fix the errors in %s and retry.";
-
-    public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
-
-    public static final String PATH_EXPANSION_LIMIT_REACHED =
-            "Graph Engine reached the path expansion upper limit (%d).";
 }
