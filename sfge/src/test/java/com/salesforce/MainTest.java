@@ -80,7 +80,8 @@ public class MainTest {
     void testNoActionProvided() {
         final Main main = new Main(dependencies);
         main.process();
-        verify(dependencies).printError(UserFacingMessages.REQUIRES_AT_LEAST_ONE_ARGUMENT);
+        verify(dependencies)
+                .printError(UserFacingMessages.InvocationErrors.REQUIRES_AT_LEAST_ONE_ARGUMENT);
     }
 
     @Test
@@ -91,7 +92,8 @@ public class MainTest {
         assertThrows(
                 CliArgParser.InvocationException.class,
                 () -> main.process(invalid_action),
-                String.format(UserFacingMessages.UNRECOGNIZED_ACTION, invalid_action));
+                String.format(
+                        UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, invalid_action));
     }
 
     @Test

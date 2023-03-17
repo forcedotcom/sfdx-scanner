@@ -182,7 +182,7 @@ public final class GraphUtil {
         } catch (JorjeUtil.JorjeCompilationException ex) {
             throw new GraphLoadException(
                     String.format(
-                            UserFacingMessages.FIX_COMPILATION_ERRORS,
+                            UserFacingMessages.CompilationErrors.FIX_COMPILATION_ERRORS,
                             sourceFileVisitor.lastVisitedFile),
                     ex);
         }

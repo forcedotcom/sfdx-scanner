@@ -25,6 +25,6 @@ public final class FlsStripInaccessibleWarningInfo extends FlsViolationInfo {
     }
 
     public String getMessageTemplate() {
-        return UserFacingMessages.STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE;
+        return UserFacingMessages.CrudFlsTemplates.STRIP_INACCESSIBLE_READ_WARNING_TEMPLATE;
     }
 }

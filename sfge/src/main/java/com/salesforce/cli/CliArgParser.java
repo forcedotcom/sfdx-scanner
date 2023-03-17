@@ -37,7 +37,8 @@ public class CliArgParser {
             return CLI_ACTION.CATALOG;
         } else {
             throw new InvocationException(
-                    String.format(UserFacingMessages.UNRECOGNIZED_ACTION, actionArg));
+                    String.format(
+                            UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, actionArg));
         }
     }
 
@@ -120,7 +121,7 @@ public class CliArgParser {
             if (args.length != ARG_COUNT) {
                 throw new InvocationException(
                         String.format(
-                                UserFacingMessages.INCORRECT_ARGUMENT_COUNT,
+                                UserFacingMessages.InvocationErrors.INCORRECT_ARGUMENT_COUNT,
                                 ARG_COUNT,
                                 args.length));
             }

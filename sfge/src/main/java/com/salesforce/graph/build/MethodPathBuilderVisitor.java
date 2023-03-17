@@ -597,7 +597,7 @@ public class MethodPathBuilderVisitor {
             // Ask user to fix unreachable code
             throw new UserActionException(
                     String.format(
-                            UserFacingMessages.UNREACHABLE_CODE,
+                            UserFacingMessages.UserActionMessage.UNREACHABLE_CODE,
                             GremlinUtil.getFileName(g, to),
                             to.value(Schema.DEFINING_TYPE),
                             to.value(Schema.BEGIN_LINE)));

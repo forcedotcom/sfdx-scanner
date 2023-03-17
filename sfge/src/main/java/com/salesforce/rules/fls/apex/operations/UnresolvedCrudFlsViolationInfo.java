@@ -14,6 +14,6 @@ public class UnresolvedCrudFlsViolationInfo extends FlsViolationInfo {
     }
 
     public String getMessageTemplate() {
-        return UserFacingMessages.UNRESOLVED_CRUD_FLS_TEMPLATE;
+        return UserFacingMessages.CrudFlsTemplates.UNRESOLVED_CRUD_FLS_TEMPLATE;
     }
 }

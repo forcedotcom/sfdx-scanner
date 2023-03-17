@@ -87,7 +87,8 @@ public final class JorjeUtil {
                             .map(
                                     e ->
                                             String.format(
-                                                    UserFacingMessages.INVALID_SYNTAX_TEMPLATE,
+                                                    UserFacingMessages.CompilationErrors
+                                                            .INVALID_SYNTAX_TEMPLATE,
                                                     e.getLoc().getLine(),
                                                     e.getLoc().getColumn(),
                                                     e.getError()))
