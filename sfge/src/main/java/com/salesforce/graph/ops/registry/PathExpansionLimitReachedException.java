@@ -9,6 +9,9 @@ import com.salesforce.exception.SfgeRuntimeException;
  */
 public class PathExpansionLimitReachedException extends SfgeRuntimeException {
     public PathExpansionLimitReachedException(int limit) {
-        super(String.format(UserFacingMessages.PathExpansionTemplates.PATH_EXPANSION_LIMIT_REACHED, limit));
+        super(
+                String.format(
+                        UserFacingMessages.PathExpansionTemplates.PATH_EXPANSION_LIMIT_REACHED,
+                        limit));
     }
 }

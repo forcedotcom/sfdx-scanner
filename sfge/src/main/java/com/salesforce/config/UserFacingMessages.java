@@ -71,5 +71,4 @@ public final class UserFacingMessages {
                 "Graph engine encountered compilation errors. Fix the errors in %s and retry.";
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
     }
-
 }

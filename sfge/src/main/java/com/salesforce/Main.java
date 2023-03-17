@@ -85,7 +85,8 @@ public class Main {
         }
         if (args.length == 0) {
             // No args means we can't do anything productive.
-            dependencies.printError(UserFacingMessages.InvocationErrors.REQUIRES_AT_LEAST_ONE_ARGUMENT);
+            dependencies.printError(
+                    UserFacingMessages.InvocationErrors.REQUIRES_AT_LEAST_ONE_ARGUMENT);
             return EXIT_WITH_INTERNAL_ERROR_NO_VIOLATIONS;
         }
 

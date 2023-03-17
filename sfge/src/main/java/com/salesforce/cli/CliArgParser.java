@@ -37,7 +37,8 @@ public class CliArgParser {
             return CLI_ACTION.CATALOG;
         } else {
             throw new InvocationException(
-                    String.format(UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, actionArg));
+                    String.format(
+                            UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, actionArg));
         }
     }
 

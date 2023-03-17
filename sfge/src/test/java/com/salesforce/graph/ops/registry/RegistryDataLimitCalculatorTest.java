@@ -54,6 +54,8 @@ public class RegistryDataLimitCalculatorTest {
         assertThrows(
                 UserActionException.class,
                 () -> calculator.calculateAllowedLimit(objectSize, minimumItemCountExpected),
-                String.format(UserFacingMessages.PathExpansionTemplates.INSUFFICIENT_HEAP_SPACE, maxHeapSpaceSize));
+                String.format(
+                        UserFacingMessages.PathExpansionTemplates.INSUFFICIENT_HEAP_SPACE,
+                        maxHeapSpaceSize));
     }
 }
