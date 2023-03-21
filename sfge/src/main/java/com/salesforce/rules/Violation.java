@@ -329,6 +329,22 @@ public abstract class Violation implements Comparable<Violation>, RuleThrowable 
     }
 
     /**
+     * Violation type to indicate that an action is expected from the user to complete analyzing the
+     * path.
+     */
+    public static final class UserActionViolation extends Violation {
+        public UserActionViolation(String message, SFVertex vertex) {
+            super(message, vertex);
+            this.ruleName = "UserActionExpected";
+            this.category = INTERNAL_ERROR_CATEGORY;
+            this.description = "";
+            this.severity = AbstractRule.SEVERITY.LOW.code;
+            this.url =
+                    "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/working-with-sfge/";
+        }
+    }
+
+    /**
      * An artificial "violation" not associated with a rule, but used as a representation of an
      * error that occurred during rule execution.
      */
