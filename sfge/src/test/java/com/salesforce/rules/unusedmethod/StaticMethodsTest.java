@@ -338,7 +338,15 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      *
      * @param collidingName - The name given to the tested class to cause a collision.
      */
-    @ValueSource(strings = {"instanceProp", "staticProp", "methodParam", "variable", "InnerClass"})
+    @ValueSource(
+            strings = {
+                "instanceProp",
+                "staticProp",
+                // "inheritedProp", TODO: FIX AND ENABLE THIS TEST
+                "methodParam",
+                "variable",
+                "InnerClass"
+            })
     @ParameterizedTest(name = "{displayName}: Collides with {0}")
     public void externalReferenceSyntaxCollision_expectViolation(String collidingName) {
         // spotless:off
@@ -363,8 +371,17 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "        return true;\n"
           + "    }\n"
           + "}",
+            // Declare an extensible class with a heritable property for the tested method to collide with.
+            // For simplicity, the property is an instance of the class itself and it has the collide-able method.
+            "global virtual class ExtensibleClass {\n"
+          + "    public ExtensibleClass inheritedProp = this;\n"
+          + "    /* sfge-disable-stack UnusedMethodRule */\n"
+          + "    public boolean getBoolean() {\n"
+          + "        return true;\n"
+          + "    }\n"
+          + "}",
             // Declare a class that will do all sorts of collision-y operations.
-            "global class CollisionCreator {\n"
+            "global class CollisionCreator extends ExtensibleClass {\n"
             // These properties can be collided with.
           + "    public InstanceCollider instanceProp;\n"
           + "    public static InstanceCollider staticProp;\n"

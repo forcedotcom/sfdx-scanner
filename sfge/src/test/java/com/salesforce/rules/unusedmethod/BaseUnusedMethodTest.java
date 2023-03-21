@@ -67,16 +67,16 @@ public class BaseUnusedMethodTest {
      * that can use it. Has the following wildcards:
      *
      * <ol>
-     *   <li>%s for modifiers to the scope of the method declared in the parent class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for modifiers to the scope of the method declared in the child class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for the value returned by the child method. (E.g., invocation of parent method, or a
-     *       literal value.)
-     *   <li>%s for modifiers to the scope of the method declared in the grandchild class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for the value returned by the grandchild method. (E.g., invocation of parent/child
+     *   <li>%s in Source 1 for modifiers to the scope of the method declared in the parent class.
+     *       (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 2 for modifiers to the scope of the method declared in the child class.
+     *       (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 2 for the value returned by the child method. (E.g., invocation of parent
      *       method, or a literal value.)
+     *   <li>%s in Source 3 for modifiers to the scope of the method declared in the grandchild
+     *       class. (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 3 for the value returned by the grandchild method. (E.g., invocation of
+     *       parent/child method, or a literal value.)
      * </ol>
      */
     // spotless:off
@@ -110,6 +110,57 @@ public class BaseUnusedMethodTest {
     // spotless:on
 
     /**
+     * Template for a parent class that defines a method, along with a child class that overrides
+     * it. Each class has another method that can be configured as needed. Has the following
+     * wildcards:
+     *
+     * <ol>
+     *   <li>%s in Source 1 for modifiers to the declaration of the parent class (e.g
+     *       "abstract/virtual").
+     *   <li>%s in Source 1 to allow injection of engine directive to exclude the parent's version
+     *       of the method.
+     *   <li>%s in Source 1 allowing the second method in the parent class to potentially call the
+     *       overrideable method.
+     *   <li>%s in Source 2 to allow injection of engine directive to exclude the child's version of
+     *       the method.
+     *   <li>%s in Source 2 to allow the second method in the child class to potentially call either
+     *       version of the overrideable method.
+     * </ol>
+     */
+    // spotless:off
+    protected static final String[] SUBCLASS_OVERRIDDEN_SOURCES = new String[]{
+        // PARENT CLASS, configurably abstract or virtual.
+        "global %s class ParentClass {\n"
+        // Define an overrideable, configurably excludeable method.
+      + "    %s\n"
+      + "    public virtual boolean getBool() {\n"
+      + "        return true;\n"
+      + "    }\n"
+        // Also define a method that can be configured to invoke the overrideable method.
+        // Annotate it to not trip the rule.
+      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+      + "    public boolean parentOptionalInvoker() {\n"
+      + "        return %s;\n"
+      + "    }\n"
+      + "}",
+        // CHILD CLASS
+        "global class ChildClass extends ParentClass {\n"
+        // define an override of the inherited method, configurably excludeable.
+      + "    %s\n"
+      + "    public override boolean getBool() {\n"
+      + "        return false;\n"
+      + "    }\n"
+        // Also define a method that can be configured to invoke whatever method is needed.
+        // Annotate it to not trip the rule.
+      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+      + "    public boolean childOptionalInvoker() {\n"
+      + "        return %s;\n"
+      + "    }\n"
+      + "}"
+    };
+    // spotless:on
+
+    /**
      * Template for a class that defines a method and invokes it via a property. Has the following
      * wildcards:
      *
@@ -129,6 +180,51 @@ public class BaseUnusedMethodTest {
         // Declare our tested method.
       + "    %s boolean testedMethod() {\n"
       + "        return true;\n"
+      + "    }\n"
+      + "}";
+    // spotless:on
+
+    /**
+     * Template for a class that can configurably invoke a method on another class. Has the
+     * following wildcards:
+     *
+     * <ol>
+     *   <li>%s for the type of static property {@code staticProp}.
+     *   <li>%s for the type of instance property {@code instanceProp}.
+     *   <li>%s for the return type of static method {@code staticMethod()}.
+     *   <li>%s for the return type of instance method {@code instanceMethod()}.
+     *   <li>%s for the type of parameter {@code param} for method {@code invokeMethod()}.
+     *   <li>%s for the type of variable {@code var} declared within method {@code invokeMethod()}.
+     *   <li>%s for the return value of method {@code invokeMethod()}.
+     * </ol>
+     */
+    // spotless:off
+    protected static final String INVOKER_SOURCE =
+        "global class InvokerClass {\n"
+        // Add a static property of configurable type.
+      + "    public static %s staticProp;\n"
+        // Add an instance property of configurable type.
+      + "    public %s instanceProp;\n"
+        // Add a static method of configurable return type, annotated to not trip the rule.
+      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+      + "    public static %s staticMethod() {\n"
+        // UnusedMethodRule won't care that the method returns null.
+      + "        return null;\n"
+      + "    }"
+        // Add an instance method of configurable return type, annotated to not trip the rule.
+      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+      + "    public %s instanceMethod() {\n"
+        // UnusedMethodRule won't care that the method returns null.
+      + "        return null;\n"
+      + "    }\n"
+        // Declare a method annotated to not trip the rule, and with a parameter
+        // of configurable type.
+      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+      + "    public boolean invokeMethod(%s param)\n"
+        // Declare a variable of configurable type. UnusedMethodRule won't care
+        // that the variable is uninitialized.
+      + "        %s var;\n"
+      + "        return %s;\n"
       + "    }\n"
       + "}";
     // spotless:on

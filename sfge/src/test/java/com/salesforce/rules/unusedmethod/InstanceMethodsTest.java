@@ -14,6 +14,8 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 public class InstanceMethodsTest extends BaseUnusedMethodTest {
 
+    // ====== SECTION 1: BLATANTLY UNUSED METHODS ======
+
     /**
      * Simple tests verifying that obviously unused instance methods are flagged as unused.
      *
@@ -59,6 +61,8 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
         // spotless:on
         assertViolations(sourceCode, "unusedMethod");
     }
+
+    // ====== SECTION 2: INTERNAL CALLS ======
 
     /**
      * Tests for cases where an instance method is called by the class that defines it.
@@ -117,7 +121,7 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
     })
     @ParameterizedTest(name = "{displayName}: Called by {0} in {1} as {2}")
     @Disabled
-    public void instanceInvokedBySubclass_expectNoViolation(
+    public void instanceInvokedByInheritingSubclass_expectNoViolation(
             String testedVisibility, String callerClass, String invocation) {
         // Either the child or grandchild will invoke the parent method. The other will return a
         // literal true.
@@ -148,97 +152,170 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
             })
     @ParameterizedTest(name = "{displayName}: Invoked via {0}")
     @Disabled
-    public void instanceOverriddenAndNotInvoked_expectViolation(String invocation) {
-        // spotless:off
-        String[] sourceCodes = new String[]{
-            "global virtual class ParentClass {\n"
-            // Define the method that will be overridden
-          + "    public virtual boolean testedMethod() {\n"
-          + "        return true;\n"
-          + "    }\n"
-          + "}",
-            "global class ChildClass extends ParentClass {\n"
-            // Override the method from the parent.
-          + "    /* sfge-disable-stack UnusedMethodRule */"
-          + "    public override boolean testedMethod() {\n"
-          + "        return true;\n"
-          + "    }\n"
-            // Call the override, not the variant on the parent.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean invoker() {\n"
-          + "        return " + invocation + ";\n"
-          + "    }\n"
-          + "}"
-        };
-        // spotless:on
+    public void instanceNotInvokedByOverridingSubclass_expectViolation(String invocation) {
+        // Fill in the source code template.
+        String[] sourceCodes =
+                new String[] {
+                    // The parent class should be virtual, its version of the method un-excluded,
+                    // and its secondary method doing nothing important.
+                    String.format(SUBCLASS_OVERRIDDEN_SOURCES[0], "virtual", "", "true"),
+                    // The child's version of the method should be excluded, and invoked by the
+                    // secondary method.
+                    String.format(
+                            SUBCLASS_OVERRIDDEN_SOURCES[1],
+                            "/* sfge-disable-stack UnusedMethodRule */",
+                            invocation)
+                };
         assertViolations(
                 sourceCodes,
                 v -> {
-                    assertEquals("testedMethod", v.getSourceVertexName());
+                    assertEquals("getBool", v.getSourceVertexName());
                     assertEquals("ParentClass", v.getSourceVertex().getDefiningType());
                 });
     }
 
     /**
+     * Tests for the cases where a method is invoked in a superclass and overridden in a subclass.
+     * The subclass's version of the method should count as used. This paradigm is most common in
+     * abstract classes.
+     *
+     * @param superclassModifier - The modifier allowing the superclass to be heritable.
+     * @param invocation - The manner in which the superclass invokes the tested method.
+     */
+    @CsvSource({
+        "virtual, this.getBool()",
+        "virtual, getBool()",
+        "abstract, this.getBool()",
+        "abstract, getBool()",
+    })
+    @ParameterizedTest(name = "{displayName}: superclass is {0}, method invoked as {1}")
+    @Disabled
+    public void instanceInvokedByOriginatingSuperclass_expectNoViolation(
+            String superclassModifier, String invocation) {
+        String[] sourceCodes =
+                new String[] {
+                    // The parent's version of the method should be excluded from analysis, and the
+                    // secondary method should invoke it.
+                    String.format(
+                            SUBCLASS_OVERRIDDEN_SOURCES[0],
+                            superclassModifier,
+                            "/* sfge-disable-stack UnusedMethodRule */",
+                            invocation),
+                    // The child's version of the method should be un-excluded, and the secondary
+                    // method should do nothing important.
+                    String.format(SUBCLASS_OVERRIDDEN_SOURCES[1], "", "true")
+                };
+        assertNoViolations(sourceCodes, 1);
+    }
+
+    // ====== SECTION 3: EXTERNAL CALLS ======
+    /**
      * Tests for cases where an instance method is invoked on an instance of its defining class or a
      * subclass that inherits it without overriding it.
      *
      * @param hostClass - The class to be instantiated
+     * @param instantiation - The instance of {@code hostClass} on which {@code getBool()} is
+     *     invoked.
      */
-    @ValueSource(strings = {"ParentClass", "ChildClass", "GrandchildClass"})
-    @ParameterizedTest(name = "{displayName}: Instance of {0}")
+    @CsvSource({
+        // Every combination of:
+        // - Parent/child/grandchild class
+        // - Invocation via
+        //    - static property/method with/without explicit type
+        //    - instance property/method with/without explicit this
+        //    - method parameter
+        //    - variable
+        //    - inline construction
+        "ParentClass, InvokerClass.staticProp",
+        "ParentClass, staticProp",
+        "ParentClass, InvokerClass.staticMethod()",
+        "ParentClass, staticMethod()",
+        "ParentClass, this.instanceProp",
+        "ParentClass, instanceProp",
+        "ParentClass, this.instanceMethod()",
+        "ParentClass, instanceMethod()",
+        "ParentClass, param",
+        "ParentClass, var",
+        "ParentClass, new ParentClass()",
+        "ChildClass, InvokerClass.staticProp",
+        "ChildClass, staticProp",
+        "ChildClass, InvokerClass.staticMethod()",
+        "ChildClass, staticMethod()",
+        "ChildClass, this.instanceProp",
+        "ChildClass, instanceProp",
+        "ChildClass, this.instanceMethod()",
+        "ChildClass, instanceMethod()",
+        "ChildClass, param",
+        "ChildClass, var",
+        "ChildClass, new ChildClass()",
+        "GrandchildClass, InvokerClass.staticProp",
+        "GrandchildClass, staticProp",
+        "GrandchildClass, InvokerClass.staticMethod()",
+        "GrandchildClass, staticMethod()",
+        "GrandchildClass, this.instanceProp",
+        "GrandchildClass, instanceProp",
+        "GrandchildClass, this.instanceMethod()",
+        "GrandchildClass, instanceMethod()",
+        "GrandchildClass, param",
+        "GrandchildClass, var",
+        "GrandchildClass, new GrandchildClass()",
+    })
+    @ParameterizedTest(name = "{displayName}: Called on {1}, instance of {0}")
     @Disabled
-    public void instanceInvokedOnObjectInstance_expectNoViolation(String hostClass) {
-        // spotless:off
-        String[] sourceCodes = new String[] {
-            // The parent method will be public, and neither the child nor grandchild will invoke it.
-            String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[0], "public"),
-            String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[1], "public", "true"),
-            String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[2], "public", "true"),
-            // Also add another class that instantiates the class and calls the method.
-            "global class InvokerClass {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean invokeMethod() {\n"
-          + "        " + hostClass + " obj = new " + hostClass + "();\n"
-          + "        return obj.methodOnParent();\n"
-          + "    }\n"
-          + "}"
-        };
-        // spotless:on
+    public void instanceInvokedOnInstantiatedObject_expectNoViolation(
+            String hostClass, String instantiation) {
+        String[] sourceCodes =
+                new String[] {
+                    // The parent method will be public, and neither the child nor grandchild will
+                    // invoke it.
+                    String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[0], "public"),
+                    String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[1], "public", "true"),
+                    String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[2], "public", "true"),
+                    // Add a version of the invoker class that calls the method as specified.
+                    configureInvoker(hostClass, instantiation + ".getBool()")
+                };
         assertNoViolations(sourceCodes, 1);
     }
 
     /**
      * Test for the case where an instance method is overridden by a subclass, then the subclass is
-     * instantiated and the override version is called instead of the original.
+     * instantiated and its version of the method is called. This should not count as a usage of the
+     * parent method.
+     *
+     * @param instantiation - The instance of the child class on which {@code getBool()} is invoked.
      */
-    @Test
+    @ValueSource(
+            strings = {
+                "InvokerClass.staticProp",
+                "staticProp",
+                "InvokerClass.staticMethod()",
+                "staticMethod()",
+                "this.instanceProp",
+                "instanceProp",
+                "this.instanceMethod()",
+                "instanceMethod()",
+                "param",
+                "var",
+                "new ChildClass()"
+            })
+    @ParameterizedTest(name = "{displayName}: Child method invoked via {0}")
     @Disabled
-    public void instanceInvokedOnOverriddenSubclass_expectViolation() {
-        // spotless:off
-        String[] sourceCodes = new String[]{
-            // PARENT CLASS
-            "global virtual class ParentClass {\n"
-          + "    public virtual boolean testedMethod() {\n"
-          + "        return true;\n"
-          + "    }\n"
-          + "}",
-            // CHILD CLASS overrides parent method
-            "global class ChildClass extends ParentClass {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public override boolean testedMethod() {\n"
-          + "        return true;\n"
-          + "    }\n"
-          + "}\n",
-            // Invoker class instantiates the subclass and invokes the method.
-            "global class Invoker {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean callMethod() {\n"
-          + "        return new ChildClass().testedMethod();\n"
-          + "    }\n"
-          + "}"
-        };
-        // spotless:on
+    public void instanceNotInvokedOnInstantiatedOverrider_expectViolation(String instantiation) {
+        String[] sourceCodes =
+                new String[] {
+                    // The parent class should be virtual, its version of the method un-excluded,
+                    // and its secondary method doing nothing interesting.
+                    String.format(SUBCLASS_OVERRIDDEN_SOURCES[0], "virtual", "", "true"),
+                    // The child class's version of the method should be excluded and its secondary
+                    // method does nothing interesting.
+                    String.format(
+                            SUBCLASS_OVERRIDDEN_SOURCES[1],
+                            "/* sfge-disable-stack UnusedMethodRule */",
+                            "true"),
+                    // Add a version of the invoker configured to instantiate the child class and
+                    // invoke its version of the method.
+                    configureInvoker("ChildClass", instantiation + ".getBool()")
+                };
         assertViolations(
                 sourceCodes,
                 v -> {
@@ -248,81 +325,100 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
     }
 
     /**
-     * Tests for the cases where a method overrides a method it inherited from a parent class, and
-     * the parent class calls the method. The method should count as used, because this paradigm is
-     * exceedingly popular for abstract classes.
+     * Tests for cases where a method overrides a superclass's method, and the method is called on
+     * an instance of the superclass. In this case, the method should count as used, because it's
+     * possible that it's actually a child class instance being up-cast. This paradigm is
+     * exceedingly popular with abstract classes.
      *
-     * @param superclassModifier - The modifier that allows the superclass to be heritable.
-     * @param invocation - The manner in which the superclass invokes the method.
+     * @param instantiation - The instance of the parent class on which {@code getBool()} is
+     *     invoked.
      */
-    @CsvSource({
-        "virtual, this.getBool()",
-        "virtual, getBool()",
-        "abstract, this.getBool()",
-        "abstract, getBool()"
-    })
-    @ParameterizedTest(name = "{displayName}: {0} superclass, invoked as {1}")
+    @ValueSource(
+            strings = {
+                // CRUCIAL NOTE: This test does NOT include an inline construction of ParentClass,
+                // since in such
+                // a case it's transparently obvious that the object isn't an up-cast subclass.
+                "InvokerClass.staticProp",
+                "staticProp",
+                "InvokerClass.staticMethod()",
+                "staticMethod()",
+                "this.instanceProp",
+                "instanceProp",
+                "this.instanceMethod()",
+                "instanceMethod()",
+                "param",
+                "var"
+            })
+    @ParameterizedTest(name = "{displayName}: Invocation via {0}")
     @Disabled
-    public void instanceInvokedBySuperclass_expectNoViolation(
-            String superclassModifier, String invocation) {
-        // spotless:off
-        String[] sourceCodes = new String[] {
-            "global " + superclassModifier + " class Superclass {\n"
-            // Declare a method in the superclass, annotated so it can't trip the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public virtual boolean getBool() {\n"
-          + "        return true;\n"
-          + "    }\n"
-            // Declare a method that invokes the tested method.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean callTestedMethod() {\n"
-          + "        return " + invocation + ";\n"
-          + "    }\n"
-          + "}",
-            // Declare a subclass that overrides the inherited method.
-            "global class MyClass extends Superclass {\n"
-          + "    public override boolean getBool() {\n"
-          + "        return true;\n"
-          + "    }\n"
-          + "}"
-        };
-        // spotless:on
+    public void instanceInvokedOnInstantiatedOriginator_expectNoViolation(String instantiation) {
+        String[] sourceCodes =
+                new String[] {
+                    // The parent should be virtual, its version of the method should be excluded
+                    // from analysis, and its secondary method does nothing.
+                    String.format(
+                            SUBCLASS_OVERRIDDEN_SOURCES[0],
+                            "virtual",
+                            "/* sfge-disable-stack UnusedMethodRule */",
+                            "true"),
+                    // The child's version of the method should be non-excluded, and its secondary
+                    // method does nothing.
+                    String.format(SUBCLASS_OVERRIDDEN_SOURCES[1], "", "true"),
+                    // Add an invoker that calls the method on an instantiation of the parent.
+                    configureInvoker("ParentClass", instantiation + ".getBool()")
+                };
         assertNoViolations(sourceCodes, 1);
     }
 
     /**
-     * Tests for cases where a method overrides a superclass's method, and the method is called on
-     * an instance of the superclass. In this case, the method should count as used, because this
-     * paradigm is very common with abstract classes in particular.
+     * Tests for cases where an instance method is called at the end of a long chain of middleman
+     * calls and properties.
      *
-     * @param superclassModifier - The modifier applied to the superclass that makes it heritable.
+     * @param middlemanChain - The intermediate chain of properties/method calls.
      */
-    @ValueSource(strings = {"virtual", "abstract"})
-    @ParameterizedTest(name = "{displayName}: {0} superclass")
+    @ValueSource(
+            strings = {
+                // property -> property -> end property
+                "middlemanProp.middlemanProp.endProp",
+                // property -> property -> end method
+                "middlemanProp.middlemanProp.endMethod()",
+                // property -> method -> end property
+                "middlemanProp.middlemanMethod().endProp",
+                // property -> method -> end method
+                "middlemanProp.middlemanMethod().endMethod()",
+                // method -> property -> end property
+                "middlemanMethod().middlemanProp.endProp",
+                // method -> property -> end method
+                "middlemanMethod().middlemanProp.endMethod()",
+                // method -> method -> end property
+                "middlemanMethod().middlemanMethod().endProp",
+                // method -> method -> end method
+                "middlemanMethod().middlemanMethod().endMethod()"
+            })
+    @ParameterizedTest(name = "{displayName}: middleman chain {0}")
     @Disabled
-    public void instanceInvokedOnSuperclass_expectNoViolation(String superclassModifier) {
+    public void instanceInvokedViaMiddleman_expectNoViolation(String middlemanChain) {
         // spotless:off
-        String[] sourceCodes = new String[] {
-            "global " + superclassModifier + " class Superclass {\n"
-            // Declare a method in the superclass, annotated so it can't trip the rule.
+        String[] sourceCodes = new String[]{
+            // The target class can be simple.
+            String.format(SIMPLE_UNUSED_OUTER_METHOD_SOURCE, "public"),
+            // Declare a class that will act as a middleman.
+            "global class MiddlemanClass {\n"
+            // Give the middleman class a self-referential property, and a property instantiated as the target class.
+          + "    public MiddlemanClass middlemanProp = this;\n"
+          + "    public MyClass endProp = new MyClass();\n"
+            // Give the middleman class a self-returning method and a MyClass-returning method.
           + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public virtual boolean getBool() {\n"
-          + "        return true;\n"
+          + "    public MiddlemanClass middlemanMethod() {\n"
+          + "        return this;\n"
+          + "    }\n"
+          + "    /* sfge-disable-stack UnusedMethodRule */\n"
+          + "    public MyClass endMethod() {\n"
+          + "        return new MyClass();\n"
           + "    }\n"
           + "}",
-            // Declare a subclass that overrides the inherited method.
-            "global class MyClass extends Superclass {\n"
-          + "    public override boolean getBool() {\n"
-          + "        return true;\n"
-          + "    }\n"
-          + "}",
-            // Declare a class with a method that accepts a superclass instance and calls the target method.
-            "global class InvokerClass {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean callMethod(Superclass obj) {\n"
-          + "        return obj.getBool();\n"
-          + "    }\n"
-          + "}"
+            // Create an invoker that uses the middleman as requested.
+            configureInvoker("MiddlemanClass", "this.instanceProp." + middlemanChain + ".unusedMethod()")
         };
         // spotless:on
         assertNoViolations(sourceCodes, 1);
@@ -460,5 +556,67 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
                         + "    }\n"
                         + "}\n";
         assertNoViolations(sourceCode, 1);
+    }
+
+    /**
+     * This test covers a weird edge case: Inner classes can be instantiated by outer/sibling
+     * classes with just the inner name. If another outer class shares the same name, and both
+     * classes have a method with the same signature, then the inner class takes precedence over the
+     * outer class.
+     */
+    @Test
+    @Disabled
+    public void externalReferenceSyntaxCollision_expectViolation() {
+        // spotless:off
+        String[] sourceCodes = new String[]{
+            // Declare an outer class
+            "global class OuterClass {\n"
+            // Declare a method that instantiates the inner class
+          + "    /* sfge-disable-stack UnusedMethodRule */\n"
+          + "    public boolean causeCollision() {\n"
+          + "        return new CollidingClass().getBoolean();\n"
+          + "    }\n"
+            // Declare an inner class to cause collisions.
+          + "    public class CollidingClass {\n"
+            // Declare a method. Annotate it to not trip the rule.
+          + "        /* sfge-disable-stack UnusedMethodRule */\n"
+          + "        public boolean getBoolean() {\n"
+          + "            return true;\n"
+          + "        }\n"
+          + "    }\n"
+          + "}",
+            // Declare an outer class with the same name as the inner class.
+            "global class CollidingClass {\n"
+            // Give it a method with the same signature as the inner method.
+          + "    public boolean getBoolean() {\n"
+          + "        return true;\n"
+          + "    }\n"
+          + "}"
+        };
+        // spotless:on
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("CollidingClass", v.getSourceDefiningType());
+                    assertEquals("getBoolean", v.getSourceVertexName());
+                });
+    }
+
+    /**
+     * Helper method for easily configuring {@link #INVOKER_SOURCE}.
+     *
+     * @param hostClass - The class to be used in all class-related wildcards.
+     * @param invocation - The invocation to be used in the invocation wildcard.
+     */
+    private static String configureInvoker(String hostClass, String invocation) {
+        return String.format(
+                INVOKER_SOURCE,
+                hostClass,
+                hostClass,
+                hostClass,
+                hostClass,
+                hostClass,
+                hostClass,
+                invocation);
     }
 }
