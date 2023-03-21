@@ -50,7 +50,7 @@ public final class UserFacingMessages {
         public static final String INSUFFICIENT_HEAP_SPACE =
                 "There's insufficient heap space (%d bytes) to execute Graph Engine. Increase heap space using the --sfgejvmargs option and retry.";
         public static final String PATH_EXPANSION_LIMIT_REACHED =
-                "Graph Engine reached the path expansion upper limit (%d).";
+                "Graph Engine reached the path expansion upper limit (%d)";
     }
 
     public static final class CrudFlsTemplates {
