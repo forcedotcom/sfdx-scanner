@@ -429,7 +429,6 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
      * another inner class, then those methods count as used. Specific case: Instance provided as
      * method parameter.
      */
-    @ValueSource(strings = {"MyClass.MyInner1", "MyInner1"})
     @CsvSource({
         "public,  MyClass.MyInner1",
         "protected,  MyClass.MyInner1",
@@ -559,6 +558,41 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
     }
 
     /**
+     * This test covers a weird edge case: If a class and its instance property both have an
+     * instance method with the same name, then invoking {@code this.prop.theMethod()} needs to
+     * count as a usage for {@code prop}'s method, not {@code this}'s.
+     */
+    @Test
+    @Disabled
+    public void externalReferenceThisCollision_expectViolation() {
+        // spotless:off
+        String[] sourceCodes = new String[] {
+            // The first class should be our generic unused class with a public method.
+            String.format(SIMPLE_UNUSED_OUTER_METHOD_SOURCE, "public"),
+            "global class SecondClass {\n"
+            // Give the second class a property that's an instance of MyClass.
+          + "    public MyClass prop;\n"
+            // Also give it a method with the name "UnusedMethod", so it overlaps with MyClass.
+          + "    public boolean unusedMethod() {\n"
+          + "        return false;\n"
+          + "    }\n"
+            // Give it a method that calls the property's method via `this`, annotated to skip the rule.
+          + "    /* sfge-disable-stack UnusedMethodRule */\n"
+          + "    public boolean invoker() {\n"
+          + "        return this.prop.unusedMethod();\n"
+          + "    }\n"
+          + "}"
+        };
+        // spotless:on
+        assertViolations(
+                sourceCodes,
+                v -> {
+                    assertEquals("SecondClass", v.getSourceDefiningType());
+                    assertEquals("unusedMethod", v.getSourceVertexName());
+                });
+    }
+
+    /**
      * This test covers a weird edge case: Inner classes can be instantiated by outer/sibling
      * classes with just the inner name. If another outer class shares the same name, and both
      * classes have a method with the same signature, then the inner class takes precedence over the
@@ -566,7 +600,7 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
      */
     @Test
     @Disabled
-    public void externalReferenceSyntaxCollision_expectViolation() {
+    public void externalReferenceClassNameCollision_expectViolation() {
         // spotless:off
         String[] sourceCodes = new String[]{
             // Declare an outer class
