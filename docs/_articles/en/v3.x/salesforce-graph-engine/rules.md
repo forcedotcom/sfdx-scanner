@@ -3,7 +3,7 @@ title: 'Rules'
 lang: en
 ---
 
-## ApexFlsViolationRule
+## ApexFlsViolationRule#
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the data flow analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule.
 
 ### Definitions
@@ -79,7 +79,7 @@ Graph Engine encountered an error while walking this path. Manually verify that 
 - [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
 - [Frequently Asked Questions](./en/v3.x/faq/)
 
-## UnusedMethodRule
+## UnusedMethodRule#
 
 UnusedMethodRule detects methods contained in your code that aren’t invoked. It detects:
 
@@ -111,7 +111,7 @@ Because no invocations of the indicated method were found, the method is unneces
 - Protected and public instance methods aren't supported, are excluded from analysis, and can produce false negatives.
 - Global methods are intentionally excluded because their external usage is assumed.
 
-## UnimplementedTypeRule
+## UnimplementedTypeRule#
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
 
@@ -211,4 +211,5 @@ The operation dereferences a null object and throws a NullPointerException. Revi
 
 ## Roadmap
 
-We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).
+We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).	
+	
