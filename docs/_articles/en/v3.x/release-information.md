@@ -20,7 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We updated the PMD engine to version 6.55.0.
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
-* NEW (GraphEngine): We added a new rule, ApexNullPointerExceptionRule, to Graph Engine. Use this rule to identify Apex operations in your code that throw NullPointerExceptions.
+* NEW (GraphEngine): We added a new rule, ApexNullPointerExceptionRule, to Graph Engine. Use this rule to identify Apex operations in your code that throw NullPointerExceptions. Read Graph Engine [Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation for more info.
 * FIX (GraphEngine): We updated Graph Engine’s UnusedMethodRule to detect all static, unused methods.
 * FIX (GraphEngine): We updated Graph Engine's UnusedMethodRule to detect all unused constructors.
 
