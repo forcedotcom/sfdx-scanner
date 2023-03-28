@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## ApexFlsViolationRule#
-ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the data flow analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule.
+ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. Example: `sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target`.
 
 ### Definitions
 
