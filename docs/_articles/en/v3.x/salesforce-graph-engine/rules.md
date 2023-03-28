@@ -152,7 +152,8 @@ Examples:
 ```
 public void example1() {
 	Object myStr = null;
-	System.debug(myStr.toLowerCase()); // throws System.NullPointerException 
+	System.debug(myStr.toLowerCase()); 
+// throws System.NullPointerException 
 // since method is invoked on null object.
 }
 
@@ -166,7 +167,8 @@ public void example2(String myStr) {
 
 public void example3() {
 	Integer i; // Not initialized
-	Integer y = i + 2; // throws System.NullPointerException since 
+	Integer y = i + 2; 
+// throws System.NullPointerException since 
 // binary operation is invoked on null object
 }
 ```
