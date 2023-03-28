@@ -59,7 +59,7 @@ Parameter explanation:
 
 > _Validation-Type_ validation is missing for _Operation-Name_ operation on _Object-Type_ with fields _Comma-Separated-Fields_ - Graph Engine couldn't parse all objects and fields correctly. Confirm manually if the objects and fields involved in these segments have FLS checks: _Unknown-Segments_
 
-This case is the ame as the common case, but also Graph Engine isn't confident about the object names or field names that it detected. You also see this clause when your field or object ends with `__r`. In both cases, review the relational field, object, and the unparsed segments to ensure that they have the required CRUD/FLS checks. Next, add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to force Graph Engine to ignore this warning in the next run.
+This case is the same as the common case, but also Graph Engine isn't confident about the object names or field names that it detected. You also see this clause when your field or object ends with `__r`. In both cases, review the relational field, object, and the unparsed segments to ensure that they have the required CRUD/FLS checks. Next, add an [engine directive](./en/v3.x/salesforce-graph-engine/working-with-sfge/#add-engine-directives) to force Graph Engine to ignore this warning in the next run.
 
 *stripInaccessible Warning Case*
 
