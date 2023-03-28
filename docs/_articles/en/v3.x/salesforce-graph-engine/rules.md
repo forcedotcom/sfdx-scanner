@@ -203,7 +203,7 @@ To run the both graph-based analysis rules–ApexFlsViolationRule and ApexNullPo
 | **Sanitizer**	 |				                                  														      		|
 |                |Non-null initialization of variables and null checks before accessing. Examples: `String s = 'abcde';` , `if (s != null) {` |
 
-### Interpreting ApexNullPointerRule Results
+### Interpreting ApexNullPointerExceptionRule Results
 
 Match any violation message that you receive with this case to understand more about the violation.
 
@@ -215,6 +215,6 @@ Parameter explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-## Roadmap
+## Roadmap	
 
 We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).	
