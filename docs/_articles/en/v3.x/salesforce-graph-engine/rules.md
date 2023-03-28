@@ -182,7 +182,7 @@ To fix NullPointerException issues, use one of these methods.
 
 Avoid initializing variables to `null`. If your logic demands initialization to `null`, make sure to reassign a value to your variable before you invoke an operation on it.
 
-To run the both data flow analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Error Prone”` to run ApexNullPointerExceptionRule only.
+To run the both graph-based analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Error Prone”` to run ApexNullPointerExceptionRule only.
 
 ### Definitions
 
@@ -218,4 +218,3 @@ The operation dereferences a null object and throws a NullPointerException. Revi
 ## Roadmap
 
 We’re working on adding more rules. In the meantime, give us your [feedback](https://www.research.net/r/SalesforceCA).	
-	
