@@ -5,7 +5,7 @@ lang: en
 ## Introduction to Salesforce Graph Engine
 Salesforce Graph Engine is an open-source Salesforce tool that developers use to detect security and quality issues in their code. Graph Engine also performs more complex checks than an average static analysis tool because Graph Engine uses [data flow analysis](https://en.wikipedia.org/wiki/Data-flow_analysis).
 
-During this pilot, Graph Engine supports one Salesforce language and one rule: Apex and the `ApexFlsViolationRule` rule. `ApexFlsViolationRule` helps detect [Create, Read, Update, and Delete and Field-Level Security (CRUD/FLS)](https://www.youtube.com/watch?v=1ZYjpjPTIn8) violations.
+Graph Engine detects issues in Apex. Read our [Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation to see what rules we support.
 
 ## How does Salesforce Graph Engine’s Data Flow Analysis work?
 

@@ -12,6 +12,18 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.9.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We updated the PMD engine to version 6.55.0.
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): We added a new rule, ApexNullPointerExceptionRule, to Graph Engine. Use this rule to identify Apex operations in your code that throw NullPointerExceptions. Read Graph Engine [Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation for more info.
+* FIX (GraphEngine): We updated Graph Engine’s UnusedMethodRule to detect all static, unused methods.
+* FIX (GraphEngine): We updated Graph Engine's UnusedMethodRule to detect all unused constructors.
+
 ## [v3.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.10.0) (02-27-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.10.0...v3.9.0)
