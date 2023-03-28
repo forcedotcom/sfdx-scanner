@@ -209,7 +209,7 @@ Match any violation message that you receive with this case to understand more a
 
 *Common Case*
 
-ApexNullPointerRule identifies Apex operations with a high likelihood of throwing a NullPointerException
+ApexNullPointerExceptionRule identifies Apex operations with a high likelihood of throwing a NullPointerException
 
 Parameter explanation:
 
