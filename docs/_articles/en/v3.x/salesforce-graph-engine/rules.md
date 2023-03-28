@@ -4,7 +4,7 @@ lang: en
 ---
 
 ## ApexFlsViolationRule#
-ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
+ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis rules–-ApexFlsViolationRule and ApexNullPointerExceptionRule–-run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
 
 Example: 
 ```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
@@ -90,7 +90,7 @@ UnusedMethodRule detects methods contained in your code that aren’t invoked. I
 - private instance methods
 - constructors
 
-To invoke the graph-based rules–UnusedMethodRule and UnimplementedTypeRule–run: `scanner:run --engine sfge --projectdir MyDirectory`. 
+To invoke the graph-based rules–-UnusedMethodRule and UnimplementedTypeRule–-run: `scanner:run --engine sfge --projectdir MyDirectory`. 
 
 Example: 
 ```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
@@ -121,7 +121,7 @@ Because no invocations of the indicated method were found, the method is unneces
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
 
-To invoke the non-data-flow analysis rules–UnusedMethodRule and UnimplementedTypeRule–run: `scanner:run --engine sfge --projectdir MyDirectory`.
+To invoke the graph-based analysis rules–-UnusedMethodRule and UnimplementedTypeRule–-run: `scanner:run --engine sfge --projectdir MyDirectory`.
 
 ### Definition
 
