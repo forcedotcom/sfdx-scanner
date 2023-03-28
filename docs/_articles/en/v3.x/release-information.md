@@ -14,7 +14,7 @@ We publish the latest Code Analyzer monthly.
 
 ## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
 
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.9.0)
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.10.0)
 
 ### Release Summary
 
@@ -23,6 +23,28 @@ We publish the latest Code Analyzer monthly.
 * NEW (GraphEngine): We added a new rule, ApexNullPointerExceptionRule, to Graph Engine. Use this rule to identify Apex operations in your code that throw NullPointerExceptions. Read Graph Engine [Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation for more info.
 * FIX (GraphEngine): We updated Graph Engine’s UnusedMethodRule to detect all static, unused methods.
 * FIX (GraphEngine): We updated Graph Engine's UnusedMethodRule to detect all unused constructors.
+
+**Closed issues:**
+* Unable to install sfdx-scanner plugin [\#1019](https://github.com/forcedotcom/sfdx-scanner/issues/1019)
+* [BUG] SFGE reports false positives for constructors only called within a given class [\#1001](https://github.com/forcedotcom/sfdx-scanner/issues/1001)
+* [BUG] FLS Violation not being found [\#1017](https://github.com/forcedotcom/sfdx-scanner/issues/1017)
+* [BUG] Cannot add custom ruleset with XPATH rules  [\#1018](https://github.com/forcedotcom/sfdx-scanner/issues/1018)
+* [Bug] How to Install the plugin link is not working [\#1011](https://github.com/forcedotcom/sfdx-scanner/issues/1011)
+* [BUG] - Error when running any command: Only json and js message files are allowed, not .md [\#998](https://github.com/forcedotcom/sfdx-scanner/issues/998)
+* [BUG] Cannot execute PMD scan with custom XML rules [\#992](https://github.com/forcedotcom/sfdx-scanner/issues/992)
+
+**Merged pull requests**
+* FIX (GraphEngine): @W-12672520@: Fixes format in UI text message [\#1029](https://github.com/forcedotcom/sfdx-scanner/pull/1029)
+* CHANGE (GraphEngine): @W-12672520@: Applies UI text feedback [\#1024](https://github.com/forcedotcom/sfdx-scanner/pull/1024)
+* CHANGE (GraphEngine): @W-12494075@: Adjusted messages for ApexNullPointerExceptionRule. [\#1021](https://github.com/forcedotcom/sfdx-scanner/pull/1021)
+* CHANGE (PMD): @W-12699831@: Upgrades PMD version to 6.55.0 [\#1022](https://github.com/forcedotcom/sfdx-scanner/pull/1022)
+* FIX (GraphEngine): @W-12696959@: UnusedMethodRule now fully supports constructors. [\#1020](https://github.com/forcedotcom/sfdx-scanner/pull/1020)
+* NEW (GraphEngine): @W-11464344@: UnusedMethodRule supports static methods, tests enabled and passing. [\#1014](https://github.com/forcedotcom/sfdx-scanner/pull/1014)
+* CHANGE (GraphEngine): @W-12672065@: Handles backend changes to cover remaining NPE Rule cases. [\#1016](https://github.com/forcedotcom/sfdx-scanner/pull/1016)
+* NEW (GraphEngine): @W-12494075@: Add new rule `ApexNullPointerExceptionRule` [\#1010](https://github.com/forcedotcom/sfdx-scanner/pull/1010)
+* CHANGE (CodeAnalyzer): @W-12671389@: Fixed broken links in README. [\#1012](https://github.com/forcedotcom/sfdx-scanner/pull/1012)
+* FIX (GraphEngine): @W-11464344@: Refactored implementation of UnusedMethodRule. [\#1013](https://github.com/forcedotcom/sfdx-scanner/pull/1013)
+* FIX (GraphEngine): @W-11464344@: Refactored tests for UnusedMethodRule. [\#1002](https://github.com/forcedotcom/sfdx-scanner/pull/1002)
 
 ## [v3.10.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.10.0) (02-27-2023)
 

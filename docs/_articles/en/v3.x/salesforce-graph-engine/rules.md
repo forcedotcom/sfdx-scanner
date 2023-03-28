@@ -159,9 +159,9 @@ public void example1() {
 
 public void example2(String myStr) {
 	if (myStr == null) {
+		// The following line throws System.NullPointerException, since the conditional confirms
+		// that myStr is null when it reaches here.
 		System.debug(myStr.toLowerCase());
-// throws System.NullPointerException since the conditional
-// confirms that myStr is null when it reaches here.
 	}
 }
 
@@ -182,7 +182,7 @@ To fix NullPointerException issues, use one of these methods.
 
 Avoid initializing variables to `null`. If your logic demands initialization to `null`, make sure to reassign a value to your variable before you invoke an operation on it.
 
-To run the both graph-based analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Error Prone”` to run ApexNullPointerExceptionRule only.
+To run both the path-based analysis rules–ApexFlsViolationRule and ApexNullPointerExceptionRule–run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category "Error Prone"` to run ApexNullPointerExceptionRule only.
 
 ### Definitions
 
