@@ -68,12 +68,12 @@ For example, your LWC files are stored in a directory called `lwc`. Include this
 
 Your path names likely contain characters that cause issues. We recommend that you don’t use these characters in path names.
 
-| Character      | Work Aound                                  																		|
-| ---------		 | ---------                                															  			|
-| Space 		 |	Use underscores instead of spaces or enclose a path name that includes spaces fully in quotes.		
-| {}        | None        
-| []        | None        
-| ()        | None        
+| Character | Workaround                                                                                          |
+|:---|:----------------------------------------------------------------------------------------------------|
+| Space 		  | 	Use underscores instead of spaces<br/>or enclose a path name that includes spaces fully in quotes. |
+| {}        | None                                                                                                |
+| []        | None                                                                                                |
+| ()        | None                                                                                                |
 
 ## Issues with `scanner:run` and `eslint-typescript`
 

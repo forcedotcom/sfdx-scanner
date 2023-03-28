@@ -14,7 +14,7 @@ We publish the latest Code Analyzer monthly.
 
 ## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
 
-[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.9.0)
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.10.0)
 
 ### Release Summary
 
