@@ -215,7 +215,8 @@ public class ApexPathUtilTest {
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
         paths =
                 ApexPathExpanderUtil.expand(
-                        g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig());
+                                g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig())
+                        .getAcceptedResults();
         MatcherAssert.assertThat(paths, hasSize(equalTo(2)));
 
         List<MethodCallExpressionVertex> methodsCalled = new ArrayList<>();

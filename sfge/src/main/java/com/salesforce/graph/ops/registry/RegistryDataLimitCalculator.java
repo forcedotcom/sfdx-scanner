@@ -43,7 +43,9 @@ public class RegistryDataLimitCalculator {
 
         if (heapMaxSize < minimumItemCountExpected * averageItemSize) {
             throw new UserActionException(
-                    String.format(UserFacingMessages.INSUFFICIENT_HEAP_SPACE, heapMaxSize));
+                    String.format(
+                            UserFacingMessages.PathExpansionTemplates.INSUFFICIENT_HEAP_SPACE,
+                            heapMaxSize));
         }
 
         final int allowedLimit = (int) ((heapMaxSize * CAPACITY_LIMIT) / averageItemSize);

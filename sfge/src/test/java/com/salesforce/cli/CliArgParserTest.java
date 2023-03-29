@@ -48,14 +48,15 @@ public class CliArgParserTest {
         assertThrows(
                 CliArgParser.InvocationException.class,
                 () -> parser.getCliAction("notARealAction"),
-                String.format(UserFacingMessages.UNRECOGNIZED_ACTION, "notARealAction"));
+                String.format(
+                        UserFacingMessages.InvocationErrors.UNRECOGNIZED_ACTION, "notARealAction"));
     }
 
     @CsvSource({
         // As we add new DFA and non-DFA rules, the numbers in these tests
         // will increase.
         "pathless, 2",
-        "dfa, 1"
+        "dfa, 2"
     })
     @ParameterizedTest(name = "{displayName}: {0} rules")
     public void catalogFlowReturnsExpectedRules(String arg, int ruleCount) {

@@ -68,7 +68,8 @@ public class ApexPathExpanderTest {
 
         paths =
                 ApexPathExpanderUtil.expand(
-                        g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig());
+                                g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig())
+                        .getAcceptedResults();
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
         path = paths.get(0);
         // The path should have a mapping for #getInstance and #getName
@@ -152,7 +153,8 @@ public class ApexPathExpanderTest {
 
         paths =
                 ApexPathExpanderUtil.expand(
-                        g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig());
+                                g, paths.get(0), ApexPathUtil.getSimpleExpandingConfig())
+                        .getAcceptedResults();
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
         path = paths.get(0);
         // The path should have a mapping for new MyClass() and #doSomething

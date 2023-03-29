@@ -1,7 +1,8 @@
 package com.salesforce.graph.ops.expander;
 
 import com.salesforce.graph.symbols.apex.ApexValue;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import com.salesforce.graph.vertex.BaseSFVertex;
+import com.salesforce.graph.vertex.NullAccessCheckedVertex;
 import javax.annotation.Nullable;
 
 /**
@@ -14,17 +15,21 @@ import javax.annotation.Nullable;
  */
 public final class NullValueAccessedException extends ApexPathExpanderRuntimeException {
     private final ApexValue<?> apexValue;
-    private final MethodCallExpressionVertex vertex;
+    private final NullAccessCheckedVertex vertex;
 
     /**
      * @param apexValue that is explicitly set to null
-     * @param vertex {@link MethodCallExpressionVertex} that was executed when the object was null
+     * @param vertex {@link BaseSFVertex} that was invoked when the object was null
      */
     public NullValueAccessedException(
-            ApexValue<?> apexValue, @Nullable MethodCallExpressionVertex vertex) {
+            ApexValue<?> apexValue, @Nullable NullAccessCheckedVertex vertex) {
         super("ApexValue=" + apexValue + ", vertex=" + (vertex != null ? vertex : "<null>"));
         this.apexValue = apexValue;
         this.vertex = vertex;
+    }
+
+    public NullAccessCheckedVertex getVertex() {
+        return vertex;
     }
 
     @Override

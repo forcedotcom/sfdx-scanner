@@ -43,7 +43,9 @@ public class PathExpansionRegistryTest {
         assertThrows(
                 PathExpansionLimitReachedException.class,
                 () -> createApexPathExpanders(itemCountToAdd, new PathExpansionRegistry()),
-                String.format(UserFacingMessages.PATH_EXPANSION_LIMIT_REACHED, limit));
+                String.format(
+                        UserFacingMessages.PathExpansionTemplates.PATH_EXPANSION_LIMIT_REACHED,
+                        limit));
     }
 
     @Test
