@@ -64,6 +64,17 @@ For example, your LWC files are stored in a directory called `lwc`. Include this
 
 ---
 
+### I’m seeing errors on my scans. Why isn’t Code Analyzer scanning all of my paths?
+
+Your path names likely contain characters that cause issues. We recommend that you don’t use these characters in path names.
+
+| Character | Workaround                                                                                          |
+|:---|:----------------------------------------------------------------------------------------------------|
+| Space 		  | 	Use underscores instead of spaces<br/>or enclose a path name that includes spaces fully in quotes. |
+| {}        | None                                                                                                |
+| []        | None                                                                                                |
+| ()        | None                                                                                                |
+
 ## Issues with `scanner:run` and `eslint-typescript`
 
 ### The `scanner:run` command output contains the message `'<file_name>' doesn’t reside in a location that is included by your tsconfig.json 'include' attribute`.

@@ -29,7 +29,7 @@ To compile your new Java-based PMD rules:
 
 * Add ```$PMD_BIN_HOME/lib/*``` to your CLASSPATH. 
 * Reflect the ```java-home path``` in your Java setup in ```<HOME_DIR>/.sfdx-scanner/Config.json```.
-* Use [PMD version 6.48.0](https://pmd.github.io/#downloads) to write your custom rules.
+* Use {{ site.data.versions-v3.pmd }} to write your custom rules.
 * If you’re using an integrated development environment (IDE), add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To compile from the command line, use the ```javac``` command. 
 
 	Example:
