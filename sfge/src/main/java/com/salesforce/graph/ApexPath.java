@@ -19,14 +19,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.StandardConditionVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.NotThreadSafe;
@@ -191,6 +184,38 @@ public class ApexPath implements DeepCloneable<ApexPath>, Collectible<ApexPath> 
     @Override
     public ApexPath deepClone() {
         return new ApexPath(this);
+    }
+
+    /**
+     * Get every subpath contained within this path.
+     *
+     * @param deep - Also include subpaths of subpaths
+     */
+    public List<ApexPath> getAllSubpaths(boolean deep) {
+        List<ApexPath> results = new ArrayList<>();
+        if (instanceInitializationPath != null) {
+            results.add(instanceInitializationPath);
+        }
+        if (constructorPath != null) {
+            results.add(constructorPath);
+        }
+        List<Collectible<ApexPath>> collectiblePaths =
+                new ArrayList<>(newInstanceToInitializationPath.values());
+        collectiblePaths.addAll(staticClassNameToInitializationPath.values());
+        for (Collectible<ApexPath> pathCollectible : collectiblePaths) {
+            if (pathCollectible.getCollectible() != null) {
+                results.add(pathCollectible.getCollectible());
+            }
+        }
+        results.addAll(invocableVertexToPath.values());
+        if (deep) {
+            int i = 0;
+            while (i < results.size()) {
+                results.addAll(results.get(i).getAllSubpaths(true));
+                i++;
+            }
+        }
+        return results;
     }
 
     public Optional<ApexPathVertexMetaInfo> getApexPathMetaInfo() {
