@@ -355,21 +355,25 @@ public class BaseUnusedMethodTest {
             String[] sourceCodes, String[] defTypes, String[] methodNames, int[] beginLines) {
         TestUtil.buildGraph(g, sourceCodes);
         UnusedMethodRule rule = UnusedMethodRule.getInstance();
+        // Get every eligible method.
+        List<MethodVertex> eligibleMethods = rule.getEligibleMethods(g);
         for (int i = 0; i < defTypes.length; i++) {
             String definingType = defTypes[i];
             String methodName = methodNames[i];
             int beginLine = beginLines[i];
-            List<MethodVertex> methods =
+            List<MethodVertex> testedMethods =
                     SFVertexFactory.loadVertices(
                             g,
                             g.V()
                                     .has(NodeType.METHOD, Schema.DEFINING_TYPE, definingType)
                                     .has(Schema.NAME, methodName)
                                     .has(Schema.BEGIN_LINE, beginLine));
-            for (MethodVertex mv : methods) {
-                assertTrue(
-                        rule.methodIsIneligible(mv),
-                        "Expected " + mv.toMinimalString() + " to be ineligible for rule");
+            for (MethodVertex testedMethod : testedMethods) {
+                assertFalse(
+                        eligibleMethods.contains(testedMethod),
+                        "Expected "
+                                + testedMethod.toMinimalString()
+                                + " to be ineligible for rule");
             }
         }
     }
