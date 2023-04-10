@@ -1,6 +1,5 @@
 package com.salesforce.rules.unusedmethod;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.common.collect.Lists;
@@ -10,6 +9,9 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.rules.*;
+import com.salesforce.rules.unusedmethod.operations.BaseUsageTracker;
+import com.salesforce.rules.unusedmethod.operations.TestUsageTracker;
+import com.salesforce.rules.unusedmethod.operations.UsageTrackerProvider;
 import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -258,21 +260,27 @@ public class BaseUnusedMethodTest {
         TestUtil.buildGraph(g, sourceCodes);
 
         UnusedMethodRule rule = UnusedMethodRule.getInstance();
-        // TODO: FLS rule doesn't need to do this. Why not?
-        rule.reset();
         MethodVertex entryMethodVertex =
                 TestUtil.getMethodVertex(g, entryDefiningType, entryMethod);
         PathBasedRuleRunner runner =
                 new PathBasedRuleRunner(g, Lists.newArrayList(rule), entryMethodVertex);
         // Violations aren't actually generated during the `runRules()` call.
         List<Violation> violations = new ArrayList<>(runner.runRules());
+        BaseUsageTracker usageTracker = UsageTrackerProvider.get();
+        if (!(usageTracker instanceof TestUsageTracker)) {
+            fail(
+                    "Expected to receive instance of TestUsageTracker. Received "
+                            + usageTracker.getClass().getSimpleName());
+        }
+        TestUsageTracker testUsageTracker = (TestUsageTracker) usageTracker;
         for (String usedMethodKey : usedMethodKeys) {
             assertTrue(
-                    rule.usageDetected(usedMethodKey), "Expected usage of method " + usedMethodKey);
+                    testUsageTracker.isUsed(usedMethodKey),
+                    "Expected usage of method " + usedMethodKey);
         }
         for (String unusedMethodKey : unusedMethodKeys) {
             assertFalse(
-                    rule.usageDetected(unusedMethodKey),
+                    testUsageTracker.isUsed(unusedMethodKey),
                     "Expected non-usage of method " + unusedMethodKey);
         }
     }

@@ -3,7 +3,6 @@ package com.salesforce.rules;
 import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
-import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
@@ -11,6 +10,7 @@ import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.vertex.*;
+import com.salesforce.rules.unusedmethod.operations.UsageTrackerProvider;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -38,28 +38,13 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
-    /**
-     * Used internally for tracking every unique method invoked during the traversal of every path.
-     */
-    private Set<String> encounteredUsageKeys;
 
-    private UnusedMethodRule() {
-        this.encounteredUsageKeys = CollectionUtil.newTreeSet();
-    }
+    private UnusedMethodRule() {}
 
     @Override
     public boolean test(BaseSFVertex vertex) {
         // This rule is interested in any vertex representing an invocation of a method.
         return vertex instanceof InvocableVertex;
-    }
-
-    /**
-     * Reset the internal state of the rule, so it can be reused freshly. NOTE: This method should
-     * only be invoked in tests. TODO: Can we make this method's existence unnecessary?
-     */
-    @VisibleForTesting
-    public void reset() {
-        encounteredUsageKeys = CollectionUtil.newTreeSet();
     }
 
     /***
@@ -71,15 +56,14 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
     protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
         InvocableVertex invocable = (InvocableVertex) vertex;
         Optional<ApexPath> subpathOptional = getInvokedSubpath(path, invocable, true);
-        if (subpathOptional.isPresent()) {
-            // If we found a subpath corresponding to the method call, then we know which method
-            // is being called, and can mark it as used.
-            Optional<MethodVertex> methodOptional = subpathOptional.get().getMethodVertex();
-            if (methodOptional.isPresent()) {
-                String usageKey = generateUsageKey(methodOptional.get());
-                encounteredUsageKeys.add(usageKey);
-            }
-        }
+        subpathOptional.ifPresent(
+                apexPath -> {
+                    // If we found a subpath corresponding to the method call, then we know which
+                    // method is being called, and can mark it as used.
+                    Optional<MethodVertex> methodOptional = apexPath.getMethodVertex();
+                    methodOptional.ifPresent(
+                            methodVertex -> UsageTrackerProvider.get().markAsUsed(methodVertex));
+                });
 
         // Method always returns an empty list.
         return new ArrayList<>();
@@ -121,9 +105,7 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
         List<MethodVertex> eligibleMethods = getEligibleMethods(g);
         for (MethodVertex methodVertex : eligibleMethods) {
 
-            String usageKey = generateUsageKey(methodVertex);
-
-            if (!encounteredUsageKeys.contains(usageKey)) {
+            if (!UsageTrackerProvider.get().isUsed(methodVertex)) {
                 String violationMsg =
                         String.format(
                                 UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,
@@ -137,16 +119,6 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
             }
         }
         return results;
-    }
-
-    /** Generate a unique key associated with this method, so we can mark its usage. */
-    private static String generateUsageKey(MethodVertex methodVertex) {
-        // Format of keys is "definingType#methodName@beginLine".
-        return methodVertex.getDefiningType()
-                + "#"
-                + methodVertex.getName()
-                + "@"
-                + methodVertex.getBeginLine();
     }
 
     /** Returns every {@link MethodVertex} instance eligible for analysis under this rule. */
@@ -221,15 +193,6 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
             }
         }
         return false;
-    }
-
-    /**
-     * Returns true if the provided key matches a method we've seen. Note: This method is only
-     * public for use in tests. Don't use it elsewhere.
-     */
-    @VisibleForTesting
-    public boolean usageDetected(String key) {
-        return encounteredUsageKeys.contains(key);
     }
 
     public static UnusedMethodRule getInstance() {
