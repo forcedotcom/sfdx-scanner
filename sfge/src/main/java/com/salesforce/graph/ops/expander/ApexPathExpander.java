@@ -433,6 +433,7 @@ class ApexPathExpander
     void visit(ApexPath path)
             throws PathExcludedException, MethodPathForkedException, RecursionDetectedException,
                     ReturnValueInvalidCollapsedException, PathCollapsedException {
+        onVisit(path);
         boolean push = path.firstVertex() instanceof BlockStatementVertex;
         List<EngineDirective> engineDirectives = null;
         if (push) {
@@ -483,6 +484,12 @@ class ApexPathExpander
 
     Map<PathVertex, ForkEvent> getForkEvents() {
         return forkEvents;
+    }
+
+    private void onVisit(ApexPath path) {
+        for (PathExpansionObserver observer : config.getExpansionObservers()) {
+            observer.onPathVisit(path);
+        }
     }
 
     /** */

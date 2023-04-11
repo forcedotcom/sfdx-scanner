@@ -7,6 +7,7 @@ import com.salesforce.graph.ops.ApexPathUtil;
 import com.salesforce.graph.ops.ApexPathUtil.ApexPathRetrievalSummary;
 import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
 import com.salesforce.graph.ops.expander.PathExpansionException;
+import com.salesforce.graph.ops.expander.PathExpansionObserver;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
@@ -24,6 +25,7 @@ public class PathBasedRuleRunner {
     private static final Logger LOGGER = LogManager.getLogger(PathBasedRuleRunner.class);
 
     private final GraphTraversalSource g;
+    private final List<AbstractPathBasedRule> allRules;
     private final List<AbstractPathAnomalyRule> anomalyRules;
     private final List<AbstractPathTraversalRule> traversalRules;
     private final MethodVertex methodVertex;
@@ -35,6 +37,7 @@ public class PathBasedRuleRunner {
     public PathBasedRuleRunner(
             GraphTraversalSource g, List<AbstractPathBasedRule> rules, MethodVertex methodVertex) {
         this.g = g;
+        this.allRules = rules;
         this.anomalyRules = new ArrayList<>();
         this.traversalRules = new ArrayList<>();
         for (AbstractPathBasedRule rule : rules) {
@@ -198,6 +201,13 @@ public class PathBasedRuleRunner {
     private ApexPathExpanderConfig getApexPathExpanderConfig() {
         ApexPathExpanderConfig.Builder expanderConfigBuilder =
                 ApexPathUtil.getFullConfiguredPathExpanderConfigBuilder();
+        for (AbstractPathBasedRule rule : allRules) {
+            Optional<PathExpansionObserver> observerOptional = rule.getPathExpansionObserver();
+            if (observerOptional.isPresent()) {
+                expanderConfigBuilder =
+                        expanderConfigBuilder.withPathExpansionObserver(observerOptional.get());
+            }
+        }
         for (AbstractPathTraversalRule rule : traversalRules) {
             expanderConfigBuilder = expanderConfigBuilder.withVertexPredicate(rule);
         }

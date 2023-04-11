@@ -100,7 +100,13 @@ public abstract class AbstractRuleRunner {
         for (MethodVertex pathEntryPoint : pathEntryPoints) {
             submissions.add(getRuleRunnerSubmission(g, pathEntryPoint, rules));
         }
-        return ThreadableRuleExecutor.run(submissions);
+        Result res = ThreadableRuleExecutor.run(submissions);
+        for (AbstractPathBasedRule rule : rules) {
+            if (rule instanceof PostProcessingRule) {
+                res.addViolations(((PostProcessingRule) rule).postProcess(g));
+            }
+        }
+        return res;
     }
 
     /**

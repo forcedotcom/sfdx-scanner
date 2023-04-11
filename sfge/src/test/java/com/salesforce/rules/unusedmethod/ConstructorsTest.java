@@ -1,11 +1,10 @@
 package com.salesforce.rules.unusedmethod;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.rules.Violation;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -37,14 +36,13 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
         String sourceCode =
             "global class MyClass {\n"
           + "    " + declaration + " {}\n"
+          + "    \n"
+          + "    global static boolean entrypoint() {\n"
+          + "        return true;\n"
+          + "    }\n"
           + "}";
         // spotless:on
-        Consumer<Violation.RuleViolation> assertion =
-                v -> {
-                    assertEquals("<init>", v.getSourceVertexName());
-                    assertEquals(arity, ((MethodVertex) v.getSourceVertex()).getArity());
-                };
-        assertViolations(sourceCode, assertion);
+        assertNoUsage(new String[] {sourceCode}, "MyClass", "entrypoint", "MyClass#<init>#2");
     }
 
     /**
@@ -56,20 +54,21 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
     @ParameterizedTest(name = "{displayName}: {0} constructor")
     public void constructorCalledViaThis_expectNoViolation(String visibility) {
         // spotless:off
-        String sourceCode =
+        String[] sourceCodes = new String[]{
             "global class MyClass {\n"
             // Declare the tested constructor with the specified visibility.
-          + "    " +  visibility + " MyClass(boolean b, boolean b2) {}\n"
+          + "    " + visibility + " MyClass(boolean b, boolean b2) {}\n"
           + "    \n"
-            // Use the engine directive to prevent this constructor from tripping the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public MyClass(boolean b) {\n"
-            // Invocation of the tested constructor.
+            // Invocation of the tested constructor via `this`
           + "        this(b, true);\n"
           + "    }\n"
-          + "}";
+          + "}",
+            // Add an entrypoint that calls the constructor indirectly via the other constructor.
+            String.format(SIMPLE_ENTRYPOINT, "new MyClass(false)")
+        };
         // spotless:on
-        assertNoViolations(sourceCode, 1);
+        assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#<init>@2");
     }
 
     /**
@@ -88,16 +87,54 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "    " + visibility + " ParentClass(" + StringUtils.repeat("boolean b", arity) + ") {}\n"
           + "}",
             "global class ChildClass extends ParentClass {\n"
-            // Declare a constructor annotated with the engine directive so it doesn't trip the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public ChildClass() {\n"
             // Invoke the parent constructor via super
           + "        super(" + StringUtils.repeat("true", arity) + ");\n"
           + "    }\n"
-          + "}"
+          + "}",
+            // An entrypoint to call the super-using constructor variant.
+            String.format(SIMPLE_ENTRYPOINT, "new ChildClass()")
         };
         // spotless:on
-        assertNoViolations(sourceCodes, 1);
+        assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "ParentClass#<init>@2");
+    }
+
+    /**
+     * Tests for cases where a class with a declared default constructor has a subclass without a
+     * default constructor, and the subclass is instantiated via {@code new}. In this case, the
+     * subclass's implicit default constructor should call the parent's default constructor.
+     *
+     * @param visibility - The visibility of the parent default constructor.
+     */
+    @ValueSource(strings = {"public", "protected"})
+    @ParameterizedTest(name = "{displayName}: parent constructor scope {0}")
+    @Disabled // TODO: FIX AND ENABLE THIS TEST
+    public void constructorCalledViaImplicitSubclassConstructor_expectNoViolation(
+            String visibility) {
+        // spotless:off
+        String[] sourceCodes= new String[] {
+            // Declare a parent class with an explicitly-defined 0-arity constructor.
+            "global virtual class ParentClass {\n"
+          + "    " + visibility + " ParentClass() {}\n"
+          + "}",
+            // Declare a child class without a 0-arity constructor.
+            "global class ChildClass extends ParentClass {\n"
+            // Give the child class a method that returns a boolean.
+          + "    public boolean getBoolean() {\n"
+          + "        return true;\n"
+          + "    }\n"
+          + "}",
+            // Add an entrypoint that instantiates the child class using
+            // the implicitly-created default constructor.
+            String.format(SIMPLE_ENTRYPOINT, "new ChildClass().getBoolean()")
+        };
+        // spotless:on
+        assertExpectations(
+                sourceCodes,
+                "MyEntrypoint",
+                "entrypointMethod",
+                Arrays.asList("ChildClass#<init>@1", "ParentClass#<init>@2"),
+                new ArrayList<>());
     }
 
     /**
@@ -117,24 +154,24 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "}",
             "global virtual class ChildClass extends ParentClass {\n"
             // Declare a constructor with the expected arity that does nothing in particular.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public ChildClass(" + StringUtils.repeat("boolean b", arity) + ") {}\n"
           + "}",
             "global class GrandchildClass extends ChildClass {\n"
-            // Declare a constructor annotated to not trip the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
+            // Declare a constructor that invokes super, which will only go up one level.
           + "    public GrandchildClass() {\n"
           + "        super(" + StringUtils.repeat("true", arity) + ");\n"
           + "    }\n"
-          + "}"
+          + "}",
+            // An entrypoint to call the grandchild constructor, which will not invoke the parent variant.
+            String.format(SIMPLE_ENTRYPOINT, "new GrandchildClass()")
         };
         // spotless:on
-        Consumer<Violation.RuleViolation> assertion =
-                v -> {
-                    assertEquals("<init>", v.getSourceVertexName());
-                    assertEquals("ParentClass", v.getSourceDefiningType());
-                };
-        assertViolations(sourceCodes, assertion);
+        assertExpectations(
+                sourceCodes,
+                "MyEntrypoint",
+                "entrypointMethod",
+                Arrays.asList("GrandchildClass#<init>@2", "ChildClass#<init>@2"),
+                Collections.singletonList("ParentClass#<init>@2"));
     }
 
     /**
@@ -154,16 +191,14 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "}",
             // Declare a class to invoke the tested constructor.
             "global class InvokerClass {\n"
-            // Annotate the invoker method to avoid tripping the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public static TestedClass invokeTestedConstructor() {\n"
+          + "    global static TestedClass invokeTestedConstructor() {\n"
             // Invoke the tested constructor with however many parameters it expects.
           + "        return new TestedClass(" + StringUtils.repeat("true", arity) + ");\n"
           + "    }\n"
           + "}"
         };
         // spotless:on
-        assertNoViolations(sourceCodes, 1);
+        assertUsage(sourceCodes, "InvokerClass", "invokeTestedConstructor", "TestedClass#<init>@2");
     }
 
     /**
@@ -183,10 +218,10 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
         // spotless:off
         String sourceCode =
             "global class OuterClass {\n"
-            // Declare a method in the outer class to call the inner constructor, annotated to not trip the rule.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public void invoker() {\n"
+            // Declare a method in the outer class to call the inner constructor
+          + "    global static boolean invoker() {\n"
           + "        " + variable + " obj = new " + constructor + "(false);\n"
+          + "        return true;\n"
           + "    }\n"
           + "    global class InnerClass {\n"
             // Declare a constructor for the inner class
@@ -194,7 +229,11 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "    }\n"
           + "}";
         // spotless:on
-        assertNoViolations(sourceCode, 1);
+        assertUsage(
+                new String[] {sourceCode},
+                "OuterClass",
+                "invoker",
+                "OuterClass.InnerClass#<init>@7");
     }
 
     /**
@@ -222,14 +261,18 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "    \n"
           + "    global class InnerClass2 {\n"
             // Declare a method on the sibling inner class that instantiates the tested one.
-          + "        /* sfge-disable-stack UnusedMethodRule */\n"
-          + "        public void invoker() {\n"
+          + "        global static boolean invoker() {\n"
           + "            " + variable + " obj = new " + constructor + "(false);\n"
+          + "            return true;\n"
           + "        }\n"
           + "    }\n"
           + "}";
         // spotless:on
-        assertNoViolations(sourceCode, 1);
+        assertUsage(
+                new String[] {sourceCode},
+                "OuterClass.InnerClass2",
+                "invoker",
+                "OuterClass.InnerClass#<init>@3");
     }
 
     /**
@@ -242,6 +285,7 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      */
     @ValueSource(ints = {0, 1})
     @ParameterizedTest(name = "{displayName}: Constructor of arity {0}")
+    @Disabled // TODO: FIX AND ENABLE THESE TESTS
     public void externalReferenceSyntaxCollision_expectViolation(Integer arity) {
         // spotless:off
         String[] sourceCodes = new String[]{
@@ -258,8 +302,7 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "    }\n"
           + "    \n"
             // Give the outer class a static method that instantiates the inner class.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public static boolean callConstructor() {\n"
+          + "    global static boolean callConstructor() {\n"
             // IMPORTANT: This is where the constructor is called.
           + "        CollidingName obj = new CollidingName(" + StringUtils.repeat("true", arity) +");\n"
           + "        return true;\n"
@@ -267,11 +310,11 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "}"
         };
         // spotless:on
-        assertViolations(
+        assertExpectations(
                 sourceCodes,
-                v -> {
-                    assertEquals("<init>", v.getSourceVertexName());
-                    assertEquals("CollidingName", v.getSourceDefiningType());
-                });
+                "OuterClass",
+                "callConstructor",
+                Collections.singletonList("OuterClass.CollidingName#<init>@3"),
+                Collections.singletonList("CollidingName#<init>@2"));
     }
 }

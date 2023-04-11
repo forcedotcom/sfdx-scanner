@@ -12,6 +12,7 @@ public final class UserFacingMessages {
                 "Identfies Apex operations that dereference null objects and throw NullPointerExceptions.";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
+        public static final String UNUSED_METHOD_RULE = "Identifies methods that are not invoked";
     }
 
     public static final class RuleViolationTemplates {
@@ -24,6 +25,7 @@ public final class UserFacingMessages {
         // Format: First %s is either "abstract class" or "interface".
         //         Second %s is the name of a class or interface.
         public static final String UNIMPLEMENTED_TYPE_RULE = "Extend, implement, or delete %s %s";
+        public static final String UNUSED_METHOD_RULE = "Method %s in class %s is never invoked";
         public static final String LIMIT_REACHED_VIOLATION_MESSAGE =
                 "%s. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine and target this entry method with a larger heap space.";
     }

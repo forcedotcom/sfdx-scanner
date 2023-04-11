@@ -24,6 +24,7 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
     private final List<ApexPathStandardConditionExcluder> conditionExcluders;
     private final List<ApexValueConstrainer> valueConstrainers;
     private final List<VertexPredicate> vertexPredicates;
+    private final List<PathExpansionObserver> expansionObservers;
     private final DefaultSymbolProviderVertexVisitor defaultSymbolProviderVertexVisitor;
     private final String deserializedClassName;
     private final String instanceClassName;
@@ -37,6 +38,7 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
         this.conditionExcluders = Collections.unmodifiableList(builder.conditionExcluders);
         this.valueConstrainers = Collections.unmodifiableList(builder.valueConstrainers);
         this.vertexPredicates = Collections.unmodifiableList(builder.vertexPredicates);
+        this.expansionObservers = Collections.unmodifiableList(builder.expansionObservers);
         this.deserializedClassName = builder.deserializedClassName;
         this.instanceClassName = builder.instanceClassName;
         this.staticClassName = builder.staticClassName;
@@ -69,6 +71,10 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
 
     public List<VertexPredicate> getVertexPredicates() {
         return vertexPredicates;
+    }
+
+    public List<PathExpansionObserver> getExpansionObservers() {
+        return expansionObservers;
     }
 
     /**
@@ -108,6 +114,7 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
         private final List<ApexPathStandardConditionExcluder> conditionExcluders;
         private final List<ApexValueConstrainer> valueConstrainers;
         private final List<VertexPredicate> vertexPredicates;
+        private final List<PathExpansionObserver> expansionObservers;
         private String deserializedClassName;
         private String instanceClassName;
         private String staticClassName;
@@ -120,6 +127,7 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
             this.conditionExcluders = new ArrayList<>();
             this.valueConstrainers = new ArrayList<>();
             this.vertexPredicates = new ArrayList<>();
+            this.expansionObservers = new ArrayList<>();
         }
 
         public static Builder get() {
@@ -135,6 +143,12 @@ public class ApexPathExpanderConfig implements Immutable<ApexPathExpanderConfig>
         /** Additively add interest in certain vertices */
         public Builder withVertexPredicate(VertexPredicate vertexPredicate) {
             vertexPredicates.add(vertexPredicate);
+            return this;
+        }
+
+        /** Additively add a {@link PathExpansionObserver} */
+        public Builder withPathExpansionObserver(PathExpansionObserver observer) {
+            expansionObservers.add(observer);
             return this;
         }
 
