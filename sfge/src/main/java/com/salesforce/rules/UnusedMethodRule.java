@@ -9,6 +9,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
+import com.salesforce.graph.ops.expander.PathExpansionObserver;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.unusedmethod.operations.UsageTrackerProvider;
 import java.util.*;
@@ -33,8 +34,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
  *   <li>The method is not annotated with an engine directive that silences this rule.
  * </ol>
  */
-public final class UnusedMethodRule extends AbstractPathTraversalRule
-        implements PostProcessingRule {
+public final class UnusedMethodRule extends AbstractPathBasedRule implements PostProcessingRule {
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
@@ -42,56 +42,8 @@ public final class UnusedMethodRule extends AbstractPathTraversalRule
     private UnusedMethodRule() {}
 
     @Override
-    public boolean test(BaseSFVertex vertex) {
-        // This rule is interested in any vertex representing an invocation of a method.
-        return vertex instanceof InvocableVertex;
-    }
-
-    /***
-     * Returns no violations, but seeks the {@link MethodVertex} invoked by {@code vertex} and marks it as used.
-     * @param vertex - Always an instance of {@link InvocableVertex}.
-     * @return - Always an empty list.
-     */
-    @Override
-    protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
-        InvocableVertex invocable = (InvocableVertex) vertex;
-        Optional<ApexPath> subpathOptional = getInvokedSubpath(path, invocable, true);
-        subpathOptional.ifPresent(
-                apexPath -> {
-                    // If we found a subpath corresponding to the method call, then we know which
-                    // method is being called, and can mark it as used.
-                    Optional<MethodVertex> methodOptional = apexPath.getMethodVertex();
-                    methodOptional.ifPresent(
-                            methodVertex -> UsageTrackerProvider.get().markAsUsed(methodVertex));
-                });
-
-        // Method always returns an empty list.
-        return new ArrayList<>();
-    }
-
-    /**
-     * Search the subpaths of {@code path} for an {@link ApexPath} instance corresponding to
-     * invocation of {@code invocableVertex}.
-     *
-     * @param checkRecursively - If true, the subpaths of {@code path} will be checked too.
-     */
-    private Optional<ApexPath> getInvokedSubpath(
-            ApexPath path, InvocableVertex invocableVertex, boolean checkRecursively) {
-        Map<InvocableVertex, ApexPath> invocableMap = path.getInvocableVertexToPaths();
-        if (invocableMap.containsKey(invocableVertex)) {
-            return Optional.of(invocableMap.get(invocableVertex));
-        }
-        if (checkRecursively) {
-            List<ApexPath> allSubpaths = path.getAllSubpaths(true);
-            for (ApexPath subpath : allSubpaths) {
-                Optional<ApexPath> recursiveResult =
-                        getInvokedSubpath(subpath, invocableVertex, false);
-                if (recursiveResult.isPresent()) {
-                    return recursiveResult;
-                }
-            }
-        }
-        return Optional.empty();
+    public Optional<PathExpansionObserver> getPathExpansionObserver() {
+        return Optional.of(UsageTrackerProvider.get());
     }
 
     /**

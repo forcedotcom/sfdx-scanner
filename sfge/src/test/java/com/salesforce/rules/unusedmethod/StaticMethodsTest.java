@@ -1,6 +1,7 @@
 package com.salesforce.rules.unusedmethod;
 
 import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -299,6 +300,52 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
                     String.format(COMPLEX_ENTRYPOINT, entrypointBody)
                 };
         assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@4");
+    }
+
+    /**
+     * Test for the case where a path is guaranteed to terminate in an exception. A static method
+     * called before that exception should count as used.
+     */
+    @Test
+    public void staticInvokedBeforeException_expectNoViolation() {
+        // spotless:off
+        String entrypointBody =
+            "        String s = null;\n"
+          + "        boolean b = MyClass.testedMethod();\n"
+            // This operation will throw an exception, since s is null.
+          + "        Integer i = s.length();\n"
+          + "        return false;\n";
+        // spotless:on
+        String[] sourceCodes =
+                new String[] {
+                    // The tested method should be public static. The rest is irrelevant.
+                    String.format(SIMPLE_SOURCE, "public static", "global static", "true"),
+                    String.format(COMPLEX_ENTRYPOINT, entrypointBody)
+                };
+        assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@2");
+    }
+
+    /**
+     * Test for the case where a path is guaranteed to terminate in an exception. A static method
+     * called after that point is technically unreachable and should count as unused.
+     */
+    @Test
+    public void staticUnreachablyInvokedAfterException_expectViolation() {
+        // spotless:off
+        String entrypointBody =
+            "        String s = null;\n"
+            // This operation will throw an exception, since s is null.
+          + "        Integer i = s.length();\n"
+          + "        boolean b = MyClass.testedMethod();\n"
+          + "        return false;\n";
+        // spotless:on
+        String[] sourceCodes =
+                new String[] {
+                    // The tested method should be public static, the rest is irrelevant.
+                    String.format(SIMPLE_SOURCE, "public static", "global static", "true"),
+                    String.format(COMPLEX_ENTRYPOINT, entrypointBody)
+                };
+        assertNoUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@2");
     }
 
     /**
