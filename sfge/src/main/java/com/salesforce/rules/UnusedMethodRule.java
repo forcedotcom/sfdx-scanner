@@ -11,7 +11,7 @@ import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
 import com.salesforce.graph.vertex.*;
-import com.salesforce.rules.unusedmethod.operations.UsageTrackerProvider;
+import com.salesforce.rules.unusedmethod.operations.UsageTracker;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +43,7 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
 
     @Override
     public Optional<PathExpansionObserver> getPathExpansionObserver() {
-        return Optional.of(UsageTrackerProvider.get());
+        return Optional.of(new UsageTracker());
     }
 
     /**
@@ -55,9 +55,10 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
         List<Violation> results = new ArrayList<>();
         // Get all vertices eligible for the rule.
         List<MethodVertex> eligibleMethods = getEligibleMethods(g);
+        UsageTracker usageTracker = new UsageTracker();
         for (MethodVertex methodVertex : eligibleMethods) {
 
-            if (!UsageTrackerProvider.get().isUsed(methodVertex)) {
+            if (!usageTracker.isUsed(methodVertex.generateUniqueKey())) {
                 String violationMsg =
                         String.format(
                                 UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,

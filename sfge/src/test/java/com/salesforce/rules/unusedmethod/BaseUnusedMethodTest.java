@@ -9,9 +9,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.rules.*;
-import com.salesforce.rules.unusedmethod.operations.BaseUsageTracker;
-import com.salesforce.rules.unusedmethod.operations.TestUsageTracker;
-import com.salesforce.rules.unusedmethod.operations.UsageTrackerProvider;
+import com.salesforce.rules.unusedmethod.operations.*;
 import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -266,21 +264,15 @@ public class BaseUnusedMethodTest {
                 new PathBasedRuleRunner(g, Lists.newArrayList(rule), entryMethodVertex);
         // Violations aren't actually generated during the `runRules()` call.
         List<Violation> violations = new ArrayList<>(runner.runRules());
-        BaseUsageTracker usageTracker = UsageTrackerProvider.get();
-        if (!(usageTracker instanceof TestUsageTracker)) {
-            fail(
-                    "Expected to receive instance of TestUsageTracker. Received "
-                            + usageTracker.getClass().getSimpleName());
-        }
-        TestUsageTracker testUsageTracker = (TestUsageTracker) usageTracker;
+        UsageTracker usageTracker = new UsageTracker();
         for (String usedMethodKey : usedMethodKeys) {
             assertTrue(
-                    testUsageTracker.isUsed(usedMethodKey),
+                    usageTracker.isUsed(usedMethodKey),
                     "Expected usage of method " + usedMethodKey);
         }
         for (String unusedMethodKey : unusedMethodKeys) {
             assertFalse(
-                    testUsageTracker.isUsed(unusedMethodKey),
+                    UsageTrackerDataProvider.contains(unusedMethodKey),
                     "Expected non-usage of method " + unusedMethodKey);
         }
     }
