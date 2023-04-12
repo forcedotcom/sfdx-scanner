@@ -14,8 +14,6 @@ public class UsageTrackerDataProvider {
         USAGE_TRACKER.get().add(key);
     }
 
-    // TODO: JDOC
-
     /** Indicate whether the underlying {@link UsageTrackerData} contains the desired key. */
     public static boolean contains(String key) {
         return USAGE_TRACKER.get().contains(key);
