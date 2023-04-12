@@ -34,6 +34,7 @@ public enum EngineDirectiveCommand {
             NodeType.DML_UPDATE_STATEMENT,
             NodeType.DML_UPSERT_STATEMENT,
             NodeType.EXPRESSION_STATEMENT,
+            NodeType.METHOD,
             NodeType.VARIABLE_EXPRESSION,
             NodeType.VARIABLE_DECLARATION_STATEMENTS),
 
