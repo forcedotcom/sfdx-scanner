@@ -78,11 +78,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
      *
      * @param directive - The specific directive to use
      */
-    @ValueSource(
-            strings = {
-                "sfge-disable-stack",
-                // "sfge-disable-next-line" // TODO: FIX AND ENABLE THIS TEST
-            })
+    @ValueSource(strings = {"sfge-disable-stack", "sfge-disable-next-line"})
     @ParameterizedTest(name = "{displayName}: Directive {0}")
     public void applyLineLevelDirective_expectNoAnalysis(String directive) {
         String directiveLine = "/* " + directive + " UnusedMethodRule */";
