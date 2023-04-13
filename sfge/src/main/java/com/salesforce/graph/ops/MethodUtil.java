@@ -863,10 +863,30 @@ public final class MethodUtil {
                     // TODO: Pass information to #getInvoked that this needs to be a static method
                     definingType = String.join(".", vertex.getChainedNames());
                 }
-                definingType = ApexStandardLibraryUtil.getCanonicalName(definingType);
-                invoked =
-                        getInvoked(g, definingType, (MethodCallExpressionVertex) vertex, symbols)
-                                .orElse(null);
+                // The defining type could be an aliased reference to an inner class, so check that
+                // first.
+                String potentialInnerClassDefType =
+                        ClassUtil.getMoreSpecificClassName(vertex, definingType).orElse(null);
+                if (potentialInnerClassDefType != null) {
+                    invoked =
+                            getInvoked(
+                                            g,
+                                            potentialInnerClassDefType,
+                                            (MethodCallExpressionVertex) vertex,
+                                            symbols)
+                                    .orElse(null);
+                }
+                // If we found no inner classes, check outer classes.
+                if (invoked == null) {
+                    definingType = ApexStandardLibraryUtil.getCanonicalName(definingType);
+                    invoked =
+                            getInvoked(
+                                            g,
+                                            definingType,
+                                            (MethodCallExpressionVertex) vertex,
+                                            symbols)
+                                    .orElse(null);
+                }
             }
         } else if (vertex instanceof NewObjectExpressionVertex) {
             invoked = getInvoked(g, (NewObjectExpressionVertex) vertex, symbols).orElse(null);

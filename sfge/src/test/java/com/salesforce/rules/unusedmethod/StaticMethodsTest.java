@@ -419,7 +419,7 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         "inheritedProp, InstanceCollider, 2",
         "methodParam, InstanceCollider, 2",
         "variable, InstanceCollider, 2",
-        // "InnerClass, StaticCollider, 2" // TODO: FIX AND ENABLE THIS TEST
+        "InnerClass, StaticCollider, 2"
     })
     @ParameterizedTest(name = "{displayName}: Collides with {0}")
     public void externalReferenceSyntaxCollision_expectViolation(

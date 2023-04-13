@@ -122,32 +122,37 @@ public final class ClassUtil {
                 .get(
                         key,
                         () -> {
+                            UserClassVertex result = null;
+                            // Get the type by which this vertex is declared.
                             final String className = vertex.getCanonicalType();
-                            UserClassVertex result =
-                                    SFVertexFactory.loadSingleOrNull(
-                                            g,
-                                            g.V()
-                                                    .where(
-                                                            H.has(
-                                                                    ASTConstants.NodeType
-                                                                            .USER_CLASS,
-                                                                    Schema.DEFINING_TYPE,
-                                                                    className)));
+                            // The canonical type could be an aliased reference to an inner class,
+                            // so check that first.
+                            final String potentialInnerClassName =
+                                    getMoreSpecificClassName(vertex, className).orElse(null);
+                            if (potentialInnerClassName != null) {
+                                result =
+                                        SFVertexFactory.loadSingleOrNull(
+                                                g,
+                                                g.V()
+                                                        .where(
+                                                                H.has(
+                                                                        ASTConstants.NodeType
+                                                                                .USER_CLASS,
+                                                                        Schema.DEFINING_TYPE,
+                                                                        potentialInnerClassName)));
+                            }
+                            // If we found no matching inner class, check for outer classes.
                             if (result == null) {
-                                final String fullClassName =
-                                        getMoreSpecificClassName(vertex, className).orElse(null);
-                                if (fullClassName != null) {
-                                    result =
-                                            SFVertexFactory.loadSingleOrNull(
-                                                    g,
-                                                    g.V()
-                                                            .where(
-                                                                    H.has(
-                                                                            ASTConstants.NodeType
-                                                                                    .USER_CLASS,
-                                                                            Schema.DEFINING_TYPE,
-                                                                            fullClassName)));
-                                }
+                                result =
+                                        SFVertexFactory.loadSingleOrNull(
+                                                g,
+                                                g.V()
+                                                        .where(
+                                                                H.has(
+                                                                        ASTConstants.NodeType
+                                                                                .USER_CLASS,
+                                                                        Schema.DEFINING_TYPE,
+                                                                        className)));
                             }
                             return result != null ? result : BaseSFVertex.NULL_VALUE;
                         });
