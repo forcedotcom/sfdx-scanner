@@ -95,6 +95,12 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
                                 .by(Schema.CHILD_INDEX, Order.asc));
     }
 
+    /** Generate a unique key associated with this method. */
+    public String generateUniqueKey() {
+        // Format of keys is "definingType#methodName@beginLine".
+        return this.getDefiningType() + "#" + this.getName() + "@" + this.getBeginLine();
+    }
+
     private LazyVertexList<ParameterVertex> _getParameters() {
         return new LazyVertexList<>(
                 () ->
