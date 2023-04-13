@@ -85,6 +85,10 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
                                 .hasLabel(NodeType.METHOD)
                                 // The "<clinit>" method is ineligible.
                                 .has(Schema.NAME, P.neq("<clinit>"))
+                                // TODO: FOR NOW, WE'RE IGNORING CONSTRUCTORS TO CUT DOWN ON NOISE.
+                                //       IN THE FULLNESS OF TIME, AS WE FIX RELEVANT BUGS, WE'LL
+                                //       REMOVE THIS RESTRICTION.
+                                .has(Schema.NAME, P.neq("<init>"))
                                 // Getters are typically used by VF controllers rather than Apex,
                                 // and setters are often private to render the property immutable.
                                 // As such, including these methods is likely to generate
