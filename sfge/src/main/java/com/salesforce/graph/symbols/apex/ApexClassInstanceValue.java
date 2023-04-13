@@ -50,6 +50,7 @@ public final class ApexClassInstanceValue extends ApexValue<ApexClassInstanceVal
 
     @Override
     public Optional<ApexValue<?>> apply(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        // TODO: invoke something here that would fetch the resolved value
         return Optional.empty();
     }
 

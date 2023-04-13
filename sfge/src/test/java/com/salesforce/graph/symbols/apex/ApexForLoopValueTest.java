@@ -490,7 +490,7 @@ public class ApexForLoopValueTest {
     }
 
     @Test
-    @Disabled // TODO: apply() method on ApexClassInstanceValue should have the capability to match
+//    @Disabled // TODO: apply() method on ApexClassInstanceValue should have the capability to match
     // the method call and convert to ApexValue
     public void testMethodCallOnForLoopVariable() {
         String[] sourceCode = {
