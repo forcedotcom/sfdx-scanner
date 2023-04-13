@@ -153,6 +153,10 @@ public final class ApexForLoopValue extends ApexPropertiesValue<ApexForLoopValue
 
     @Override
     public Optional<String> getDefiningType() {
+        if (!items.isEmpty()) {
+            // TODO: we should try to look at more than just the first item
+            return items.get(0).getDefiningType();
+        }
         return Optional.empty();
     }
 
