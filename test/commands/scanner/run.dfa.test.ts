@@ -29,11 +29,14 @@ const completedAnalysisMessage = sfgeMessages.getMessage('info.sfgeCompletedPath
 
 function isSubstr(output: string, substring: string): boolean {
 	const updatedSubstr = substring.replace('[', '\\[');
-	const regex = new RegExp(`^${updatedSubstr}`, 'gm');
+	const regex = new RegExp(`${updatedSubstr}`, 'gm');
 	const regexMatch = output.match(regex);
 	return regexMatch != null && regexMatch.length >= 1;
 }
 
+function verifyContains(output: string, substring: string): void {
+	expect(isSubstr(output, substring), `Output "${output}" should contain substring "${substring}"`).is.true;
+}
 
 function verifyNotContains(output: string, substring: string): void {
 	expect(isSubstr(output, substring), `Output "${output}" should not contain substring "${substring}"`).is.false;
@@ -58,8 +61,35 @@ describe('scanner:run:dfa', function () {
 				} catch (error) {
 					expect.fail("dummy", "another dummy", "Invalid JSON output from --format json: " + ctx.stdout + ", error = " + error);
 				}
-				
+
 				});
+			});
+		});
+
+		describe('Flags', () => {
+			describe('--with-experimental', () => {
+				setupCommandTest
+					.command(['scanner:run:dfa',
+						'--target', dfaTarget,
+						'--projectdir', projectdir,
+						'--format', 'json',
+						'--with-experimental'
+					])
+					.it('Including flag activates experimental rules', ctx => {
+						// Verify that there's a violation somewhere for an experimental rule.
+						verifyContains(ctx.stdout, "UnusedMethodRule");
+					});
+
+				setupCommandTest
+					.command(['scanner:run:dfa',
+						'--target', dfaTarget,
+						'--projectdir', projectdir,
+						'--format', 'json'
+					])
+					.it('Omitting flag disables experimental rules', ctx => {
+						// Verify that there's a NOT violation somewhere for an experimental rule.
+						verifyNotContains(ctx.stdout, "UnusedMethodRule");
+					});
 			});
 		});
 
@@ -70,7 +100,7 @@ describe('scanner:run:dfa', function () {
 					sandbox = sinon.createSandbox();
 					spy = sandbox.spy(Dfa.prototype, "updateSpinner");
 				});
-	
+
 				after(() => {
 					spy.restore();
 					sinon.restore();
@@ -90,6 +120,6 @@ describe('scanner:run:dfa', function () {
 				});
 
 		});
-		
+
 	});
 });
