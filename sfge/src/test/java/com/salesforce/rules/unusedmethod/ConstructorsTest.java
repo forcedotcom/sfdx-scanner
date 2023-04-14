@@ -138,14 +138,17 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
     }
 
     /**
-     * Tests for cases where a class's grandchild class calls its {@code super()} constructor.
-     * Constructors only inherit one level, so a violation is expected.
+     * Unless a subclass constructor calls another {@code this}-constructor or a specific {@code
+     * super}-constructor, it will implicitly call the superclass's default constructor. Therefore,
+     * constructing a grandchild class will implicitly invoke the parent class constructor even if
+     * the child class doesn't explicitly call {@code super()}.
      *
      * @param arity - The arity of the tested constructor.
      */
     @ValueSource(ints = {0, 1})
     @ParameterizedTest(name = "{displayName}: arity {0}")
-    public void constructorUncalledByGrandchildSuper_expectViolation(Integer arity) {
+    @Disabled // TODO: FIX AND ENABLE THIS TEST
+    public void constructorImplicitlyCalledByGrandchild_expectNoViolation(Integer arity) {
         // spotless:off
         String[] sourceCodes = new String[]{
             "global virtual class ParentClass {\n"
@@ -170,8 +173,9 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
                 sourceCodes,
                 "MyEntrypoint",
                 "entrypointMethod",
-                Arrays.asList("GrandchildClass#<init>@2", "ChildClass#<init>@2"),
-                Collections.singletonList("ParentClass#<init>@2"));
+                Arrays.asList(
+                        "GrandchildClass#<init>@2", "ChildClass#<init>@2", "ParentClass#<init>@2"),
+                new ArrayList<>());
     }
 
     /**
@@ -281,12 +285,17 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      * Whatever()} in the inner class's outer/sibling classes should count as an invocation for the
      * inner class, not the outer class.
      *
+     * @param referencer - The class that references the inner class.
      * @param arity - The arity of the tested constructor.
      */
-    @ValueSource(ints = {0, 1})
-    @ParameterizedTest(name = "{displayName}: Constructor of arity {0}")
-    @Disabled // TODO: FIX AND ENABLE THESE TESTS
-    public void externalReferenceSyntaxCollision_expectViolation(Integer arity) {
+    @CsvSource({
+        "OuterClass, 0",
+        "OuterClass, 1",
+        "OuterClass.SiblingClass, 0",
+        "OuterClass.SiblingClass, 1"
+    })
+    @ParameterizedTest(name = "{displayName}: {1}-arity constructor, called via {0}")
+    public void externalReferenceSyntaxCollision_expectViolation(String referencer, Integer arity) {
         // spotless:off
         String[] sourceCodes = new String[]{
             // Declare an outer class with a constructor.
@@ -301,19 +310,28 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "        public CollidingName(" + StringUtils.repeat("boolean b", arity) + ") {}\n"
           + "    }\n"
           + "    \n"
-            // Give the outer class a static method that instantiates the inner class.
-          + "    global static boolean callConstructor() {\n"
+            // Add another inner class with a method that instantiates the tested inner class.
+          + "    global class SiblingClass {\n"
+          + "        global boolean callConstructor() {\n"
+          + "            CollidingName obj = new CollidingName(" + StringUtils.repeat("true", arity) + ");\n"
+          + "            return true;\n"
+          + "        }\n"
+          + "    }\n"
+            // Give the outer class a method that instantiates the tested inner class.
+          + "    global boolean callConstructor() {\n"
             // IMPORTANT: This is where the constructor is called.
           + "        CollidingName obj = new CollidingName(" + StringUtils.repeat("true", arity) +");\n"
           + "        return true;\n"
           + "    }\n"
-          + "}"
+          + "}",
+            // Add an entrypoint that calls the desired method.
+            String.format(SIMPLE_ENTRYPOINT, "new " + referencer + "().callConstructor()")
         };
         // spotless:on
         assertExpectations(
                 sourceCodes,
-                "OuterClass",
-                "callConstructor",
+                "MyEntrypoint",
+                "entrypointMethod",
                 Collections.singletonList("OuterClass.CollidingName#<init>@3"),
                 Collections.singletonList("CollidingName#<init>@2"));
     }

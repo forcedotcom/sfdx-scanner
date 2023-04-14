@@ -729,14 +729,16 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
     }
 
     /**
-     * This test covers a weird edge case: Inner classes can be instantiated by outer/sibling
+     * These tests cover a weird edge case: Inner classes can be instantiated by outer/sibling
      * classes with just the inner name. If another outer class shares the same name, and both
      * classes have a method with the same signature, then the inner class takes precedence over the
      * outer class.
+     *
+     * @param referencerClass - The class performing the reference to the inner class.
      */
-    @Test
-    @Disabled // TODO: FIX AND ENABLE TEST
-    public void externalReferenceClassNameCollision_expectViolation() {
+    @ValueSource(strings = {"OuterClass", "OuterClass.SiblingClass"})
+    @ParameterizedTest(name = "{displayName}: Referenced by {0}")
+    public void externalReferenceClassNameCollision_expectViolation(String referencerClass) {
         // spotless:off
         String[] sourceCodes = new String[]{
             // Declare an outer class
@@ -751,6 +753,12 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
           + "            return true;\n"
           + "        }\n"
           + "    }\n"
+            // Declare another inner class that instantiates the tested inner class and calls its version of the colliding method.
+          + "    public class SiblingClass {\n"
+          + "        public boolean causeCollision() {\n"
+          + "            return new CollidingClass().getBoolean();\n"
+          + "        }\n"
+          + "    }\n"
           + "}",
             // Declare an outer class with the same name as the inner class.
             "global class CollidingClass {\n"
@@ -759,7 +767,7 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
           + "        return true;\n"
           + "    }\n"
           + "}",
-            String.format(SIMPLE_ENTRYPOINT, "new OuterClass().causeCollision()")
+            String.format(SIMPLE_ENTRYPOINT, "new " + referencerClass + "().causeCollision()")
         };
         // spotless:on
 
