@@ -73,6 +73,11 @@ public class UnimplementedTypeRule extends AbstractStaticRule {
     }
 
     @Override
+    protected boolean isExperimental() {
+        return false;
+    }
+
+    @Override
     protected int getSeverity() {
         return SEVERITY.LOW.code;
     }

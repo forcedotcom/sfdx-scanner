@@ -55,8 +55,8 @@ public abstract class AbstractRule {
     }
 
     protected boolean isExperimental() {
-        // By default, rules are non-experimental.
-        return false;
+        // By default, rules are experimental.
+        return true;
     }
 
     /**

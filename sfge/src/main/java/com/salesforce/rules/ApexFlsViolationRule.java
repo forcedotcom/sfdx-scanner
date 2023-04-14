@@ -60,6 +60,11 @@ public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
     }
 
     @Override
+    protected boolean isExperimental() {
+        return false;
+    }
+
+    @Override
     protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
         final HashSet<FlsViolationInfo> flsViolationInfos = new HashSet<>();
 
