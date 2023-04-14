@@ -181,6 +181,11 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
         return true;
     }
 
+    @Override
+    protected boolean isExperimental() {
+        return true;
+    }
+
     private static final class LazyHolder {
         // Postpone initialization until first use
         private static final UnusedMethodRule INSTANCE = new UnusedMethodRule();

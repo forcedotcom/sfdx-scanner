@@ -14,7 +14,9 @@ module.exports = {
 		"sfgejvmargsDescription": "specify Java Virtual Machine (JVM) arguments to optimize Salesforce Graph Engine execution to your system (optional)",
 		"sfgejvmargsDescriptionLong": "Specifies Java Virtual Machine arguments to override system defaults while executing Salesforce Graph Engine. For multiple arguments, add them to the same string separated by space.",
 		"targetDescription": "return location of source code",
-		"targetDescriptionLong": "Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list."
+		"targetDescriptionLong": "Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list.",
+		"withexperimentalDescription": "include experimental rules",
+		"withexperimentalDescriptionLong": "Allow experimental rules to execute."
 	},
 	"validations": {
 		"methodLevelTargetCannotBeGlob": "Method-level targets supplied to --target cannot be globs",
@@ -45,5 +47,8 @@ Use --rule-thread-timeout to increase or decrease the maximum runtime for a sing
 Use --sfgejvmargs to pass Java Virtual Machine args to override system defaults while executing Salesforce Graph Engine's rules.
 The example overrides the system's default heap space allocation to 8 GB and decreases chances of encountering OutOfMemory error.
 	$ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
+Use --with-experimental to allow execution of experimental rules:
+This example allows experimental rules in the "Performance" category to execute.
+	$ sfdx scanner:run:dfa --category 'Performance' --with-experimental ...
 `
 };
