@@ -54,8 +54,8 @@ public abstract class AbstractRule {
         return false;
     }
 
-    protected boolean isExperimental() {
-        // By default, rules are experimental.
+    protected boolean isPilot() {
+        // By default, rules are pilot.
         return true;
     }
 
@@ -71,14 +71,14 @@ public abstract class AbstractRule {
         private final String description;
         private final String category;
         private final String url;
-        private final boolean isExperimental;
+        private final boolean isPilot;
 
         private Descriptor(AbstractRule rule) {
             this.name = rule.getClass().getSimpleName();
             this.description = rule.getDescription();
             this.category = rule.getCategory();
             this.url = rule.getUrl();
-            this.isExperimental = rule.isExperimental();
+            this.isPilot = rule.isPilot();
         }
 
         public String getName() {
@@ -97,8 +97,8 @@ public abstract class AbstractRule {
             return url;
         }
 
-        public boolean isExperimental() {
-            return isExperimental;
+        public boolean isPilot() {
+            return isPilot;
         }
     }
 }

@@ -60,7 +60,7 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
     }
 
     @Override
-    protected boolean isExperimental() {
+    protected boolean isPilot() {
         return false;
     }
 

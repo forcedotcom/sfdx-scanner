@@ -15,7 +15,7 @@ export type RunOptions  = {
 	format: OUTPUT_FORMAT;
 	normalizeSeverity: boolean;
 	runDfa: boolean;
-	withExperimental: boolean;
+	withPilot: boolean;
 	sfdxVersion: string;
 }
 

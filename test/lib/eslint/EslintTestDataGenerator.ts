@@ -16,7 +16,7 @@ export function getDummyRule(myEngineName = engineName): Rule {
 		languages: ["language"],
 		sourcepackage: "MySourcePackage",
 		isDfa: false,
-		isExperimental: false,
+		isPilot: false,
 		rulesets: [],
 		defaultEnabled: true
 	}

@@ -172,7 +172,7 @@ describe('RuleFilter', () => {
 					description: null,
 					rulesets: null,
 					isDfa: false,
-					isExperimental: false,
+					isPilot: false,
 					languages: null,
 					defaultEnabled: true
 				};

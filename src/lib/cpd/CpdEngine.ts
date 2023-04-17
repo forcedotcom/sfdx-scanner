@@ -78,7 +78,7 @@ export class CpdEngine extends AbstractRuleEngine {
 				categories: [CpdRuleCategory],
 				rulesets: [],
 				isDfa: false,
-				isExperimental: false,
+				isPilot: false,
 				languages: CpdLanguagesSupported,
 				defaultEnabled: true
 			}],

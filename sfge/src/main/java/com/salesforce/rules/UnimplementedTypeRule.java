@@ -73,7 +73,7 @@ public class UnimplementedTypeRule extends AbstractStaticRule {
     }
 
     @Override
-    protected boolean isExperimental() {
+    protected boolean isPilot() {
         return false;
     }
 

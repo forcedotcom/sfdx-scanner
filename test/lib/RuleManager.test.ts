@@ -193,7 +193,7 @@ describe('RuleManager', () => {
 				format: OUTPUT_FORMAT.JSON,
 				normalizeSeverity: false,
 				runDfa: false,
-				withExperimental: false,
+				withPilot: false,
 				sfdxVersion: 'test'
 			};
 			describe('Test Case: Run without filters', () => {

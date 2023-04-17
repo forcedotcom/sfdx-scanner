@@ -19,7 +19,7 @@ const columns = [messages.getMessage('columnNames.name'),
 				messages.getMessage('columnNames.rulesets'),
 				messages.getMessage('columnNames.engine'),
 				messages.getMessage('columnNames.is-dfa'),
-				messages.getMessage('columnNames.is-experimental')];
+				messages.getMessage('columnNames.is-pilot')];
 const MSG_YES = messages.getMessage('yes');
 const MSG_NO = messages.getMessage('no');
 
@@ -100,7 +100,7 @@ export default class List extends ScannerCommand {
 		transformedRule[columns[3]] = rule.rulesets.join(',');
 		transformedRule[columns[4]] = rule.engine;
 		transformedRule[columns[5]] = rule.isDfa ? MSG_YES : MSG_NO;
-		transformedRule[columns[6]] = rule.isExperimental ? MSG_YES : MSG_NO;
+		transformedRule[columns[6]] = rule.isPilot ? MSG_YES : MSG_NO;
 		return transformedRule;
 	}
 

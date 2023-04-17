@@ -60,7 +60,7 @@ public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
     }
 
     @Override
-    protected boolean isExperimental() {
+    protected boolean isPilot() {
         return false;
     }
 

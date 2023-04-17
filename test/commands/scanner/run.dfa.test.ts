@@ -67,15 +67,15 @@ describe('scanner:run:dfa', function () {
 		});
 
 		describe('Flags', () => {
-			describe('--with-experimental', () => {
+			describe('--with-pilot', () => {
 				setupCommandTest
 					.command(['scanner:run:dfa',
 						'--target', dfaTarget,
 						'--projectdir', projectdir,
 						'--format', 'json',
-						'--with-experimental'
+						'--with-pilot'
 					])
-					.it('Including flag activates experimental rules', ctx => {
+					.it('Including flag activates pilot rules', ctx => {
 						// Verify that there's a violation somewhere for an experimental rule.
 						verifyContains(ctx.stdout, "UnusedMethodRule");
 					});
@@ -86,7 +86,7 @@ describe('scanner:run:dfa', function () {
 						'--projectdir', projectdir,
 						'--format', 'json'
 					])
-					.it('Omitting flag disables experimental rules', ctx => {
+					.it('Omitting flag disables pilot rules', ctx => {
 						// Verify that there's a NOT violation somewhere for an experimental rule.
 						verifyNotContains(ctx.stdout, "UnusedMethodRule");
 					});

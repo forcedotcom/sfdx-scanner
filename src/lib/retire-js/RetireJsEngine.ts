@@ -28,7 +28,7 @@ const retireJsCatalog: Catalog = {
 		rulesets: [],
 		languages: ['javascript'],
 		isDfa: false,
-		isExperimental: false,
+		isPilot: false,
 		defaultEnabled: true
 	}],
 	categories: [{
