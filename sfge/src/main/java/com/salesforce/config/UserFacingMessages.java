@@ -9,11 +9,12 @@ public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
         public static final String APEX_NULL_POINTER_EXCEPTION_RULE =
-                "Identfies Apex operations that dereference null objects and throw NullPointerExceptions.";
+                "Identifies Apex operations that dereference null objects and throw NullPointerExceptions.";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
         public static final String UNUSED_METHOD_RULE =
                 "Identifies methods that aren't invoked from recognized entry points.";
+        public static final String GET_GLOBAL_DESCRIBE_VIOLATION_RULE = "Detects Schema.getGlobalDescribe() calls made in scenarios that could result in performance degradation.";
     }
 
     public static final class RuleViolationTemplates {
