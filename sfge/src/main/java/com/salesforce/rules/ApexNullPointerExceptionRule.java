@@ -60,6 +60,11 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
     }
 
     @Override
+    protected boolean isPilot() {
+        return false;
+    }
+
+    @Override
     protected int getSeverity() {
         return SEVERITY.MODERATE.code;
     }

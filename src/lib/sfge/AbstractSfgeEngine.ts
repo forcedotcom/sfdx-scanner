@@ -18,6 +18,7 @@ type SfgePartialRule = {
 	name: string;
 	description: string;
 	category: string;
+	isPilot: boolean;
 }
 
 export type SfgeViolation = {
@@ -123,12 +124,13 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 		// We'll also want to pull out the name of every category we encounter.
 		const categoryNames: Set<string> = new Set();
 
-		partialRules.forEach(({name, description, category}) => {
+		partialRules.forEach(({name, description, category, isPilot}) => {
 			completeRules.push({
 				engine: AbstractSfgeEngine.ENGINE_ENUM,
 				sourcepackage: "sfge",
 				name,
 				description,
+				isPilot,
 				// Graph Engine rules each belong to exactly one category, so the string must be converted to a singleton array.
 				categories: [category],
 				// Graph Engine does not use rulests.

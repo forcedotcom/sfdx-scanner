@@ -160,6 +160,7 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 			categories: [meta.type],
 			rulesets: [meta.type],
 			isDfa: false,
+			isPilot: false,
 			languages: [...this.strategy.getLanguages()],
 			defaultEnabled: this.strategy.ruleDefaultEnabled(key),
 			defaultConfig: this.strategy.getDefaultConfig(key),

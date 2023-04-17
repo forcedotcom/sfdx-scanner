@@ -76,8 +76,10 @@ export abstract class AbstractRuleEngine implements RuleEngine {
 	abstract isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean;
 	abstract isDfaEngine(): boolean;
 	abstract getNormalizedSeverity(severity: number): Severity;
+	protected executionDescriptor: EngineExecutionDescriptor;
 
 	async runEngine(descriptor: EngineExecutionDescriptor): Promise<RuleResult[]>{
+		this.executionDescriptor = descriptor;
         const results = await this.run(descriptor.ruleGroups, descriptor.rules, descriptor.target, descriptor.engineOptions);
 		if (descriptor.normalizeSeverity) {
 			this.normalizeSeverity(results);

@@ -64,11 +64,13 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
                                 UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,
                                 methodVertex.getName(),
                                 methodVertex.getDefiningType());
-                results.add(
+                Violation.PathBasedRuleViolation violation =
                         new Violation.PathBasedRuleViolation(
                                 // NOTE: Since the violations represent the non-invocation of a
                                 // method, the method is both source and sink.
-                                violationMsg, methodVertex, methodVertex));
+                                violationMsg, methodVertex, methodVertex);
+                violation.setPropertiesFromRule(this);
+                results.add(violation);
             }
         }
         return results;

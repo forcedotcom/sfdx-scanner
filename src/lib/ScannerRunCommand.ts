@@ -90,6 +90,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			format: this.determineOutputFormat(),
 			normalizeSeverity: normalizeSeverity,
 			runDfa: this.pathBasedEngines(),
+			withPilot: this.flags['with-pilot'] as boolean,
 			sfdxVersion: this.config.version
 		};
 

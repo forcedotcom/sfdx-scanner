@@ -54,6 +54,11 @@ public abstract class AbstractRule {
         return false;
     }
 
+    protected boolean isPilot() {
+        // By default, rules are pilot.
+        return true;
+    }
+
     /**
      * Unless the rule has a predetermined URL, we'll return a link to information about the engine.
      */
@@ -66,12 +71,14 @@ public abstract class AbstractRule {
         private final String description;
         private final String category;
         private final String url;
+        private final boolean isPilot;
 
         private Descriptor(AbstractRule rule) {
             this.name = rule.getClass().getSimpleName();
             this.description = rule.getDescription();
             this.category = rule.getCategory();
             this.url = rule.getUrl();
+            this.isPilot = rule.isPilot();
         }
 
         public String getName() {
@@ -88,6 +95,10 @@ public abstract class AbstractRule {
 
         public String getUrl() {
             return url;
+        }
+
+        public boolean isPilot() {
+            return isPilot;
         }
     }
 }
