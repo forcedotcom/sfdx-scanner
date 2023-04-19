@@ -13,6 +13,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
+import com.salesforce.rules.getglobaldescribe.MassSchemaLookupViolationInfo;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.*;
@@ -120,6 +121,7 @@ public class PathBasedRuleRunner {
         // time, and
         // require post-processing.
         final HashSet<FlsViolationInfo> incompleteThrowables = new HashSet<>();
+        final HashSet<MassSchemaLookupViolationInfo> tempDeleteMe = new HashSet<>();
         // For each path...
         for (ApexPath path : paths) {
             // If the path's metadata is present...
@@ -143,6 +145,8 @@ public class PathBasedRuleRunner {
                         // objects.
                         if (ruleThrowable instanceof FlsViolationInfo) {
                             incompleteThrowables.add((FlsViolationInfo) ruleThrowable);
+                        } else if (ruleThrowable instanceof MassSchemaLookupViolationInfo) {
+                            tempDeleteMe.add((MassSchemaLookupViolationInfo) ruleThrowable);
                         } else if (ruleThrowable instanceof Violation) {
                             // If the violation is done, it can just go directly into the results
                             // set.
@@ -156,6 +160,7 @@ public class PathBasedRuleRunner {
         }
 
         convertToViolations(incompleteThrowables);
+        convertGgdToViolations(tempDeleteMe);
 
         if (!foundVertex) {
             // If no vertices were found, we should log something so that information isn't lost,
@@ -167,6 +172,15 @@ public class PathBasedRuleRunner {
         }
     }
 
+    private void convertGgdToViolations(HashSet<MassSchemaLookupViolationInfo> ggdViolationInfos) {
+        // TODO: consolidate by sink/source
+
+        for (MassSchemaLookupViolationInfo ggdViolationInfo: ggdViolationInfos) {
+            violations.add(ggdViolationInfo.convert());
+        }
+    }
+
+    // TODO: Restructure to make this logic work on other types of violation info too
     private void convertToViolations(HashSet<FlsViolationInfo> flsViolationInfos) {
         // Consolidate/regroup FLS violations across paths so that there are no
         // duplicates with different field sets for the same source/sink/dmlOperation

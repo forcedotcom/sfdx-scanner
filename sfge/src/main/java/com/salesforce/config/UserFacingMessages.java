@@ -76,4 +76,12 @@ public final class UserFacingMessages {
                 "Graph engine encountered compilation errors. Fix the errors in %s and retry.";
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
     }
+
+    public static final class GetGlobalDescribeTemplates {
+        public static final String INVOKED_IN_A_LOOP_TEXT = "invoked in a loop";
+        public static final String INVOKED_IN_A_LOOP_ADDITIONAL_INFO = ". Loop started at %s:%d."; // file name, line number
+        public static final String INVOKED_MULTIPLE_TIMES_TEXT = "invoked multiple times";
+        public static final String INVOKED_MULTIPLE_TIMES_ADDITIONAL_INFO = ". Previous invocation occurred at %s:%d."; // file name, line number
+        public static final String MESSAGE_TEMPLATE = "Detected %s %s. %s"; // method name, type-specific-text, type-specific-additional-info
+    }
 }
