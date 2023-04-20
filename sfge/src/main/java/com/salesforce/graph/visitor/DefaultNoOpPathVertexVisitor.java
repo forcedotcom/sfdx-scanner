@@ -245,9 +245,7 @@ public class DefaultNoOpPathVertexVisitor implements PathVertexVisitor {
     public void afterVisit(BaseSFVertex vertex, SymbolProvider symbols) {}
 
     @Override
-    public void afterVisit(DoLoopStatementVertex vertex, SymbolProvider symbols) {
-
-    }
+    public void afterVisit(DoLoopStatementVertex vertex, SymbolProvider symbols) {}
 
     @Override
     public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {}
@@ -268,14 +266,10 @@ public class DefaultNoOpPathVertexVisitor implements PathVertexVisitor {
     public void afterVisit(DmlUpsertStatementVertex vertex, SymbolProvider symbols) {}
 
     @Override
-    public void afterVisit(ForEachStatementVertex vertex, SymbolProvider symbols) {
-
-    }
+    public void afterVisit(ForEachStatementVertex vertex, SymbolProvider symbols) {}
 
     @Override
-    public void afterVisit(ForLoopStatementVertex vertex, SymbolProvider symbols) {
-
-    }
+    public void afterVisit(ForLoopStatementVertex vertex, SymbolProvider symbols) {}
 
     @Override
     public void afterVisit(FieldDeclarationVertex vertex, SymbolProvider symbols) {}
@@ -299,7 +293,5 @@ public class DefaultNoOpPathVertexVisitor implements PathVertexVisitor {
     public void afterVisit(ThrowStatementVertex vertex, SymbolProvider symbols) {}
 
     @Override
-    public void afterVisit(WhileLoopStatementVertex vertex, SymbolProvider symbols) {
-
-    }
+    public void afterVisit(WhileLoopStatementVertex vertex, SymbolProvider symbols) {}
 }

@@ -13,7 +13,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
-import com.salesforce.rules.getglobaldescribe.MassSchemaLookupViolationInfo;
+import com.salesforce.rules.getglobaldescribe.MassSchemaLookupInfo;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.*;
@@ -121,7 +121,7 @@ public class PathBasedRuleRunner {
         // time, and
         // require post-processing.
         final HashSet<FlsViolationInfo> incompleteThrowables = new HashSet<>();
-        final HashSet<MassSchemaLookupViolationInfo> tempDeleteMe = new HashSet<>();
+        final HashSet<MassSchemaLookupInfo> tempDeleteMe = new HashSet<>();
         // For each path...
         for (ApexPath path : paths) {
             // If the path's metadata is present...
@@ -145,8 +145,8 @@ public class PathBasedRuleRunner {
                         // objects.
                         if (ruleThrowable instanceof FlsViolationInfo) {
                             incompleteThrowables.add((FlsViolationInfo) ruleThrowable);
-                        } else if (ruleThrowable instanceof MassSchemaLookupViolationInfo) {
-                            tempDeleteMe.add((MassSchemaLookupViolationInfo) ruleThrowable);
+                        } else if (ruleThrowable instanceof MassSchemaLookupInfo) {
+                            tempDeleteMe.add((MassSchemaLookupInfo) ruleThrowable);
                         } else if (ruleThrowable instanceof Violation) {
                             // If the violation is done, it can just go directly into the results
                             // set.
@@ -172,10 +172,10 @@ public class PathBasedRuleRunner {
         }
     }
 
-    private void convertGgdToViolations(HashSet<MassSchemaLookupViolationInfo> ggdViolationInfos) {
+    private void convertGgdToViolations(HashSet<MassSchemaLookupInfo> ggdViolationInfos) {
         // TODO: consolidate by sink/source
 
-        for (MassSchemaLookupViolationInfo ggdViolationInfo: ggdViolationInfos) {
+        for (MassSchemaLookupInfo ggdViolationInfo : ggdViolationInfos) {
             violations.add(ggdViolationInfo.convert());
         }
     }

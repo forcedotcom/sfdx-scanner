@@ -4,12 +4,10 @@ import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.ProgrammingException;
-import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.RuleThrowable;
 import com.salesforce.rules.Violation;
-
 import java.util.Optional;
 import java.util.TreeSet;
 
@@ -172,22 +170,19 @@ public class FlsViolationInfo extends ObjectFieldInfo<FlsViolationInfo> implemen
         return new FlsViolationInfo(this);
     }
 
-//    @Override
+    //    @Override
     public Violation convert() {
-        final String violationMessage =
-            FlsViolationMessageUtil.constructMessage(this);
+        final String violationMessage = FlsViolationMessageUtil.constructMessage(this);
         final Optional<SFVertex> sourceVertex = this.getSourceVertex();
         final Optional<SFVertex> sinkVertex = this.getSinkVertex();
         if (sinkVertex.isPresent()) {
             final Violation.RuleViolation ruleViolation =
-                new Violation.PathBasedRuleViolation(
-                    violationMessage, sourceVertex.get(), sinkVertex.get());
+                    new Violation.PathBasedRuleViolation(
+                            violationMessage, sourceVertex.get(), sinkVertex.get());
             ruleViolation.setPropertiesFromRule(rule);
             return ruleViolation;
         } else {
-            throw new ProgrammingException(
-                "Sink vertex not set in flsViolationInfo: "
-                    + this);
+            throw new ProgrammingException("Sink vertex not set in flsViolationInfo: " + this);
         }
     }
 }

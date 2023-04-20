@@ -3,17 +3,12 @@ package com.salesforce.rules;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.rules.getglobaldescribe.MassSchemaLookupViolationInfo;
 import com.salesforce.rules.getglobaldescribe.AvoidMultipleMassSchemaLookupHandler;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-/**
- * Rule to detect possible performance degradations while invoking Schema.getGlobalDescribe().
- */
+/** Rule to detect possible performance degradations while invoking Schema.getGlobalDescribe(). */
 public class AvoidMultipleMassSchemaLookup extends AbstractPathTraversalRule {
 
     private final AvoidMultipleMassSchemaLookupHandler ruleHandler;
@@ -29,10 +24,10 @@ public class AvoidMultipleMassSchemaLookup extends AbstractPathTraversalRule {
 
     @Override
     protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
-        MassSchemaLookupViolationInfo massSchemaLookupViolationInfos = ruleHandler.detectViolations(g, path, vertex);
         List<RuleThrowable> violations = new ArrayList<>();
-        // TODO: do further processing here
-        violations.add(massSchemaLookupViolationInfos);
+
+        violations.addAll(ruleHandler.detectViolations(g, path, vertex));
+
         return violations;
     }
 
@@ -62,6 +57,7 @@ public class AvoidMultipleMassSchemaLookup extends AbstractPathTraversalRule {
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final AvoidMultipleMassSchemaLookup INSTANCE = new AvoidMultipleMassSchemaLookup();
+        private static final AvoidMultipleMassSchemaLookup INSTANCE =
+                new AvoidMultipleMassSchemaLookup();
     }
 }
