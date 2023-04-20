@@ -47,8 +47,8 @@ Use --rule-thread-timeout to increase or decrease the maximum runtime for a sing
 Use --sfgejvmargs to pass Java Virtual Machine args to override system defaults while executing Salesforce Graph Engine's rules.
 The example overrides the system's default heap space allocation to 8 GB and decreases chances of encountering OutOfMemory error.
 	$ sfdx scanner:run:dfa --sfgejvmargs "-Xmx8g" ...
-Use --with-pilot to allow execution of pilot rules:
-This example allows pilot rules in the "Performance" category to execute.
+Use --with-pilot to allow execution of experimental rules.
+This example allows pilot rules in the Performance category to execute.
 	$ sfdx scanner:run:dfa --category 'Performance' --with-pilot ...
 `
 };
