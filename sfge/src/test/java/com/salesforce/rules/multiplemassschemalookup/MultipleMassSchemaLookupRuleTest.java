@@ -1,17 +1,17 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.rules.AvoidMultipleMassSchemaLookup;
+import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-// TODO: break down test, add updated assertions
-public class AvoidMultipleMassSchemaLookupTest extends BaseAvoidMultipleMassSchemaLookupTest {
+// TODO: Breakdown to more test suites
+public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchemaLookupTest {
 
-    private static final AvoidMultipleMassSchemaLookup RULE =
-            AvoidMultipleMassSchemaLookup.getInstance();
+    private static final MultipleMassSchemaLookupRule RULE =
+            MultipleMassSchemaLookupRule.getInstance();
 
     @CsvSource({
         "ForEachStatement, for (String s : myList)",

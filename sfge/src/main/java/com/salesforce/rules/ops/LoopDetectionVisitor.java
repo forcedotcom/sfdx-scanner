@@ -1,13 +1,13 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.ops;
 
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
 
 /** Visitor that gets notified when a loop vertex is invoked in the path. */
-abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor {
+public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor {
 
-    abstract void execAfterLoopVertexVisit(BaseSFVertex vertex, SymbolProvider symbols);
+    protected abstract void execAfterLoopVertexVisit(BaseSFVertex vertex, SymbolProvider symbols);
 
     @Override
     public void afterVisit(DoLoopStatementVertex vertex, SymbolProvider symbols) {

@@ -1,4 +1,4 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.ApexPath;
@@ -7,17 +7,17 @@ import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.graph.visitor.ApexPathWalker;
-import com.salesforce.rules.AvoidMultipleMassSchemaLookup;
+import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-/** Executes internals of {@link AvoidMultipleMassSchemaLookup} */
-public class AvoidMultipleMassSchemaLookupHandler {
+/** Executes internals of {@link MultipleMassSchemaLookupRule} */
+public class MultipleMassSchemaLookupRuleHandler {
 
     /**
      * @param vertex to consider for analysis
      * @return true if the vertex parameter requires to be treated as a target vertex for {@link
-     *     AvoidMultipleMassSchemaLookup}.
+     *     MultipleMassSchemaLookupRule}.
      */
     public boolean test(BaseSFVertex vertex) {
         return vertex instanceof MethodCallExpressionVertex
@@ -46,13 +46,13 @@ public class AvoidMultipleMassSchemaLookupHandler {
         return ruleVisitor.getViolation();
     }
 
-    public static AvoidMultipleMassSchemaLookupHandler getInstance() {
-        return AvoidMultipleMassSchemaLookupHandler.LazyHolder.INSTANCE;
+    public static MultipleMassSchemaLookupRuleHandler getInstance() {
+        return MultipleMassSchemaLookupRuleHandler.LazyHolder.INSTANCE;
     }
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final AvoidMultipleMassSchemaLookupHandler INSTANCE =
-                new AvoidMultipleMassSchemaLookupHandler();
+        private static final MultipleMassSchemaLookupRuleHandler INSTANCE =
+                new MultipleMassSchemaLookupRuleHandler();
     }
 }

@@ -4,13 +4,14 @@ import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
+import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
-import com.salesforce.rules.getglobaldescribe.MassSchemaLookupInfoUtil;
-import com.salesforce.rules.getglobaldescribe.RuleConstants;
+import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfoUtil;
+import com.salesforce.rules.multiplemassschemalookup.RuleConstants;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -199,9 +200,7 @@ public class ViolationWrapper {
         }
     }
 
-    /**
-     * Message builder to help with testing {@link com.salesforce.rules.AvoidMultipleMassSchemaLookup}.
-     */
+    /** Message builder to help with testing {@link MultipleMassSchemaLookupRule}. */
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
         private final RuleConstants.RepetitionType repetitionType;

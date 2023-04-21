@@ -1,4 +1,4 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
 import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;

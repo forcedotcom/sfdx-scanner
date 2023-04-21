@@ -1,9 +1,10 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
+import com.salesforce.rules.ops.LoopDetectionVisitor;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,7 +31,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     }
 
     @Override
-    void execAfterLoopVertexVisit(BaseSFVertex vertex, SymbolProvider symbols) {
+    protected void execAfterLoopVertexVisit(BaseSFVertex vertex, SymbolProvider symbols) {
         if (shouldContinue()) {
             violations.add(
                     new MassSchemaLookupInfo(

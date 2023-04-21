@@ -1,4 +1,4 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;

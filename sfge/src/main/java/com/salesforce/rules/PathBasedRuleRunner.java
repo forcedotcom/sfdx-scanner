@@ -13,7 +13,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
-import com.salesforce.rules.getglobaldescribe.MassSchemaLookupInfo;
+import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfo;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.*;

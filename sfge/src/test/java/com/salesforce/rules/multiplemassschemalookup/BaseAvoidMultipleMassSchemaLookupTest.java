@@ -1,9 +1,10 @@
-package com.salesforce.rules.getglobaldescribe;
+package com.salesforce.rules.multiplemassschemalookup;
 
+import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
 
-/** Base class to tests for {@link com.salesforce.rules.AvoidMultipleMassSchemaLookup} */
+/** Base class to tests for {@link MultipleMassSchemaLookupRule} */
 public abstract class BaseAvoidMultipleMassSchemaLookupTest extends BasePathBasedRuleTest {
 
     protected ViolationWrapper.MassSchemaLookupInfoBuilder expect(

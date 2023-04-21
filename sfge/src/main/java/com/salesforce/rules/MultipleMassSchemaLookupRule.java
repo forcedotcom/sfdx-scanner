@@ -3,18 +3,18 @@ package com.salesforce.rules;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.rules.getglobaldescribe.AvoidMultipleMassSchemaLookupHandler;
+import com.salesforce.rules.multiplemassschemalookup.MultipleMassSchemaLookupRuleHandler;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /** Rule to detect possible performance degradations while invoking Schema.getGlobalDescribe(). */
-public class AvoidMultipleMassSchemaLookup extends AbstractPathTraversalRule {
+public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
 
-    private final AvoidMultipleMassSchemaLookupHandler ruleHandler;
+    private final MultipleMassSchemaLookupRuleHandler ruleHandler;
 
-    private AvoidMultipleMassSchemaLookup() {
-        ruleHandler = AvoidMultipleMassSchemaLookupHandler.getInstance();
+    private MultipleMassSchemaLookupRule() {
+        ruleHandler = MultipleMassSchemaLookupRuleHandler.getInstance();
     }
 
     @Override
@@ -51,13 +51,13 @@ public class AvoidMultipleMassSchemaLookup extends AbstractPathTraversalRule {
         return false;
     }
 
-    public static AvoidMultipleMassSchemaLookup getInstance() {
-        return AvoidMultipleMassSchemaLookup.LazyHolder.INSTANCE;
+    public static MultipleMassSchemaLookupRule getInstance() {
+        return MultipleMassSchemaLookupRule.LazyHolder.INSTANCE;
     }
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final AvoidMultipleMassSchemaLookup INSTANCE =
-                new AvoidMultipleMassSchemaLookup();
+        private static final MultipleMassSchemaLookupRule INSTANCE =
+                new MultipleMassSchemaLookupRule();
     }
 }
