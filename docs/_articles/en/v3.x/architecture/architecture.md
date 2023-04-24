@@ -10,13 +10,22 @@ Salesforce Code Analyzer (Code Analyzer) is an open-source Salesforce CLI plug-i
 
 ## Salesforce Code Analyzer Internals
 
-Code Analyzer is powered by multiple static analyzers, also known as rule engines, and by Salesforce Graph Engine, which provides data flow analysis. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. Code Analyzer unifies these rules engines as a single static analyzer and provides a common user experience to benefit.
+Code Analyzer is powered by multiple static analyzers, also known as rule engines, and by Salesforce Graph Engine, which provides path-based and data-flow analysis. These rule engines specialize in different aspects of static analysis and support multiple languages. Each rule engine has its own unique set of rules, input parameters, and formats for reporting the results. Code Analyzer unifies these rules engines as a single static analyzer and provides a common user experience to benefit.
 
-Version {{ site.data.versions-v3.scanner }} of the Code Analyzer uses PMD v{{ site.data.versions-v3.pmd }}, ESLint v{{ site.data.versions-v3.eslint }}, RetireJS v{{ site.data.versions-v3.retirejs }}, and Salesforce Graph Engine.
+### Available Engines
+
+| Rule Engine    | Description | Version |
+| -------- | ------- | ------- |
+| [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/)  | Detects security and quality issues in code, as an open-source Salesforce tool | {{ site.data.versions-v3.scanner} |
+| [PMD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/pmd-engine/) | Allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce    | {{ site.data.versions-v3.pmd}	|
+| [CPD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/cpd-engine/)    | Identifies blocks of duplication across files   | {{ site.data.versions-v3.cpd}	|
+| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Lightning Web Component (LWC) Plug-In)| Evaluates Salesforce Lightning Web Components | {{ site.data.versions-v3.eslint}		|
+| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Typescript plug-in | Evaluates any targeted TypeScript (.ts) files	| {{ site.data.versions-v3.eslint}	|
+| [RetireJS](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/retire-js-engine/) | Analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities |	3.x {{ site.data.versions-v3.retirejs}	|
 
 -------
 
-![Plugin Design](./assets/images/ScannerPlugin.jpeg)
+![Plugin Design](./assets/images/architecture-042023.png)
 
 -------
 
