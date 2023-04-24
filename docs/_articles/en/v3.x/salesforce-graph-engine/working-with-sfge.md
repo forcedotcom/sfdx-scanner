@@ -9,13 +9,13 @@ Each code path contains these three elements.
 
 * Source–An entry point for an external interaction.
 * Sink–Code that modifies data.
-* Sanitizer–The check that happens between source and sink to ensure that the user who is performing this action on data has the necessary access to the object and fields.
+* Sanitizer–The check that happens between source and sink to ensure that the user who performs this action on the data has the necessary access to the object and fields.
 
 A code path must have a sanitizer in between the source and the sink. When the sanitizer is missing, Graph Engine returns a violation. To avoid violations, ensure that each path created from any source to sink is sanitized.
 
 A source can lead to multiple sinks. Also, a sink can be reached through multiple sources. In fact, we can have multiple paths between the same source and sink. 
 
-For more information, read [Try it yourself](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
+For more information, read [Try it Yourself](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
 
 ## Invoke Graph Engine through Code Analyzer
 Invoke data-flow-based rules through SFCA by running [scanner:run:dfa](./en/v3.x/scanner-commands/dfa/).
@@ -26,12 +26,12 @@ An individual row in the Graph Engine results file represents a violation. Each 
 
 Here’s a breakdown of the output you see by column name.
 
-* Severity. The severity of the violation. By default, all security violations are marked as severity 1.
-* Sink File, Sink Line, Sink Column. The location where the data interaction happens in your source code.
-* Source File, Source Line, Source Column. The location where the path begins.
-* Source Type, Source Method. Additional information to help identify the path entry.
-* Rule. The rule that was run which led to the violation.
-* Description. The violation message. For more info on Graph Engine violation messages, read our [FAQ](./en/v3.x/faq/#q-what-do-the-violation-messages-mean).
+* Severity–The severity of the violation. By default, all security violations are marked as severity 1.
+* Sink File, Sink Line, Sink Column–The location where the data interaction happens in your source code.
+* Source File, Source Line, Source Column–The location where the path begins.
+* Source Type, Source Method–Additional information to help identify the path entry.
+* Rule–The rule that was run which led to the violation.
+* Description–The violation message. For more info on Graph Engine violation messages, read our [FAQ](./en/v3.x/faq/#q-what-do-the-violation-messages-mean).
 
 ## Add Engine Directives
 
@@ -82,6 +82,47 @@ Example:
 /* sfge-disable ApexFlsViolationRule */
 public class MyClass {
 ```
+
+## Unblock Graph Engine Analysis
+
+If your Graph Engine analysis is intentionally blocked, it’s because Graph Engine identified something incorrect in your code. You must modify your code to unblock the analysis. Depending on the situation, you see one of these messages.
+
+
+| Violation | When it Occurs | Message |
+| -------- | ------- | ------- |
+| User Action | Returned one time on an entire analysis. <br> Analysis of all code is blocked. | Remove unreachable code to proceed with the analysis. |
+| User Action Violation | Returned on a single path. <br> Analysis of only that code path is blocked. | Rename or delete this reused variable to proceed with the analysis. |
+
+### Examples:
+
+**User Action Example.** 
+
+This code example produces multiple actions, such as a `throw` statement followed by a `return` statement.
+
+```
+public Integer foo(String input) {
+	If (input == ‘Account’) {
+		throw new Exception();
+		return 5;
+	}
+	return 10;
+}
+```
+
+**Result:** A Graph Engine analysis attempt on this code results in the entire analysis being blocked and the User Action message is returned: ```Remove unreachable code to proceed with the analysis```.
+
+**User Action Violation Example.** 
+
+This code example reuses a variable, String input, in the same scope of a method.
+```
+public Integer foo(String input) {
+	String input = ‘another value’;
+	System.debug(input);
+}
+```
+**Result:** A Graph Engine analysis attempt on this code path results in a User Action Violation on this path. Analysis on other paths can proceed. Sometimes other violations are returned. This message is returned: ```Rename or delete this reused variable to proceed with the analysis```.
+
+
 ## Understand OutOfMemory Errors
 
 When Graph Engine analyzes highly complex code, it runs out of heap space, which  results in an `OutOfMemory` error. To decrease the occurrence of `OutOfMemory` errors and to complete as much analysis as possible within a shorter period, we added processing limits on Graph Engine. These limits help Graph Engine to fail fast when a path’s analysis is approaching an `OutOfMemory` error. This fail-fast process includes preemptively aborting a path analysis when Graph Engine encounters a path that’s too complex.
@@ -91,11 +132,11 @@ To proactively reduce the chances of an `OutOfMemory` error in your scans, take 
 
 1. Execute `scanner:run:dfa` with default heap space settings and collect the results to a file using the `--outfile` parameter. The output file contains the majority of the actionable items.
 2. Filter your output file on the `LimitReached` violation and group these violations into sets of targets. `LimitReached` violations are the more complex paths that need more heap space and time. 
-3. To determine your previous execution’s path expansion limit and maximum heap space allocated, search for this string in `/<home>/.sfdx-scanner/sfge.log`: “Path expansion limit”. You employ these values later to control the complexity Graph Engine can handle for your code.
+3. To determine your previous execution’s path expansion limit and maximum heap space allocated, search for this string in `/<home>/.sfdx-scanner/sfge.log`: “Path expansion limit”–You use these values later to control the complexity that Graph Engine can handle for your code.
 4. Execute `scanner:run:dfa` on each `LimitReached` target grouping that you created. 
 5. Run `scanner:run:dfa` iteratively with larger memory allocation each time to exclusively target complex areas. 
 	
-	Example: Sample command allocating max heap space of 20G
+	**Example**: Sample command allocating max heap space of 20G
  
 	```
 	sfdx scanner:run:dfa --projectdir /path/to/full/project --target /path/to/a/source/file#optionalSpecificEntryMethod --sfgejvmargs "-Xmx20g" --outfile result_2.csv
@@ -132,11 +173,11 @@ To maximize your heap space balance with Graph Engine performance, follow these 
 * To avoid large IF/ELSE-IF/ELSE conditional trees, simplify your code, which helps bring down the number of paths created.
 
 #### Set complexity-handling-limit Using`--pathexplimit` Parameter
-Heap space allocated for a `scanner:run:dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up earlier.
+Heap space allocated for a `scanner:run:dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up.
 
 Override your path expansion limit using the `--pathexplimit` parameter. Or remove the limit by passing in this value as -1.
 
-Refer to the `OutOfMemory Error` section in the [FAQ](./en/v3.x/faq/#out-of-memory-error) to find more information about path expansion limits.
+To find more information about path expansion limits, refer to the `OutOfMemory Error` section in the [FAQ](./en/v3.x/faq/#out-of-memory-error).
 
 ## Limitations of Salesforce Graph Engine
 
