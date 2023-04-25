@@ -692,7 +692,7 @@ public final class MethodUtil {
                                     .orElse(null);
                 }
             }
-        } else if (apexValue != null && apexValue.getDefiningType().isPresent()) { // TODO: handle this if we have a forloopvalue of class instances
+        } else if (apexValue != null && apexValue.getDefiningType().isPresent()) {
             String definingType = apexValue.getDefiningType().get();
             if (vertex instanceof MethodCallExpressionVertex
                     && (apexValue instanceof ApexClassInstanceValue
