@@ -169,20 +169,4 @@ public class FlsViolationInfo extends ObjectFieldInfo<FlsViolationInfo> implemen
     public FlsViolationInfo deepClone() {
         return new FlsViolationInfo(this);
     }
-
-    //    @Override
-    public Violation convert() {
-        final String violationMessage = FlsViolationMessageUtil.constructMessage(this);
-        final Optional<SFVertex> sourceVertex = this.getSourceVertex();
-        final Optional<SFVertex> sinkVertex = this.getSinkVertex();
-        if (sinkVertex.isPresent()) {
-            final Violation.RuleViolation ruleViolation =
-                    new Violation.PathBasedRuleViolation(
-                            violationMessage, sourceVertex.get(), sinkVertex.get());
-            ruleViolation.setPropertiesFromRule(rule);
-            return ruleViolation;
-        } else {
-            throw new ProgrammingException("Sink vertex not set in flsViolationInfo: " + this);
-        }
-    }
 }

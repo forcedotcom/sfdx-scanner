@@ -38,7 +38,7 @@ public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.GET_GLOBAL_DESCRIBE_VIOLATION_RULE;
+        return UserFacingMessages.RuleDescriptions.MULTIPLE_MASS_SCHEMA_LOOKUP_RULE;
     }
 
     @Override

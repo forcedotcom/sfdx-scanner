@@ -23,9 +23,9 @@ public class RuleConstants {
 
     /** Enum to indicate the type of repetition the method call was subjected. */
     public enum RepetitionType {
-        LOOP(UserFacingMessages.AvoidExcessiveSchemaLookupsTemplates.OCCURRENCE_LOOP_TEMPLATE),
+        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.OCCURRENCE_LOOP_TEMPLATE),
         MULTIPLE(
-                UserFacingMessages.AvoidExcessiveSchemaLookupsTemplates
+                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates
                         .OCCURRENCE_MULTIPLE_TEMPLATE);
 
         String messageTemplate;

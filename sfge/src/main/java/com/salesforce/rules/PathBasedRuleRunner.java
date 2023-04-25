@@ -172,11 +172,11 @@ public class PathBasedRuleRunner {
         }
     }
 
-    private void convertGgdToViolations(HashSet<MassSchemaLookupInfo> ggdViolationInfos) {
+    private void convertGgdToViolations(HashSet<MassSchemaLookupInfo> massSchemaLookupInfos) {
         // TODO: consolidate by sink/source
 
-        for (MassSchemaLookupInfo ggdViolationInfo : ggdViolationInfos) {
-            violations.add(ggdViolationInfo.convert());
+        for (MassSchemaLookupInfo massSchemaLookupInfo : massSchemaLookupInfos) {
+            violations.add(massSchemaLookupInfo.convert());
         }
     }
 

@@ -76,24 +76,4 @@ public class MassSchemaLookupInfo implements RuleThrowable {
         return repetitionVertex;
     }
 
-    //    private String getMessage() {
-    //        return
-    // String.format(UserFacingMessages.AvoidExcessiveSchemaLookupsTemplates.MESSAGE_TEMPLATE,
-    //            sinkVertex.getFullMethodName(),
-    //            getOccurrenceMessage(),
-    //            repetitionVertex.getDefiningType(),
-    //            repetitionVertex.getBeginLine());
-    //    }
-    //
-    //    private String getOccurrenceMessage() {
-    //        if (RuleConstants.RepetitionType.MULTIPLE.equals(repetitionType)) {
-    //            // Use method name on template message
-    //            return repetitionType.getMessage(((MethodCallExpressionVertex)
-    // repetitionVertex).getFullMethodName());
-    //        } else {
-    //            // Use Loop type on template message
-    //            return repetitionType.getMessage(repetitionVertex.getDefiningType());
-    //        }
-    //    }
-
 }

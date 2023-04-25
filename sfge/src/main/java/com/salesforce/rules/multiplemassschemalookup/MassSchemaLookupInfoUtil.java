@@ -26,7 +26,7 @@ public final class MassSchemaLookupInfoUtil {
         final String occurrenceMessage = getOccurrenceMessage(repetitionType, occurrenceInfoValue);
 
         return String.format(
-                UserFacingMessages.AvoidExcessiveSchemaLookupsTemplates.MESSAGE_TEMPLATE,
+                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.MESSAGE_TEMPLATE,
                 sinkMethodName,
                 occurrenceMessage,
                 occurrenceClassName,

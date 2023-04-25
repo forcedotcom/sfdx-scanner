@@ -14,7 +14,8 @@ public final class UserFacingMessages {
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
         public static final String UNUSED_METHOD_RULE =
                 "Identifies methods that aren't invoked from recognized entry points.";
-        public static final String GET_GLOBAL_DESCRIBE_VIOLATION_RULE = "Detects Schema.getGlobalDescribe() calls made in scenarios that could result in performance degradation.";
+        public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
+                "Detects Schema.getGlobalDescribe() calls made in scenarios that could result in performance degradation.";
     }
 
     public static final class RuleViolationTemplates {
@@ -77,7 +78,7 @@ public final class UserFacingMessages {
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
     }
 
-    public static final class AvoidExcessiveSchemaLookupsTemplates {
+    public static final class MultipleMassSchemaLookupRuleTemplates {
         public static final String MESSAGE_TEMPLATE =
                 "Avoid excessive Schema lookups in a single path. Detected %s %s at %s:%d.";
         public static final String OCCURRENCE_LOOP_TEMPLATE = "inside a %s";
