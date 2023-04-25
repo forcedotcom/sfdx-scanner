@@ -10,7 +10,7 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | ApexFlsViolationRule | Path-based analysis | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
 | ApexNullPointerExceptionRule | Path-based analysis | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
 | UnimplementedTypeRule | Graph-based analysis | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
-| UnusedMethodsRule (pilot) | Path-based analysis | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
+| UnusedMethodRule (pilot) | Path-based analysis | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 
 ## ApexFlsViolationRule#
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis, rules run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
@@ -203,7 +203,7 @@ To run a specific category of rules including the pilot rules in that category, 
 
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
-## UnusedMethodRule#
+### UnusedMethodRule#
 
 UnusedMethodRule is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. UnusedMethodRule detects methods contained in your code that aren’t invoked. It detects:
 
@@ -227,11 +227,11 @@ UnusedMethodRule recognizes these entry points.
 * Messaging.InboundEmailResult handleInboundEmail() methods on implementations of Messaging.InboundEmailHandler
 * Any method targeted during invocation
 
-### Definition
+#### Definition
 
 UnusedMethodRule uses sources like ApexFlsViolationRule does, but the UnusedMethodRule sinks are different. Instead of seeking DML operations that occur in the course of a path, UnusedMethodsRule sinks track all method invocations that occur on that path and use that information to identify methods that are never invoked.
 
-### Interpreting UnusedMethodRule Results
+#### Interpreting UnusedMethodRule Results
 
 Match any violation message that you receive with this case to understand more about the violation.
 
@@ -243,7 +243,7 @@ Parameter Explanation:
 
 Because no invocations of the indicated method were found in the paths originating from the identified entry points, the method is unnecessary and can be deleted.
 
-### UnusedMethodRule Limitations
+#### UnusedMethodRule Limitations
 
 - UnusedMethodRule works on static methods and instance methods. Constructors aren't detected.
 - Global methods are intentionally excluded because their external usage is assumed.
