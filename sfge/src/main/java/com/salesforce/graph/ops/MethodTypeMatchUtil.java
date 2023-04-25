@@ -19,6 +19,9 @@ import java.util.Optional;
 
 import static com.salesforce.graph.ops.TypeableUtil.NOT_A_MATCH;
 
+/**
+ * Performs type-related operations while matching method calls with method definitions.
+ */
 public final class MethodTypeMatchUtil {
     private MethodTypeMatchUtil() {}
 
