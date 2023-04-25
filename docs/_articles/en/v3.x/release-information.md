@@ -20,7 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * CHANGE: (GraphEngine): UnusedMethodRule is now a path-based rule that’s invoked from `scanner:run:dfa` and covers many more cases than before. For more info on UnusedMethodRule, see [Graph Engine Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation.
-* NEW: (GraphEngine): Graph Engine now recognizes `for-loop` and `for-each-loop` executed on class instances.
+* NEW: (GraphEngine): Graph Engine now recognizes `for-each-loop` executed on class instances.
 
 
 ## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
