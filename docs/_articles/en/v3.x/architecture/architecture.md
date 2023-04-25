@@ -16,12 +16,12 @@ Code Analyzer is powered by multiple static analyzers, also known as rule engine
 
 | Rule Engine    | Description | Version |
 | -------- | ------- | ------- |
-| [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/)  | Detects security and quality issues in code, as an open-source Salesforce tool | {{ site.data.versions-v3.scanner} |
-| [PMD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/pmd-engine/) | Allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce    | {{ site.data.versions-v3.pmd}	|
-| [CPD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/cpd-engine/)    | Identifies blocks of duplication across files   | {{ site.data.versions-v3.cpd}	|
-| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Lightning Web Component (LWC) Plug-In)| Evaluates Salesforce Lightning Web Components | {{ site.data.versions-v3.eslint}		|
-| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Typescript plug-in | Evaluates any targeted TypeScript (.ts) files	| {{ site.data.versions-v3.eslint}	|
-| [RetireJS](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/retire-js-engine/) | Analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities |	3.x {{ site.data.versions-v3.retirejs}	|
+| [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/)  | Detects security and quality issues in code, as an open-source Salesforce tool | {{ site.data.versions-v3.scanner}} |
+| [PMD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/pmd-engine/) | Allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce    | {{ site.data.versions-v3.pmd}}	|
+| [CPD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/cpd-engine/)    | Identifies blocks of duplication across files   | {{ site.data.versions-v3.pmd}}	|
+| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Lightning Web Component (LWC) Plug-In)| Evaluates Salesforce Lightning Web Components | {{ site.data.versions-v3.eslint}}		|
+| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Typescript plug-in | Evaluates any targeted TypeScript (.ts) files	| {{ site.data.versions-v3.eslint}}	|
+| [RetireJS](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/retire-js-engine/) | Analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities | {{ site.data.versions-v3.retirejs}}	|
 
 -------
 
