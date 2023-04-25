@@ -29,7 +29,6 @@ import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.EventKey;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -359,7 +358,8 @@ public final class MethodUtil {
                     }
                     continue;
                 }
-                final int matchRank = MethodTypeMatchUtil.parameterTypesMatch(method, invocable, symbols);
+                final int matchRank =
+                        MethodTypeMatchUtil.parameterTypesMatch(method, invocable, symbols);
                 if (matchRank != NOT_A_MATCH) {
                     // Make sure we have only one method at a given rank.
                     // Multiple matches at the same rank would be a compilation error.
@@ -684,7 +684,8 @@ public final class MethodUtil {
 
         if (invoked != null) {
             if (apexValue instanceof ApexForLoopValue && apexValue.getDefiningType().isPresent()) {
-                // TODO: We have a situation where we need to indicate that the return value should be a forloop value too
+                // TODO: We have a situation where we need to indicate that the return value should
+                // be a forloop value too
             }
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Finding forward path. vertex=" + vertex + ", invoked=" + invoked);
@@ -727,11 +728,13 @@ public final class MethodUtil {
                 // early.
                 return true;
             } else if (methodVariableName != null
-                    && !MethodTypeMatchUtil.methodVariableTypeMatches(g, method, methodVariableName, symbols)) {
+                    && !MethodTypeMatchUtil.methodVariableTypeMatches(
+                            g, method, methodVariableName, symbols)) {
                 // If the invocation is for an instance method of the wrong type, we can return
                 // early.
                 return true;
-            } else if (MethodTypeMatchUtil.parameterTypesMatch(method, mcev, symbols) == NOT_A_MATCH) {
+            } else if (MethodTypeMatchUtil.parameterTypesMatch(method, mcev, symbols)
+                    == NOT_A_MATCH) {
                 // If the method's parameter types don't match the arguments of the method call,
                 // return early.
                 return true;

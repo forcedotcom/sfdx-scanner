@@ -1,5 +1,7 @@
 package com.salesforce.graph.ops;
 
+import static com.salesforce.graph.ops.TypeableUtil.NOT_A_MATCH;
+
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.Schema;
@@ -9,28 +11,22 @@ import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.vertex.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static com.salesforce.graph.ops.TypeableUtil.NOT_A_MATCH;
-
-/**
- * Performs type-related operations while matching method calls with method definitions.
- */
+/** Performs type-related operations while matching method calls with method definitions. */
 public final class MethodTypeMatchUtil {
     private MethodTypeMatchUtil() {}
 
-
     static boolean methodVariableTypeMatches(
-        GraphTraversalSource g,
-        MethodVertex method,
-        String hostVariable,
-        SymbolProvider symbols) {
+            GraphTraversalSource g,
+            MethodVertex method,
+            String hostVariable,
+            SymbolProvider symbols) {
         // Get the declaration of the variable, and make sure its type matches.
         Typeable declaration = symbols.getTypedVertex(hostVariable).orElse(null);
 
@@ -54,7 +50,9 @@ public final class MethodTypeMatchUtil {
                                     // Starting from the vertex that represents the method's
                                     // defining class/interface...
                                     .hasLabel(
-                                            P.within(ASTConstants.NodeType.USER_INTERFACE, ASTConstants.NodeType.USER_CLASS))
+                                            P.within(
+                                                    ASTConstants.NodeType.USER_INTERFACE,
+                                                    ASTConstants.NodeType.USER_CLASS))
                                     .where(
                                             CaseSafePropertyUtil.H.has(
                                                     Arrays.asList(
@@ -84,7 +82,7 @@ public final class MethodTypeMatchUtil {
     }
 
     static int parameterTypesMatch(
-        MethodVertex method, InvocableWithParametersVertex invocable, SymbolProvider symbols) {
+            MethodVertex method, InvocableWithParametersVertex invocable, SymbolProvider symbols) {
         int rank = 0;
         // For each of the method's parameters...
         for (int i = 0; i < method.getParameters().size(); i++) {

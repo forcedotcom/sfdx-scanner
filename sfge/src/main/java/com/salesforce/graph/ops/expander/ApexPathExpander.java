@@ -516,8 +516,7 @@ class ApexPathExpander
 
         final boolean visitChildren =
                 visitCalled.computeIfAbsent(
-                        pathVertex,
-                        k -> shouldVisitChildren(vertex, pathVertex));
+                        pathVertex, k -> shouldVisitChildren(vertex, pathVertex));
 
         if (visitChildren) {
             for (BaseSFVertex child : vertex.getChildren()) {
@@ -550,19 +549,15 @@ class ApexPathExpander
                 predicate.accept(
                         new VertexPredicateVisitor() {
                             @Override
-                            public void defaultVisit(
-                                    VertexPredicate predicate) {
+                            public void defaultVisit(VertexPredicate predicate) {
                                 // TODO: This is a test only path
-                                apexPathVertexMetaInfo.addVertex(
-                                        predicate, pathVertex);
+                                apexPathVertexMetaInfo.addVertex(predicate, pathVertex);
                             }
 
                             @Override
                             public void visit(AbstractPathTraversalRule rule) {
-                                if (EngineDirectiveUtil.isRuleEnabled(
-                                    vertex, rule)) {
-                                    apexPathVertexMetaInfo.addVertex(
-                                            predicate, pathVertex);
+                                if (EngineDirectiveUtil.isRuleEnabled(vertex, rule)) {
+                                    apexPathVertexMetaInfo.addVertex(predicate, pathVertex);
                                 } else {
                                     if (LOGGER.isInfoEnabled()) {
                                         LOGGER.info(
@@ -613,7 +608,9 @@ class ApexPathExpander
         symbolProviderVisitor.popScope(vertex);
     }
 
-    private void handleMethodCall(ApexPath path, BaseSFVertex vertex, PathVertex pathVertex) throws MethodPathForkedException, RecursionDetectedException, PathExcludedException, ReturnValueInvalidCollapsedException, PathCollapsedException {
+    private void handleMethodCall(ApexPath path, BaseSFVertex vertex, PathVertex pathVertex)
+            throws MethodPathForkedException, RecursionDetectedException, PathExcludedException,
+                    ReturnValueInvalidCollapsedException, PathCollapsedException {
         final InvocableVertex invocable = (InvocableVertex) vertex;
         final PathInvocableCall pathInvocableCall = new PathInvocableCall(path, invocable);
 
@@ -622,21 +619,19 @@ class ApexPathExpander
             // Nothing else to do here.
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace(
-                    "Method has been invoked before. pathInvocableCall="
-                        + pathInvocableCall);
+                        "Method has been invoked before. pathInvocableCall=" + pathInvocableCall);
             }
             return;
         }
 
-
         final Optional<ApexPath> methodPathOpt = resolveMethodCall(path, invocable);
 
         if (!methodPathOpt.isPresent()) {
-            // Method did not resolve to anything. We don't have any more information to expand further.
+            // Method did not resolve to anything. We don't have any more information to expand
+            // further.
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace(
-                    "Method could not be resolved. pathInvocableCall="
-                        + pathInvocableCall);
+                        "Method could not be resolved. pathInvocableCall=" + pathInvocableCall);
             }
             return;
         }
@@ -645,9 +640,7 @@ class ApexPathExpander
 
         checkMethodForRecursion(path, vertex, invocable, methodPath);
 
-
         // Follow the path if it exists and the current path isn't the terminal method call
-
 
         final MethodVertex method = methodPath.getMethodVertex().get();
         final String methodDefiningType = method.getDefiningType();
@@ -656,22 +649,22 @@ class ApexPathExpander
         if (vertex instanceof NewObjectExpressionVertex) {
             // Add the initializer paths before storing the beforeMethodCalled. This will allow us
             // to start off at the same place if a forked path exception is thrown
-            isInstanceInitializationPathAdded = addInstanceInitializationPath(path, (NewObjectExpressionVertex) vertex);
+            isInstanceInitializationPathAdded =
+                    addInstanceInitializationPath(path, (NewObjectExpressionVertex) vertex);
         } else {
             initializeClassStaticScope(methodDefiningType);
         }
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace(
-                "Starting method path. methodCall="
-                    + vertex
-                    + ", firstVertex="
-                    + methodPath.firstVertex());
+                    "Starting method path. methodCall="
+                            + vertex
+                            + ", firstVertex="
+                            + methodPath.firstVertex());
         }
 
         if (beforeMethodCalled.add(pathInvocableCall)) {
-            symbolProviderVisitor.beforeMethodCall(
-                invocable, methodPath.getMethodVertex().get());
+            symbolProviderVisitor.beforeMethodCall(invocable, methodPath.getMethodVertex().get());
         }
 
         if (isInstanceInitializationPathAdded) {
@@ -685,24 +678,28 @@ class ApexPathExpander
 
         if (afterMethodCalled.add(pathInvocableCall)) {
             Optional<ApexValue<?>> lastReturnValue =
-                symbolProviderVisitor.afterMethodCall(
-                    invocable, methodPath.getMethodVertex().get());
+                    symbolProviderVisitor.afterMethodCall(
+                            invocable, methodPath.getMethodVertex().get());
 
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace(
-                    "lastReturnValue="
-                        + lastReturnValue.orElse(null)
-                        + ", methodCall"
-                        + invocable);
+                        "lastReturnValue="
+                                + lastReturnValue.orElse(null)
+                                + ", methodCall"
+                                + invocable);
             }
             validateAndAddReturnValueToCollapser(pathVertex, methodPath, lastReturnValue);
         }
-
     }
 
-    private boolean addInstanceInitializationPath(ApexPath path, NewObjectExpressionVertex newObjectExpression) throws PathExcludedException, MethodPathForkedException, ReturnValueInvalidCollapsedException, RecursionDetectedException, PathCollapsedException {
+    private boolean addInstanceInitializationPath(
+            ApexPath path, NewObjectExpressionVertex newObjectExpression)
+            throws PathExcludedException, MethodPathForkedException,
+                    ReturnValueInvalidCollapsedException, RecursionDetectedException,
+                    PathCollapsedException {
         boolean isInitializationPathAdded = false;
-        final UserClassVertex userClass = ClassUtil.getUserClass(g, newObjectExpression).orElse(null);
+        final UserClassVertex userClass =
+                ClassUtil.getUserClass(g, newObjectExpression).orElse(null);
         if (userClass != null) {
             isInitializationPathAdded = true;
             initializeClassStaticScope(userClass.getDefiningType());
@@ -710,31 +707,32 @@ class ApexPathExpander
             // Map the NewObjectExpressionVertex to the instance initialization path for the
             // class that corresponds the NewObjectExpressionVertex
             Collectible<ApexPath> apexPath =
-                path.getNewInstanceToInitializationPath(newObjectExpression)
-                    .orElse(null);
+                    path.getNewInstanceToInitializationPath(newObjectExpression).orElse(null);
             if (apexPath == null) {
                 apexPath =
-                    ClassInstanceScope.getInitializationPath(
-                            g, userClass.getDefiningType())
-                        .orElse(null);
+                        ClassInstanceScope.getInitializationPath(g, userClass.getDefiningType())
+                                .orElse(null);
                 path.putNewObjectExpression(
-                    newObjectExpression,
-                    apexPath != null ? apexPath : ApexPath.NULL_VALUE);
+                        newObjectExpression, apexPath != null ? apexPath : ApexPath.NULL_VALUE);
             }
         }
         return isInitializationPathAdded;
     }
 
-    private void initializeNewInstance(ApexPath path, NewObjectExpressionVertex vertex) throws PathExcludedException, MethodPathForkedException, RecursionDetectedException, ReturnValueInvalidCollapsedException, PathCollapsedException {
+    private void initializeNewInstance(ApexPath path, NewObjectExpressionVertex vertex)
+            throws PathExcludedException, MethodPathForkedException, RecursionDetectedException,
+                    ReturnValueInvalidCollapsedException, PathCollapsedException {
         NewObjectExpressionVertex newObjectExpression = vertex;
         Collectible<ApexPath> apexPath =
-            path.getNewInstanceToInitializationPath(newObjectExpression).orElse(null);
+                path.getNewInstanceToInitializationPath(newObjectExpression).orElse(null);
         if (apexPath != null && apexPath.getCollectible() != null) {
             visit(apexPath.getCollectible());
         }
     }
 
-    private void validateAndAddReturnValueToCollapser(PathVertex pathVertex, ApexPath methodPath, Optional<ApexValue<?>> lastReturnValue) throws ReturnValueInvalidCollapsedException, PathCollapsedException {
+    private void validateAndAddReturnValueToCollapser(
+            PathVertex pathVertex, ApexPath methodPath, Optional<ApexValue<?>> lastReturnValue)
+            throws ReturnValueInvalidCollapsedException, PathCollapsedException {
         // Ask the collapsers if the invoked method returned a useful value. If not, the
         // path will not be considered
         for (ApexReturnValuePathCollapser collapser : config.getReturnValueCollapsers()) {
@@ -753,14 +751,14 @@ class ApexPathExpander
 
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(
-                    "Path isValid="
-                        + isValid
-                        + ", method="
-                        + methodPath.getMethodVertex()
-                        + ", lastReturnValue="
-                        + lastReturnValue.orElse(null)
-                        + ", collapser="
-                        + collapser.getClass().getSimpleName());
+                        "Path isValid="
+                                + isValid
+                                + ", method="
+                                + methodPath.getMethodVertex()
+                                + ", lastReturnValue="
+                                + lastReturnValue.orElse(null)
+                                + ", collapser="
+                                + collapser.getClass().getSimpleName());
             }
 
             if (!isValid) {
@@ -768,20 +766,20 @@ class ApexPathExpander
                 // not remove the
                 // whole path
                 throw new ReturnValueInvalidCollapsedException(
-                    forkEvents.get(pathVertex), methodPath, lastReturnValue);
+                        forkEvents.get(pathVertex), methodPath, lastReturnValue);
             }
         }
         if (forkResults.containsKey(pathVertex)) {
             if (forkResults.put(pathVertex, lastReturnValue) != null) {
-                throw new UnexpectedException(
-                    "Duplicated return result. vertex=" + pathVertex);
+                throw new UnexpectedException("Duplicated return result. vertex=" + pathVertex);
             }
-            apexPathCollapser.resultReturned(
-                this, forkEvents.get(pathVertex), lastReturnValue);
+            apexPathCollapser.resultReturned(this, forkEvents.get(pathVertex), lastReturnValue);
         }
     }
 
-    private void checkMethodForRecursion(ApexPath path, BaseSFVertex vertex, InvocableVertex invocable, ApexPath methodPath) throws RecursionDetectedException {
+    private void checkMethodForRecursion(
+            ApexPath path, BaseSFVertex vertex, InvocableVertex invocable, ApexPath methodPath)
+            throws RecursionDetectedException {
         try {
             // TODO: Can this happen in other cases?
             if (invocable instanceof MethodCallExpressionVertex) {
@@ -803,7 +801,10 @@ class ApexPathExpander
      * Adds static scope if the Single Variable expression appears to be a static invocation to
      * another class.
      */
-    private void initializeAdditionalStaticScope(VariableExpressionVertex.Single variableExpression) throws PathExcludedException, MethodPathForkedException, ReturnValueInvalidCollapsedException, RecursionDetectedException, PathCollapsedException {
+    private void initializeAdditionalStaticScope(VariableExpressionVertex.Single variableExpression)
+            throws PathExcludedException, MethodPathForkedException,
+                    ReturnValueInvalidCollapsedException, RecursionDetectedException,
+                    PathCollapsedException {
         String symbolicName = variableExpression.getSymbolicName().orElse(null);
         String fullName = variableExpression.getFullName();
 
@@ -811,7 +812,6 @@ class ApexPathExpander
         if (fullName.contains(".") && symbolicName != null) {
             initializeClassStaticScope(symbolicName);
         }
-
     }
 
     /**
