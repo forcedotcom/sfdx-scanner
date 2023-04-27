@@ -12,6 +12,17 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.12.0) (05-03-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.12.0...v3.11.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* CHANGE: (GraphEngine): UnusedMethodRule is now a path-based rule that’s invoked from `scanner:run:dfa` and covers many more cases than before. For more info on UnusedMethodRule, see [Graph Engine Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation.
+* NEW: (GraphEngine): Graph Engine now recognizes `for-each-loop` executed on class instances.
+
+
 ## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.10.0)
