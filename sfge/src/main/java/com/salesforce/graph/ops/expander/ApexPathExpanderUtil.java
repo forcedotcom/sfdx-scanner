@@ -144,8 +144,7 @@ public final class ApexPathExpanderUtil {
                         apexPathExpanders.push(apexPathExpander);
                     } else {
                         // Expand by number of constructors * number of paths
-                        for (MethodVertex.ConstructorVertex constructor :
-                                MethodUtil.getNonDefaultConstructors(g, className)) {
+                        for (MethodVertex.ConstructorVertex constructor : constructors) {
                             for (ApexPath constructorPath :
                                     ApexPathUtil.getForwardPaths(g, constructor, false)) {
                                 final ApexPath clonedPath = path.deepClone();
