@@ -273,6 +273,17 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex
         return (String) properties.get(Schema.METHOD_NAME);
     }
 
+    /**
+     * @return Optional value of ArrayLoadExpressionVertex if the method call was made on an array
+     *     expression such as list[i].doSomething().
+     */
+    public Optional<ArrayLoadExpressionVertex> getArrayInvocation() {
+        AbstractReferenceExpressionVertex referenceExpression = getReferenceExpression();
+        ArrayLoadExpressionVertex arrayExpressionVertex =
+                referenceExpression.getOnlyChildOrNull(NodeType.ARRAY_LOAD_EXPRESSION);
+        return Optional.ofNullable(arrayExpressionVertex);
+    }
+
     @Override
     public <T> T accept(TypedVertexVisitor<T> visitor) {
         return visitor.visit(this);
