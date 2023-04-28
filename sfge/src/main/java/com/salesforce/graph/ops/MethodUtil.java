@@ -619,7 +619,6 @@ public final class MethodUtil {
                                 .orElse(null);
             } else if (vertex instanceof ArrayLoadExpressionVertex) {
                 // Intentionally left blank
-                // TODO: Why?
             } else {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace(
@@ -641,7 +640,6 @@ public final class MethodUtil {
                 final String methodName = methodCallExpression.getMethodName();
                 String fullMethodName = methodCallExpression.getFullMethodName();
                 if (methodName.equals(fullMethodName)) {
-                    // TODO: Method invoked on ArrayLoadExpression is incorrectly getting in here
                     // The method is being called on a class onto itself
                     definingType = vertex.getDefiningType();
                 } else {

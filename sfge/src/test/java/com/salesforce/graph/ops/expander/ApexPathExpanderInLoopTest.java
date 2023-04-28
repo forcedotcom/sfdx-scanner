@@ -9,6 +9,7 @@ import com.salesforce.graph.symbols.apex.ApexBooleanValue;
 import com.salesforce.graph.symbols.apex.ApexForLoopValue;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
+import com.salesforce.graph.vertex.ChainedVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.List;
@@ -31,12 +32,15 @@ import org.junit.jupiter.api.Test;
  * </ul>
  *
  * Even though we'd ideally prefer to have all of them treated the same way, we are currently
- * treating them differently. Category 3 (Method invocation on instances of classes) require path
- * expansion to understand what value is returned, but Categories 1 and 2 have predetermined methods
- * whose value we derive directly within Graph Engine (for example, toLowerCase() on a String
- * primitive). This leads to Categories 1 & 2 returning an ApexForLoopValue when a method is invoked
- * on them during iteration (see {@link ApexForLoopValue#apply(MethodCallExpressionVertex,
- * SymbolProvider)}) and Category 3 returning a non-loop value when a method is invoked on it.
+ * treating them differently. Category 3 (Method invocation on instances of classes) requires path
+ * expansion to understand what value is returned, but Categories 1 and 2 have a known set of
+ * methods - we derive their return values directly within Graph Engine (for example, toLowerCase()
+ * on a String primitive). This leads to Categories 1 & 2 returning an ApexForLoopValue when a
+ * method is invoked on them during iteration (see {@link
+ * ApexForLoopValue#apply(MethodCallExpressionVertex, SymbolProvider)}) and Category 3 returning a
+ * non-loop value when a method is invoked on it (see {@link
+ * com.salesforce.graph.ops.MethodUtil#getPaths(GraphTraversalSource, ChainedVertex,
+ * SymbolProvider)}).
  *
  * <p>While For-loop and ForEach-loop are well-structured, While-loops don't clearly state what's
  * iterated. Because of this shortcoming, we don't give loop-treatment to method calls made inside a

@@ -579,7 +579,6 @@ public class MethodUtilCollectionTest {
         TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
         SystemDebugAccumulator visitor = result.getVisitor();
 
-        // TODO: Why doesn't this get treated as a ApexForLoopValue?
         final ApexForLoopValue forLoopValue = visitor.getSingletonResult();
         final List<ApexValue<?>> items = forLoopValue.getForLoopValues();
         assertThat(items.size(), equalTo(1));
