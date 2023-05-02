@@ -28,6 +28,8 @@ We publish the latest Code Analyzer monthly.
 * INTERNAL ERROR: Unexpected error occurred while cataloging rules [\#1033](https://github.com/forcedotcom/sfdx-scanner/issues/1033)
 
 **Merged pull requests**
+* CHANGE (CodeAnalyzer): @W-13114136@: Updates package.json and retire-js vulnerabilities [\#1064](https://github.com/forcedotcom/sfdx-scanner/pull/1064)
+* CHANGE (CodeAnalyzer): @W-13114136@: Bump vm2 from 3.9.14 to 3.9.17 [\#1056](https://github.com/forcedotcom/sfdx-scanner/pull/1056)
 * CHANGE (GraphEngine): @W-12278342@: Expands paths on ForEach loop value method invocation. [\#1060](https://github.com/forcedotcom/sfdx-scanner/pull/1060)
 * CHANGE (GraphEngine): @W-12696440@: UnusedMethodRule is now pilot. [\#1052](https://github.com/forcedotcom/sfdx-scanner/pull/1052)
 * FIX (GraphEngine): @W-13015204@: Path expansion properly resolves inner-class references. [\#1050](https://github.com/forcedotcom/sfdx-scanner/pull/1050)
