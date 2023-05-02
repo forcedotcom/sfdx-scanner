@@ -12,6 +12,34 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.12.0) (05-02-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.12.0...v3.11.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* CHANGE: (GraphEngine): UnusedMethodRule is now a path-based rule that’s invoked from `scanner:run:dfa` and covers many more cases than before. For more info on UnusedMethodRule, see [Graph Engine Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/) documentation.
+* NEW: (GraphEngine): Graph Engine now recognizes `for-each-loop` executed on class instances.
+
+**Closed issues:**
+* [BUG] can't use "sfdx project delete source" [\#1055](https://github.com/forcedotcom/sfdx-scanner/issues/1055)
+* [BUG] @salesforce/sfdx-scanner > ts-node@10.9.1" has unmet peer dependency "@types/node@* [\#1000](https://github.com/forcedotcom/sfdx-scanner/issues/1000)
+* INTERNAL ERROR: Unexpected error occurred while cataloging rules [\#1033](https://github.com/forcedotcom/sfdx-scanner/issues/1033)
+
+**Merged pull requests**
+* CHANGE (CodeAnalyzer): @W-13114136@: Updates package.json and retire-js vulnerabilities [\#1064](https://github.com/forcedotcom/sfdx-scanner/pull/1064)
+* CHANGE (CodeAnalyzer): @W-13114136@: Bump vm2 from 3.9.14 to 3.9.17 [\#1056](https://github.com/forcedotcom/sfdx-scanner/pull/1056)
+* CHANGE (GraphEngine): @W-12278342@: Expands paths on ForEach loop value method invocation. [\#1060](https://github.com/forcedotcom/sfdx-scanner/pull/1060)
+* CHANGE (GraphEngine): @W-12696440@: UnusedMethodRule is now pilot. [\#1052](https://github.com/forcedotcom/sfdx-scanner/pull/1052)
+* FIX (GraphEngine): @W-13015204@: Path expansion properly resolves inner-class references. [\#1050](https://github.com/forcedotcom/sfdx-scanner/pull/1050)
+* FIX (GraphEngine): @W-13021340@: UnusedMethodRule now ignores constructors. [\#1049](https://github.com/forcedotcom/sfdx-scanner/pull/1049)
+* FIX (GraphEngine): @W-12696440@: Switched usage tracking to more threadsafe style. [\#1048](https://github.com/forcedotcom/sfdx-scanner/pull/1048)
+* FIX (GraphEngine): @W-13015237@: sfge-disable-next-line now works for MethodVertex. [\#1046](https://github.com/forcedotcom/sfdx-scanner/pull/1046)
+* CHANGE (GraphEngine): @W-12696440@: Refactored UnusedMethodRule into a PathBased rule. [\#1039](https://github.com/forcedotcom/sfdx-scanner/pull/1039)
+* CHANGE (CodeAnalyzer): @W-12729175@: Update Production heartbeat timings [\#1040](https://github.com/forcedotcom/sfdx-scanner/pull/1040)
+* CHANGE (GraphEngine): @W-12733533@: Creates a violation type for UserFacing message [\#1030](https://github.com/forcedotcom/sfdx-scanner/pull/1030)
+
 ## [v3.11.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.11.0) (03-29-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.11.0...v3.10.0)
