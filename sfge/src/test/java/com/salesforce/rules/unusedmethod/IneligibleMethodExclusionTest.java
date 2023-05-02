@@ -21,9 +21,9 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
      * generated. To reduce noise, this should always count as used.
      */
     @Test
-    public void impliedConstructorWithoutInvocation_expectNoAnalysis() {
+    public void impliedConstructorWithoutInvocation_expectIneligible() {
         String sourceCode = "public class MyClass {}";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "<init>", 1);
     }
 
     /**
@@ -32,53 +32,86 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
      * positives.
      */
     @Test
-    public void privateArity0ConstructorWithoutInvocation_expectNoAnalysis() {
+    public void privateArity0ConstructorWithoutInvocation_expectIneligible() {
         String sourceCode =
                 "public class MyClass {\n" + "    private MyClass() {\n" + "    }\n" + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "<init>", 2);
     }
 
     /* ============ SECTION 2: ENGINE DIRECTIVES ============ */
-    @Test
-    public void applySkipStack_expectNoAnalysis() {
+    /**
+     * Template for test cases about using engine directive. Has the following wildcards:
+     *
+     * <ol>
+     *   <li>%s for optionally adding a class-level directive
+     *   <li>%s for optionally adding a line-level directive to {@code staticMethod()}
+     *   <li>%s for optionally adding a line-level directive to {@code instanceMethod()}
+     *   <li>%s for optionally adding a line-level directive to the constructor
+     * </ol>
+     */
+    // spotless:off
+    private static final String DIRECTIVE_TEMPLATE =
+        // Add a space for a class-level directive.
+        "%s\n"
+      + "public class MyClass {\n"
+        // A static method, with a space for an annotation.
+      + "    %s\n"
+      + "    public static boolean staticMethod() {\n"
+      + "        return true;\n"
+      + "    }\n"
+      + "    \n"
+        // An instance method, with a space for an annotation.
+      + "    %s\n"
+      + "    public boolean instanceMethod() {\n"
+      + "        return true;\n"
+      + "    }\n"
+      + "    \n"
+        // A constructor, with a space for an annotation.
+      + "    %s\n"
+      + "    public MyClass() {}\n"
+      + "}";
+    // spotless:on
+
+    /**
+     * Tests verifying that the line-level directives (e.g. {@code sfge-disable-stack} and {@code
+     * sfge-disable-next-line}) cause otherwise eligible vertices to be excluded from analysis.
+     *
+     * @param directive - The specific directive to use
+     */
+    @ValueSource(strings = {"sfge-disable-stack", "sfge-disable-next-line"})
+    @ParameterizedTest(name = "{displayName}: Directive {0}")
+    public void applyLineLevelDirective_expectNoAnalysis(String directive) {
+        String directiveLine = "/* " + directive + " UnusedMethodRule */";
         String sourceCode =
-                "public class MyClass {\n"
-                        // Unused static method, annotated with the directive.
-                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                        + "    private static boolean unusedStaticMethod() {\n"
-                        + "        return true;\n"
-                        + "    }\n"
-                        // Unused instance method, annotated with the directive.
-                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                        + "    private boolean unusedInstanceMethod() {\n"
-                        + "        return true;\n"
-                        + "    }\n"
-                        // Unused constructor, annotated with the method.
-                        + "    /* sfge-disable-stack UnusedMethodRule */\n"
-                        + "    private MyClass () {\n"
-                        + "    }\n"
-                        + "}\n";
-        assertNoAnalysis(sourceCode);
+                String.format(
+                        DIRECTIVE_TEMPLATE,
+                        // No class-level directive
+                        "",
+                        // Use the directive at every opportunity.
+                        directiveLine,
+                        directiveLine,
+                        directiveLine);
+        assertMethodIneligibility(
+                sourceCode,
+                new String[] {"MyClass", "MyClass", "MyClass"},
+                new String[] {"staticMethod", "instanceMethod", "<init>"},
+                new int[] {4, 9, 14});
     }
 
+    /**
+     * Test verifying that applying the {@code sfge-disable} annotation to a class excludes
+     * otherwise eligible methods in that class.
+     */
     @Test
-    public void applySkipClassDirective_expectNoAnalysis() {
+    public void applyClassLevelDirective_expectNoAnalysis() {
         String sourceCode =
-                "/* sfge-disable UnusedMethodRule */\n"
-                        + "public class MyClass {\n"
-                        // Unused static method
-                        + "    private static boolean unusedStaticMethod() {\n"
-                        + "        return true;\n"
-                        + "    }\n"
-                        // Unused instance method
-                        + "    private boolean unusedInstanceMethod() {\n"
-                        + "        return true;\n"
-                        + "    }\n"
-                        // Unused constructor
-                        + "    private MyClass () {\n"
-                        + "    }\n"
-                        + "}\n";
-        assertNoAnalysis(sourceCode);
+                String.format(
+                        DIRECTIVE_TEMPLATE, "/* sfge-disable UnusedMethodRule */", "", "", "");
+        assertMethodIneligibility(
+                sourceCode,
+                new String[] {"MyClass", "MyClass", "MyClass"},
+                new String[] {"staticMethod", "instanceMethod", "<init>"},
+                new int[] {4, 9, 14});
     }
 
     /* =============== SECTION 3: PATH ENTRY POINTS =============== */
@@ -95,7 +128,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                         + "        return true;\n"
                         + "    }\n"
                         + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "someMethod", 2);
     }
 
     /** public methods on controllers are entrypoints, and should count as used. */
@@ -125,7 +158,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                             return references;
                         }
                     });
-            assertNoAnalysis(sourceCode);
+            assertMethodIneligibility(sourceCode, "MyController", "getSomeProperty", 2);
         } finally {
             MetaInfoCollectorTestProvider.removeVisualForceHandler();
         }
@@ -140,7 +173,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                         + "        return null;\n"
                         + "    }\n"
                         + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "someMethod", 2);
     }
 
     /** Certain annotated methods are entrypoints, and should count as used. */
@@ -160,7 +193,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                         + "        return true;\n"
                         + "    }\n"
                         + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "someMethod", 3);
     }
 
     /**
@@ -175,7 +208,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                         + "        return null;\n"
                         + "    }\n"
                         + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(sourceCode, "MyClass", "handleInboundEmail", 2);
     }
 
     /* =============== SECTION 4: PROPERTY GETTERS AND SETTERS =============== */
@@ -193,7 +226,11 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                         + "        private set;\n"
                         + "    }\n"
                         + "}\n";
-        assertNoAnalysis(sourceCode);
+        assertMethodIneligibility(
+                sourceCode,
+                new String[] {"MyClass", "MyClass"},
+                new String[] {"__sfdc_someProperty", "__sfdc_someProperty"},
+                new int[] {2, 2});
     }
 
     /* =============== SECTION 5: ABSTRACT METHOD DECLARATION =============== */
@@ -213,6 +250,10 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
                     + "}\n",
             "global interface MyInterface {\n" + "    boolean anotherMethod();\n" + "}\n"
         };
-        assertNoAnalysis(sourceCodes);
+        assertMethodIneligibility(
+                sourceCodes,
+                new String[] {"AbstractWithPublic", "AbstractWithProtected", "MyInterface"},
+                new String[] {"someMethod", "someMethod", "anotherMethod"},
+                new int[] {2, 2, 2});
     }
 }

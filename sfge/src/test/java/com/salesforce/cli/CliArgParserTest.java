@@ -55,8 +55,8 @@ public class CliArgParserTest {
     @CsvSource({
         // As we add new DFA and non-DFA rules, the numbers in these tests
         // will increase.
-        "pathless, 2",
-        "dfa, 2"
+        "pathless, 1",
+        "dfa, 3"
     })
     @ParameterizedTest(name = "{displayName}: {0} rules")
     public void catalogFlowReturnsExpectedRules(String arg, int ruleCount) {

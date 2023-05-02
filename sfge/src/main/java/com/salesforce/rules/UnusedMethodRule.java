@@ -1,34 +1,157 @@
 package com.salesforce.rules;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
+import com.salesforce.config.UserFacingMessages;
+import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
+import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.graph.vertex.SFVertexFactory;
-import com.salesforce.rules.unusedmethod.*;
+import com.salesforce.graph.ops.expander.PathExpansionObserver;
+import com.salesforce.graph.vertex.*;
+import com.salesforce.rules.unusedmethod.operations.UsageTracker;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 
-public class UnusedMethodRule extends AbstractStaticRule {
+/**
+ * Rule for identifying dead code. After all {@link ApexPath} instances have been traversed,
+ * generates violations for any eligible {@link MethodVertex} that was never invoked. A method is
+ * considered eligible if it meets all the following criteria:
+ *
+ * <ol>
+ *   <li>The method is not declared as a {@code testMethod}
+ *   <li>The method is not declared as {@code abstract}
+ *   <li>The method is not a private, 0-arity constructor
+ *   <li>The method is not a VisualForce getter/setter
+ *   <li>The method is not considered a path entrypoint
+ *   <li>The method is not annotated with an engine directive that silences this rule.
+ * </ol>
+ */
+public final class UnusedMethodRule extends AbstractPathBasedRule implements PostProcessingRule {
+    private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
-    private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
-    private static final String DESCRIPTION = "Identifies methods that are not invoked";
-    private static final String VIOLATION_TEMPLATE = "Method %s in class %s is never invoked";
 
-    GraphTraversalSource g;
-    /** A helper object used to track state and caching as the rule executes. */
-    RuleStateTracker ruleStateTracker;
+    private UnusedMethodRule() {}
 
-    private UnusedMethodRule() {
-        super();
+    @Override
+    public Optional<PathExpansionObserver> getPathExpansionObserver() {
+        return Optional.of(new UsageTracker());
+    }
+
+    /**
+     * Create violations for every eligible {@link MethodVertex} for which an invocation was never
+     * found.
+     */
+    public List<Violation> postProcess(GraphTraversalSource g) {
+        // Create an empty result list.
+        List<Violation> results = new ArrayList<>();
+        // Get all vertices eligible for the rule.
+        List<MethodVertex> eligibleMethods = getEligibleMethods(g);
+        UsageTracker usageTracker = new UsageTracker();
+        for (MethodVertex methodVertex : eligibleMethods) {
+
+            if (!usageTracker.isUsed(methodVertex.generateUniqueKey())) {
+                String violationMsg =
+                        String.format(
+                                UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,
+                                methodVertex.getName(),
+                                methodVertex.getDefiningType());
+                Violation.PathBasedRuleViolation violation =
+                        new Violation.PathBasedRuleViolation(
+                                // NOTE: Since the violations represent the non-invocation of a
+                                // method, the method is both source and sink.
+                                violationMsg, methodVertex, methodVertex);
+                violation.setPropertiesFromRule(this);
+                results.add(violation);
+            }
+        }
+        return results;
+    }
+
+    /** Returns every {@link MethodVertex} instance eligible for analysis under this rule. */
+    @VisibleForTesting
+    public List<MethodVertex> getEligibleMethods(GraphTraversalSource g) {
+        // Some eligibility exclusions are easy to apply in the initial query.
+        List<MethodVertex> methods =
+                SFVertexFactory.loadVertices(
+                        g,
+                        g.V()
+                                .hasLabel(NodeType.METHOD)
+                                // The "<clinit>" method is ineligible.
+                                .has(Schema.NAME, P.neq("<clinit>"))
+                                // TODO: FOR NOW, WE'RE IGNORING CONSTRUCTORS TO CUT DOWN ON NOISE.
+                                //       IN THE FULLNESS OF TIME, AS WE FIX RELEVANT BUGS, WE'LL
+                                //       REMOVE THIS RESTRICTION.
+                                .has(Schema.NAME, P.neq("<init>"))
+                                // Getters are typically used by VF controllers rather than Apex,
+                                // and setters are often private to render the property immutable.
+                                // As such, including these methods is likely to generate
+                                // false/noisy positives.
+                                .where(
+                                        H.hasNotStartingWith(
+                                                NodeType.METHOD,
+                                                Schema.NAME,
+                                                ASTConstants.PROPERTY_METHOD_PREFIX))
+                                // Abstract methods must be implemented by all concrete child
+                                // classes. This rule can detect whether those concrete
+                                // implementations are used, and another rule detects abstract
+                                // types with no implementations. Therefore, inspecting abstract
+                                // methods directly is redundant.
+                                .where(
+                                        __.out(Schema.CHILD)
+                                                .has(NodeType.MODIFIER_NODE, Schema.ABSTRACT, false)
+                                                .count()
+                                                .is(P.eq(1)))
+                                // Test methods are ineligible.
+                                .where(
+                                        __.or(
+                                                __.hasNot(Schema.IS_TEST),
+                                                __.has(Schema.IS_TEST, false))));
+        // Other eligibility exclusions are more easily applied to the returned list.
+        return methods.stream()
+                .filter(
+                        methodVertex -> {
+                            // Private, 0-arity constructors are excluded, since they are most often
+                            // used by Util classes and other static-method-only classes to prevent
+                            // instantiation entirely and thus uninvoked by design.
+                            if (methodVertex.isConstructor()
+                                    && methodVertex.isPrivate()
+                                    && methodVertex.getArity() == 0) {
+                                return false;
+                            }
+                            // Vertices we're directed to skip should be skipped.
+                            if (directedToSkip(methodVertex)) {
+                                return false;
+                            }
+                            // We should also skip path entrypoints, because they're definitionally
+                            // publicly accessible, and therefore we should assume they're used
+                            // somewhere or other.
+                            return !PathEntryPointUtil.isPathEntryPoint(methodVertex);
+                        })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Helper method for {@link #getEligibleMethods(GraphTraversalSource)}. Indicates whether a
+     * method is annotated with an engine directive denoting that it should be skipped by this rule.
+     */
+    private boolean directedToSkip(MethodVertex methodVertex) {
+        List<EngineDirective> directives = methodVertex.getAllEngineDirectives();
+        for (EngineDirective directive : directives) {
+            if (directive.isAnyDisable()
+                    && directive.matchesRule(this.getClass().getSimpleName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static UnusedMethodRule getInstance() {
@@ -42,7 +165,7 @@ public class UnusedMethodRule extends AbstractStaticRule {
 
     @Override
     protected String getDescription() {
-        return DESCRIPTION;
+        return UserFacingMessages.RuleDescriptions.UNUSED_METHOD_RULE;
     }
 
     @Override
@@ -60,158 +183,8 @@ public class UnusedMethodRule extends AbstractStaticRule {
         return true;
     }
 
-    public RuleStateTracker getRuleStateTracker() {
-        return ruleStateTracker;
-    }
-
-    @Override
-    protected List<Violation> _run(
-            GraphTraversalSource g, GraphTraversal<Vertex, Vertex> eligibleVertices) {
-        reset(g);
-        List<MethodVertex> candidateVertices = getCandidateVertices(eligibleVertices);
-        seekMethodUsages(candidateVertices);
-        return convertMethodsToViolations();
-    }
-
-    /** Reset the rule's state to prepare for a subsequent execution. */
-    private void reset(GraphTraversalSource g) {
-        this.g = g;
-        this.ruleStateTracker = new RuleStateTracker(g);
-    }
-
-    /**
-     * Get a list of all method vertices on non-standard types. All such methods are candidates for
-     * analysis.
-     */
-    private List<MethodVertex> getCandidateVertices(
-            GraphTraversal<Vertex, Vertex> eligibleVertices) {
-        return SFVertexFactory.loadVertices(
-                g, eligibleVertices.hasLabel(NodeType.METHOD).hasNot(Schema.IS_STANDARD));
-    }
-
-    /**
-     * Seek an invocation of each provided method, unless the method is deemed to be ineligible for
-     * analysis. Eligible and unused methods are tracked in {@link #ruleStateTracker}.
-     */
-    private void seekMethodUsages(List<MethodVertex> candidateVertices) {
-        for (MethodVertex candidateVertex : candidateVertices) {
-            // If the method is one that isn't eligible to be analyzed, skip it.
-            if (methodIsIneligible(candidateVertex)) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info(
-                            "Skipping vertex "
-                                    + candidateVertex.getName()
-                                    + ", as it is ineligible for analysis");
-                }
-                continue;
-            }
-
-            // If the method was determined as eligible, track it as such.
-            ruleStateTracker.trackEligibleMethod(candidateVertex);
-
-            // Depending on the kind of method, we should instantiate a different call validator.
-            BaseMethodCallValidator validator;
-            if (candidateVertex.isStatic()) {
-                validator = new StaticMethodCallValidator(candidateVertex, ruleStateTracker);
-            } else if (candidateVertex.isConstructor()) {
-                validator = new ConstructorMethodCallValidator(candidateVertex, ruleStateTracker);
-            } else {
-                validator = new InstanceMethodCallValidator(candidateVertex, ruleStateTracker);
-            }
-            // If the validator can't find any usage, then we should add the method as unused.
-            if (!validator.usageDetected()) {
-                ruleStateTracker.trackUnusedMethod(candidateVertex);
-            }
-        }
-    }
-
-    /** Convert every known unused method to a violation, and return them in a list. */
-    private List<Violation> convertMethodsToViolations() {
-        return ruleStateTracker.getUnusedMethods().stream()
-                .map(
-                        m ->
-                                new Violation.StaticRuleViolation(
-                                        String.format(
-                                                VIOLATION_TEMPLATE,
-                                                m.getName(),
-                                                m.getDefiningType()),
-                                        m))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Returns true if the provided method isn't a valid candidate for analysis by this rule. Used
-     * for filtering the list of all possible candidates into just the eligible ones.
-     */
-    private boolean methodIsIneligible(MethodVertex vertex) {
-        // TODO: At this time, only static methods, constructors, and private instance methods are
-        //       supported. This limit will be loosened over time, and eventually removed entirely.
-        if (!vertex.isStatic() && !vertex.isConstructor() && !vertex.isPrivate()) {
-            return true;
-        }
-
-        // Test methods are ineligible.
-        if (vertex.isTest()) {
-            return true;
-        }
-
-        // The "<clinit>" method is inherently ineligible.
-        if (vertex.getName().equalsIgnoreCase("<clinit>")) {
-            return true;
-        }
-
-        // If we're directed to skip this method, obviously we should do so.
-        if (directedToSkip(vertex)) {
-            return true;
-        }
-
-        // Abstract methods must be implemented by all child classes.
-        // This rule can detect if those implementations are unused, and another rule exists to
-        // detect unused abstract classes and interface themselves. As such, inspecting
-        // abstract methods directly is unnecessary.
-        if (vertex.isAbstract()) {
-            return true;
-        }
-
-        // Private constructors with arity of 0 are ineligible. Creating such a constructor is a
-        // standard way of preventing utility classes whose only methods are static from being
-        // instantiated at all, so including such methods in our analysis is likely to generate
-        // more false positives than true positives.
-        if (vertex.isConstructor() && vertex.isPrivate() && vertex.getArity() == 0) {
-            return true;
-        }
-
-        // Methods whose name starts with this prefix are getters/setters. Getters are typically
-        // used by VF controllers, and setters are frequently made private to render a property
-        // immutable. As such, inspecting these methods is likely to generate false or noisy
-        // positives.
-        if (vertex.getName().toLowerCase().startsWith(ASTConstants.PROPERTY_METHOD_PREFIX)) {
-            return true;
-        }
-
-        // Finally, path entry points should be skipped, because they're definitionally publicly
-        // accessible, and therefore we must assume that they're used somewhere or other.
-        // But if the method isn't a path entry point, then it's eligible.
-        return PathEntryPointUtil.isPathEntryPoint(vertex);
-    }
-
-    /**
-     * Helper method for {@link #methodIsIneligible(MethodVertex)}. Indicates whether a method is
-     * annotated with an engine directive denoting that it should be skipped by this rule.
-     */
-    private boolean directedToSkip(MethodVertex methodVertex) {
-        List<EngineDirective> directives = methodVertex.getAllEngineDirectives();
-        for (EngineDirective directive : directives) {
-            if (directive.isAnyDisable()
-                    && directive.matchesRule(this.getClass().getSimpleName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private static final class LazyHolder {
-        // Postpone initialization until first use.
+        // Postpone initialization until first use
         private static final UnusedMethodRule INSTANCE = new UnusedMethodRule();
     }
 }

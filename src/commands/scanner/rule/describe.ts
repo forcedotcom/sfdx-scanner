@@ -82,6 +82,7 @@ export default class Describe extends ScannerCommand {
 			const styledRule: DescribeStyledRule = {
 				...r,
 				runWith: r.isDfa ? Dfa.id : Run.id,
+				isPilot: r.isPilot,
 				enabled: enabledEngineNames.has(r.engine)
 			};
 			// Strip any whitespace off of the description.
@@ -91,6 +92,6 @@ export default class Describe extends ScannerCommand {
 	}
 
 	private logStyledRule(rule: DescribeStyledRule): void {
-		this.ux.styledObject(rule, ['name', 'engine', 'runWith', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
+		this.ux.styledObject(rule, ['name', 'engine', 'runWith', 'isPilot', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
 	}
 }

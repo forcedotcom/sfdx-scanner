@@ -37,6 +37,12 @@ export default class Dfa extends ScannerRunCommand {
 	protected static flagsConfig = {
 		// Include all common flags from the super class.
 		...ScannerRunCommand.flagsConfig,
+		// BEGIN: Filter-related flags.
+		'with-pilot': flags.boolean({
+			description: messages.getMessage('flags.withpilotDescription'),
+			longDescription: messages.getMessage('flags.withpilotDescriptionLong')
+		}),
+		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
 		// NOTE: All run commands have a `--target` flag, but they have differing functionalities,
 		// and therefore different descriptions, so each command defines this flag separately.

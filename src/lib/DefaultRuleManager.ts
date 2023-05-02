@@ -78,7 +78,9 @@ export class DefaultRuleManager implements RuleManager {
 		// Derives rules from our filters to feed the engines.
 		const engines: RuleEngine[] = await this.resolveEngineFilters(filters, engineOptions, runOptions);
 		const ruleGroups: RuleGroup[] = await this.catalog.getRuleGroupsMatchingFilters(filters, engines);
-		const rules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
+		const filteredRules: Rule[] = this.catalog.getRulesMatchingFilters(filters);
+		// If the run doesn't allow pilot rules, filter those now.
+		const rules = runOptions.withPilot ? filteredRules : filteredRules.filter(r => !r.isPilot);
 		const runDescriptorList: RunDescriptor[] = [];
 		const matchedTargets: Set<string> = new Set<string>();
 

@@ -18,6 +18,7 @@ module.exports = {
 		"categories": "categories",
 		"rulesets": "rulesets [dep]",
 		"is-dfa": "is dfa",
+		"is-pilot": "is pilot",
 		"engine": "engine"
 	},
 	"yes": "Y",

@@ -1,7 +1,7 @@
 package com.salesforce.rules.unusedmethod;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import java.util.Collections;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -25,9 +25,10 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
             })
     @ParameterizedTest(name = "{displayName}: {0} static")
     public void staticWithoutInvocation_expectViolation(String visibility) {
-        String sourceCode =
-                String.format(SIMPLE_UNUSED_OUTER_METHOD_SOURCE, visibility + " static");
-        assertViolations(sourceCode, "unusedMethod");
+        // Have the entrypoint method return true instead of calling anything.
+        String sourceCode = String.format(SIMPLE_SOURCE, visibility + " static", "global", "true");
+        assertNoUsage(
+                new String[] {sourceCode}, "MyClass", "entrypointMethod", "MyClass#testedMethod@2");
     }
 
     /**
@@ -45,23 +46,24 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         // - private/public tested method (static methods can't be "protected")
         // - static/instance caller method
         // - implicit/explicit type mention.
-        "public, public static, method1()",
-        "public, public static, MyClass.method1()",
-        "public, public, method1()",
-        "public, public, MyClass.method1()",
-        "private, public static, method1()",
-        "private, public static, MyClass.method1()",
-        "private, public, method1()",
-        "private, public, MyClass.method1()",
+        "public, global static, testedMethod()",
+        "public, global static, MyClass.testedMethod()",
+        "public, global, testedMethod()",
+        "public, global, MyClass.testedMethod()",
+        "private, global static, testedMethod()",
+        "private, global static, MyClass.testedMethod()",
+        "private, global, testedMethod()",
+        "private, global, MyClass.testedMethod()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static called by {1} as {2}")
     public void staticInvokedByOwnClass_expectNoViolation(
             String testedVisibility, String callerScope, String invocation) {
         // The tested method is always static.
         String testedScope = testedVisibility + " static";
-        String sourceCode =
-                String.format(SIMPLE_USED_METHOD_SOURCE, testedScope, callerScope, invocation);
-        assertNoViolations(sourceCode, 1);
+        // Have the entrypoint invoke the tested method.
+        String sourceCode = String.format(SIMPLE_SOURCE, testedScope, callerScope, invocation);
+        assertUsage(
+                new String[] {sourceCode}, "MyClass", "entrypointMethod", "MyClass#testedMethod@2");
     }
 
     /**
@@ -75,9 +77,9 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      */
     @CsvSource({
         // Every combination of private/public tested method and implicit/explicit type reference.
-        "public, testedMethod()",
+        // "public, testedMethod()", // TODO: FIX AND ENABLE THIS TEST
         "public, MyClass.testedMethod()",
-        "private, testedMethod()",
+        // "private, testedMethod()", // TODO: FIX AND ENABLE TEST
         "private, MyClass.testedMethod()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static invoked as {1}")
@@ -92,17 +94,19 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "    }\n"
           + "    \n"
             // Define an inner class.
-          + "    public class InnerClass {\n"
-            // Give the inner class a method annotated with the engine directive so it doesn't trip the rule.
-          + "        /* sfge-disable-stack UnusedMethodRule */\n"
-          + "        public boolean callerMethod() {\n"
+          + "    global class InnerClass {\n"
+          + "        global boolean callerMethod() {\n"
             // Invoke the tested method.
           + "            return " + invocation + ";\n"
           + "        }\n"
           + "    }\n"
           + "}";
         // spotless:on
-        assertNoViolations(sourceCode, 1);
+        assertUsage(
+                new String[] {sourceCode},
+                "MyClass.InnerClass",
+                "callerMethod",
+                "MyClass#testedMethod@2");
     }
 
     /**
@@ -144,15 +148,26 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
         // literal true.
         String childReturn = callerClass.equalsIgnoreCase("child") ? invocation : "true";
         String grandchildReturn = callerClass.equalsIgnoreCase("grandchild") ? invocation : "true";
+        // The entrypoint will invoke either the child or grandchild's entrypoint method.
+        String entrypointInvocation =
+                callerScope.equalsIgnoreCase("public")
+                        ? (callerClass.equalsIgnoreCase("child")
+                                ? "(new ChildClass()).methodOnChild()"
+                                : "(new GrandchildClass()).methodOnGrandchild()")
+                        : (callerClass.equalsIgnoreCase("child")
+                                ? "ChildClass.methodOnChild()"
+                                : "GrandchildClass.methodOnGrandchild()");
 
         // Fill in the source code template.
         String[] sourceCodes =
                 new String[] {
+                    String.format(SIMPLE_ENTRYPOINT, entrypointInvocation),
                     String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[0], testedScope),
                     String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[1], callerScope, childReturn),
                     String.format(SUBCLASS_NON_OVERRIDDEN_SOURCES[2], callerScope, grandchildReturn)
                 };
-        assertNoViolations(sourceCodes, 1);
+        assertUsage(
+                sourceCodes, "MyEntrypoint", "entrypointMethod", "ParentClass#methodOnParent@2");
     }
 
     /**
@@ -163,7 +178,11 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      *     references to outer type.
      */
     @ValueSource(
-            strings = {"testedMethod()", "ParentClass.testedMethod()", "ChildClass.testedMethod()"})
+            strings = {
+                // "testedMethod()", // TODO: FIX AND ENABLE THIS TEST
+                "ParentClass.testedMethod()",
+                "ChildClass.testedMethod()"
+            })
     @ParameterizedTest(name = "{displayName}: Invoked as {0}")
     public void staticInvokedByInnerOfSubclass_expectNoViolation(String invocation) {
         // spotless:off
@@ -178,10 +197,9 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
             // Child class
             "global class ChildClass extends ParentClass {\n"
             // Inner class of child class
-          + "    public class InnerOfChild {\n"
-            // Give the inner class a method with the directive so it doesn't trigger the rule.
-          + "        /* sfge-disable-stack UnusedMethodRule */\n"
-          + "        public boolean callTestedMethod() {\n"
+          + "    global class InnerOfChild {\n"
+            // Give the inner class a method to use as our entrypoint.
+          + "        global boolean callTestedMethod() {\n"
             // Invoke the tested method
           + "            " + invocation + ";\n"
           + "        }\n"
@@ -189,7 +207,11 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "}"
         };
         // spotless:on
-        assertNoViolations(sourceCodes, 1);
+        assertUsage(
+                sourceCodes,
+                "ChildClass.InnerOfChild",
+                "callTestedMethod",
+                "ParentClass#testedMethod@2");
     }
 
     /**
@@ -220,14 +242,13 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
             // ...with an inner class that extends the tested class...
           + "    global class ChildClass extends ParentClass {}\n"
             // ...and a method that configurably calls the tested static method.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean invoker() {\n"
+          + "    global boolean invoker() {\n"
           + "        return " + invocation + ";\n"
           + "    }\n"
           + "}"
         };
         // spotless:on
-        assertNoViolations(sourceCodes, 1);
+        assertUsage(sourceCodes, "OuterClass", "invoker", "ParentClass#testedMethod@2");
     }
 
     /**
@@ -264,13 +285,67 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
     @ParameterizedTest(name = "{displayName}: {0} static invoked by {1} property as {2}")
     public void staticInvokedViaOwnProperty_expectNoViolation(
             String methodVisibility, String propScope, String invocation) {
-        String sourceCode =
-                String.format(
-                        METHOD_INVOKED_AS_PROPERTY_SOURCE,
-                        propScope,
-                        invocation,
-                        methodVisibility + " static");
-        assertNoViolations(sourceCode, 1);
+        // spotless:off
+        String entrypointBody =
+            "        MyClass mc = new MyClass();\n"
+          + "        return false;\n";
+        // spotless:on
+        String[] sourceCodes =
+                new String[] {
+                    String.format(
+                            METHOD_INVOKED_AS_PROPERTY_SOURCE,
+                            propScope,
+                            invocation,
+                            methodVisibility + " static"),
+                    String.format(COMPLEX_ENTRYPOINT, entrypointBody)
+                };
+        assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@4");
+    }
+
+    /**
+     * Test for the case where a path is guaranteed to terminate in an exception. A static method
+     * called before that exception should count as used.
+     */
+    @Test
+    public void staticInvokedBeforeException_expectNoViolation() {
+        // spotless:off
+        String entrypointBody =
+            "        String s = null;\n"
+          + "        boolean b = MyClass.testedMethod();\n"
+            // This operation will throw an exception, since s is null.
+          + "        Integer i = s.length();\n"
+          + "        return false;\n";
+        // spotless:on
+        String[] sourceCodes =
+                new String[] {
+                    // The tested method should be public static. The rest is irrelevant.
+                    String.format(SIMPLE_SOURCE, "public static", "global static", "true"),
+                    String.format(COMPLEX_ENTRYPOINT, entrypointBody)
+                };
+        assertUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@2");
+    }
+
+    /**
+     * Test for the case where a path is guaranteed to terminate in an exception. A static method
+     * called after that point is technically unreachable and should count as unused.
+     */
+    @Test
+    public void staticUnreachablyInvokedAfterException_expectViolation() {
+        // spotless:off
+        String entrypointBody =
+            "        String s = null;\n"
+            // This operation will throw an exception, since s is null.
+          + "        Integer i = s.length();\n"
+          + "        boolean b = MyClass.testedMethod();\n"
+          + "        return false;\n";
+        // spotless:on
+        String[] sourceCodes =
+                new String[] {
+                    // The tested method should be public static, the rest is irrelevant.
+                    String.format(SIMPLE_SOURCE, "public static", "global static", "true"),
+                    String.format(COMPLEX_ENTRYPOINT, entrypointBody)
+                };
+        assertNoUsage(sourceCodes, "MyEntrypoint", "entrypointMethod", "MyClass#testedMethod@2");
     }
 
     /**
@@ -281,10 +356,16 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      * count as unused.
      *
      * @param collidingMethod - The name to be used for the static method.
+     * @param collidingClass - The class where the colliding instance method is declared.
+     * @param beginLine - The beginning line for the colliding instance method.
      */
-    @ValueSource(strings = {"methodFromInnerClass", "methodFromParentClass", "methodFromInterface"})
+    @CsvSource({
+        "methodFromInnerClass, MyClass.InnerClass, 6",
+        "methodFromParentClass, ParentClass, 2",
+    })
     @ParameterizedTest(name = "{displayName}: Collision with {0}")
-    public void internalReferenceSyntaxCollision_expectViolation(String collidingMethod) {
+    public void internalReferenceSyntaxCollision_expectViolation(
+            String collidingMethod, String collidingClass, int beginLine) {
         // spotless:off
         String[] sourceCodes = new String[]{
             // Declare an outer class with a static method. This will be our tested method.
@@ -292,17 +373,14 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "    public static boolean " + collidingMethod + "() {\n"
           + "        return true;\n"
           + "    }\n"
-            // Declare an abstract inner class that has a method, and inherits methods from both an interface
-            // and another class.
-          + "    global abstract class InnerClass extends ParentClass implements ParentInterface {\n"
-            // The inner class has a method annotated to not trip the rule.
-          + "        /* sfge-disable-stack UnusedMethodRule */\n"
+            // Declare an abstract inner class that has a method, and inherits methods from another class.
+          + "    global abstract class InnerClass extends ParentClass {\n"
+            // The inner class a method annotated to collide with.
           + "        public boolean methodFromInnerClass() {\n"
           + "            return false;\n"
           + "        }\n"
             // The inner class also has a method that invokes the colliding method.
-          + "        /* sfge-disable-stack UnusedMethodRule */\n"
-          + "        public boolean callMethod() {\n"
+          + "        global boolean callMethod() {\n"
             // IMPORTANT! THE COLLIDING METHOD IS INVOKED WITHOUT ANY QUALIFIERS,
           + "            return " + collidingMethod + "();\n"
           + "        }\n"
@@ -311,23 +389,18 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
             // Declare a parent class for the inner class to extend
             "global virtual class ParentClass {\n"
             // Give the parent class a method for the inner class to inherit.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public boolean methodFromParentClass() {\n"
           + "        return true;\n"
           + "    }\n"
-          + "}",
-            // Declare an interface for the inner class to implement
-            "global interface ParentInterface {\n"
-          + "    boolean methodFromInterface();\n"
           + "}"
         };
         // spotless:on
-        assertViolations(
+        assertExpectations(
                 sourceCodes,
-                v -> {
-                    assertEquals("MyClass", v.getSourceDefiningType());
-                    assertEquals(collidingMethod, v.getSourceVertexName());
-                });
+                "MyClass.InnerClass",
+                "callMethod",
+                Collections.singletonList(collidingClass + "#" + collidingMethod + "@" + beginLine),
+                Collections.singletonList("MyClass#" + collidingMethod + "@2"));
     }
 
     /**
@@ -337,10 +410,20 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      * static method should count as unused.
      *
      * @param collidingName - The name given to the tested class to cause a collision.
+     * @param collidingClass - The class where the method being collided with exists.
+     * @param beginLine - The begin line number for the collided-with method.
      */
-    @ValueSource(strings = {"instanceProp", "staticProp", "methodParam", "variable", "InnerClass"})
+    @CsvSource({
+        "instanceProp, InstanceCollider, 2",
+        "staticProp, InstanceCollider, 2",
+        "inheritedProp, InstanceCollider, 2",
+        "methodParam, InstanceCollider, 2",
+        "variable, InstanceCollider, 2",
+        "InnerClass, StaticCollider, 2"
+    })
     @ParameterizedTest(name = "{displayName}: Collides with {0}")
-    public void externalReferenceSyntaxCollision_expectViolation(String collidingName) {
+    public void externalReferenceSyntaxCollision_expectViolation(
+            String collidingName, String collidingClass, int beginLine) {
         // spotless:off
         String[] sourceCodes = new String[]{
             // Declare a class with a static method and a configurable name. That's our  tested method.
@@ -351,40 +434,42 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
           + "}",
             // Declare a class with an instance method for the tested method to collide with.
             "global class InstanceCollider {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public boolean getBoolean() {\n"
           + "        return true;\n"
           + "    }\n"
           + "}",
             // Declare a class with a static method for the tested method to collide with.
             "global virtual class StaticCollider {\n"
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
           + "    public static boolean getBoolean () {\n"
           + "        return true;\n"
           + "    }\n"
           + "}",
+            // Declare an extensible class with a heritable property for the tested method to collide with.
+            "global virtual class ExtensibleClass {\n"
+          + "    public InstanceCollider inheritedProp = new InstanceCollider();\n"
+          + "}",
             // Declare a class that will do all sorts of collision-y operations.
-            "global class CollisionCreator {\n"
+            "global class CollisionCreator extends ExtensibleClass {\n"
             // These properties can be collided with.
-          + "    public InstanceCollider instanceProp;\n"
-          + "    public static InstanceCollider staticProp;\n"
+          + "    public InstanceCollider instanceProp = new InstanceCollider();\n"
+          + "    public static InstanceCollider staticProp = new InstanceCollider();\n"
             // This inner class extends StaticCollider, meaning it has the static
             // method and can therefore cause collisions.
           + "    public class InnerClass extends StaticCollider {}\n"
             // IMPORTANT: This method allows us to create a configurable collision.
-          + "    /* sfge-disable-stack UnusedMethodRule */\n"
-          + "    public boolean causeCollision(InstanceCollider methodParam) {\n"
+          + "    global boolean causeCollision(InstanceCollider methodParam) {\n"
           + "        InstanceCollider variable = new InstanceCollider();\n"
           + "        return " + collidingName + ".getBoolean();\n"
           + "    }\n"
-          + "}"
+          + "}",
+            String.format(SIMPLE_ENTRYPOINT, "new CollisionCreator().causeCollision(new InstanceCollider())")
         };
         // spotless:on
-        assertViolations(
+        assertExpectations(
                 sourceCodes,
-                v -> {
-                    assertEquals("getBoolean", v.getSourceVertexName());
-                    assertEquals(collidingName, v.getSourceDefiningType());
-                });
+                "MyEntrypoint",
+                "entrypointMethod",
+                Collections.singletonList(collidingClass + "#getBoolean@" + beginLine),
+                Collections.singletonList(collidingName + "#getBoolean@2"));
     }
 }

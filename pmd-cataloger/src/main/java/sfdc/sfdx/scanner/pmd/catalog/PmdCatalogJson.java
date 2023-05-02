@@ -19,6 +19,7 @@ public class PmdCatalogJson {
 	public static final String JSON_SOURCEPACKAGE = "sourcepackage";
 	public static final String JSON_DEFAULTENABLED = "defaultEnabled";
     public static final String JSON_ISDFA = "isDfa";
+    public static final String JSON_ISPILOT = "isPilot";
 
 	private final List<PmdCatalogRule> rules;
 	private final List<PmdCatalogCategory> categories;

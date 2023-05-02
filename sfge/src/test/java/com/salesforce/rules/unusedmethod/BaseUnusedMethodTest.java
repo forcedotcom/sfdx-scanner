@@ -1,62 +1,84 @@
 package com.salesforce.rules.unusedmethod;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.common.collect.Lists;
 import com.salesforce.TestUtil;
-import com.salesforce.rules.AbstractStaticRule;
-import com.salesforce.rules.UnusedMethodRule;
-import com.salesforce.rules.Violation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import com.salesforce.apex.jorje.ASTConstants.NodeType;
+import com.salesforce.graph.Schema;
+import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.SFVertexFactory;
+import com.salesforce.rules.*;
+import com.salesforce.rules.unusedmethod.operations.*;
+import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 
 public class BaseUnusedMethodTest {
     protected GraphTraversalSource g;
 
     /* ============== SOURCE CODE TEMPLATES ============== */
+
     /**
-     * Template for an obviously unused method on an outer class. Has the following wildcards:
+     * Template for a global class {@code MyEntrypoint} with a global boolean method {@code
+     * entrypointMethod()}, for use as a simple entrypoint in tests that require one. Has the
+     * following wildcards:
      *
      * <ol>
-     *   <li>%s for method modifiers. (e.g., "public", "public static", etc).
+     *   <li>%s for the return value of {@code entrypointMethod}. E.g., {@code true} or {@code new
+     *       Whatever().someMethod()}.
      * </ol>
      */
     // spotless:off
-    protected static final String SIMPLE_UNUSED_OUTER_METHOD_SOURCE =
-        "global class MyClass {\n"
-      + "    %s boolean unusedMethod() {\n"
-      + "        return true;\n"
+    protected static final String SIMPLE_ENTRYPOINT =
+        "global class MyEntrypoint {\n"
+      + "    global boolean entrypointMethod() {\n"
+      + "        return %s;\n"
       + "    }\n"
       + "}";
     // spotless:on
 
     /**
-     * Template for a class that defines a rule-eligible method and then uses it. Has the following
-     * wildcards:
+     * Template for a global class {@code MyEntrypoint} with a global boolean method {@code
+     * entrypointMethod()}, for use as a more complicated entrypoint in tests that require one. Has
+     * the following wildcards:
      *
      * <ol>
-     *   <li>%s for modifiers to the tested method. (e.g., "public", "public static", etc).
-     *   <li>%s for modifiers to the method that invokes the tested method. (e.g., "public", "public
-     *       static", etc).
-     *   <li>%s for the invocation of the tested method. (e.g., "this.method1()").
+     *   <li>%s for the entire body of {@code entrypointMethod}. Input should end with returning a
+     *       boolean, but the rest is up to you.
      * </ol>
      */
     // spotless:off
-    protected static final String SIMPLE_USED_METHOD_SOURCE =
+    protected static final String COMPLEX_ENTRYPOINT =
+        "global class MyEntrypoint {\n"
+      + "    global boolean entrypointMethod() {\n"
+      + "%s"
+      + "    }\n"
+      + "}";
+    // spotless:on
+
+    /**
+     * Template for a simple class {@code MyClass} with boolean methods {@code testedMethod()} and
+     * {@code entrypointMethod()}. Has the following wildcards.
+     *
+     * <ol>
+     *   <li>%s for modifiers to {@code testedMethod()}, e.g. {@code public}, {@code public static},
+     *       etc.
+     *   <li>%s for modifiers to {@code entrypointMethod()}, e.g. {@code global}, {@code global
+     *       static}, etc.
+     *   <li>%s for the return value of {@code entrypointMethod}, e.g. {@code true}, {@code
+     *       someMethod()}.
+     *   <li>
+     * </ol>
+     */
+    // spotless:off
+    protected static final String SIMPLE_SOURCE =
         "global class MyClass {\n"
-        // Declare the tested method.
-      + "    %s boolean method1() {\n"
+      + "    %s boolean testedMethod() {\n"
       + "        return true;\n"
       + "    }\n"
       + "    \n"
-        // Use the engine directive to prevent this method from tripping the rule.
-      + "    /* sfge-disable-stack UnusedMethodRule */\n"
-      + "    %s boolean method2() {\n"
-        // Invocation of the tested method.
+      + "    %s boolean entrypointMethod() {\n"
       + "        return %s;\n"
       + "    }\n"
       + "}";
@@ -67,16 +89,16 @@ public class BaseUnusedMethodTest {
      * that can use it. Has the following wildcards:
      *
      * <ol>
-     *   <li>%s for modifiers to the scope of the method declared in the parent class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for modifiers to the scope of the method declared in the child class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for the value returned by the child method. (E.g., invocation of parent method, or a
-     *       literal value.)
-     *   <li>%s for modifiers to the scope of the method declared in the grandchild class. (E.g.,
-     *       "public", "public static", etc.)
-     *   <li>%s for the value returned by the grandchild method. (E.g., invocation of parent/child
+     *   <li>%s in Source 1 for modifiers to the scope of the method declared in the parent class.
+     *       (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 2 for modifiers to the scope of the method declared in the child class.
+     *       (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 2 for the value returned by the child method. (E.g., invocation of parent
      *       method, or a literal value.)
+     *   <li>%s in Source 3 for modifiers to the scope of the method declared in the grandchild
+     *       class. (E.g., "public", "public static", etc.)
+     *   <li>%s in Source 3 for the value returned by the grandchild method. (E.g., invocation of
+     *       parent/child method, or a literal value.)
      * </ol>
      */
     // spotless:off
@@ -90,8 +112,7 @@ public class BaseUnusedMethodTest {
       + "}",
         // CHILD CLASS
         "global virtual class ChildClass extends ParentClass {\n"
-        // Declare a method on the child, with the engine directive to prevent it tripping the rule.
-      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+        // Declare a method on the child.
       + "    %s boolean methodOnChild() {\n"
         // Wildcard allows this method to either call the parent method or return a literal.
       + "        return %s;\n"
@@ -99,10 +120,51 @@ public class BaseUnusedMethodTest {
       + "}",
         // GRANDCHILD CLASS
         "global class GrandchildClass extends ChildClass {\n"
-        // Declare a method on the grandchild, with the engine directive to prevent it tripping the rule.
-      + "    /* sfge-disable-stack UnusedMethodRule */\n"
+        // Declare a method on the grandchild.
       + "    %s boolean methodOnGrandchild() {\n"
         // Wildcard allows this method to either call the parent method, child method, or return a literal.
+      + "        return %s;\n"
+      + "    }\n"
+      + "}"
+    };
+    // spotless:on
+
+    /**
+     * Template for a parent class that defines a method, along with a child class that overrides
+     * it. Each class has another method that can be configured as needed. Has the following
+     * wildcards:
+     *
+     * <ol>
+     *   <li>%s in Source 1 for modifiers to the declaration of the parent class (e.g
+     *       "abstract/virtual").
+     *   <li>%s in Source 1 allowing the second method in the parent class to potentially call the
+     *       overrideable method.
+     *   <li>%s in Source 2 to allow the second method in the child class to potentially call either
+     *       version of the overrideable method.
+     * </ol>
+     */
+    // spotless:off
+    protected static final String[] SUBCLASS_OVERRIDDEN_SOURCES = new String[]{
+        // PARENT CLASS, configurably abstract or virtual.
+        "global %s class ParentClass {\n"
+        // Define an overrideable method.
+      + "    public virtual boolean getBool() {\n"
+      + "        return true;\n"
+      + "    }\n"
+        // Also define a method that can be configured to invoke the overrideable method.
+        // Annotate it to not trip the rule.
+      + "    public boolean parentOptionalInvoker() {\n"
+      + "        return %s;\n"
+      + "    }\n"
+      + "}",
+        // CHILD CLASS
+        "global class ChildClass extends ParentClass {\n"
+        // define an override of the inherited method.
+      + "    public override boolean getBool() {\n"
+      + "        return false;\n"
+      + "    }\n"
+        // Also define a method that can be configured to invoke whatever method is needed.
+      + "    public boolean childOptionalInvoker() {\n"
       + "        return %s;\n"
       + "    }\n"
       + "}"
@@ -134,144 +196,185 @@ public class BaseUnusedMethodTest {
     // spotless:on
 
     /**
-     * Template for a class with two overloads of a method, and a third method that calls one
-     * overload or the other. Has the following wildcards:
+     * Template for a class that can configurably invoke a method on another class. Has the
+     * following wildcards:
      *
      * <ol>
-     *   <li>%s for modifiers to scope of first overload (e.g. "public", "public static", etc).
-     *   <li>%s for parameters accepted by the first overload.
-     *   <li>%s for modifiers to scope of second overload (e.g. "public", "public static", etc).
-     *   <li>%s for parameters accepted by the second overload.
-     *   <li>%s for modifiers to scope of overload invoker (e.g. "public", "public static", etc).
-     *   <li>%s for arguments provided to overload invocation.
+     *   <li>%s for the type of static property {@code staticProp}.
+     *   <li>%s for the construction of static property {@code staticProp}.
+     *   <li>%s for the type of instance property {@code instanceProp}.
+     *   <li>%s for the construction of instance property {@code instanceProp}.
+     *   <li>%s for the return type of static method {@code staticMethod()}.
+     *   <li>%s for the return type of instance method {@code instanceMethod()}.
+     *   <li>%s for the type of parameter {@code param} for method {@code invokeMethod()}.
+     *   <li>%s for the type of variable {@code var} declared within method {@code invokeMethod()}.
+     *   <li>%s for the construction of variable {@code var} declared within method {@code
+     *       invokeMethod()}.
+     *   <li>%s for the return value of method {@code invokeMethod()}.
      * </ol>
      */
     // spotless:off
-    protected static final String OVERLOADS_SOURCE =
-        "global class MyClass {\n"
-        // Declare two overloads of the same method.
-      + "    %s boolean getBool(%s) {\n"
-      + "        return true;\n"
+    protected static final String INVOKER_SOURCE =
+        "global class InvokerClass {\n"
+        // Add a static property of configurable type.
+      + "    public static %s staticProp = %s;\n"
+        // Add an instance property of configurable type.
+      + "    public %s instanceProp = %s;\n"
+        // Add a static method of configurable return type.
+      + "    public static %s staticMethod() {\n"
+      + "        return staticProp;\n"
       + "    }\n"
-      + "    \n"
-      + "    %s boolean getBool(%s) {\n"
-      + "        return true;\n"
+        // Add an instance method of configurable return type.
+      + "    public %s instanceMethod() {\n"
+      + "        return instanceProp;\n"
       + "    }\n"
-      + "    \n"
-        // Declare a method that invokes one overload or the other, annotated to not trip the rule.
-      + "    /* sfge-disable-stack UnusedMethodRule */\n"
-      + "    %s boolean callOverload() {\n"
-      + "        return getBool(%s);\n"
+        // Declare a method with a parameter of configurable type.
+      + "    public boolean invokeMethod(%s param) {\n"
+        // Declare a variable of configurable type. UnusedMethodRule won't care
+        // that the variable is uninitialized.
+      + "        %s var = %s;\n"
+      + "        return %s;\n"
       + "    }\n"
       + "}";
     // spotless:on
 
-    /* ============== SETUP METHODS ============== */
+    /* ============== SETUP/UTILITY METHODS ============== */
     @BeforeEach
     public void setup() {
         this.g = TestUtil.getGraph();
     }
 
-    /* ============== ASSERT VIOLATIONS ============== */
+    /**
+     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * specified method on the specified type. Verify that the provided methods are used/unused as
+     * expected.
+     */
+    protected void assertExpectations(
+            String[] sourceCodes,
+            String entryDefiningType,
+            String entryMethod,
+            Collection<String> usedMethodKeys,
+            Collection<String> unusedMethodKeys) {
+        TestUtil.buildGraph(g, sourceCodes);
+
+        UnusedMethodRule rule = UnusedMethodRule.getInstance();
+        MethodVertex entryMethodVertex =
+                TestUtil.getMethodVertex(g, entryDefiningType, entryMethod);
+        PathBasedRuleRunner runner =
+                new PathBasedRuleRunner(g, Lists.newArrayList(rule), entryMethodVertex);
+        // Violations aren't actually generated during the `runRules()` call.
+        List<Violation> violations = new ArrayList<>(runner.runRules());
+        UsageTracker usageTracker = new UsageTracker();
+        for (String usedMethodKey : usedMethodKeys) {
+            assertTrue(
+                    usageTracker.isUsed(usedMethodKey),
+                    "Expected usage of method " + usedMethodKey);
+        }
+        for (String unusedMethodKey : unusedMethodKeys) {
+            assertFalse(
+                    UsageTrackerDataProvider.contains(unusedMethodKey),
+                    "Expected non-usage of method " + unusedMethodKey);
+        }
+    }
+
+    /* ============== ASSERT NO USAGE ============== */
     // TODO: Refactoring opportunity. Long-term, we may want to modularize these methods and put
     // them in another class for re-use.
 
     /**
-     * Assert that each of the provided method names corresponds to a method that threw a violation.
-     *
-     * @param sourceCode - A single source file
+     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * specified method on the specified type. Verify that the method corresponding to the given key
+     * is NOT found to be used.
      */
-    protected void assertViolations(String sourceCode, String... methodNames) {
-        assertViolations(new String[] {sourceCode}, methodNames);
+    protected void assertNoUsage(
+            String[] sourceCodes,
+            String entryDefiningType,
+            String entryMethod,
+            String testedMethodKey) {
+        assertExpectations(
+                sourceCodes,
+                entryDefiningType,
+                entryMethod,
+                new ArrayList<>(),
+                Collections.singletonList(testedMethodKey));
+    }
+
+    /* ============== ASSERT USAGE ============== */
+
+    /**
+     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * specified method on the specified type. Verify that the method corresponding to the given key
+     * is found to be used.
+     */
+    protected void assertUsage(
+            String[] sourceCodes,
+            String entryDefiningType,
+            String entryMethod,
+            String testedMethodKey) {
+        assertExpectations(
+                sourceCodes,
+                entryDefiningType,
+                entryMethod,
+                Collections.singletonList(testedMethodKey),
+                new ArrayList<>());
+    }
+
+    /* ============== ASSERT INELIGIBILITY ============== */
+
+    /**
+     * Verify that the specified method is not eligible for analysis under {@link UnusedMethodRule}.
+     */
+    protected void assertMethodIneligibility(
+            String sourceCode, String defType, String methodName, int beginLine) {
+        assertMethodIneligibility(
+                sourceCode,
+                new String[] {defType},
+                new String[] {methodName},
+                new int[] {beginLine});
     }
 
     /**
-     * Assert that each of the provided method names corresponds to a method that threw a violation.
-     *
-     * @param sourceCodes - An array of source files
+     * Verify that the specified methods are not eligible for analysis under {@link
+     * UnusedMethodRule}.
      */
-    protected void assertViolations(String[] sourceCodes, String... methodNames) {
-        List<Consumer<Violation.RuleViolation>> assertions = new ArrayList<>();
-
-        for (int i = 0; i < methodNames.length; i++) {
-            final int idx = i;
-            assertions.add(
-                    v -> {
-                        assertEquals(methodNames[idx], v.getSourceVertexName());
-                    });
-        }
-        assertViolations(sourceCodes, assertions.toArray(new Consumer[] {}));
+    protected void assertMethodIneligibility(
+            String sourceCode, String[] defTypes, String[] methodNames, int[] beginLines) {
+        assertMethodIneligibility(new String[] {sourceCode}, defTypes, methodNames, beginLines);
     }
 
     /**
-     * Assert that violations were generated that match the provided checks.
+     * Verify that the specified methods are not eligible for analysis under {@link
+     * UnusedMethodRule}.
      *
-     * @param sourceCode - A source file
-     * @param assertions - One or more consumers that perform assertions. The n-th consumer is
-     *     applied to the n-th violation.
+     * @param sourceCodes
+     * @param defTypes
+     * @param methodNames
+     * @param beginLines
      */
-    protected void assertViolations(
-            String sourceCode, Consumer<Violation.RuleViolation>... assertions) {
-        assertViolations(new String[] {sourceCode}, assertions);
-    }
-
-    /**
-     * Assert that violations were generated that match the provided checks.
-     *
-     * @param sourceCodes - An array of source files
-     * @param assertions - One or more consumers that perform assertions. The n-th consumer is
-     *     applied to the n-th violation.
-     */
-    protected void assertViolations(
-            String[] sourceCodes, Consumer<Violation.RuleViolation>... assertions) {
+    protected void assertMethodIneligibility(
+            String[] sourceCodes, String[] defTypes, String[] methodNames, int[] beginLines) {
         TestUtil.buildGraph(g, sourceCodes);
-
-        AbstractStaticRule rule = UnusedMethodRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(violations, hasSize(equalTo(assertions.length)));
-        for (int i = 0; i < assertions.length; i++) {
-            assertions[i].accept((Violation.RuleViolation) violations.get(i));
+        UnusedMethodRule rule = UnusedMethodRule.getInstance();
+        // Get every eligible method.
+        List<MethodVertex> eligibleMethods = rule.getEligibleMethods(g);
+        for (int i = 0; i < defTypes.length; i++) {
+            String definingType = defTypes[i];
+            String methodName = methodNames[i];
+            int beginLine = beginLines[i];
+            List<MethodVertex> testedMethods =
+                    SFVertexFactory.loadVertices(
+                            g,
+                            g.V()
+                                    .has(NodeType.METHOD, Schema.DEFINING_TYPE, definingType)
+                                    .has(Schema.NAME, methodName)
+                                    .has(Schema.BEGIN_LINE, beginLine));
+            for (MethodVertex testedMethod : testedMethods) {
+                assertFalse(
+                        eligibleMethods.contains(testedMethod),
+                        "Expected "
+                                + testedMethod.toMinimalString()
+                                + " to be ineligible for rule");
+            }
         }
-    }
-
-    /* ============== ASSERT NO VIOLATIONS ============== */
-
-    /**
-     * Assert that the expected number of methods were analyzed, and all were determined to be used.
-     *
-     * @param sourceCode - A source file
-     */
-    protected void assertNoViolations(String sourceCode, int eligibleMethodCount) {
-        assertNoViolations(new String[] {sourceCode}, eligibleMethodCount);
-    }
-
-    /**
-     * Assert that the expected number of methods were analyzed, and all were determined to be used.
-     *
-     * @param sourceCodes - An array of source files
-     */
-    protected void assertNoViolations(String[] sourceCodes, int eligibleMethodCount) {
-        TestUtil.buildGraph(g, sourceCodes);
-
-        UnusedMethodRule rule = UnusedMethodRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(violations, empty());
-        assertEquals(eligibleMethodCount, rule.getRuleStateTracker().getEligibleMethodCount());
-    }
-
-    /* ============== ASSERT NO ANALYSIS ATTEMPT ============== */
-    protected void assertNoAnalysis(String sourceCode) {
-        assertNoAnalysis(new String[] {sourceCode});
-    }
-
-    protected void assertNoAnalysis(String[] sourceCodes) {
-        TestUtil.buildGraph(g, sourceCodes, true);
-        UnusedMethodRule rule = UnusedMethodRule.getInstance();
-        List<Violation> violations = rule.run(g);
-
-        MatcherAssert.assertThat(violations, empty());
-        assertEquals(0, rule.getRuleStateTracker().getEligibleMethodCount());
     }
 }

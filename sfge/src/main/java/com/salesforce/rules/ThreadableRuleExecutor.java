@@ -3,6 +3,7 @@ package com.salesforce.rules;
 import com.salesforce.cli.Result;
 import com.salesforce.config.SfgeConfigProvider;
 import com.salesforce.exception.SfgeRuntimeException;
+import com.salesforce.exception.UserActionException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.ops.LogUtil;
 import com.salesforce.graph.ops.registry.PathExpansionLimitReachedException;
@@ -229,6 +230,8 @@ public class ThreadableRuleExecutor {
                 violations.addAll(pathBasedRuleRunner.runRules());
             } catch (PathExpansionLimitReachedException ex) {
                 violations.add(new Violation.LimitReachedViolation(ex.getMessage(), pathEntry));
+            } catch (UserActionException ex) {
+                violations.add(new Violation.UserActionViolation(ex.getMessage(), pathEntry));
             }
             return violations;
         }
