@@ -176,7 +176,10 @@ public class PathBasedRuleRunner {
         // TODO: consolidate by sink/source
 
         for (MassSchemaLookupInfo massSchemaLookupInfo : massSchemaLookupInfos) {
-            violations.add(massSchemaLookupInfo.convert());
+            Violation.RuleViolation violation = massSchemaLookupInfo.convert();
+            // FIXME
+            violation.setPropertiesFromRule(MultipleMassSchemaLookupRule.getInstance());
+            violations.add(violation);
         }
     }
 

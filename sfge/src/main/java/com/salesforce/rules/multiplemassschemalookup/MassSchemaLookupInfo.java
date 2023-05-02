@@ -55,7 +55,7 @@ public class MassSchemaLookupInfo implements RuleThrowable {
     }
 
     //    @Override
-    public Violation convert() {
+    public Violation.PathBasedRuleViolation convert() {
         return new Violation.PathBasedRuleViolation(
                 MassSchemaLookupInfoUtil.getMessage(this), sourceVertex, sinkVertex);
     }
@@ -75,5 +75,4 @@ public class MassSchemaLookupInfo implements RuleThrowable {
     public SFVertex getRepetitionVertex() {
         return repetitionVertex;
     }
-
 }
