@@ -3,14 +3,15 @@ package com.salesforce.rules;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.expander.NullValueAccessedException;
 import com.salesforce.graph.ops.expander.PathExpansionException;
+import com.salesforce.graph.source.ApexPathSource.Type;
 import com.salesforce.graph.vertex.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-/** */
+/**
+ * Rule for detecting NPEs. Operates by checking paths that were rejected from analysis, and seeing
+ * which ones were rejected because they terminated in an NPE.
+ */
 public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule {
     private static final String URL =
             "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#ApexNullPointerExceptionRule";
@@ -21,6 +22,13 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
 
     public static ApexNullPointerExceptionRule getInstance() {
         return LazyHolder.INSTANCE;
+    }
+
+    @Override
+    public List<Type> getSourceTypes() {
+        // ApexNullPointerExceptionRule cares about all sources, since they're all equally capable
+        // fo throwing NPEs.
+        return Arrays.asList(Type.values());
     }
 
     @Override

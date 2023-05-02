@@ -7,9 +7,9 @@ import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
-import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
+import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.unusedmethod.operations.UsageTracker;
 import java.util.*;
@@ -44,6 +44,13 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
     @Override
     public Optional<PathExpansionObserver> getPathExpansionObserver() {
         return Optional.of(new UsageTracker());
+    }
+
+    @Override
+    public List<ApexPathSource.Type> getSourceTypes() {
+        // UnusedMethodRule cares about all sources, since they're all equally capable of using a
+        // method.
+        return Arrays.asList(ApexPathSource.Type.values());
     }
 
     /**
@@ -134,7 +141,7 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
                             // We should also skip path entrypoints, because they're definitionally
                             // publicly accessible, and therefore we should assume they're used
                             // somewhere or other.
-                            return !PathEntryPointUtil.isPathEntryPoint(methodVertex);
+                            return !ApexPathSource.isPotentialSource(methodVertex);
                         })
                 .collect(Collectors.toList());
     }
