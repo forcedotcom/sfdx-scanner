@@ -1,11 +1,9 @@
 package com.salesforce.rules;
 
 import com.salesforce.TestUtil;
-import com.salesforce.collections.CollectionUtil;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import java.util.List;
 import java.util.TreeSet;
-
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;

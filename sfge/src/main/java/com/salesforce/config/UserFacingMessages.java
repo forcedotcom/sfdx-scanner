@@ -79,8 +79,7 @@ public final class UserFacingMessages {
     }
 
     public static final class MultipleMassSchemaLookupRuleTemplates {
-        public static final String MESSAGE_TEMPLATE =
-                "%s was %s at %s:%d.";
+        public static final String MESSAGE_TEMPLATE = "%s was %s at %s:%d.";
         public static final String OCCURRENCE_LOOP_TEMPLATE = "called inside a %s";
         public static final String OCCURRENCE_MULTIPLE_TEMPLATE = "preceded by a call to %s";
     }

@@ -3,11 +3,9 @@ package com.salesforce.rules.fls.apex.operations;
 import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
-import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.AbstractRule;
 import com.salesforce.rules.RuleThrowable;
-import com.salesforce.rules.Violation;
 import java.util.Optional;
 import java.util.TreeSet;
 

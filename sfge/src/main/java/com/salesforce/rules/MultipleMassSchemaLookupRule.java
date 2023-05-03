@@ -48,7 +48,7 @@ public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
 
     @Override
     protected boolean isEnabled() {
-        return false;
+        return true;
     }
 
     public static MultipleMassSchemaLookupRule getInstance() {
