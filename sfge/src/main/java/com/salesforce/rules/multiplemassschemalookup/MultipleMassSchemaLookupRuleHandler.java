@@ -24,7 +24,7 @@ public class MultipleMassSchemaLookupRuleHandler {
                 && RuleConstants.isSchemaExpensiveMethod((MethodCallExpressionVertex) vertex);
     }
 
-    public Set<MassSchemaLookupInfo> detectViolations(
+    public Set<MultipleMassSchemaLookupInfo> detectViolations(
             GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
         if (!(vertex instanceof MethodCallExpressionVertex)) {
             throw new ProgrammingException(

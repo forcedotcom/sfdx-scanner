@@ -13,7 +13,7 @@ import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
-import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfo;
+import com.salesforce.rules.multiplemassschemalookup.MultipleMassSchemaLookupInfo;
 import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.*;
@@ -120,8 +120,8 @@ public class PathBasedRuleRunner {
         // This set holds the violations whose information couldn't be fully processed at creation
         // time, and
         // require post-processing.
-        final HashSet<FlsViolationInfo> incompleteThrowables = new HashSet<>();
-        final HashSet<MassSchemaLookupInfo> tempDeleteMe = new HashSet<>();
+        final HashSet<FlsViolationInfo> flsViolationInfos = new HashSet<>();
+        final HashSet<MultipleMassSchemaLookupInfo> mmsLookupInfos = new HashSet<>();
         // For each path...
         for (ApexPath path : paths) {
             // If the path's metadata is present...
@@ -144,9 +144,10 @@ public class PathBasedRuleRunner {
                         // to the list of such
                         // objects.
                         if (ruleThrowable instanceof FlsViolationInfo) {
-                            incompleteThrowables.add((FlsViolationInfo) ruleThrowable);
-                        } else if (ruleThrowable instanceof MassSchemaLookupInfo) {
-                            tempDeleteMe.add((MassSchemaLookupInfo) ruleThrowable);
+                            flsViolationInfos.add((FlsViolationInfo) ruleThrowable);
+                        } else if (ruleThrowable instanceof MultipleMassSchemaLookupInfo) {
+                            // FIXME: PR incoming with refactors to this portion
+                            mmsLookupInfos.add((MultipleMassSchemaLookupInfo) ruleThrowable);
                         } else if (ruleThrowable instanceof Violation) {
                             // If the violation is done, it can just go directly into the results
                             // set.
@@ -159,8 +160,8 @@ public class PathBasedRuleRunner {
             }
         }
 
-        convertToViolations(incompleteThrowables);
-        convertGgdToViolations(tempDeleteMe);
+        convertFlsInfoToViolations(flsViolationInfos);
+        convertMmsInfoToViolations(mmsLookupInfos);
 
         if (!foundVertex) {
             // If no vertices were found, we should log something so that information isn't lost,
@@ -172,19 +173,16 @@ public class PathBasedRuleRunner {
         }
     }
 
-    private void convertGgdToViolations(HashSet<MassSchemaLookupInfo> massSchemaLookupInfos) {
-        // TODO: consolidate by sink/source
-
-        for (MassSchemaLookupInfo massSchemaLookupInfo : massSchemaLookupInfos) {
-            Violation.RuleViolation violation = massSchemaLookupInfo.convert();
-            // FIXME
+    private void convertMmsInfoToViolations(HashSet<MultipleMassSchemaLookupInfo> mmsLookupInfos) {
+        for (MultipleMassSchemaLookupInfo mmsLookupInfo : mmsLookupInfos) {
+            Violation.RuleViolation violation = mmsLookupInfo.convert();
             violation.setPropertiesFromRule(MultipleMassSchemaLookupRule.getInstance());
             violations.add(violation);
         }
     }
 
     // TODO: Restructure to make this logic work on other types of violation info too
-    private void convertToViolations(HashSet<FlsViolationInfo> flsViolationInfos) {
+    private void convertFlsInfoToViolations(HashSet<FlsViolationInfo> flsViolationInfos) {
         // Consolidate/regroup FLS violations across paths so that there are no
         // duplicates with different field sets for the same source/sink/dmlOperation
         final HashSet<FlsViolationInfo> consolidatedFlsViolationInfos =

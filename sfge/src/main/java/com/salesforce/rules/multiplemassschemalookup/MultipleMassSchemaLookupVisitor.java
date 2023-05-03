@@ -19,7 +19,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     private final MethodCallExpressionVertex sinkVertex;
 
     /** Collects violation information */
-    private final HashSet<MassSchemaLookupInfo> violations;
+    private final HashSet<MultipleMassSchemaLookupInfo> violations;
 
     /** Indicates if the sink vertex has been visited or not. */
     private boolean isSinkVisited = false;
@@ -34,7 +34,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     protected void execAfterLoopVertexVisit(BaseSFVertex vertex, SymbolProvider symbols) {
         if (shouldContinue()) {
             violations.add(
-                    new MassSchemaLookupInfo(
+                    new MultipleMassSchemaLookupInfo(
                             sourceVertex, sinkVertex, RuleConstants.RepetitionType.LOOP, vertex));
         }
     }
@@ -48,7 +48,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
             isSinkVisited = true;
         } else if (RuleConstants.isSchemaExpensiveMethod(vertex) && shouldContinue()) {
             violations.add(
-                    new MassSchemaLookupInfo(
+                    new MultipleMassSchemaLookupInfo(
                             sourceVertex,
                             sinkVertex,
                             RuleConstants.RepetitionType.MULTIPLE,
@@ -68,7 +68,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     /**
      * @return Violations collected by the rule.
      */
-    Set<MassSchemaLookupInfo> getViolation() {
+    Set<MultipleMassSchemaLookupInfo> getViolation() {
         return violations;
     }
 }

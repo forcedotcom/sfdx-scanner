@@ -6,7 +6,7 @@ import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.RuleThrowable;
 import com.salesforce.rules.Violation;
 
-public class MassSchemaLookupInfo implements RuleThrowable {
+public class MultipleMassSchemaLookupInfo implements RuleThrowable {
 
     /**
      * vertex where the expensive Schema lookup happens TODO: Is this always only a
@@ -23,7 +23,7 @@ public class MassSchemaLookupInfo implements RuleThrowable {
     /** Vertex where the repetition occurs */
     private final SFVertex repetitionVertex;
 
-    public MassSchemaLookupInfo(
+    public MultipleMassSchemaLookupInfo(
             SFVertex sourceVertex,
             MethodCallExpressionVertex sinkVertex,
             RuleConstants.RepetitionType repetitionType,

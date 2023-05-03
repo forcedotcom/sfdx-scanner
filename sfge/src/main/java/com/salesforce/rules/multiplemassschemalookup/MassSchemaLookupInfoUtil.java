@@ -8,7 +8,7 @@ import com.salesforce.graph.vertex.SFVertex;
 public final class MassSchemaLookupInfoUtil {
     private MassSchemaLookupInfoUtil() {}
 
-    public static String getMessage(MassSchemaLookupInfo info) {
+    public static String getMessage(MultipleMassSchemaLookupInfo info) {
         return getMessage(
                 info.getSinkVertex().getFullMethodName(),
                 info.getRepetitionType(),

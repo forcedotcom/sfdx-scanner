@@ -15,7 +15,7 @@ public final class UserFacingMessages {
         public static final String UNUSED_METHOD_RULE =
                 "Identifies methods that aren't invoked from recognized entry points.";
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
-                "Detects Schema.getGlobalDescribe() calls made in scenarios that could result in performance degradation.";
+                "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
     }
 
     public static final class RuleViolationTemplates {
@@ -80,8 +80,8 @@ public final class UserFacingMessages {
 
     public static final class MultipleMassSchemaLookupRuleTemplates {
         public static final String MESSAGE_TEMPLATE =
-                "Avoid excessive Schema lookups in a single path. Detected %s %s at %s:%d.";
-        public static final String OCCURRENCE_LOOP_TEMPLATE = "inside a %s";
+                "%s was %s at %s:%d.";
+        public static final String OCCURRENCE_LOOP_TEMPLATE = "called inside a %s";
         public static final String OCCURRENCE_MULTIPLE_TEMPLATE = "preceded by a call to %s";
     }
 }
