@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.TestUtil;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.rules.AbstractPathBasedRule;
@@ -190,9 +191,9 @@ public class ApexPathSourceTest {
     private static class AuraInterestedTestRule extends AbstractPathBasedRule {
 
         @Override
-        public List<ApexPathSource.Type> getSourceTypes() {
+        public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
             // Express interest in just the Aura Enabled sources.
-            return Collections.singletonList(ApexPathSource.Type.ANNOTATION_AURA_ENABLED);
+            return ImmutableSet.of(ApexPathSource.Type.ANNOTATION_AURA_ENABLED);
         }
 
         @Override

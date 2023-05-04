@@ -1,6 +1,7 @@
 package com.salesforce.rules;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.config.UserFacingMessages;
@@ -36,6 +37,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
  */
 public final class UnusedMethodRule extends AbstractPathBasedRule implements PostProcessingRule {
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
+    // UnusedMethodRule cares about all sources, since they're all equally capable of using a
+    // method.
+    private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
+            ImmutableSet.copyOf(ApexPathSource.Type.values());
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
 
@@ -47,10 +52,8 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
     }
 
     @Override
-    public List<ApexPathSource.Type> getSourceTypes() {
-        // UnusedMethodRule cares about all sources, since they're all equally capable of using a
-        // method.
-        return Arrays.asList(ApexPathSource.Type.values());
+    public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+        return SOURCE_TYPES;
     }
 
     /**

@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.cli.Result;
@@ -270,8 +271,8 @@ public class RuleRunnerTest {
         }
 
         @Override
-        public List<ApexPathSource.Type> getSourceTypes() {
-            return Arrays.asList(ApexPathSource.Type.values());
+        public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+            return ImmutableSet.copyOf(ApexPathSource.Type.values());
         }
 
         private static final class LazyHolder {

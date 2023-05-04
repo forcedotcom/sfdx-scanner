@@ -167,7 +167,7 @@ public class ApexPathSource {
      * Indicates whether the provided method could potentially be considered a Source of one of the
      * specified types.
      */
-    public static boolean isPotentialSource(MethodVertex methodVertex, List<Type> types) {
+    public static boolean isPotentialSource(MethodVertex methodVertex, Collection<Type> types) {
         return !types.isEmpty() && types.stream().anyMatch(t -> t.isPotentialSource(methodVertex));
     }
 }

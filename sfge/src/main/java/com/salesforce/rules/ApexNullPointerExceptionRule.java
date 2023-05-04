@@ -1,5 +1,6 @@
 package com.salesforce.rules;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.expander.NullValueAccessedException;
 import com.salesforce.graph.ops.expander.PathExpansionException;
@@ -15,6 +16,9 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule {
     private static final String URL =
             "https://forcedotcom.github.io./sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#ApexNullPointerExceptionRule";
+    // ApexNullPointerExceptionRule cares about all sources, since they're all equally capable
+    // of throwing NPEs.
+    private static final ImmutableSet<Type> SOURCE_TYPES = ImmutableSet.copyOf(Type.values());
 
     private ApexNullPointerExceptionRule() {
         super();
@@ -25,10 +29,8 @@ public final class ApexNullPointerExceptionRule extends AbstractPathAnomalyRule 
     }
 
     @Override
-    public List<Type> getSourceTypes() {
-        // ApexNullPointerExceptionRule cares about all sources, since they're all equally capable
-        // fo throwing NPEs.
-        return Arrays.asList(Type.values());
+    public ImmutableSet<Type> getSourceTypes() {
+        return SOURCE_TYPES;
     }
 
     @Override

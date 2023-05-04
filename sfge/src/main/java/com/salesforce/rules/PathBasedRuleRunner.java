@@ -64,6 +64,7 @@ public class PathBasedRuleRunner {
                 LOGGER.info(
                         "EntryPoint=" + methodVertex.toSimpleString() + "; No interested rules.");
             }
+            // TODO: SURFACE A WARNING TO THE USER.
             return new HashSet<>();
         }
 
