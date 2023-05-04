@@ -1,11 +1,13 @@
 package com.salesforce.graph.build;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 import com.salesforce.TestRunner;
 import com.salesforce.TestUtil;
+import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
+import com.salesforce.graph.symbols.apex.ApexForLoopValue;
+import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.symbols.apex.ApexValue;
 import com.salesforce.graph.visitor.SystemDebugAccumulator;
 import java.util.List;
@@ -560,5 +562,51 @@ public class MethodUtilCollectionTest {
         SystemDebugAccumulator visitor = result.getVisitor();
 
         assertThat(visitor.getSingletonResult(), Matchers.notNullValue());
+    }
+
+    @Test
+    public void testForLoopOnArrayExpressionLookup() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   void doSomething() {\n"
+                        + "       String[] myList = new String[] {'hi'};\n"
+                        + "       for (Integer i = 0; i < myList.size(); i++) {\n"
+                        + "           System.debug(myList[i]);\n"
+                        + "       }\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        final ApexForLoopValue forLoopValue = visitor.getSingletonResult();
+        final List<ApexValue<?>> items = forLoopValue.getForLoopValues();
+        assertThat(items.size(), equalTo(1));
+        final ApexStringValue stringValue = (ApexStringValue) items.get(0);
+        assertThat(TestUtil.apexValueToString(stringValue), equalTo("hi"));
+    }
+
+    @Test
+    public void testForLoopOnArrayExpressionLookup_classInstance() {
+        String sourceCode[] = {
+            "public class MyClass {\n"
+                    + "   void doSomething() {\n"
+                    + "       Bean[] beans = new Bean[] {new Bean()};\n"
+                    + "       for (Integer i = 0; i < beans.size(); i++) {\n"
+                    + "           System.debug(beans[i]);\n"
+                    + "       }\n"
+                    + "   }\n"
+                    + "}\n",
+            "public class Bean {}\n"
+        };
+
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+        SystemDebugAccumulator visitor = result.getVisitor();
+
+        final ApexForLoopValue forLoopValue = visitor.getSingletonResult();
+        List<ApexValue<?>> items = forLoopValue.getForLoopValues();
+        assertThat(items.size(), equalTo(1));
+        final ApexClassInstanceValue classInstanceValue = (ApexClassInstanceValue) items.get(0);
+        assertThat(classInstanceValue.getDefiningType().orElse(""), equalTo("Bean"));
     }
 }
