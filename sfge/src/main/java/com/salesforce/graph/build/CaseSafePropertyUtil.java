@@ -47,7 +47,8 @@ public class CaseSafePropertyUtil {
                     Schema.NAME,
                     Schema.RETURN_TYPE,
                     Schema.SUPER_CLASS_NAME,
-                    Schema.SUPER_INTERFACE_NAME);
+                    Schema.SUPER_INTERFACE_NAME,
+                    Schema.TARGET_NAME);
 
     static void addCaseSafeProperty(
             GraphTraversal<Vertex, Vertex> traversal, String property, Object value) {

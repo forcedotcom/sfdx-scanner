@@ -194,7 +194,7 @@ public final class GraphUtil {
         String pathString = path.toString();
         final ProgressListener progressListener = ProgressListenerProvider.get();
 
-        if (!pathString.toLowerCase(Locale.ROOT).endsWith(".cls")) {
+        if (!isGraphablePath(pathString)) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Skipping file. path=" + pathString);
             }
@@ -213,6 +213,11 @@ public final class GraphUtil {
                 throw ex;
             }
         }
+    }
+
+    private static boolean isGraphablePath(String pathString) {
+        String lcPathString = pathString.toLowerCase(Locale.ROOT);
+        return lcPathString.endsWith(".cls") || lcPathString.endsWith(".trigger");
     }
 
     private GraphUtil() {}
