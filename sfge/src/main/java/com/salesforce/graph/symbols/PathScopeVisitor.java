@@ -1427,6 +1427,7 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
         ApexValue<?> apexValue = null;
 
         InvocableWithParametersVertex previous = vertex.getPrevious().orElse(null);
+        ArrayLoadExpressionVertex arrayInvocation = vertex.getArrayInvocation().orElse(null);
         if (previous instanceof SoqlExpressionVertex) {
             // Handle chained SOQL expressions that were not assigned to a variable
             // i.e. return [SELECT Id FROM MyObject__c].isEmpty();
@@ -1435,6 +1436,10 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
             // The method is being called on a chain
             // SObjectType sot = Schema.getGlobalDescribe().get('Account');
             apexValue = getReturnedValue(previous).orElse(null);
+        } else if (arrayInvocation != null) {
+            // The method call is made on an array expression
+            // items[i].toLowerCase();
+            apexValue = ScopeUtil.resolveToApexValue(this, arrayInvocation).orElse(null);
         } else {
             String symbolicName = vertex.getSymbolicName().orElse(null);
             if (symbolicName != null) {
