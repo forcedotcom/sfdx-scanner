@@ -2,47 +2,7 @@ package com.salesforce.graph.visitor;
 
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.symbols.SymbolProvider;
-import com.salesforce.graph.vertex.AssignmentExpressionVertex;
-import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.graph.vertex.BlockStatementVertex;
-import com.salesforce.graph.vertex.CatchBlockStatementVertex;
-import com.salesforce.graph.vertex.DmlDeleteStatementVertex;
-import com.salesforce.graph.vertex.DmlInsertStatementVertex;
-import com.salesforce.graph.vertex.DmlMergeStatementVertex;
-import com.salesforce.graph.vertex.DmlUndeleteStatementVertex;
-import com.salesforce.graph.vertex.DmlUpdateStatementVertex;
-import com.salesforce.graph.vertex.DmlUpsertStatementVertex;
-import com.salesforce.graph.vertex.ElseWhenBlockVertex;
-import com.salesforce.graph.vertex.EmptyReferenceExpressionVertex;
-import com.salesforce.graph.vertex.ExpressionStatementVertex;
-import com.salesforce.graph.vertex.FieldDeclarationStatementsVertex;
-import com.salesforce.graph.vertex.FieldDeclarationVertex;
-import com.salesforce.graph.vertex.FieldVertex;
-import com.salesforce.graph.vertex.ForEachStatementVertex;
-import com.salesforce.graph.vertex.ForLoopStatementVertex;
-import com.salesforce.graph.vertex.IfBlockStatementVertex;
-import com.salesforce.graph.vertex.IfElseBlockStatementVertex;
-import com.salesforce.graph.vertex.LiteralExpressionVertex;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.graph.vertex.ModifierNodeVertex;
-import com.salesforce.graph.vertex.NewKeyValueObjectExpressionVertex;
-import com.salesforce.graph.vertex.NewListLiteralExpressionVertex;
-import com.salesforce.graph.vertex.NewObjectExpressionVertex;
-import com.salesforce.graph.vertex.ParameterVertex;
-import com.salesforce.graph.vertex.PrefixExpressionVertex;
-import com.salesforce.graph.vertex.ReferenceExpressionVertex;
-import com.salesforce.graph.vertex.ReturnStatementVertex;
-import com.salesforce.graph.vertex.SoqlExpressionVertex;
-import com.salesforce.graph.vertex.StandardConditionVertex;
-import com.salesforce.graph.vertex.SuperMethodCallExpressionVertex;
-import com.salesforce.graph.vertex.SwitchStatementVertex;
-import com.salesforce.graph.vertex.ThrowStatementVertex;
-import com.salesforce.graph.vertex.TryCatchFinallyBlockStatementVertex;
-import com.salesforce.graph.vertex.ValueWhenBlockVertex;
-import com.salesforce.graph.vertex.VariableDeclarationStatementsVertex;
-import com.salesforce.graph.vertex.VariableDeclarationVertex;
-import com.salesforce.graph.vertex.VariableExpressionVertex;
+import com.salesforce.graph.vertex.*;
 
 /**
  * Visits vertices in a particular path. Return true if the visitor does not want to visit the
@@ -147,6 +107,8 @@ public interface PathVertexVisitor {
 
     void afterVisit(BaseSFVertex vertex, SymbolProvider symbols);
 
+    void afterVisit(DoLoopStatementVertex vertex, SymbolProvider symbols);
+
     void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols);
 
     void afterVisit(DmlInsertStatementVertex vertex, SymbolProvider symbols);
@@ -158,6 +120,10 @@ public interface PathVertexVisitor {
     void afterVisit(DmlUpdateStatementVertex vertex, SymbolProvider symbols);
 
     void afterVisit(DmlUpsertStatementVertex vertex, SymbolProvider symbols);
+
+    void afterVisit(ForEachStatementVertex vertex, SymbolProvider symbols);
+
+    void afterVisit(ForLoopStatementVertex vertex, SymbolProvider symbols);
 
     void afterVisit(FieldDeclarationVertex vertex, SymbolProvider symbols);
 
@@ -172,4 +138,6 @@ public interface PathVertexVisitor {
     void afterVisit(StandardConditionVertex.Positive vertex, SymbolProvider symbols);
 
     void afterVisit(ThrowStatementVertex vertex, SymbolProvider symbols);
+
+    void afterVisit(WhileLoopStatementVertex vertex, SymbolProvider symbols);
 }
