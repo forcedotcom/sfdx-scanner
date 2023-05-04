@@ -43,7 +43,7 @@ public class MultipleMassSchemaLookupRuleHandler {
         ApexPathWalker.walkPath(g, path, ruleVisitor, symbols);
 
         // Once it finishes walking, collect any violations thrown
-        return ruleVisitor.getViolation();
+        return ruleVisitor.getViolations();
     }
 
     public static MultipleMassSchemaLookupRuleHandler getInstance() {

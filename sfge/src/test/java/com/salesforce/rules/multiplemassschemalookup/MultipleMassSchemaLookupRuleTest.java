@@ -50,6 +50,30 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
+    @Disabled // TODO: Only surrounding loop should be counted as a violation.
+    public void testSimpleGgdOutsideLoop(String loopAstLabel, String loopStructure) {
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n" +
+                "   void foo() {\n" +
+                "       List<String> myList = new String[] {'Account','Contact'};\n" +
+                "       " + loopStructure + " {\n" +
+                "           String s = 'abc';\n" +
+                "       }\n" +
+                "       Schema.getGlobalDescribe();\n" +
+                "   }\n" +
+                "}\n";
+        // spotless:on
+
+        assertNoViolation(RULE, sourceCode);
+    }
+
+    @CsvSource({
+        "ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < s.size; s++)",
+        "WhileLoopStatement, while(true)"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
     public void testGgdInLoopInMethodCall(String loopAstLabel, String loopStructure) {
         // spotless:off
         String sourceCode =
@@ -126,17 +150,15 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testMultipleInvocations(String testName, String firstCall, String secondCall) {
+        // spotless:off
         String sourceCode =
                 "public class MyClass {\n"
                         + "   void foo() {\n"
-                        + "       "
-                        + firstCall
-                        + "();\n"
-                        + "       "
-                        + secondCall
-                        + "();\n"
+                        + "       " + firstCall + "();\n"
+                        + "       " + secondCall + "();\n"
                         + "   }\n"
                         + "}\n";
+        // spotless:on
 
         assertViolations(
                 RULE,
@@ -152,6 +174,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
 
     @Test
     public void testForEachLoopInClassInstance() {
+        // spotless:off
         String sourceCode[] = {
             "public class MyClass {\n"
                     + "   void foo() {\n"
@@ -167,6 +190,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                     + "}\n"
                     + "}\n"
         };
+        // spotless:on
 
         assertViolations(
                 RULE,
@@ -184,6 +208,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     @Test
     @Disabled
     public void testForLoopInClassInstance() {
+        // spotless:off
         String sourceCode[] = {
             "public class MyClass {\n"
                     + "   void foo() {\n"
@@ -199,6 +224,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                     + "}\n"
                     + "}\n"
         };
+        // spotless:on
 
         assertViolations(
                 RULE,
@@ -214,6 +240,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
 
     @Test
     public void testForLoopConditionalOnClassInstance() {
+        // spotless:off
         String sourceCode[] = {
             "public class MyClass {\n"
                     + "   void foo() {\n"
@@ -235,6 +262,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                     + "}\n"
                     + "}\n"
         };
+        // spotless:on
 
         assertViolations(
                 RULE,
@@ -250,6 +278,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
 
     @Test // TODO: Check if this is a false positive. Static block should get invoked only once
     public void testLoopFromStaticBlock() {
+        // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
                     + "   void foo(String[] objectNames) {\n"
@@ -267,6 +296,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                     + "   }\n"
                     + "}\n"
         };
+        // spotless:on
 
         assertViolations(
                 RULE,
@@ -280,18 +310,61 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         ASTConstants.NodeType.FOR_LOOP_STATEMENT));
     }
 
-    @Test
-    public void testLoopAfterGgdShouldNotGetViolation() {
+    @CsvSource({
+        "ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < s.size; s++)",
+        "WhileLoopStatement, while(true)"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testLoopAfterGgdShouldNotGetViolation(String loopAstLabel, String loopStructure) {
+        // spotless:off
         String sourceCode =
                 "public class MyClass {\n"
-                        + "   void foo(String[] objectNames) {\n"
+                        + "   void foo() {\n"
                         + "       Schema.getGlobalDescribe();\n"
-                        + "       for (String name: objectNames) {\n"
-                        + "           System.debug(name);\n"
+                        + "       " + loopStructure + " {\n"
+                        + "           List<String> myList = new String[] {'Account','Contact'};\n"
+                        + "           System.debug('hi');\n"
                         + "       }\n"
                         + "   }\n"
                         + "}\n";
+        // spotless:on
 
         assertNoViolation(RULE, sourceCode);
+    }
+
+    @CsvSource({
+        "ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < s.size; s++)",
+        "WhileLoopStatement, while(true)"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    @Disabled // TODO: Only surrounding loop should be counted as a violation.
+    public void testLoopBeforeAndAroundGgd(String loopAstLabel, String loopStructure) {
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n"
+                + "   void foo() {\n"
+                + "       List<String> myList = new String[] {'Account','Contact'};\n"
+                + "       " + loopStructure + " {\n"
+                + "           System.debug('hi');\n"
+                + "       }\n"
+                + "       " + loopStructure + " {\n"
+                + "         Schema.getGlobalDescribe();\n"
+                + "       }\n"
+                + "   }\n"
+                + "}\n";
+        // spotless:on
+
+        assertViolations(
+                RULE,
+                sourceCode,
+                expect(
+                        8,
+                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        7,
+                        "MyClass",
+                        RuleConstants.RepetitionType.LOOP,
+                        loopAstLabel));
     }
 }

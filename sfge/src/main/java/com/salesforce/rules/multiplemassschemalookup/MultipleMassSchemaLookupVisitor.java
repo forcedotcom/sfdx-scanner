@@ -68,7 +68,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     /**
      * @return Violations collected by the rule.
      */
-    Set<MultipleMassSchemaLookupInfo> getViolation() {
+    Set<MultipleMassSchemaLookupInfo> getViolations() {
         return violations;
     }
 }

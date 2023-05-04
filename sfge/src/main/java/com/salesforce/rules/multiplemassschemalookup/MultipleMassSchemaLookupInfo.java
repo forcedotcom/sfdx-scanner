@@ -7,8 +7,8 @@ import com.salesforce.rules.RuleThrowable;
 import com.salesforce.rules.Violation;
 
 /**
- * Represents information required to create a violation from
- * {@link com.salesforce.rules.MultipleMassSchemaLookupRule}.
+ * Represents information required to create a violation from {@link
+ * com.salesforce.rules.MultipleMassSchemaLookupRule}.
  */
 public class MultipleMassSchemaLookupInfo implements RuleThrowable {
 
@@ -57,7 +57,6 @@ public class MultipleMassSchemaLookupInfo implements RuleThrowable {
             }
         }
     }
-
 
     public Violation.PathBasedRuleViolation convert() {
         return new Violation.PathBasedRuleViolation(
