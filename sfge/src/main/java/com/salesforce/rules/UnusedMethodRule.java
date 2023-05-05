@@ -1,15 +1,16 @@
 package com.salesforce.rules;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
-import com.salesforce.graph.ops.PathEntryPointUtil;
 import com.salesforce.graph.ops.directive.EngineDirective;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
+import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.unusedmethod.operations.UsageTracker;
 import java.util.*;
@@ -36,6 +37,10 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
  */
 public final class UnusedMethodRule extends AbstractPathBasedRule implements PostProcessingRule {
     private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
+    // UnusedMethodRule cares about all sources, since they're all equally capable of using a
+    // method.
+    private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
+            ImmutableSet.copyOf(ApexPathSource.Type.values());
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
 
@@ -44,6 +49,11 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
     @Override
     public Optional<PathExpansionObserver> getPathExpansionObserver() {
         return Optional.of(new UsageTracker());
+    }
+
+    @Override
+    public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+        return SOURCE_TYPES;
     }
 
     /**
@@ -134,7 +144,7 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
                             // We should also skip path entrypoints, because they're definitionally
                             // publicly accessible, and therefore we should assume they're used
                             // somewhere or other.
-                            return !PathEntryPointUtil.isPathEntryPoint(methodVertex);
+                            return !ApexPathSource.isPotentialSource(methodVertex);
                         })
                 .collect(Collectors.toList());
     }

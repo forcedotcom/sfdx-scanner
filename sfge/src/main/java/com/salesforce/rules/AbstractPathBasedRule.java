@@ -1,6 +1,9 @@
 package com.salesforce.rules;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
+import com.salesforce.graph.source.ApexPathSource;
+import com.salesforce.graph.vertex.MethodVertex;
 import java.util.Optional;
 
 /**
@@ -14,5 +17,13 @@ public abstract class AbstractPathBasedRule extends AbstractRule {
      */
     public Optional<PathExpansionObserver> getPathExpansionObserver() {
         return Optional.empty();
+    }
+
+    /** Allows rules to indicate what types of path sources they are interested in. */
+    public abstract ImmutableSet<ApexPathSource.Type> getSourceTypes();
+
+    /** Indicates whether this rule considers the specified method as a source of interest. */
+    public boolean methodIsPotentialSource(MethodVertex methodVertex) {
+        return ApexPathSource.isPotentialSource(methodVertex, getSourceTypes());
     }
 }

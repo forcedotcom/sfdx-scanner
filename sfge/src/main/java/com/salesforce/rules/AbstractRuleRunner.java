@@ -6,7 +6,7 @@ import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.JustInTimeGraphProvider;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
-import com.salesforce.graph.ops.PathEntryPointUtil;
+import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.util.ArrayList;
@@ -86,19 +86,30 @@ public abstract class AbstractRuleRunner {
         if (rules.isEmpty()) {
             return new Result();
         }
-        List<MethodVertex> pathEntryPoints = PathEntryPointUtil.getPathEntryPoints(g, targets);
-        if (pathEntryPoints.isEmpty()) {
+        List<ApexPathSource> sources = ApexPathSource.getApexPathSources(g, rules, targets);
+        if (sources.isEmpty()) {
             LOGGER.info("No path-based entry points found");
             return new Result();
         }
 
         // Let listener know that we have finished identifying entry points in target
-        ProgressListenerProvider.get().pathEntryPointsIdentified(pathEntryPoints.size());
+        ProgressListenerProvider.get().pathEntryPointsIdentified(sources.size());
 
         // For each entry point, generate a submission object.
         List<ThreadableRuleExecutor.ThreadableRuleSubmission> submissions = new ArrayList<>();
-        for (MethodVertex pathEntryPoint : pathEntryPoints) {
-            submissions.add(getRuleRunnerSubmission(g, pathEntryPoint, rules));
+        for (ApexPathSource source : sources) {
+            // If the source was explicitly requested, run all rules against it.
+            // Otherwise, just run the rules that express interest in it.
+            List<AbstractPathBasedRule> interestedRules =
+                    source.isForceTargeted()
+                            ? rules
+                            : rules.stream()
+                                    .filter(
+                                            r ->
+                                                    r.methodIsPotentialSource(
+                                                            source.getMethodVertex()))
+                                    .collect(Collectors.toList());
+            submissions.add(getRuleRunnerSubmission(g, source.getMethodVertex(), interestedRules));
         }
         Result res = ThreadableRuleExecutor.run(submissions);
         for (AbstractPathBasedRule rule : rules) {

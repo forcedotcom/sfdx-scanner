@@ -59,6 +59,15 @@ public class PathBasedRuleRunner {
      * @return a set of violations that were detected
      */
     public Set<Violation> runRules() {
+        if (allRules.isEmpty()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(
+                        "EntryPoint=" + methodVertex.toSimpleString() + "; No interested rules.");
+            }
+            // TODO: SURFACE A WARNING TO THE USER.
+            return new HashSet<>();
+        }
+
         // Build configuration to define how apex paths will be expanded
         final ApexPathExpanderConfig expanderConfig = getApexPathExpanderConfig();
 

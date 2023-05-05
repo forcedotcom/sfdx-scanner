@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.cli.Result;
@@ -16,16 +17,13 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.cache.VertexCache;
 import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.cache.VertexCacheTestProvider;
+import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ReturnStatementVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.rules.AbstractRuleRunner.RuleRunnerTarget;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -270,6 +268,11 @@ public class RuleRunnerTest {
 
         public static PathTraversalTestRule getInstance() {
             return LazyHolder.INSTANCE;
+        }
+
+        @Override
+        public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+            return ImmutableSet.copyOf(ApexPathSource.Type.values());
         }
 
         private static final class LazyHolder {
