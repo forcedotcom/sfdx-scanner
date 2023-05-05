@@ -1,7 +1,9 @@
 package com.salesforce.rules;
 
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.rules.multiplemassschemalookup.MultipleMassSchemaLookupRuleHandler;
 import java.util.ArrayList;
@@ -10,6 +12,9 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 
 /** Rule to detect possible performance degradations while invoking Schema.getGlobalDescribe(). */
 public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
+    // Any path is capable of violating this rule.
+    private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
+            ImmutableSet.copyOf(ApexPathSource.Type.values());
 
     private final MultipleMassSchemaLookupRuleHandler ruleHandler;
 
@@ -29,6 +34,11 @@ public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
         violations.addAll(ruleHandler.detectViolations(g, path, vertex));
 
         return violations;
+    }
+
+    @Override
+    public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+        return SOURCE_TYPES;
     }
 
     @Override
