@@ -68,6 +68,7 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
     static final String METHOD_STARTS_WITH_IGNORE_CASE = "startsWithIgnoreCase";
     static final String METHOD_SUB_STRING = "subString";
     static final String METHOD_SUB_STRING_AFTER = "subStringAfter";
+    static final String METHOD_SUB_STRING_AFTER_LAST = "subStringAfterLast";
     static final String METHOD_SUB_STRING_BEFORE = "subStringBefore";
     static final String METHOD_SUB_STRING_BETWEEN = "subStringBetween";
     static final String METHOD_TO_LOWER_CASE = "toLowerCase";
@@ -198,6 +199,7 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
                                     METHOD_REMOVE_START_IGNORE_CASE,
                                     StringUtils::removeStartIgnoreCase),
                             Pair.of(METHOD_SUB_STRING_AFTER, StringUtils::substringAfter),
+                            Pair.of(METHOD_SUB_STRING_AFTER_LAST, StringUtils::substringAfterLast),
                             Pair.of(METHOD_SUB_STRING_BEFORE, StringUtils::substringBefore),
                             Pair.of(METHOD_SUB_STRING_BETWEEN, StringUtils::substringBetween));
 
