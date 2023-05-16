@@ -211,6 +211,21 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
         assertMethodIneligibility(sourceCode, "MyClass", "handleInboundEmail", 2);
     }
 
+    /** Triggers are entrypoints, and should count as used. */
+    @Test
+    public void trigger_expectNoAnalysis() {
+        // spotless:off
+        String sourceCode =
+            "trigger AccountBefore on Account (before insert) {\n"
+          + "    if (Trigger.isBefore) {\n"
+          + "        System.debug('asdf');\n"
+          + "    }\n"
+          + "}\n";
+        // spotless:on
+        assertMethodIneligibility(
+                sourceCode, new String[] {"AccountBefore"}, new String[] {"invoke"}, new int[] {1});
+    }
+
     /* =============== SECTION 4: PROPERTY GETTERS AND SETTERS =============== */
     // REASONING: Public setters are often used by Visualforce, and private setters are often
     //            declared to prevent a variable from being modified entirely.
