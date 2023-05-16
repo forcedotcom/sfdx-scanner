@@ -2,6 +2,7 @@ import {SfdxCommand} from '@salesforce/command';
 import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {stringArrayTypeGuard} from './util/Utils';
+import {initContainer} from '../ioc.config';
 import {AnyJson} from '@salesforce/ts-types';
 
 import {Messages} from '@salesforce/core';
@@ -29,6 +30,8 @@ export abstract class ScannerCommand extends SfdxCommand {
 	 */
 	protected runCommonSteps(): void {
 		this.ux.warn(commonMessages.getMessage('surveyRequestMessage'));
+		// Bootstrap the IOC container.
+		initContainer();
 	}
 
 	protected buildRuleFilters(): RuleFilter[] {

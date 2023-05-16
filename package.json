@@ -119,10 +119,7 @@
 		},
 		"devPlugins": [
 			"@oclif/plugin-help"
-		],
-		"hooks": {
-			"init": "./lib/lib/hooks/init"
-		}
+		]
 	},
 	"nyc": {
 		"branches": "80",
