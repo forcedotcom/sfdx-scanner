@@ -8,5 +8,5 @@ public interface Boundary<T> {
     /**
      * @return the object that governs this boundary.
      */
-    T getBoundaryVertex();
+    T getBoundaryItem();
 }

@@ -2,7 +2,6 @@ package com.salesforce.rules.ops.boundary;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
-import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
 import java.util.Optional;
 import java.util.Stack;
@@ -10,9 +9,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * PathVertex visitor that tracks the beginning and end of boundaries. Each implementation of a
- * {@link BoundaryDetector} works with a specific type of {@link Boundary}. This visitor maintains a
- * stack which shows if a boundary is currently active.
+ * Tracks the beginning and end of boundaries. Each implementation of a {@link BoundaryDetector}
+ * works with a specific type of {@link Boundary}. Use {@link #peek()} to know if a boundary is
+ * currently active.
  *
  * @param <T> Boundary type associated with the implementation.
  */
@@ -40,12 +39,12 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
     }
 
     public void pushBoundary(T boundary) {
-        LOGGER.debug("Entering loop boundary with vertex=" + boundary.getBoundaryVertex());
+        LOGGER.debug("Entering loop boundary with boundaryItem=" + boundary.getBoundaryItem());
         push(boundary);
     }
 
-    public void popBoundary(SFVertex vertex) {
-        LOGGER.debug("Exiting boundary with vertex=" + vertex);
+    public void popBoundary(R boundaryItem) {
+        LOGGER.debug("Exiting boundary with boundaryItem=" + boundaryItem);
 
         // Perform checks to ensure correctness of logic
         Optional<T> boundaryOptional = peek();
@@ -54,13 +53,13 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
                     "No boundary has been pushed to get a corresponding pop.");
         }
 
-        R existingBoundaryVertex = boundaryOptional.get().getBoundaryVertex();
-        if (!vertex.equals(existingBoundaryVertex)) {
+        R existingBoundaryItem = boundaryOptional.get().getBoundaryItem();
+        if (!boundaryItem.equals(existingBoundaryItem)) {
             throw new UnexpectedException(
-                    "Boundary vertices don't match. existingBoundaryVertex="
-                            + existingBoundaryVertex
-                            + ", afterVisit vertex="
-                            + vertex);
+                    "Boundary vertices don't match. existingBoundaryItem="
+                            + existingBoundaryItem
+                            + ", afterVisit boundaryItem="
+                            + boundaryItem);
         }
 
         pop();

@@ -11,7 +11,8 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Visitor detects when more than one invocation of Schema.getGlobalDescribe() is made in a path.
+ * Visitor detects when more than one invocation of Schema.getGlobalDescribe() or
+ * Schema.describeSObjects is made in a path.
  */
 class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     /** Represents the path entry point that this visitor is walking */
@@ -58,7 +59,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         final Optional<LoopBoundary> loopBoundaryOptional = loopBoundaryDetector.peek();
         if (loopBoundaryOptional.isPresent()) {
             // Method has been invoked inside a loop. Create a violation.
-            final SFVertex loopVertex = loopBoundaryOptional.get().getBoundaryVertex();
+            final SFVertex loopVertex = loopBoundaryOptional.get().getBoundaryItem();
             violations.add(
                     new MultipleMassSchemaLookupInfo(
                             sourceVertex,

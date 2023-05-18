@@ -2,19 +2,17 @@ package com.salesforce.rules.ops.boundary;
 
 import com.salesforce.graph.vertex.SFVertex;
 
-/**
- * Boundary information for loop detection.
- */
+/** Boundary information for loop detection. */
 public class LoopBoundary implements Boundary<SFVertex> {
 
-    SFVertex loopVertex;
+    private final SFVertex loopVertex;
 
     public LoopBoundary(SFVertex loopVertex) {
         this.loopVertex = loopVertex;
     }
 
     @Override
-    public SFVertex getBoundaryVertex() {
+    public SFVertex getBoundaryItem() {
         return loopVertex;
     }
 
