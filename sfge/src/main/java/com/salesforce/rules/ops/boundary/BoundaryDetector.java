@@ -40,6 +40,7 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
 
     /**
      * Start extent of a new boundary
+     *
      * @param boundary item that governs this extent.
      */
     public void pushBoundary(T boundary) {
@@ -49,6 +50,7 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
 
     /**
      * End extent of a boundary. Performs additional checks to confirm validity.
+     *
      * @param boundaryItem that is expected to govern the current boundary that's to be ended.
      */
     public void popBoundary(R boundaryItem) {
