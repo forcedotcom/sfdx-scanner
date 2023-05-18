@@ -23,6 +23,8 @@ public interface PathVertexVisitor {
 
     boolean visit(CatchBlockStatementVertex vertex, SymbolProvider symbols);
 
+    boolean visit(DoLoopStatementVertex vertex, SymbolProvider symbols);
+
     boolean visit(DmlDeleteStatementVertex vertex, SymbolProvider symbols);
 
     boolean visit(DmlInsertStatementVertex vertex, SymbolProvider symbols);
@@ -104,6 +106,8 @@ public interface PathVertexVisitor {
     boolean visit(VariableExpressionVertex.ForLoop vertex, SymbolProvider symbols);
 
     boolean visit(VariableExpressionVertex.Single vertex, SymbolProvider symbols);
+
+    boolean visit(WhileLoopStatementVertex vertex, SymbolProvider symbols);
 
     void afterVisit(BaseSFVertex vertex, SymbolProvider symbols);
 

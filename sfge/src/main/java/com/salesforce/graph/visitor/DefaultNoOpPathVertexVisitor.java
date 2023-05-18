@@ -37,6 +37,11 @@ public class DefaultNoOpPathVertexVisitor implements PathVertexVisitor {
     }
 
     @Override
+    public boolean visit(DoLoopStatementVertex vertex, SymbolProvider symbols) {
+        return DefaultNoOpScopeVisitor.shouldVisitChildren(vertex);
+    }
+
+    @Override
     public boolean visit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
         return DefaultNoOpScopeVisitor.shouldVisitChildren(vertex);
     }
@@ -238,6 +243,11 @@ public class DefaultNoOpPathVertexVisitor implements PathVertexVisitor {
 
     @Override
     public boolean visit(VariableExpressionVertex.Single vertex, SymbolProvider symbols) {
+        return DefaultNoOpScopeVisitor.shouldVisitChildren(vertex);
+    }
+
+    @Override
+    public boolean visit(WhileLoopStatementVertex vertex, SymbolProvider symbols) {
         return DefaultNoOpScopeVisitor.shouldVisitChildren(vertex);
     }
 
