@@ -129,13 +129,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 expect(
                         5,
                         RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        3,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        loopAstLabel),
-                expect(
-                        5,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
                         RuleConstants.RepetitionType.LOOP,
@@ -232,8 +225,8 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 expect(
                         3,
                         RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
+                        3,
+                        "Another",
                         RuleConstants.RepetitionType.LOOP,
                         ASTConstants.NodeType.FOR_LOOP_STATEMENT));
     }
@@ -339,7 +332,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled // TODO: Only surrounding loop should be counted as a violation.
     public void testLoopBeforeAndAroundGgd(String loopAstLabel, String loopStructure) {
         // spotless:off
         String sourceCode =
