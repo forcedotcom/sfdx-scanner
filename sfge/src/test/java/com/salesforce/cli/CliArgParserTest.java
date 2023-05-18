@@ -56,7 +56,7 @@ public class CliArgParserTest {
         // As we add new DFA and non-DFA rules, the numbers in these tests
         // will increase.
         "pathless, 1",
-        "dfa, 3"
+        "dfa, 4"
     })
     @ParameterizedTest(name = "{displayName}: {0} rules")
     public void catalogFlowReturnsExpectedRules(String arg, int ruleCount) {
