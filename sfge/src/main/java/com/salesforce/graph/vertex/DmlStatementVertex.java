@@ -31,26 +31,18 @@ public abstract class DmlStatementVertex extends BaseSFVertex {
         // If AccessLevel is included in the syntax, it's usually the last child. It shows up in the
         // form of a VariableExpression with a ReferenceExpression child.
 
+        // spotless: off
         // Example:
-        // <DmlUpdateStatement BeginColumn="9" BeginLine="6" DefiningType="MyClass"
-        // DefiningType_CaseSafe="myclass" EndLine="6" EndScopes="[BlockStatement]"
-        // FirstChild="false" LastChild="true" childIdx="2">
-        //                <VariableExpression BeginColumn="24" BeginLine="6" DefiningType="MyClass"
-        // DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true" LastChild="false" Name="a"
-        // Name_CaseSafe="a" childIdx="0">
-        //                    <EmptyReferenceExpression BeginColumn="24" BeginLine="6"
-        // DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true"
-        // LastChild="true" childIdx="0"/>
-        //                </VariableExpression>
-        //                <VariableExpression BeginColumn="30" BeginLine="-1" DefiningType="MyClass"
-        // DefiningType_CaseSafe="myclass" EndLine="-1" FirstChild="false" LastChild="true"
-        // Name="USER_MODE" Name_CaseSafe="user_mode" childIdx="1">
-        //                    <ReferenceExpression BeginColumn="19" BeginLine="6"
-        // DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true"
-        // LastChild="true" Name="AccessLevel" Name_CaseSafe="accesslevel" Names="[AccessLevel]"
-        // ReferenceType="LOAD" childIdx="0"/>
-        //                </VariableExpression>
-        //            </DmlUpdateStatement>
+        //<DmlUpdateStatement BeginColumn="9" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" EndScopes="[BlockStatement]" FirstChild="false" LastChild="true" childIdx="2">
+        //  <VariableExpression BeginColumn="24" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true" LastChild="false" Name="a" Name_CaseSafe="a" childIdx="0">
+        //    <EmptyReferenceExpression BeginColumn="24" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true" LastChild="true" childIdx="0"/>
+        //  </VariableExpression>
+        //  <VariableExpression BeginColumn="30" BeginLine="-1" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="-1" FirstChild="false" LastChild="true" Name="USER_MODE" Name_CaseSafe="user_mode" childIdx="1">
+        //    <ReferenceExpression BeginColumn="19" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true" LastChild="true" Name="AccessLevel" Name_CaseSafe="accesslevel" Names="[AccessLevel]" ReferenceType="LOAD" childIdx="0"/>
+        //  </VariableExpression>
+        //</DmlUpdateStatement>
+
+        // spotless: on
 
         final List<VariableExpressionVertex> children =
                 vertex.getChildren(ASTConstants.NodeType.VARIABLE_EXPRESSION);
