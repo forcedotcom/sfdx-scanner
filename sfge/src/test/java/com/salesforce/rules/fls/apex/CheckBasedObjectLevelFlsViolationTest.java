@@ -31,15 +31,28 @@ public class CheckBasedObjectLevelFlsViolationTest extends BaseFlsTest {
                         FlsValidationType.DELETE,
                         "Account a = new Account(Name = 'Acme Inc.');\n" + "delete a;\n"),
                 getArguments(
+                        FlsValidationType.DELETE,
+                        "Account a = new Account(Name = 'Acme Inc.');\n" + "delete as system a;\n"),
+                getArguments(
                         FlsValidationType.MERGE,
                         "Account a1 = new Account(Name = 'Acme Inc.');\n"
                                 + "Account a2 = new Account(Name = 'Acme');\n"
                                 + "merge a1 a2;\n"),
                 getArguments(
+                        FlsValidationType.MERGE,
+                        "Account a1 = new Account(Name = 'Acme Inc.');\n"
+                                + "Account a2 = new Account(Name = 'Acme');\n"
+                                + "merge as system a1 a2;\n"),
+                getArguments(
                         FlsValidationType.UNDELETE,
                         "/* sfge-disable-next-line ApexFlsViolationRule */\n"
                                 + "Account a = [SELECT Id, Name FROM Account WHERE Name = 'Acme Inc.' ALL ROWS];\n"
-                                + "undelete a;\n"));
+                                + "undelete a;\n"),
+                getArguments(
+                        FlsValidationType.UNDELETE,
+                        "/* sfge-disable-next-line ApexFlsViolationRule */\n"
+                                + "Account a = [SELECT Id, Name FROM Account WHERE Name = 'Acme Inc.' ALL ROWS];\n"
+                                + "undelete as system a;\n"));
     }
 
     private static Arguments getArguments(
