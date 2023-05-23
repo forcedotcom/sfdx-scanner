@@ -284,8 +284,8 @@ describe('scanner:run', function () {
 				expect(rows.length).to.equal(2);
 
 				// Verify that each row looks approximately right.
-				expect(rows[0]['line']).to.equal('11', 'Violation #1 should occur on the expected line');
-				expect(rows[1]['line']).to.equal('19', 'Violation #2 should occur on the expected line');
+				expect(rows[0]['line']).to.equal(11, 'Violation #1 should occur on the expected line');
+				expect(rows[1]['line']).to.equal(19, 'Violation #2 should occur on the expected line');
 				expect(rows[0]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #1 should be of the expected type');
 				expect(rows[1]['ruleName']).to.equal('ApexUnitTestClassShouldHaveAsserts', 'Violation #2 should be of the expected type');
 			}
@@ -361,8 +361,8 @@ describe('scanner:run', function () {
 				expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
 
 				expect(output[0].violations.length).to.equal(2, 'Should be 2 violations');
-				expect(output[0].violations[0].line).to.equal('11', 'Violation #1 should occur on the expected line');
-				expect(output[0].violations[1].line).to.equal('19', 'Violation #2 should occur on the expected line');
+				expect(output[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
+				expect(output[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
 			}
 
 			setupCommandTest
@@ -475,8 +475,8 @@ describe('scanner:run', function () {
 					expect(result[0].engine).to.equal('pmd', 'Engine should be PMD');
 
 					expect(result[0].violations.length).to.equal(2, 'Should be 2 violations');
-					expect(result[0].violations[0].line).to.equal('11', 'Violation #1 should occur on the expected line');
-					expect(result[0].violations[1].line).to.equal('19', 'Violation #2 should occur on the expected line');
+					expect(result[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
+					expect(result[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
 				});
 
 			setupCommandTest
