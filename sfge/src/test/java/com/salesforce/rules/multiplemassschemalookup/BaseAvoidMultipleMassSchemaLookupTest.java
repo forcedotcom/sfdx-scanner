@@ -7,6 +7,9 @@ import com.salesforce.testutils.ViolationWrapper;
 /** Base class to tests for {@link MultipleMassSchemaLookupRule} */
 public abstract class BaseAvoidMultipleMassSchemaLookupTest extends BasePathBasedRuleTest {
 
+    protected static final MultipleMassSchemaLookupRule RULE =
+            MultipleMassSchemaLookupRule.getInstance();
+
     protected ViolationWrapper.MassSchemaLookupInfoBuilder expect(
             int sinkLine,
             String sinkMethodName,
