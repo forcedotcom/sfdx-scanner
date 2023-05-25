@@ -31,7 +31,7 @@ public abstract class DmlStatementVertex extends BaseSFVertex {
         // If AccessLevel is included in the syntax, it's usually the last child. It shows up in the
         // form of a VariableExpression with a ReferenceExpression child.
 
-        // spotless: off
+        // spotless:off
         // Example:
         //<DmlUpdateStatement BeginColumn="9" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" EndScopes="[BlockStatement]" FirstChild="false" LastChild="true" childIdx="2">
         //  <VariableExpression BeginColumn="24" BeginLine="6" DefiningType="MyClass" DefiningType_CaseSafe="myclass" EndLine="6" FirstChild="true" LastChild="false" Name="a" Name_CaseSafe="a" childIdx="0">
@@ -42,7 +42,7 @@ public abstract class DmlStatementVertex extends BaseSFVertex {
         //  </VariableExpression>
         //</DmlUpdateStatement>
 
-        // spotless: on
+        // spotless:on
 
         final List<VariableExpressionVertex> children =
                 vertex.getChildren(ASTConstants.NodeType.VARIABLE_EXPRESSION);

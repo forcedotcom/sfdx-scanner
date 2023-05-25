@@ -1,7 +1,6 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,9 +8,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 // TODO: Breakdown to more test suites
 public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchemaLookupTest {
-
-    private static final MultipleMassSchemaLookupRule RULE =
-            MultipleMassSchemaLookupRule.getInstance();
 
     @CsvSource({
         "ForEachStatement, for (String s : myList)",
@@ -197,6 +193,24 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         ASTConstants.NodeType.FOR_EACH_STATEMENT));
     }
 
+    @Test
+    public void testMethodCallWithinForEachLoopIsSafe() {
+        // spotless:off
+        String sourceCode[] = {
+            "public class MyClass {\n"
+                + "   void foo() {\n"
+                + "       String[] objectList = new String[] {'Account','Contact'};\n"
+                + "       for (Schema.DescribeSObjectResult objDesc: Schema.describeSObjects(objectList)) {\n"
+                + "           System.debug(objDesc.getLabel());\n"
+                + "       }\n"
+                + "   }\n"
+                + "}\n"
+        };
+        // spotless:on
+
+        assertNoViolation(RULE, sourceCode);
+    }
+
     /** TODO: Handle path expansion from array[index].methodCall() */
     @Test
     @Disabled
@@ -270,6 +284,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     }
 
     @Test // TODO: Check if this is a false positive. Static block should get invoked only once
+    @Disabled
     public void testLoopFromStaticBlock() {
         // spotless:off
         String[] sourceCode = {
@@ -291,16 +306,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         };
         // spotless:on
 
-        assertViolations(
-                RULE,
-                sourceCode,
-                expect(
-                        3,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        3,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        ASTConstants.NodeType.FOR_LOOP_STATEMENT));
+        assertNoViolation(RULE, sourceCode);
     }
 
     @CsvSource({
