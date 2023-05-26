@@ -9,6 +9,7 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | -------- | ----------- | ----------- |
 | ApexFlsViolationRule | Path-based analysis | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
 | ApexNullPointerExceptionRule | Path-based analysis | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
+| MultipleMassSchemaLookupRule | Path-based analysis | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
 | UnimplementedTypeRule | Graph-based analysis | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
 | UnusedMethodRule (pilot) | Path-based analysis | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 
@@ -162,6 +163,47 @@ ApexNullPointerExceptionRule identifies Apex operations with a high likelihood o
 Parameter explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
+
+## MultipleMassSchemaLookupRule
+
+MultipleMassSchemaLookupRule is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
+
+These methods are identified by MultipleMassSchemaLookupRule.
+
+* `Schema.getGlobalDescribe()`
+* `Schema.describeSObjects(...)`
+
+Flagged lookups include:
+
+* Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
+* More than one invocation in a path 
+
+These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
+* `Schema.getGlobalDescribe()` within a loop
+* `Schema.describeSObjects(...)` within a loop
+* `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
+* `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
+
+### Interpreting MultipleMassSchemaLookupRule Results
+Match any violation message that you receive with these cases to understand more about the violation.
+
+#### Loop Case
+
+`Schema.getGlobalDescribe` was called inside a ForLoopStatement at <class>:<line>.
+`Schema.describeSObjects` was called inside a WhileLoopStatement at <class>:<line>.  
+
+*Explanation*
+
+Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` outside the loop, then rescan your code. 
+
+#### More Than One Invocation in a Path Case
+
+`Schema.getGlobalDescribe` was preceded by a call to `Schema.getGlobalDescribe` at <class>:<line>.
+`Schema.describeSObjects` was preceded by a call to `Schema.getGlobalDescribe` at <class>:<line>.
+
+*Explanation*
+
+Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` multiple times in a single path. Reduce the invocation of the method to one time, then rescan your code.
 
 ## UnimplementedTypeRule#
 
