@@ -23,7 +23,7 @@ We publish the latest Code Analyzer monthly.
 * FIX (GraphEngine): We added support for the built-in string method, `substringAfterLast()`.
 * FIX (CodeAnalyzer): We resolved an issue that caused Just-In-Time installations to fail on the first attempt.
 * NEW (GraphEngine): DML transactions with the "as user" keyword are now treated as secure by ApexFlsViolationRule.
-* FIX (CodeAnalyzer): We updated the `--json` flag to treat universally position information as numbers.
+* FIX (CodeAnalyzer): We updated the `--json` flag to treat position information universally as numbers.
 
 **Closed issues:**
 
