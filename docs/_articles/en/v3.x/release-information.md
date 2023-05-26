@@ -12,6 +12,23 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.13.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.13.0) (06-07-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.13.0...v3.12.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): To improve your code performance, we added a new Salesforce Graph Engine path-based rule, MultipleMassSchemaLookupRule. This new rule detects scenarios where expensive schema lookups are made more than one time in a path and can cause performance degradation.
+* FIX (GraphEngine): We added support for the built-in string method, `substringAfterLast()`.
+* FIX (CodeAnalyzer): We resolved an issue that caused Just-In-Time installations to fail on the first attempt.
+* NEW (GraphEngine): DML transactions with the "as user" keyword are now treated as secure by ApexFlsViolationRule.
+* FIX (CodeAnalyzer): We updated the `--json` flag to treat universally position information as numbers.
+
+**Closed issues:**
+
+**Merged pull requests**
+
 ## [v3.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.12.0) (05-02-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.12.0...v3.11.0)
