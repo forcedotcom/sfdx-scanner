@@ -184,6 +184,27 @@ These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 * `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
 * `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
 
+### Definitions
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |`Schema.getGlobalDescribe()`													|
+|				 |`Schema.describeSObjects(...)`																										|
+| **Sanitizer**	 |				                                  														      		|
+|			 	 | |
+
+
 ### Interpreting MultipleMassSchemaLookupRule Results
 Match any violation message that you receive with these cases to understand more about the violation.
 
