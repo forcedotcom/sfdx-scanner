@@ -201,9 +201,6 @@ These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 | **Sink**		 | 																													|
 | 		  	  	 |`Schema.getGlobalDescribe()`													|
 |				 |`Schema.describeSObjects(...)`																										|
-| **Sanitizer**	 |				                                  														      		|
-|			 	 | |
-
 
 ### Interpreting MultipleMassSchemaLookupRule Results
 Match any violation message that you receive with these cases to understand more about the violation.
