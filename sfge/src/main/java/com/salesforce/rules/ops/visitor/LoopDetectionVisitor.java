@@ -5,10 +5,12 @@ import com.salesforce.graph.vertex.*;
 import com.salesforce.graph.visitor.DefaultNoOpPathVertexVisitor;
 import com.salesforce.rules.ops.boundary.LoopBoundary;
 import com.salesforce.rules.ops.boundary.LoopBoundaryDetector;
+import com.salesforce.rules.ops.boundary.LoopExclusionBoundary;
+import java.util.Optional;
 
 /** Visitor that gets notified when a loop vertex is invoked in the path. */
 public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor {
-    protected final LoopBoundaryDetector loopBoundaryDetector;
+    private final LoopBoundaryDetector loopBoundaryDetector;
 
     public LoopDetectionVisitor() {
         loopBoundaryDetector = new LoopBoundaryDetector();
@@ -56,5 +58,59 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
     @Override
     public void afterVisit(WhileLoopStatementVertex vertex, SymbolProvider symbols) {
         loopBoundaryDetector.popBoundary(vertex);
+    }
+
+    /**
+     * This case is specific to method calls on ForEach loop definition. These methods are called
+     * only once even though they are technically under a loop definition. We create this boundary
+     * to show that calls here are not actually called multiple times.
+     *
+     * <p>For example, <code>getValues()</code> in this forEach gets called only once: <code>
+     * for (String s: getValues())</code>
+     *
+     * @param vertex Method call in question
+     * @param symbols SymbolProvider at this state
+     * @return true to visit the children
+     */
+    @Override
+    public boolean visit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        // If already within a loop's boundary, get the loop item
+        final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
+        if (currentLoopBoundaryOpt.isPresent()) {
+            final SFVertex loopBoundaryItem = currentLoopBoundaryOpt.get().getBoundaryItem();
+            if (loopBoundaryItem instanceof ForEachStatementVertex) {
+                // We are within a ForEach statement.
+                // Check if the method calls parent is the same as this ForEach statement.
+                // If they are the same, this method would get invoked only once.
+                BaseSFVertex parentVertex = vertex.getParent();
+                if (parentVertex instanceof ForEachStatementVertex
+                        && parentVertex.equals(loopBoundaryItem)) {
+                    // This method would get invoked only once.
+                    loopBoundaryDetector.pushBoundary(new LoopExclusionBoundary(vertex));
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        // If within a method call loop exclusion, pop boundary here.
+        final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
+        if (currentLoopBoundaryOpt.isPresent()) {
+            final LoopBoundary loopBoundary = currentLoopBoundaryOpt.get();
+            if (loopBoundary instanceof LoopExclusionBoundary) {
+                // We are in exclusion zone. Check if the method call on the loop exclusion boundary
+                // is the same as the current method call.
+                if (vertex.equals(loopBoundary.getBoundaryItem())) {
+                    // Pop the method call
+                    loopBoundaryDetector.popBoundary(vertex);
+                }
+            }
+        }
+    }
+
+    protected Optional<? extends SFVertex> isInsideLoop() {
+        return loopBoundaryDetector.isInsideLoop();
     }
 }

@@ -2,7 +2,6 @@ package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
-import com.salesforce.rules.ops.boundary.LoopBoundary;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
 import java.util.HashSet;
 import java.util.Optional;
@@ -46,16 +45,16 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         } else if (RuleConstants.isSchemaExpensiveMethod(vertex) && shouldContinue()) {
             createViolation(RuleConstants.RepetitionType.MULTIPLE, vertex);
         }
+
+        // Perform super method's logic as well to remove exclusion boundary if needed.
+        super.afterVisit(vertex, symbols);
     }
 
     private void checkIfInsideLoop(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        final Optional<LoopBoundary> loopBoundaryOptional = loopBoundaryDetector.peek();
-        if (loopBoundaryOptional.isPresent()) {
-            if (!isLoopOutlier(vertex, symbols)) {
-                // Method has been invoked inside a loop. Create a violation.
-                final SFVertex loopVertex = loopBoundaryOptional.get().getBoundaryItem();
-                createViolation(RuleConstants.RepetitionType.LOOP, loopVertex);
-            }
+        final Optional<? extends SFVertex> loopedVertexOpt = isInsideLoop();
+        if (loopedVertexOpt.isPresent()) {
+            // Method has been invoked inside a loop. Create a violation.
+            createViolation(RuleConstants.RepetitionType.LOOP, loopedVertexOpt.get());
         }
     }
 
