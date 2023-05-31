@@ -36,7 +36,6 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        super.afterVisit(vertex, symbols);
         if (vertex.equals(sinkVertex)) {
             // Mark sink as visited. From this point on, we don't need to
             // look for anymore loops or additional calls.
@@ -46,6 +45,9 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         } else if (RuleConstants.isSchemaExpensiveMethod(vertex) && shouldContinue()) {
             createViolation(RuleConstants.RepetitionType.MULTIPLE, vertex);
         }
+
+        // Perform super method's logic as well to remove exclusion boundary if needed.
+        super.afterVisit(vertex, symbols);
     }
 
     private void checkIfInsideLoop(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
