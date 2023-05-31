@@ -44,7 +44,9 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
      * @param boundary item that governs this extent.
      */
     public void pushBoundary(T boundary) {
-        LOGGER.debug("Entering loop boundary with boundaryItem=" + boundary.getBoundaryItem());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Entering loop boundary with boundaryItem=" + boundary.getBoundaryItem());
+        }
         push(boundary);
     }
 
@@ -54,7 +56,9 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
      * @param boundaryItem that is expected to govern the current boundary that's to be ended.
      */
     public void popBoundary(R boundaryItem) {
-        LOGGER.debug("Exiting boundary with boundaryItem=" + boundaryItem);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Exiting boundary with boundaryItem=" + boundaryItem);
+        }
 
         // Check if a boundary is actually in place
         Optional<T> boundaryOptional = peek();

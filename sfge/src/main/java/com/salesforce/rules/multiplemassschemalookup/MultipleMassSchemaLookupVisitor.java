@@ -2,7 +2,6 @@ package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
-import com.salesforce.rules.ops.boundary.LoopBoundary;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
 import java.util.HashSet;
 import java.util.Optional;
@@ -37,6 +36,7 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        super.afterVisit(vertex, symbols);
         if (vertex.equals(sinkVertex)) {
             // Mark sink as visited. From this point on, we don't need to
             // look for anymore loops or additional calls.
@@ -49,13 +49,10 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     }
 
     private void checkIfInsideLoop(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        final Optional<LoopBoundary> loopBoundaryOptional = loopBoundaryDetector.peek();
-        if (loopBoundaryOptional.isPresent()) {
-            if (!isLoopOutlier(vertex, symbols)) {
-                // Method has been invoked inside a loop. Create a violation.
-                final SFVertex loopVertex = loopBoundaryOptional.get().getBoundaryItem();
-                createViolation(RuleConstants.RepetitionType.LOOP, loopVertex);
-            }
+        final Optional<? extends SFVertex> loopedVertexOpt = isInsideLoop();
+        if (loopedVertexOpt.isPresent()) {
+            // Method has been invoked inside a loop. Create a violation.
+            createViolation(RuleConstants.RepetitionType.LOOP, loopedVertexOpt.get());
         }
     }
 
