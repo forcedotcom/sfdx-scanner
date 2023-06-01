@@ -106,6 +106,7 @@ public class ApexStringValueTest {
                 Arguments.of(ApexStringValue.METHOD_REMOVE_START),
                 Arguments.of(ApexStringValue.METHOD_REMOVE_START_IGNORE_CASE),
                 Arguments.of(ApexStringValue.METHOD_SUB_STRING_AFTER),
+                Arguments.of(ApexStringValue.METHOD_SUB_STRING_AFTER_LAST),
                 Arguments.of(ApexStringValue.METHOD_SUB_STRING_BETWEEN),
                 Arguments.of(ApexStringValue.METHOD_SUB_STRING_BEFORE));
     }

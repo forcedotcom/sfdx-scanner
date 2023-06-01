@@ -142,10 +142,6 @@ public class FlsValidationCentral {
         }
 
         final List<BaseSFVertex> dmlStatementVertexChildren = vertex.getChildren();
-        if (dmlStatementVertexChildren.size() != validationType.parameterCount) {
-            throw new UnexpectedException(
-                    "Unexpected count of parameters: " + dmlStatementVertexChildren.size());
-        }
 
         // Create expected validations based on the first parameter.
         // Even though MERGE operation takes two parameters, both of them need to be of the same
@@ -166,7 +162,6 @@ public class FlsValidationCentral {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
                             "TODO: Apex value not detected for dml's child vertex: " + childVertex);
-                    // TODO: add telemetry
                 }
                 violations.add(
                         FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(
@@ -175,7 +170,6 @@ public class FlsValidationCentral {
         } else {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("TODO: Child vertex of DML is not a chained vertex: " + childVertex);
-                // TODO: add telemetry
             }
             violations.add(
                     FlsViolationCreatorUtil.createUnresolvedCrudFlsViolation(

@@ -25,9 +25,19 @@ public class CheckBasedFieldLevelFlsViolationTest extends BaseFlsTest {
                         ApexFlsViolationRule.getInstance(),
                         "insert new Account(Name = 'Acme Inc.');\n"),
                 getArguments(
+                        FlsValidationType.INSERT,
+                        ApexFlsViolationRule.getInstance(),
+                        "insert as system new Account(Name = 'Acme Inc.');\n"),
+                getArguments(
                         FlsValidationType.UPDATE,
                         ApexFlsViolationRule.getInstance(),
-                        "Account a = new Account();" + "a.Name = 'Acme Inc.';" + "update a;\n"));
+                        "Account a = new Account();" + "a.Name = 'Acme Inc.';" + "update a;\n"),
+                getArguments(
+                        FlsValidationType.UPDATE,
+                        ApexFlsViolationRule.getInstance(),
+                        "Account a = new Account();"
+                                + "a.Name = 'Acme Inc.';"
+                                + "update as system a;\n"));
     }
 
     private static Arguments getArguments(

@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -198,7 +199,7 @@ public class VerticesTest {
         AnnotationVertex annotation = annotations.get(0);
         MatcherAssert.assertThat(annotation.getName(), equalTo(Schema.AURA_ENABLED));
         List<AnnotationParameterVertex> annotationParameters = annotation.getParameters();
-        MatcherAssert.assertThat(annotationParameters, hasSize(equalTo(2)));
+        MatcherAssert.assertThat(annotationParameters, hasSize(equalTo(3)));
     }
 
     @Test
@@ -763,5 +764,21 @@ public class VerticesTest {
         literalCase = (LiteralCaseVertex) caseVertices.get(3);
         LiteralExpressionVertex literalExpression = literalCase.getLiteralExpression();
         MatcherAssert.assertThat(literalExpression, instanceOf(LiteralExpressionVertex.Null.class));
+    }
+
+    @Test
+    public void testInsertAsUserSyntax() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void doSomething() {\n"
+                        + "       Account acc = new Account(Name = 'Acme Inc');\n"
+                        + "       insert as user acc;\n"
+                        + "   }\n"
+                        + "}\n";
+
+        TestUtil.buildGraph(g, sourceCode);
+        DmlInsertStatementVertex insertStatementVertex =
+                TestUtil.getVertexOnLine(g, ASTConstants.NodeType.DML_INSERT_STATEMENT, 4);
+        MatcherAssert.assertThat(insertStatementVertex, Matchers.notNullValue());
     }
 }

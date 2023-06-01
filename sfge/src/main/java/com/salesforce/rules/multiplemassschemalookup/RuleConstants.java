@@ -35,7 +35,7 @@ public class RuleConstants {
         }
 
         public String getMessage(String... params) {
-            return String.format(messageTemplate, params);
+            return String.format(messageTemplate, (Object[]) params);
         }
     }
 }
