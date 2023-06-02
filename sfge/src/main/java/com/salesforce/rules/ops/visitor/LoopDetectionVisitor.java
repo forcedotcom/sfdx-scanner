@@ -80,8 +80,15 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
         if (currentLoopBoundaryOpt.isPresent()) {
             final SFVertex loopBoundaryItem = currentLoopBoundaryOpt.get().getBoundaryItem();
+
             createPermanentLoopExclusionIfApplicable(vertex, loopBoundaryItem);
-            createOverridableLoopExclusionIfApplicable(vertex, loopBoundaryItem);
+
+            // If permanent loop exclusion was added, overridable loop exclusion will never get
+            // added.
+            // Leaving the conditional check here to be more obvious.
+            if (loopBoundaryItem instanceof ForEachStatementVertex) {
+                createOverridableLoopExclusion(vertex, loopBoundaryItem);
+            }
         }
         return true;
     }
@@ -94,19 +101,17 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         }
     }
 
-    private void createOverridableLoopExclusionIfApplicable(
+    private void createOverridableLoopExclusion(
             MethodCallExpressionVertex vertex, SFVertex loopBoundaryItem) {
-        if (loopBoundaryItem instanceof ForEachStatementVertex) {
-            // We are within a ForEach statement.
-            // Check if the method calls parent is the same as this ForEach statement.
-            // If they are the same, this method would get invoked only once.
-            BaseSFVertex parentVertex = vertex.getParent();
-            if (parentVertex instanceof ForEachStatementVertex
-                    && parentVertex.equals(loopBoundaryItem)) {
-                // This method would get invoked only once within the immediate surrounding loop
-                // context
-                loopBoundaryDetector.pushBoundary(new OverridableLoopExclusionBoundary(vertex));
-            }
+        // We are within a ForEach statement.
+        // Check if the method calls parent is the same as this ForEach statement.
+        // If they are the same, this method would get invoked only once.
+        BaseSFVertex parentVertex = vertex.getParent();
+        if (parentVertex instanceof ForEachStatementVertex
+                && parentVertex.equals(loopBoundaryItem)) {
+            // This method would get invoked only once within the immediate surrounding loop
+            // context
+            loopBoundaryDetector.pushBoundary(new OverridableLoopExclusionBoundary(vertex));
         }
     }
 

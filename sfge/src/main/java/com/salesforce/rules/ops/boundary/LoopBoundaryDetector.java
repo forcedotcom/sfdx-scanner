@@ -1,9 +1,7 @@
 package com.salesforce.rules.ops.boundary;
 
 import com.salesforce.collections.CollectionUtil;
-import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.vertex.SFVertex;
-import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 
@@ -11,11 +9,10 @@ import java.util.Stack;
 public class LoopBoundaryDetector extends BoundaryDetector<LoopBoundary, SFVertex> {
 
     /**
-     * Check if the visitor is currently inside a loop. Takes exclusion boundary
-     * into account.
+     * Check if the visitor is currently inside a loop. Takes exclusion boundary into account.
      *
-     * @return Optional of the last effective boundary vertex. If none exist, return empty to indicate that
-     *     exclusion is effective.
+     * @return Optional of the last effective boundary vertex. If none exist, return empty to
+     *     indicate that exclusion is effective.
      */
     public Optional<? extends SFVertex> isInsideLoop() {
         // TODO: This can be done without the copy stack as well, but it adds more complexity
@@ -25,7 +22,8 @@ public class LoopBoundaryDetector extends BoundaryDetector<LoopBoundary, SFVerte
         return this._isInsideLoop(copyStack);
     }
 
-    private Optional<? extends SFVertex> _isInsideLoop(Stack<? extends LoopBoundary> boundaryStack) {
+    private Optional<? extends SFVertex> _isInsideLoop(
+            Stack<? extends LoopBoundary> boundaryStack) {
         final Optional<? extends LoopBoundary> loopBoundaryOpt = CollectionUtil.peek(boundaryStack);
         if (loopBoundaryOpt.isPresent()) {
             final LoopBoundary loopBoundary = loopBoundaryOpt.get();

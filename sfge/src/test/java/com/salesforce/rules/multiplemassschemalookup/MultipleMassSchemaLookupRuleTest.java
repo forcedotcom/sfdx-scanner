@@ -315,10 +315,18 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
             "public class MyClass {\n"
                 + "   void foo(String[] objectNames) {\n"
                 + "       for (Integer i = 0; i < objectNames.size; i++) {\n"
-                + "           AnotherClass.doNothing();\n"
+                + "           FirstClass fc = new FirstClass();\n"
+                + "           fc.redirect(i);\n"
                 + "       }\n"
                 + "   }\n"
                 + "}\n",
+            "public class FirstClass {\n" +
+                "   void redirect(Integer lim) {\n" +
+                "       for (Integer i = 0; i < lim; i++) {\n" +
+                "           AnotherClass.doNothing();\n" +
+                "       }\n" +
+                "   }\n" +
+                "}\n",
             "public class AnotherClass {\n"
                 + "   static {\n"
                 + "       Schema.getGlobalDescribe();\n"
