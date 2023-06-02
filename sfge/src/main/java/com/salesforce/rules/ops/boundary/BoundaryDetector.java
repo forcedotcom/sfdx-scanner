@@ -1,10 +1,12 @@
 package com.salesforce.rules.ops.boundary;
 
+import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
-import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -16,26 +18,15 @@ import org.apache.logging.log4j.Logger;
  * @param <T> Boundary type associated with the implementation.
  */
 public abstract class BoundaryDetector<T extends Boundary<R>, R> {
-    private static final Logger LOGGER = LogManager.getLogger(LoopDetectionVisitor.class);
-    private final Stack<T> boundaries;
+    private static final Logger LOGGER = LogManager.getLogger(BoundaryDetector.class);
+    protected final Stack<T> boundaries;
 
     protected BoundaryDetector() {
         this.boundaries = new Stack<>();
     }
 
-    private void push(T boundary) {
-        this.boundaries.push(boundary);
-    }
-
-    private T pop() {
-        return this.boundaries.pop();
-    }
-
     public Optional<T> peek() {
-        if (boundaries.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(this.boundaries.peek());
+        return CollectionUtil.peek(boundaries);
     }
 
     /**
@@ -47,7 +38,7 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Entering loop boundary with boundaryItem=" + boundary.getBoundaryItem());
         }
-        push(boundary);
+        this.boundaries.push(boundary);
     }
 
     /**
@@ -78,6 +69,13 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
         }
 
         // Remove the boundary
-        pop();
+        this.boundaries.pop();
+    }
+
+    /**
+     * @return items in the boundary stack. Items are ordered TODO ?
+     */
+    public List<T> getBoundaryItems() {
+        return boundaries.stream().collect(Collectors.toList());
     }
 }

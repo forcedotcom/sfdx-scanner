@@ -5,6 +5,7 @@ import com.salesforce.apex.jorje.JorjeNode;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.Schema;
+import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,9 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
 public final class StaticBlockUtil {
     private static final Logger LOGGER = LogManager.getLogger(StaticBlockUtil.class);
 
-    static final String SYNTHETIC_STATIC_BLOCK_METHOD_NAME = "SyntheticStaticBlock_%d";
+    private static final String SYNTHETIC_STATIC_BLOCK_METHOD_BASE = "SyntheticStaticBlock__";
+    static final String SYNTHETIC_STATIC_BLOCK_METHOD_NAME =
+            SYNTHETIC_STATIC_BLOCK_METHOD_BASE + "%d";
     static final String STATIC_BLOCK_INVOKER_METHOD = "StaticBlockInvoker";
 
     private StaticBlockUtil() {}
@@ -373,5 +376,10 @@ public final class StaticBlockUtil {
         if (!expectedType.equals(vertex.label())) {
             throw new ProgrammingException("Incorrect vertex type: " + vertex.label());
         }
+    }
+
+    public static boolean isStaticBlockMethodCall(MethodCallExpressionVertex vertex) {
+        final String methodName = vertex.getMethodName();
+        return methodName.startsWith(SYNTHETIC_STATIC_BLOCK_METHOD_BASE);
     }
 }
