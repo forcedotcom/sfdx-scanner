@@ -283,8 +283,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         ASTConstants.NodeType.FOR_EACH_STATEMENT));
     }
 
-    @Test // TODO: Check if this is a false positive. Static block should get invoked only once
-    @Disabled
+    @Test
     public void testLoopFromStaticBlock() {
         // spotless:off
         String[] sourceCode = {
@@ -303,6 +302,31 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                     + "   // do nothing \n"
                     + "   }\n"
                     + "}\n"
+        };
+        // spotless:on
+
+        assertNoViolation(RULE, sourceCode);
+    }
+
+    @Test
+    public void testLoopFromStaticBlock_nestedLoop() {
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "   void foo(String[] objectNames) {\n"
+                + "       for (Integer i = 0; i < objectNames.size; i++) {\n"
+                + "           AnotherClass.doNothing();\n"
+                + "       }\n"
+                + "   }\n"
+                + "}\n",
+            "public class AnotherClass {\n"
+                + "   static {\n"
+                + "       Schema.getGlobalDescribe();\n"
+                + "   }\n"
+                + "   static void doNothing() {\n"
+                + "   // do nothing \n"
+                + "   }\n"
+                + "}\n"
         };
         // spotless:on
 
