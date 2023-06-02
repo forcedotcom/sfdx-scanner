@@ -20,9 +20,9 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (GraphEngine): To improve your code performance, we added a new Salesforce Graph Engine path-based rule, MultipleMassSchemaLookupRule. This new rule detects scenarios where expensive schema lookups are made more than one time in a path and can cause performance degradation.
+* NEW (GraphEngine): DML transactions with the "as user" keyword are now treated as secure by ApexFlsViolationRule.
 * FIX (GraphEngine): We added support for the built-in string method, `substringAfterLast()`.
 * FIX (CodeAnalyzer): We resolved an issue that caused Just-In-Time installations to fail on the first attempt.
-* NEW (GraphEngine): DML transactions with the "as user" keyword are now treated as secure by ApexFlsViolationRule.
 * FIX (CodeAnalyzer): We updated the `--json` flag to treat position information universally as numbers.
 
 **Closed issues:**
