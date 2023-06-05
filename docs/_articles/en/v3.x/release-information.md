@@ -26,8 +26,28 @@ We publish the latest Code Analyzer monthly.
 * FIX (CodeAnalyzer): We updated the `--json` flag to treat position information universally as numbers.
 
 **Closed issues:**
+* [BUG] UnimplementedMethodException: ApexStringValue:substringAfterLast [\#1003](https://github.com/forcedotcom/sfdx-scanner/issues/1003)
+* [BUG] Severity threshold always returns exit code 0 [\#1071](https://github.com/forcedotcom/sfdx-scanner/issues/1071)
+* [BUG] Path evaluation timed out after 900000 ms [\#1042](https://github.com/forcedotcom/sfdx-scanner/issues/1042)
+* [BUG] Graph Engine reached the path expansion upper limit (6688).. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine targeting this entry method with a larger heap space. [\#1041](https://github.com/forcedotcom/sfdx-scanner/issues/1041)
+* [BUG] ApexSoqlInjection reported when there should be none [\#1031](https://github.com/forcedotcom/sfdx-scanner/issues/1031)
+* [BUG] `sfdx plugins:update` does not automatically update to the latest v3.12.0. [\#1070](https://github.com/forcedotcom/sfdx-scanner/issues/1070)
 
 **Merged pull requests**
+* FIX (GraphEngine): @W-13363157@: Handles loop exclusions more effectively [\#1085](https://github.com/forcedotcom/sfdx-scanner/pull/1085)
+* CHANGE (CodeAnalyzer): @W-13519850@: Bump vm2 from 3.9.17 to 3.9.19 [\#1076](https://github.com/forcedotcom/sfdx-scanner/pull/1076)
+* CHANGE (GraphEngine): @W-13363157@: Handles multiple levels of method call from loop definition [\#1084](https://github.com/forcedotcom/sfdx-scanner/pull/1084)
+* FIX (GraphEngine): @W-13363157@: Exclude method calls from ForEach loop definition in MMSLookupRule [\#1082](https://github.com/forcedotcom/sfdx-scanner/pull/1082)
+* FIX (CodeAnalyzer): @W-13473580@: Pmd output now treats position info as numbers. [\#1081](https://github.com/forcedotcom/sfdx-scanner/pull/1081)
+* CHANGE (GraphEngine): @W-12446560@: Updates apex-jorje-lsp jar with minor test changes [\#1079](https://github.com/forcedotcom/sfdx-scanner/pull/1079)
+* NEW (GraphEngine): @W-12408352@: Classifies "as user" DML operations as safe. [\#1080](https://github.com/forcedotcom/sfdx-scanner/pull/1080)
+* CHANGE (GraphEngine): @W-11989381@: Adds loop boundaries while walking the path [\#1078](https://github.com/forcedotcom/sfdx-scanner/pull/1078)
+* FIX (GraphEngine): @W-12672062@: Add support for built-in String method substringAfterLast. [\#1074](https://github.com/forcedotcom/sfdx-scanner/pull/1074)
+* FIX (CodeAnalyzer): @W-13151459@: IOC initializes in scanner command instead of OCLIF. [\#1073](https://github.com/forcedotcom/sfdx-scanner/pull/1073)
+* NEW (GraphEngine): @W-13080871@: Triggers are now compiled and added to the graph. [\#1072](https://github.com/forcedotcom/sfdx-scanner/pull/1072)
+* CHANGE (GraphEngine): @W-13136274@: Sources are now specified at the rule level. [\#1068](https://github.com/forcedotcom/sfdx-scanner/pull/1068)
+* NEW (GraphEngine): @W-11989381@: New MultipleMassSchemaLookupRule to detect performance degrading schema lookups. [\#1054](https://github.com/forcedotcom/sfdx-scanner/pull/1054)
+* CHANGE (GraphEngine): @W-13123571@: Handle method invocations made directly on iterated array item [\#1062](https://github.com/forcedotcom/sfdx-scanner/pull/1062)
 
 ## [v3.12.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.12.0) (05-02-2023)
 
