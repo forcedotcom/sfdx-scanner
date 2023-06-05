@@ -559,6 +559,7 @@
       "jquery-ui",
       "jquery.ui"
     ],
+    "npmname": "jquery-ui",
     "vulnerabilities": [
       {
         "below": "1.13.2",
@@ -671,6 +672,7 @@
       "jquery-ui",
       "jquery.ui"
     ],
+    "npmname": "jquery-ui",
     "vulnerabilities": [
       {
         "atOrAbove": "1.8.9",
@@ -728,6 +730,7 @@
       "jquery-ui",
       "jquery.ui"
     ],
+    "npmname": "jquery-ui",
     "vulnerabilities": [],
     "extractors": {
       "filecontent": [
@@ -744,6 +747,7 @@
       "jquery-ui",
       "jquery.ui"
     ],
+    "npmname": "jquery-ui",
     "vulnerabilities": [
       {
         "atOrAbove": "1.9.2",
@@ -779,6 +783,7 @@
     "bowername": [
       "jquery-prettyPhoto"
     ],
+    "basePurl": "pkg:github/scaron/prettyphoto",
     "vulnerabilities": [
       {
         "below": "3.1.5",
@@ -826,6 +831,7 @@
     "bowername": [
       "jPlayer"
     ],
+    "npmname": "jplayer",
     "vulnerabilities": [
       {
         "below": "2.3.1",
@@ -987,6 +993,7 @@
       "tinymce",
       "tinymce-dist"
     ],
+    "npmname": "tinymce",
     "vulnerabilities": [
       {
         "below": "1.4.2",
@@ -1196,6 +1203,7 @@
       "yui",
       "yui3"
     ],
+    "npmname": "yui",
     "vulnerabilities": [
       {
         "atOrAbove": "3.5.0",
@@ -2307,6 +2315,7 @@
       "angularjs",
       "angular.js"
     ],
+    "npmname": "angular",
     "vulnerabilities": [
       {
         "below": "1.8.0",
@@ -2496,6 +2505,8 @@
       "backbonejs",
       "backbone"
     ],
+    "npmname": "backbone",
+    "basePurl": "npm:npm/backbone",
     "vulnerabilities": [
       {
         "below": "0.5.0",
@@ -2532,6 +2543,8 @@
       "mustache.js",
       "mustache"
     ],
+    "npmname": "mustache",
+    "basePurl": "npm:npm/mustache",
     "vulnerabilities": [
       {
         "below": "0.3.1",
@@ -2925,6 +2938,7 @@
     }
   },
   "easyXDM": {
+    "npmname": "easyxdm",
     "vulnerabilities": [
       {
         "below": "2.4.18",
@@ -3166,6 +3180,7 @@
       "dompurify",
       "DOMPurify"
     ],
+    "npmname": "dompurify",
     "vulnerabilities": [
       {
         "below": "0.6.1",
@@ -3514,6 +3529,7 @@
     }
   },
   "DWR": {
+    "npmname": "dwr",
     "vulnerabilities": [
       {
         "below": "1.1.4",
@@ -3578,6 +3594,8 @@
       "moment",
       "momentjs"
     ],
+    "npmname": "moment",
+    "basePurl": "pkg:npm/moment",
     "vulnerabilities": [
       {
         "below": "2.11.2",
@@ -3664,8 +3682,11 @@
       "uri": [
         "/moment\\.js/(§§version§§)/moment(.min)?\\.js"
       ],
+      "filename": [
+        "moment(?:-|\\.)(§§version§§)(?:-min)?\\.js"
+      ],
       "filecontent": [
-        "//! moment.js(?:[\n\r]+)//! version : (§§version§§)",
+        "//!? moment.js(?:[\n\r]+)//!? version : (§§version§§)",
         "\\.version=\"(§§version§§)\".{300,500}\\.isMoment="
       ]
     }
@@ -3675,6 +3696,7 @@
       "Underscore",
       "underscore"
     ],
+    "npmname": "underscore",
     "vulnerabilities": [
       {
         "below": "1.12.1",
@@ -4726,6 +4748,7 @@
     }
   },
   "AlaSQL": {
+    "npmname": "alasql",
     "vulnerabilities": [
       {
         "below": "0.7.0",
@@ -4755,6 +4778,7 @@
     }
   },
   "jquery.datatables": {
+    "npmname": "datatables",
     "vulnerabilities": [
       {
         "below": "1.11.3",
@@ -5006,6 +5030,118 @@
         "var version=\"(§§version§§)\";const KNOWN_POSITIONS=\\[\"top\",\"bottom\",\"left\",\"right\",\"chartArea\"\\]",
         "/\\*![\\s]+\\* Chart.js v(§§version§§)",
         "/\\*![\\s]+\\* Chart.js[\\s]+\\* http://chartjs.org/[\\s]+\\* Version: (§§version§§)"
+      ]
+    }
+  },
+  "froala": {
+    "npmname": "froala-editor",
+    "vulnerabilities": [
+      {
+        "below": "4.0.11",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS vulnerability in [insert video]",
+          "issue": "3880"
+        },
+        "info": [
+          "https://github.com/froala/wysiwyg-editor/releases/tag/v4.0.11"
+        ]
+      },
+      {
+        "below": "3.2.7",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Froala WYSIWYG Editor 3.2.6-1 is affected by XSS due to a namespace confusion during parsing.",
+          "CVE": [
+            "CVE-2021-28114"
+          ]
+        },
+        "info": [
+          "https://bishopfox.com/blog/froala-editor-v3-2-6-advisory"
+        ]
+      },
+      {
+        "below": "3.2.7",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Froala WYSIWYG Editor 3.2.6 is affected by Cross Site Scripting (XSS). Under certain conditions, a base64 crafted string leads to persistent XSS.",
+          "CVE": [
+            "CVE-2021-30109"
+          ]
+        },
+        "info": [
+          "https://github.com/froala/wysiwyg-editor/releases/tag/v4.0.11"
+        ]
+      },
+      {
+        "below": "3.2.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Security issue: XSS via pasted content",
+          "issue": "3880"
+        },
+        "info": [
+          "https://froala.com/wysiwyg-editor/changelog/#3.2.2"
+        ]
+      },
+      {
+        "below": "3.2.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS Issue In Link Insertion",
+          "issue": "3270"
+        },
+        "info": [
+          "https://github.com/froala/wysiwyg-editor/issues/3270"
+        ]
+      }
+    ],
+    "extractors": {
+      "uri": [
+        "/froala-editor/(§§version§§)/",
+        "/froala-editor@(§§version§§)/"
+      ],
+      "filecontent": [
+        "/\\*![\\s]+\\* froala_editor v(§§version§§)",
+        "VERSION:\"(§§version§§)\",INSTANCES:\\[\\],OPTS_MAPPING:\\{\\}"
+      ]
+    }
+  },
+  "pendo": {
+    "vulnerabilities": [
+      {
+        "below": "2.15.18",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Patched XSS vulnerability around script loading",
+          "retid": "74"
+        },
+        "info": [
+          "https://developers.pendo.io/agent-version-2-15-18/"
+        ]
+      }
+    ],
+    "extractors": {
+      "filecontent": [
+        "// Pendo Agent Wrapper\n//[\\s]+Environment:[\\s]+[^\n]+\n// Agent Version:[\\s]+(§§version§§)"
       ]
     }
   },
