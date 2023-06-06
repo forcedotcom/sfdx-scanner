@@ -12,11 +12,7 @@ import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.build.CaseSafePropertyUtil.H;
 import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
-import com.salesforce.graph.symbols.AbstractClassScope;
-import com.salesforce.graph.symbols.ContextProviders;
-import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
-import com.salesforce.graph.symbols.MethodInvocationScope;
-import com.salesforce.graph.symbols.SymbolProvider;
+import com.salesforce.graph.symbols.*;
 import com.salesforce.graph.symbols.apex.ApexClassInstanceValue;
 import com.salesforce.graph.symbols.apex.ApexForLoopValue;
 import com.salesforce.graph.symbols.apex.ApexStandardValue;
@@ -531,6 +527,16 @@ public final class MethodUtil {
             apexValue = symbols.getReturnedValue((InvocableVertex) vertex).orElse(null);
         }
 
+        if (apexValue == null && vertex instanceof MethodCallExpressionVertex) {
+            final Optional<ArrayLoadExpressionVertex> arrayExpressionVertex =
+                    ((MethodCallExpressionVertex) vertex).getArrayInvocation();
+            if (arrayExpressionVertex.isPresent()) {
+                apexValue =
+                        ScopeUtil.resolveToApexValue(symbols, arrayExpressionVertex.get())
+                                .orElse(null);
+            }
+        }
+
         return Optional.ofNullable(apexValue);
     }
 
@@ -613,7 +619,6 @@ public final class MethodUtil {
                                 .orElse(null);
             } else if (vertex instanceof ArrayLoadExpressionVertex) {
                 // Intentionally left blank
-                // TODO: Why?
             } else {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace(

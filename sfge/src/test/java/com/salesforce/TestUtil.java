@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.AstNodeWrapper;
@@ -45,10 +44,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -300,6 +296,17 @@ public final class TestUtil {
             String definingType,
             String methodName,
             Boolean renderXml) {
+
+        return getViolations(g, sourceCode, definingType, methodName, renderXml, rule);
+    }
+
+    public static List<Violation> getViolations(
+            GraphTraversalSource g,
+            String[] sourceCode,
+            String definingType,
+            String methodName,
+            Boolean renderXml,
+            AbstractPathBasedRule... rules) {
         if (USE_EXISTING_GRAPH != sourceCode) {
             Config.Builder builder = Config.Builder.get(g, sourceCode);
             if (renderXml != null) {
@@ -310,8 +317,9 @@ public final class TestUtil {
         }
 
         final MethodVertex methodVertex = getMethodVertex(g, definingType, methodName);
+
         final PathBasedRuleRunner ruleRunner =
-                new PathBasedRuleRunner(g, Lists.newArrayList(rule), methodVertex);
+                new PathBasedRuleRunner(g, Arrays.asList(rules), methodVertex);
         final List<Violation> violations = new ArrayList<>(ruleRunner.runRules());
 
         return violations;

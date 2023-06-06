@@ -1,13 +1,13 @@
 package com.salesforce.rules;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.source.ApexPathSource.Type;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -18,6 +18,17 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
  */
 public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
     private static final Logger LOGGER = LogManager.getLogger(ApexFlsViolationRule.class);
+    // ApexFlsViolationRule only cares about sources that don't intrinsically respect CRUD/FLS.
+    private static final ImmutableSet<Type> SOURCE_TYPES =
+            ImmutableSet.of(
+                    Type.ANNOTATION_AURA_ENABLED,
+                    Type.ANNOTATION_INVOCABLE_METHOD,
+                    Type.ANNOTATION_NAMESPACE_ACCESSIBLE,
+                    Type.ANNOTATION_REMOTE_ACTION,
+                    Type.EXPOSED_CONTROLLER_METHOD,
+                    Type.GLOBAL_METHOD,
+                    Type.INBOUND_EMAIL_HANDLER,
+                    Type.PAGE_REFERENCE);
 
     /**
      * This isn't private, so it can be used as the value for InternalErrorViolation and
@@ -36,6 +47,11 @@ public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
                 ImmutableList.of(
                         ApexFlsReadRuleHandler.getInstance(),
                         ApexFlsWriteRuleHandler.getInstance());
+    }
+
+    @Override
+    public ImmutableSet<Type> getSourceTypes() {
+        return SOURCE_TYPES;
     }
 
     protected int getSeverity() {

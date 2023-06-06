@@ -18,5 +18,7 @@ public final class UserTriggerWrapper extends AstNodeWrapper<UserTrigger>
     @Override
     protected void fillProperties(Map<String, Object> properties) {
         properties.put(Schema.NAME, getName());
+        properties.put(Schema.TARGET_NAME, getNode().getTargetName().get(0).getValue());
+        properties.put(Schema.USAGES, getNode().getUsages().toString());
     }
 }

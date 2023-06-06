@@ -18,10 +18,10 @@ const engineMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "PmdEng
 
 interface PmdViolation extends Element {
 	attributes: {
-		begincolumn: number;
-		beginline: number;
-		endcolumn: number;
-		endline: number;
+		begincolumn: string;
+		beginline: string;
+		endcolumn: string;
+		endline: string;
 		externalInfoUrl: string;
 		priority: string;
 		rule: string;
@@ -280,10 +280,10 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			violations: element.elements.map(
 				(v: PmdViolation) => {
 					return {
-						line: v.attributes.beginline,
-						column: v.attributes.begincolumn,
-						endLine: v.attributes.endline,
-						endColumn: v.attributes.endcolumn,
+						line: Number(v.attributes.beginline),
+						column: Number(v.attributes.begincolumn),
+						endLine: Number(v.attributes.endline),
+						endColumn: Number(v.attributes.endcolumn),
 						severity: Number(v.attributes.priority),
 						ruleName: v.attributes.rule,
 						category: v.attributes.ruleset,

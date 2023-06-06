@@ -3,12 +3,7 @@ package com.salesforce.collections;
 import com.google.common.collect.ImmutableList;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ops.TypeableUtil;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.BiFunction;
@@ -184,6 +179,21 @@ public final class CollectionUtil {
         return IntStream.range(0, values.size())
                 .mapToObj(i -> factoryFunction.apply(i, values.get(i)))
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+    }
+
+    /**
+     * Peek into the stack to get the last element. Converts value into an Optional instead of
+     * throwing an {@link EmptyStackException} when stack is empty.
+     *
+     * @param stack to look at
+     * @param <T> Stack's generic
+     * @return last element added to the stack
+     */
+    public static <T> Optional<T> peek(Stack<T> stack) {
+        if (stack.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(stack.peek());
     }
 
     private CollectionUtil() {}

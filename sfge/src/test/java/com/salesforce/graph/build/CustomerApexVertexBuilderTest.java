@@ -3,6 +3,7 @@ package com.salesforce.graph.build;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
@@ -12,10 +13,7 @@ import com.salesforce.graph.Schema;
 import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
@@ -83,6 +81,53 @@ public class CustomerApexVertexBuilderTest {
         assertEquals("MyClass", properties.get(Schema.NAME));
         assertEquals(1, properties.get(Schema.BEGIN_LINE));
         assertEquals("SimpleSource", properties.get(Schema.FILE_NAME));
+    }
+
+    /**
+     * Verifies that the special properties associated with {@link
+     * com.salesforce.graph.vertex.UserTriggerVertex} are set.
+     */
+    @Test
+    public void testTriggers() {
+        // spotless:off
+        String triggerSource =
+            "trigger AccountBefore on Account (before insert, before update) {\n"
+          + "    if (Trigger.isInsert) {\n"
+          + "        System.debug('Some debug-worthy message');\n"
+          + "    }\n"
+          + "}\n";
+        // spotless:on
+
+        AstNodeWrapper<?> triggerComp = JorjeUtil.compileApexFromString(triggerSource);
+        Util.CompilationDescriptor triggerDesc =
+                new Util.CompilationDescriptor("TestCode1", triggerComp);
+
+        CustomerApexVertexBuilder vertexBuilder =
+                new CustomerApexVertexBuilder(g, Collections.singletonList(triggerDesc));
+        vertexBuilder.build();
+
+        // Validate that a vertex was created for the trigger.
+        Map<Object, Object> triggerVertex =
+                g.V().hasLabel(NodeType.USER_TRIGGER).elementMap().next();
+        assertEquals("AccountBefore", triggerVertex.get(Schema.NAME));
+        assertEquals("AccountBefore", triggerVertex.get(Schema.DEFINING_TYPE));
+        assertEquals("Account", triggerVertex.get(Schema.TARGET_NAME));
+        String rawUsages = (String) triggerVertex.get(Schema.USAGES);
+        Set<String> usages =
+                new HashSet<>(
+                        Arrays.asList(rawUsages.substring(1, rawUsages.length() - 1).split(", ")));
+        assertTrue(usages.contains("BEFORE INSERT"));
+        assertTrue(usages.contains("BEFORE UPDATE"));
+        // validate that the trigger's contents were added as an `invoke()` method.
+        Map<Object, Object> invokeVertex =
+                g.V()
+                        .hasLabel(NodeType.USER_TRIGGER)
+                        .out(Schema.CHILD)
+                        .hasLabel(NodeType.METHOD)
+                        .has(Schema.NAME, "invoke")
+                        .elementMap()
+                        .next();
+        assertEquals("AccountBefore", invokeVertex.get(Schema.DEFINING_TYPE));
     }
 
     @Test

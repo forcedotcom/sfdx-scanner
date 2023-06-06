@@ -91,7 +91,9 @@ public abstract class AbstractFlsVisitor extends BooleanStateDetectorVisitor {
     }
 
     protected void afterVisitDmlStatementVertex(DmlStatementVertex vertex, SymbolProvider symbols) {
-        if (shouldCollectInfo(vertex)) {
+        // If the DML statement is in User mode, the operation is already considered safe.
+        // Continue only if the statement is in System mode.
+        if (vertex.isSystemMode() && shouldCollectInfo(vertex)) {
             validationCentral.createExpectedValidations(vertex, symbols);
             validationCentral.tallyValidations(vertex);
         }

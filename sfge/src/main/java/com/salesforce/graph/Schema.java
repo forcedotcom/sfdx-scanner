@@ -62,10 +62,12 @@ public class Schema {
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
     public static final String SUPER_CLASS_NAME = "SuperClassName";
     public static final String SUPER_INTERFACE_NAME = "SuperInterfaceName";
+    public static final String TARGET_NAME = "TargetName";
     public static final String TYPE = "Type";
     /** Contains type for statements such as MyClass.class */
     public static final String TYPE_REF = "TypeRef";
 
+    public static final String USAGES = "Usages";
     public static final String VALUE = "Value";
     public static final String VIRTUAL = "Virtual";
     public static final String QUERY = "Query";

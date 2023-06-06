@@ -9,11 +9,13 @@ public final class UserFacingMessages {
 
     public static final class RuleDescriptions {
         public static final String APEX_NULL_POINTER_EXCEPTION_RULE =
-                "Identfies Apex operations that dereference null objects and throw NullPointerExceptions.";
+                "Identifies Apex operations that dereference null objects and throw NullPointerExceptions.";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
         public static final String UNUSED_METHOD_RULE =
                 "Identifies methods that aren't invoked from recognized entry points.";
+        public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
+                "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
     }
 
     public static final class RuleViolationTemplates {
@@ -74,5 +76,11 @@ public final class UserFacingMessages {
         public static final String FIX_COMPILATION_ERRORS =
                 "Graph engine encountered compilation errors. Fix the errors in %s and retry.";
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
+    }
+
+    public static final class MultipleMassSchemaLookupRuleTemplates {
+        public static final String MESSAGE_TEMPLATE = "%s was %s at %s:%d.";
+        public static final String OCCURRENCE_LOOP_TEMPLATE = "called inside a %s";
+        public static final String OCCURRENCE_MULTIPLE_TEMPLATE = "preceded by a call to %s";
     }
 }
