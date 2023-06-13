@@ -65,7 +65,7 @@ public final class TestUtil {
     public static final String RENDER_XML_ENV_VAR_NAME = "SFGE_RENDER_XML";
 
     private static final boolean RENDER_XML =
-            Boolean.parseBoolean(System.getenv().getOrDefault(RENDER_XML_ENV_VAR_NAME, "false"));
+            Boolean.parseBoolean(System.getenv().getOrDefault(RENDER_XML_ENV_VAR_NAME, "true"));
 
     /** Support for multi threaded tests requires its own GraphTraversalSource */
     private static final ThreadLocal<GraphTraversalSource> THREAD_LOCAL_GRAPHS =

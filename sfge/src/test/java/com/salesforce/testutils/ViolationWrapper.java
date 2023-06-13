@@ -11,7 +11,7 @@ import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfoUtil;
-import com.salesforce.rules.multiplemassschemalookup.RuleConstants;
+import com.salesforce.rules.multiplemassschemalookup.MmslrUtil;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.function.Function;
@@ -203,7 +203,7 @@ public class ViolationWrapper {
     /** Message builder to help with testing {@link MultipleMassSchemaLookupRule}. */
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
-        private final RuleConstants.RepetitionType repetitionType;
+        private final MmslrUtil.RepetitionType repetitionType;
         private final String typeInfo;
         private final String occurrenceClassName;
         private final int occurrenceLine;
@@ -213,7 +213,7 @@ public class ViolationWrapper {
                 String sinkMethodName,
                 int occurrenceLine,
                 String occurrenceClassName,
-                RuleConstants.RepetitionType type,
+                MmslrUtil.RepetitionType type,
                 String typeInfo) {
             super(sinkLine);
             this.sinkMethodName = sinkMethodName;
@@ -228,7 +228,7 @@ public class ViolationWrapper {
                 String sinkMethodName,
                 int occurrenceLine,
                 String occurrenceClassName,
-                RuleConstants.RepetitionType type,
+                MmslrUtil.RepetitionType type,
                 String typeInfo) {
             return new MassSchemaLookupInfoBuilder(
                     sinkLine, sinkMethodName, occurrenceLine, occurrenceClassName, type, typeInfo);

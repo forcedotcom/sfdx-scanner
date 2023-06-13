@@ -15,7 +15,7 @@ public abstract class BaseAvoidMultipleMassSchemaLookupTest extends BasePathBase
             String sinkMethodName,
             int occurrenceLine,
             String occurrenceClassName,
-            RuleConstants.RepetitionType type,
+            MmslrUtil.RepetitionType type,
             String typeInfo) {
         return ViolationWrapper.MassSchemaLookupInfoBuilder.get(
                 sinkLine, sinkMethodName, occurrenceLine, occurrenceClassName, type, typeInfo);

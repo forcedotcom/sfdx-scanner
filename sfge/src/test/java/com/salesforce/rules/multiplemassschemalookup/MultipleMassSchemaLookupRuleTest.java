@@ -33,10 +33,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         5,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         loopAstLabel));
     }
 
@@ -91,10 +91,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         9,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         loopAstLabel));
     }
 
@@ -124,10 +124,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         5,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         loopAstLabel));
     }
 
@@ -157,7 +157,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         secondCall,
                         3,
                         "MyClass",
-                        RuleConstants.RepetitionType.MULTIPLE,
+                        MmslrUtil.RepetitionType.MULTIPLE,
                         firstCall));
     }
 
@@ -186,10 +186,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         3,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         ASTConstants.NodeType.FOR_EACH_STATEMENT));
     }
 
@@ -238,10 +238,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         3,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         3,
                         "Another",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         ASTConstants.NodeType.FOR_LOOP_STATEMENT));
     }
 
@@ -276,10 +276,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         8,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         4,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         ASTConstants.NodeType.FOR_EACH_STATEMENT));
     }
 
@@ -391,10 +391,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 sourceCode,
                 expect(
                         8,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                         7,
                         "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
+                        MmslrUtil.RepetitionType.LOOP,
                         loopAstLabel));
     }
 }
