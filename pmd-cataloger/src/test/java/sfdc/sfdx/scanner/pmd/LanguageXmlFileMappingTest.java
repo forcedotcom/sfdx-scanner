@@ -75,7 +75,7 @@ public class LanguageXmlFileMappingTest {
 
 	@Test
 	public void testXml() {
-		String xmlPath = XML_FILE.toAbsolutePath().toString();
+		String xmlPath = SOMECAT_XML_FILE.toAbsolutePath().toString();
 		Map<String, Set<String>> pathMap;
 		Set<String> paths;
 

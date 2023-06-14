@@ -4,14 +4,12 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static sfdc.sfdx.scanner.TestConstants.JAR_FILE_CATEGORIES_AND_RULESETS;
-import static sfdc.sfdx.scanner.TestConstants.TEST_JAR_DIR;
-import static sfdc.sfdx.scanner.TestConstants.TEST_XML_DIR;
-import static sfdc.sfdx.scanner.TestConstants.XML_FILE;
+import static org.junit.Assert.*;
+import static sfdc.sfdx.scanner.TestConstants.*;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -66,11 +64,10 @@ public class XmlFileFinderTest {
 
 		List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder
 				.findXmlFilesInPath(TEST_XML_DIR.toAbsolutePath().toString());
-		assertThat(xmlContainers, hasSize(equalTo(1)));
-		XmlFileFinder.XmlContainer xmlContainer = xmlContainers.get(0);
-		assertEquals(XML_FILE.toAbsolutePath().toString(), xmlContainer.filePath);
-		assertThat(xmlContainer.containedFilePaths, hasSize(equalTo(1)));
-		assertThat(xmlContainer.containedFilePaths, contains(XML_FILE.toAbsolutePath().toString()));
+		assertThat(xmlContainers, hasSize(equalTo(2)));
+        Set<String> xmlPathSet = xmlContainers.stream().map(container -> container.filePath).collect(Collectors.toSet());
+        assertTrue(xmlPathSet.contains(SOMECAT_XML_FILE.toAbsolutePath().toString()));
+        assertTrue(xmlPathSet.contains(SMOKE_CONFIG_XML_FILE.toAbsolutePath().toString()));
 	}
 
 	@Test
@@ -78,12 +75,12 @@ public class XmlFileFinderTest {
 		XmlFileFinder xmlFileFinder = new XmlFileFinder();
 
 		List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder
-				.findXmlFilesInPath(XML_FILE.toAbsolutePath().toString());
+				.findXmlFilesInPath(SOMECAT_XML_FILE.toAbsolutePath().toString());
 		assertThat(xmlContainers, hasSize(equalTo(1)));
 		XmlFileFinder.XmlContainer xmlContainer = xmlContainers.get(0);
-		assertEquals(XML_FILE.toAbsolutePath().toString(), xmlContainer.filePath);
+		assertEquals(SOMECAT_XML_FILE.toAbsolutePath().toString(), xmlContainer.filePath);
 		assertThat(xmlContainer.containedFilePaths, hasSize(equalTo(1)));
-		assertThat(xmlContainer.containedFilePaths, contains(XML_FILE.toAbsolutePath().toString()));
+		assertThat(xmlContainer.containedFilePaths, contains(SOMECAT_XML_FILE.toAbsolutePath().toString()));
 	}
 
 	private XmlFileFinder.XmlContainer findXmlContainer(List<XmlFileFinder.XmlContainer> xmlContainers, String jarName) {

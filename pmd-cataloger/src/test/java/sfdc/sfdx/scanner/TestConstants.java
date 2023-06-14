@@ -1,7 +1,5 @@
 package sfdc.sfdx.scanner;
 
-import static sfdc.sfdx.scanner.TestConstants.JAR_FILE_CATEGORIES_AND_RULESETS;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,5 +19,6 @@ public class TestConstants {
 	public static final Path TEST_JAR_APEX_DIR = TEST_JAR_DIR.resolve("apex");
 	public static final Path JAR_FILE_CATEGORIES_AND_RULESETS = TEST_JAR_APEX_DIR
 			.resolve("testjar-categories-and-rulesets-1.jar");
-	public static final Path XML_FILE = TEST_XML_DIR.resolve("category").resolve("apex").resolve("somecat.xml");
+	public static final Path SOMECAT_XML_FILE = TEST_XML_DIR.resolve("category").resolve("apex").resolve("somecat.xml");
+    public static final Path SMOKE_CONFIG_XML_FILE = TEST_XML_DIR.resolve("category").resolve("apex").resolve("smoke-config.xml");
 }
