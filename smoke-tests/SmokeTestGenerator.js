@@ -45,7 +45,7 @@ function buildPath(pathSegs, delim) {
 function generateScriptBody(isBash, delim) {
 	const projectsPath = ['test', 'code-fixtures', 'projects'];
 	const customRulePath = ['test', 'test-jars', 'apex', 'testjar1.jar'];
-	const customConfigPath = ['test', 'test-xml', 'apex', 'smoke-config.xml'];
+	const customConfigPath = ['test', 'test-xml', 'category', 'apex', 'smoke-config.xml'];
 	const resultsPath = ['smoke-test-results'];
 
 	const exeName = isBash ? '$EXE_NAME' : '%EXE_NAME%';
@@ -71,25 +71,25 @@ function generateScriptBody(isBash, delim) {
 		`${exeName} scanner:rule:describe -n NotAnActualRule`,
 		// Run such that PMD and ESLint are invoked.
 		`echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="`,
-		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'pmd-eslint.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'pmd-eslint-result.xml'], delim)}`,
 		// Run such that ESLint-Typescript is invoked.
 		`echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="`,
-		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'eslint-typescript.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --target ${buildPath([...projectsPath, 'ts', 'src', 'simpleYetWrong.ts'], delim)} --tsconfig ${buildPath([...projectsPath, 'tsconfig.json'], delim)} --outfile ${buildPath([...resultsPath, 'eslint-typescript-result.xml'], delim)}`,
 		// Run such that RetireJS is invoked.
 		`echo "==== Run RetireJS against a folder ===="`,
-		`${exeName} scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'retire-js.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --engine retire-js --target ${buildPath([...projectsPath, 'dep-test-app', 'folder-a'], delim)} --outfile ${buildPath([...resultsPath, 'retire-js-result.xml'], delim)}`,
 		// Run such that CPD is invoked.
 		`echo "==== Run CPD against a folder ===="`,
-		`${exeName} scanner:run --format junit --engine cpd --target ${buildPath([...projectsPath, 'cpd-test-app', 'src', 'classes'], delim)} --outfile ${buildPath([...resultsPath, 'cpd.xml'])}`,
+		`${exeName} scanner:run --format junit --engine cpd --target ${buildPath([...projectsPath, 'cpd-test-app', 'src', 'classes'], delim)} --outfile ${buildPath([...resultsPath, 'cpd-result.xml'], delim)}`,
 		// Run such that PMD is invoked with a custom config.
 		`echo "==== Run PMD with custom config via --pmdconfig flag ===="`,
-		`${exeName} scanner:run --format junit --engine pmd --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --pmdconfig ${buildPath(customConfigPath, delim)} --outfile ${buildPath([...resultsPath, 'pmd-customconfig.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --engine pmd --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --pmdconfig ${buildPath(customConfigPath, delim)} --outfile ${buildPath([...resultsPath, 'pmd-customconfig-result.xml'], delim)}`,
 		// Run such that GraphEngine's AST-based rules are invoked.
 		`echo "==== Run Salesforce Graph Engine's non-DFA rules against a folder ===="`,
-		`${exeName} scanner:run --format junit --engine sfge --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'sfca-pathless.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --engine sfge --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'sfca-pathless-result.xml'], delim)}`,
 		// Run such that the DFA rules are invoked.
 		`echo "==== Run Salesforce Graph Engine's DFA rules against a folder ===="`,
-		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'sfca-dfa.xml'], delim)}`,
+		`${exeName} scanner:run:dfa --format junit --target ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --projectdir ${buildPath([...projectsPath, 'sfge-smoke-app', 'src'], delim)} --outfile ${buildPath([...resultsPath, 'sfca-dfa-result.xml'], delim)}`,
 		// Add a JAR of custom rules.
 		`echo "==== Add a JAR of custom rules ===="`,
 		`${exeName} scanner:rule:add --language apex --path ${buildPath(customRulePath, delim)}`,
@@ -101,7 +101,7 @@ function generateScriptBody(isBash, delim) {
 		`${exeName} scanner:rule:describe -n fakerule1`,
 		// Run such that the custom rules are executed.
 		`echo "==== Run a custom rule ===="`,
-		`${exeName} scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'pmd-custom-rules.xml'], delim)}`,
+		`${exeName} scanner:run --format junit --category SomeCat1,Security --target ${buildPath([...projectsPath, 'app', 'force-app'], delim)} --outfile ${buildPath([...resultsPath, 'pmd-custom-rules-result.xml'], delim)}`,
 		// Remove the custom rules.
 		`echo "==== Remove a custom rule ===="`,
 		`${exeName} scanner:rule:remove --path ${buildPath(customRulePath, delim)} --force`,

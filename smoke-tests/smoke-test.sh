@@ -19,19 +19,19 @@ $EXE_NAME scanner:rule:describe -n EmptyCatchBlock
 echo "==== Describe a non-existent rule ===="
 $EXE_NAME scanner:rule:describe -n NotAnActualRule
 echo "==== Run rules against force-app, which should hit PMD and ESLint engines ===="
-$EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/pmd-eslint.xml
+$EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/pmd-eslint-result.xml
 echo "==== Run rules against a typescript file, which should run ESLint-Typescript ===="
-$EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/ts/src/simpleYetWrong.ts --tsconfig test/code-fixtures/projects/tsconfig.json --outfile smoke-test-results/eslint-typescript.xml
+$EXE_NAME scanner:run --format junit --target test/code-fixtures/projects/ts/src/simpleYetWrong.ts --tsconfig test/code-fixtures/projects/tsconfig.json --outfile smoke-test-results/eslint-typescript-result.xml
 echo "==== Run RetireJS against a folder ===="
-$EXE_NAME scanner:run --format junit --engine retire-js --target test/code-fixtures/projects/dep-test-app/folder-a --outfile smoke-test-results/retire-js.xml
+$EXE_NAME scanner:run --format junit --engine retire-js --target test/code-fixtures/projects/dep-test-app/folder-a --outfile smoke-test-results/retire-js-result.xml
 echo "==== Run CPD against a folder ===="
-$EXE_NAME scanner:run --format junit --engine cpd --target test/code-fixtures/projects/cpd-test-app/src/classes --outfile smoke-test-results,cpd.xm
+$EXE_NAME scanner:run --format junit --engine cpd --target test/code-fixtures/projects/cpd-test-app/src/classes --outfile smoke-test-results/cpd-result.xml
 echo "==== Run PMD with custom config via --pmdconfig flag ===="
-$EXE_NAME scanner:run --format junit --engine pmd --target test/code-fixtures/projects/app/force-app --pmdconfig test/test-xml/apex/smoke-config.xml --outfile smoke-test-results/pmd-customconfig.xml
+$EXE_NAME scanner:run --format junit --engine pmd --target test/code-fixtures/projects/app/force-app --pmdconfig test/test-xml/category/apex/smoke-config.xml --outfile smoke-test-results/pmd-customconfig-result.xml
 echo "==== Run Salesforce Graph Engine's non-DFA rules against a folder ===="
-$EXE_NAME scanner:run --format junit --engine sfge --target test/code-fixtures/projects/sfge-smoke-app/src --projectdir test/code-fixtures/projects/sfge-smoke-app/src --outfile smoke-test-results/sfca-pathless.xml
+$EXE_NAME scanner:run --format junit --engine sfge --target test/code-fixtures/projects/sfge-smoke-app/src --projectdir test/code-fixtures/projects/sfge-smoke-app/src --outfile smoke-test-results/sfca-pathless-result.xml
 echo "==== Run Salesforce Graph Engine's DFA rules against a folder ===="
-$EXE_NAME scanner:run:dfa --format junit --target test/code-fixtures/projects/sfge-smoke-app/src --projectdir test/code-fixtures/projects/sfge-smoke-app/src --outfile smoke-test-results/sfca-dfa.xml
+$EXE_NAME scanner:run:dfa --format junit --target test/code-fixtures/projects/sfge-smoke-app/src --projectdir test/code-fixtures/projects/sfge-smoke-app/src --outfile smoke-test-results/sfca-dfa-result.xml
 echo "==== Add a JAR of custom rules ===="
 $EXE_NAME scanner:rule:add --language apex --path test/test-jars/apex/testjar1.jar
 echo "==== List the rules, including the custom ones ===="
@@ -39,7 +39,7 @@ $EXE_NAME scanner:rule:list --engine pmd
 echo "==== Describe a custom rule ===="
 $EXE_NAME scanner:rule:describe -n fakerule1
 echo "==== Run a custom rule ===="
-$EXE_NAME scanner:run --format junit --category SomeCat1,Security --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/pmd-custom-rules.xml
+$EXE_NAME scanner:run --format junit --category SomeCat1,Security --target test/code-fixtures/projects/app/force-app --outfile smoke-test-results/pmd-custom-rules-result.xml
 echo "==== Remove a custom rule ===="
 $EXE_NAME scanner:rule:remove --path test/test-jars/apex/testjar1.jar --force
 echo "==== List the rules a final time, to make sure nothing broke ===="
