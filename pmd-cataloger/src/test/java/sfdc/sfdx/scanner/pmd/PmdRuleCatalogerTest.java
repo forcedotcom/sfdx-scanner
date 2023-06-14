@@ -114,7 +114,7 @@ public class PmdRuleCatalogerTest {
     @SuppressWarnings("unchecked")
 	@Test
 	public void testAddXml() {
-    	String path = XML_FILE.toAbsolutePath().toString();
+    	String path = SOMECAT_XML_FILE.toAbsolutePath().toString();
 		Map<String, List<String>> rulePathEntries = new Hashtable<>();
 
 		rulePathEntries.put(APEX, Collections.singletonList(path));

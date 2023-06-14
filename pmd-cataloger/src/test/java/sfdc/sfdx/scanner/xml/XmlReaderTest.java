@@ -7,21 +7,20 @@ import static sfdc.sfdx.scanner.TestConstants.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import sfdc.sfdx.scanner.TestConstants;
 
 /**
  * Unit test for {@link XmlReader}
  */
 public class XmlReaderTest {
 	private XmlReader xmlReader;
-	
+
 	@Before
 	public void setup() {
 		xmlReader = new XmlReader();
 	}
-	
+
 	/**
-	 * Verify that a file can be read from the classpath. This test relies on {@link #JAR_FILE_CATEGORIES_AND_RULESETS} 
+	 * Verify that a file can be read from the classpath. This test relies on {@link #JAR_FILE_CATEGORIES_AND_RULESETS}
 	 */
 	@Test
 	public void testReadFromJar() {
@@ -33,7 +32,7 @@ public class XmlReaderTest {
 
 	@Test
 	public void testReadFromFileSystem() {
-		Document document = xmlReader.getDocumentFromPath(XML_FILE.toAbsolutePath().toString());
+		Document document = xmlReader.getDocumentFromPath(SOMECAT_XML_FILE.toAbsolutePath().toString());
 		assertNotNull(document);
 		assertEquals("ruleset", document.getDocumentElement().getTagName());
 	}
