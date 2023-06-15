@@ -6,6 +6,7 @@ import org.w3c.dom.*;
 import org.json.simple.*;
 import com.salesforce.messaging.MessagePassableException;
 import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.CliMessager;
 
 import static sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson.*;
 
@@ -13,6 +14,9 @@ public class PmdCatalogRule {
 	public static final String ATTR_NAME = "name";
 	public static final String ATTR_MESSAGE = "message";
 	public static final String ATTR_DESCRIPTION = "description";
+
+    public static final String ATTR_LANGUAGE = "language";
+    public static final String ATTR_DEPRECATED = "deprecated";
 
 	private final String name;
 	private final String message;
@@ -37,6 +41,7 @@ public class PmdCatalogRule {
 		this.category = category;
 		this.description = getDescription(element);
 		this.sourceJar = category.getSourceJar();
+        validatePmd7Readiness(element);
 	}
 
 	String getFullName() {
@@ -84,6 +89,18 @@ public class PmdCatalogRule {
 		}
 		return res;
 	}
+
+    private void validatePmd7Readiness(Element element) {
+        // PMD 7 expects rules to have a "language" property.
+        String langProp = element.getAttribute(ATTR_LANGUAGE);
+        // Rules can be deprecated.
+        boolean deprecated = element.getAttribute(ATTR_DEPRECATED).equalsIgnoreCase("true");
+
+        // If the rule lacks the necessary property and isn't deprecated, log a warning for it.
+        if (langProp.isEmpty() && !deprecated) {
+            CliMessager.getInstance().addMessage("Rule " + name + " is incompatible with PMD 7", EventKey.WARNING_PMD7_INCOMPATIBLE_RULE, name);
+        }
+    }
 
 	/**
 	 * Converts this rule into a JSONObject.
