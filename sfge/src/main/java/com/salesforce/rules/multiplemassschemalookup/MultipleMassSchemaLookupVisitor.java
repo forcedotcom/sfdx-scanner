@@ -37,9 +37,6 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         this.violations = new HashSet<>();
     }
 
-    public boolean visit(BlockStatementVertex vertex, SymbolProvider symbols) {
-        return false;
-    }
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
@@ -55,12 +52,6 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
         super.afterVisit(vertex, symbols);
-    }
-
-    private void createViolationIfMultipleCall(MethodCallExpressionVertex vertex) {
-        if (MmslrUtil.isSchemaExpensiveMethod(vertex) && shouldContinue()) {
-            createViolation(MmslrUtil.RepetitionType.MULTIPLE, vertex);
-        }
     }
 
     private void createViolationIfInsideLoop(MethodCallExpressionVertex vertex, SymbolProvider symbols) {

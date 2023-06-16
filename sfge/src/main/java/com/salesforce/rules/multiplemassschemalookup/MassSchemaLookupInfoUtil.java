@@ -43,7 +43,7 @@ public final class MassSchemaLookupInfoUtil {
             if (repetitionVertex instanceof MethodCallExpressionVertex) {
                 return ((MethodCallExpressionVertex) repetitionVertex).getFullMethodName();
             } else if (repetitionVertex instanceof NewObjectExpressionVertex) {
-                return ((NewObjectExpressionVertex) repetitionVertex).getResolvedInnerClassName().orElse("new object");
+                return ((NewObjectExpressionVertex) repetitionVertex).getCanonicalType();
             } else {
                 return repetitionVertex.getLabel();
             }

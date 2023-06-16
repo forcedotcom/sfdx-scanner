@@ -1,5 +1,6 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
+import com.salesforce.apex.jorje.ASTConstants;
 import org.junit.jupiter.api.Test;
 
 public class MultipleCallsOfSameMethodTest extends BaseAvoidMultipleMassSchemaLookupTest {
@@ -294,5 +295,43 @@ public class MultipleCallsOfSameMethodTest extends BaseAvoidMultipleMassSchemaLo
                 "MyClass",
                 MmslrUtil.RepetitionType.MULTIPLE,
                 "Schema.describeSObjects"));
+    }
+
+    @Test
+    public void testForLoopConditionalOnClassInstance() {
+        // spotless:off
+        String sourceCode[] = {
+            "public class MyClass {\n"
+                + "   void foo() {\n"
+                + "     Another a1 = new Another();\n"
+                + "     Another a2 = new Another();\n"
+                + "   }\n"
+                + "}\n",
+            "public class Another {\n"
+                + " public Map<String,Schema.SObjectType> types;\n"
+                + " Another() {\n"
+                + "     types = Schema.getGlobalDescribe();\n"
+                + " }\n"
+                + "}\n"
+        };
+        // spotless:on
+
+        assertViolations(
+            RULE,
+            sourceCode,
+            expect(
+                4,
+                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                3,
+                "MyClass",
+                MmslrUtil.RepetitionType.ANOTHER_PATH,
+                "Another"),
+            expect(
+                4,
+                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                4,
+                "MyClass",
+                MmslrUtil.RepetitionType.ANOTHER_PATH,
+                "Another"));
     }
 }

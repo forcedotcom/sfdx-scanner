@@ -208,6 +208,7 @@ public final class ASTConstants {
                         Arrays.asList(
                                 NodeType.BLOCK_STATEMENT,
                                 NodeType.CATCH_BLOCK_STATEMENT,
+                                NodeType.DO_LOOP_STATEMENT,
                                 NodeType.ELSE_WHEN_BLOCK,
                                 NodeType.FOR_EACH_STATEMENT,
                                 NodeType.FOR_LOOP_STATEMENT,
@@ -215,7 +216,8 @@ public final class ASTConstants {
                                 NodeType.SWITCH_STATEMENT,
                                 NodeType.TRY_CATCH_FINALLY_BLOCK_STATEMENT,
                                 NodeType.TYPE_WHEN_BLOCK,
-                                NodeType.VALUE_WHEN_BLOCK));
+                                NodeType.VALUE_WHEN_BLOCK,
+                                NodeType.WHILE_LOOP_STATEMENT));
 
         /** Labels that indicate a path is terminated. Outgoing edges should not be created */
         public static final Set<String> TERMINAL_VERTEX_LABELS =
