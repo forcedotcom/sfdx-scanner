@@ -1,23 +1,21 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
-import com.salesforce.collections.CollectionUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Visitor detects when more than one invocation of Schema.getGlobalDescribe() or
  * Schema.describeSObjects is made in a path.
  */
 class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
-    private static final Logger LOGGER = LogManager.getLogger(MultipleMassSchemaLookupVisitor.class);
+    private static final Logger LOGGER =
+            LogManager.getLogger(MultipleMassSchemaLookupVisitor.class);
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
@@ -37,7 +35,6 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         this.violations = new HashSet<>();
     }
 
-
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         if (vertex.equals(sinkVertex)) {
@@ -54,7 +51,8 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         super.afterVisit(vertex, symbols);
     }
 
-    private void createViolationIfInsideLoop(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+    private void createViolationIfInsideLoop(
+            MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         final Optional<? extends SFVertex> loopedVertexOpt = isInsideLoop();
         if (loopedVertexOpt.isPresent()) {
             // Method has been invoked inside a loop. Create a violation.

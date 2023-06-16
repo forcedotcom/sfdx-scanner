@@ -22,12 +22,11 @@ import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
+import com.salesforce.rules.ops.methodpath.MethodPathListener;
+import com.salesforce.rules.ops.methodpath.NoOpMethodPathListenerImpl;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
-
-import com.salesforce.rules.ops.methodpath.MethodPathListener;
-import com.salesforce.rules.ops.methodpath.NoOpMethodPathListenerImpl;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,20 +45,27 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
     private final TreeMap<String, ClassStaticScope> classStaticScopes;
 
     private ApexPathWalker(
-        GraphTraversalSource g,
-        ApexPath topMostPath,
-        PathVertexVisitor visitor,
-        SymbolProviderVertexVisitor symbolProviderVisitor,
-        SymbolProvider symbolProvider) {
-        this(g, topMostPath, visitor, symbolProviderVisitor, NoOpMethodPathListenerImpl.get(), symbolProvider);
+            GraphTraversalSource g,
+            ApexPath topMostPath,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolProviderVisitor,
+            SymbolProvider symbolProvider) {
+        this(
+                g,
+                topMostPath,
+                visitor,
+                symbolProviderVisitor,
+                NoOpMethodPathListenerImpl.get(),
+                symbolProvider);
     }
 
     public ApexPathWalker(
-        GraphTraversalSource g,
-        ApexPath topMostPath,
-        PathVertexVisitor visitor,
-        SymbolProviderVertexVisitor symbolProviderVisitor,
-        MethodPathListener methodPathListener, SymbolProvider symbolProvider) {
+            GraphTraversalSource g,
+            ApexPath topMostPath,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolProviderVisitor,
+            MethodPathListener methodPathListener,
+            SymbolProvider symbolProvider) {
         this.g = g;
         this.topMostPath = topMostPath;
         this.visitor = visitor;
@@ -91,26 +97,28 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
      * Walk the given path with {@code visitor}, {@code symbolVisitor}, and {@code symbolProvider}.
      */
     public static void walkPath(
-        GraphTraversalSource g,
-        ApexPath path,
-        PathVertexVisitor visitor,
-        SymbolProviderVertexVisitor symbolVisitor,
-        SymbolProvider symbolProvider) {
+            GraphTraversalSource g,
+            ApexPath path,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolVisitor,
+            SymbolProvider symbolProvider) {
         walkPath(g, path, visitor, symbolVisitor, NoOpMethodPathListenerImpl.get(), symbolProvider);
     }
 
     /**
-     * Walk the given path with {@code visitor}, {@code symbolVisitor}, {@code methodPathListener} and {@code symbolProvider}.
+     * Walk the given path with {@code visitor}, {@code symbolVisitor}, {@code methodPathListener}
+     * and {@code symbolProvider}.
      */
     public static void walkPath(
-        GraphTraversalSource g,
-        ApexPath path,
-        PathVertexVisitor visitor,
-        SymbolProviderVertexVisitor symbolVisitor,
-        MethodPathListener methodPathListener,
-        SymbolProvider symbolProvider) {
+            GraphTraversalSource g,
+            ApexPath path,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolVisitor,
+            MethodPathListener methodPathListener,
+            SymbolProvider symbolProvider) {
         final ApexPathWalker apexPathWalker =
-                new ApexPathWalker(g, path, visitor, symbolVisitor, methodPathListener, symbolProvider);
+                new ApexPathWalker(
+                        g, path, visitor, symbolVisitor, methodPathListener, symbolProvider);
         try {
             ContextProviders.CLASS_STATIC_SCOPE.push(apexPathWalker);
             apexPathWalker.walk(path);
@@ -227,7 +235,9 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
         if (methodPath != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
-                        "Starting method path from ApexPath" + path.getStableId() + ". methodCall="
+                        "Starting method path from ApexPath"
+                                + path.getStableId()
+                                + ". methodCall="
                                 + vertex
                                 + ", firstVertex="
                                 + methodPath.firstVertex());

@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tinkerpop.gremlin.process.traversal.P;
-
-import javax.annotation.Nullable;
 
 /**
  * Tracks the beginning and end of boundaries. Each implementation of a {@link BoundaryDetector}
@@ -57,12 +55,14 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
      * End extent of a boundary. Performs additional checks to confirm validity.
      *
      * @param boundaryItem that is expected to govern the current boundary that's to be ended.
-     * @param shouldValidate indicates if additional validation should be performed. If this is true, boundaryItem is expected to be not-null.
+     * @param shouldValidate indicates if additional validation should be performed. If this is
+     *     true, boundaryItem is expected to be not-null.
      */
     public void popBoundary(@Nullable R boundaryItem, boolean shouldValidate) {
 
         if (shouldValidate && boundaryItem == null) {
-            throw new ProgrammingException("Additional validation requires non-null boundary item to be passed.");
+            throw new ProgrammingException(
+                    "Additional validation requires non-null boundary item to be passed.");
         }
 
         if (LOGGER.isTraceEnabled()) {
@@ -81,17 +81,16 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
             R existingBoundaryItem = boundaryOptional.get().getBoundaryItem();
             if (!boundaryItem.equals(existingBoundaryItem)) {
                 throw new UnexpectedException(
-                    "Boundary vertices don't match. existingBoundaryItem="
-                        + existingBoundaryItem
-                        + ", afterVisit boundaryItem="
-                        + boundaryItem);
+                        "Boundary vertices don't match. existingBoundaryItem="
+                                + existingBoundaryItem
+                                + ", afterVisit boundaryItem="
+                                + boundaryItem);
             }
         }
 
         // Remove the boundary
         this.boundaries.pop();
     }
-
 
     /**
      * @return items in the boundary stack. Items are ordered TODO ?

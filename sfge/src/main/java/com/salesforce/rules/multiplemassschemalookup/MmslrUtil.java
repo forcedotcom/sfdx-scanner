@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
-
 import java.util.Locale;
 
 public final class MmslrUtil {
@@ -15,7 +14,9 @@ public final class MmslrUtil {
     static final String METHOD_SCHEMA_DESCRIBE_SOBJECTS = "Schema.describeSObjects";
 
     private static final ImmutableSet<String> EXPENSIVE_METHODS =
-            ImmutableSet.of(METHOD_SCHEMA_GET_GLOBAL_DESCRIBE.toLowerCase(Locale.ROOT), METHOD_SCHEMA_DESCRIBE_SOBJECTS.toLowerCase(Locale.ROOT));
+            ImmutableSet.of(
+                    METHOD_SCHEMA_GET_GLOBAL_DESCRIBE.toLowerCase(Locale.ROOT),
+                    METHOD_SCHEMA_DESCRIBE_SOBJECTS.toLowerCase(Locale.ROOT));
 
     /**
      * @param vertex to check
@@ -26,7 +27,11 @@ public final class MmslrUtil {
         return EXPENSIVE_METHODS.contains(fullMethodName.toLowerCase(Locale.ROOT));
     }
 
-    static MultipleMassSchemaLookupInfo newViolation(SFVertex sourceVertex, MethodCallExpressionVertex sinkVertex, RepetitionType type, SFVertex repetitionVertex) {
+    static MultipleMassSchemaLookupInfo newViolation(
+            SFVertex sourceVertex,
+            MethodCallExpressionVertex sinkVertex,
+            RepetitionType type,
+            SFVertex repetitionVertex) {
         return new MultipleMassSchemaLookupInfo(sourceVertex, sinkVertex, type, repetitionVertex);
     }
 
@@ -36,7 +41,8 @@ public final class MmslrUtil {
         MULTIPLE(
                 UserFacingMessages.MultipleMassSchemaLookupRuleTemplates
                         .OCCURRENCE_MULTIPLE_TEMPLATE),
-        ANOTHER_PATH(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.ANOTHER_PATH_TEMPLATE);
+        ANOTHER_PATH(
+                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.ANOTHER_PATH_TEMPLATE);
 
         String messageTemplate;
 

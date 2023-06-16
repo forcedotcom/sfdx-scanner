@@ -2,55 +2,81 @@ package com.salesforce.rules.ops.methodpath;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.salesforce.collections.CollectionUtil;
 import com.salesforce.graph.ApexPath;
-import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.InvocableVertex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.TreeSet;
+public abstract class AbstractDuplicateMethodCallDetector implements MethodPathListener {
 
-abstract public class AbstractDuplicateMethodCallDetector implements MethodPathListener {
-
-    private static final Logger LOGGER = LogManager.getLogger(AbstractDuplicateMethodCallDetector.class);
+    private static final Logger LOGGER =
+            LogManager.getLogger(AbstractDuplicateMethodCallDetector.class);
     protected final Multimap<String, InvocableVertex> methodCallToInvocationOccurrence;
 
     protected AbstractDuplicateMethodCallDetector() {
         methodCallToInvocationOccurrence = ArrayListMultimap.create();
     }
 
+    /**
+     * Execute action to be performed before processing the vertex further
+     *
+     * @param vertex InvocableVertex that's forked
+     */
+    protected abstract void performPreAction(InvocableVertex vertex);
 
+    /**
+     * Checks if a vertex should be ignored.
+     *
+     * @param vertex to examine
+     * @return true if vertex can be ignored.
+     */
     protected abstract boolean shouldIgnoreMethod(InvocableVertex vertex);
 
-    protected abstract void performActionForDetectedDuplication(InvocableVertex vertex);
+    /**
+     * Performs additional action with the vertex when a duplicate call is detected.
+     *
+     * @param key that represents this invocable.
+     * @param vertex that had a duplicate call.
+     */
+    protected abstract void performActionForDetectedDuplication(String key, InvocableVertex vertex);
 
     @Override
     public void beforePathStart(ApexPath path) {
-        LOGGER.warn("Before path start, clearing methodCallsMade.");
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Before path start, clearing method calls made.");
+        }
         methodCallToInvocationOccurrence.clear();
     }
 
     @Override
-    public void onMethodPathFork(ApexPath currentPath, ApexPath newMethodPath, InvocableVertex invocableVertex) {
-//        final String currentPathMethodUniqueKey = currentPath.getMethodVertex().get().generateUniqueKey();
-        final String newPathMethodUniqueKey = newMethodPath.getMethodVertex().get().generateUniqueKey();
-        final String key = /*currentPathMethodUniqueKey + "," +*/ newPathMethodUniqueKey;
+    public void onMethodPathFork(
+            ApexPath currentPath, ApexPath newMethodPath, InvocableVertex invocableVertex) {
+        performPreAction(invocableVertex);
+
+        final String newPathMethodUniqueKey =
+                newMethodPath.getMethodVertex().get().generateUniqueKey();
+        final String key = newPathMethodUniqueKey;
 
         if (shouldIgnoreMethod(invocableVertex)) {
-            LOGGER.warn("Method call ignored: " + key);
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Method call ignored: " + key);
+            }
             return;
         }
 
-        LOGGER.warn("Adding method to treeSet: " + key);
+        // Detect if this method has been visited before.
+        // Fyi, boolean return value of put method has not been reliable.
+        boolean visitedBefore = false;
+        if (methodCallToInvocationOccurrence.containsKey(key)) {
+            visitedBefore = true;
+        }
+        methodCallToInvocationOccurrence.put(key, invocableVertex);
 
-        boolean firstTimeVisit = methodCallToInvocationOccurrence.put(key, invocableVertex);
-
-        if (!firstTimeVisit) {
-            LOGGER.warn("Method has been visited before: " + key);
-            performActionForDetectedDuplication(invocableVertex);
+        if (visitedBefore) {
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("Method has been visited before: " + key);
+            }
+            performActionForDetectedDuplication(key, invocableVertex);
         }
     }
 }

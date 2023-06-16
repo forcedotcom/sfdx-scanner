@@ -7,7 +7,8 @@ public final class NoOpMethodPathListenerImpl implements MethodPathListener {
     private NoOpMethodPathListenerImpl() {}
 
     @Override
-    public void onMethodPathFork(ApexPath currentPath, ApexPath newMethodPath, InvocableVertex invocableVertex) {
+    public void onMethodPathFork(
+            ApexPath currentPath, ApexPath newMethodPath, InvocableVertex invocableVertex) {
         // Do nothing. Intentionally blank.
     }
 

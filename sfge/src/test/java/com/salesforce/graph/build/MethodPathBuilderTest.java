@@ -2418,7 +2418,11 @@ public class MethodPathBuilderTest {
         List<Edge> edges = g.V().outE(Schema.CFG_PATH).toList();
         MatcherAssert.assertThat(edges, hasSize(6));
         assertEndScopes(
-                new String[] {NodeType.BLOCK_STATEMENT, NodeType.WHILE_LOOP_STATEMENT, NodeType.BLOCK_STATEMENT},
+                new String[] {
+                    NodeType.BLOCK_STATEMENT,
+                    NodeType.WHILE_LOOP_STATEMENT,
+                    NodeType.BLOCK_STATEMENT
+                },
                 ExpressionStatementVertex.class,
                 6);
 

@@ -10,11 +10,8 @@ import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
-
 import java.util.HashSet;
 import java.util.Set;
-
-import com.salesforce.rules.ops.methodpath.MethodPathListener;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /** Executes internals of {@link MultipleMassSchemaLookupRule} */
@@ -44,11 +41,15 @@ public class MultipleMassSchemaLookupRuleHandler {
         final MultipleMassSchemaLookupVisitor ruleVisitor =
                 new MultipleMassSchemaLookupVisitor(
                         sourceVertex, (MethodCallExpressionVertex) vertex);
-        final MmsDuplicateMethodCallDetector duplicateMethodCallDetector = new MmsDuplicateMethodCallDetector(sourceVertex, (MethodCallExpressionVertex) vertex);
+        final MmsDuplicateMethodCallDetector duplicateMethodCallDetector =
+                new MmsDuplicateMethodCallDetector(
+                        sourceVertex, (MethodCallExpressionVertex) vertex);
 
-        final DefaultSymbolProviderVertexVisitor symbolVisitor = new DefaultSymbolProviderVertexVisitor(g);
+        final DefaultSymbolProviderVertexVisitor symbolVisitor =
+                new DefaultSymbolProviderVertexVisitor(g);
         final SymbolProvider symbols = new CloningSymbolProvider(symbolVisitor.getSymbolProvider());
-        ApexPathWalker.walkPath(g, path, ruleVisitor, symbolVisitor, duplicateMethodCallDetector, symbols);
+        ApexPathWalker.walkPath(
+                g, path, ruleVisitor, symbolVisitor, duplicateMethodCallDetector, symbols);
 
         // Once it finishes walking, collect any violations thrown
         mmslInfo.addAll(ruleVisitor.getViolations());

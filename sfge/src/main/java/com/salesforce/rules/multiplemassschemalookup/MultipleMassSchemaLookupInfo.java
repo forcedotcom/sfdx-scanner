@@ -2,7 +2,6 @@ package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.TodoException;
-import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
@@ -42,8 +41,7 @@ public class MultipleMassSchemaLookupInfo implements RuleThrowable {
         this.repetitionVertex = repetitionVertex;
     }
 
-    private void validateInput(
-            MmslrUtil.RepetitionType repetitionType, SFVertex repetitionVertex) {
+    private void validateInput(MmslrUtil.RepetitionType repetitionType, SFVertex repetitionVertex) {
         if (repetitionType == null) {
             throw new ProgrammingException("repetitionType cannot be null.");
         }
@@ -61,10 +59,11 @@ public class MultipleMassSchemaLookupInfo implements RuleThrowable {
         }
 
         if (MmslrUtil.RepetitionType.ANOTHER_PATH.equals(repetitionType)) {
-            if (!(repetitionVertex instanceof MethodCallExpressionVertex || repetitionVertex instanceof NewObjectExpressionVertex)) {
+            if (!(repetitionVertex instanceof MethodCallExpressionVertex
+                    || repetitionVertex instanceof NewObjectExpressionVertex)) {
                 throw new TodoException(
-                    "Repetition of type ANOTHER_PATH not handled. repetitionVertex="
-                        + repetitionVertex);
+                        "Repetition of type ANOTHER_PATH not handled. repetitionVertex="
+                                + repetitionVertex);
             }
         }
     }

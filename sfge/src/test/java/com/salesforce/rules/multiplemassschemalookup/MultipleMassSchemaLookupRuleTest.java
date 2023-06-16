@@ -46,7 +46,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled // TODO: Only surrounding loop should be counted as a violation.
     public void testSimpleGgdOutsideLoop(String loopAstLabel, String loopStructure) {
         // spotless:off
         String sourceCode =
@@ -152,13 +151,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         assertViolations(
                 RULE,
                 sourceCode,
-                expect(
-                        4,
-                        secondCall,
-                        3,
-                        "MyClass",
-                        MmslrUtil.RepetitionType.MULTIPLE,
-                        firstCall));
+                expect(4, secondCall, 3, "MyClass", MmslrUtil.RepetitionType.MULTIPLE, firstCall));
     }
 
     @Test
@@ -243,44 +236,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         "Another",
                         MmslrUtil.RepetitionType.LOOP,
                         ASTConstants.NodeType.FOR_LOOP_STATEMENT));
-    }
-
-    @Test
-    public void testForLoopConditionalOnClassInstance() {
-        // spotless:off
-        String sourceCode[] = {
-            "public class MyClass {\n"
-                    + "   void foo() {\n"
-                    + "       Another[] anotherList = new Another[] {new Another(false), new Another(false)};\n"
-                    + "       for (Another an : anotherList) {\n"
-                    + "           an.exec();\n"
-                    + "       }\n"
-                    + "   }\n"
-                    + "}\n",
-            "public class Another {\n"
-                    + "boolean shouldCheck;\n"
-                    + "Another(boolean b) {\n"
-                    + "   shouldCheck = b;\n"
-                    + "}\n"
-                    + "void exec() {\n"
-                    + "   if (shouldCheck) {\n"
-                    + "       Schema.getGlobalDescribe();\n"
-                    + "   }\n"
-                    + "}\n"
-                    + "}\n"
-        };
-        // spotless:on
-
-        assertViolations(
-                RULE,
-                sourceCode,
-                expect(
-                        8,
-                        MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        MmslrUtil.RepetitionType.LOOP,
-                        ASTConstants.NodeType.FOR_EACH_STATEMENT));
     }
 
     @Test

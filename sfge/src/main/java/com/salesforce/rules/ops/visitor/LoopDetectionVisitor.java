@@ -11,19 +11,18 @@ import com.salesforce.rules.ops.boundary.LoopBoundary;
 import com.salesforce.rules.ops.boundary.LoopBoundaryDetector;
 import com.salesforce.rules.ops.boundary.OverridableLoopExclusionBoundary;
 import com.salesforce.rules.ops.boundary.PermanentLoopExclusionBoundary;
-
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 /** Visitor that gets notified when a loop vertex is invoked in the path. */
 public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor {
     private final LoopBoundaryDetector loopBoundaryDetector;
-    private static final ImmutableSet<String> LOOP_VERTICES_LABELS = ImmutableSet.of(
-        ASTConstants.NodeType.DO_LOOP_STATEMENT,
-        ASTConstants.NodeType.FOR_EACH_STATEMENT,
-        ASTConstants.NodeType.FOR_LOOP_STATEMENT,
-        ASTConstants.NodeType.WHILE_LOOP_STATEMENT);
+    private static final ImmutableSet<String> LOOP_VERTICES_LABELS =
+            ImmutableSet.of(
+                    ASTConstants.NodeType.DO_LOOP_STATEMENT,
+                    ASTConstants.NodeType.FOR_EACH_STATEMENT,
+                    ASTConstants.NodeType.FOR_LOOP_STATEMENT,
+                    ASTConstants.NodeType.WHILE_LOOP_STATEMENT);
 
     public LoopDetectionVisitor() {
         loopBoundaryDetector = new LoopBoundaryDetector();
@@ -139,20 +138,29 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
 
                 // Check if a boundary is actually in place
                 if (!currentLoopBoundaryOpt.isPresent()) {
-                    throw new ProgrammingException("Invalid scenario. No loop boundary is available to pop. vertex=" + vertex);
+                    throw new ProgrammingException(
+                            "Invalid scenario. No loop boundary is available to pop. vertex="
+                                    + vertex);
                 }
                 final LoopBoundary currentLoopBoundary = currentLoopBoundaryOpt.get();
 
                 // Check if the existing boundary has the same boundary item as the end item
-                if (!currentLoopBoundary.getBoundaryItem().getLabel().equalsIgnoreCase(endScopeLabel)) {
-                    throw new ProgrammingException("Current Loop Boundary does not match current end scope. currentLoopBoundaryItem=" + currentLoopBoundary.getBoundaryItem().getLabel() + ", currentEndScope=" + endScopeLabel + ", vertex=" + vertex);
+                if (!currentLoopBoundary
+                        .getBoundaryItem()
+                        .getLabel()
+                        .equalsIgnoreCase(endScopeLabel)) {
+                    throw new ProgrammingException(
+                            "Current Loop Boundary does not match current end scope. currentLoopBoundaryItem="
+                                    + currentLoopBoundary.getBoundaryItem().getLabel()
+                                    + ", currentEndScope="
+                                    + endScopeLabel
+                                    + ", vertex="
+                                    + vertex);
                 }
                 loopBoundaryDetector.popBoundary(null, false);
             }
         }
     }
-
-
 
     protected Optional<? extends SFVertex> isInsideLoop() {
         return loopBoundaryDetector.isInsideLoop();
