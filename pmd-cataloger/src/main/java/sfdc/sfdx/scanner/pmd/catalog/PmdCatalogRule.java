@@ -33,28 +33,34 @@ public class PmdCatalogRule {
 	 */
 	private final Set<PmdCatalogRuleset> rulesets = new HashSet<>();
 
+    private final Element element;
+
 
 	public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
+        this.element = element;
 		this.name = element.getAttribute(ATTR_NAME);
 		this.message = element.getAttribute(ATTR_MESSAGE);
 		this.language = language;
 		this.category = category;
 		this.description = getDescription(element);
 		this.sourceJar = category.getSourceJar();
-        validatePmd7Readiness(element);
 	}
 
 	String getFullName() {
 		return getCategoryPath() + "/" + getName();
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
 	String getCategoryPath() {
 		return category.getPath();
 	}
+
+    public Element getElement() {
+        return element;
+    }
 
 	/**
 	 * Adds the provided ruleset to the list of rulesets of which this rule is a member.
@@ -89,19 +95,6 @@ public class PmdCatalogRule {
 		}
 		return res;
 	}
-
-    private void validatePmd7Readiness(Element element) {
-        // If the rule has the `ref` property, then this isn't the rule's actual
-        // definition. So there's no sense in checking this one for PMD7 readiness.
-        if (element.hasAttribute(ATTR_REF)) {
-            return;
-        }
-        // PMD7 expects rules to have a `language` property.
-        String langProp = element.getAttribute(ATTR_LANGUAGE);
-        if (langProp.isEmpty()) {
-            CliMessager.getInstance().addMessage("Rule " + name + " is imcompabile with PMD 7", EventKey.WARNING_PMD7_INCOMPATIBLE_RULE, name);
-        }
-    }
 
 	/**
 	 * Converts this rule into a JSONObject.
