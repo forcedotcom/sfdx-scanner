@@ -1,7 +1,6 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.apex.jorje.ASTConstants;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class MultipleCallsOfSameMethodTest extends BaseAvoidMultipleMassSchemaLookupTest {
@@ -416,7 +415,6 @@ public class MultipleCallsOfSameMethodTest extends BaseAvoidMultipleMassSchemaLo
     }
 
     @Test
-    @Disabled // TODO: This is a false positive that needs to be handled correctly.
     public void testSameMethodInvokedBeforeAndAfterSafe() {
         String sourceCode[] = {
             "public class MyClass {\n"
@@ -427,6 +425,33 @@ public class MultipleCallsOfSameMethodTest extends BaseAvoidMultipleMassSchemaLo
                     + "   }\n"
                     + "   void anotherMethod() {\n"
                     + "      System.debug('hi');\n"
+                    + "   }\n"
+                    + "}\n",
+        };
+
+        assertNoViolation(RULE, sourceCode);
+    }
+
+    @Test
+    public void testSameMethodInvokedBeforeAndAfterSafe_twoLevel() {
+        String sourceCode[] = {
+            "public class MyClass {\n"
+                    + "   void foo() {\n"
+                    + "     anotherMethod();\n"
+                    + "     yetAnotherMethod();\n"
+                    + "     anotherMethod();\n"
+                    + "   }\n"
+                    + "   void anotherMethod() {\n"
+                    + "      notExpensive();\n"
+                    + "   }\n"
+                    + "   void notExpensive() {\n"
+                    + "      System.debug('hi');\n"
+                    + "   }\n"
+                    + "   void yetAnotherMethod() {\n"
+                    + "      expensiveInvoker();\n"
+                    + "   }\n"
+                    + "   void expensiveInvoker() {\n"
+                    + "     Map<String,Schema.SObjectType> types = Schema.getGlobalDescribe();\n"
                     + "   }\n"
                     + "}\n",
         };

@@ -37,16 +37,16 @@ public class MultipleMassSchemaLookupRuleHandler {
         }
 
         final SFVertex sourceVertex = path.getMethodVertex().orElse(null);
+        final DefaultSymbolProviderVertexVisitor symbolVisitor =
+                new DefaultSymbolProviderVertexVisitor(g);
 
         final MultipleMassSchemaLookupVisitor ruleVisitor =
                 new MultipleMassSchemaLookupVisitor(
                         sourceVertex, (MethodCallExpressionVertex) vertex);
-        final MmsDuplicateMethodCallDetector duplicateMethodCallDetector =
-                new MmsDuplicateMethodCallDetector(
-                        sourceVertex, (MethodCallExpressionVertex) vertex);
+        final AnotherPathViolationDetector duplicateMethodCallDetector =
+                new AnotherPathViolationDetector(
+                        symbolVisitor, sourceVertex, (MethodCallExpressionVertex) vertex);
 
-        final DefaultSymbolProviderVertexVisitor symbolVisitor =
-                new DefaultSymbolProviderVertexVisitor(g);
         final SymbolProvider symbols = new CloningSymbolProvider(symbolVisitor.getSymbolProvider());
         ApexPathWalker.walkPath(
                 g, path, ruleVisitor, symbolVisitor, duplicateMethodCallDetector, symbols);

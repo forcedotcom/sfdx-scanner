@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.vertex.InvocableVertex;
+import com.salesforce.graph.vertex.MethodVertex;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,8 +54,8 @@ public abstract class AbstractDuplicateMethodCallDetector implements MethodPathL
             ApexPath currentPath, ApexPath newMethodPath, InvocableVertex invocableVertex) {
         performPreAction(invocableVertex);
 
-        final String newPathMethodUniqueKey =
-                newMethodPath.getMethodVertex().get().generateUniqueKey();
+        final MethodVertex resolvedMethod = newMethodPath.getMethodVertex().get();
+        final String newPathMethodUniqueKey = resolvedMethod.generateUniqueKey();
         final String key = newPathMethodUniqueKey;
 
         if (shouldIgnoreMethod(invocableVertex)) {
