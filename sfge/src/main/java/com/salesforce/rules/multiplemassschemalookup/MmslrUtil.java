@@ -3,7 +3,6 @@ package com.salesforce.rules.multiplemassschemalookup;
 import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.SFVertex;
 import java.util.Locale;
 
 public final class MmslrUtil {
@@ -27,22 +26,13 @@ public final class MmslrUtil {
         return EXPENSIVE_METHODS.contains(fullMethodName.toLowerCase(Locale.ROOT));
     }
 
-    static MultipleMassSchemaLookupInfo newViolation(
-            SFVertex sourceVertex,
-            MethodCallExpressionVertex sinkVertex,
-            RepetitionType type,
-            SFVertex repetitionVertex) {
-        return new MultipleMassSchemaLookupInfo(sourceVertex, sinkVertex, type, repetitionVertex);
-    }
-
     /** Enum to indicate the type of repetition the method call was subjected. */
     public enum RepetitionType {
-        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.OCCURRENCE_LOOP_TEMPLATE),
-        MULTIPLE(
+        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.LOOP_MESSAGE_TEMPLATE),
+        PRECEDED_BY(
                 UserFacingMessages.MultipleMassSchemaLookupRuleTemplates
-                        .OCCURRENCE_MULTIPLE_TEMPLATE),
-        ANOTHER_PATH(
-                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.ANOTHER_PATH_TEMPLATE);
+                        .PRECEDED_BY_MESSAGE_TEMPLATE),
+        CALL_STACK(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.CALL_STACK_TEMPLATE);
 
         String messageTemplate;
 

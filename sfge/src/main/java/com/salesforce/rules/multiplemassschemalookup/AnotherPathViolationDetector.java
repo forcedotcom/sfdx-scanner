@@ -1,15 +1,12 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.exception.ProgrammingException;
-import com.salesforce.exception.TodoException;
 import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
 import com.salesforce.graph.vertex.InvocableVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.ops.methodpath.SinkCentricDuplicateMethodCallDetector;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -60,20 +57,18 @@ public class AnotherPathViolationDetector extends SinkCentricDuplicateMethodCall
         for (String methodCallKey : methodCallToInvocationOccurrence.keys()) {
             Collection<InvocableVertex> invocableVertices =
                     methodCallToInvocationOccurrence.get(methodCallKey);
+            List<SFVertex> repetitionVertices = new ArrayList<>();
+            for (InvocableVertex invocableVertex : invocableVertices) {
+                repetitionVertices.add((SFVertex) invocableVertex);
+            }
             if (invocableVertices.size() > 1) {
-                for (InvocableVertex invocableVertex : invocableVertices) {
-                    if (!(invocableVertex instanceof SFVertex)) {
-                        throw new TodoException(
-                                "Invocable vertex is not an instance of SFVertex. invocableVertex="
-                                        + invocableVertex);
-                    }
-                    violations.add(
-                            MmslrUtil.newViolation(
-                                    sourceVertex,
-                                    sinkMethodCallVertex,
-                                    MmslrUtil.RepetitionType.ANOTHER_PATH,
-                                    (SFVertex) invocableVertex));
-                }
+                violations.add(
+                        new MultipleMassSchemaLookupInfo(
+                                sourceVertex,
+                                sinkMethodCallVertex,
+                                MmslrUtil.RepetitionType.CALL_STACK,
+                                repetitionVertices.toArray(new SFVertex[0])));
+
             } else {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Only one invocation of " + methodCallKey + " detected.");

@@ -27,43 +27,56 @@ public class MultipleMassSchemaLookupInfo implements RuleThrowable {
     private final MmslrUtil.RepetitionType repetitionType;
 
     /** Vertex where the repetition occurs */
-    private final SFVertex repetitionVertex;
+    private final SFVertex[] repetitionVertices;
 
     public MultipleMassSchemaLookupInfo(
             SFVertex sourceVertex,
             MethodCallExpressionVertex sinkVertex,
             MmslrUtil.RepetitionType repetitionType,
             SFVertex repetitionVertex) {
-        validateInput(repetitionType, repetitionVertex);
+        this(sourceVertex, sinkVertex, repetitionType, new SFVertex[] {repetitionVertex});
+    }
+
+    public MultipleMassSchemaLookupInfo(
+            SFVertex sourceVertex,
+            MethodCallExpressionVertex sinkVertex,
+            MmslrUtil.RepetitionType repetitionType,
+            SFVertex[] repetitionVertices) {
+
+        validateInput(repetitionType, repetitionVertices);
+
+        this.repetitionVertices = repetitionVertices;
         this.sourceVertex = sourceVertex;
         this.sinkVertex = sinkVertex;
         this.repetitionType = repetitionType;
-        this.repetitionVertex = repetitionVertex;
     }
 
-    private void validateInput(MmslrUtil.RepetitionType repetitionType, SFVertex repetitionVertex) {
+    private void validateInput(
+            MmslrUtil.RepetitionType repetitionType, SFVertex[] repetitionVertices1) {
         if (repetitionType == null) {
             throw new ProgrammingException("repetitionType cannot be null.");
         }
 
-        if (repetitionVertex == null) {
-            throw new ProgrammingException("repetitionVertex cannot be null.");
-        }
-
-        if (MmslrUtil.RepetitionType.MULTIPLE.equals(repetitionType)) {
-            if (!(repetitionVertex instanceof MethodCallExpressionVertex)) {
-                throw new ProgrammingException(
-                        "Repetition of type MULTIPLE can only happen on MethodCallExpressions. repetitionVertex="
-                                + repetitionVertex);
+        for (SFVertex repetitionVertex : repetitionVertices1) {
+            if (repetitionVertex == null) {
+                throw new ProgrammingException("repetitionVertex cannot be null.");
             }
-        }
 
-        if (MmslrUtil.RepetitionType.ANOTHER_PATH.equals(repetitionType)) {
-            if (!(repetitionVertex instanceof MethodCallExpressionVertex
-                    || repetitionVertex instanceof NewObjectExpressionVertex)) {
-                throw new TodoException(
-                        "Repetition of type ANOTHER_PATH not handled. repetitionVertex="
-                                + repetitionVertex);
+            if (MmslrUtil.RepetitionType.PRECEDED_BY.equals(repetitionType)) {
+                if (!(repetitionVertex instanceof MethodCallExpressionVertex)) {
+                    throw new ProgrammingException(
+                            "Repetition of type MULTIPLE can only happen on MethodCallExpressions. repetitionVertex="
+                                    + repetitionVertex);
+                }
+            }
+
+            if (MmslrUtil.RepetitionType.CALL_STACK.equals(repetitionType)) {
+                if (!(repetitionVertex instanceof MethodCallExpressionVertex
+                        || repetitionVertex instanceof NewObjectExpressionVertex)) {
+                    throw new TodoException(
+                            "Repetition of type ANOTHER_PATH not handled. repetitionVertex="
+                                    + repetitionVertex);
+                }
             }
         }
     }
@@ -85,7 +98,7 @@ public class MultipleMassSchemaLookupInfo implements RuleThrowable {
         return repetitionType;
     }
 
-    public SFVertex getRepetitionVertex() {
-        return repetitionVertex;
+    public SFVertex[] getRepetitionVertices() {
+        return repetitionVertices;
     }
 }

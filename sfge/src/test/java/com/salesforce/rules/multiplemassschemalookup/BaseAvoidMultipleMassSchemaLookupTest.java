@@ -7,17 +7,13 @@ import com.salesforce.testutils.ViolationWrapper;
 /** Base class to tests for {@link MultipleMassSchemaLookupRule} */
 public abstract class BaseAvoidMultipleMassSchemaLookupTest extends BasePathBasedRuleTest {
 
+    protected static final String MY_CLASS = "MyClass";
+
     protected static final MultipleMassSchemaLookupRule RULE =
             MultipleMassSchemaLookupRule.getInstance();
 
     protected ViolationWrapper.MassSchemaLookupInfoBuilder expect(
-            int sinkLine,
-            String sinkMethodName,
-            int occurrenceLine,
-            String occurrenceClassName,
-            MmslrUtil.RepetitionType type,
-            String typeInfo) {
-        return ViolationWrapper.MassSchemaLookupInfoBuilder.get(
-                sinkLine, sinkMethodName, occurrenceLine, occurrenceClassName, type, typeInfo);
+            int sinkLine, String sinkMethodName, MmslrUtil.RepetitionType type) {
+        return ViolationWrapper.MassSchemaLookupInfoBuilder.get(sinkLine, sinkMethodName, type);
     }
 }

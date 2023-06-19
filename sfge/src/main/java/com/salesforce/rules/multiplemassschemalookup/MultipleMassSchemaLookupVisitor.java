@@ -40,11 +40,10 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
         if (vertex.equals(sinkVertex)) {
             // Mark sink as visited. From this point on, we don't need to
             // look for anymore loops or additional calls.
-            // TODO: A more performant approach would be to stop walking path from this point
             isSinkVisited = true;
             createViolationIfInsideLoop(vertex, symbols);
         } else if (MmslrUtil.isSchemaExpensiveMethod(vertex) && shouldContinue()) {
-            createViolation(MmslrUtil.RepetitionType.MULTIPLE, vertex);
+            createViolation(MmslrUtil.RepetitionType.PRECEDED_BY, vertex);
         }
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
@@ -61,7 +60,8 @@ class MultipleMassSchemaLookupVisitor extends LoopDetectionVisitor {
     }
 
     private void createViolation(MmslrUtil.RepetitionType type, SFVertex repetitionVertex) {
-        violations.add(MmslrUtil.newViolation(sourceVertex, sinkVertex, type, repetitionVertex));
+        violations.add(
+                new MultipleMassSchemaLookupInfo(sourceVertex, sinkVertex, type, repetitionVertex));
     }
 
     /**

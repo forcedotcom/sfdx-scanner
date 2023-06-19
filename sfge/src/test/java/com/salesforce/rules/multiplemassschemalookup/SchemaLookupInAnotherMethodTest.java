@@ -31,13 +31,8 @@ public class SchemaLookupInAnotherMethodTest extends BaseAvoidMultipleMassSchema
         assertViolations(
                 RULE,
                 sourceCode,
-                expect(
-                        9,
-                        MmslrUtil.METHOD_SCHEMA_DESCRIBE_SOBJECTS,
-                        4,
-                        "MyClass",
-                        MmslrUtil.RepetitionType.LOOP,
-                        loopAstLabel));
+                expect(9, MmslrUtil.METHOD_SCHEMA_DESCRIBE_SOBJECTS, MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(loopAstLabel, "MyClass", 4));
     }
 
     @Test
