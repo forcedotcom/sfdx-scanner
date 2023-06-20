@@ -320,6 +320,10 @@ public final class StaticBlockUtil {
         properties.put(Schema.DEFINING_TYPE, definingType);
         properties.put(Schema.IS_SYNTHETIC, true);
         properties.put(Schema.RETURN_TYPE, ASTConstants.TYPE_VOID);
+        // TODO: These should use the same line/column numbers as the static block.
+        properties.put(Schema.BEGIN_LINE, -1);
+        properties.put(Schema.BEGIN_COLUMN, -1);
+        properties.put(Schema.END_LINE, -1);
 
         addProperties(g, staticBlockInvokerVertex, properties);
     }

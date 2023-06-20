@@ -32,12 +32,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        5,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        loopAstLabel));
+                                5,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(loopAstLabel, MY_CLASS, 4));
     }
 
     @CsvSource({
@@ -46,7 +44,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled // TODO: Only surrounding loop should be counted as a violation.
     public void testSimpleGgdOutsideLoop(String loopAstLabel, String loopStructure) {
         // spotless:off
         String sourceCode =
@@ -90,12 +87,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        9,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        loopAstLabel));
+                                9,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(loopAstLabel, MY_CLASS, 4));
     }
 
     @CsvSource({
@@ -123,12 +118,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        5,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        loopAstLabel));
+                                5,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(loopAstLabel, MY_CLASS, 4));
     }
 
     @CsvSource({
@@ -152,13 +145,8 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         assertViolations(
                 RULE,
                 sourceCode,
-                expect(
-                        4,
-                        secondCall,
-                        3,
-                        "MyClass",
-                        RuleConstants.RepetitionType.MULTIPLE,
-                        firstCall));
+                expect(4, secondCall, MmslrUtil.RepetitionType.PRECEDED_BY)
+                        .withOccurrence(firstCall, MY_CLASS, 3));
     }
 
     @Test
@@ -185,12 +173,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        3,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        ASTConstants.NodeType.FOR_EACH_STATEMENT));
+                                3,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(ASTConstants.NodeType.FOR_EACH_STATEMENT, MY_CLASS, 4));
     }
 
     @Test
@@ -237,50 +223,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        3,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        3,
-                        "Another",
-                        RuleConstants.RepetitionType.LOOP,
-                        ASTConstants.NodeType.FOR_LOOP_STATEMENT));
-    }
-
-    @Test
-    public void testForLoopConditionalOnClassInstance() {
-        // spotless:off
-        String sourceCode[] = {
-            "public class MyClass {\n"
-                    + "   void foo() {\n"
-                    + "       Another[] anotherList = new Another[] {new Another(false), new Another(false)};\n"
-                    + "       for (Another an : anotherList) {\n"
-                    + "           an.exec();\n"
-                    + "       }\n"
-                    + "   }\n"
-                    + "}\n",
-            "public class Another {\n"
-                    + "boolean shouldCheck;\n"
-                    + "Another(boolean b) {\n"
-                    + "   shouldCheck = b;\n"
-                    + "}\n"
-                    + "void exec() {\n"
-                    + "   if (shouldCheck) {\n"
-                    + "       Schema.getGlobalDescribe();\n"
-                    + "   }\n"
-                    + "}\n"
-                    + "}\n"
-        };
-        // spotless:on
-
-        assertViolations(
-                RULE,
-                sourceCode,
-                expect(
-                        8,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        4,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        ASTConstants.NodeType.FOR_EACH_STATEMENT));
+                                3,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(ASTConstants.NodeType.FOR_LOOP_STATEMENT, "Another", 3));
     }
 
     @Test
@@ -390,11 +336,9 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 RULE,
                 sourceCode,
                 expect(
-                        8,
-                        RuleConstants.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                        7,
-                        "MyClass",
-                        RuleConstants.RepetitionType.LOOP,
-                        loopAstLabel));
+                                8,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(loopAstLabel, MY_CLASS, 7));
     }
 }

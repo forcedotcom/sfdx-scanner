@@ -1,5 +1,6 @@
 package com.salesforce.graph.symbols;
 
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.DeepCloneable;
 import com.salesforce.graph.ops.CloneUtil;
@@ -58,9 +59,7 @@ import com.salesforce.graph.vertex.VariableDeclarationStatementsVertex;
 import com.salesforce.graph.vertex.VariableDeclarationVertex;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
 import com.salesforce.graph.vertex.WhileLoopStatementVertex;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,8 +77,19 @@ public final class DefaultSymbolProviderVertexVisitor
             LogManager.getLogger(DefaultSymbolProviderVertexVisitor.class);
     private final GraphTraversalSource g;
 
+    /**
+     * Symbol table stack. Each item contains the state of the Symbol table at that point of scope.
+     */
     private final Stack<PathScopeVisitor> scopeStack;
+
+    /**
+     * Holds vertices encountered in the path that require inner scope (for e.g.: {@link
+     * ForEachStatementVertex}, {@link IfBlockStatementVertex})
+     */
     private final Stack<String> currentScopeLabel;
+
+    /** Used only to track the method names in the call stack for simple lookup. */
+    private final Stack<String> methodCallStack;
 
     public DefaultSymbolProviderVertexVisitor(GraphTraversalSource g) {
         this(g, null);
@@ -93,12 +103,14 @@ public final class DefaultSymbolProviderVertexVisitor
             this.scopeStack.push(initialScope);
         }
         this.currentScopeLabel = new Stack<>();
+        this.methodCallStack = new Stack<>();
     }
 
     private DefaultSymbolProviderVertexVisitor(DefaultSymbolProviderVertexVisitor other) {
         this.g = other.g;
         this.scopeStack = CloneUtil.cloneStack(other.scopeStack);
         this.currentScopeLabel = CloneUtil.cloneStack(other.currentScopeLabel);
+        this.methodCallStack = CloneUtil.cloneStack(other.methodCallStack);
     }
 
     @Override
@@ -243,6 +255,8 @@ public final class DefaultSymbolProviderVertexVisitor
 
     @Override
     public PathScopeVisitor beforeMethodCall(InvocableVertex invocable, MethodVertex method) {
+        pushMethodCallStack(method);
+
         // Get the parameters that will be pushed on the stack
         MethodInvocationScope methodInvocationScope =
                 invocable.resolveInvocationParameters(
@@ -279,6 +293,8 @@ public final class DefaultSymbolProviderVertexVisitor
 
     @Override
     public Optional<ApexValue<?>> afterMethodCall(InvocableVertex invocable, MethodVertex method) {
+        popMethodCallStack(method);
+
         PathScopeVisitor pathScopeVisitor = scopeStack.pop();
         MethodInvocationScope methodInvocationScope =
                 pathScopeVisitor.popMethodInvocationScope(invocable);
@@ -293,6 +309,33 @@ public final class DefaultSymbolProviderVertexVisitor
                 .peek()
                 .afterMethodCall(
                         invocable, method, methodInvocationScope.getReturnValue().orElse(null));
+    }
+
+    /**
+     * @param method who unique key will be added to {@link #methodCallStack}.
+     */
+    private void pushMethodCallStack(MethodVertex method) {
+        methodCallStack.push(method.generateUniqueKey());
+    }
+
+    /**
+     * @param method that is expected to get popped from {@link #methodCallStack}.
+     */
+    private void popMethodCallStack(MethodVertex method) {
+        final String methodUniqueKey = method.generateUniqueKey();
+        final String currentMethodInStack = methodCallStack.peek();
+        if (!methodUniqueKey.equalsIgnoreCase(currentMethodInStack)) {
+            throw new ProgrammingException(
+                    "Method call names don't match. methodUniqueKey="
+                            + methodUniqueKey
+                            + ", currentMethodInStack="
+                            + currentMethodInStack);
+        }
+        methodCallStack.pop();
+    }
+
+    public ArrayList<String> getMethodCallStack() {
+        return new ArrayList<>(methodCallStack);
     }
 
     @Override

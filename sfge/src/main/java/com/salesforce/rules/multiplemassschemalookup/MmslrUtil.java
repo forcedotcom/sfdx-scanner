@@ -3,14 +3,19 @@ package com.salesforce.rules.multiplemassschemalookup;
 import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import java.util.Locale;
 
-public class RuleConstants {
+public final class MmslrUtil {
 
-    static final String METHOD_SCHEMA_GET_GLOBAL_DESCRIBE = "schema.getglobaldescribe";
-    static final String METHOD_SCHEMA_DESCRIBE_SOBJECTS = "schema.describesobjects";
+    private MmslrUtil() {}
+
+    static final String METHOD_SCHEMA_GET_GLOBAL_DESCRIBE = "Schema.getGlobalDescribe";
+    static final String METHOD_SCHEMA_DESCRIBE_SOBJECTS = "Schema.describeSObjects";
 
     private static final ImmutableSet<String> EXPENSIVE_METHODS =
-            ImmutableSet.of(METHOD_SCHEMA_GET_GLOBAL_DESCRIBE, METHOD_SCHEMA_DESCRIBE_SOBJECTS);
+            ImmutableSet.of(
+                    METHOD_SCHEMA_GET_GLOBAL_DESCRIBE.toLowerCase(Locale.ROOT),
+                    METHOD_SCHEMA_DESCRIBE_SOBJECTS.toLowerCase(Locale.ROOT));
 
     /**
      * @param vertex to check
@@ -18,15 +23,16 @@ public class RuleConstants {
      */
     static boolean isSchemaExpensiveMethod(MethodCallExpressionVertex vertex) {
         final String fullMethodName = vertex.getFullMethodName();
-        return EXPENSIVE_METHODS.contains(fullMethodName.toLowerCase());
+        return EXPENSIVE_METHODS.contains(fullMethodName.toLowerCase(Locale.ROOT));
     }
 
     /** Enum to indicate the type of repetition the method call was subjected. */
     public enum RepetitionType {
-        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.OCCURRENCE_LOOP_TEMPLATE),
-        MULTIPLE(
+        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.LOOP_MESSAGE_TEMPLATE),
+        PRECEDED_BY(
                 UserFacingMessages.MultipleMassSchemaLookupRuleTemplates
-                        .OCCURRENCE_MULTIPLE_TEMPLATE);
+                        .PRECEDED_BY_MESSAGE_TEMPLATE),
+        CALL_STACK(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.CALL_STACK_TEMPLATE);
 
         String messageTemplate;
 

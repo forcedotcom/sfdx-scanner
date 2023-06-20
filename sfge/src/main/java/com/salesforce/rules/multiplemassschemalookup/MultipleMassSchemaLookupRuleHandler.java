@@ -2,12 +2,15 @@ package com.salesforce.rules.multiplemassschemalookup;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.ApexPath;
+import com.salesforce.graph.symbols.CloningSymbolProvider;
 import com.salesforce.graph.symbols.DefaultSymbolProviderVertexVisitor;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
+import java.util.HashSet;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
@@ -21,11 +24,12 @@ public class MultipleMassSchemaLookupRuleHandler {
      */
     public boolean test(BaseSFVertex vertex) {
         return vertex instanceof MethodCallExpressionVertex
-                && RuleConstants.isSchemaExpensiveMethod((MethodCallExpressionVertex) vertex);
+                && MmslrUtil.isSchemaExpensiveMethod((MethodCallExpressionVertex) vertex);
     }
 
     public Set<MultipleMassSchemaLookupInfo> detectViolations(
             GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
+        final HashSet<MultipleMassSchemaLookupInfo> mmslInfo = new HashSet<>();
         if (!(vertex instanceof MethodCallExpressionVertex)) {
             throw new ProgrammingException(
                     "GetGlobalDescribeViolationRule unexpected invoked on an instance that's not MethodCallExpressionVertex. vertex="
@@ -33,17 +37,25 @@ public class MultipleMassSchemaLookupRuleHandler {
         }
 
         final SFVertex sourceVertex = path.getMethodVertex().orElse(null);
+        final DefaultSymbolProviderVertexVisitor symbolVisitor =
+                new DefaultSymbolProviderVertexVisitor(g);
 
         final MultipleMassSchemaLookupVisitor ruleVisitor =
                 new MultipleMassSchemaLookupVisitor(
                         sourceVertex, (MethodCallExpressionVertex) vertex);
-        // TODO: I'm expecting to add other visitors depending on the other factors we will analyze
-        // to decide if a GGD call is not performant.
-        DefaultSymbolProviderVertexVisitor symbols = new DefaultSymbolProviderVertexVisitor(g);
-        ApexPathWalker.walkPath(g, path, ruleVisitor, symbols);
+        final AnotherPathViolationDetector duplicateMethodCallDetector =
+                new AnotherPathViolationDetector(
+                        symbolVisitor, sourceVertex, (MethodCallExpressionVertex) vertex);
+
+        final SymbolProvider symbols = new CloningSymbolProvider(symbolVisitor.getSymbolProvider());
+        ApexPathWalker.walkPath(
+                g, path, ruleVisitor, symbolVisitor, duplicateMethodCallDetector, symbols);
 
         // Once it finishes walking, collect any violations thrown
-        return ruleVisitor.getViolations();
+        mmslInfo.addAll(ruleVisitor.getViolations());
+        mmslInfo.addAll(duplicateMethodCallDetector.getViolations());
+
+        return mmslInfo;
     }
 
     public static MultipleMassSchemaLookupRuleHandler getInstance() {

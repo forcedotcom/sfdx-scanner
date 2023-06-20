@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,9 +47,26 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
      *
      * @param boundaryItem that is expected to govern the current boundary that's to be ended.
      */
-    public void popBoundary(R boundaryItem) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Exiting boundary with boundaryItem=" + boundaryItem);
+    public void popBoundary(@Nullable R boundaryItem) {
+        popBoundary(boundaryItem, true);
+    }
+
+    /**
+     * End extent of a boundary. Performs additional checks to confirm validity.
+     *
+     * @param boundaryItem that is expected to govern the current boundary that's to be ended.
+     * @param shouldValidate indicates if additional validation should be performed. If this is
+     *     true, boundaryItem is expected to be not-null.
+     */
+    public void popBoundary(@Nullable R boundaryItem, boolean shouldValidate) {
+
+        if (shouldValidate && boundaryItem == null) {
+            throw new ProgrammingException(
+                    "Additional validation requires non-null boundary item to be passed.");
+        }
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Exiting boundary with boundaryItem=" + boundaryItem);
         }
 
         // Check if a boundary is actually in place
@@ -58,14 +76,16 @@ public abstract class BoundaryDetector<T extends Boundary<R>, R> {
                     "No boundary has been pushed to get a corresponding pop.");
         }
 
-        // Check if the existing boundary has the same boundary item as the end item
-        R existingBoundaryItem = boundaryOptional.get().getBoundaryItem();
-        if (!boundaryItem.equals(existingBoundaryItem)) {
-            throw new UnexpectedException(
-                    "Boundary vertices don't match. existingBoundaryItem="
-                            + existingBoundaryItem
-                            + ", afterVisit boundaryItem="
-                            + boundaryItem);
+        if (shouldValidate) {
+            // Check if the existing boundary has the same boundary item as the end item
+            R existingBoundaryItem = boundaryOptional.get().getBoundaryItem();
+            if (!boundaryItem.equals(existingBoundaryItem)) {
+                throw new UnexpectedException(
+                        "Boundary vertices don't match. existingBoundaryItem="
+                                + existingBoundaryItem
+                                + ", afterVisit boundaryItem="
+                                + boundaryItem);
+            }
         }
 
         // Remove the boundary
