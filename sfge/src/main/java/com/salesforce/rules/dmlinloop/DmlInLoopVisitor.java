@@ -53,7 +53,27 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         super.afterVisit(vertex, symbols);
     }
 
-    public void afterVisit(DmlStatementVertex vertex, SymbolProvider symbols) {
+    public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
+        createViolationIfSinkInsideLoop(vertex, symbols);
+    }
+
+    public void afterVisit(DmlInsertStatementVertex vertex, SymbolProvider symbols) {
+        createViolationIfSinkInsideLoop(vertex, symbols);
+    }
+
+    public void afterVisit(DmlUndeleteStatementVertex vertex, SymbolProvider symbols) {
+        createViolationIfSinkInsideLoop(vertex, symbols);
+    }
+
+    public void afterVisit(DmlUpdateStatementVertex vertex, SymbolProvider symbols) {
+        createViolationIfSinkInsideLoop(vertex, symbols);
+    }
+
+    public void afterVisit(DmlUpsertStatementVertex vertex, SymbolProvider symbols) {
+        createViolationIfSinkInsideLoop(vertex, symbols);
+    }
+
+    public void afterVisit(DmlMergeStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 

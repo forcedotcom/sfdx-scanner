@@ -245,20 +245,18 @@ public class ViolationWrapper {
         }
     }
 
-    public static class DmlInLoopInfoBuider extends ViolationBuilder {
+    public static class DmlInLoopInfoBuilder extends ViolationBuilder {
 
-        private final String dmlTypeLabel;
         private final OccurrenceInfo occurrenceInfo;
 
-        public DmlInLoopInfoBuider(int line, String dmlTypeLabel, OccurrenceInfo occurrenceInfo) {
+        public DmlInLoopInfoBuilder(int line, OccurrenceInfo occurrenceInfo) {
             super(line);
-            this.dmlTypeLabel = dmlTypeLabel;
             this.occurrenceInfo = occurrenceInfo;
         }
 
-        public static DmlInLoopInfoBuider get(
-            int sinkLine, String dmlTypeLabel, OccurrenceInfo occurrenceInfo) {
-            return new DmlInLoopInfoBuider(sinkLine, dmlTypeLabel, occurrenceInfo);
+        public static DmlInLoopInfoBuilder get(
+            int sinkLine, OccurrenceInfo occurrenceInfo) {
+            return new DmlInLoopInfoBuilder(sinkLine, occurrenceInfo);
         }
 
         @Override

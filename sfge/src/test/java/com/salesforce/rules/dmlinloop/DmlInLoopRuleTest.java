@@ -13,9 +13,15 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     protected static final DmlInLoopRule RULE = DmlInLoopRule.getInstance();
 
-    protected ViolationWrapper.DmlInLoopInfoBuider expect(
-        int sinkLine, String dmlTypeLabel, OccurrenceInfo occurrenceInfo) {
-        return ViolationWrapper.DmlInLoopInfoBuider.get(sinkLine, dmlTypeLabel, occurrenceInfo);
+    /**
+     * function to get the expected violation from some code and an loop OccurrenceInfo
+     * @param sinkLine the line on which the sink vertex occurs
+     * @param occurrenceInfo the information about the loop
+     * @return a ViolationWrapper.DmlInLoopInfoBuilder
+     */
+    protected ViolationWrapper.DmlInLoopInfoBuilder expect(
+        int sinkLine, OccurrenceInfo occurrenceInfo) {
+        return ViolationWrapper.DmlInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
     }
 
     @CsvSource({
@@ -24,14 +30,14 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void DmlInLoopOne(String loopLabel, String loopStructure) {
+    public void testSoqlStatementInLoop(String loopLabel, String loopStructure) {
         String[] sourceCode = {
             "public class MyClass {\n" +
                 "void foo() {\n" +
                     "List<Integer> myList = new Integer[] {3,5};\n" +
                     loopStructure + " {\n" +
                             "Account myAcct = \n " +
-                            "[SELECT Id, Name, BillingCity FROM Account WHERE Id = :i];" +
+                            "[SELECT Id, Name, BillingCity FROM Account WHERE Id = :i];\n" +
                     "}\n" +
                 "}\n" +
             "}\n"
@@ -42,11 +48,63 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             sourceCode,
             expect(
                 6,
-                "SoqlExpression",
                 new OccurrenceInfo(
                     loopLabel,
                     MY_CLASS,
                     4
+                )
+            )
+        );
+    }
+
+
+
+    @CsvSource({
+        "ForEachStatement, for (Integer i : myList), delete",
+        "ForEachStatement, for (Integer i : myList), insert",
+        "ForEachStatement, for (Integer i : myList), merge newAcct",
+        "ForEachStatement, for (Integer i : myList), undelete",
+        "ForEachStatement, for (Integer i : myList), update",
+        "ForEachStatement, for (Integer i : myList), upsert",
+        "ForLoopStatement, for (Integer i; i < 2; i++), delete",
+        "ForLoopStatement, for (Integer i; i < 2; i++), insert",
+        "ForLoopStatement, for (Integer i; i < 2; i++), merge newAcct",
+        "ForLoopStatement, for (Integer i; i < 2; i++), undelete",
+        "ForLoopStatement, for (Integer i; i < 2; i++), update",
+        "ForLoopStatement, for (Integer i; i < 2; i++), upsert",
+        "WhileLoopStatement, while(true), delete",
+        "WhileLoopStatement, while(true), insert",
+        "WhileLoopStatement, while(true), merge newAcct",
+        "WhileLoopStatement, while(true), undelete",
+        "WhileLoopStatement, while(true), update",
+        "WhileLoopStatement, while(true), upsert"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testDmlStatementInLoop(String loopLabel, String loopStructure, String dmlStatement) {
+        String[] sourceCode = {
+            "public class MyClass {\n" +
+                "void foo() {\n" +
+                    "List<Integer> myList = new Integer[] {3,5};\n" +
+                    "Account newAcct = new Account(name = 'Acme');\n" +
+                    "Account existing = [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3];\n" +
+                    loopStructure + " {\n" +
+                        "try {\n" +
+                            dmlStatement + " existing;\n" +
+                        "} catch (DmlException e) { }\n" +
+                "}\n" +
+                "}\n" +
+            "}\n"
+        };
+
+        assertViolations(
+            RULE,
+            sourceCode,
+            expect(
+                8,
+                new OccurrenceInfo(
+                    loopLabel,
+                    MY_CLASS,
+                    6
                 )
             )
         );
