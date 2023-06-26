@@ -78,15 +78,9 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * @param loopVertex the vertex at which the violation (loop) was detected
      */
     private void createViolation(SFVertex loopVertex) {
-        String sinkName;
-
-        if (sinkVertex instanceof MethodCallExpressionVertex) sinkName = ((MethodCallExpressionVertex) sinkVertex).getFullMethodName();
-
-        // TODO check final UI text
-        else sinkName = sinkVertex.getLabel();
 
         violations.add(new Violation.PathBasedRuleViolation(
-            DmlInLoopUtil.getMessage(sinkName, loopVertex),
+            DmlInLoopUtil.getMessage(loopVertex),
             sourceVertex, sinkVertex));
     }
 

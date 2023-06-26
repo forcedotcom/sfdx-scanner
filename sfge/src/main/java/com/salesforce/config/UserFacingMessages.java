@@ -134,7 +134,7 @@ public final class UserFacingMessages {
          * String Param 3: Occurrence information using {@link
          *  OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Can be more than one occurrence.
          */
-        public static final String MESSAGE_TEMPLATE = "%1$s ran in a loop at %2$s";
+        public static final String MESSAGE_TEMPLATE = "A DML operation was made inside a %1$s";
 
     }
 }

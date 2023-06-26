@@ -263,7 +263,7 @@ public class ViolationWrapper {
 
         @Override
         public String getMessage() {
-            return DmlInLoopUtil.getMessage(dmlTypeLabel, occurrenceInfo);
+            return DmlInLoopUtil.getMessage(occurrenceInfo);
         }
     }
 

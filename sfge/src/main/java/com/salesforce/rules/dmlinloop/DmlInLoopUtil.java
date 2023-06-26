@@ -8,14 +8,12 @@ public class DmlInLoopUtil {
 
     /**
      * Retrieve the DML Rule violation message
-     * @param sinkName the name/label of the DML method/statement
      * @param loopVertex the vertex that created the loop containing sinkName
      * @return
      */
-    public static String getMessage(String sinkName, SFVertex loopVertex) {
+    public static String getMessage(SFVertex loopVertex) {
         return String.format(
             UserFacingMessages.DmlInLoopRuleTemplates.MESSAGE_TEMPLATE,
-            sinkName,
             new OccurrenceInfo(
                 loopVertex.getLabel(),
                 loopVertex.getDefiningType(),
@@ -25,14 +23,12 @@ public class DmlInLoopUtil {
 
     /**
      * Retrieve the DML Rule violation message
-     * @param sinkName the name/label of the DML method/statement
      * @param occurenceInfo the OccurenceInfo of the sink (DML statement)
      * @return
      */
-    public static String getMessage( String sinkName, OccurrenceInfo occurenceInfo) {
+    public static String getMessage(OccurrenceInfo occurenceInfo) {
         return String.format(
             UserFacingMessages.DmlInLoopRuleTemplates.MESSAGE_TEMPLATE,
-            sinkName,
             occurenceInfo);
     }
 }
