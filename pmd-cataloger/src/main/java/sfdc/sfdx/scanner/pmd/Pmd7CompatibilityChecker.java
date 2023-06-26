@@ -7,10 +7,19 @@ import sfdc.sfdx.scanner.telemetry.TelemetryUtil;
 
 import java.util.*;
 
+/**
+ * PMD 7 has some incompatibilities with PMD 6. This class allows us to identify customer-created
+ * rules that are incompatible with PMD 7, so they can avoid getting sandbagged.
+ */
 public class Pmd7CompatibilityChecker {
     private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be '%s'";
     private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
 
+    /**
+     * Check all provided rules for compatibility with PMD 7. Incompatible rules will be flagged with
+     * a warning and counted by a telemetry event.
+     * @param rules
+     */
     public void validatePmd7Readiness(List<PmdCatalogRule> rules) {
         int unreadyRuleCount = 0;
         for (PmdCatalogRule rule : rules) {

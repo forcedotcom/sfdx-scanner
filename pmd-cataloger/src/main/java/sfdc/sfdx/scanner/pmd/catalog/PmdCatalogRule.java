@@ -21,7 +21,17 @@ public class PmdCatalogRule {
     public static final String ATTR_CLASS = "class";
     public static final String ATTR_REF = "ref";
 
+    /**
+     * Regex that matches the naming convention used by PMD's JARs.
+     * Ordinarily, this would be less hardcoded, but PMD's not releasing new versions of 6,
+     * so we can count on the JAR remaining constant until PMD 7 releases, at which point this
+     * code will probably be obsolete.
+     */
     private static final Pattern STANDARD_JAR_PATTERN = Pattern.compile("pmd-(apex|java|javascript|visualforce|xml)-6\\.55\\.0\\.jar", Pattern.CASE_INSENSITIVE);
+    /**
+     * Path used for comparison to identify standard rules.
+     * See note on {@link #STANDARD_JAR_PATTERN} for information about why this is hardcoded.
+     */
     private static final Path STANDARD_JAR_PATH = Paths.get("dist", "pmd", "lib");
 
 	private final String name;
