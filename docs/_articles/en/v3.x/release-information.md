@@ -12,6 +12,19 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.14.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.14.0) (07-06-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.14.0...v3.13.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (CodeAnalyzer): The upcoming release of [PMD 7.x](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html) contains some changes that require you to rewrite your PMD 6.x rules. Code Analyzer hasn’t upgraded to PMD 7.x yet. To alert you in advance about what you must change in your code to comply with PMD 7.x, we added a warning message. Fix your code, and if you need help, create an issue on github.com/forcedotcom/sfdx-scanner.
+
+**Closed issues:**
+
+**Merged pull requests**
+
 ## [v3.13.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.13.0) (06-07-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.13.0...v3.12.0)
