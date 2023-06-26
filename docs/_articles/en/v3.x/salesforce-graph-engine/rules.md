@@ -5,13 +5,13 @@ lang: en
 
 Salesforce Graph Engine includes path-based and data-flow analysis rules.
 
-| Rule | Type | Description |
-| -------- | ----------- | ----------- |
-| ApexFlsViolationRule | Path-based analysis | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
-| ApexNullPointerExceptionRule | Path-based analysis | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
-| MultipleMassSchemaLookupRule | Path-based analysis | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
-| UnimplementedTypeRule | Graph-based analysis | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
-| UnusedMethodRule (pilot) | Path-based analysis | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
+| Rule | Type | Status | Description |
+| -------- | ----------- | ----------- | ----------- |
+| ApexFlsViolationRule | Path-based analysis | Generally Available (GA) | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
+| ApexNullPointerExceptionRule | Path-based analysis | GA | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
+| MultipleMassSchemaLookupRule | Path-based analysis | Pilot | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
+| UnimplementedTypeRule | Graph-based analysis | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
+| UnusedMethodRule | Path-based analysis | Pilot | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 
 ## ApexFlsViolationRule#
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis, rules run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
@@ -164,65 +164,6 @@ Parameter explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-## MultipleMassSchemaLookupRule
-
-MultipleMassSchemaLookupRule is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
-
-These methods are identified by MultipleMassSchemaLookupRule.
-
-* `Schema.getGlobalDescribe()`
-* `Schema.describeSObjects(...)`
-
-Flagged lookups include:
-
-* Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
-* More than one invocation in a path 
-
-These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
-* `Schema.getGlobalDescribe()` within a loop
-* `Schema.describeSObjects(...)` within a loop
-* `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
-* `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
-
-### Definitions
-
-| Rule Component | Definition                                  																		|
-| ---------		 | ---------                                															  			|
-|**Source**		 |																													|
-|		 	  	 | `@AuraEnabled`-annotated methods     																			|
-|				 |`@InvocableMethod`-annotated methods																			  	|
-|     			 | `@NamespaceAccessible`-annotated methods 																		|
-| 				 |`@RemoteAction`-annotated methods																				  	|
-|				 |Any method returning a `PageReference` object																	  	|
-|				 |`public`-scoped methods on Visualforce Controllers																|
-|				 |`global`-scoped methods on any class																			  	|
-|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation																				|
-| **Sink**		 | 																													|
-| 		  	  	 |`Schema.getGlobalDescribe()`													|
-|				 |`Schema.describeSObjects(...)`																										|
-
-### Interpreting MultipleMassSchemaLookupRule Results
-Match any violation message that you receive with these cases to understand more about the violation.
-
-#### Loop Case
-
-`Schema.getGlobalDescribe` was called inside a ForLoopStatement at <class>:<line>.
-`Schema.describeSObjects` was called inside a WhileLoopStatement at <class>:<line>.  
-
-*Explanation*
-
-Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` outside the loop, then rescan your code. 
-
-#### More Than One Invocation in a Path Case
-
-`Schema.getGlobalDescribe` was preceded by a call to `Schema.getGlobalDescribe` at <class>:<line>.
-`Schema.describeSObjects` was preceded by a call to `Schema.getGlobalDescribe` at <class>:<line>.
-
-*Explanation*
-
-Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` multiple times in a single path. Reduce the invocation of the method to one time, then rescan your code.
-
 ## UnimplementedTypeRule#
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
@@ -262,6 +203,72 @@ To run a specific category of rules including the pilot rules in that category, 
 **Example**:
 
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
+## MultipleMassSchemaLookupRule
+
+MultipleMassSchemaLookupRule is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
+
+These methods are identified by MultipleMassSchemaLookupRule.
+
+* `Schema.getGlobalDescribe()`
+* `Schema.describeSObjects(...)`
+
+Flagged lookups include:
+
+* Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
+* Multiple expensive schema lookups are invoked
+* An expensive schema lookup was executed multiple times
+
+These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
+* `Schema.getGlobalDescribe()` within a loop
+* `Schema.describeSObjects(...)` within a loop
+* `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
+* `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
+
+### Definitions
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |`Schema.getGlobalDescribe()`													|
+|				 |`Schema.describeSObjects(...)`																										|
+
+### Interpreting MultipleMassSchemaLookupRule Results
+Match any violation message that you receive with these cases to understand more about the violation.
+
+#### Loop Case
+
+`Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
+
+*Explanation*
+
+Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` outside the loop, then rescan your code. 
+
+#### Multiple Schema Lookups Are Invoked Case
+
+Multiple schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
+
+*Explanation*
+
+Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObjects`. Modify your code so that only one expensive schema lookup is invoked.
+
+#### More Than One Execution in a Path Case
+
+`Schema.getGlobalDescribe` was executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
+
+*Explanation*
+
+`Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code.
 
 ### UnusedMethodRule#
 
