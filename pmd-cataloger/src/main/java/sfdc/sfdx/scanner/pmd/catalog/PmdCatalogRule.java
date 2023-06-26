@@ -1,12 +1,14 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.w3c.dom.*;
 import org.json.simple.*;
 import com.salesforce.messaging.MessagePassableException;
 import com.salesforce.messaging.EventKey;
-import com.salesforce.messaging.CliMessager;
 
 import static sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson.*;
 
@@ -16,7 +18,11 @@ public class PmdCatalogRule {
 	public static final String ATTR_DESCRIPTION = "description";
 
     public static final String ATTR_LANGUAGE = "language";
+    public static final String ATTR_CLASS = "class";
     public static final String ATTR_REF = "ref";
+
+    private static final Pattern STANDARD_JAR_PATTERN = Pattern.compile("pmd-(apex|java|javascript|visualforce|xml)-6\\.55\\.0\\.jar", Pattern.CASE_INSENSITIVE);
+    private static final Path STANDARD_JAR_PATH = Paths.get("dist", "pmd", "lib");
 
 	private final String name;
 	private final String message;
@@ -46,6 +52,10 @@ public class PmdCatalogRule {
 		this.sourceJar = category.getSourceJar();
 	}
 
+    public String getLanguage() {
+        return language;
+    }
+
 	String getFullName() {
 		return getCategoryPath() + "/" + getName();
 	}
@@ -53,6 +63,33 @@ public class PmdCatalogRule {
 	public String getName() {
 		return name;
 	}
+
+    public boolean isXpath() {
+        NodeList properties = element.getElementsByTagName("properties");
+        if (properties.getLength() == 0) {
+            return false;
+        }
+
+        Element propertiesElem = (Element) properties.item(0);
+        NodeList propertyList = propertiesElem.getElementsByTagName("property");
+        for (int i = 0; i < propertyList.getLength(); i++) {
+            Element elem = (Element) propertyList.item(i);
+            if (elem.hasAttribute("name") && elem.getAttribute("name").equalsIgnoreCase("xpath")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isStandard() {
+        // Make sure that we're in a JAR whose name matches PMD's naming convention.
+        if (!STANDARD_JAR_PATTERN.matcher(this.sourceJar).find()) {
+            return false;
+        }
+        // Make sure that we're in a directory that could plausibly be our dist directory.
+        Path parentDir = Paths.get(this.sourceJar).getParent();
+        return parentDir.endsWith(STANDARD_JAR_PATH);
+    }
 
 	String getCategoryPath() {
 		return category.getPath();

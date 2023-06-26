@@ -5,10 +5,11 @@ import com.salesforce.messaging.EventKey;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
 import sfdc.sfdx.scanner.telemetry.TelemetryUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Pmd7CompatibilityChecker {
+    private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be '%s'";
+    private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
 
     public void validatePmd7Readiness(List<PmdCatalogRule> rules) {
         int unreadyRuleCount = 0;
@@ -17,18 +18,25 @@ public class Pmd7CompatibilityChecker {
             if (ruleIsIndirectRef(rule)) {
                 continue;
             }
-            // Check for missing properties.
-            List<String> missingProps = new ArrayList<>();
-            if (ruleLacksLanguageProp(rule)) {
-                missingProps.add(PmdCatalogRule.ATTR_LANGUAGE);
+            // Built-in rules shouldn't be checked for PMD7 readiness.
+            if (rule.isStandard()) {
+                continue;
             }
-            // If any properties are missing, throw a warning about it and increment our total.
-            if (!missingProps.isEmpty()) {
-                String missingPropString = String.join(",", missingProps);
+            // Check for missing/wrong properties.
+            Set<String> propWarningSet = new HashSet<>();
+            if (ruleLacksLanguageProp(rule)) {
+                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_LANGUAGE, rule.getLanguage()));
+            }
+            if (ruleIsBadXpath(rule)) {
+                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_CLASS, EXPECTED_XPATH_CLASS));
+            }
+            // If any properties are bad, throw a warning about it and increment our total.
+            if (!propWarningSet.isEmpty()) {
+                String badPropString = String.join("; ", propWarningSet);
                 CliMessager.getInstance().addMessage(
-                    "Rule " + rule.getName() + " lacks PMD7-mandatory properties " + missingPropString,
+                    "Rule " + rule.getName() + " is PMD7-incompatible",
                     EventKey.WARNING_PMD7_INCOMPATIBLE_RULE,
-                    rule.getName(), missingPropString
+                    rule.getName(), badPropString
                 );
                 unreadyRuleCount += 1;
             }
@@ -46,6 +54,14 @@ public class Pmd7CompatibilityChecker {
         // If the rule's element has a `ref` property, it's an indirect reference to
         // the rule's actual declaration.
         return rule.getElement().hasAttribute(PmdCatalogRule.ATTR_REF);
+    }
+
+    private boolean ruleIsBadXpath(PmdCatalogRule rule) {
+        if (!rule.isXpath()) {
+            return false;
+        }
+        String classProp = rule.getElement().getAttribute(PmdCatalogRule.ATTR_CLASS);
+        return !classProp.equalsIgnoreCase(EXPECTED_XPATH_CLASS);
     }
 
     private boolean ruleLacksLanguageProp(PmdCatalogRule rule) {
