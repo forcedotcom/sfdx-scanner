@@ -6,6 +6,7 @@ import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
 import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.dmlinloop.DmlInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
@@ -241,6 +242,28 @@ public class ViolationWrapper {
         public String getMessage() {
             return MassSchemaLookupInfoUtil.getMessage(
                     sinkMethodName, repetitionType, occurrenceInfoList);
+        }
+    }
+
+    public static class DmlInLoopInfoBuider extends ViolationBuilder {
+
+        private final String dmlTypeLabel;
+        private final OccurrenceInfo occurrenceInfo;
+
+        public DmlInLoopInfoBuider(int line, String dmlTypeLabel, OccurrenceInfo occurrenceInfo) {
+            super(line);
+            this.dmlTypeLabel = dmlTypeLabel;
+            this.occurrenceInfo = occurrenceInfo;
+        }
+
+        public static DmlInLoopInfoBuider get(
+            int sinkLine, String dmlTypeLabel, OccurrenceInfo occurrenceInfo) {
+            return new DmlInLoopInfoBuider(sinkLine, dmlTypeLabel, occurrenceInfo);
+        }
+
+        @Override
+        public String getMessage() {
+            return DmlInLoopUtil.getMessage(dmlTypeLabel, occurrenceInfo);
         }
     }
 

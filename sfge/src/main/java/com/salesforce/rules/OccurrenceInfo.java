@@ -3,8 +3,8 @@ package com.salesforce.rules;
 import com.salesforce.config.UserFacingMessages;
 
 /**
- * Internal representation of an occurrence info. TODO: Consider moving this and its related
- * methods to their own class if it's used outside MMSLR.
+ * Internal representation of an occurrence info.
+ * Originally from MMSL Info Utils.
  */
 public class OccurrenceInfo {
     final String label;
@@ -20,7 +20,7 @@ public class OccurrenceInfo {
     @Override
     public String toString() {
         return String.format(
-            UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.OCCURRENCE_TEMPLATE,
+            UserFacingMessages.OccurrenceInfoTemplates.OCCURRENCE_TEMPLATE,
             label,
             definingType,
             lineNum);

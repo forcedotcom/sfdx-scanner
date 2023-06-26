@@ -16,6 +16,7 @@ public final class UserFacingMessages {
                 "Identifies methods that aren't invoked from recognized entry points.";
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
+        public static final String DML_IN_LOOP_RULE = "Detects DML operations that occur inside loops leading to degraded performance.";
     }
 
     public static final class RuleViolationTemplates {
@@ -78,7 +79,7 @@ public final class UserFacingMessages {
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
     }
 
-    public static final class MultipleMassSchemaLookupRuleTemplates {
+    public static final class OccurrenceInfoTemplates {
         /**
          * String Param 1: Vertex or MethodCall information String Param 2: Class name Number Param:
          * Line-number in code
@@ -86,6 +87,11 @@ public final class UserFacingMessages {
          * <p>Example: ForEachStatement at MyClass:23
          */
         public static final String OCCURRENCE_TEMPLATE = "%s at %s:%d";
+
+    }
+
+    public static final class MultipleMassSchemaLookupRuleTemplates {
+
 
         /** Indicates when an expensive schema lookup operation happened inside a loop. */
         public static final String LOOP_MESSAGE_TEMPLATE = "was called inside a loop";
@@ -109,7 +115,7 @@ public final class UserFacingMessages {
          * <p>String Param 2: Text corresponding to occurrence type ({@link #LOOP_MESSAGE_TEMPLATE},
          * {@link #PRECEDED_BY_MESSAGE_TEMPLATE}, {@link #CALL_STACK_TEMPLATE})
          *
-         * <p>String Param 3: Occurrence information using {@link #OCCURRENCE_TEMPLATE}. Can be more
+         * <p>String Param 3: Occurrence information using {@link OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Can be more
          * than one occurrence.
          */
         public static final String MESSAGE_TEMPLATE = "%1$s %2$s. %3$s";
@@ -119,5 +125,16 @@ public final class UserFacingMessages {
          * Meant for violation messages that don't include the name of the expensive method.
          */
         public static final String METHODLESS_MESSAGE_TEMPLATE = "%2$s. %3$s";
+    }
+
+    public static final class DmlInLoopRuleTemplates {
+
+        /**
+         * String Param 1: DML Statement Type
+         * String Param 3: Occurrence information using {@link
+         *  OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Can be more than one occurrence.
+         */
+        public static final String MESSAGE_TEMPLATE = "%1$s ran in a loop at %2$s";
+
     }
 }
