@@ -12,12 +12,10 @@ import java.util.*;
  * rules that are incompatible with PMD 7, so they can avoid getting sandbagged.
  */
 public class Pmd7CompatibilityChecker {
-    private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be '%s'";
+    private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be %s";
     private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
-    private static final String VISUALFORCE = "visualforce";
-    private static final String VF = "vf";
-    private static final String JAVASCRIPT = "javascript";
-    private static final String ECMASCRIPT = "ecmascript";
+    private static final String RULE_TAG = "<rule>";
+    private static final String NON_NULL = "non-null";
 
     /**
      * Check all provided rules for compatibility with PMD 7. Incompatible rules will be flagged with
@@ -38,10 +36,10 @@ public class Pmd7CompatibilityChecker {
             // Check for missing/wrong properties.
             Set<String> propWarningSet = new HashSet<>();
             if (ruleLacksLanguageProp(rule)) {
-                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_LANGUAGE, getExpectedLanguageValue(rule.getLanguage())));
+                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_LANGUAGE, NON_NULL));
             }
             if (ruleIsBadXpath(rule)) {
-                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_CLASS, EXPECTED_XPATH_CLASS));
+                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_CLASS, "'" + EXPECTED_XPATH_CLASS + "'"));
             }
             // If any properties are bad, throw a warning about it and increment our total.
             if (!propWarningSet.isEmpty()) {
@@ -79,20 +77,6 @@ public class Pmd7CompatibilityChecker {
 
     private boolean ruleLacksLanguageProp(PmdCatalogRule rule) {
         return !rule.getElement().hasAttribute(PmdCatalogRule.ATTR_LANGUAGE);
-    }
-
-    private String getExpectedLanguageValue(String ruleLanguage) {
-        // We index VF rules as a slightly different name than PMD uses.
-        if (ruleLanguage.equalsIgnoreCase(VISUALFORCE)) {
-            return VF;
-        } else if (ruleLanguage.equalsIgnoreCase(JAVASCRIPT)) {
-            // We index JS-like rules as a slightly different name than PMD uses.
-            return ECMASCRIPT;
-        } else {
-            // In all other cases, just cast the language name to lowercase.
-            // FIXME: POM, WSDL, and XSL rules will all wrongly return "xml" here.
-            return ruleLanguage.toLowerCase();
-        }
     }
 
     private static class TelemetryData extends TelemetryUtil.AbstractTelemetryData {

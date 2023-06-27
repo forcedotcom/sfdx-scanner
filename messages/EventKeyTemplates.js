@@ -19,7 +19,7 @@ module.exports = {
 		"telemetry": "This message is unused."
 	},
 	"warning": {
-		"pmd7IncompatibleRule": "PMD rule [%s] is incompatible with PMD 7: %s. If resolving these problems is non-viable for you, log an issue on github.com/forcedotcom/sfdx-scanner",
+		"pmd7IncompatibleRule": "PMD rule [%s] isn't compatible with PMD 7.0: %s. Resolve these issues to future-proof your rule. If you need help, log an issue on github.com/forcedotcom/sfdx-scanner",
 		"invalidCategorySkipped": "Cataloger: Skipping invalid PMD Category file '%s'.",
 		"invalidRulesetSkipped": "Cataloger: Skipping invalid PMD Ruleset file '%s'.",
 		"xmlDropped": "Cataloger: Dropping XML file [%s] since its path does not conform to Rulesets or Category.",
