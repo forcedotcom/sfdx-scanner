@@ -16,6 +16,8 @@ public class Pmd7CompatibilityChecker {
     private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
     private static final String VISUALFORCE = "visualforce";
     private static final String VF = "vf";
+    private static final String JAVASCRIPT = "javascript";
+    private static final String ECMASCRIPT = "ecmascript";
 
     /**
      * Check all provided rules for compatibility with PMD 7. Incompatible rules will be flagged with
@@ -80,16 +82,15 @@ public class Pmd7CompatibilityChecker {
     }
 
     private String getExpectedLanguageValue(String ruleLanguage) {
-        // We index VF rules' language as "visualforce", but PMD expects the
-        // property's value to be "vf".
+        // We index VF rules as a slightly different name than PMD uses.
         if (ruleLanguage.equalsIgnoreCase(VISUALFORCE)) {
             return VF;
+        } else if (ruleLanguage.equalsIgnoreCase(JAVASCRIPT)) {
+            // We index JS-like rules as a slightly different name than PMD uses.
+            return ECMASCRIPT;
         } else {
-            // Otherwise, just cast the language to lowercase.
-            // FIXME: Because of how we resolve language names to JARs, this will return
-            //        wrong values for the following languages:
-            //        - ECMA variants (will probably return "javascript" instead of "ecmascript")
-            //        - POM/WSDL/XSL (will return "xml" instead of "pom"/"wsdl"/"xsl")
+            // In all other cases, just cast the language name to lowercase.
+            // FIXME: POM, WSDL, and XSL rules will all wrongly return "xml" here.
             return ruleLanguage.toLowerCase();
         }
     }
