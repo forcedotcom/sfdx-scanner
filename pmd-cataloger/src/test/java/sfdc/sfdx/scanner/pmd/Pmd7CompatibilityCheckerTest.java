@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.salesforce.messaging.CliMessager;
 import com.salesforce.messaging.Message;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 
 public class Pmd7CompatibilityCheckerTest {
 
@@ -32,8 +32,8 @@ public class Pmd7CompatibilityCheckerTest {
     /**
      * Before and after each test, reset the CLI messages.
      */
-    @BeforeEach
-    @AfterEach
+    @Before
+    @After
     public void clearMessages() {
         CliMessager.getInstance().resetMessages();
     }
