@@ -20,6 +20,9 @@ public class PmdCatalogRule {
     public static final String ATTR_LANGUAGE = "language";
     public static final String ATTR_CLASS = "class";
     public static final String ATTR_REF = "ref";
+    public static final String ELEM_PROPERTIES = "properties";
+    public static final String ELEM_PROPERTY = "property";
+    public static final String VAL_XPATH = "xpath";
 
     /**
      * Regex that matches the naming convention used by PMD's JARs.
@@ -75,16 +78,16 @@ public class PmdCatalogRule {
 	}
 
     public boolean isXpath() {
-        NodeList properties = element.getElementsByTagName("properties");
+        NodeList properties = element.getElementsByTagName(ELEM_PROPERTIES);
         if (properties.getLength() == 0) {
             return false;
         }
 
         Element propertiesElem = (Element) properties.item(0);
-        NodeList propertyList = propertiesElem.getElementsByTagName("property");
+        NodeList propertyList = propertiesElem.getElementsByTagName(ELEM_PROPERTY);
         for (int i = 0; i < propertyList.getLength(); i++) {
             Element elem = (Element) propertyList.item(i);
-            if (elem.hasAttribute("name") && elem.getAttribute("name").equalsIgnoreCase("xpath")) {
+            if (elem.hasAttribute(ATTR_NAME) && elem.getAttribute(ATTR_NAME).equalsIgnoreCase(VAL_XPATH)) {
                 return true;
             }
         }
