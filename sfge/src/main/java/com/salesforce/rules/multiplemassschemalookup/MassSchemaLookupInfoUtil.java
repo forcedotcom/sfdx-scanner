@@ -24,9 +24,7 @@ public final class MassSchemaLookupInfoUtil {
             String sinkMethodName,
             MmslrUtil.RepetitionType repetitionType,
             List<OccurrenceInfo> occurrenceInfos) {
-
-        return String.format(
-                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.MESSAGE_TEMPLATE,
+        return repetitionType.getViolationMessage(
                 sinkMethodName,
                 getOccurrenceMessage(repetitionType, ""),
                 getConsolidatedOccurrenceInfo(occurrenceInfos));
@@ -53,7 +51,7 @@ public final class MassSchemaLookupInfoUtil {
 
     private static String getOccurrenceMessage(
             MmslrUtil.RepetitionType repetitionType, String value) {
-        return repetitionType.getMessage(value);
+        return repetitionType.getOccurrenceMessage(value);
     }
 
     private static List<OccurrenceInfo> getOccurrenceInfo(
