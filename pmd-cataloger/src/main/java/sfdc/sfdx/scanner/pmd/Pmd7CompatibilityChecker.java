@@ -14,6 +14,8 @@ import java.util.*;
 public class Pmd7CompatibilityChecker {
     private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be '%s'";
     private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
+    private static final String VISUALFORCE = "visualforce";
+    private static final String VF = "vf";
 
     /**
      * Check all provided rules for compatibility with PMD 7. Incompatible rules will be flagged with
@@ -34,7 +36,7 @@ public class Pmd7CompatibilityChecker {
             // Check for missing/wrong properties.
             Set<String> propWarningSet = new HashSet<>();
             if (ruleLacksLanguageProp(rule)) {
-                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_LANGUAGE, rule.getLanguage()));
+                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_LANGUAGE, getExpectedLanguageValue(rule.getLanguage())));
             }
             if (ruleIsBadXpath(rule)) {
                 propWarningSet.add(String.format(BAD_PROP_TEMPLATE, "<rule>", PmdCatalogRule.ATTR_CLASS, EXPECTED_XPATH_CLASS));
@@ -75,6 +77,21 @@ public class Pmd7CompatibilityChecker {
 
     private boolean ruleLacksLanguageProp(PmdCatalogRule rule) {
         return !rule.getElement().hasAttribute(PmdCatalogRule.ATTR_LANGUAGE);
+    }
+
+    private String getExpectedLanguageValue(String ruleLanguage) {
+        // We index VF rules' language as "visualforce", but PMD expects the
+        // property's value to be "vf".
+        if (ruleLanguage.equalsIgnoreCase(VISUALFORCE)) {
+            return VF;
+        } else {
+            // Otherwise, just cast the language to lowercase.
+            // FIXME: Because of how we resolve language names to JARs, this will return
+            //        wrong values for the following languages:
+            //        - ECMA variants (will probably return "javascript" instead of "ecmascript")
+            //        - POM/WSDL/XSL (will return "xml" instead of "pom"/"wsdl"/"xsl")
+            return ruleLanguage.toLowerCase();
+        }
     }
 
     private static class TelemetryData extends TelemetryUtil.AbstractTelemetryData {
