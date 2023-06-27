@@ -61,7 +61,11 @@ dependencies {
   implementation("com.google.code.gson:gson:2.3")
   implementation("com.google.guava:guava:28.0-jre")
   testImplementation("org.mockito:mockito-core:1.+")
-  testImplementation("junit", "junit", "4.12")
+  testCompileOnly("junit:junit:4.12")
+  testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.7.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-engine:5.7.2")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.7.2")
   testImplementation("org.hamcrest:hamcrest:2.1")
   // Used in unit tests
   testImplementation(files("$buildDir/../../test/test-jars/apex/testjar-categories-and-rulesets-1.jar"))
@@ -87,6 +91,7 @@ tasks.named("assemble") {
 }
 
 tasks.test {
+  useJUnitPlatform()
   finalizedBy(tasks.jacocoTestReport) // Report is always generated after test runs.
 }
 
