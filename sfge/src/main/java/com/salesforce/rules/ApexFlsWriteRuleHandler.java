@@ -34,32 +34,32 @@ final class ApexFlsWriteRuleHandler implements FlsRuleHandler {
     private static final TreeMap<String, Supplier<AbstractFlsVisitor>>
             DML_STATEMENT_TYPE_TO_VISITOR =
                     CollectionUtil.newTreeMapOf(
-                            FlsConstants.FlsValidationType.DELETE.dmlStatementType,
+                            FlsConstants.FlsValidationType.DELETE.getDmlStatementType(),
                                     DmlDeleteFlsRuleVisitor::new,
-                            FlsConstants.FlsValidationType.INSERT.dmlStatementType,
+                            FlsConstants.FlsValidationType.INSERT.getDmlStatementType(),
                                     DmlInsertFlsRuleVisitor::new,
-                            FlsConstants.FlsValidationType.MERGE.dmlStatementType,
+                            FlsConstants.FlsValidationType.MERGE.getDmlStatementType(),
                                     DmlMergeFlsRuleVisitor::new,
-                            FlsConstants.FlsValidationType.UPDATE.dmlStatementType,
+                            FlsConstants.FlsValidationType.UPDATE.getDmlStatementType(),
                                     DmlUpdateFlsRuleVisitor::new,
-                            FlsConstants.FlsValidationType.UPSERT.dmlStatementType,
+                            FlsConstants.FlsValidationType.UPSERT.getDmlStatementType(),
                                     DmlUpsertFlsRuleVisitor::new,
-                            FlsConstants.FlsValidationType.UNDELETE.dmlStatementType,
+                            FlsConstants.FlsValidationType.UNDELETE.getDmlStatementType(),
                                     DmlUndeleteFlsRuleVisitor::new);
 
     private static final TreeMap<String, Supplier<AbstractFlsVisitor>> DATABASE_METHOD_TO_VISITOR =
             CollectionUtil.newTreeMapOf(
-                    FlsConstants.FlsValidationType.DELETE.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.DELETE.getDmlStatementType(),
                             DmlDeleteFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.INSERT.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.INSERT.getDmlStatementType(),
                             DmlInsertFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.MERGE.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.MERGE.getDmlStatementType(),
                             DmlMergeFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UPDATE.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.UPDATE.getDmlStatementType(),
                             DmlUpdateFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UPSERT.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.UPSERT.getDmlStatementType(),
                             DmlUpsertFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UNDELETE.databaseOperationMethod,
+                    FlsConstants.FlsValidationType.UNDELETE.getDmlStatementType(),
                             DmlUndeleteFlsRuleVisitor::new);
 
     @Override

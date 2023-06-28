@@ -1,17 +1,19 @@
 package com.salesforce.rules.dmlinloop;
 
-import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
-import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.DmlUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
@@ -49,7 +51,17 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        createViolationIfSinkInsideLoop(vertex, symbols);
+
+        final String fullMethodName = vertex.getFullMethodName();
+
+        Set<String> dmlMethodNames = Arrays.stream(DmlUtil.DmlOperation.values())
+            .map(op -> op.getDatabaseOperationMethod()).collect(Collectors.toSet());
+
+        // we know this is a method call/expression vertex, but we need to see
+        // if it is a Database.<method> call to confirm it is a DML operation
+        if (dmlMethodNames.contains(fullMethodName)) {
+            createViolationIfSinkInsideLoop(vertex, symbols);
+        }
         super.afterVisit(vertex, symbols);
     }
 
@@ -81,9 +93,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
-    private void createViolationIfSinkInsideLoop(
-        SFVertex vertex, SymbolProvider symbols
-    ) {
+    private void createViolationIfSinkInsideLoop(SFVertex vertex, SymbolProvider symbols) {
         if (vertex != null && vertex.equals(sinkVertex)) {
             final Optional<? extends SFVertex> loopedVertexOpt = isInsideLoop();
             if (loopedVertexOpt.isPresent()) {

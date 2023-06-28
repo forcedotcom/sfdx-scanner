@@ -110,7 +110,7 @@ public class UnresolvedCrudFlsTest extends BaseFlsTest {
                 "public class MyClass {\n"
                         + "   public void foo() {\n"
                         + "       "
-                        + validationType.databaseOperationMethod
+                        + validationType.getDatabaseOperationMethod()
                         + "(MyBuilder.someMethod());\n"
                         + "   }\n"
                         + "}\n";

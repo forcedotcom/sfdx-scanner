@@ -22,7 +22,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 final class ApexFlsReadRuleHandler implements FlsRuleHandler {
     private static final FlsConstants.FlsValidationType VALIDATION_TYPE =
             FlsConstants.FlsValidationType.READ;
-    private static final String DATABASE_READ_METHOD_NAME = VALIDATION_TYPE.databaseOperationMethod;
+    private static final String DATABASE_READ_METHOD_NAME = VALIDATION_TYPE.getDatabaseOperationMethod();
 
     @Override
     public Set<FlsViolationInfo> detectViolations(
