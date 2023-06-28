@@ -13,7 +13,7 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | UnimplementedTypeRule | Graph-based analysis | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
 | UnusedMethodRule | Path-based analysis | Pilot | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 
-## ApexFlsViolationRule#
+## ApexFlsViolationRule
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis, rules run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
 
 Example: 
@@ -92,7 +92,7 @@ Graph Engine encountered an error while walking this path. Manually verify that 
 - [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
 - [Frequently Asked Questions](./en/v3.x/faq/)
 
-## ApexNullPointerExceptionRule#
+## ApexNullPointerExceptionRule
 
 ApexNullPointerExceptionRule identifies Apex operations that dereference null objects and throw NullPointerExceptions. NullPointerExceptions generally indicate underlying problems in your code to address. 
 
@@ -164,7 +164,7 @@ Parameter explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-## UnimplementedTypeRule#
+## UnimplementedTypeRule
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
 
@@ -270,7 +270,7 @@ Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObje
 
 `Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code.
 
-### UnusedMethodRule#
+### UnusedMethodRule
 
 UnusedMethodRule is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. UnusedMethodRule detects methods contained in your code that aren’t invoked. It detects:
 
