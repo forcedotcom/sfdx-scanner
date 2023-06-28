@@ -204,7 +204,7 @@ To run a specific category of rules including the pilot rules in that category, 
 
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
-## MultipleMassSchemaLookupRule
+### MultipleMassSchemaLookupRule
 
 MultipleMassSchemaLookupRule is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
 
@@ -225,7 +225,7 @@ These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 * `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
 * `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
 
-### Definitions
+#### Definitions
 
 | Rule Component | Definition                                  																		|
 | ---------		 | ---------                                															  			|
@@ -243,10 +243,10 @@ These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 | 		  	  	 |`Schema.getGlobalDescribe()`													|
 |				 |`Schema.describeSObjects(...)`																										|
 
-### Interpreting MultipleMassSchemaLookupRule Results
+#### Interpreting MultipleMassSchemaLookupRule Results
 Match any violation message that you receive with these cases to understand more about the violation.
 
-#### Loop Case
+##### Loop Case
 
 > `Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
 
@@ -254,7 +254,7 @@ Match any violation message that you receive with these cases to understand more
 
 Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` outside the loop, then rescan your code. 
 
-#### Multiple Schema Lookups Are Invoked Case
+##### Multiple Schema Lookups Are Invoked Case
 
 > Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
 
@@ -262,7 +262,7 @@ Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` i
 
 Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObjects`. Modify your code so that only one expensive schema lookup is invoked.
 
-#### More Than One Execution in a Path Case
+##### More Than One Execution in a Path Case
 
 > `Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
 
