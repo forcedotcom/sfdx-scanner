@@ -1,7 +1,7 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
 import com.google.common.collect.ImmutableSet;
-import com.salesforce.config.UserFacingMessages;
+import com.salesforce.config.UserFacingMessages.MultipleMassSchemaLookupRuleTemplates;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import java.util.Locale;
 
@@ -28,19 +28,29 @@ public final class MmslrUtil {
 
     /** Enum to indicate the type of repetition the method call was subjected. */
     public enum RepetitionType {
-        LOOP(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.LOOP_MESSAGE_TEMPLATE),
+        LOOP(
+                MultipleMassSchemaLookupRuleTemplates.LOOP_MESSAGE_TEMPLATE,
+                MultipleMassSchemaLookupRuleTemplates.MESSAGE_TEMPLATE),
         PRECEDED_BY(
-                UserFacingMessages.MultipleMassSchemaLookupRuleTemplates
-                        .PRECEDED_BY_MESSAGE_TEMPLATE),
-        CALL_STACK(UserFacingMessages.MultipleMassSchemaLookupRuleTemplates.CALL_STACK_TEMPLATE);
+                MultipleMassSchemaLookupRuleTemplates.PRECEDED_BY_MESSAGE_TEMPLATE,
+                MultipleMassSchemaLookupRuleTemplates.METHODLESS_MESSAGE_TEMPLATE),
+        CALL_STACK(
+                MultipleMassSchemaLookupRuleTemplates.CALL_STACK_TEMPLATE,
+                MultipleMassSchemaLookupRuleTemplates.MESSAGE_TEMPLATE);
 
-        String messageTemplate;
+        final String occurrenceTemplate;
+        final String messageTemplate;
 
-        RepetitionType(String messageTemplate) {
+        RepetitionType(String occurrenceTemplate, String messageTemplate) {
+            this.occurrenceTemplate = occurrenceTemplate;
             this.messageTemplate = messageTemplate;
         }
 
-        public String getMessage(String... params) {
+        public String getOccurrenceMessage(String... params) {
+            return String.format(occurrenceTemplate, (Object[]) params);
+        }
+
+        public String getViolationMessage(String... params) {
             return String.format(messageTemplate, (Object[]) params);
         }
     }
