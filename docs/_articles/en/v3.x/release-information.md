@@ -19,7 +19,7 @@ We publish the latest Code Analyzer monthly.
 ### Release Summary
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
-* NEW (CodeAnalyzer): The upcoming release of [PMD 7.x](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html) contains some changes that require you to rewrite your PMD 6.x rules. Code Analyzer hasn’t upgraded to PMD 7.x yet. To alert you in advance about what you must change in your code to comply with PMD 7.x, we added a warning message. Fix your code, and if you need help, create an issue on github.com/forcedotcom/sfdx-scanner.
+* NEW (CodeAnalyzer): The upcoming release of [PMD 7.x](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html) contains some changes that require you to rewrite your PMD 6.x rules. Code Analyzer hasn’t upgraded to PMD 7.x yet. To alert you in advance about what you must change in your code to comply with PMD 7.x, we added a warning message. Fix your code, and if you need help, create an issue on [our repo](https://github.com/forcedotcom/sfdx-scanner).
 
 **Closed issues:**
 
