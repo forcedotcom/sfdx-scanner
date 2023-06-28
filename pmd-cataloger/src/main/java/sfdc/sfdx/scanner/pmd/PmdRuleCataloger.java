@@ -80,10 +80,13 @@ class PmdRuleCataloger {
 			linkRulesToRulesets(rules, rulesets);
 		}
 
-		// STEP 5: Build a JSON using all of our objects.
+        // STEP 5: Verify that the rules are all PMD7-compatible.
+        new Pmd7CompatibilityChecker().validatePmd7Readiness(masterRuleList);
+
+		// STEP 6: Build a JSON using all of our objects.
 		PmdCatalogJson json = new PmdCatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
 
-		// STEP 6: Write the JSON to a file.
+		// STEP 7: Write the JSON to a file.
 		writeJsonToFile(json);
 	}
 

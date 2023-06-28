@@ -9,6 +9,7 @@ public enum EventKey {
 	WARNING_INVALID_CAT_SKIPPED("warning.invalidCategorySkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_INVALID_RULESET_SKIPPED("warning.invalidRulesetSkipped", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_XML_DROPPED("warning.xmlDropped", 1, MessageType.WARNING, MessageHandler.UX, true),
+    WARNING_PMD7_INCOMPATIBLE_RULE("warning.pmd7IncompatibleRule", 2, MessageType.WARNING, MessageHandler.UX, false),
 	INFO_JAR_AND_XML_PROCESSED("info.jarAndXmlProcessed", 2, MessageType.INFO, MessageHandler.UX, true),
 	ERROR_INTERNAL_UNEXPECTED("error.internal.unexpectedError", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
 	ERROR_INTERNAL_MAIN_INVALID_ARGUMENT("error.internal.mainInvalidArgument", 1, MessageType.ERROR, MessageHandler.INTERNAL, false),
