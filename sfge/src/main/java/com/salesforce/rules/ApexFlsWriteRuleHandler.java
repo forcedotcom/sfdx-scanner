@@ -49,17 +49,17 @@ final class ApexFlsWriteRuleHandler implements FlsRuleHandler {
 
     private static final TreeMap<String, Supplier<AbstractFlsVisitor>> DATABASE_METHOD_TO_VISITOR =
             CollectionUtil.newTreeMapOf(
-                    FlsConstants.FlsValidationType.DELETE.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.DELETE.getDatabaseOperationMethod(),
                             DmlDeleteFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.INSERT.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.INSERT.getDatabaseOperationMethod(),
                             DmlInsertFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.MERGE.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.MERGE.getDatabaseOperationMethod(),
                             DmlMergeFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UPDATE.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.UPDATE.getDatabaseOperationMethod(),
                             DmlUpdateFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UPSERT.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.UPSERT.getDatabaseOperationMethod(),
                             DmlUpsertFlsRuleVisitor::new,
-                    FlsConstants.FlsValidationType.UNDELETE.getDmlStatementType(),
+                    FlsConstants.FlsValidationType.UNDELETE.getDatabaseOperationMethod(),
                             DmlUndeleteFlsRuleVisitor::new);
 
     @Override
