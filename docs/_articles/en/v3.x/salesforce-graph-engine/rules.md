@@ -216,8 +216,8 @@ These methods are identified by MultipleMassSchemaLookupRule.
 Flagged lookups include:
 
 * Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
-* Multiple expensive schema lookups are invoked
-* An expensive schema lookup was executed multiple times
+* Multiple expensive schema lookups that are invoked
+* An expensive schema lookup that is executed multiple times
 
 These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 * `Schema.getGlobalDescribe()` within a loop
@@ -256,7 +256,7 @@ Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` i
 
 #### Multiple Schema Lookups Are Invoked Case
 
-Multiple schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
+Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
 
 *Explanation*
 
@@ -264,7 +264,7 @@ Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObje
 
 #### More Than One Execution in a Path Case
 
-`Schema.getGlobalDescribe` was executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
+`Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
 
 *Explanation*
 
