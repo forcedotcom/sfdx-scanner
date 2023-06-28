@@ -6,22 +6,25 @@ import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.rules.dmlinloop.DmlInLoopRuleHandler;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 public class DmlInLoopRule extends AbstractPathTraversalRule {
 
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
-        ImmutableSet.copyOf(ApexPathSource.Type.values());
+            ImmutableSet.copyOf(ApexPathSource.Type.values());
 
     private final DmlInLoopRuleHandler ruleHandler;
 
-    private DmlInLoopRule() { ruleHandler = DmlInLoopRuleHandler.getInstance(); }
+    private DmlInLoopRule() {
+        ruleHandler = DmlInLoopRuleHandler.getInstance();
+    }
 
     @Override
-    public boolean test(BaseSFVertex vertex) { return ruleHandler.test(vertex); }
+    public boolean test(BaseSFVertex vertex) {
+        return ruleHandler.test(vertex);
+    }
 
     @Override
     protected List<RuleThrowable> _run(GraphTraversalSource g, ApexPath path, BaseSFVertex vertex) {
@@ -32,20 +35,26 @@ public class DmlInLoopRule extends AbstractPathTraversalRule {
         return violations;
     }
 
-
     @Override
-    public ImmutableSet<ApexPathSource.Type> getSourceTypes() { return SOURCE_TYPES; }
+    public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
+        return SOURCE_TYPES;
+    }
 
     // TODO confirm severity of this rule
     @Override
-    protected int getSeverity() { return SEVERITY.HIGH.code; }
+    protected int getSeverity() {
+        return SEVERITY.HIGH.code;
+    }
 
     @Override
-    protected String getDescription() { return UserFacingMessages.RuleDescriptions.DML_IN_LOOP_RULE; }
-
+    protected String getDescription() {
+        return UserFacingMessages.RuleDescriptions.DML_IN_LOOP_RULE;
+    }
 
     @Override
-    protected String getCategory() { return CATEGORY.PERFORMANCE.name; }
+    protected String getCategory() {
+        return CATEGORY.PERFORMANCE.name;
+    }
 
     @Override
     protected boolean isEnabled() {

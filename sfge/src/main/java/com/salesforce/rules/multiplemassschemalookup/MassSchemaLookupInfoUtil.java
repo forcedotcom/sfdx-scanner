@@ -1,11 +1,9 @@
 package com.salesforce.rules.multiplemassschemalookup;
 
-import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.OccurrenceInfo;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,5 +81,4 @@ public final class MassSchemaLookupInfoUtil {
                 repetitionVertex.getDefiningType(),
                 repetitionVertex.getBeginLine());
     }
-
 }

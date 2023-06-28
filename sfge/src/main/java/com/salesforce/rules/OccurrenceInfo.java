@@ -2,10 +2,7 @@ package com.salesforce.rules;
 
 import com.salesforce.config.UserFacingMessages;
 
-/**
- * Internal representation of an occurrence info.
- * Originally from MMSL Info Utils.
- */
+/** Internal representation of an occurrence info. Originally from MMSL Info Utils. */
 public class OccurrenceInfo {
     final String label;
     final String definingType;
@@ -20,9 +17,9 @@ public class OccurrenceInfo {
     @Override
     public String toString() {
         return String.format(
-            UserFacingMessages.OccurrenceInfoTemplates.OCCURRENCE_TEMPLATE,
-            label,
-            definingType,
-            lineNum);
+                UserFacingMessages.OccurrenceInfoTemplates.OCCURRENCE_TEMPLATE,
+                label,
+                definingType,
+                lineNum);
     }
 }

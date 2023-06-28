@@ -15,12 +15,13 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     /**
      * function to get the expected violation from some code and an loop OccurrenceInfo
+     *
      * @param sinkLine the line on which the sink vertex occurs
      * @param occurrenceInfo the information about the loop
      * @return a ViolationWrapper.DmlInLoopInfoBuilder
      */
     protected ViolationWrapper.DmlInLoopInfoBuilder expect(
-        int sinkLine, OccurrenceInfo occurrenceInfo) {
+            int sinkLine, OccurrenceInfo occurrenceInfo) {
         return ViolationWrapper.DmlInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
     }
 
@@ -32,32 +33,20 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testSoqlStatementInLoop(String loopLabel, String loopStructure) {
         String[] sourceCode = {
-            "public class MyClass {\n" +
-                "void foo() {\n" +
-                    "List<Integer> myList = new Integer[] {3,5};\n" +
-                    loopStructure + " {\n" +
-                            "Account myAcct = \n " +
-                            "[SELECT Id, Name, BillingCity FROM Account WHERE Id = :i];\n" +
-                    "}\n" +
-                "}\n" +
-            "}\n"
+            "public class MyClass {\n"
+                    + "void foo() {\n"
+                    + "List<Integer> myList = new Integer[] {3,5};\n"
+                    + loopStructure
+                    + " {\n"
+                    + "Account myAcct = \n "
+                    + "[SELECT Id, Name, BillingCity FROM Account WHERE Id = :i];\n"
+                    + "}\n"
+                    + "}\n"
+                    + "}\n"
         };
 
-        assertViolations(
-            RULE,
-            sourceCode,
-            expect(
-                6,
-                new OccurrenceInfo(
-                    loopLabel,
-                    MY_CLASS,
-                    4
-                )
-            )
-        );
+        assertViolations(RULE, sourceCode, expect(6, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
     }
-
-
 
     @CsvSource({
         "ForEachStatement, for (Integer i : myList), delete",
@@ -80,35 +69,25 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), upsert"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testDmlStatementInLoop(String loopLabel, String loopStructure, String dmlStatement) {
+    public void testDmlStatementInLoop(
+            String loopLabel, String loopStructure, String dmlStatement) {
         String[] sourceCode = {
-            "public class MyClass {\n" +
-                "void foo() {\n" +
-                    "List<Integer> myList = new Integer[] {3,5};\n" +
-                    "Account newAcct = new Account(name = 'Acme');\n" +
-                    "Account existing = [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3];\n" +
-                    loopStructure + " {\n" +
-                        "try {\n" +
-                            dmlStatement + " existing;\n" +
-                        "} catch (DmlException e) { }\n" +
-                "}\n" +
-                "}\n" +
-            "}\n"
+            "public class MyClass {\n"
+                    + "void foo() {\n"
+                    + "List<Integer> myList = new Integer[] {3,5};\n"
+                    + "Account newAcct = new Account(name = 'Acme');\n"
+                    + "Account existing = [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3];\n"
+                    + loopStructure
+                    + " {\n"
+                    + "try {\n"
+                    + dmlStatement
+                    + " existing;\n"
+                    + "} catch (DmlException e) { }\n"
+                    + "}\n"
+                    + "}\n"
+                    + "}\n"
         };
 
-        assertViolations(
-            RULE,
-            sourceCode,
-            expect(
-                8,
-                new OccurrenceInfo(
-                    loopLabel,
-                    MY_CLASS,
-                    6
-                )
-            )
-        );
+        assertViolations(RULE, sourceCode, expect(8, new OccurrenceInfo(loopLabel, MY_CLASS, 6)));
     }
-
-
 }

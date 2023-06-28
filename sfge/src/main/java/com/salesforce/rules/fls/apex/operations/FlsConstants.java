@@ -85,7 +85,6 @@ public final class FlsConstants {
          */
         public final DmlOperation dmlOperation;
 
-
         /** Check method used in standard FLS. Invoked on SObjecDescribe.FieldDescribe */
         public final TreeSet<String> checkMethod;
 
@@ -178,16 +177,20 @@ public final class FlsConstants {
         }
 
         /**
-         * @return the databse operation method stored in the underlying {@link com.salesforce.rules.DmlUtil}
+         * @return the databse operation method stored in the underlying {@link
+         *     com.salesforce.rules.DmlUtil}
          */
         public String getDatabaseOperationMethod() {
             return getDmlOperation().getDatabaseOperationMethod();
         }
 
         /**
-         * @return the databse statement type (aka method name) stored in the underlying {@link com.salesforce.rules.DmlUtil}
+         * @return the databse statement type (aka method name) stored in the underlying {@link
+         *     com.salesforce.rules.DmlUtil}
          */
-        public String getDmlStatementType() { return getDmlOperation().getDmlStatementType(); }
+        public String getDmlStatementType() {
+            return getDmlOperation().getDmlStatementType();
+        }
 
         public ProcessFields getProcessFields() {
             if (AnalysisLevel.FIELD_LEVEL.equals(this.analysisLevel)) {

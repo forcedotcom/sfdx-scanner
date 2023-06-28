@@ -17,7 +17,6 @@ public class DmlUtil {
         UPSERT(ASTConstants.NodeType.DML_UPSERT_STATEMENT, "Database.upsert"),
         ;
 
-
         /**
          * Statement type indicated in the AST. This is applicable only for direct DML statements
          * such as: READ: [SELECT Id, Name from Account] INSERT: insert account; UPDATE: update
@@ -44,6 +43,5 @@ public class DmlUtil {
         public String getDatabaseOperationMethod() {
             return databaseOperationMethod;
         }
-
     }
 }

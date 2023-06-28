@@ -5,30 +5,26 @@ import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.DmlUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
-    private static final Logger LOGGER =
-        LogManager.getLogger(DmlInLoopVisitor.class);
+    private static final Logger LOGGER = LogManager.getLogger(DmlInLoopVisitor.class);
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
 
-    /** Represents the DML statement that is possibly inside a loop  */
+    /** Represents the DML statement that is possibly inside a loop */
     private final BaseSFVertex sinkVertex;
 
     /** Collects violation information */
     private final HashSet<Violation.PathBasedRuleViolation> violations;
-
 
     DmlInLoopVisitor(SFVertex sourceVertex, DmlStatementVertex sinkVertex) {
         this.sourceVertex = sourceVertex;
@@ -54,8 +50,10 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
         final String fullMethodName = vertex.getFullMethodName();
 
-        Set<String> dmlMethodNames = Arrays.stream(DmlUtil.DmlOperation.values())
-            .map(op -> op.getDatabaseOperationMethod()).collect(Collectors.toSet());
+        Set<String> dmlMethodNames =
+                Arrays.stream(DmlUtil.DmlOperation.values())
+                        .map(op -> op.getDatabaseOperationMethod())
+                        .collect(Collectors.toSet());
 
         // we know this is a method call/expression vertex, but we need to see
         // if it is a Database.<method> call to confirm it is a DML operation
@@ -105,17 +103,20 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     /**
      * Logs a violation
+     *
      * @param loopVertex the vertex at which the violation (loop) was detected
      */
     private void createViolation(SFVertex loopVertex) {
 
-        violations.add(new Violation.PathBasedRuleViolation(
-            DmlInLoopUtil.getMessage(loopVertex),
-            sourceVertex, sinkVertex));
+        violations.add(
+                new Violation.PathBasedRuleViolation(
+                        DmlInLoopUtil.getMessage(loopVertex), sourceVertex, sinkVertex));
     }
 
     /**
      * @return Violations collected by the rule.
      */
-    Set<Violation.PathBasedRuleViolation> getViolations() { return violations; }
+    Set<Violation.PathBasedRuleViolation> getViolations() {
+        return violations;
+    }
 }

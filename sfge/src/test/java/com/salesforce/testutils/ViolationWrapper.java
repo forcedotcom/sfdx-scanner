@@ -233,8 +233,7 @@ public class ViolationWrapper {
          */
         public MassSchemaLookupInfoBuilder withOccurrence(
                 String label, String definingType, int line) {
-            this.occurrenceInfoList.add(
-                    new OccurrenceInfo(label, definingType, line));
+            this.occurrenceInfoList.add(new OccurrenceInfo(label, definingType, line));
             return this;
         }
 
@@ -254,8 +253,7 @@ public class ViolationWrapper {
             this.occurrenceInfo = occurrenceInfo;
         }
 
-        public static DmlInLoopInfoBuilder get(
-            int sinkLine, OccurrenceInfo occurrenceInfo) {
+        public static DmlInLoopInfoBuilder get(int sinkLine, OccurrenceInfo occurrenceInfo) {
             return new DmlInLoopInfoBuilder(sinkLine, occurrenceInfo);
         }
 

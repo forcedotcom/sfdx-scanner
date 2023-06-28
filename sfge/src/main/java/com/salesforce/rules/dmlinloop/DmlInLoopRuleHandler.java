@@ -8,19 +8,18 @@ import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.rules.Violation;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-
 import java.util.Set;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 public class DmlInLoopRuleHandler {
 
     /** checks if a certain vertex is of interest to this rule */
     public boolean test(BaseSFVertex vertex) {
         /* Three different types of DML statements we need to check for:
-            1. [SELECT a FROM b WHERE c]
-            2. insert a;
-            3. Database.something();
-         */
+           1. [SELECT a FROM b WHERE c]
+           2. insert a;
+           3. Database.something();
+        */
         if (vertex instanceof DmlStatementVertex) {
             return true;
         } else if (vertex instanceof SoqlExpressionVertex) {
@@ -35,35 +34,32 @@ public class DmlInLoopRuleHandler {
         return DmlInLoopRuleHandler.LazyHolder.INSTANCE;
     }
 
-    public Set<Violation.PathBasedRuleViolation> detectViolations (
-        GraphTraversalSource g, ApexPath path, BaseSFVertex dmlVertex) {
+    public Set<Violation.PathBasedRuleViolation> detectViolations(
+            GraphTraversalSource g, ApexPath path, BaseSFVertex dmlVertex) {
 
-        final SFVertex sourceVertex =  path.getMethodVertex().orElse(null);
+        final SFVertex sourceVertex = path.getMethodVertex().orElse(null);
         final DefaultSymbolProviderVertexVisitor symbolVisitor =
-            new DefaultSymbolProviderVertexVisitor(g);
+                new DefaultSymbolProviderVertexVisitor(g);
 
         // We should only be detecting
         final DmlInLoopVisitor ruleVisitor;
         if (dmlVertex instanceof DmlStatementVertex) {
-             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (DmlStatementVertex) dmlVertex);
+            ruleVisitor = new DmlInLoopVisitor(sourceVertex, (DmlStatementVertex) dmlVertex);
         } else if (dmlVertex instanceof MethodCallExpressionVertex) {
-            ruleVisitor = new DmlInLoopVisitor(sourceVertex, (MethodCallExpressionVertex) dmlVertex);
+            ruleVisitor =
+                    new DmlInLoopVisitor(sourceVertex, (MethodCallExpressionVertex) dmlVertex);
         } else if (dmlVertex instanceof SoqlExpressionVertex) {
             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (SoqlExpressionVertex) dmlVertex);
-        }
-        else {
+        } else {
             throw new ProgrammingException(
-                // TODO finalize message
-                "GetGlobalDescribeViolationRule unexpected invoked on an instance " +
-                    "that's not DmlStatementVertex or MethodCallExpressionVertex or SoqlExpressionVertex. vertex="
-                    + dmlVertex
-            );
+                    // TODO finalize message
+                    "GetGlobalDescribeViolationRule unexpected invoked on an instance "
+                            + "that's not DmlStatementVertex or MethodCallExpressionVertex or SoqlExpressionVertex. vertex="
+                            + dmlVertex);
         }
 
         final SymbolProvider symbols = new CloningSymbolProvider(symbolVisitor.getSymbolProvider());
-        ApexPathWalker.walkPath(
-            g, path, ruleVisitor, symbolVisitor, symbols
-        );
+        ApexPathWalker.walkPath(g, path, ruleVisitor, symbolVisitor, symbols);
 
         // Once it finishes walking, collect any violations thrown.
         return ruleVisitor.getViolations();
@@ -71,8 +67,6 @@ public class DmlInLoopRuleHandler {
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final DmlInLoopRuleHandler INSTANCE =
-            new DmlInLoopRuleHandler();
+        private static final DmlInLoopRuleHandler INSTANCE = new DmlInLoopRuleHandler();
     }
-
 }
