@@ -158,7 +158,7 @@ Match any violation message that you receive with this case to understand more a
 
 *Common Case*
 
-ApexNullPointerExceptionRule identifies Apex operations with a high likelihood of throwing a NullPointerException
+> ApexNullPointerExceptionRule identifies Apex operations with a high likelihood of throwing a NullPointerException
 
 Parameter explanation:
 
@@ -248,7 +248,7 @@ Match any violation message that you receive with these cases to understand more
 
 #### Loop Case
 
-`Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
+> `Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
 
 *Explanation*
 
@@ -256,7 +256,7 @@ Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` i
 
 #### Multiple Schema Lookups Are Invoked Case
 
-Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
+> Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
 
 *Explanation*
 
@@ -264,7 +264,7 @@ Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObje
 
 #### More Than One Execution in a Path Case
 
-`Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
+> `Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
 
 *Explanation*
 
