@@ -14,6 +14,8 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     protected static final DmlInLoopRule RULE = DmlInLoopRule.getInstance();
 
+    // TODO test Database.<method> methods
+
     /**
      * function to get the expected violation from some code and an loop OccurrenceInfo
      *
@@ -22,19 +24,13 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
      * @return a ViolationWrapper.DmlInLoopInfoBuilder
      */
     protected ViolationWrapper.DmlInLoopInfoBuilder expect(
-        int sinkLine, OccurrenceInfo occurrenceInfo) {
+            int sinkLine, OccurrenceInfo occurrenceInfo) {
         return ViolationWrapper.DmlInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
     }
-    /*
-    1. implement method checking
-    2. fix top 2 tests for all combinations of DML and loop types
-    3. loop and loop calls method -> still throws violation (makes this a path-based rule)
-     */
 
     /**
-     * tests basic loops with a SOQL statement.
-     * corresponds to SOQLStatementVertex.
-     * SELECT is the only type of query we can make in [this syntax].
+     * tests basic loops with a SOQL statement. corresponds to SOQLStatementVertex. SELECT is the
+     * only type of query we can make in [this syntax].
      */
     @CsvSource({
         // technically the myList could be in the method call or query
@@ -49,22 +45,18 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             "public class MyClass {\n"
                 + "void foo() {\n"
                     + "List<Integer> myList = new Integer[] {3,5};\n"
-                    + loopStructure
-                    + " {\n"
-                        + "Account myAcct = [SELECT Id, Name, BillingCity FROM Account WHERE Id = :i LIMIT 1];\n" // TODO LIMIT for one object
+                    + loopStructure + " {\n"
+                        + "Account myAcct = [SELECT Id, Name, BillingCity FROM Account WHERE Id = :i LIMIT 1];\n"
                     + "}\n"
                 + "}\n"
             + "}\n"
         };
         // spotless:on
 
-        assertViolations(RULE, sourceCode, expect(6, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
+        assertViolations(RULE, sourceCode, expect(5, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
     }
 
-
-    /**
-     * tests SOQL statements not in a loop
-     */
+    /** SOQL statements not in a loop should not be violations */
     @CsvSource({
         "ForEachStatement, for (Integer i : myList)",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++)",
@@ -72,6 +64,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testSoqlStatementNotInLoop(String loopLabel, String loopStructure) {
+        // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
                 + "void foo() {\n"
@@ -83,13 +76,15 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                 + "}\n"
             + "}\n"
         };
+        // spotless:on
 
         assertNoViolation(RULE, sourceCode);
     }
 
     /**
-     * tests basic loops with DML statements.
-     * corresponds with DmlStatementVertex (DmlDeleteStatementVertex, DmlMergeStatementVertex, etc.)
+     * tests basic loops with DML statements, corresponding with DmlStatementVertex
+     * (DmlDeleteStatementVertex, DmlMergeStatementVertex, etc.). any of 6 possible DML statements
+     * within a loop should be a violation.
      */
     @CsvSource({
         "ForEachStatement, for (Integer i : myList), delete",
@@ -135,7 +130,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         assertViolations(RULE, sourceCode, expect(8, new OccurrenceInfo(loopLabel, MY_CLASS, 6)));
     }
 
-
+    /** Any of 6 possible DML statements before or after a loop should not be a violation. */
     @CsvSource({
         "ForEachStatement, for (Integer i : myList), delete",
         "ForEachStatement, for (Integer i : myList), insert",
@@ -144,7 +139,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "ForEachStatement, for (Integer i : myList), update",
         "ForEachStatement, for (Integer i : myList), upsert",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), delete",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert", // TODO replace i++ with
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), merge newAcct",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), undelete",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), update",
@@ -158,7 +153,8 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testDmlStatementNotInLoop(
-        String loopLabel, String loopStructure, String dmlStatement) {
+            String loopLabel, String loopStructure, String dmlStatement) {
+        // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
                 + "void foo() {\n"
@@ -166,47 +162,49 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                     + "Account newAcct = new Account(name = 'Acme');\n"
                     + "Account existing = [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3];\n"
                     + "try {\n"
-                    + dmlStatement
-                    + " existing;\n"
+                        + dmlStatement
+                        + " existing;\n"
                     + "} catch (DmlException e) { }\n"
                     + loopStructure
                     + " { }\n"
+                    + "try {\n"
+                        + dmlStatement
+                    + " existing;\n"
+                    + "} catch (DmlException e) { }\n"
                 + "}\n"
             + "}\n"
         };
+        // spotless:on
 
         assertNoViolation(RULE, sourceCode);
     }
 
-    // TODO this test is failing, double check to see the cause. seems to be a problem with LoopDetectionVisitor maybe
     /**
-     * The second part (post-colon) of a for-each loop declaration is only run once,
-     * so this should be OK.
+     * The second part (post-colon) of a for-each loop declaration is only run once, so a SOQL query
+     * within that part should not be a violation.
      */
     @Test
-    public void testLoopInForEachDeclaration() {
-
-        //spotless:off
+    public void testSoqlQueryWithinForEachLoopIsSafe() {
+        // spotless:off
         String[] sourceCode = {
-            "public class MyClass {\n" +
-                "void foo() {\n" +
-                    "for (Account acc : [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3]) {\n" +
-                    "}\n" +
-                "}\n" +
-            "}\n"
+            "public class MyClass {\n"
+                + "   void foo() {\n"
+                + "       String[] objectList = new String[] {'Account','Contact'};\n"
+                + "       for (Account a: [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3]) {\n"
+                + "           System.debug(a);\n"
+                + "       }\n"
+                + "   }\n"
+                + "}\n"
         };
-        //spotless:off
+        // spotless:on
 
         assertNoViolation(RULE, sourceCode);
     }
 
-    /**
-     * The termination clause of a for loop repeats, so this is a violation
-     */
+    /** The termination clause of a for loop repeats, which should be a violation */
     @Test
     public void testForLoopTerminationStatement() {
-
-        //spotless:off
+        // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n" +
                 "void foo() {\n" +
@@ -215,21 +213,51 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                 "}\n" +
             "}\n"
         };
+        // spotless:on
+
+        assertViolations(
+                RULE, sourceCode, expect(3, new OccurrenceInfo("ForLoopStatement", MY_CLASS, 3)));
+    }
+
+    /** The increment clause of a for loop repeats, which should be a violation */
+    @CsvSource({
+        "delete a",
+        "insert a",
+        "merge a a",
+        "undelete a",
+        "update a",
+        "upsert a",
+        "'Account b = [SELECT Id, Age FROM accounts WHERE Id = 3]'"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testForLoopIncrementStatement(String dmlStatement) {
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n" +
+                "private Integer i;\n" +
+                "MyClass() {\n" +
+                    "this.i = 0;\n" +
+                "}\n" +
+
+                "void incr() {\n" +
+                    "this.i++;\n" +
+                    "Account a = new Account();\n" +
+                    dmlStatement + ";\n" +
+                "}\n" +
+
+                "void foo() {\n" +
+                    "for (Integer i = 0; i < 4; incr()) {\n" +
+                    "}\n" +
+                "}\n" +
+            "}\n"
+        };
         //spotless:on
 
         assertViolations(
-            RULE,
-            sourceCode,
-            expect(
-                3,
-                new OccurrenceInfo(
-                    "ForLoopStatement",
-                    MY_CLASS,
-                    3
-                )
-            )
-        );
+                RULE, sourceCode, expect(9, new OccurrenceInfo("ForLoopStatement", MY_CLASS, 12)));
     }
+
+    /** Methods called within a loop containing DML are violations. */
     @CsvSource({
         "ForEachStatement, for (Integer i : myList), 'Account acc = [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3 LIMIT 1];'",
         "ForEachStatement, for (Integer i : myList), delete one;",
@@ -254,8 +282,9 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), upsert one;",
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testIndirectMethodCallSoql(String loopLabel, String loopStructure, String dmlStatement) {
-        //spotless:off
+    public void testIndirectMethodCallSoql(
+            String loopLabel, String loopStructure, String dmlStatement) {
+        // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n" +
                 "void foo() {\n" +
@@ -269,20 +298,40 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                 "}\n" +
             "}\n"
         };
-        //spotless:on
+        // spotless:on
 
-        assertViolations(
-            RULE,
-            sourceCode,
-            expect(
-                9,
-                new OccurrenceInfo(
-                    loopLabel,
-                    MY_CLASS,
-                    4
-                )
-            )
-        );
+        assertViolations(RULE, sourceCode, expect(9, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
+    }
 
+    @CsvSource({
+        "'Account s = [SELECT Id, Age FROM accounts WHERE Id = 3 LIMIT 1]'",
+        "delete a",
+        "insert a",
+        "merge a a",
+        "update a",
+        "undelete a",
+        "upsert a"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testLoopFromStaticBlock(String dmlStatement) {
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n" +
+                "void foo(String[] objectNames) {\n" +
+                    "for (Integer i = 0; i < objectNames.size; i++) {" +
+                        "AnotherClass.donothing();\n" +
+                    "}\n" +
+                "}\n" +
+                "public class AnotherClass {\n" +
+                    "static {\n" +
+                        "Account a = new Account(3, 10);\n" +
+                        dmlStatement + ";\n" +
+                    "}\n" +
+                    "static void doNothing() {} \n" +
+                "}\n" +
+            "}\n"
+        };
+
+        assertNoViolation(RULE, sourceCode);
     }
 }
