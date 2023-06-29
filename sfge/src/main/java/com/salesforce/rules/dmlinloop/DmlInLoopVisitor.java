@@ -50,6 +50,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
         final String fullMethodName = vertex.getFullMethodName();
 
+        // TODO move this to constructor or somewhere else more efficient?
         Set<String> dmlMethodNames =
                 Arrays.stream(DmlUtil.DmlOperation.values())
                         .map(op -> op.getDatabaseOperationMethod())
@@ -60,6 +61,8 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         if (dmlMethodNames.contains(fullMethodName)) {
             createViolationIfSinkInsideLoop(vertex, symbols);
         }
+
+        // Perform super method's logic as well to remove exclusion boundary if needed.
         super.afterVisit(vertex, symbols);
     }
 
@@ -89,6 +92,9 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     public void afterVisit(SoqlExpressionVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
+
+        // Perform super method's logic as well to remove exclusion boundary if needed.
+        super.afterVisit(vertex, symbols);
     }
 
     private void createViolationIfSinkInsideLoop(SFVertex vertex, SymbolProvider symbols) {

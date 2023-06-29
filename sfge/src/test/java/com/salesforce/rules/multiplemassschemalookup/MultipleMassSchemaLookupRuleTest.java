@@ -197,6 +197,32 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         assertNoViolation(RULE, sourceCode);
     }
 
+    /*
+    Since SOQL within the ForEachLoop statement should not be flagged (DmlInLoopRule),
+    still ensure that the mass schema lookup within that ForEachLoop is a violation.
+     */
+    @Test
+    public void testMethodCallForEachLoopIsFlagged() {
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "   void foo() {\n"
+                + "       String[] objectList = new String[] {'Account','Contact'};\n"
+                + "       for (Account a: [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3]) {\n"
+                + "           Schema.describeSObjects(objectList);\n"
+                + "       }\n"
+                + "   }\n"
+            + "}\n"
+        };
+        // spotless:on
+
+        assertViolations(
+                RULE,
+                sourceCode,
+                expect(5, MmslrUtil.METHOD_SCHEMA_DESCRIBE_SOBJECTS, MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(ASTConstants.NodeType.FOR_EACH_STATEMENT, MY_CLASS, 4));
+    }
+
     /** TODO: Handle path expansion from array[index].methodCall() */
     @Test
     @Disabled
