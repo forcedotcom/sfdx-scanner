@@ -40,7 +40,7 @@ public abstract class BaseFlsTest extends BasePathBasedRuleTest {
         return SFVertexFactory.load(
                         g,
                         g.V()
-                                .hasLabel(validationType.getDmlStatementType())
+                                .hasLabel(validationType.dmlStatementType)
                                 .has(Schema.DEFINING_TYPE, CLASS_NAME))
                 .getBeginLine();
     }
@@ -54,7 +54,7 @@ public abstract class BaseFlsTest extends BasePathBasedRuleTest {
         return SFVertexFactory.loadVertices(
                         g,
                         g.V()
-                                .hasLabel(validationType.getDmlStatementType())
+                                .hasLabel(validationType.dmlStatementType)
                                 .has(Schema.DEFINING_TYPE, CLASS_NAME)
                                 .order(Scope.global)
                                 .by(Schema.DEFINING_TYPE, Order.asc))

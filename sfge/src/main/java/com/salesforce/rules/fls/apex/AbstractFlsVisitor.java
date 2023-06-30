@@ -48,7 +48,7 @@ public abstract class AbstractFlsVisitor extends BooleanStateDetectorVisitor {
             // Change gears and check if we encountered a new DML operation invoked through Database
             // namespace
             final String fullMethodName = vertex.getFullMethodName();
-            if (validationType.getDatabaseOperationMethod().equalsIgnoreCase(fullMethodName)) {
+            if (validationType.databaseOperationMethod.equalsIgnoreCase(fullMethodName)) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Encountered database operation: " + fullMethodName);
                 }

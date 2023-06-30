@@ -2,6 +2,7 @@ package com.salesforce.rules.fls.apex.operations;
 
 import com.google.common.collect.Sets;
 import com.salesforce.apex.ApexEnum;
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.exception.TodoException;
 import com.salesforce.graph.EnumUtil;
@@ -10,7 +11,6 @@ import com.salesforce.graph.symbols.apex.ApexEnumValue;
 import com.salesforce.graph.symbols.apex.MethodBasedSanitization;
 import com.salesforce.graph.vertex.DmlStatementVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.rules.DmlUtil.DmlOperation;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
@@ -25,44 +25,51 @@ public final class FlsConstants {
     /** Source of truth for all validations supported so far. */
     public enum FlsValidationType {
         DELETE(
-                DmlOperation.DELETE,
+                ASTConstants.NodeType.DML_DELETE_STATEMENT,
+                "Database.delete",
                 Sets.newHashSet("isdeletable"),
                 AnalysisLevel.OBJECT_LEVEL,
                 false,
                 null),
         INSERT(
-                DmlOperation.INSERT,
+                ASTConstants.NodeType.DML_INSERT_STATEMENT,
+                "Database.insert",
                 Sets.newHashSet("iscreateable"),
                 AnalysisLevel.FIELD_LEVEL,
                 true,
                 StripInaccessibleAccessType.CREATABLE),
         MERGE(
-                DmlOperation.MERGE,
+                ASTConstants.NodeType.DML_MERGE_STATEMENT,
+                "Database.merge",
                 Sets.newHashSet("ismergeable"),
                 AnalysisLevel.OBJECT_LEVEL,
                 false,
                 null,
                 2),
         READ(
-                DmlOperation.READ,
+                ASTConstants.NodeType.SOQL_EXPRESSION,
+                "Database.query",
                 Sets.newHashSet("isaccessible"),
                 AnalysisLevel.FIELD_LEVEL,
                 true,
                 StripInaccessibleAccessType.READABLE),
         UNDELETE(
-                DmlOperation.UNDELETE,
+                ASTConstants.NodeType.DML_UNDELETE_STATEMENT,
+                "Database.undelete",
                 Sets.newHashSet("isundeletable"),
                 AnalysisLevel.OBJECT_LEVEL,
                 false,
                 null),
         UPDATE(
-                DmlOperation.UPDATE,
+                ASTConstants.NodeType.DML_UPDATE_STATEMENT,
+                "Database.update",
                 Sets.newHashSet("isupdateable"),
                 AnalysisLevel.FIELD_LEVEL,
                 true,
                 StripInaccessibleAccessType.UPDATABLE),
         UPSERT(
-                DmlOperation.UPSERT,
+                ASTConstants.NodeType.DML_UPSERT_STATEMENT,
+                "Database.upsert",
                 Sets.newHashSet("iscreateable", "isupdateable"),
                 AnalysisLevel.FIELD_LEVEL,
                 true,
@@ -80,10 +87,18 @@ public final class FlsConstants {
                         FlsValidationType.class, FlsValidationType::getDmlStatementType);
 
         /**
-         * DML Operation Type enumeration that stores the Statement type (as indicated by AST) and
-         * the corresponding DML operation invoked on the Database type. See DmlUtil.DmlOperation.
+         * Statement type indicated in the AST. This is applicable only for direct DML statements
+         * such as: READ: [SELECT Id, Name from Account] INSERT: insert account; UPDATE: update
+         * account; DELETE: delete account;
          */
-        public final DmlOperation dmlOperation;
+        public final String dmlStatementType;
+
+        /**
+         * DML operation invoked on Database type. Examples: READ: Database.query('SELECT Id, Name
+         * from Account'); INSERT: Database.insert(accounts); UPDATE: Database.update(accounts);
+         * DELETE: Database.delete(accounts);
+         */
+        public final String databaseOperationMethod;
 
         /** Check method used in standard FLS. Invoked on SObjecDescribe.FieldDescribe */
         public final TreeSet<String> checkMethod;
@@ -112,13 +127,15 @@ public final class FlsConstants {
         public final int parameterCount;
 
         FlsValidationType(
-                DmlOperation dmlOperation,
+                String dmlStatementType,
+                String databaseOperationMethod,
                 Set<String> checkMethod,
                 AnalysisLevel analysisLevel,
                 boolean isStripInaccessibleSupported,
                 StripInaccessibleAccessType stripInaccessibleAccessType) {
             this(
-                    dmlOperation,
+                    dmlStatementType,
+                    databaseOperationMethod,
                     checkMethod,
                     analysisLevel,
                     isStripInaccessibleSupported,
@@ -127,13 +144,15 @@ public final class FlsConstants {
         }
 
         FlsValidationType(
-                DmlOperation dmlOperation,
+                String dmlStatementType,
+                String databaseOperationMethod,
                 Set<String> checkMethod,
                 AnalysisLevel analysisLevel,
                 boolean isStripInaccessibleSupported,
                 StripInaccessibleAccessType stripInaccessibleAccessType,
                 int parameterCount) {
-            this.dmlOperation = dmlOperation;
+            this.dmlStatementType = dmlStatementType;
+            this.databaseOperationMethod = databaseOperationMethod;
             this.checkMethod = CollectionUtil.newTreeSet();
             this.checkMethod.addAll(checkMethod);
             this.analysisLevel = analysisLevel;
@@ -172,24 +191,12 @@ public final class FlsConstants {
             return AnalysisLevel.FIELD_LEVEL.equals(this.analysisLevel);
         }
 
-        private DmlOperation getDmlOperation() {
-            return dmlOperation;
+        private String getDatabaseOperationMethod() {
+            return databaseOperationMethod;
         }
 
-        /**
-         * @return the databse operation method stored in the underlying {@link
-         *     com.salesforce.rules.DmlUtil}
-         */
-        public String getDatabaseOperationMethod() {
-            return getDmlOperation().getDatabaseOperationMethod();
-        }
-
-        /**
-         * @return the databse statement type (aka method name) stored in the underlying {@link
-         *     com.salesforce.rules.DmlUtil}
-         */
-        public String getDmlStatementType() {
-            return getDmlOperation().getDmlStatementType();
+        private String getDmlStatementType() {
+            return dmlStatementType;
         }
 
         public ProcessFields getProcessFields() {
