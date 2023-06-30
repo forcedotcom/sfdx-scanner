@@ -342,21 +342,21 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
-                    + "void foo(String[] objectNames) {\n"
+                + "void foo(String[] objectNames) {\n"
                     + "for (Integer i = 0; i < objectNames.size; i++) {"
-                    + "AnotherClass.donothing();\n"
+                        + "AnotherClass.donothing();\n"
                     + "}\n"
-                    + "}\n"
-                    + "public class AnotherClass {\n"
+                + "}\n"
+                + "public class AnotherClass {\n"
                     + "static {\n"
-                    + "Account a = new Account(3, 10);\n"
-                    + dmlStatement
-                    + ";\n"
+                        + "Account a = new Account(3, 10);\n"
+                        + dmlStatement + ";\n"
                     + "}\n"
                     + "static void doNothing() {} \n"
-                    + "}\n"
-                    + "}\n"
+                + "}\n"
+            + "}\n"
         };
+        // spotless:on
 
         assertNoViolation(RULE, sourceCode);
     }

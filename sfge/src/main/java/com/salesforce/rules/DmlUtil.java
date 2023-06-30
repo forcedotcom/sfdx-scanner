@@ -9,6 +9,10 @@ public class DmlUtil {
     // we don't ever want this class to be initialized
     private DmlUtil() {}
 
+    /**
+     * An enumeration of all of the possible Database.method() methods in the Database class in
+     * Apex.
+     */
     public enum DatabaseOperation {
         CONVERT_LEAD("Database.convertLead", true),
         COUNT_QUERY("Database.countQuery", true),
@@ -43,7 +47,9 @@ public class DmlUtil {
         private static final TreeMap<String, DatabaseOperation> FROM_DATABASE_METHOD =
                 EnumUtil.getEnumTreeMap(
                         DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
+        /** stores the string representation of this method */
         private final String databaseOperationMethod;
+        /** stores if this method should be a violation when in a loop */
         private final boolean loopIsViolation;
 
         /**
@@ -53,11 +59,14 @@ public class DmlUtil {
          *     DmlInLoopRule}
          */
         DatabaseOperation(String databaseOperationMethod, boolean loopIsViolation) {
-
             this.databaseOperationMethod = databaseOperationMethod;
             this.loopIsViolation = loopIsViolation;
         }
 
+        /**
+         * get the string representation of the associated method. For example, Databse.query()
+         * returns Database.query.
+         */
         public String getDatabaseOperationMethod() {
             return this.databaseOperationMethod;
         }
@@ -71,9 +80,10 @@ public class DmlUtil {
         }
 
         /**
-         * Convert a Databse.[method] name to a DatabaseOperation
+         * Convert a Databse.method() name to a DatabaseOperation
          *
-         * @param method the method name to convert. For example, <code>Database.update</code>
+         * @param method the name of the method to convert. For example, <code>Database.update
+         *     </code>
          * @return the corresponding DatabaseOperation, if found
          */
         public static Optional<DatabaseOperation> fromString(String method) {

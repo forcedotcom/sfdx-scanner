@@ -16,8 +16,8 @@ public class DmlInLoopRuleHandler {
     /** checks if a certain vertex is of interest to this rule */
     public boolean test(BaseSFVertex vertex) {
         /* Three different types of DML statements we need to check for:
-           1. [SELECT a FROM b WHERE c]
-           2. insert a;
+           1. insert a;
+           2. [SELECT a FROM b WHERE c]
            3. Database.something();
         */
         if (vertex instanceof DmlStatementVertex) {
@@ -25,16 +25,12 @@ public class DmlInLoopRuleHandler {
         } else if (vertex instanceof SoqlExpressionVertex) {
             return true;
         } else if (vertex instanceof MethodCallExpressionVertex) {
-            // TODO check for Database.<whatever> calls
             return true;
         }
         return false;
     }
 
-    public static DmlInLoopRuleHandler getInstance() {
-        return DmlInLoopRuleHandler.LazyHolder.INSTANCE;
-    }
-
+    /** within a path, check if there is a violation where DML is in a loop */
     public Set<Violation.PathBasedRuleViolation> detectViolations(
             GraphTraversalSource g, ApexPath path, BaseSFVertex dmlVertex) {
 
@@ -42,10 +38,9 @@ public class DmlInLoopRuleHandler {
         final DefaultSymbolProviderVertexVisitor symbolVisitor =
                 new DefaultSymbolProviderVertexVisitor(g);
 
-        // We should only be detecting
+        // We should only be detecting vertices that have to do with DML
         final DmlInLoopVisitor ruleVisitor;
         if (dmlVertex instanceof DmlStatementVertex) {
-
             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (DmlStatementVertex) dmlVertex);
         } else if (dmlVertex instanceof MethodCallExpressionVertex) {
             ruleVisitor =
@@ -54,9 +49,8 @@ public class DmlInLoopRuleHandler {
             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (SoqlExpressionVertex) dmlVertex);
         } else {
             throw new ProgrammingException(
-                    // TODO finalize message
                     "GetGlobalDescribeViolationRule unexpected invoked on an instance "
-                            + "that's not DmlStatementVertex or MethodCallExpressionVertex or SoqlExpressionVertex. vertex="
+                            + "that's not DmlStatementVertex, MethodCallExpressionVertex, nor SoqlExpressionVertex. vertex="
                             + dmlVertex);
         }
 
@@ -70,5 +64,9 @@ public class DmlInLoopRuleHandler {
     private static final class LazyHolder {
         // Postpone initialization until first use
         private static final DmlInLoopRuleHandler INSTANCE = new DmlInLoopRuleHandler();
+    }
+
+    public static DmlInLoopRuleHandler getInstance() {
+        return DmlInLoopRuleHandler.LazyHolder.INSTANCE;
     }
 }

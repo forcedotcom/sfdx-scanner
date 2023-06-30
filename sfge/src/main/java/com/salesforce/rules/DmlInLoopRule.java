@@ -21,6 +21,7 @@ public class DmlInLoopRule extends AbstractPathTraversalRule {
         ruleHandler = DmlInLoopRuleHandler.getInstance();
     }
 
+    /** check if a certain vertex is of interest to this DmlInLoopRule */
     @Override
     public boolean test(BaseSFVertex vertex) {
         return ruleHandler.test(vertex);
@@ -40,10 +41,9 @@ public class DmlInLoopRule extends AbstractPathTraversalRule {
         return SOURCE_TYPES;
     }
 
-    // TODO confirm severity of this rule
     @Override
     protected int getSeverity() {
-        return SEVERITY.HIGH.code;
+        return SEVERITY.MODERATE.code;
     }
 
     @Override

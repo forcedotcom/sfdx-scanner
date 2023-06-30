@@ -112,9 +112,6 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         return true;
     }
 
-    // TODO create an override to visit() that adds an appropriate loop exclusion boundary for SOQL
-    // inside for each statement
-
     /**
      * Prevent static blocks from being counted as loops. Should only be used for
      * MethodCallExpressionVertex.
@@ -149,6 +146,7 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         }
     }
 
+    // necessary to limit the _afterLoopVisit method to only Method calls and Soql calls
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         _afterLoopVisit(vertex, symbols);
@@ -159,7 +157,11 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         _afterLoopVisit(vertex, symbols);
     }
 
-    /** helper method to deal with removing the appropriate loop exclusion boundaries */
+    /**
+     * helper method to deal with removing the appropriate loop exclusion boundaries (see {@link
+     * #visit(MethodCallExpressionVertex, SymbolProvider)} and {@link #visit(SoqlExpressionVertex,
+     * SymbolProvider)})
+     */
     private void _afterLoopVisit(BaseSFVertex vertex, SymbolProvider symbols) {
         if (!(vertex instanceof SoqlExpressionVertex
                 || vertex instanceof MethodCallExpressionVertex)) {

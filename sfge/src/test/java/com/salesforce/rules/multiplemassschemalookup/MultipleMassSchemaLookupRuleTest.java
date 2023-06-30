@@ -198,8 +198,8 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     }
 
     /*
-    Since SOQL within the ForEachLoop statement should not be flagged (DmlInLoopRule),
-    still ensure that the mass schema lookup within that ForEachLoop is a violation.
+    Since SOQL within the ForEachLoop statement should not be flagged (in DmlInLoopRule),
+    ensure that the mass schema lookup within that ForEachLoop is a violation.
      */
     @Test
     public void testMethodCallForEachLoopIsFlagged() {

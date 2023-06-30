@@ -129,8 +129,10 @@ public final class UserFacingMessages {
     public static final class DmlInLoopRuleTemplates {
 
         /**
-         * String Param 1: DML Statement Type String Param 3: Occurrence information using {@link
-         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Can be more than one occurrence.
+         * String Param 1: DML Statement Type
+         *
+         * <p>String Param 2: Occurrence information using {@link
+         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is suported.
          */
         public static final String MESSAGE_TEMPLATE = "A DML operation was made inside a %1$s";
     }

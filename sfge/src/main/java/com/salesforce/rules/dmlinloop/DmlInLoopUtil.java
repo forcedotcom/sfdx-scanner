@@ -10,9 +10,10 @@ public class DmlInLoopUtil {
      * Retrieve the DML Rule violation message
      *
      * @param loopVertex the vertex that created the loop containing sinkName
-     * @return
+     * @return the appropriate violation message
      */
     public static String getMessage(SFVertex loopVertex) {
+        // just create an OccurrenceInfo with the information from this vertex
         return String.format(
                 UserFacingMessages.DmlInLoopRuleTemplates.MESSAGE_TEMPLATE,
                 new OccurrenceInfo(
@@ -25,7 +26,7 @@ public class DmlInLoopUtil {
      * Retrieve the DML Rule violation message
      *
      * @param occurenceInfo the OccurenceInfo of the sink (DML statement)
-     * @return
+     * @return the appropriate violation message
      */
     public static String getMessage(OccurrenceInfo occurenceInfo) {
         return String.format(

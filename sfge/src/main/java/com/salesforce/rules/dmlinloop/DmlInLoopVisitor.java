@@ -24,19 +24,21 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
     /** Collects violation information */
     private final HashSet<Violation.PathBasedRuleViolation> violations;
 
+    // DmlStatementVertex represents statements like insert a;
     DmlInLoopVisitor(SFVertex sourceVertex, DmlStatementVertex sinkVertex) {
         this.sourceVertex = sourceVertex;
         this.sinkVertex = sinkVertex;
         this.violations = new HashSet<>();
     }
 
-    // this constructor is necessary to detect Database.<whatever> methods
+    // MethodCallExpressionVertex is necessary to detect Database.<whatever> methods
     DmlInLoopVisitor(SFVertex sourceVertex, MethodCallExpressionVertex sinkVertex) {
         this.sourceVertex = sourceVertex;
         this.sinkVertex = sinkVertex;
         this.violations = new HashSet<>();
     }
 
+    // DmlStatementVertex represents statements like [SELECT Id, Age FROM Accounts]
     DmlInLoopVisitor(SFVertex sourceVertex, SoqlExpressionVertex sinkVertex) {
         this.sourceVertex = sourceVertex;
         this.sinkVertex = sinkVertex;
@@ -63,6 +65,9 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         super.afterVisit(vertex, symbols);
     }
 
+    // for all of these DmlStatementVertex implemenetations, we need these
+    // so that the afterVisit method will resolve correctly,
+    // and not to the parent classes generic afterVisit(BaseSFVertex).
     public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
