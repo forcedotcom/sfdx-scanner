@@ -179,6 +179,31 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         assertNoViolation(RULE, sourceCode);
     }
 
+    @CsvSource({
+        // technically the myList could be in the method call or query
+        "ForEachStatement, for (Integer i : myList), ",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++)",
+        "WhileLoopStatement, while(true)"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testDatabaseMethodWithinLoop(String loopLabel, String loopStructure) {
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n"
+                + "void foo() {\n"
+                    + "List<Integer> myList = new Integer[] {3,5};\n"
+                    + loopStructure + " {\n"
+                        + "Account[] accs = new Account[]{new Account(3, 10)};\n"
+                        + "Database.deleteAsync(accs, null);\n"
+                    + "}\n"
+                + "}\n"
+            + "}\n"
+        };
+        // spotless:on
+
+        assertViolations(RULE, sourceCode, expect(6, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
+    }
+
     /**
      * The second part (post-colon) of a for-each loop declaration is only run once, so a SOQL query
      * within that part should not be a violation.
@@ -316,20 +341,21 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     public void testLoopFromStaticBlock(String dmlStatement) {
         // spotless:off
         String[] sourceCode = {
-            "public class MyClass {\n" +
-                "void foo(String[] objectNames) {\n" +
-                    "for (Integer i = 0; i < objectNames.size; i++) {" +
-                        "AnotherClass.donothing();\n" +
-                    "}\n" +
-                "}\n" +
-                "public class AnotherClass {\n" +
-                    "static {\n" +
-                        "Account a = new Account(3, 10);\n" +
-                        dmlStatement + ";\n" +
-                    "}\n" +
-                    "static void doNothing() {} \n" +
-                "}\n" +
-            "}\n"
+            "public class MyClass {\n"
+                    + "void foo(String[] objectNames) {\n"
+                    + "for (Integer i = 0; i < objectNames.size; i++) {"
+                    + "AnotherClass.donothing();\n"
+                    + "}\n"
+                    + "}\n"
+                    + "public class AnotherClass {\n"
+                    + "static {\n"
+                    + "Account a = new Account(3, 10);\n"
+                    + dmlStatement
+                    + ";\n"
+                    + "}\n"
+                    + "static void doNothing() {} \n"
+                    + "}\n"
+                    + "}\n"
         };
 
         assertNoViolation(RULE, sourceCode);

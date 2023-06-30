@@ -2,31 +2,27 @@ package com.salesforce.rules.dmlinloop;
 
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
+import com.salesforce.rules.DmlUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
-import java.util.Arrays;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
-    private static final Logger LOGGER =
-        LogManager.getLogger(DmlInLoopVisitor.class);
+    private static final Logger LOGGER = LogManager.getLogger(DmlInLoopVisitor.class);
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
 
-    /** Represents the DML statement that is possibly inside a loop  */
+    /** Represents the DML statement that is possibly inside a loop */
     private final BaseSFVertex sinkVertex;
 
     /** Collects violation information */
     private final HashSet<Violation.PathBasedRuleViolation> violations;
-
 
     DmlInLoopVisitor(SFVertex sourceVertex, DmlStatementVertex sinkVertex) {
         this.sourceVertex = sourceVertex;
@@ -49,21 +45,19 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        createViolationIfSinkInsideLoop(vertex, symbols);
 
         final String fullMethodName = vertex.getFullMethodName();
 
-        // TODO move this to constructor or somewhere else more efficient?
-        Set<String> dmlMethodNames =
-                Arrays.stream(DmlUtil.DmlOperation.values())
-                        .map(op -> op.getDatabaseOperationMethod())
-                        .collect(Collectors.toSet());
-
         // we know this is a method call/expression vertex, but we need to see
         // if it is a Database.<method> call to confirm it is a DML operation
-        if (dmlMethodNames.contains(fullMethodName)) {
-            createViolationIfSinkInsideLoop(vertex, symbols);
-        }
+        // if so, confirm it should be a violation in a loop
+        DmlUtil.DatabaseOperation.fromString(fullMethodName)
+                .ifPresent(
+                        op -> {
+                            if (op.isLoopIsViolation()) {
+                                createViolationIfSinkInsideLoop(vertex, symbols);
+                            }
+                        });
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
         super.afterVisit(vertex, symbols);
@@ -100,9 +94,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         super.afterVisit(vertex, symbols);
     }
 
-    private void createViolationIfSinkInsideLoop(
-        SFVertex vertex, SymbolProvider symbols
-    ) {
+    private void createViolationIfSinkInsideLoop(SFVertex vertex, SymbolProvider symbols) {
         if (vertex != null && vertex.equals(sinkVertex)) {
             final Optional<? extends SFVertex> loopedVertexOpt = isInsideLoop();
             if (loopedVertexOpt.isPresent()) {

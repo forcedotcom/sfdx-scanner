@@ -64,7 +64,7 @@ public final class TestUtil {
     /** Set this variable in your environment to render the AST as xml. */
     public static final String RENDER_XML_ENV_VAR_NAME = "SFGE_RENDER_XML";
 
-    private static final boolean RENDER_XML =
+    private static final boolean RENDER_XML = // set to true here if needed
             Boolean.parseBoolean(System.getenv().getOrDefault(RENDER_XML_ENV_VAR_NAME, "false"));
 
     /** Support for multi threaded tests requires its own GraphTraversalSource */

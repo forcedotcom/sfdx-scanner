@@ -1,47 +1,83 @@
 package com.salesforce.rules;
 
-import com.salesforce.apex.jorje.ASTConstants;
+import com.salesforce.graph.EnumUtil;
+import java.util.Optional;
+import java.util.TreeMap;
 
 public class DmlUtil {
 
     // we don't ever want this class to be initialized
     private DmlUtil() {}
 
-    public enum DmlOperation {
-        DELETE(ASTConstants.NodeType.DML_DELETE_STATEMENT, "Database.delete"),
-        INSERT(ASTConstants.NodeType.DML_INSERT_STATEMENT, "Database.insert"),
-        MERGE(ASTConstants.NodeType.DML_MERGE_STATEMENT, "Database.merge"),
-        READ(ASTConstants.NodeType.SOQL_EXPRESSION, "Database.query"),
-        UNDELETE(ASTConstants.NodeType.DML_UNDELETE_STATEMENT, "Database.undelete"),
-        UPDATE(ASTConstants.NodeType.DML_UPDATE_STATEMENT, "Database.update"),
-        UPSERT(ASTConstants.NodeType.DML_UPSERT_STATEMENT, "Database.upsert"),
-        ;
+    public enum DatabaseOperation {
+        CONVERT_LEAD("Database.convertLead", true),
+        COUNT_QUERY("Database.countQuery", true),
+        COUNT_QUERY_WITH_BINDS("Database.countQueryWithBinds", true),
+        DELETE("Database.delete", true),
+        DELETE_ASYNC("Database.deleteAsync", true),
+        DELETE_IMMEDIATE("Database.deleteImmediate", true),
+        EMPTY_RECYCLE_BIN("Database.emptyRecycleBin", true),
+        EXECUTE_BATCH("Database.executeBatch", true),
+        GET_ASYNC_DELETE_RESULT("Database.getAsyncDeleteResult", true),
+        GET_ASYNC_LOCATOR("Database.getAsyncLocator", true),
+        GET_ASYNC_SAVE_RESULT("Database.getAsyncSaveResult", true),
+        GET_DELETED("Database.getDeleted", true),
+        GET_QUERY_LOCATOR("Database.getQueryLocator", true),
+        GET_QUERY_LOCATOR_WITH_BINDS("Database.getQueryLocatorWithBinds", true),
+        GET_UPDATED("Database.getUpdated", true),
+        INSERT("Database.insert", true),
+        INSERT_ASYNC("Database.insertAsync", true),
+        INSERT_IMMEDIATE("Database.insertImmediate", true),
+        MERGE("Database.merge", true),
+        QUERY("Database.query", true),
+        QUERY_WITH_BINDS("Database.queryWithBinds", true),
+        ROLLBACK("Database.rollback", true),
+        SET_SAVEPOINT("Database.setSavepoint", true),
+        UNDELETE("Database.undelete", true),
+        UPDATE("Database.update", true),
+        UPDATE_ASYNC("Database.updateAsync", true),
+        UPDATE_IMMEDIATE("Database.updateImmediate", true),
+        UPSERT("Database.upsert", true);
 
-        /**
-         * Statement type indicated in the AST. This is applicable only for direct DML statements
-         * such as: READ: [SELECT Id, Name from Account] INSERT: insert account; UPDATE: update
-         * account; DELETE: delete account;
-         */
-        private final String dmlStatementType;
-
-        /**
-         * DML operation invoked on Database type. Examples: READ: Database.query('SELECT Id, Name
-         * from Account'); INSERT: Database.insert(accounts); UPDATE: Database.update(accounts);
-         * DELETE: Database.delete(accounts);
-         */
+        // Create a map of database operation method -> DatabaseOperation for fromString method
+        private static final TreeMap<String, DatabaseOperation> FROM_DATABASE_METHOD =
+                EnumUtil.getEnumTreeMap(
+                        DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
         private final String databaseOperationMethod;
+        private final boolean loopIsViolation;
 
-        DmlOperation(String dmlStatementType, String databaseOperationMethod) {
-            this.dmlStatementType = dmlStatementType;
+        /**
+         * @param databaseOperationMethod the method name of the Database method. For example,
+         *     <code>Database.insertAsync</code>.
+         * @param loopIsViolation whether this operation in a loop is a violation of {@link
+         *     DmlInLoopRule}
+         */
+        DatabaseOperation(String databaseOperationMethod, boolean loopIsViolation) {
+
             this.databaseOperationMethod = databaseOperationMethod;
-        }
-
-        public String getDmlStatementType() {
-            return dmlStatementType;
+            this.loopIsViolation = loopIsViolation;
         }
 
         public String getDatabaseOperationMethod() {
-            return databaseOperationMethod;
+            return this.databaseOperationMethod;
+        }
+
+        /**
+         * @return true if this operation should be a violation in {@link DmlInLoopRule}, false
+         *     otherwise.
+         */
+        public boolean isLoopIsViolation() {
+            return loopIsViolation;
+        }
+
+        /**
+         * Convert a Databse.[method] name to a DatabaseOperation
+         *
+         * @param method the method name to convert. For example, <code>Database.update</code>
+         * @return the corresponding DatabaseOperation, if found
+         */
+        public static Optional<DatabaseOperation> fromString(String method) {
+            return Optional.ofNullable(FROM_DATABASE_METHOD.get(method));
         }
     }
 }

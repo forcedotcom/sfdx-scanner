@@ -26,6 +26,7 @@ public class DmlInLoopRuleHandler {
             return true;
         } else if (vertex instanceof MethodCallExpressionVertex) {
             // TODO check for Database.<whatever> calls
+            return true;
         }
         return false;
     }
@@ -44,6 +45,7 @@ public class DmlInLoopRuleHandler {
         // We should only be detecting
         final DmlInLoopVisitor ruleVisitor;
         if (dmlVertex instanceof DmlStatementVertex) {
+
             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (DmlStatementVertex) dmlVertex);
         } else if (dmlVertex instanceof MethodCallExpressionVertex) {
             ruleVisitor =
