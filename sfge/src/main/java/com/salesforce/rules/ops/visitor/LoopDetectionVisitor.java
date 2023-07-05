@@ -189,7 +189,7 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         final List<String> vertexEndScopes = vertex.getEndScopes();
 
         // Look at the list in reverse order to get the newest innermost scope first.
-        for (int i = vertexEndScopes.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < vertexEndScopes.size(); i++) {
             final String endScopeLabel = vertexEndScopes.get(i);
             // Continue processing only if this is a loop scope.
             if (LOOP_VERTICES_LABELS.contains(endScopeLabel)) {
