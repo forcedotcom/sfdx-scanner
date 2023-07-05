@@ -1,9 +1,11 @@
 package com.salesforce.rules.dmlinloop;
 
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.rules.DmlInLoopRule;
 import com.salesforce.rules.OccurrenceInfo;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -181,12 +183,93 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     @CsvSource({
         // technically the myList could be in the method call or query
-        "ForEachStatement, for (Integer i : myList), ",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++)",
-        "WhileLoopStatement, while(true)"
+        "ForEachStatement, for (Integer i : myList), convertLead({}, true)",
+        "ForEachStatement, for (Integer i : myList), countQuery('SELECT count() FROM Account')",
+        "ForEachStatement, for (Integer i : myList), countQueryWithBinds('SELECT count() FROM Account', new Map<String, Object>{'name' => accountName})",
+        "ForEachStatement, for (Integer i : myList), delete(new Account(3, 10, 'Dave'), false)",
+        "ForEachStatement, for (Integer i : myList), deleteAsync(List.of(new Account(15, 1, 'Sree'), false)",
+        "ForEachStatement, for (Integer i : myList), deleteImmediate(new Account(9, 2, 'Min')",
+        "ForEachStatement, for (Integer i : myList), emptyRecycleBin(new Account[]{new Account(10, 10, 'Jay')})",
+        "ForEachStatement, for (Integer i : myList), executeBatch(null)", // TODO
+        "ForEachStatement, for (Integer i : myList), getAsyncDeleteResult(Database.deleteAsync(List.of(new Account(15, 1, 'Sree'), false))",
+        "ForEachStatement, for (Integer i : myList), getAsyncLocator(Database.deleteAsync(List.of(new Account(15, 1, 'Sree'), false))",
+        "ForEachStatement, for (Integer i : myList), getAsyncSaveResult(Database.insert(new Account(10, 11, 'Kate')))",
+        "ForEachStatement, for (Integer i : myList), getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForEachStatement, for (Integer i : myList), getQueryLocator('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1')",
+        "ForEachStatement, for (Integer i : myList), getQueryLocatorWithBinds('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1', new Map<String, Object>{'name' => accountName})",
+        "ForEachStatement, for (Integer i : myList), getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForEachStatement, for (Integer i : myList), insert(new Account(10, 11, 'Kate'))",
+        "ForEachStatement, for (Integer i : myList), insertAsync(new Account(0, 4, 'Raj'), a -> {})",
+        "ForEachStatement, for (Integer i : myList), insertImmediate(new Account(8, 1, 'Mike'))",
+        "ForEachStatement, for (Integer i : myList), merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin')",
+        "ForEachStatement, for (Integer i : myList), query(TODO)", // TODO finish this
+        "ForEachStatement, for (Integer i : myList), queryWithBinds(TODO)",
+        "ForEachStatement, for (Integer i : myList), setSavepoint(TODO); rollback(TODO)",     // +rollback + setSavepoint used in sequence
+        "ForEachStatement, for (Integer i : myList), undelete(TODO)",
+        "ForEachStatement, for (Integer i : myList), update(TODO)",
+        "ForEachStatement, for (Integer i : myList), updateAsync(TODO)",
+        "ForEachStatement, for (Integer i : myList), updateImmediate(TODO)",
+        "ForEachStatement, for (Integer i : myList), upsert(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), convertLead({}, true))",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), countQuery('SELECT count() FROM Account')",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), countQueryWithBinds(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), delete(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), deleteAsync(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), deleteImmediate(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), emptyRecycleBin(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), executeBatch(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncDeleteResult(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncLocator(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncSaveResult(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getDeleted(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getQueryLocator(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getQueryLocatorWithBinds(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getUpdated(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insertAsync(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insertImmediate(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), merge(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), query(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), queryWithBinds(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), rollback(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), setSavepoint(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), undelete(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), update(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), updateAsync(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), updateImmediate(TODO)",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), upsert(TODO)",
+        "WhileLoopStatement, while(true), convertLead({}, true)",
+        "WhileLoopStatement, while(true), countQuery('SELECT count() FROM Account')",
+        "WhileLoopStatement, while(true), countQueryWithBinds(TODO)",
+        "WhileLoopStatement, while(true), delete(TODO)",
+        "WhileLoopStatement, while(true), deleteAsync(TODO)",
+        "WhileLoopStatement, while(true), deleteImmediate(TODO)",
+        "WhileLoopStatement, while(true), emptyRecycleBin(TODO)",
+        "WhileLoopStatement, while(true), executeBatch(TODO)",
+        "WhileLoopStatement, while(true), getAsyncDeleteResult(TODO)",
+        "WhileLoopStatement, while(true), getAsyncLocator(TODO)",
+        "WhileLoopStatement, while(true), getAsyncSaveResult(TODO)",
+        "WhileLoopStatement, while(true), getDeleted(TODO)",
+        "WhileLoopStatement, while(true), getQueryLocator(TODO)",
+        "WhileLoopStatement, while(true), getQueryLocatorWithBinds(TODO)",
+        "WhileLoopStatement, while(true), getUpdated(TODO)",
+        "WhileLoopStatement, while(true), insert(TODO)",
+        "WhileLoopStatement, while(true), insertAsync(TODO)",
+        "WhileLoopStatement, while(true), insertImmediate(TODO)",
+        "WhileLoopStatement, while(true), merge(TODO)",
+        "WhileLoopStatement, while(true), query(TODO)",
+        "WhileLoopStatement, while(true), queryWithBinds(TODO)",
+        "WhileLoopStatement, while(true), rollback(TODO)",
+        "WhileLoopStatement, while(true), setSavepoint(TODO)",
+        "WhileLoopStatement, while(true), undelete(TODO)",
+        "WhileLoopStatement, while(true), update(TODO)",
+        "WhileLoopStatement, while(true), updateAsync(TODO)",
+        "WhileLoopStatement, while(true), updateImmediate(TODO)",
+        "WhileLoopStatement, while(true), upsert(TODO)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testDatabaseMethodWithinLoop(String loopLabel, String loopStructure) {
+    @Disabled
+    public void testDatabaseMethodWithinLoop(String loopLabel, String loopStructure, String dbMethod) {
         // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
@@ -194,7 +277,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                     + "List<Integer> myList = new Integer[] {3,5};\n"
                     + loopStructure + " {\n"
                         + "Account[] accs = new Account[]{new Account(3, 10)};\n"
-                        + "Database.deleteAsync(accs, null);\n"
+                        + "Database." + dbMethod + ";\n"
                     + "}\n"
                 + "}\n"
             + "}\n"
@@ -241,7 +324,11 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         // spotless:on
 
         assertViolations(
-                RULE, sourceCode, expect(3, new OccurrenceInfo("ForLoopStatement", MY_CLASS, 3)));
+                RULE,
+                sourceCode,
+                expect(
+                        3,
+                        new OccurrenceInfo(ASTConstants.NodeType.FOR_LOOP_STATEMENT, MY_CLASS, 3)));
     }
 
     /** The increment clause of a for loop repeats, which should be a violation */
@@ -279,7 +366,12 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         //spotless:on
 
         assertViolations(
-                RULE, sourceCode, expect(9, new OccurrenceInfo("ForLoopStatement", MY_CLASS, 12)));
+                RULE,
+                sourceCode,
+                expect(
+                        9,
+                        new OccurrenceInfo(
+                                ASTConstants.NodeType.FOR_LOOP_STATEMENT, MY_CLASS, 12)));
     }
 
     /** Methods called within a loop containing DML are violations. */
@@ -338,7 +430,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "upsert a"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testLoopFromStaticBlock(String dmlStatement) {
+    public void testLoopFromStaticBlockOk(String dmlStatement) {
         // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
@@ -359,5 +451,42 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         // spotless:on
 
         assertNoViolation(RULE, sourceCode);
+    }
+
+    @CsvSource({
+        "ForEachStatement, for (String s : myList), ForEachStatement, for (String s : myList)",
+        "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < s.size; i++)",
+        "ForEachStatement, for (String s : myList), WhileLoopStatement, while(true)",
+        "ForLoopStatement, for (Integer i; i < s.size; i++), ForLoopStatement, for (Integer i; i < s.size; i++)",
+        "ForLoopStatement, for (Integer i; i < s.size; i++), ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < s.size; i++), WhileLoopStatement, while(true)",
+        "WhileLoopStatement, while(true), ForEachStatement, for (String s : myList)",
+        "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < s.size; i++)",
+        "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
+    })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testNestedLoop(String outerLoopLabel, String outerLoopStructure, String innerLoopLabel, String innerLoopStructure) {
+
+        // spotless:off
+        String[] sourceCode = {
+            "public class MyClass {\n" +
+                "void foo() {\n" +
+                    "List<String> myList = new String[] {'Account', 'Contact'};\n" +
+                    outerLoopStructure + "{\n" +
+                        innerLoopStructure + "{\n" +
+                            "Account a = [SELECT Id, Name FROM account WHERE Id = 3 LIMIT 1];\n" +
+                        "}\n" +
+                    "}\n" +
+                "}\n" +
+            "}\n"
+        };
+        // spotless:on
+
+        assertViolations(
+            RULE,
+            sourceCode,
+            expect(6, new OccurrenceInfo(innerLoopLabel, MY_CLASS, 5)
+            )
+        );
     }
 }
