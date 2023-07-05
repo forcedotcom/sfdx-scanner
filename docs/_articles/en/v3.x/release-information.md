@@ -22,8 +22,14 @@ We publish the latest Code Analyzer monthly.
 * NEW (CodeAnalyzer): The upcoming release of [PMD 7.x](https://pmd.github.io/pmd/pmd_release_notes_pmd7.html) contains some changes that require you to rewrite your PMD 6.x rules. Code Analyzer hasn’t upgraded to PMD 7.x yet. To alert you in advance about what you must change in your code to comply with PMD 7.x, we added a warning message. Fix your code, and if you need help, create an issue on [our repo](https://github.com/forcedotcom/sfdx-scanner).
 
 **Closed issues:**
+* [BUG] Not Working eslintconfig [\#1099](https://github.com/forcedotcom/sfdx-scanner/issues/1099)
+* [BUG] Internal Error [\#1053](https://github.com/forcedotcom/sfdx-scanner/issues/1053)
 
 **Merged pull requests**
+* CHANGE (PMD): @W-13603126@: Added warning for pmd7-incompatible rules. [\#1093](https://github.com/forcedotcom/sfdx-scanner/pull/1093)
+* CHANGE (GraphEngine): @W-13463071@: Changed violation messages to approved versions. [\#1098](https://github.com/forcedotcom/sfdx-scanner/pull/1098)
+* FIX (GraphEngine): @W-13463071@: Handle multiple invocations of the same method [\#1094](https://github.com/forcedotcom/sfdx-scanner/pull/1094)
+* CHANGE (CodeAnalyzer): @W-13594221@: Added CPD and pmd-custom checks to smoke tests. [\#1092](https://github.com/forcedotcom/sfdx-scanner/pull/1092)
 
 ## [v3.13.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.13.0) (06-07-2023)
 
