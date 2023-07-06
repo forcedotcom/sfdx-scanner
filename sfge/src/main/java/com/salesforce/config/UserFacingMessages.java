@@ -79,8 +79,45 @@ public final class UserFacingMessages {
     }
 
     public static final class MultipleMassSchemaLookupRuleTemplates {
-        public static final String MESSAGE_TEMPLATE = "%s was %s at %s:%d.";
-        public static final String OCCURRENCE_LOOP_TEMPLATE = "called inside a %s";
-        public static final String OCCURRENCE_MULTIPLE_TEMPLATE = "preceded by a call to %s";
+        /**
+         * String Param 1: Vertex or MethodCall information String Param 2: Class name Number Param:
+         * Line-number in code
+         *
+         * <p>Example: ForEachStatement at MyClass:23
+         */
+        public static final String OCCURRENCE_TEMPLATE = "%s at %s:%d";
+
+        /** Indicates when an expensive schema lookup operation happened inside a loop. */
+        public static final String LOOP_MESSAGE_TEMPLATE = "was called inside a loop";
+        /**
+         * Indicates when a path leading to an expensive schema call has another expensive schema
+         * call as well at a different line.
+         */
+        public static final String PRECEDED_BY_MESSAGE_TEMPLATE =
+                "Multiple expensive schema lookups are invoked";
+        /**
+         * Indicates when the same expensive schema call is invoke multiple times through various
+         * method calls.
+         */
+        public static final String CALL_STACK_TEMPLATE =
+                "executed multiple times in the call stack";
+
+        /**
+         * String Param 1: Expensive Schema Lookup type (Schema.getGlobalDescribe or
+         * Schema.describeSObjects)
+         *
+         * <p>String Param 2: Text corresponding to occurrence type ({@link #LOOP_MESSAGE_TEMPLATE},
+         * {@link #PRECEDED_BY_MESSAGE_TEMPLATE}, {@link #CALL_STACK_TEMPLATE})
+         *
+         * <p>String Param 3: Occurrence information using {@link #OCCURRENCE_TEMPLATE}. Can be more
+         * than one occurrence.
+         */
+        public static final String MESSAGE_TEMPLATE = "%1$s %2$s. %3$s";
+
+        /**
+         * Exact same arguments as {@link #MESSAGE_TEMPLATE}, except the first argument is unused.
+         * Meant for violation messages that don't include the name of the expensive method.
+         */
+        public static final String METHODLESS_MESSAGE_TEMPLATE = "%2$s. %3$s";
     }
 }

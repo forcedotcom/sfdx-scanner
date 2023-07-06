@@ -11,8 +11,10 @@ import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfoUtil;
-import com.salesforce.rules.multiplemassschemalookup.RuleConstants;
+import com.salesforce.rules.multiplemassschemalookup.MmslrUtil;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Function;
 
@@ -203,41 +205,41 @@ public class ViolationWrapper {
     /** Message builder to help with testing {@link MultipleMassSchemaLookupRule}. */
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
-        private final RuleConstants.RepetitionType repetitionType;
-        private final String typeInfo;
-        private final String occurrenceClassName;
-        private final int occurrenceLine;
+        private final MmslrUtil.RepetitionType repetitionType;
+        private final List<MassSchemaLookupInfoUtil.OccurrenceInfo> occurrenceInfoList;
 
         private MassSchemaLookupInfoBuilder(
-                int sinkLine,
-                String sinkMethodName,
-                int occurrenceLine,
-                String occurrenceClassName,
-                RuleConstants.RepetitionType type,
-                String typeInfo) {
+                int sinkLine, String sinkMethodName, MmslrUtil.RepetitionType type) {
             super(sinkLine);
             this.sinkMethodName = sinkMethodName;
-            this.occurrenceLine = occurrenceLine;
-            this.occurrenceClassName = occurrenceClassName;
             this.repetitionType = type;
-            this.typeInfo = typeInfo;
+            this.occurrenceInfoList = new ArrayList<>();
         }
 
         public static MassSchemaLookupInfoBuilder get(
-                int sinkLine,
-                String sinkMethodName,
-                int occurrenceLine,
-                String occurrenceClassName,
-                RuleConstants.RepetitionType type,
-                String typeInfo) {
-            return new MassSchemaLookupInfoBuilder(
-                    sinkLine, sinkMethodName, occurrenceLine, occurrenceClassName, type, typeInfo);
+                int sinkLine, String sinkMethodName, MmslrUtil.RepetitionType type) {
+            return new MassSchemaLookupInfoBuilder(sinkLine, sinkMethodName, type);
+        }
+
+        /**
+         * To include occurrence information in the verification.
+         *
+         * @param label on the occurrence
+         * @param definingType - class in which the occurrence is expected
+         * @param line - where the occurrence should show up.
+         * @return reference to the builder to continue building the value.
+         */
+        public MassSchemaLookupInfoBuilder withOccurrence(
+                String label, String definingType, int line) {
+            this.occurrenceInfoList.add(
+                    new MassSchemaLookupInfoUtil.OccurrenceInfo(label, definingType, line));
+            return this;
         }
 
         @Override
         public String getMessage() {
             return MassSchemaLookupInfoUtil.getMessage(
-                    sinkMethodName, repetitionType, typeInfo, occurrenceClassName, occurrenceLine);
+                    sinkMethodName, repetitionType, occurrenceInfoList);
         }
     }
 

@@ -22,6 +22,8 @@ import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.ThrowStatementVertex;
+import com.salesforce.rules.ops.methodpath.MethodPathListener;
+import com.salesforce.rules.ops.methodpath.NoOpMethodPathListenerImpl;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,7 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
     private final PathVertexVisitor visitor;
     private final SymbolProviderVertexVisitor symbolProviderVisitor;
     private final SymbolProvider symbolProvider;
+    private final MethodPathListener methodPathListener;
     /** Map used to implement ClassStaticScopeProvider */
     private final TreeMap<String, ClassStaticScope> classStaticScopes;
 
@@ -47,10 +50,27 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
             PathVertexVisitor visitor,
             SymbolProviderVertexVisitor symbolProviderVisitor,
             SymbolProvider symbolProvider) {
+        this(
+                g,
+                topMostPath,
+                visitor,
+                symbolProviderVisitor,
+                NoOpMethodPathListenerImpl.get(),
+                symbolProvider);
+    }
+
+    public ApexPathWalker(
+            GraphTraversalSource g,
+            ApexPath topMostPath,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolProviderVisitor,
+            MethodPathListener methodPathListener,
+            SymbolProvider symbolProvider) {
         this.g = g;
         this.topMostPath = topMostPath;
         this.visitor = visitor;
         this.symbolProviderVisitor = symbolProviderVisitor;
+        this.methodPathListener = methodPathListener;
         this.symbolProvider = symbolProvider;
         this.classStaticScopes = CollectionUtil.newTreeMap();
     }
@@ -82,8 +102,23 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
             PathVertexVisitor visitor,
             SymbolProviderVertexVisitor symbolVisitor,
             SymbolProvider symbolProvider) {
+        walkPath(g, path, visitor, symbolVisitor, NoOpMethodPathListenerImpl.get(), symbolProvider);
+    }
+
+    /**
+     * Walk the given path with {@code visitor}, {@code symbolVisitor}, {@code methodPathListener}
+     * and {@code symbolProvider}.
+     */
+    public static void walkPath(
+            GraphTraversalSource g,
+            ApexPath path,
+            PathVertexVisitor visitor,
+            SymbolProviderVertexVisitor symbolVisitor,
+            MethodPathListener methodPathListener,
+            SymbolProvider symbolProvider) {
         final ApexPathWalker apexPathWalker =
-                new ApexPathWalker(g, path, visitor, symbolVisitor, symbolProvider);
+                new ApexPathWalker(
+                        g, path, visitor, symbolVisitor, methodPathListener, symbolProvider);
         try {
             ContextProviders.CLASS_STATIC_SCOPE.push(apexPathWalker);
             apexPathWalker.walk(path);
@@ -200,11 +235,18 @@ public final class ApexPathWalker implements ClassStaticScopeProvider {
         if (methodPath != null) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
-                        "Starting method path. methodCall="
+                        "Starting method path from ApexPath"
+                                + path.getStableId()
+                                + ". methodCall="
                                 + vertex
                                 + ", firstVertex="
                                 + methodPath.firstVertex());
             }
+
+            // Notify method path listener
+            methodPathListener.onMethodPathFork(path, methodPath, invocable);
+
+            // Initialize method invocation's static scope
             MethodVertex method = methodPath.getMethodVertex().get();
             String className = method.getDefiningType();
 

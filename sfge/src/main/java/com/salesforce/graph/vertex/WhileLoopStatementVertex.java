@@ -29,4 +29,9 @@ public class WhileLoopStatementVertex extends BaseSFVertex {
     public void afterVisit(SymbolProviderVertexVisitor visitor) {
         visitor.afterVisit(this);
     }
+
+    @Override
+    public boolean startsInnerScope() {
+        return true;
+    }
 }
