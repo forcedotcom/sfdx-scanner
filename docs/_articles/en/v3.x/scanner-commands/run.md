@@ -88,6 +88,7 @@ $ sfdx scanner:run --format xml --target "somefile.js"
 ```
 
 This example evaluates all rules in the Design and Best Practices categories. When you specify multiple categories or rulesets, the results are combined with a logical OR.
+
 ```bash
 $ sfdx scanner:run --format xml --target "somefile.js" --category "Design,Best Practices"
 ```
@@ -115,8 +116,10 @@ $ sfdx scanner:run --target "/my-project/**/*.ts" --tsconfig "/my-project/tsconf
 ```
 
 This example evaluates rules against somefile.js, including Jasmine in the environment variables. Uses --env to override the default ESLint environment variables to add frameworks.
+
 ```bash
 $ sfdx scanner:run --target "somefile.js" --env '{"jasmine": true}'
+```
 
 This example evaluates rules aginst somefile.js using eslint-lwc and pmd engines. Use --engine to include or exclude engines. Any engine listed will be run, regardless of its current 'disabled' attribute.
 
