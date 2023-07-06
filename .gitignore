@@ -1,6 +1,7 @@
 /build
 /test-results
 /test-coverage
+/typescript-test-results
 .DS_Store
 *-debug.log
 *-error.log
