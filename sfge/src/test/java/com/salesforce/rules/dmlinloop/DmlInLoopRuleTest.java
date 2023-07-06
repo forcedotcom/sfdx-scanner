@@ -16,8 +16,6 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     protected static final DmlInLoopRule RULE = DmlInLoopRule.getInstance();
 
-    // TODO test Database.<method> methods
-
     /**
      * function to get the expected violation from some code and an loop OccurrenceInfo
      *
@@ -181,110 +179,108 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         assertNoViolation(RULE, sourceCode);
     }
 
-    @CsvSource({
+    @CsvSource(delimiterString = " | ", value = {
         // technically the myList could be in the method call or query
-        "ForEachStatement, for (Integer i : myList), convertLead({}, true)",
-        "ForEachStatement, for (Integer i : myList), countQuery('SELECT count() FROM Account')",
-        "ForEachStatement, for (Integer i : myList), countQueryWithBinds('SELECT count() FROM Account', new Map<String, Object>{'name' => accountName})",
-        "ForEachStatement, for (Integer i : myList), delete(new Account(3, 10, 'Dave'), false)",
-        "ForEachStatement, for (Integer i : myList), deleteAsync(List.of(new Account(15, 1, 'Sree'), false)",
-        "ForEachStatement, for (Integer i : myList), deleteImmediate(new Account(9, 2, 'Min')",
-        "ForEachStatement, for (Integer i : myList), emptyRecycleBin(new Account[]{new Account(10, 10, 'Jay')})",
-        "ForEachStatement, for (Integer i : myList), executeBatch(null)", // TODO
-        "ForEachStatement, for (Integer i : myList), getAsyncDeleteResult(Database.deleteAsync(List.of(new Account(15, 1, 'Sree'), false))",
-        "ForEachStatement, for (Integer i : myList), getAsyncLocator(Database.deleteAsync(List.of(new Account(15, 1, 'Sree'), false))",
-        "ForEachStatement, for (Integer i : myList), getAsyncSaveResult(Database.insert(new Account(10, 11, 'Kate')))",
-        "ForEachStatement, for (Integer i : myList), getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
-        "ForEachStatement, for (Integer i : myList), getQueryLocator('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1')",
-        "ForEachStatement, for (Integer i : myList), getQueryLocatorWithBinds('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1', new Map<String, Object>{'name' => accountName})",
-        "ForEachStatement, for (Integer i : myList), getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
-        "ForEachStatement, for (Integer i : myList), insert(new Account(10, 11, 'Kate'))",
-        "ForEachStatement, for (Integer i : myList), insertAsync(new Account(0, 4, 'Raj'), a -> {})",
-        "ForEachStatement, for (Integer i : myList), insertImmediate(new Account(8, 1, 'Mike'))",
-        "ForEachStatement, for (Integer i : myList), merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin')",
-        "ForEachStatement, for (Integer i : myList), query(TODO)", // TODO finish this
-        "ForEachStatement, for (Integer i : myList), queryWithBinds(TODO)",
-        "ForEachStatement, for (Integer i : myList), setSavepoint(TODO); rollback(TODO)",     // +rollback + setSavepoint used in sequence
-        "ForEachStatement, for (Integer i : myList), undelete(TODO)",
-        "ForEachStatement, for (Integer i : myList), update(TODO)",
-        "ForEachStatement, for (Integer i : myList), updateAsync(TODO)",
-        "ForEachStatement, for (Integer i : myList), updateImmediate(TODO)",
-        "ForEachStatement, for (Integer i : myList), upsert(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), convertLead({}, true))",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), countQuery('SELECT count() FROM Account')",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), countQueryWithBinds(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), delete(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), deleteAsync(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), deleteImmediate(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), emptyRecycleBin(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), executeBatch(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncDeleteResult(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncLocator(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getAsyncSaveResult(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getDeleted(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getQueryLocator(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getQueryLocatorWithBinds(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), getUpdated(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insertAsync(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), insertImmediate(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), merge(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), query(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), queryWithBinds(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), rollback(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), setSavepoint(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), undelete(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), update(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), updateAsync(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), updateImmediate(TODO)",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), upsert(TODO)",
-        "WhileLoopStatement, while(true), convertLead({}, true)",
-        "WhileLoopStatement, while(true), countQuery('SELECT count() FROM Account')",
-        "WhileLoopStatement, while(true), countQueryWithBinds(TODO)",
-        "WhileLoopStatement, while(true), delete(TODO)",
-        "WhileLoopStatement, while(true), deleteAsync(TODO)",
-        "WhileLoopStatement, while(true), deleteImmediate(TODO)",
-        "WhileLoopStatement, while(true), emptyRecycleBin(TODO)",
-        "WhileLoopStatement, while(true), executeBatch(TODO)",
-        "WhileLoopStatement, while(true), getAsyncDeleteResult(TODO)",
-        "WhileLoopStatement, while(true), getAsyncLocator(TODO)",
-        "WhileLoopStatement, while(true), getAsyncSaveResult(TODO)",
-        "WhileLoopStatement, while(true), getDeleted(TODO)",
-        "WhileLoopStatement, while(true), getQueryLocator(TODO)",
-        "WhileLoopStatement, while(true), getQueryLocatorWithBinds(TODO)",
-        "WhileLoopStatement, while(true), getUpdated(TODO)",
-        "WhileLoopStatement, while(true), insert(TODO)",
-        "WhileLoopStatement, while(true), insertAsync(TODO)",
-        "WhileLoopStatement, while(true), insertImmediate(TODO)",
-        "WhileLoopStatement, while(true), merge(TODO)",
-        "WhileLoopStatement, while(true), query(TODO)",
-        "WhileLoopStatement, while(true), queryWithBinds(TODO)",
-        "WhileLoopStatement, while(true), rollback(TODO)",
-        "WhileLoopStatement, while(true), setSavepoint(TODO)",
-        "WhileLoopStatement, while(true), undelete(TODO)",
-        "WhileLoopStatement, while(true), update(TODO)",
-        "WhileLoopStatement, while(true), updateAsync(TODO)",
-        "WhileLoopStatement, while(true), updateImmediate(TODO)",
-        "WhileLoopStatement, while(true), upsert(TODO)"
+        "ForEachStatement | for (Integer i : myList) | convertLead(null, true)",
+        "ForEachStatement | for (Integer i : myList) | countQuery('SELECT count() FROM Account')",
+        "ForEachStatement | for (Integer i : myList) | countQueryWithBinds('SELECT count() FROM Account', new Map<String, Object>{'name' => 'RAPTOR'})",
+        "ForEachStatement | for (Integer i : myList) | delete(new Account(3, 10, 'Dave'), false)",
+        "ForEachStatement | for (Integer i : myList) | deleteAsync(List.of(new Account(15, 1, 'Sree')), false)",
+        "ForEachStatement | for (Integer i : myList) | deleteImmediate(new Account(9, 2, 'Min'))",
+        "ForEachStatement | for (Integer i : myList) | emptyRecycleBin(new Account[]{new Account(10, 10, 'Jay')})",
+        "ForEachStatement | for (Integer i : myList) | executeBatch(null)", // TODO
+        "ForEachStatement | for (Integer i : myList) | getAsyncDeleteResult(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "ForEachStatement | for (Integer i : myList) | getAsyncLocator(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "ForEachStatement | for (Integer i : myList) | getAsyncSaveResult(Database.insert(new Account(10, 11, 'Kate')))",
+        "ForEachStatement | for (Integer i : myList) | getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForEachStatement | for (Integer i : myList) | getQueryLocator('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1')",
+        "ForEachStatement | for (Integer i : myList) | getQueryLocatorWithBinds('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1', new Map<String, Object>{'name' => 'KENSINGTON'})",
+        "ForEachStatement | for (Integer i : myList) | getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForEachStatement | for (Integer i : myList) | insert(new Account(10, 11, 'Kate'))",
+        "ForEachStatement | for (Integer i : myList) | insertAsync(new Account(0, 4, 'Raj'), nothing())",
+        "ForEachStatement | for (Integer i : myList) | insertImmediate(new Account(8, 1, 'Mike'))",
+        "ForEachStatement | for (Integer i : myList) | merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin'))",
+        "ForEachStatement | for (Integer i : myList) | query('SELECT Id, Age, Name FROM Accounts WHERE Id = 100 LIMIT 1')",
+        "ForEachStatement | for (Integer i : myList) | queryWithBinds('SELECT ID, Age, Name FROM Accounts WHERE Id = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
+        "ForEachStatement | for (Integer i : myList) | rollback(Database.setSavepoint())", // shortcut since rollback + setSavepoint used in sequence
+        "ForEachStatement | for (Integer i : myList) | undelete(new Account(10, 'Rod', 53), false)",
+        "ForEachStatement | for (Integer i : myList) | update(new Account(10, 'Ron', 53), false)",
+        "ForEachStatement | for (Integer i : myList) | updateAsync(new Account(10, 'Roy', 53), false)",
+        "ForEachStatement | for (Integer i : myList) | updateImmediate(new Account(10, 'Rob', 53), false)",
+        "ForEachStatement | for (Integer i : myList) | upsert(new Account(10, 'Rot', 53), null, false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | convertLead(null, true)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | countQuery('SELECT count() FROM Account')",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | countQueryWithBinds('SELECT count() FROM Account', new Map<String, Object>{'name' => 'RAPTOR'})",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | delete(new Account(3, 10, 'Dave'), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | deleteAsync(List.of(new Account(15, 1, 'Sree')), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | deleteImmediate(new Account(9, 2, 'Min'))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | emptyRecycleBin(new Account[]{new Account(10, 10, 'Jay')})",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | executeBatch(null)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getAsyncDeleteResult(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getAsyncLocator(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getAsyncSaveResult(Database.insert(new Account(10, 11, 'Kate')))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getQueryLocator('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1')",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getQueryLocatorWithBinds('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1', new Map<String, Object>{'name' => 'KENSINGTON'})",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | insert(new Account(10, 11, 'Kate'))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | insertAsync(new Account(0, 4, 'Raj'), nothing())",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | insertAsync(new Account(8, 1, 'Mike'))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin'))",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | query('SELECT Id, Age, Name FROM Accounts WHERE Id = 100 LIMIT 1')",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | queryWithBinds('SELECT ID, Age, Name FROM Accounts WHERE Id = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | rollback(setSavepoint())",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | undelete(new Account(10, 'Rod', 53), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | update(new Account(10, 'Ron', 53), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | updateAsync(new Account(10, 'Roy', 53), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | updateImmediate(new Account(10, 'Rob', 53), false)",
+        "ForLoopStatement | for (Integer i = 0; i < 2; i++) | upsert(new Account(10, 'Rot', 53), null, false)",
+        "WhileLoopStatement | while(true) | convertLead(null, true)",
+        "WhileLoopStatement | while(true) | countQuery('SELECT count() FROM Account')",
+        "WhileLoopStatement | while(true) | countQueryWithBinds(TODO)",
+        "WhileLoopStatement | while(true) | delete(new Account(3, 10, 'Dave'), false)",
+        "WhileLoopStatement | while(true) | deleteAsync(List.of(new Account(15, 1, 'Sree')), false)",
+        "WhileLoopStatement | while(true) | deleteImmediate(new Account(9, 2, 'Min'))",
+        "WhileLoopStatement | while(true) | emptyRecycleBin(new Account[]{new Account(10, 10, 'Jay')})",
+        "WhileLoopStatement | while(true) | executeBatch(null)",
+        "WhileLoopStatement | while(true) | getAsyncDeleteResult(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "WhileLoopStatement | while(true) | getAsyncLocator(Database.deleteAsync(List.of(new Account(15, 1, 'Sree')), false))",
+        "WhileLoopStatement | while(true) | getAsyncSaveResult(Database.insert(new Account(10, 11, 'Kate')))",
+        "WhileLoopStatement | while(true) | getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "WhileLoopStatement | while(true) | getQueryLocator('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1')",
+        "WhileLoopStatement | while(true) | getQueryLocatorWithBinds('SELECT Id, Age FROM account WHERE Id = 3 LIMIT 1', new Map<String, Object>{'name' => 'KENSINGTON'})",
+        "WhileLoopStatement | while(true) | getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
+        "WhileLoopStatement | while(true) | insert(new Account(10, 11, 'Kate'))",
+        "WhileLoopStatement | while(true) | insertAsync(new Account(0, 4, 'Raj'), nothing())",
+        "WhileLoopStatement | while(true) | insertAsync(new Account(8, 1, 'Mike'))",
+        "WhileLoopStatement | while(true) | merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin'))",
+        "WhileLoopStatement | while(true) | query('SELECT Id, Age, Name FROM Accounts WHERE Id = 100 LIMIT 1')",
+        "WhileLoopStatement | while(true) | queryWithBinds('SELECT ID, Age, Name FROM Accounts WHERE Id = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
+        "WhileLoopStatement | while(true) | rollback(setSavepoint())",
+        "WhileLoopStatement | while(true) | undelete(new Account(10, 'Rod', 53), false)",
+        "WhileLoopStatement | while(true) | update(new Account(10, 'Ron', 53), false)",
+        "WhileLoopStatement | while(true) | updateAsync(new Account(10, 'Roy', 53), false)",
+        "WhileLoopStatement | while(true) | updateImmediate(new Account(10, 'Rob', 53), false)",
+        "WhileLoopStatement | while(true) | upsert(new Account(10, 'Rot', 53), null, false)"
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
-    @Disabled
+    @ParameterizedTest(name = "{displayName}: {0}:{2}")
     public void testDatabaseMethodWithinLoop(String loopLabel, String loopStructure, String dbMethod) {
         // spotless:off
         String[] sourceCode = {
             "public class MyClass {\n"
-                + "void foo() {\n"
-                    + "List<Integer> myList = new Integer[] {3,5};\n"
-                    + loopStructure + " {\n"
-                        + "Account[] accs = new Account[]{new Account(3, 10)};\n"
-                        + "Database." + dbMethod + ";\n"
-                    + "}\n"
-                + "}\n"
+            + "     void foo() {\n"
+            + "         List<Integer> myList = new Integer[] {3,5};\n"
+            + "         Account[] accs = new Account[]{new Account(3, 10)};\n"
+            + "         " + loopStructure + " {\n"
+            + "             Database." + dbMethod + ";\n"
+            + "         }\n"
+            + "     }\n"
+            + "     void nothing() {}\n"
             + "}\n"
         };
         // spotless:on
 
-        assertViolations(RULE, sourceCode, expect(6, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
+        assertViolations(RULE, sourceCode, expect(6, new OccurrenceInfo(loopLabel, MY_CLASS, 5)));
     }
 
     /**
