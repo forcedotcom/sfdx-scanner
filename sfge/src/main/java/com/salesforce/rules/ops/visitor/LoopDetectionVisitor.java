@@ -147,7 +147,7 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
     }
 
     /**
-     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider) method} to handle
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider)} method to handle
      * DML statements in loops, limiting what vertices are allowed in that method.
      */
     @Override
@@ -156,7 +156,7 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
     }
 
     /**
-     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider) method} to handle
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider)} method to handle
      * DML statements in loops, limiting what vertices are allowed in that method.
      */
     @Override
