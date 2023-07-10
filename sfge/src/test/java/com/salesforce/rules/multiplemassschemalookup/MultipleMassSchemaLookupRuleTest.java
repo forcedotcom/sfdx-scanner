@@ -15,7 +15,8 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                 "ForEachStatement | for (String s : myList)",
                 "ForLoopStatement | for (Integer i; i < s.size; s++)",
                 "WhileLoopStatement | while(true)",
-                "ForEachStatement | for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 30])"
+                "ForEachStatement | for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 30])",
+                "ForEachStatement | for (Account a: getAccounts())"
             })
     @ParameterizedTest(name = "{displayName}: {0}:{1}")
     public void testSimpleGgdInLoop(String loopAstLabel, String loopStructure) {
@@ -28,6 +29,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
             "           Schema.getGlobalDescribe();\n" +
             "       }\n" +
             "   }\n" +
+                "Account[] getAccounts() { return new List<Account>(); }\n" +
             "}\n";
         // spotless:on
 
