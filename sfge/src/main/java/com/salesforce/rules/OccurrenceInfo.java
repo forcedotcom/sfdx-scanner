@@ -2,7 +2,7 @@ package com.salesforce.rules;
 
 import com.salesforce.config.UserFacingMessages;
 
-/** Internal representation of an occurrence info. Originally from MMSL Info Utils. */
+/** Internal representation of an occurrence info. */
 public class OccurrenceInfo {
     final String label;
     final String definingType;

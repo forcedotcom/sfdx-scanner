@@ -1,19 +1,15 @@
 package com.salesforce.rules.dmlinloop;
 
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
-import com.salesforce.rules.DmlUtil;
 import com.salesforce.rules.Violation;
 import com.salesforce.rules.ops.visitor.LoopDetectionVisitor;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class DmlInLoopVisitor extends LoopDetectionVisitor {
-
-    private static final Logger LOGGER = LogManager.getLogger(DmlInLoopVisitor.class);
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
@@ -24,22 +20,22 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
     /** Collects violation information */
     private final HashSet<Violation.PathBasedRuleViolation> violations;
 
-    // DmlStatementVertex represents statements like insert a;
-    DmlInLoopVisitor(SFVertex sourceVertex, DmlStatementVertex sinkVertex) {
-        this.sourceVertex = sourceVertex;
-        this.sinkVertex = sinkVertex;
-        this.violations = new HashSet<>();
-    }
-
-    // MethodCallExpressionVertex is necessary to detect Database.<whatever> methods
-    DmlInLoopVisitor(SFVertex sourceVertex, MethodCallExpressionVertex sinkVertex) {
-        this.sourceVertex = sourceVertex;
-        this.sinkVertex = sinkVertex;
-        this.violations = new HashSet<>();
-    }
-
-    // DmlStatementVertex represents statements like [SELECT Id, Age FROM Accounts]
-    DmlInLoopVisitor(SFVertex sourceVertex, SoqlExpressionVertex sinkVertex) {
+    /**
+     * Create a DmlInLoopVisitor
+     *
+     * @param sourceVertex the source of the path containing this vertex
+     * @param sinkVertex the problematic sink vertex (in this case a vertex with DML). The sink
+     *     vertex must be an instance of an {@link DmlStatementVertex}, {@link
+     *     MethodCallExpressionVertex}, or {@link SoqlExpressionVertex}.
+     */
+    DmlInLoopVisitor(SFVertex sourceVertex, BaseSFVertex sinkVertex) {
+        if (!(sinkVertex instanceof DmlStatementVertex
+                || sinkVertex instanceof MethodCallExpressionVertex
+                || sinkVertex instanceof SoqlExpressionVertex)) {
+            throw new ProgrammingException(
+                    "Sink vertex must be a DmlStatementVertex, MethodCallExpressionVertex, or SoqlExpressionVertex. Provided sink vertex="
+                            + sinkVertex);
+        }
         this.sourceVertex = sourceVertex;
         this.sinkVertex = sinkVertex;
         this.violations = new HashSet<>();
@@ -47,19 +43,8 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-
-        final String fullMethodName = vertex.getFullMethodName();
-
-        // we know this is a method call/expression vertex, but we need to see
-        // if it is a Database.<method> call to confirm it is a DML operation
-        // if so, confirm it should be a violation in a loop
-        DmlUtil.DatabaseOperation.fromString(fullMethodName)
-                .ifPresent(
-                        op -> {
-                            if (op.isLoopIsViolation()) {
-                                createViolationIfSinkInsideLoop(vertex, symbols);
-                            }
-                        });
+        // from DmlInLoopRuleHandler we already know that vertex is a database operation
+        // method, in the format of Database.<something>
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
         super.afterVisit(vertex, symbols);

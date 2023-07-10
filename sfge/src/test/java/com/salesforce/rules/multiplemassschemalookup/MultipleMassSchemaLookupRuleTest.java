@@ -9,12 +9,13 @@ import org.junit.jupiter.params.provider.CsvSource;
 // TODO: Breakdown to more test suites
 public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchemaLookupTest {
 
-    @CsvSource({
-        "ForEachStatement, for (String s : myList)",
-        "ForLoopStatement, for (Integer i; i < s.size; s++)",
-        "WhileLoopStatement, while(true)"
+    @CsvSource(delimiterString = " | ", value = {
+        "ForEachStatement | for (String s : myList)",
+        "ForLoopStatement | for (Integer i; i < s.size; s++)",
+        "WhileLoopStatement | while(true)",
+        "ForEachStatement | for (Account a: [SELECT Id, Name, Age, BillingCity FROM Accounts WHERE Age = 30])"
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{displayName}: {0}:{1}")
     public void testSimpleGgdInLoop(String loopAstLabel, String loopStructure) {
         // spotless:off
         String sourceCode =
@@ -197,32 +198,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         assertNoViolation(RULE, sourceCode);
     }
 
-    /*
-    Since SOQL within the ForEachLoop statement should not be flagged (in DmlInLoopRule),
-    ensure that the mass schema lookup within that ForEachLoop is a violation.
-     */
-    @Test
-    public void testMethodCallForEachLoopIsFlagged() {
-        // spotless:off
-        String[] sourceCode = {
-            "public class MyClass {\n"
-                + "   void foo() {\n"
-                + "       String[] objectList = new String[] {'Account','Contact'};\n"
-                + "       for (Account a: [SELECT Id, Name, BillingCity FROM Accounts WHERE Id = 3]) {\n"
-                + "           Schema.describeSObjects(objectList);\n"
-                + "       }\n"
-                + "   }\n"
-            + "}\n"
-        };
-        // spotless:on
-
-        assertViolations(
-                RULE,
-                sourceCode,
-                expect(5, MmslrUtil.METHOD_SCHEMA_DESCRIBE_SOBJECTS, MmslrUtil.RepetitionType.LOOP)
-                        .withOccurrence(ASTConstants.NodeType.FOR_EACH_STATEMENT, MY_CLASS, 4));
-    }
-
     /** TODO: Handle path expansion from array[index].methodCall() */
     @Test
     @Disabled
@@ -368,8 +343,6 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                         .withOccurrence(loopAstLabel, MY_CLASS, 7));
     }
 
-
-
     @CsvSource({
         "ForEachStatement, for (String s : myList), ForEachStatement, for (String s : myList)",
         "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < s.size; i++)",
@@ -382,7 +355,11 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
-    public void testNestedLoop(String outerLoopLabel, String outerLoopStructure, String innerLoopLabel, String innerLoopStructure) {
+    public void testNestedLoop(
+            String outerLoopLabel,
+            String outerLoopStructure,
+            String innerLoopLabel,
+            String innerLoopStructure) {
 
         // spotless:off
         String[] sourceCode = {
@@ -400,13 +377,12 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         // spotless:on
 
         assertViolations(
-            RULE,
-            sourceCode,
-            expect(
-                6,
-                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                MmslrUtil.RepetitionType.LOOP
-            ).withOccurrence(innerLoopLabel, MY_CLASS, 5)
-        );
+                RULE,
+                sourceCode,
+                expect(
+                                6,
+                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
+                                MmslrUtil.RepetitionType.LOOP)
+                        .withOccurrence(innerLoopLabel, MY_CLASS, 5));
     }
 }

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-public class DmlInLoopRule extends AbstractPathTraversalRule {
+public final class DmlInLoopRule extends AbstractPathTraversalRule {
 
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
@@ -58,7 +58,7 @@ public class DmlInLoopRule extends AbstractPathTraversalRule {
 
     @Override
     protected boolean isEnabled() {
-        return false;
+        return true;
     }
 
     public static DmlInLoopRule getInstance() {

@@ -146,12 +146,19 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         }
     }
 
-    // necessary to limit the _afterLoopVisit method to only Method calls and Soql calls
+    /**
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider) method} to handle
+     * DML statements in loops, limiting what vertices are allowed in that method.
+     */
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         _afterLoopVisit(vertex, symbols);
     }
 
+    /**
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider) method} to handle
+     * DML statements in loops, limiting what vertices are allowed in that method.
+     */
     @Override
     public void afterVisit(SoqlExpressionVertex vertex, SymbolProvider symbols) {
         _afterLoopVisit(vertex, symbols);
@@ -165,7 +172,10 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
     private void _afterLoopVisit(BaseSFVertex vertex, SymbolProvider symbols) {
         if (!(vertex instanceof SoqlExpressionVertex
                 || vertex instanceof MethodCallExpressionVertex)) {
-            afterVisit(vertex, symbols);
+            throw new ProgrammingException(
+                    "Cannot perform post-visit loop tasks on a vertex that is not "
+                            + "a SoqlExpressionVertex or MethodCallExpressionVertex. Provided vertex="
+                            + vertex);
         }
         // If within a method call loop exclusion, pop boundary here.
         final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
@@ -188,7 +198,6 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         // If the vertex has endScopes, pop out the loop items that match the end scopes.
         final List<String> vertexEndScopes = vertex.getEndScopes();
 
-        // Look at the list in reverse order to get the newest innermost scope first.
         for (int i = 0; i < vertexEndScopes.size(); i++) {
             final String endScopeLabel = vertexEndScopes.get(i);
             // Continue processing only if this is a loop scope.

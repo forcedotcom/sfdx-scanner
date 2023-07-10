@@ -8,6 +8,7 @@ import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.rules.Violation;
+import java.util.Optional;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
@@ -25,7 +26,15 @@ public class DmlInLoopRuleHandler {
         } else if (vertex instanceof SoqlExpressionVertex) {
             return true;
         } else if (vertex instanceof MethodCallExpressionVertex) {
-            return true;
+            MethodCallExpressionVertex methodVertex = (MethodCallExpressionVertex) vertex;
+            final String fullMethodName = methodVertex.getFullMethodName();
+
+            // we know this is a method call/expression vertex, but we need to see
+            // if it is a Database.<method> call to confirm it is a DML operation
+            // if so, confirm it should be a violation in a loop, and visit
+            Optional<DmlUtil.DatabaseOperation> operation =
+                    DmlUtil.DatabaseOperation.fromString(fullMethodName);
+            return (operation.isPresent() && operation.get().isViolationInLoop());
         }
         return false;
     }

@@ -1,10 +1,11 @@
-package com.salesforce.rules;
+package com.salesforce.rules.dmlinloop;
 
 import com.salesforce.graph.EnumUtil;
+import com.salesforce.rules.DmlInLoopRule;
 import java.util.Optional;
 import java.util.TreeMap;
 
-public class DmlUtil {
+public final class DmlUtil {
 
     // we don't ever want this class to be initialized
     private DmlUtil() {}
@@ -43,24 +44,24 @@ public class DmlUtil {
         UPDATE_IMMEDIATE("Database.updateImmediate", true),
         UPSERT("Database.upsert", true);
 
-        // Create a map of database operation method -> DatabaseOperation for fromString method
-        private static final TreeMap<String, DatabaseOperation> FROM_DATABASE_METHOD =
+        /** map of database operation method strings -> DatabaseOperation for fromString method */
+        private static final TreeMap<String, DatabaseOperation> MethodNameToDatabaseOperation =
                 EnumUtil.getEnumTreeMap(
                         DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
         /** stores the string representation of this method */
         private final String databaseOperationMethod;
         /** stores if this method should be a violation when in a loop */
-        private final boolean loopIsViolation;
+        private final boolean violationInLoop;
 
         /**
          * @param databaseOperationMethod the method name of the Database method. For example,
          *     <code>Database.insertAsync</code>.
-         * @param loopIsViolation whether this operation in a loop is a violation of {@link
+         * @param violationInLoop whether this operation in a loop is a violation of {@link
          *     DmlInLoopRule}
          */
-        DatabaseOperation(String databaseOperationMethod, boolean loopIsViolation) {
+        DatabaseOperation(String databaseOperationMethod, boolean violationInLoop) {
             this.databaseOperationMethod = databaseOperationMethod;
-            this.loopIsViolation = loopIsViolation;
+            this.violationInLoop = violationInLoop;
         }
 
         /**
@@ -75,8 +76,8 @@ public class DmlUtil {
          * @return true if this operation should be a violation in {@link DmlInLoopRule}, false
          *     otherwise.
          */
-        public boolean isLoopIsViolation() {
-            return loopIsViolation;
+        public boolean isViolationInLoop() {
+            return violationInLoop;
         }
 
         /**
@@ -87,7 +88,7 @@ public class DmlUtil {
          * @return the corresponding DatabaseOperation, if found
          */
         public static Optional<DatabaseOperation> fromString(String method) {
-            return Optional.ofNullable(FROM_DATABASE_METHOD.get(method));
+            return Optional.ofNullable(MethodNameToDatabaseOperation.get(method));
         }
     }
 }
