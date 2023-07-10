@@ -2,7 +2,7 @@ package com.salesforce.rules.dmlinloop;
 
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.SFVertex;
-import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.ops.OccurrenceInfo;
 
 public class DmlInLoopUtil {
 

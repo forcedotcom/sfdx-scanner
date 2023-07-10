@@ -5,7 +5,7 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
-import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.ops.OccurrenceInfo;
 import com.salesforce.rules.dmlinloop.DmlInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;

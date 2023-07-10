@@ -2,7 +2,7 @@ package com.salesforce.rules.dmlinloop;
 
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.rules.DmlInLoopRule;
-import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.ops.OccurrenceInfo;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
 import org.junit.jupiter.api.Test;

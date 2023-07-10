@@ -1,4 +1,4 @@
-package com.salesforce.rules;
+package com.salesforce.rules.ops;
 
 import com.salesforce.config.UserFacingMessages;
 

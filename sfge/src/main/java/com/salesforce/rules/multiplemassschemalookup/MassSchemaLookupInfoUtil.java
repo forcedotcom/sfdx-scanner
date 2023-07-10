@@ -3,7 +3,7 @@ package com.salesforce.rules.multiplemassschemalookup;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
-import com.salesforce.rules.OccurrenceInfo;
+import com.salesforce.rules.ops.OccurrenceInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
