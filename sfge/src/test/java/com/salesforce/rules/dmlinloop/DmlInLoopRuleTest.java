@@ -412,8 +412,8 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         assertViolations(RULE, sourceCode, expect(9, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
     }
 
-    @CsvSource({
-        "'Account s = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3 LIMIT 1]'",
+    @ValueSource(strings = {
+        "Account s = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3 LIMIT 1]",
         "delete a",
         "insert a",
         "merge a a",
