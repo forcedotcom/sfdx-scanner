@@ -373,7 +373,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "ForEachStatement, for (Integer i : myList), undelete one;",
         "ForEachStatement, for (Integer i : myList), update one;",
         "ForEachStatement, for (Integer i : myList), upsert one;",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), 'Account acc = [SELECT Id, Name, Age, BillingCity FROM Accounts WHERE Age, = 3 LIMIT 1];'",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), 'Account acc = [SELECT Id, Name, Age, BillingCity FROM Accounts WHERE Age = 3 LIMIT 1];'",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), delete one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), merge one one;",
@@ -388,7 +388,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), update one;",
         "WhileLoopStatement, while(true), upsert one;",
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{displayName}: {0}:{1}:{2}")
     public void testIndirectMethodCallSoql(
             String loopLabel, String loopStructure, String dmlStatement) {
         // spotless:off
