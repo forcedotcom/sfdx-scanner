@@ -8,6 +8,7 @@ import com.salesforce.testutils.ViolationWrapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
@@ -322,14 +323,14 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     }
 
     /** The increment clause of a for loop repeats, which should be a violation */
-    @CsvSource({
+    @ValueSource(strings = {
         "delete a",
         "insert a",
         "merge a a",
         "undelete a",
         "update a",
         "upsert a",
-        "'Account b = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3]'"
+        "Account b = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3]"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testForLoopIncrementStatement(String dmlStatement) {
@@ -337,6 +338,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         String[] sourceCode = {
             "public class " + MY_CLASS + " {\n" +
                 "private Integer i;\n" +
+
                 MY_CLASS + "() {\n" +
                     "this.i = 0;\n" +
                 "}\n" +
