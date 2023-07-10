@@ -97,19 +97,28 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     }
 
     @CsvSource({
-        "ForEachStatement, for (String s1 : myList), for (String s2 : myList)",
-        "ForLoopStatement, for (Integer i; i < myList.size; s++), for (Integer j; j < myList.size; s++)",
-        "WhileLoopStatement, while(true), while(true)"
+        "ForEachStatement, for (String s : myList), ForEachStatement, for (String s : myList)",
+        "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < myList.size(); i++)",
+        "ForEachStatement, for (String s : myList), WhileLoopStatement, while(true)",
+        "ForLoopStatement, for (Integer i; i < myList.size(); i++), ForLoopStatement, for (Integer i; i < myList.size(); i++)",
+        "ForLoopStatement, for (Integer i; i < myList.size(); i++), ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < myList.size(); i++), WhileLoopStatement, while(true)",
+        "WhileLoopStatement, while(true), ForEachStatement, for (String s : myList)",
+        "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < myList.size(); i++)",
+        "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{displayName}: {2} within {0}")
     public void testLoopWithinLoop(
-            String loopAstLabel, String loopStructure1, String loopStructure2) {
+        String outerLoopLabel,
+        String outerLoopStructure,
+        String innerLoopLabel,
+        String innerLoopStructure) {
         // spotless:off
         String sourceCode =
                 "public class MyClass {\n" +
                 "   void foo(String[] myList) {\n" +
-                    "   " + loopStructure1 + " {\n" +
-                    "       " + loopStructure2 + " {\n" +
+                    "   " + outerLoopStructure + " {\n" +
+                    "       " + innerLoopStructure + " {\n" +
                     "           Schema.getGlobalDescribe();\n" +
                     "       }\n" +
                     "   }\n" +
@@ -124,7 +133,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                                 5,
                                 MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                                 MmslrUtil.RepetitionType.LOOP)
-                        .withOccurrence(loopAstLabel, MY_CLASS, 4));
+                        .withOccurrence(innerLoopLabel, MY_CLASS, 4));
     }
 
     @CsvSource({
@@ -343,48 +352,5 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
                                 MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
                                 MmslrUtil.RepetitionType.LOOP)
                         .withOccurrence(loopAstLabel, MY_CLASS, 7));
-    }
-
-    @CsvSource({
-        "ForEachStatement, for (String s : myList), ForEachStatement, for (String s : myList)",
-        "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < s.size; i++)",
-        "ForEachStatement, for (String s : myList), WhileLoopStatement, while(true)",
-        "ForLoopStatement, for (Integer i; i < s.size; i++), ForLoopStatement, for (Integer i; i < s.size; i++)",
-        "ForLoopStatement, for (Integer i; i < s.size; i++), ForEachStatement, for (String s : myList)",
-        "ForLoopStatement, for (Integer i; i < s.size(); i++), WhileLoopStatement, while(true)",
-        "WhileLoopStatement, while(true), ForEachStatement, for (String s : myList)",
-        "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < s.size; i++)",
-        "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
-    })
-    @ParameterizedTest(name = "{displayName}: {0}")
-    public void testNestedLoop(
-            String outerLoopLabel,
-            String outerLoopStructure,
-            String innerLoopLabel,
-            String innerLoopStructure) {
-
-        // spotless:off
-        String[] sourceCode = {
-            "public class MyClass {\n" +
-                "void foo() {\n" +
-                    "List<String> myList = new String[] {'Account', 'Contact'};\n" +
-                    outerLoopStructure + "{\n" +
-                        innerLoopStructure + "{\n" +
-                            "Schema.getGlobalDescribe();\n" +
-                        "}\n" +
-                    "}\n" +
-                "}\n" +
-            "}\n"
-        };
-        // spotless:on
-
-        assertViolations(
-                RULE,
-                sourceCode,
-                expect(
-                                6,
-                                MmslrUtil.METHOD_SCHEMA_GET_GLOBAL_DESCRIBE,
-                                MmslrUtil.RepetitionType.LOOP)
-                        .withOccurrence(innerLoopLabel, MY_CLASS, 5));
     }
 }
