@@ -45,7 +45,7 @@ public final class DmlUtil {
         UPSERT("Database.upsert", true);
 
         /** map of database operation method strings -> DatabaseOperation for fromString method */
-        private static final TreeMap<String, DatabaseOperation> MethodNameToDatabaseOperation =
+        private static final TreeMap<String, DatabaseOperation> METHOD_NAME_TO_DATABASE_OPERATION =
                 EnumUtil.getEnumTreeMap(
                         DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
         /** stores the string representation of this method */
@@ -88,7 +88,7 @@ public final class DmlUtil {
          * @return the corresponding DatabaseOperation, if found
          */
         public static Optional<DatabaseOperation> fromString(String method) {
-            return Optional.ofNullable(MethodNameToDatabaseOperation.get(method));
+            return Optional.ofNullable(METHOD_NAME_TO_DATABASE_OPERATION.get(method));
         }
     }
 }
