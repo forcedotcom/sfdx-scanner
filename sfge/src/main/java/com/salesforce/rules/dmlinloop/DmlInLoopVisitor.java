@@ -51,29 +51,52 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
         super.afterVisit(vertex, symbols);
     }
 
-    // for all of these DmlStatementVertex implemenetations, we need these
-    // so that the afterVisit method will resolve correctly,
-    // and not to the parent classes generic afterVisit(BaseSFVertex).
+    /**
+     * For all of the DmlStatementVertex implemenetations, we need these overloaded afterVisit
+     * methods so that the method will resolve correctly for all child classes of {@link
+     * DmlStatementVertex}, and not to the parent class' generic {@link
+     * LoopDetectionVisitor#afterVisit(BaseSFVertex, SymbolProvider)}
+     */
     public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
+    /**
+     * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
+     * SymbolProvider)}
+     */
     public void afterVisit(DmlInsertStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
+    /**
+     * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
+     * SymbolProvider)}
+     */
     public void afterVisit(DmlUndeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
+    /**
+     * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
+     * SymbolProvider)}
+     */
     public void afterVisit(DmlUpdateStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
+    /**
+     * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
+     * SymbolProvider)}
+     */
     public void afterVisit(DmlUpsertStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
 
+    /**
+     * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
+     * SymbolProvider)}
+     */
     public void afterVisit(DmlMergeStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }

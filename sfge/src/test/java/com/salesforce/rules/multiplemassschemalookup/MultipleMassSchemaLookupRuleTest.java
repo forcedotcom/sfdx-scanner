@@ -9,12 +9,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 // TODO: Breakdown to more test suites
 public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchemaLookupTest {
 
-    @CsvSource(delimiterString = " | ", value = {
-        "ForEachStatement | for (String s : myList)",
-        "ForLoopStatement | for (Integer i; i < s.size; s++)",
-        "WhileLoopStatement | while(true)",
-        "ForEachStatement | for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 30])"
-    })
+    @CsvSource(
+            delimiterString = " | ",
+            value = {
+                "ForEachStatement | for (String s : myList)",
+                "ForLoopStatement | for (Integer i; i < s.size; s++)",
+                "WhileLoopStatement | while(true)",
+                "ForEachStatement | for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 30])"
+            })
     @ParameterizedTest(name = "{displayName}: {0}:{1}")
     public void testSimpleGgdInLoop(String loopAstLabel, String loopStructure) {
         // spotless:off

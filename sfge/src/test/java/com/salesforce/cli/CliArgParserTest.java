@@ -63,7 +63,10 @@ public class CliArgParserTest {
         CliArgParser.CatalogArgParser parser = new CliArgParser.CatalogArgParser();
         try {
             parser.parseArgs("catalog", arg);
-            assertThat("Wrong number of rules returned. Did you add any?", parser.getSelectedRules().size(), equalTo(ruleCount));
+            assertThat(
+                    "Wrong number of rules returned. Did you add any?",
+                    parser.getSelectedRules().size(),
+                    equalTo(ruleCount));
         } catch (RuleUtil.RuleNotFoundException rnf) {
             fail("Should not throw exception");
         }
