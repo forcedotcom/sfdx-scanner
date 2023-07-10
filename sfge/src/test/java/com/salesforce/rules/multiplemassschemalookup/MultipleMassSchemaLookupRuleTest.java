@@ -13,7 +13,7 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
         "ForEachStatement | for (String s : myList)",
         "ForLoopStatement | for (Integer i; i < s.size; s++)",
         "WhileLoopStatement | while(true)",
-        "ForEachStatement | for (Account a: [SELECT Id, Name, Age, BillingCity FROM Accounts WHERE Age = 30])"
+        "ForEachStatement | for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 30])"
     })
     @ParameterizedTest(name = "{displayName}: {0}:{1}")
     public void testSimpleGgdInLoop(String loopAstLabel, String loopStructure) {
