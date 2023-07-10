@@ -447,13 +447,13 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     @CsvSource({
         "ForEachStatement, for (String s : myList), ForEachStatement, for (String s : myList)",
-        "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < s.size; i++)",
+        "ForEachStatement, for (String s : myList), ForLoopStatement, for (Integer i; i < myList.size; i++)",
         "ForEachStatement, for (String s : myList), WhileLoopStatement, while(true)",
-        "ForLoopStatement, for (Integer i; i < s.size; i++), ForLoopStatement, for (Integer i; i < s.size; i++)",
-        "ForLoopStatement, for (Integer i; i < s.size; i++), ForEachStatement, for (String s : myList)",
-        "ForLoopStatement, for (Integer i; i < s.size; i++), WhileLoopStatement, while(true)",
+        "ForLoopStatement, for (Integer i; i < myList.size; i++), ForLoopStatement, for (Integer i; i < myList.size; i++)",
+        "ForLoopStatement, for (Integer i; i < myList.size; i++), ForEachStatement, for (String s : myList)",
+        "ForLoopStatement, for (Integer i; i < myList.size; i++), WhileLoopStatement, while(true)",
         "WhileLoopStatement, while(true), ForEachStatement, for (String s : myList)",
-        "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < s.size; i++)",
+        "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < myList.size; i++)",
         "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
