@@ -45,6 +45,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         // from DmlInLoopRuleHandler we already know that vertex is a database operation
         // method, in the format of Database.<something>
+        createViolationIfSinkInsideLoop(vertex, symbols);
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
         super.afterVisit(vertex, symbols);
