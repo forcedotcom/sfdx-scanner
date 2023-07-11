@@ -119,7 +119,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             + "void foo() {\n"
                 + "List<Integer> myList = new Integer[] {3,5};\n"
                 + "Account newAcct = new Account(name = 'Acme');\n"
-                + "Account existing = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3];\n"
+                + "Account existing = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3];\n"
                 + loopStructure + " {\n"
                     + dmlStatement + " existing;\n"
                 + "}\n"
@@ -161,7 +161,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
                 + "void foo() {\n"
                     + "List<Integer> myList = new Integer[] {3,5};\n"
                     + "Account newAcct = new Account(name = 'Acme');\n"
-                    + "Account existing = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3];\n"
+                    + "Account existing = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3];\n"
                     + dmlStatement  + " existing;\n"
                     + loopStructure + " { }\n"
                     + "try {\n"
@@ -231,8 +231,8 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             "insertAsync(new Account(0, 4, 'Raj'), nothing())",
             "insertImmediate(new Account(8, 1, 'Mike'))",
             "merge(new Account(10, 11, 'Ben'), new Account(10, 11, 'Benjamin'))",
-            "query('SELECT Id, NumberOfEmployees, Name FROM Accounts WHERE NumberOfEmployees = 100 LIMIT 1')",
-            "queryWithBinds('SELECT ID, NumberOfEmployees, Name FROM Accounts WHERE NumberOfEmployees = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
+            "query('SELECT Id, NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100 LIMIT 1')",
+            "queryWithBinds('SELECT ID, NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
             "rollback(Database.setSavepoint())",
             "undelete(new Account(10, 'Rod', 53), false)",
             "update(new Account(10, 'Ron', 53), false)",
@@ -265,7 +265,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             "public class " + MY_CLASS + " {\n"
                 + "   void foo() {\n"
                 + "       String[] objectList = new String[] {'Account','Contact'};\n"
-                + "       for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3]) {\n"
+                + "       for (Account a: [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3]) {\n"
                 + "           System.debug(a);\n"
                 + "       }\n"
                 + "   }\n"
@@ -283,7 +283,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         String[] sourceCode = {
             "public class " + MY_CLASS + " {\n" +
                 "void foo() {\n" +
-                    "for (Integer i = 0; i < [SELECT NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3 LIMIT 1]; i++) {\n" +
+                    "for (Integer i = 0; i < [SELECT NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1]; i++) {\n" +
                     "}\n" +
                 "}\n" +
             "}\n"
@@ -306,7 +306,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "undelete a",
         "update a",
         "upsert a",
-        "Account b = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3]"
+        "Account b = [SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3]"
     })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testForLoopIncrementStatement(String dmlStatement) {
@@ -344,21 +344,21 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
     /** Methods called within a loop containing DML are violations. */
     @CsvSource({
-        "ForEachStatement, for (Integer i : myList), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3 LIMIT 1];'",
+        "ForEachStatement, for (Integer i : myList), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3 LIMIT 1];'",
         "ForEachStatement, for (Integer i : myList), delete one;",
         "ForEachStatement, for (Integer i : myList), insert one;",
         "ForEachStatement, for (Integer i : myList), merge one one;",
         "ForEachStatement, for (Integer i : myList), undelete one;",
         "ForEachStatement, for (Integer i : myList), update one;",
         "ForEachStatement, for (Integer i : myList), upsert one;",
-        "ForLoopStatement, for (Integer i = 0; i < 2; i++), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3 LIMIT 1];'",
+        "ForLoopStatement, for (Integer i = 0; i < 2; i++), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3 LIMIT 1];'",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), delete one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), insert one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), merge one one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), undelete one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), update one;",
         "ForLoopStatement, for (Integer i = 0; i < 2; i++), upsert one;",
-        "WhileLoopStatement, while(true), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 3 LIMIT 1];'",
+        "WhileLoopStatement, while(true), 'Account acc = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 3 LIMIT 1];'",
         "WhileLoopStatement, while(true), delete one;",
         "WhileLoopStatement, while(true), insert one;",
         "WhileLoopStatement, while(true), merge one one;",
@@ -373,7 +373,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         String[] sourceCode = {
             "public class " + MY_CLASS + " {\n" +
                 "void foo() {\n" +
-                    "Account one = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Accounts WHERE NumberOfEmployees = 2 LIMIT 1]; \n " +
+                    "Account one = [SELECT Id, Name, NumberOfEmployees, BillingCity FROM Account WHERE NumberOfEmployees = 2 LIMIT 1]; \n " +
                     loopStructure + " {\n" +
                         "withDml(one);\n" +
                     "}\n" +
@@ -389,7 +389,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     }
 
     @ValueSource(strings = {
-        "Account s = [SELECT Id, NumberOfEmployees FROM accounts WHERE NumberOfEmployees = 3 LIMIT 1]",
+        "Account s = [SELECT Id, NumberOfEmployees FROM Account WHERE NumberOfEmployees = 3 LIMIT 1]",
         "delete a",
         "insert a",
         "merge a a",
