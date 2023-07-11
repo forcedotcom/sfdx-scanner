@@ -110,7 +110,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), update",
         "WhileLoopStatement, while(true), upsert"
     })
-    @ParameterizedTest(name = "{displayName}: {0}:{2}")
+    @ParameterizedTest(name = "{displayName}: {2} within {0}")
     public void testDmlStatementInLoop(
             String loopLabel, String loopStructure, String dmlStatement) {
         // spotless:off
@@ -152,7 +152,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), update",
         "WhileLoopStatement, while(true), upsert"
     })
-    @ParameterizedTest(name = "{displayName}: {0}:{2}")
+    @ParameterizedTest(name = "{displayName}: {2} outside of {0}")
     public void testDmlStatementNotInLoop(
             String loopLabel, String loopStructure, String dmlStatement) {
         // spotless:off
@@ -177,7 +177,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     }
 
     @MethodSource("getDatabaseClassMethodsInLoopsTests")
-    @ParameterizedTest(name = "{displayName}: {0}:{2}")
+    @ParameterizedTest(name = "{displayName}: Database.{2} within {0}")
     public void testDatabaseMethodWithinLoop(
             String loopLabel, String loopStructure, String dbMethod) {
         // spotless:off
@@ -366,7 +366,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), update one;",
         "WhileLoopStatement, while(true), upsert one;",
     })
-    @ParameterizedTest(name = "{displayName}: {0}:{1}:{2}")
+    @ParameterizedTest(name = "{displayName}: {2} in method called in {0}")
     public void testIndirectMethodCallSoql(
             String loopLabel, String loopStructure, String dmlStatement) {
         // spotless:off
@@ -432,7 +432,7 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         "WhileLoopStatement, while(true), ForLoopStatement, for (Integer i; i < myList.size; i++)",
         "WhileLoopStatement, while(true), WhileLoopStatement, while(true)"
     })
-    @ParameterizedTest(name = "{displayName}: {0}")
+    @ParameterizedTest(name = "{displayName}: {0} outer loop and {2} inner loop")
     public void testNestedLoop(
             String outerLoopLabel,
             String outerLoopStructure,
