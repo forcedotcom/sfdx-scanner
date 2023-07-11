@@ -6,11 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.cache.VertexCacheProvider;
+import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.*;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -242,4 +245,94 @@ public class CustomerApexVertexBuilderTest {
                                 "Boolean intParam_ReturnsBool(Integer)",
                                 "List<Integer> intParams_ReturnsIntList(Integer,Integer,Integer)")));
     }
+
+
+    @Test
+    public void testEndScopesOrderDeepLoop() {
+        // spotless:off
+        String classWithLoops =
+            "public class MyClass {\n"
+                + "     public void foo(List<Integer> myList) {\n"
+                + "         for (Integer i : myList) {\n"
+                + "             for (int j = 0; j < myList.size(); j++) {\n"
+                + "                 int k = 0;\n"
+                + "             }\n"
+                + "         }\n"
+                + "     }\n"
+                + "}\n"
+            ;
+        // spotless:on
+
+        VertexCacheProvider.get().initialize(g);
+
+        AstNodeWrapper<?> compilation = JorjeUtil.compileApexFromString(classWithLoops);
+        Util.CompilationDescriptor compilationDescriptor = new Util.CompilationDescriptor("TestCode", compilation);
+
+        CustomerApexVertexBuilder bvb = new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
+
+        bvb.build();
+
+        BaseSFVertex k = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 5)).get(0);
+        List<String> kEndScopes = k.getEndScopes();
+
+        assertEquals(kEndScopes, Arrays.asList(
+            NodeType.BLOCK_STATEMENT,
+            NodeType.FOR_LOOP_STATEMENT,
+            NodeType.BLOCK_STATEMENT,
+            NodeType.FOR_EACH_STATEMENT,
+            NodeType.BLOCK_STATEMENT
+        ));
+
+
+    }
+
+
+    @Test
+    public void testEndScopesOrderOutsideLoop() {
+        // spotless:off
+        String classWithLoops =
+            "public class MyClass {\n"
+                + "     public void foo(List<Integer> myList) {\n"
+                + "         for (Integer i : myList) {\n"
+                + "             for (int j = 0; j < myList.size(); j++) {\n"
+                + "                 int k = 0;\n"
+                + "             }\n"
+                + "             boolean b = false;\n"
+                + "         }\n"
+                + "     }\n"
+                + "}\n"
+            ;
+        // spotless:on
+
+        VertexCacheProvider.get().initialize(g);
+
+        AstNodeWrapper<?> compilation = JorjeUtil.compileApexFromString(classWithLoops);
+        Util.CompilationDescriptor compilationDescriptor = new Util.CompilationDescriptor("TestCode", compilation);
+
+        CustomerApexVertexBuilder bvb = new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
+
+        bvb.build();
+
+        BaseSFVertex k = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 5)).get(0);
+        List<String> kEndScopes = k.getEndScopes();
+
+        assertEquals(kEndScopes, Arrays.asList(
+            NodeType.BLOCK_STATEMENT,
+            NodeType.FOR_LOOP_STATEMENT
+        ));
+
+
+
+        BaseSFVertex b = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 7)).get(0);
+        List<String> bEndScopes = b.getEndScopes();
+
+        assertEquals(bEndScopes, Arrays.asList(
+            NodeType.BLOCK_STATEMENT,
+            NodeType.FOR_EACH_STATEMENT,
+            NodeType.BLOCK_STATEMENT
+        ));
+
+    }
+
+
 }

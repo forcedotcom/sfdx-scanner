@@ -56,14 +56,17 @@ public class CliArgParserTest {
         // As we add new DFA and non-DFA rules, the numbers in these tests
         // will increase.
         "pathless, 1",
-        "dfa, 4"
+        "dfa, 5"
     })
     @ParameterizedTest(name = "{displayName}: {0} rules")
     public void catalogFlowReturnsExpectedRules(String arg, int ruleCount) {
         CliArgParser.CatalogArgParser parser = new CliArgParser.CatalogArgParser();
         try {
             parser.parseArgs("catalog", arg);
-            assertThat(parser.getSelectedRules().size(), equalTo(ruleCount));
+            assertThat(
+                    "Wrong number of rules returned. Did you add any?",
+                    parser.getSelectedRules().size(),
+                    equalTo(ruleCount));
         } catch (RuleUtil.RuleNotFoundException rnf) {
             fail("Should not throw exception");
         }

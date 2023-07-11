@@ -5,6 +5,8 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
+import com.salesforce.rules.ops.OccurrenceInfo;
+import com.salesforce.rules.dmlinloop.DmlInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
@@ -206,7 +208,7 @@ public class ViolationWrapper {
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
         private final MmslrUtil.RepetitionType repetitionType;
-        private final List<MassSchemaLookupInfoUtil.OccurrenceInfo> occurrenceInfoList;
+        private final List<OccurrenceInfo> occurrenceInfoList;
 
         private MassSchemaLookupInfoBuilder(
                 int sinkLine, String sinkMethodName, MmslrUtil.RepetitionType type) {
@@ -231,8 +233,7 @@ public class ViolationWrapper {
          */
         public MassSchemaLookupInfoBuilder withOccurrence(
                 String label, String definingType, int line) {
-            this.occurrenceInfoList.add(
-                    new MassSchemaLookupInfoUtil.OccurrenceInfo(label, definingType, line));
+            this.occurrenceInfoList.add(new OccurrenceInfo(label, definingType, line));
             return this;
         }
 
@@ -240,6 +241,25 @@ public class ViolationWrapper {
         public String getMessage() {
             return MassSchemaLookupInfoUtil.getMessage(
                     sinkMethodName, repetitionType, occurrenceInfoList);
+        }
+    }
+
+    public static class DmlInLoopInfoBuilder extends ViolationBuilder {
+
+        private final OccurrenceInfo occurrenceInfo;
+
+        public DmlInLoopInfoBuilder(int line, OccurrenceInfo occurrenceInfo) {
+            super(line);
+            this.occurrenceInfo = occurrenceInfo;
+        }
+
+        public static DmlInLoopInfoBuilder get(int sinkLine, OccurrenceInfo occurrenceInfo) {
+            return new DmlInLoopInfoBuilder(sinkLine, occurrenceInfo);
+        }
+
+        @Override
+        public String getMessage() {
+            return DmlInLoopUtil.getMessage(occurrenceInfo);
         }
     }
 
