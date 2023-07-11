@@ -10,6 +10,11 @@ public final class DmlUtil {
     // we don't ever want this class to be initialized
     private DmlUtil() {}
 
+    /** map of database operation method strings -> DatabaseOperation for fromString method */
+    private static final TreeMap<String, DatabaseOperation> METHOD_NAME_TO_DATABASE_OPERATION =
+        EnumUtil.getEnumTreeMap(
+            DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
+
     /**
      * An enumeration of all of the possible Database.method() methods in the Database class in
      * Apex.
@@ -44,10 +49,7 @@ public final class DmlUtil {
         UPDATE_IMMEDIATE("Database.updateImmediate", true),
         UPSERT("Database.upsert", true);
 
-        /** map of database operation method strings -> DatabaseOperation for fromString method */
-        private static final TreeMap<String, DatabaseOperation> METHOD_NAME_TO_DATABASE_OPERATION =
-                EnumUtil.getEnumTreeMap(
-                        DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
+
         /** stores the string representation of this method */
         private final String databaseOperationMethod;
         /** stores if this method should be a violation when in a loop */
