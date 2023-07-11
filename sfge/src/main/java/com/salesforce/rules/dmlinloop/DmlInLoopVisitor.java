@@ -57,6 +57,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * DmlStatementVertex}, and not to the parent class' generic {@link
      * LoopDetectionVisitor#afterVisit(BaseSFVertex, SymbolProvider)}
      */
+    @Override
     public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
@@ -65,6 +66,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
      * SymbolProvider)}
      */
+    @Override
     public void afterVisit(DmlInsertStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
@@ -73,6 +75,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
      * SymbolProvider)}
      */
+    @Override
     public void afterVisit(DmlUndeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
@@ -81,6 +84,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
      * SymbolProvider)}
      */
+    @Override
     public void afterVisit(DmlUpdateStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
@@ -89,6 +93,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      * for a more in-depth explanation, see {@link #afterVisit(DmlDeleteStatementVertex,
      * SymbolProvider)}
      */
+    @Override
     public void afterVisit(DmlUpsertStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
     }
@@ -99,8 +104,10 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
      */
     public void afterVisit(DmlMergeStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
+        super.afterVisit(vertex, symbols);
     }
 
+    @Override
     public void afterVisit(SoqlExpressionVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
 
