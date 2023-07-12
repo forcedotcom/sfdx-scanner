@@ -17,7 +17,7 @@ public final class UserFacingMessages {
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
         public static final String DML_IN_LOOP_RULE =
-                "Detects DML operations that occur inside loops leading to degraded performance.";
+                "Detects database operations that occur inside loops leading to degraded performance.";
     }
 
     public static final class RuleViolationTemplates {
@@ -129,11 +129,10 @@ public final class UserFacingMessages {
     public static final class DmlInLoopRuleTemplates {
 
         /**
-         * String Param 1: DML Statement Type
-         *
-         * <p>String Param 2: Occurrence information using {@link
-         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is suported.
+         * String Param 1: an {@link com.salesforce.rules.ops.OccurrenceInfo} which converts into
+         * occurrence information in the format of an {@link
+         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is supported.
          */
-        public static final String MESSAGE_TEMPLATE = "A DML operation was made inside a %1$s";
+        public static final String MESSAGE_TEMPLATE = "A database operation was made inside a loop. [%1$s]";
     }
 }

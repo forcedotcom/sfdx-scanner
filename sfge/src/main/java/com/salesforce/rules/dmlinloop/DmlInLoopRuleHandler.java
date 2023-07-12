@@ -58,7 +58,7 @@ public class DmlInLoopRuleHandler {
             ruleVisitor = new DmlInLoopVisitor(sourceVertex, (SoqlExpressionVertex) dmlVertex);
         } else {
             throw new ProgrammingException(
-                    "GetGlobalDescribeViolationRule unexpected invoked on an instance "
+                    "DmlInLoopRule unexpected invoked on an instance "
                             + "that's not DmlStatementVertex, MethodCallExpressionVertex, nor SoqlExpressionVertex. vertex="
                             + dmlVertex);
         }

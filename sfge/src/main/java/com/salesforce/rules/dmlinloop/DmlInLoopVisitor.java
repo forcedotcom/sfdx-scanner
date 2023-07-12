@@ -33,7 +33,7 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
                 || sinkVertex instanceof MethodCallExpressionVertex
                 || sinkVertex instanceof SoqlExpressionVertex)) {
             throw new ProgrammingException(
-                    "Sink vertex must be a DmlStatementVertex, MethodCallExpressionVertex, or SoqlExpressionVertex. Provided sink vertex="
+                    "DmlInLoopRule sink vertex must be a DmlStatementVertex, MethodCallExpressionVertex, or SoqlExpressionVertex. Provided sink vertex="
                             + sinkVertex);
         }
         this.sourceVertex = sourceVertex;
