@@ -58,6 +58,7 @@ public class Schema {
     public static final String REMOTE_ACTION = "RemoteAction";
     public static final String RETURN_TYPE = "ReturnType";
     public static final String RULE_NAMES = "RulesNames";
+    public static final String SHARING_POLICY = "SharingPolicy";
     public static final String STATIC = "Static";
     public static final String STATIC_CONSTRUCTOR_CANONICAL_NAME = "<clinit>";
     public static final String SUPER_CLASS_NAME = "SuperClassName";

@@ -69,13 +69,13 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 @SuppressWarnings(
         "PMD.UnusedFormalParameter") // Future implementations may need the currently unused
 // parameter
-public final class DefaultSymbolProviderVertexVisitor
+public class DefaultSymbolProviderVertexVisitor
         implements SymbolProviderVertexVisitor,
                 SymbolProvider,
                 DeepCloneable<DefaultSymbolProviderVertexVisitor> {
     private static final Logger LOGGER =
             LogManager.getLogger(DefaultSymbolProviderVertexVisitor.class);
-    private final GraphTraversalSource g;
+    protected final GraphTraversalSource g;
 
     /**
      * Symbol table stack. Each item contains the state of the Symbol table at that point of scope.

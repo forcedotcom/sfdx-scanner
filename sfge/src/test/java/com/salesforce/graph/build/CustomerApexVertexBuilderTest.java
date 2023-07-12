@@ -2,10 +2,10 @@ package com.salesforce.graph.build;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.has;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.salesforce.TestUtil;
+import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
@@ -19,9 +19,12 @@ import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class CustomerApexVertexBuilderTest {
     private GraphTraversalSource g;
@@ -345,5 +348,60 @@ public class CustomerApexVertexBuilderTest {
                         NodeType.BLOCK_STATEMENT,
                         NodeType.FOR_EACH_STATEMENT,
                         NodeType.BLOCK_STATEMENT));
+    }
+
+    @ValueSource(
+            strings = {
+                ASTConstants.SharingPolicy.WITH_SHARING,
+                ASTConstants.SharingPolicy.WITHOUT_SHARING,
+                ASTConstants.SharingPolicy.INHERITED_SHARING,
+                ASTConstants.SharingPolicy.OMITTED_DECLARATION,
+            })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSharingPolicyLabels(String policy) {
+        System.out.println("Testing with policy=" + policy);
+        // spotless:off
+        String classWithSharing =
+            "public " + policy + " class MyClass {\n" +
+                "public " + policy + " class SubClass {}\n" +
+            "}";
+        // spotless:on
+        VertexCacheProvider.get().initialize(g);
+
+        AstNodeWrapper<?> compilation = JorjeUtil.compileApexFromString(classWithSharing);
+        Util.CompilationDescriptor compilationDescriptor =
+                new Util.CompilationDescriptor("TestCode", compilation);
+
+        CustomerApexVertexBuilder bvb =
+                new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
+
+        bvb.build();
+
+        List<BaseSFVertex> vertices =
+                SFVertexFactory.loadVertices(
+                        g,
+                        g.V()
+                                .hasLabel(NodeType.MODIFIER_NODE)
+                                .or(
+                                        __.where(
+                                                __.out(Schema.PARENT)
+                                                        .hasLabel(NodeType.USER_CLASS)
+                                                        .has(Schema.NAME, "MyClass")),
+                                        __.where(
+                                                __.out(Schema.PARENT)
+                                                        .hasLabel(NodeType.USER_CLASS)
+                                                        .has(Schema.NAME, "SubClass")))
+                                .order()
+                                .by(Schema.NAME));
+
+        BaseSFVertex myClassVertex = vertices.get(0);
+        BaseSFVertex subClassVertex = vertices.get(1);
+
+        // on OMITTED_DECLARATION, we expect nothing to be stored on the vertex
+        String expectedPolicy =
+                policy.equals(ASTConstants.SharingPolicy.OMITTED_DECLARATION) ? null : policy;
+
+        assertEquals(myClassVertex.getProperties().get(Schema.SHARING_POLICY), expectedPolicy);
+        assertEquals(subClassVertex.getProperties().get(Schema.SHARING_POLICY), expectedPolicy);
     }
 }

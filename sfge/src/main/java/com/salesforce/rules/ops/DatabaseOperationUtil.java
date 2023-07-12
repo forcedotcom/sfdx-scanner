@@ -1,19 +1,56 @@
-package com.salesforce.rules.avoiddatabaseoperationinloop;
+package com.salesforce.rules.ops;
 
 import com.salesforce.graph.EnumUtil;
+import com.salesforce.graph.vertex.BaseSFVertex;
+import com.salesforce.graph.vertex.DmlStatementVertex;
+import com.salesforce.graph.vertex.MethodCallExpressionVertex;
+import com.salesforce.graph.vertex.SoqlExpressionVertex;
 import com.salesforce.rules.AvoidDatabaseOperationInLoop;
 import java.util.Optional;
 import java.util.TreeMap;
 
-public final class DmlUtil {
+public final class DatabaseOperationUtil {
 
     // we don't ever want this class to be initialized
-    private DmlUtil() {}
+    private DatabaseOperationUtil() {}
 
     /** map of database operation method strings -> DatabaseOperation for fromString method */
     private static final TreeMap<String, DatabaseOperation> METHOD_NAME_TO_DATABASE_OPERATION =
             EnumUtil.getEnumTreeMap(
                     DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
+
+    /**
+     * Checks a {@link BaseSFVertex} to see if it is a database operation. This includes:
+     *
+     * <ul>
+     *   <li>Any {@link MethodCallExpressionVertex} that is in the Database namespace (e.g. <code>
+     *       Database.query(...);</code>)
+     *   <li>Any {@link DmlStatementVertex} and any of its child classes including {@link
+     *       com.salesforce.graph.vertex.DmlInsertStatementVertex} etc. (e.g. <code>insert a;</code>
+     *       )
+     *   <li>Any {@link SoqlExpressionVertex} (e.g. <code>[SELECT Id, Name FROM Account LIMIT 1];
+     *       </code>)
+     *
+     * @param vertex the vertex to check
+     * @return true if the vertex represents a database operation, false otherwise.
+     */
+    public static boolean isDatabaseOperation(BaseSFVertex vertex) {
+        if (vertex instanceof DmlStatementVertex) {
+            return true;
+        } else if (vertex instanceof SoqlExpressionVertex) {
+            return true;
+        } else if (vertex instanceof MethodCallExpressionVertex) {
+            MethodCallExpressionVertex methodVertex = (MethodCallExpressionVertex) vertex;
+            final String fullMethodName = methodVertex.getFullMethodName();
+
+            // we know this is a method call/expression vertex, but we need to see
+            // if it is a Database.<method> call to confirm it is a database operation
+            Optional<DatabaseOperationUtil.DatabaseOperation> operation =
+                    DatabaseOperation.fromString(fullMethodName);
+            return operation.isPresent();
+        }
+        return false;
+    }
 
     /**
      * An enumeration of all of the possible Database.method() methods in the Database class in
@@ -77,6 +114,7 @@ public final class DmlUtil {
          * @return true if this operation should be a violation in {@link
          *     AvoidDatabaseOperationInLoop}, false otherwise.
          */
+        // TODO: move this and violationInLoop boolean into AvoidDatabaseInLoop
         public boolean isViolationInLoop() {
             return violationInLoop;
         }

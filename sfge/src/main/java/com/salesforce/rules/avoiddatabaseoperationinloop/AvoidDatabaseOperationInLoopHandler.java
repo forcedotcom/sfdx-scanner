@@ -8,7 +8,7 @@ import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.*;
 import com.salesforce.graph.visitor.ApexPathWalker;
 import com.salesforce.rules.Violation;
-import java.util.Optional;
+import com.salesforce.rules.ops.DatabaseOperationUtil;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
@@ -16,27 +16,20 @@ public class AvoidDatabaseOperationInLoopHandler {
 
     /** checks if a certain vertex is of interest to this rule */
     public boolean test(BaseSFVertex vertex) {
-        /* Three different types of DML statements we need to check for:
-           1. insert a;
-           2. [SELECT a FROM b WHERE c]
-           3. Database.something();
-        */
-        if (vertex instanceof DmlStatementVertex) {
-            return true;
-        } else if (vertex instanceof SoqlExpressionVertex) {
-            return true;
-        } else if (vertex instanceof MethodCallExpressionVertex) {
-            MethodCallExpressionVertex methodVertex = (MethodCallExpressionVertex) vertex;
-            final String fullMethodName = methodVertex.getFullMethodName();
-
-            // we know this is a method call/expression vertex, but we need to see
-            // if it is a Database.<method> call to confirm it is a DML operation
-            // if so, confirm it should be a violation in a loop, and visit
-            Optional<DmlUtil.DatabaseOperation> operation =
-                    DmlUtil.DatabaseOperation.fromString(fullMethodName);
-            return (operation.isPresent() && operation.get().isViolationInLoop());
+        // we're only interested in database operations
+        if (!DatabaseOperationUtil.isDatabaseOperation(vertex)) {
+            return false;
         }
-        return false;
+        // automatically interested in all database operations that aren't method calls
+        if (!(vertex instanceof MethodCallExpressionVertex)) {
+            return true;
+        }
+        // any database operations that are method calls are from Database class.
+        // must confirm that they are actually violations in a loop.
+        return DatabaseOperationUtil.DatabaseOperation.fromString(
+                        ((MethodCallExpressionVertex) vertex).getFullMethodName())
+                .get() // we know this exists thanks to isDatabaseOperation(vertex)
+                .isViolationInLoop();
     }
 
     /** within a path, check if there is a violation where DML is in a loop */
@@ -48,18 +41,18 @@ public class AvoidDatabaseOperationInLoopHandler {
                 new DefaultSymbolProviderVertexVisitor(g);
 
         // We should only be detecting vertices that have to do with DML
-        final AvoidDatabaseOperationInLoopViditor ruleVisitor;
+        final AvoidDatabaseOperationInLoopVisitor ruleVisitor;
         if (dmlVertex instanceof DmlStatementVertex) {
             ruleVisitor =
-                    new AvoidDatabaseOperationInLoopViditor(
+                    new AvoidDatabaseOperationInLoopVisitor(
                             sourceVertex, (DmlStatementVertex) dmlVertex);
         } else if (dmlVertex instanceof MethodCallExpressionVertex) {
             ruleVisitor =
-                    new AvoidDatabaseOperationInLoopViditor(
+                    new AvoidDatabaseOperationInLoopVisitor(
                             sourceVertex, (MethodCallExpressionVertex) dmlVertex);
         } else if (dmlVertex instanceof SoqlExpressionVertex) {
             ruleVisitor =
-                    new AvoidDatabaseOperationInLoopViditor(
+                    new AvoidDatabaseOperationInLoopVisitor(
                             sourceVertex, (SoqlExpressionVertex) dmlVertex);
         } else {
             throw new ProgrammingException(

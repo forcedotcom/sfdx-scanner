@@ -28,7 +28,7 @@ public class RuleUtilTest {
         try {
             List<AbstractRule> allRules = RuleUtil.getEnabledRules();
             MatcherAssert.assertThat(
-                    "Wrong number of rules returned. Did you add any?", allRules, hasSize(6));
+                    "Wrong number of rules returned. Did you add any?", allRules, hasSize(7));
             assertTrue(allRules.contains(ApexFlsViolationRule.getInstance()));
         } catch (Exception ex) {
             fail("Unexpected " + ex.getClass().getSimpleName() + ": " + ex.getMessage());

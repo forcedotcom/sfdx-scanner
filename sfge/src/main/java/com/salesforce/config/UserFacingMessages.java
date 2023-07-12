@@ -18,6 +18,8 @@ public final class UserFacingMessages {
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
         public static final String AVOID_DATABASE_OPERATION_IN_LOOP =
                 "Detects database operations inside loops, which can cause degraded performance.";
+        public static final String SHARING_RULE =
+                "Identifies a database operation executed outside of a \"with sharing\" policy. Warns when DML or SOQL operations inherit sharing rules implicitly instead of explicitly";
     }
 
     public static final class RuleViolationTemplates {
@@ -135,5 +137,22 @@ public final class UserFacingMessages {
          */
         public static final String MESSAGE_TEMPLATE =
                 "A database operation occurred inside a loop. [%1$s]";
+    }
+
+    public static final class SharingPolicyRuleTemplates {
+        /**
+         * String param: the type of DML/SOQL operation (see {@link
+         * com.salesforce.apex.jorje.ASTConstants.NodeType})
+         */
+        public static final String MESSAGE_TEMPLATE =
+                "Database operation must be executed from a class that enforces sharing rules.";
+
+        /**
+         * String param 1: "parent class" or "calling class"
+         *
+         * <p>String param 2: a class name
+         */
+        public static final String WARNING_TEMPLATE =
+                "Database operation executed in a class that implicitly inherits a sharing policy from %s %s. Explicitly assign a sharing policy instead.";
     }
 }
