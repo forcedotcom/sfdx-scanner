@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+This is an example of what a custom category file should look like.
+The `name` property of the `ruleset` tag indicates the value that can be supplied to
+scanner:run's -c flag.
+Note that since this category defines Apex rules, its location is `category/apex`.
+ -->
+<ruleset xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 name="CustomRules"
+		 xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+	<description>Custom Rules</description>
+	<!--
+	This rule's name is `ExampleCustomRule`.
+	Its behavior is defined by the Java class referenced in the `class` tag.
+	Its violation message is defined by the `message` tag.
+	To ensure compatibility with PMD-7, its `language` property is `apex`.
+	-->
+	<rule
+		name="ExampleCustomRule"
+		language="apex"
+		class="com.example.pmd.ExampleCustomRule"
+		message="This is a demonstration rule"
+		externalInfoUrl="http://foo.com/bar/MyRule"
+	>
+		<description>This rule throws a violation for every Apex Class it encounters.</description>
+		<priority>1</priority>
+	</rule>
+</ruleset>

@@ -12,6 +12,10 @@
 /tmp
 node_modules
 /out
+# Build folders
+/sample-code/pmd-example-rules/target
+
+
 # Logs
 logs
 *.log
