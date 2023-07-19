@@ -16,7 +16,7 @@ Because PMD and ESLint custom rules work differently, Code Analyzer deals with e
 
 ### Write PMD Custom Rules
 
-To be compatible with Code Analyzer, your PMD custom rules must meet these guidelines.
+To be compatible with Code Analyzer, build your PMD custom rules following these guidelines:
 
 * Declare your new XPath or Java-based rules in custom category XML files using this format: `<some base dir>/category/<language>/<filename>.xml`. For more info, read PMD’s [XML rule definition](https://docs.pmd-code.org/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) documentation.
 * Combine your custom rules and PMD's built-in rules into custom rulesets in XML files using this format: `<some base dir>/rulesets/<language>/<filename>.xml`. For more info, read PMD’s [Making rulesets](https://docs.pmd-code.org/latest/pmd_userdocs_making_rulesets.html#referencing-a-single-rule).
