@@ -6,7 +6,7 @@ redirect_from: /en/custom-rules/author
 
 ## What are Custom Rules?
 
-Let’s say your codebase has specific and repetitive coding issues that you want to address. You use the built-in rules of the Salesforce Code Analyzer (Code Analyzer) to find these rule violations. But sometimes the problems exist only in the context of your codebase, and sometimes Code Analyzer’s built-in rules don’t catch them. In this case, create your own custom rules to highlight these issues as rule violations when you scan your code.
+Let’s say your codebase has specific and repetitive coding issues that you want to address. You use the built-in rules of Salesforce Code Analyzer (Code Analyzer) to find these rule violations. But sometimes the problems exist only in the context of your codebase, and sometimes Code Analyzer’s built-in rules don’t catch them. In this case, create your own custom rules to highlight these issues as rule violations when you scan your code.
 
 Because PMD and ESLint custom rules work differently, Code Analyzer deals with each in distinct ways. 
 
@@ -16,27 +16,14 @@ Because PMD and ESLint custom rules work differently, Code Analyzer deals with e
 
 ### Write PMD Custom Rules
 
-To be compatible with Code Analyzer, your PMD custom rules must meet these criteria.
+To be compatible with Code Analyzer, build your PMD custom rules following these guidelines:
 
-* PMD Rules must be XPath-based or Java-based. 
-* Define rules in XML files with a path that matches this format: ```<some base dir>/category/<language>/<filename>.xml```.
-* XPath-based rules can be contained in standalone XML files.
-* Java-based rules must be compiled and bundled into a JAR.
-* Custom rulesets consisting of references to existing rules can be contained in standalone XML files with a path that matches this format: ```<some base dir>/rulesets/<language>/<filename>.xml```.
+* Declare your new XPath or Java-based rules in custom category XML files using this format: `<some base dir>/category/<language>/<filename>.xml`. For more info, read PMD’s [XML rule definition](https://docs.pmd-code.org/latest/pmd_userdocs_extending_writing_rules_intro.html#xml-rule-definition) documentation.
+* Combine your custom rules and PMD's built-in rules into custom rulesets in XML files using this format: `<some base dir>/rulesets/<language>/<filename>.xml`. For more info, read PMD’s [Making rulesets](https://docs.pmd-code.org/latest/pmd_userdocs_making_rulesets.html#referencing-a-single-rule).
+* Register custom rulesets or [XPath-only](https://docs.pmd-code.org/latest/pmd_userdocs_extending_writing_xpath_rules.html) custom categories with Code Analyzer as standalone XML files.
+* Compile your Java-based rules, and bundle them into a JAR along with your rule declaration files, then register that JAR with Code Analyzer. We recommend using a build tool such as [Maven](https://maven.apache.org/plugins/maven-jar-plugin/) or [Gradle](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html) to manage the dependency on PMD and automate the process of building the JAR. Use our [example repo](https://github.com/forcedotcom/sfdx-scanner/tree/dev/sample-code/pmd-example-rules) as a scaffold to build your own project.
 
-### Compile Java-Based PMD Custom Rules
-To compile your new Java-based PMD rules:
-
-* Add ```$PMD_BIN_HOME/lib/*``` to your CLASSPATH. 
-* Reflect the ```java-home path``` in your Java setup in ```<HOME_DIR>/.sfdx-scanner/Config.json```.
-* Use {{ site.data.versions-v3.pmd }} to write your custom rules.
-* If you’re using an integrated development environment (IDE), add ```$PMD_BIN_HOME/lib/*``` to its CLASSPATH. To compile from the command line, use the ```javac``` command. 
-
-	Example:
-	
-	```
-	$ javac -cp ".:$PMD_BIN_HOME/lib/*" /path/to/your/Rule.java
-	```
+Refer to [Managing Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/manage/#pmd-custom-rules) for information about how to register and run your custom PMD rules.
 
 ### Bundle Java-Based PMD Custom Rules
 If you haven’t already, create an XML rule definition file for your new rules. Add your rules to a directory structure like this: 

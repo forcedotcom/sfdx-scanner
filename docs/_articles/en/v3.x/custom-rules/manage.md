@@ -47,6 +47,8 @@ The command output indicates which JAR files were found and added to Code Analyz
 
 After you add your rules to Code Analyzer with ```scanner:rule:add```, run ```scanner:rule:list``` [command](./en/v3.x/scanner-commands/list/) to review your rule list. Your custom rules are displayed under the category names that you defined in your XML rule definition files, and they’re ready to use.
 
+Run your custom rules using `scanner:run` the same way you'd run PMD's built-in rules: `scanner:run --category MyCustomCategory`. You don't need the `--pmdconfig` flag to run your custom rules.
+
 ### Remove Rules
 
 Remove custom rules from the catalog with the ```scanner:rule:remove``` [command](./en/v3.x/scanner-commands/remove/). The rules defined in the JAR/XML file that you specify with the ```-p|--path``` parameter are removed from the catalog.
