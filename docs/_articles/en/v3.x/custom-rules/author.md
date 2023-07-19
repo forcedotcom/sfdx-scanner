@@ -25,20 +25,6 @@ To be compatible with Code Analyzer, build your PMD custom rules following these
 
 Refer to [Managing Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/manage/#pmd-custom-rules) for information about how to register and run your custom PMD rules.
 
-### Bundle Java-Based PMD Custom Rules
-If you haven’t already, create an XML rule definition file for your new rules. Add your rules to a directory structure like this: 
-
-```
-<some base dir>/category/<language>/yourRuleDefinition.xml
-```
-
-After your new Java files compile and your XML rule definition matches your new custom rules that you created, create a JAR file that contains the XML and the class files. Use the correct directory structure according to its package name and the XML file in the directory path. A single JAR file can contain multiple custom rule classes.
-
-Example:
-
-```
-$ jar -cp <customRule.jar> <rule_package_base_dir> <xml_base_dir>
-```
 ---
 
 ## See Also
