@@ -244,17 +244,18 @@ public class ViolationWrapper {
         }
     }
 
-    public static class DmlInLoopInfoBuilder extends ViolationBuilder {
+    public static class AvoidDatabaseInLoopInfoBuilder extends ViolationBuilder {
 
         private final OccurrenceInfo occurrenceInfo;
 
-        public DmlInLoopInfoBuilder(int line, OccurrenceInfo occurrenceInfo) {
+        public AvoidDatabaseInLoopInfoBuilder(int line, OccurrenceInfo occurrenceInfo) {
             super(line);
             this.occurrenceInfo = occurrenceInfo;
         }
 
-        public static DmlInLoopInfoBuilder get(int sinkLine, OccurrenceInfo occurrenceInfo) {
-            return new DmlInLoopInfoBuilder(sinkLine, occurrenceInfo);
+        public static AvoidDatabaseInLoopInfoBuilder get(
+                int sinkLine, OccurrenceInfo occurrenceInfo) {
+            return new AvoidDatabaseInLoopInfoBuilder(sinkLine, occurrenceInfo);
         }
 
         @Override

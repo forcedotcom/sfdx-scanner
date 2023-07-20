@@ -21,7 +21,7 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
         ruleHandler = AvoidDatabaseOperationInLoopHandler.getInstance();
     }
 
-    /** check if a certain vertex is of interest to this DmlInLoopRule */
+    /** check if a certain vertex is of interest to this rule */
     @Override
     public boolean test(BaseSFVertex vertex) {
         return ruleHandler.test(vertex);

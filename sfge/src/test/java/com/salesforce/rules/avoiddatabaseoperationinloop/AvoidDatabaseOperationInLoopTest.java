@@ -25,11 +25,11 @@ public class AvoidDatabaseOperationInLoopTest extends BasePathBasedRuleTest {
      *
      * @param sinkLine the line on which the sink vertex occurs
      * @param occurrenceInfo the information about the loop
-     * @return a ViolationWrapper.DmlInLoopInfoBuilder
+     * @return a {@link ViolationWrapper.AvoidDatabaseInLoopInfoBuilder}
      */
-    protected ViolationWrapper.DmlInLoopInfoBuilder expect(
+    protected ViolationWrapper.AvoidDatabaseInLoopInfoBuilder expect(
             int sinkLine, OccurrenceInfo occurrenceInfo) {
-        return ViolationWrapper.DmlInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
+        return ViolationWrapper.AvoidDatabaseInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
     }
 
     /**
