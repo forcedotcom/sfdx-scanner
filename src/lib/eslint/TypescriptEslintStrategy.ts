@@ -178,7 +178,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 	 * Converts the eslint message that requires the scanned files to be a subset of the files specified by tsconfig.json
 	 */
 	processRuleViolation(): ProcessRuleViolationType {
-		return (fileName: string, ruleViolation: RuleViolation): void => {
+		return (fileName: string, ruleViolation: RuleViolation): boolean => {
 			const message: string = ruleViolation.message;
 
 			const inclusionRegex = /^Parsing error: ESLint was configured to run on `.*` using `parserOptions.project`:.*\nHowever, (that TSConfig does not|none of those TSConfigs) include this file./;
@@ -190,6 +190,8 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
 				ruleViolation.exception = true;
 			}
+			// Always keep our violations.
+			return true;
 		}
 	}
 

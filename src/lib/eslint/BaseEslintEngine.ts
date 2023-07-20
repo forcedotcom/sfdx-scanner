@@ -1,12 +1,24 @@
 import {Logger, SfError} from '@salesforce/core';
-import { Catalog, ESRuleConfig, ESRuleConfigValue, LooseObject, Rule, RuleGroup, RuleResult, RuleTarget, ESRule, TargetPattern, ESRuleMetadata } from '../../types';
-import {ENGINE, Severity} from '../../Constants';
+import {
+	Catalog,
+	ESRule,
+	ESRuleConfig,
+	ESRuleConfigValue,
+	ESRuleMetadata,
+	LooseObject,
+	Rule,
+	RuleGroup,
+	RuleResult,
+	RuleTarget,
+	TargetPattern
+} from '../../types';
+import {ENGINE, Severity, TargetType} from '../../Constants';
 import {OutputProcessor} from '../services/OutputProcessor';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
 import {Controller} from '../../Controller';
 import {deepCopy} from '../util/Utils';
-import {StaticDependencies, EslintProcessHelper, ProcessRuleViolationType} from './EslintCommons';
+import {EslintProcessHelper, ProcessRuleViolationType, StaticDependencies} from './EslintCommons';
 import * as engineUtils from '../util/CommonEngineUtils';
 import {ESLint} from 'eslint';
 
@@ -204,7 +216,7 @@ export abstract class BaseEslintEngine extends AbstractRuleEngine {
 			// Process one target path at a time to trigger eslint
 			for (const target of targets) {
 				// TODO: Will this break the typescript parser cwd setting?
-				const cwd = target.isDirectory ? this.baseDependencies.resolveTargetPath(target.target) : this.baseDependencies.getCurrentWorkingDirectory();
+				const cwd = target.targetType === TargetType.DIRECTORY ? this.baseDependencies.resolveTargetPath(target.target) : this.baseDependencies.getCurrentWorkingDirectory();
 				this.logger.trace(`Using current working directory in config as ${cwd}`);
 				const config: ESLint.Options = {cwd};
 

@@ -115,8 +115,7 @@ describe('Tests for BaseEslintEngine', () => {
 			});
 
 			it('should use target as current working directory if target is a directory', async () => {
-				const isDir = true;
-				const target = DataGenerator.getDummyTarget(isDir);
+				const target = DataGenerator.getDummyTarget();
 
 				const StaticDependenciesMock = mockStaticDependencies(target, getDummyESLint());
 
@@ -154,7 +153,7 @@ describe('Tests for BaseEslintEngine', () => {
 				const results = await engine.run(
 					[DataGenerator.getDummyRuleGroup()],
 					[], // no rules
-					[DataGenerator.getDummyTarget(true)],
+					[DataGenerator.getDummyTarget()],
 					emptyEngineOptions
 				);
 
@@ -426,7 +425,8 @@ async function createAbstractEngine(target: RuleTarget, StaticDependenciesMock: 
 	Mockito.when(MockStrategy.filterUnsupportedPaths(target.paths)).thenReturn(target.paths);
 	Mockito.when(MockStrategy.getLanguages()).thenReturn(['language']);
 	Mockito.when(MockStrategy.processRuleViolation()).thenReturn((filename: string, ruleViolation: RuleViolation)=> {
-		//do nothing
+		// Simply return true.
+		return true;
 	});
 
 	const engine = await createDummyEngine(Mockito.instance(MockStrategy), Mockito.instance(StaticDependenciesMock));

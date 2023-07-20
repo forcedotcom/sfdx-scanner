@@ -1,10 +1,10 @@
 import 'reflect-metadata';
 import {Rule, RuleResult, RuleTarget} from '../../../src/types';
-import path = require('path');
 import {expect} from 'chai';
 import {RetireJsEngine, RetireJsInvocation} from '../../../src/lib/retire-js/RetireJsEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { CUSTOM_CONFIG } from '../../../src/Constants';
+import {CUSTOM_CONFIG, TargetType} from '../../../src/Constants';
+import path = require('path');
 
 
 TestOverrides.initializeTestSetup();
@@ -37,6 +37,7 @@ describe('RetireJsEngine', () => {
 			];
 			const globTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', '**', 'jquery*.js'),
+				targetType: TargetType.GLOB,
 				paths: globPaths
 			};
 
@@ -47,7 +48,7 @@ describe('RetireJsEngine', () => {
 			];
 			const dirTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-c'),
-				isDirectory: true,
+				targetType: TargetType.DIRECTORY,
 				paths: dirPaths
 			};
 
@@ -57,6 +58,7 @@ describe('RetireJsEngine', () => {
 			];
 			const fileTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-d', 'OrangeChicken.js'),
+				targetType: TargetType.FILE,
 				paths: filePaths
 			};
 
@@ -70,7 +72,7 @@ describe('RetireJsEngine', () => {
 			];
 			const resourceTarget: RuleTarget = {
 				target: path.join('.', 'test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-e'),
-				isDirectory: true,
+				targetType: TargetType.DIRECTORY,
 				paths: resourcePaths
 			};
 
@@ -82,7 +84,7 @@ describe('RetireJsEngine', () => {
 			];
 			const implicitResourceTarget: RuleTarget = {
 				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-g'),
-				isDirectory: true,
+				targetType: TargetType.DIRECTORY,
 				paths: implicitResourcePaths
 			};
 
@@ -148,6 +150,7 @@ describe('RetireJsEngine', () => {
 			];
 			const flatZipTarget: RuleTarget = {
 				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-f', 'ZipFile*'),
+				targetType: TargetType.GLOB,
 				paths: flatZipPaths
 			};
 
@@ -158,6 +161,7 @@ describe('RetireJsEngine', () => {
 			];
 			const verticalZipTarget: RuleTarget = {
 				target: path.join('test', 'code-fixtures', 'projects', 'dep-test-app', 'folder-h', '*.zip'),
+				targetType: TargetType.GLOB,
 				paths: verticalZipPaths
 			};
 
@@ -169,6 +173,7 @@ describe('RetireJsEngine', () => {
 			];
 			const imgTarget: RuleTarget = {
 				target: path.join('test', 'code-fixtures', 'project', 'dep-test-app', 'folder-f', 'ImageFile*'),
+				targetType: TargetType.GLOB,
 				paths: imgPaths
 			};
 

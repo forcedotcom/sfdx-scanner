@@ -1,4 +1,5 @@
 import { Rule, RuleGroup, RuleTarget, ESRule } from '../../../src/types';
+import { TargetType } from '../../../src/Constants';
 import {ESLint, Linter} from 'eslint';
 
 const engineName = 'TestHarnessEngine'; // TODO: crude code. revisit
@@ -22,10 +23,10 @@ export function getDummyRule(myEngineName = engineName): Rule {
 	}
 }
 
-export function getDummyTarget(isDir = true): RuleTarget {
+export function getDummyTarget(targetType = TargetType.DIRECTORY): RuleTarget {
 	return {
 		target: "/some/target",
-		isDirectory: isDir,
+		targetType,
 		paths: ['/some/target/path1', '/some/target/path2']
 	}
 }
