@@ -1,4 +1,4 @@
-package com.salesforce.rules.dmlinloop;
+package com.salesforce.rules.avoiddatabaseoperationinloop;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.ApexPath;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-public class DmlInLoopRuleHandler {
+public class AvoidDatabaseOperationInLoopHandler {
 
     /** checks if a certain vertex is of interest to this rule */
     public boolean test(BaseSFVertex vertex) {
@@ -48,17 +48,22 @@ public class DmlInLoopRuleHandler {
                 new DefaultSymbolProviderVertexVisitor(g);
 
         // We should only be detecting vertices that have to do with DML
-        final DmlInLoopVisitor ruleVisitor;
+        final AvoidDatabaseOperationInLoopViditor ruleVisitor;
         if (dmlVertex instanceof DmlStatementVertex) {
-            ruleVisitor = new DmlInLoopVisitor(sourceVertex, (DmlStatementVertex) dmlVertex);
+            ruleVisitor =
+                    new AvoidDatabaseOperationInLoopViditor(
+                            sourceVertex, (DmlStatementVertex) dmlVertex);
         } else if (dmlVertex instanceof MethodCallExpressionVertex) {
             ruleVisitor =
-                    new DmlInLoopVisitor(sourceVertex, (MethodCallExpressionVertex) dmlVertex);
+                    new AvoidDatabaseOperationInLoopViditor(
+                            sourceVertex, (MethodCallExpressionVertex) dmlVertex);
         } else if (dmlVertex instanceof SoqlExpressionVertex) {
-            ruleVisitor = new DmlInLoopVisitor(sourceVertex, (SoqlExpressionVertex) dmlVertex);
+            ruleVisitor =
+                    new AvoidDatabaseOperationInLoopViditor(
+                            sourceVertex, (SoqlExpressionVertex) dmlVertex);
         } else {
             throw new ProgrammingException(
-                    "DmlInLoopRule unexpected invoked on an instance "
+                    "AvoidDatabaseOperationInLoopHandler unexpected invoked on an instance "
                             + "that's not DmlStatementVertex, MethodCallExpressionVertex, nor SoqlExpressionVertex. vertex="
                             + dmlVertex);
         }
@@ -72,10 +77,11 @@ public class DmlInLoopRuleHandler {
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final DmlInLoopRuleHandler INSTANCE = new DmlInLoopRuleHandler();
+        private static final AvoidDatabaseOperationInLoopHandler INSTANCE =
+                new AvoidDatabaseOperationInLoopHandler();
     }
 
-    public static DmlInLoopRuleHandler getInstance() {
-        return DmlInLoopRuleHandler.LazyHolder.INSTANCE;
+    public static AvoidDatabaseOperationInLoopHandler getInstance() {
+        return AvoidDatabaseOperationInLoopHandler.LazyHolder.INSTANCE;
     }
 }

@@ -5,8 +5,7 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
 import com.salesforce.rules.MultipleMassSchemaLookupRule;
-import com.salesforce.rules.ops.OccurrenceInfo;
-import com.salesforce.rules.dmlinloop.DmlInLoopUtil;
+import com.salesforce.rules.avoiddatabaseoperationinloop.AvoidDatabaseOperationInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
@@ -14,6 +13,7 @@ import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfoUtil;
 import com.salesforce.rules.multiplemassschemalookup.MmslrUtil;
+import com.salesforce.rules.ops.OccurrenceInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -259,7 +259,7 @@ public class ViolationWrapper {
 
         @Override
         public String getMessage() {
-            return DmlInLoopUtil.getMessage(occurrenceInfo);
+            return AvoidDatabaseOperationInLoopUtil.getMessage(occurrenceInfo);
         }
     }
 

@@ -1,7 +1,7 @@
-package com.salesforce.rules.dmlinloop;
+package com.salesforce.rules.avoiddatabaseoperationinloop;
 
 import com.salesforce.graph.EnumUtil;
-import com.salesforce.rules.DmlInLoopRule;
+import com.salesforce.rules.AvoidDatabaseOperationInLoop;
 import java.util.Optional;
 import java.util.TreeMap;
 
@@ -12,8 +12,8 @@ public final class DmlUtil {
 
     /** map of database operation method strings -> DatabaseOperation for fromString method */
     private static final TreeMap<String, DatabaseOperation> METHOD_NAME_TO_DATABASE_OPERATION =
-        EnumUtil.getEnumTreeMap(
-            DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
+            EnumUtil.getEnumTreeMap(
+                    DatabaseOperation.class, DatabaseOperation::getDatabaseOperationMethod);
 
     /**
      * An enumeration of all of the possible Database.method() methods in the Database class in
@@ -49,7 +49,6 @@ public final class DmlUtil {
         UPDATE_IMMEDIATE("Database.updateImmediate", true),
         UPSERT("Database.upsert", true);
 
-
         /** stores the string representation of this method */
         private final String databaseOperationMethod;
         /** stores if this method should be a violation when in a loop */
@@ -59,7 +58,7 @@ public final class DmlUtil {
          * @param databaseOperationMethod the method name of the Database method. For example,
          *     <code>Database.insertAsync</code>.
          * @param violationInLoop whether this operation in a loop is a violation of {@link
-         *     DmlInLoopRule}
+         *     AvoidDatabaseOperationInLoop}
          */
         DatabaseOperation(String databaseOperationMethod, boolean violationInLoop) {
             this.databaseOperationMethod = databaseOperationMethod;
@@ -75,8 +74,8 @@ public final class DmlUtil {
         }
 
         /**
-         * @return true if this operation should be a violation in {@link DmlInLoopRule}, false
-         *     otherwise.
+         * @return true if this operation should be a violation in {@link
+         *     AvoidDatabaseOperationInLoop}, false otherwise.
          */
         public boolean isViolationInLoop() {
             return violationInLoop;

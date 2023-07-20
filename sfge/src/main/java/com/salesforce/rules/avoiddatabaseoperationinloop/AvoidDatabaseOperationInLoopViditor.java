@@ -1,4 +1,4 @@
-package com.salesforce.rules.dmlinloop;
+package com.salesforce.rules.avoiddatabaseoperationinloop;
 
 import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.symbols.SymbolProvider;
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class DmlInLoopVisitor extends LoopDetectionVisitor {
+public class AvoidDatabaseOperationInLoopViditor extends LoopDetectionVisitor {
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
@@ -21,19 +21,19 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
     private final HashSet<Violation.PathBasedRuleViolation> violations;
 
     /**
-     * Create a DmlInLoopVisitor
+     * Create a AvoidDatabaseOperationInLoopVisitor
      *
      * @param sourceVertex the source of the path containing this vertex
      * @param sinkVertex the problematic sink vertex (in this case a vertex with DML). The sink
      *     vertex must be an instance of an {@link DmlStatementVertex}, {@link
      *     MethodCallExpressionVertex}, or {@link SoqlExpressionVertex}.
      */
-    DmlInLoopVisitor(SFVertex sourceVertex, BaseSFVertex sinkVertex) {
+    AvoidDatabaseOperationInLoopViditor(SFVertex sourceVertex, BaseSFVertex sinkVertex) {
         if (!(sinkVertex instanceof DmlStatementVertex
                 || sinkVertex instanceof MethodCallExpressionVertex
                 || sinkVertex instanceof SoqlExpressionVertex)) {
             throw new ProgrammingException(
-                    "DmlInLoopRule sink vertex must be a DmlStatementVertex, MethodCallExpressionVertex, or SoqlExpressionVertex. Provided sink vertex="
+                    "AvoidDatabaseOperationInLoop sink vertex must be a DmlStatementVertex, MethodCallExpressionVertex, or SoqlExpressionVertex. Provided sink vertex="
                             + sinkVertex);
         }
         this.sourceVertex = sourceVertex;
@@ -43,8 +43,8 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
-        // from DmlInLoopRuleHandler we already know that vertex is a database operation
-        // method, in the format of Database.<something>
+        // from AvoidDatabaseOperationInLoopHandler we already know that vertex is a database
+        // operation method, in the format of Database.<something>
         createViolationIfSinkInsideLoop(vertex, symbols);
 
         // Perform super method's logic as well to remove exclusion boundary if needed.
@@ -134,7 +134,9 @@ public class DmlInLoopVisitor extends LoopDetectionVisitor {
 
         violations.add(
                 new Violation.PathBasedRuleViolation(
-                        DmlInLoopUtil.getMessage(loopVertex), sourceVertex, sinkVertex));
+                        AvoidDatabaseOperationInLoopUtil.getMessage(loopVertex),
+                        sourceVertex,
+                        sinkVertex));
     }
 
     /**

@@ -111,10 +111,10 @@ public class MultipleMassSchemaLookupRuleTest extends BaseAvoidMultipleMassSchem
     })
     @ParameterizedTest(name = "{displayName}: {2} within {0}")
     public void testLoopWithinLoop(
-        String outerLoopLabel,
-        String outerLoopStructure,
-        String innerLoopLabel,
-        String innerLoopStructure) {
+            String outerLoopLabel,
+            String outerLoopStructure,
+            String innerLoopLabel,
+            String innerLoopStructure) {
         // spotless:off
         String sourceCode =
                 "public class MyClass {\n" +

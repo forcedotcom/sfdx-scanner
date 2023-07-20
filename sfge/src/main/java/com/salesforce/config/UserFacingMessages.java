@@ -126,13 +126,14 @@ public final class UserFacingMessages {
         public static final String METHODLESS_MESSAGE_TEMPLATE = "%2$s. %3$s";
     }
 
-    public static final class DmlInLoopRuleTemplates {
+    public static final class AvoidDatabaseOperationInLoopTemplates {
 
         /**
          * String Param 1: an {@link com.salesforce.rules.ops.OccurrenceInfo} which converts into
          * occurrence information in the format of an {@link
          * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is supported.
          */
-        public static final String MESSAGE_TEMPLATE = "A database operation was made inside a loop. [%1$s]";
+        public static final String MESSAGE_TEMPLATE =
+                "A database operation was made inside a loop. [%1$s]";
     }
 }
