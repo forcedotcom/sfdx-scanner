@@ -16,8 +16,8 @@ public final class UserFacingMessages {
                 "Identifies methods that aren't invoked from recognized entry points.";
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
-        public static final String DML_IN_LOOP_RULE =
-                "Detects database operations that occur inside loops leading to degraded performance.";
+        public static final String AVOID_DATABASE_OPERATION_IN_LOOP =
+                "Detects database operations inside loops, which can cause degraded performance.";
     }
 
     public static final class RuleViolationTemplates {
@@ -134,6 +134,6 @@ public final class UserFacingMessages {
          * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is supported.
          */
         public static final String MESSAGE_TEMPLATE =
-                "A database operation was made inside a loop. [%1$s]";
+                "A database operation occurred inside a loop. [%1$s]";
     }
 }

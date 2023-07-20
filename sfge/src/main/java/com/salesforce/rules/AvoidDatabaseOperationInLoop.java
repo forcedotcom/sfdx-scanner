@@ -48,7 +48,7 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.DML_IN_LOOP_RULE;
+        return UserFacingMessages.RuleDescriptions.AVOID_DATABASE_OPERATION_IN_LOOP;
     }
 
     @Override
