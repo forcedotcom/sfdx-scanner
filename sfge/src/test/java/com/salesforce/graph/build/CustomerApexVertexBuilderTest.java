@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.salesforce.TestUtil;
-import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.apex.jorje.ASTConstants.NodeType;
 import com.salesforce.apex.jorje.AstNodeWrapper;
 import com.salesforce.apex.jorje.JorjeUtil;
@@ -20,7 +19,6 @@ import java.util.stream.Collectors;
 import org.apache.tinkerpop.gremlin.process.traversal.Order;
 import org.apache.tinkerpop.gremlin.process.traversal.Scope;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -246,7 +244,6 @@ public class CustomerApexVertexBuilderTest {
                                 "List<Integer> intParams_ReturnsIntList(Integer,Integer,Integer)")));
     }
 
-
     @Test
     public void testEndScopesOrderDeepLoop() {
         // spotless:off
@@ -266,26 +263,32 @@ public class CustomerApexVertexBuilderTest {
         VertexCacheProvider.get().initialize(g);
 
         AstNodeWrapper<?> compilation = JorjeUtil.compileApexFromString(classWithLoops);
-        Util.CompilationDescriptor compilationDescriptor = new Util.CompilationDescriptor("TestCode", compilation);
+        Util.CompilationDescriptor compilationDescriptor =
+                new Util.CompilationDescriptor("TestCode", compilation);
 
-        CustomerApexVertexBuilder bvb = new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
+        CustomerApexVertexBuilder bvb =
+                new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
 
         bvb.build();
 
-        BaseSFVertex k = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 5)).get(0);
+        BaseSFVertex k =
+                SFVertexFactory.loadVertices(
+                                g,
+                                g.V()
+                                        .hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS)
+                                        .has(Schema.BEGIN_LINE, 5))
+                        .get(0);
         List<String> kEndScopes = k.getEndScopes();
 
-        assertEquals(kEndScopes, Arrays.asList(
-            NodeType.BLOCK_STATEMENT,
-            NodeType.FOR_LOOP_STATEMENT,
-            NodeType.BLOCK_STATEMENT,
-            NodeType.FOR_EACH_STATEMENT,
-            NodeType.BLOCK_STATEMENT
-        ));
-
-
+        assertEquals(
+                kEndScopes,
+                Arrays.asList(
+                        NodeType.BLOCK_STATEMENT,
+                        NodeType.FOR_LOOP_STATEMENT,
+                        NodeType.BLOCK_STATEMENT,
+                        NodeType.FOR_EACH_STATEMENT,
+                        NodeType.BLOCK_STATEMENT));
     }
-
 
     @Test
     public void testEndScopesOrderOutsideLoop() {
@@ -307,32 +310,40 @@ public class CustomerApexVertexBuilderTest {
         VertexCacheProvider.get().initialize(g);
 
         AstNodeWrapper<?> compilation = JorjeUtil.compileApexFromString(classWithLoops);
-        Util.CompilationDescriptor compilationDescriptor = new Util.CompilationDescriptor("TestCode", compilation);
+        Util.CompilationDescriptor compilationDescriptor =
+                new Util.CompilationDescriptor("TestCode", compilation);
 
-        CustomerApexVertexBuilder bvb = new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
+        CustomerApexVertexBuilder bvb =
+                new CustomerApexVertexBuilder(g, Collections.singletonList(compilationDescriptor));
 
         bvb.build();
 
-        BaseSFVertex k = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 5)).get(0);
+        BaseSFVertex k =
+                SFVertexFactory.loadVertices(
+                                g,
+                                g.V()
+                                        .hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS)
+                                        .has(Schema.BEGIN_LINE, 5))
+                        .get(0);
         List<String> kEndScopes = k.getEndScopes();
 
-        assertEquals(kEndScopes, Arrays.asList(
-            NodeType.BLOCK_STATEMENT,
-            NodeType.FOR_LOOP_STATEMENT
-        ));
+        assertEquals(
+                kEndScopes, Arrays.asList(NodeType.BLOCK_STATEMENT, NodeType.FOR_LOOP_STATEMENT));
 
-
-
-        BaseSFVertex b = SFVertexFactory.loadVertices(g, g.V().hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS).has(Schema.BEGIN_LINE, 7)).get(0);
+        BaseSFVertex b =
+                SFVertexFactory.loadVertices(
+                                g,
+                                g.V()
+                                        .hasLabel(NodeType.VARIABLE_DECLARATION_STATEMENTS)
+                                        .has(Schema.BEGIN_LINE, 7))
+                        .get(0);
         List<String> bEndScopes = b.getEndScopes();
 
-        assertEquals(bEndScopes, Arrays.asList(
-            NodeType.BLOCK_STATEMENT,
-            NodeType.FOR_EACH_STATEMENT,
-            NodeType.BLOCK_STATEMENT
-        ));
-
+        assertEquals(
+                bEndScopes,
+                Arrays.asList(
+                        NodeType.BLOCK_STATEMENT,
+                        NodeType.FOR_EACH_STATEMENT,
+                        NodeType.BLOCK_STATEMENT));
     }
-
-
 }

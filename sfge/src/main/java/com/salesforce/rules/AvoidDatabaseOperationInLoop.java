@@ -5,23 +5,23 @@ import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.source.ApexPathSource;
 import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.rules.dmlinloop.DmlInLoopRuleHandler;
+import com.salesforce.rules.avoiddatabaseoperationinloop.AvoidDatabaseOperationInLoopHandler;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-public final class DmlInLoopRule extends AbstractPathTraversalRule {
+public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRule {
 
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
 
-    private final DmlInLoopRuleHandler ruleHandler;
+    private final AvoidDatabaseOperationInLoopHandler ruleHandler;
 
-    private DmlInLoopRule() {
-        ruleHandler = DmlInLoopRuleHandler.getInstance();
+    private AvoidDatabaseOperationInLoop() {
+        ruleHandler = AvoidDatabaseOperationInLoopHandler.getInstance();
     }
 
-    /** check if a certain vertex is of interest to this DmlInLoopRule */
+    /** check if a certain vertex is of interest to this rule */
     @Override
     public boolean test(BaseSFVertex vertex) {
         return ruleHandler.test(vertex);
@@ -48,7 +48,7 @@ public final class DmlInLoopRule extends AbstractPathTraversalRule {
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.DML_IN_LOOP_RULE;
+        return UserFacingMessages.RuleDescriptions.AVOID_DATABASE_OPERATION_IN_LOOP;
     }
 
     @Override
@@ -61,12 +61,13 @@ public final class DmlInLoopRule extends AbstractPathTraversalRule {
         return true;
     }
 
-    public static DmlInLoopRule getInstance() {
-        return DmlInLoopRule.LazyHolder.INSTANCE;
+    public static AvoidDatabaseOperationInLoop getInstance() {
+        return AvoidDatabaseOperationInLoop.LazyHolder.INSTANCE;
     }
 
     private static final class LazyHolder {
         // postpone initialization until after first use
-        private static final DmlInLoopRule INSTANCE = new DmlInLoopRule();
+        private static final AvoidDatabaseOperationInLoop INSTANCE =
+                new AvoidDatabaseOperationInLoop();
     }
 }

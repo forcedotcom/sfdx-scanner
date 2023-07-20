@@ -1,10 +1,11 @@
-package com.salesforce.rules.dmlinloop;
+package com.salesforce.rules.avoiddatabaseoperationinloop;
 
 import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.rules.DmlInLoopRule;
+import com.salesforce.rules.AvoidDatabaseOperationInLoop;
 import com.salesforce.rules.ops.OccurrenceInfo;
 import com.salesforce.testutils.BasePathBasedRuleTest;
 import com.salesforce.testutils.ViolationWrapper;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -12,25 +13,23 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
+public class AvoidDatabaseOperationInLoopTest extends BasePathBasedRuleTest {
 
     private static final String MY_CLASS = "MyClass";
 
-    protected static final DmlInLoopRule RULE = DmlInLoopRule.getInstance();
+    protected static final AvoidDatabaseOperationInLoop RULE =
+            AvoidDatabaseOperationInLoop.getInstance();
 
     /**
      * function to get the expected violation from some code and an loop OccurrenceInfo
      *
      * @param sinkLine the line on which the sink vertex occurs
      * @param occurrenceInfo the information about the loop
-     * @return a ViolationWrapper.DmlInLoopInfoBuilder
+     * @return a {@link ViolationWrapper.AvoidDatabaseInLoopInfoBuilder}
      */
-    protected ViolationWrapper.DmlInLoopInfoBuilder expect(
+    protected ViolationWrapper.AvoidDatabaseInLoopInfoBuilder expect(
             int sinkLine, OccurrenceInfo occurrenceInfo) {
-        return ViolationWrapper.DmlInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
+        return ViolationWrapper.AvoidDatabaseInLoopInfoBuilder.get(sinkLine, occurrenceInfo);
     }
 
     /**
@@ -200,15 +199,11 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     /** helper method to provide inputs for the above test */
     private static Stream<Arguments> getDatabaseClassMethodsInLoopsTests() {
         String[] loopStructures = {
-            "for (Integer i : myList)",
-            "for (Integer i = 0; i < 2; i++)",
-            "while(true)"
+            "for (Integer i : myList)", "for (Integer i = 0; i < 2; i++)", "while(true)"
         };
 
         String[] loopLabels = {
-            "ForEachStatement",
-            "ForLoopStatement",
-            "WhileLoopStatement",
+            "ForEachStatement", "ForLoopStatement", "WhileLoopStatement",
         };
 
         String[] databaseMethods = {
@@ -241,7 +236,6 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
             "upsert(new Account(10, 'Rot', 53), null, false)"
         };
 
-
         Stream.Builder<Arguments> argsBuilder = Stream.builder();
 
         for (int i = 0; i < loopStructures.length; i++) {
@@ -252,7 +246,6 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
 
         return argsBuilder.build();
     }
-
 
     /**
      * The second part (post-colon) of a for-each loop declaration is only run once, so a SOQL query
@@ -299,15 +292,16 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
     }
 
     /** The increment clause of a for loop repeats, which should be a violation */
-    @ValueSource(strings = {
-        "delete a",
-        "insert a",
-        "merge a a",
-        "undelete a",
-        "update a",
-        "upsert a",
-        "Account b = [SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3]"
-    })
+    @ValueSource(
+            strings = {
+                "delete a",
+                "insert a",
+                "merge a a",
+                "undelete a",
+                "update a",
+                "upsert a",
+                "Account b = [SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3]"
+            })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testForLoopIncrementStatement(String dmlStatement) {
         // spotless:off
@@ -388,15 +382,16 @@ public class DmlInLoopRuleTest extends BasePathBasedRuleTest {
         assertViolations(RULE, sourceCode, expect(9, new OccurrenceInfo(loopLabel, MY_CLASS, 4)));
     }
 
-    @ValueSource(strings = {
-        "Account s = [SELECT Id, NumberOfEmployees FROM Account WHERE NumberOfEmployees = 3 LIMIT 1]",
-        "delete a",
-        "insert a",
-        "merge a a",
-        "update a",
-        "undelete a",
-        "upsert a"
-    })
+    @ValueSource(
+            strings = {
+                "Account s = [SELECT Id, NumberOfEmployees FROM Account WHERE NumberOfEmployees = 3 LIMIT 1]",
+                "delete a",
+                "insert a",
+                "merge a a",
+                "update a",
+                "undelete a",
+                "upsert a"
+            })
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testLoopFromStaticBlockOk(String dmlStatement) {
         // spotless:off

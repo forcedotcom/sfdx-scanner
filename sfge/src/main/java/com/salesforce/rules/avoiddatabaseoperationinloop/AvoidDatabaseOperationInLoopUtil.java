@@ -1,10 +1,10 @@
-package com.salesforce.rules.dmlinloop;
+package com.salesforce.rules.avoiddatabaseoperationinloop;
 
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.rules.ops.OccurrenceInfo;
 
-public class DmlInLoopUtil {
+public class AvoidDatabaseOperationInLoopUtil {
 
     /**
      * Retrieve the DML Rule violation message
@@ -15,7 +15,7 @@ public class DmlInLoopUtil {
     public static String getMessage(SFVertex loopVertex) {
         // just create an OccurrenceInfo with the information from this vertex
         return String.format(
-                UserFacingMessages.DmlInLoopRuleTemplates.MESSAGE_TEMPLATE,
+                UserFacingMessages.AvoidDatabaseOperationInLoopTemplates.MESSAGE_TEMPLATE,
                 new OccurrenceInfo(
                         loopVertex.getLabel(),
                         loopVertex.getDefiningType(),
@@ -30,6 +30,7 @@ public class DmlInLoopUtil {
      */
     public static String getMessage(OccurrenceInfo occurenceInfo) {
         return String.format(
-                UserFacingMessages.DmlInLoopRuleTemplates.MESSAGE_TEMPLATE, occurenceInfo);
+                UserFacingMessages.AvoidDatabaseOperationInLoopTemplates.MESSAGE_TEMPLATE,
+                occurenceInfo);
     }
 }
