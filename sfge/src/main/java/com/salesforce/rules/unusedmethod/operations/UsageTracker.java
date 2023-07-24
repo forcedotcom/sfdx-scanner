@@ -3,11 +3,12 @@ package com.salesforce.rules.unusedmethod.operations;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ops.expander.PathExpansionObserver;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.rules.RemoveUnusedMethod;
 import java.util.Optional;
 
 /**
- * Helper class for use in {@link com.salesforce.rules.UnusedMethodRule}. Allows tracking of which
- * methods have or have not been used in a path.
+ * Helper class for use in {@link RemoveUnusedMethod}. Allows tracking of which methods have or have
+ * not been used in a path.
  */
 public class UsageTracker implements PathExpansionObserver {
 

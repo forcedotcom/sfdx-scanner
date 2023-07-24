@@ -1,5 +1,6 @@
 package com.salesforce.rules.unusedmethod;
 
+import com.salesforce.rules.RemoveUnusedMethod;
 import java.util.Collections;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -7,10 +8,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-/**
- * These tests verify that instance methods are properly handled by {@link
- * com.salesforce.rules.UnusedMethodRule}.
- */
+/** These tests verify that instance methods are properly handled by {@link RemoveUnusedMethod}. */
 public class InstanceMethodsTest extends BaseUnusedMethodTest {
 
     // ====== SECTION 1: BLATANTLY UNUSED METHODS ======

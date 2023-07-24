@@ -245,7 +245,7 @@ public class BaseUnusedMethodTest {
     }
 
     /**
-     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * Run {@link RemoveUnusedMethod} against the provided files, using as an entry point the
      * specified method on the specified type. Verify that the provided methods are used/unused as
      * expected.
      */
@@ -257,7 +257,7 @@ public class BaseUnusedMethodTest {
             Collection<String> unusedMethodKeys) {
         TestUtil.buildGraph(g, sourceCodes);
 
-        UnusedMethodRule rule = UnusedMethodRule.getInstance();
+        RemoveUnusedMethod rule = RemoveUnusedMethod.getInstance();
         MethodVertex entryMethodVertex =
                 TestUtil.getMethodVertex(g, entryDefiningType, entryMethod);
         PathBasedRuleRunner runner =
@@ -282,7 +282,7 @@ public class BaseUnusedMethodTest {
     // them in another class for re-use.
 
     /**
-     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * Run {@link RemoveUnusedMethod} against the provided files, using as an entry point the
      * specified method on the specified type. Verify that the method corresponding to the given key
      * is NOT found to be used.
      */
@@ -302,7 +302,7 @@ public class BaseUnusedMethodTest {
     /* ============== ASSERT USAGE ============== */
 
     /**
-     * Run {@link UnusedMethodRule} against the provided files, using as an entry point the
+     * Run {@link RemoveUnusedMethod} against the provided files, using as an entry point the
      * specified method on the specified type. Verify that the method corresponding to the given key
      * is found to be used.
      */
@@ -322,7 +322,8 @@ public class BaseUnusedMethodTest {
     /* ============== ASSERT INELIGIBILITY ============== */
 
     /**
-     * Verify that the specified method is not eligible for analysis under {@link UnusedMethodRule}.
+     * Verify that the specified method is not eligible for analysis under {@link
+     * RemoveUnusedMethod}.
      */
     protected void assertMethodIneligibility(
             String sourceCode, String defType, String methodName, int beginLine) {
@@ -335,7 +336,7 @@ public class BaseUnusedMethodTest {
 
     /**
      * Verify that the specified methods are not eligible for analysis under {@link
-     * UnusedMethodRule}.
+     * RemoveUnusedMethod}.
      */
     protected void assertMethodIneligibility(
             String sourceCode, String[] defTypes, String[] methodNames, int[] beginLines) {
@@ -344,7 +345,7 @@ public class BaseUnusedMethodTest {
 
     /**
      * Verify that the specified methods are not eligible for analysis under {@link
-     * UnusedMethodRule}.
+     * RemoveUnusedMethod}.
      *
      * @param sourceCodes
      * @param defTypes
@@ -354,7 +355,7 @@ public class BaseUnusedMethodTest {
     protected void assertMethodIneligibility(
             String[] sourceCodes, String[] defTypes, String[] methodNames, int[] beginLines) {
         TestUtil.buildGraph(g, sourceCodes);
-        UnusedMethodRule rule = UnusedMethodRule.getInstance();
+        RemoveUnusedMethod rule = RemoveUnusedMethod.getInstance();
         // Get every eligible method.
         List<MethodVertex> eligibleMethods = rule.getEligibleMethods(g);
         for (int i = 0; i < defTypes.length; i++) {
