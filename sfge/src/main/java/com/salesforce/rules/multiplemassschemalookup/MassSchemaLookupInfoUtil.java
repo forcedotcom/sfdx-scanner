@@ -3,13 +3,14 @@ package com.salesforce.rules.multiplemassschemalookup;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
+import com.salesforce.rules.AvoidMultipleMassSchemaLookups;
 import com.salesforce.rules.ops.OccurrenceInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/** Utility to help with violation message creation on MultipleMassSchemaLookupRule */
+/** Utility to help with violation message creation on {@link AvoidMultipleMassSchemaLookups} */
 public final class MassSchemaLookupInfoUtil {
     private MassSchemaLookupInfoUtil() {}
 

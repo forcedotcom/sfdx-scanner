@@ -11,14 +11,14 @@ import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
 /** Rule to detect possible performance degradations while invoking Schema.getGlobalDescribe(). */
-public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
+public class AvoidMultipleMassSchemaLookups extends AbstractPathTraversalRule {
     // Any path is capable of violating this rule.
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
 
     private final MultipleMassSchemaLookupRuleHandler ruleHandler;
 
-    private MultipleMassSchemaLookupRule() {
+    private AvoidMultipleMassSchemaLookups() {
         ruleHandler = MultipleMassSchemaLookupRuleHandler.getInstance();
     }
 
@@ -61,13 +61,18 @@ public class MultipleMassSchemaLookupRule extends AbstractPathTraversalRule {
         return true;
     }
 
-    public static MultipleMassSchemaLookupRule getInstance() {
-        return MultipleMassSchemaLookupRule.LazyHolder.INSTANCE;
+    @Override
+    protected boolean isPilot() {
+        return false;
+    }
+
+    public static AvoidMultipleMassSchemaLookups getInstance() {
+        return AvoidMultipleMassSchemaLookups.LazyHolder.INSTANCE;
     }
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final MultipleMassSchemaLookupRule INSTANCE =
-                new MultipleMassSchemaLookupRule();
+        private static final AvoidMultipleMassSchemaLookups INSTANCE =
+                new AvoidMultipleMassSchemaLookups();
     }
 }

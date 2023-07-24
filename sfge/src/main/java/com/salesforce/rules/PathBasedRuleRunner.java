@@ -185,7 +185,7 @@ public class PathBasedRuleRunner {
     private void convertMmsInfoToViolations(HashSet<MultipleMassSchemaLookupInfo> mmsLookupInfos) {
         for (MultipleMassSchemaLookupInfo mmsLookupInfo : mmsLookupInfos) {
             Violation.RuleViolation violation = mmsLookupInfo.convert();
-            violation.setPropertiesFromRule(MultipleMassSchemaLookupRule.getInstance());
+            violation.setPropertiesFromRule(AvoidMultipleMassSchemaLookups.getInstance());
             violations.add(violation);
         }
     }

@@ -4,7 +4,7 @@ import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ops.SoqlParserUtil;
-import com.salesforce.rules.MultipleMassSchemaLookupRule;
+import com.salesforce.rules.AvoidMultipleMassSchemaLookups;
 import com.salesforce.rules.avoiddatabaseoperationinloop.AvoidDatabaseOperationInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
@@ -204,7 +204,7 @@ public class ViolationWrapper {
         }
     }
 
-    /** Message builder to help with testing {@link MultipleMassSchemaLookupRule}. */
+    /** Message builder to help with testing {@link AvoidMultipleMassSchemaLookups}. */
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
         private final MmslrUtil.RepetitionType repetitionType;
