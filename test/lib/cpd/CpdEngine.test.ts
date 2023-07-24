@@ -1,19 +1,19 @@
 import {expect} from 'chai';
 import {CpdEngine} from '../../../src/lib/cpd/CpdEngine'
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { CUSTOM_CONFIG, LANGUAGE } from '../../../src/Constants';
-import { RuleTarget } from '../../../src/types';
+import {CUSTOM_CONFIG, LANGUAGE, TargetType} from '../../../src/Constants';
+import {RuleTarget} from '../../../src/types';
 
 TestOverrides.initializeTestSetup();
 
 describe('CpdEngine', () => {
 
 	const testEngine: CpdEngine = new CpdEngine();
-    
+
 	before(async () => {
 		await testEngine.init();
 	});
-    
+
 	describe('shouldEngineRun()', () => {
 		it('should always return true if the engine was not filtered out', () => {
 			expect(testEngine.shouldEngineRun([],[],[],new Map<string,string>())).to.be.true;
@@ -24,9 +24,10 @@ describe('CpdEngine', () => {
 		it('should return the correct map based on valid cpd files and targets given', () => {
 			const targets: RuleTarget[] = [{
 				target: '',
+				targetType: TargetType.GLOB,
 				paths: ['file.cls','file.trigger','file.page','file.py','file.component']
 			}];
-		
+
 			let langPathMap: Map<LANGUAGE, string[]> = new Map();
 			langPathMap.set(LANGUAGE.APEX, ['file.cls','file.trigger']);
 			langPathMap.set(LANGUAGE.VISUALFORCE, ['file.page','file.component']);
@@ -36,16 +37,17 @@ describe('CpdEngine', () => {
 		it('should compare extensions case-insensitively', () => {
 			const targets: RuleTarget[] = [{
 				target: '',
+				targetType: TargetType.GLOB,
 				paths: ['file.Cls','file.tRIGGER']
 			}];
-		
+
 			let langPathMap: Map<LANGUAGE, string[]> = new Map();
 			langPathMap.set(LANGUAGE.APEX, ['file.Cls','file.tRIGGER']);
 			expect((testEngine as any).sortPaths(targets)).to.eql(langPathMap);
 		});
 	});
 
-	
+
 	describe('isEngineRequested()', () => {
 		const emptyEngineOptions = new Map<string, string>();
 
@@ -90,5 +92,5 @@ describe('CpdEngine', () => {
 		});
 	});
 
-    
+
 });

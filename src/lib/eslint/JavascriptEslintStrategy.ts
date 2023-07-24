@@ -84,11 +84,13 @@ export class JavascriptEslintStrategy implements EslintStrategy {
 
 	processRuleViolation(): ProcessRuleViolationType {
 		/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-		return (fileName: string, ruleViolation: RuleViolation): void => {
+		return (fileName: string, ruleViolation: RuleViolation): boolean => {
 			if (ruleViolation.message.startsWith('Parsing error:')) {
 				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
 				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
 			}
+			// Always keep our violations.
+			return true;
 		}
 	}
 }

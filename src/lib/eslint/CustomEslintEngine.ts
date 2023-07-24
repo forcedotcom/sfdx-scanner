@@ -1,6 +1,6 @@
 import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, TargetPattern, ESRuleMetadata } from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
-import {CUSTOM_CONFIG, ENGINE, EngineBase, Severity} from '../../Constants';
+import {CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, Severity, TargetType} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
 import {Logger, Messages, SfError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
@@ -105,7 +105,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			Object.keys(rulesMeta).forEach(key => rulesMap.set(key, rulesMeta[key]));
 
 			// Map results to supported format
-			this.helper.addRuleResultsFromReport(this.getName(), results, esResults, rulesMap, this.processRuleViolation());
+			this.helper.addRuleResultsFromReport(this.getName(), results, esResults, rulesMap, this.processRuleViolation(target));
 		}
 
 		return results;
@@ -135,10 +135,33 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 		return config;
 	}
 
-	processRuleViolation(): ProcessRuleViolationType {
+	/**
+	 * Converts certain edge-case ESLint violations into CodeAnalyzer-compatible violations.
+	 * @param ruleTarget The target that produced this violation
+	 */
+	processRuleViolation(ruleTarget: RuleTarget): ProcessRuleViolationType {
 		/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-		return (fileName: string, ruleViolation: RuleViolation): void => {
-			// do nothing - revisit when we have situations that need processing
+		return (fileName: string, ruleViolation: RuleViolation): boolean => {
+			if (ruleViolation.message.startsWith('File ignored because of a matching ignore pattern')) {
+				// If you run ESLint against a file that matches an Ignore pattern, then ESLint throws a
+				// pseudo-violation about it. If you run ESLint against a directory or glob that contains
+				// files matching Ignore patterns, those files are silently skipped.
+				// Since Code Analyzer decomposes targets into lists of individual files, all files
+				// matching Ignore patterns will throw pseudo-violations regardless of how they
+				// were actually targeted.
+				// As such, we throw out any pseudo-violation whose associated target wasn't a file,
+				// since it wouldn't have happened if ESLint were run directly.
+				if (ruleTarget.targetType === TargetType.FILE) {
+					ruleViolation.ruleName = HARDCODED_RULES.FILE_IGNORED.name;
+					ruleViolation.category = HARDCODED_RULES.FILE_IGNORED.category;
+				} else {
+					return false;
+				}
+			} else if (ruleViolation.message.startsWith('Parsing error:')) {
+				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
+				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
+			}
+			return true;
 		}
 	}
 

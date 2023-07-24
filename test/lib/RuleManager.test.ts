@@ -4,7 +4,7 @@ import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
 import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
-import {ENGINE, CONFIG_FILE} from '../../src/Constants';
+import {ENGINE, CONFIG_FILE, TargetType} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
@@ -520,10 +520,10 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(2, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[0], 'Wrong file matched');
-				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.FILE, 'Should be matched as file');
 				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
 				expect(results[1].target).to.equal(targets[1], 'Wrong file matched');
-				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].targetType).to.equal(TargetType.FILE, 'Should be matched as file');
 				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 
@@ -547,7 +547,7 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(1, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[0], 'Wrong directory matched');
-				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.DIRECTORY, 'Should be flagged as directory');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
 			});
 
@@ -601,7 +601,7 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(1, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[0], 'Wrong glob matched');
-				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.GLOB, 'Should be flagged as glob');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
 			});
 		});
@@ -628,7 +628,7 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(1, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[1], 'Wrong file matched');
-				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.FILE, 'Should be flagged as file');
 				expect(results[0].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 
@@ -654,10 +654,10 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(2, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[2], 'Wrong directory matched');
-				expect(results[0].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.DIRECTORY, 'Should be flagged as directory');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
 				expect(results[1].target).to.equal(targets[3], 'Wrong directory matched');
-				expect(results[1].isDirectory).to.equal(true, 'Should be flagged as directory');
+				expect(results[1].targetType).to.equal(TargetType.DIRECTORY, 'Should be flagged as directory');
 				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 
@@ -684,10 +684,10 @@ describe('RuleManager', () => {
 				// Validate the results.
 				expect(results.length).to.equal(2, 'Wrong number of targets matched');
 				expect(results[0].target).to.equal(targets[2], 'Wrong glob matched');
-				expect(results[0].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[0].targetType).to.equal(TargetType.GLOB, 'Should be flagged as glob');
 				expect(results[0].paths.length).to.equal(2, 'Wrong number of paths matched');
 				expect(results[1].target).to.equal(targets[3], 'Wrong glob matched');
-				expect(results[1].isDirectory).to.not.equal(true, 'Should not be flagged as directory');
+				expect(results[1].targetType).to.equal(TargetType.GLOB, 'Should be flagged as glob');
 				expect(results[1].paths.length).to.equal(1, 'Wrong number of paths matched');
 			});
 		});
