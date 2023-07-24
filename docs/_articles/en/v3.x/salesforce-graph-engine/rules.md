@@ -9,14 +9,17 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | -------- | ----------- | ----------- | ----------- |
 | ApexFlsViolationRule | Path-based analysis | Generally Available (GA) | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
 | ApexNullPointerExceptionRule | Path-based analysis | GA | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
-| MultipleMassSchemaLookupRule | Path-based analysis | Pilot | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
+| AvoidDatabaseOperationInLoop | Path-based analysis | Pilot | Detects database operations in loops that degrade performance. |
+| AvoidMultipleMassSchemaLookups | Path-based analysis | GA | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
+| RemoveUnusedMethod | Path-based analysis | GA | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 | UnimplementedTypeRule | Graph-based analysis | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
-| UnusedMethodRule | Path-based analysis | Pilot | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
+| UseWithSharingOnDatabaseOperation | Path-based analysis | Pilot | Detects database operations outside with-sharing-annotated classes. |
 
 ## ApexFlsViolationRule
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8). To run the path-based analysis, rules run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run only the ApexFlsViolationRule. 
 
-Example: 
+**Example:**
+
 ```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
 
 ### Definitions
@@ -58,7 +61,7 @@ Match any violation message that you receive with these cases to understand more
 
 >_Validation-Type_–validation is missing for _Operation-Name_ operation on _Object-Type_ with fields _Comma-Separated-Fields_
 
-Parameter explanation:
+Explanation:
 
 * _Validation-Type_–Type of validation to be added. CRUD requires object-level checks, and FLS requires field-level checks.
 
@@ -96,7 +99,7 @@ Graph Engine encountered an error while walking this path. Manually verify that 
 
 ApexNullPointerExceptionRule identifies Apex operations that dereference null objects and throw NullPointerExceptions. NullPointerExceptions generally indicate underlying problems in your code to address. 
 
-Examples:
+**Examples:**
 
 ```
 public void example1() {
@@ -160,55 +163,15 @@ Match any violation message that you receive with this case to understand more a
 
 > ApexNullPointerExceptionRule identifies Apex operations with a high likelihood of throwing a NullPointerException
 
-Parameter explanation:
+Explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-## UnimplementedTypeRule
+## AvoidMultipleMassSchemaLookups Rule
 
-UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
+AvoidMultipleMassSchemaLookups is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
 
-To invoke graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
-
-### Definition
-
-UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
-
-### Interpreting UnimplementedTypeRule Results
-
-Match any violation message that you receive with this case to understand more about the violation.
-
-*Common Case*
-
-> Extend, implement, or delete %s %s
-
-Parameter Explanation:
-
-Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
-
-### UnimplementedTypeRule Limitations
-
-Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
-
-## Pilot Rules
-
-To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
-
-To run all Graph Engine rules and all pilot rules, run:
-
-```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
-
-To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
-
-**Example**:
-
-```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
-
-### MultipleMassSchemaLookupRule
-
-MultipleMassSchemaLookupRule is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
-
-These methods are identified by MultipleMassSchemaLookupRule.
+These methods are identified by AvoidMultipleMassSchemaLookups.
 
 * `Schema.getGlobalDescribe()`
 * `Schema.describeSObjects(...)`
@@ -219,7 +182,7 @@ Flagged lookups include:
 * Multiple expensive schema lookups that are invoked
 * An expensive schema lookup that is executed multiple times
 
-These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
+These common scenarios trigger a violation from AvoidMultipleMassSchemaLookups.
 * `Schema.getGlobalDescribe()` within a loop
 * `Schema.describeSObjects(...)` within a loop
 * `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
@@ -243,14 +206,14 @@ These common scenarios trigger a violation from MultipleMassSchemaLookupRule.
 | 		  	  	 |`Schema.getGlobalDescribe()`													|
 |				 |`Schema.describeSObjects(...)`																										|
 
-#### Interpreting MultipleMassSchemaLookupRule Results
+#### Interpreting AvoidMultipleMassSchemaLookups Results
 Match any violation message that you receive with these cases to understand more about the violation.
 
 ##### Loop Case
 
 > `Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
 
-*Explanation*
+Explanation:
 
 Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` outside the loop, then rescan your code. 
 
@@ -258,7 +221,7 @@ Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` i
 
 > Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
 
-*Explanation*
+Explanation:
 
 Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObjects`. Modify your code so that only one expensive schema lookup is invoked.
 
@@ -266,13 +229,13 @@ Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObje
 
 > `Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
 
-*Explanation*
+Explanation:
 
 `Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code.
 
-### UnusedMethodRule
+## RemoveUnusedMethod Rule
 
-UnusedMethodRule is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. UnusedMethodRule detects methods contained in your code that aren’t invoked. It detects:
+RemoveUnusedMethod is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. RemoveUnusedMethod detects methods contained in your code that aren’t invoked. It detects:
 
 - static methods
 - instance methods
@@ -282,7 +245,7 @@ To invoke the path-based rules run: `scanner:run --engine sfge --projectdir MyDi
 **Example**: 
 ```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
-UnusedMethodRule recognizes these entry points.
+RemoveUnusedMethod recognizes these entry points.
 
 * @AuraEnabled-annotated methods
 * @InvocableMethod-annotated methods
@@ -295,10 +258,9 @@ UnusedMethodRule recognizes these entry points.
 * Any method targeted during invocation
 
 #### Definition
+RemoveUnusedMethod uses sources like ApexFlsViolationRule does, but the RemoveUnusedMethod sinks are different. Instead of seeking DML operations that occur in the course of a path, RemoveUnusedMethod sinks track all method invocations that occur on that path and use that information to identify methods that are never invoked.
 
-UnusedMethodRule uses sources like ApexFlsViolationRule does, but the UnusedMethodRule sinks are different. Instead of seeking DML operations that occur in the course of a path, UnusedMethodsRule sinks track all method invocations that occur on that path and use that information to identify methods that are never invoked.
-
-#### Interpreting UnusedMethodRule Results
+#### Interpreting RemoveUnusedMethod Results
 
 Match any violation message that you receive with this case to understand more about the violation.
 
@@ -306,15 +268,163 @@ Match any violation message that you receive with this case to understand more a
 
 > Method %s in class %s isn’t used in any path from any recognized entry point.
  
-Parameter Explanation:
+Explanation:
 
 Because no invocations of the indicated method were found in the paths originating from the identified entry points, the method is unnecessary and can be deleted.
 
-#### UnusedMethodRule Limitations
+#### RemoveUnusedMethod Limitations
 
-- UnusedMethodRule works on static methods and instance methods. Constructors aren't detected.
+- RemoveUnusedMethod works on static methods and instance methods. Constructors aren't detected.
 - Global methods are intentionally excluded because their external usage is assumed.
-- If the set of files included in `--target` is smaller than the files included in `--projectdir`, then `UnusedMethodRule` can return unexpected results. For that reason, we recommend running this rule against your whole codebase, not against individual files.
+- If the set of files included in `--target` is smaller than the files included in `--projectdir`, then `RemoveUnusedMethod` can return unexpected results. For that reason, we recommend running this rule against your whole codebase, not against individual files.
+
+## UnimplementedTypeRule
+
+UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
+
+To invoke graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
+
+### Definition
+
+UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
+
+### Interpreting UnimplementedTypeRule Results
+
+Match any violation message that you receive with this case to understand more about the violation.
+
+*Common Case*
+
+> Extend, implement, or delete %s %s
+
+Explanation:
+
+Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
+
+### UnimplementedTypeRule Limitations
+
+Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
+
+## Pilot Rules
+
+To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
+
+To run all Graph Engine rules and all pilot rules, run:
+
+```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
+To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
+
+**Example**:
+
+```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
+## AvoidDatabaseOperationInLoop
+
+AvoidDatabaseOperationInLoop detects database operations that occur inside loops and which cause performance degradation. Database operations within loops cause performance degradations and exceed Salesforce Governor Limits. To run this rule and all path-based analysis rules, run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Performance”` to run only the AvoidDatabaseOpInLoop rule.
+
+**Example**: `sfdx scanner:run:dfa --category "Performance" --projectdir /project/dir --target /project/dir/target`
+
+To remediate database operation violations, move these operations outside of loops. Follow these best practices.
+
+* Instead of querying objects within a loop, use a SOQL For Loop to iterate over a query’s results..
+
+	For example, instead of:
+	```for (String name : names) {
+		Account[] accs = [SELECT Name FROM Account WHERE Name =: name];```
+	Use:
+	```for (Account[] accs : [SELECT Name FROM Account WHERE Name IN :names]) {```
+
+* Instead of putting database operations within a loop, use the loop to iteratively construct lists of objects, and then perform the database operation on the full list after the loop.
+  
+	For example, instead of:
+	```for (String n : names) {
+  	  insert new Account(Name = n);```
+	Use:
+	```Account[] accs = new List<Account>();
+	for (String n : names) {
+   	 accs.add(new Account(Name = n));
+	}
+	insert accs;```
+
+### Definition
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |Any database operation													|						
+
+### Interpreting AvoidDatabaseOperationInLoop Results
+
+*Loop Case* 
+
+> A database operation occurred inside a loop.` [%s at %s:%d]`
+
+Explanation:
+
+Your code executes a database operation inside a loop statement. Modify your code to move the database operation outside the loop, then rescan your code.
+
+## UseWithSharingOnDatabaseOperation
+
+The UseWithSharingOnDatabaseOperation rule identifies database operations in classes annotated as `without sharing`. It also warns of database operations in classes that inherit with sharing implicitly instead of explicitly using `inherited sharing`. To run this rule and all path-based analysis rules, run `scanner:run:dfa`. Alternatively, run `scanner:run:dfa --category “Security”` to run UseWithSharingOnDatabaseOperation and other security rules.
+
+**Example**: 
+
+```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
+
+With Salesforce sharing rules, you can control who has access to which records, but it is your responsibility to ensure that your Apex code respects sharing rules. To do this, declare classes with a sharing model.
+
+* `with sharing` causes database transactions in a class to respect sharing rules. It is the default.
+* `without sharing` causes database transactions in a class to ignore sharing rules. Use with caution.
+* `inherited sharing` causes database transactions in a class to inherit the sharing model of the class that called it. Use for classes that require flexibility.
+
+To protect user data in Apex, use `with sharing` or `inherited sharing` whenever possible. 
+
+### Definition
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |Any database operation													|						
+| **Sanitizer**	 |				                                  														      		|
+|                |Class-level with sharing or inherited sharing annotation|
+
+### Interpreting UseWithSharingOnDatabaseOperation Results
+
+*Common Case: Error Message*
+
+> Database operation must be executed from a class that enforces sharing rules.
+
+Explanation:
+
+The database operation occurs in a `without sharing` context, either because it occurs in a class annotated `without sharing` or because its class inherits sharing from a `without sharing` class. To resolve this violation, add `with sharing` or `inherited sharing` to the class.
+
+*Common Case: Warning Message*
+
+> The database operation’s class implicitly inherits a sharing model from %s %s. Explicitly assign a sharing model instead.
+
+Explanation:
+
+This warning is thrown when a database operation occurs in a class that has no explicitly declared sharing model, and therefore it implicitly inherits `with sharing` from its calling class. Even though the operation is secure in this specific case, it isn’t secure by default. Explicitly assign this class a sharing model to make it secure by default.
 
 ## Roadmap	
 
