@@ -84,4 +84,18 @@ public class ModifierNodeVertex extends BaseSFVertex {
         return new LazyVertexList<>(
                 () -> g().V(getId()).out(Schema.CHILD).hasLabel(ASTConstants.NodeType.ANNOTATION));
     }
+
+    /**
+     * @return the sharing policy of this modifier node, a string found in {@link
+     *     ASTConstants.SharingPolicy}
+     */
+    public String getSharingPolicy() {
+        // if, for some reason, we find a node without a sharing policy, assume that it's
+        // OMITTED_DECLARATION
+        String policy = this.getString(Schema.SHARING_POLICY);
+        if (policy == null) {
+            policy = ASTConstants.SharingPolicy.OMITTED_DECLARATION;
+        }
+        return policy;
+    }
 }

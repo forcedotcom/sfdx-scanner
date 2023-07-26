@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-public class AvoidDatabaseOperationInLoopViditor extends LoopDetectionVisitor {
+public class AvoidDatabaseOperationInLoopVisitor extends LoopDetectionVisitor {
 
     /** Represents the path entry point that this visitor is walking */
     private final SFVertex sourceVertex;
@@ -28,7 +28,7 @@ public class AvoidDatabaseOperationInLoopViditor extends LoopDetectionVisitor {
      *     vertex must be an instance of an {@link DmlStatementVertex}, {@link
      *     MethodCallExpressionVertex}, or {@link SoqlExpressionVertex}.
      */
-    AvoidDatabaseOperationInLoopViditor(SFVertex sourceVertex, BaseSFVertex sinkVertex) {
+    AvoidDatabaseOperationInLoopVisitor(SFVertex sourceVertex, BaseSFVertex sinkVertex) {
         if (!(sinkVertex instanceof DmlStatementVertex
                 || sinkVertex instanceof MethodCallExpressionVertex
                 || sinkVertex instanceof SoqlExpressionVertex)) {
@@ -52,7 +52,7 @@ public class AvoidDatabaseOperationInLoopViditor extends LoopDetectionVisitor {
     }
 
     /**
-     * For all of the DmlStatementVertex implemenetations, we need these overloaded afterVisit
+     * For all of the DmlStatementVertex implementations, we need these overloaded afterVisit
      * methods so that the method will resolve correctly for all child classes of {@link
      * DmlStatementVertex}, and not to the parent class' generic {@link
      * LoopDetectionVisitor#afterVisit(BaseSFVertex, SymbolProvider)}
@@ -60,6 +60,7 @@ public class AvoidDatabaseOperationInLoopViditor extends LoopDetectionVisitor {
     @Override
     public void afterVisit(DmlDeleteStatementVertex vertex, SymbolProvider symbols) {
         createViolationIfSinkInsideLoop(vertex, symbols);
+        // no need to call super.afterVisit because it is defaultNoOp's afterVisit
     }
 
     /**

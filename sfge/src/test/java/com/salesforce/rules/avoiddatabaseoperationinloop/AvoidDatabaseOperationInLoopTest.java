@@ -198,13 +198,19 @@ public class AvoidDatabaseOperationInLoopTest extends BasePathBasedRuleTest {
 
     /** helper method to provide inputs for the above test */
     private static Stream<Arguments> getDatabaseClassMethodsInLoopsTests() {
+        // spotless:off
         String[] loopStructures = {
-            "for (Integer i : myList)", "for (Integer i = 0; i < 2; i++)", "while(true)"
+            "for (Integer i : myList)",
+            "for (Integer i = 0; i < 2; i++)",
+            "while(true)"
         };
 
         String[] loopLabels = {
-            "ForEachStatement", "ForLoopStatement", "WhileLoopStatement",
+            "ForEachStatement",
+            "ForLoopStatement",
+            "WhileLoopStatement",
         };
+        // spotless:on
 
         String[] databaseMethods = {
             "convertLead(null, true)",

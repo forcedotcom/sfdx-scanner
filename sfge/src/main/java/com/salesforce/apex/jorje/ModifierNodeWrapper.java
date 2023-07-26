@@ -25,5 +25,14 @@ final class ModifierNodeWrapper extends AstNodeWrapper<ModifierNode> {
         properties.put(Schema.GLOBAL, getNode().getModifiers().has(ModifierTypeInfos.GLOBAL));
         properties.put(Schema.VIRTUAL, getNode().getModifiers().has(ModifierTypeInfos.VIRTUAL));
         properties.put(Schema.OVERRIDE, getNode().getModifiers().has(ModifierTypeInfos.OVERRIDE));
+
+        if (getNode().getModifiers().has(ModifierTypeInfos.WITH_SHARING)) {
+            properties.put(Schema.SHARING_POLICY, ASTConstants.SharingPolicy.WITH_SHARING);
+        } else if (getNode().getModifiers().has(ModifierTypeInfos.WITHOUT_SHARING)) {
+            properties.put(Schema.SHARING_POLICY, ASTConstants.SharingPolicy.WITHOUT_SHARING);
+        } else if (getNode().getModifiers().has(ModifierTypeInfos.INHERITED_SHARING)) {
+            properties.put(Schema.SHARING_POLICY, ASTConstants.SharingPolicy.INHERITED_SHARING);
+        }
+        /** don't store omitted sharing policy, instead */
     }
 }

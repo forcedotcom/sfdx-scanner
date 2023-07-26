@@ -22,4 +22,8 @@ public class OccurrenceInfo {
                 definingType,
                 lineNum);
     }
+
+    public int getLineNum() {
+        return lineNum;
+    }
 }
