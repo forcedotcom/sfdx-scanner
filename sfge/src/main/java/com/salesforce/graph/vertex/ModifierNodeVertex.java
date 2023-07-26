@@ -93,7 +93,9 @@ public class ModifierNodeVertex extends BaseSFVertex {
         // if, for some reason, we find a node without a sharing policy, assume that it's
         // OMITTED_DECLARATION
         String policy = this.getString(Schema.SHARING_POLICY);
-        if (policy == null) policy = ASTConstants.SharingPolicy.OMITTED_DECLARATION;
+        if (policy == null) {
+            policy = ASTConstants.SharingPolicy.OMITTED_DECLARATION;
+        }
         return policy;
     }
 }

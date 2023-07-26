@@ -270,12 +270,15 @@ public class ViolationWrapper {
 
     /** Message builder to help with testing {@link UseWithSharingOnDatabaseOperation}. */
     public static class SharingPolicyViolationBuilder extends ViolationBuilder {
-        boolean warning = false;
-        SharingPolicyUtil.InheritanceType inheritanceType = null;
-        String classInheritedFrom = null;
+        private final boolean warning;
+        private final SharingPolicyUtil.InheritanceType inheritanceType;
+        private final String classInheritedFrom;
 
         public SharingPolicyViolationBuilder(int sinkLine) {
             super(sinkLine);
+            this.warning = false;
+            this.inheritanceType = null;
+            this.classInheritedFrom = null;
         }
 
         public SharingPolicyViolationBuilder(

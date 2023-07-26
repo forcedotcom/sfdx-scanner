@@ -177,7 +177,6 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
     public void testInheritedSharingParentNoDeclarationSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "inherited sharing", "", operation);
 
-        //            assertNoViolation(RULE, sourceCode);
         assertViolations(
                 RULE,
                 sourceCode,
