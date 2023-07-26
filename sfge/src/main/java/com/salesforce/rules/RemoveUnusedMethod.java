@@ -35,8 +35,8 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
  *   <li>The method is not annotated with an engine directive that silences this rule.
  * </ol>
  */
-public final class UnusedMethodRule extends AbstractPathBasedRule implements PostProcessingRule {
-    private static final Logger LOGGER = LogManager.getLogger(UnusedMethodRule.class);
+public final class RemoveUnusedMethod extends AbstractPathBasedRule implements PostProcessingRule {
+    private static final Logger LOGGER = LogManager.getLogger(RemoveUnusedMethod.class);
     // UnusedMethodRule cares about all sources, since they're all equally capable of using a
     // method.
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
@@ -44,7 +44,7 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
     private static final String URL =
             "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
 
-    private UnusedMethodRule() {}
+    private RemoveUnusedMethod() {}
 
     @Override
     public Optional<PathExpansionObserver> getPathExpansionObserver() {
@@ -172,7 +172,7 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
         return false;
     }
 
-    public static UnusedMethodRule getInstance() {
+    public static RemoveUnusedMethod getInstance() {
         return LazyHolder.INSTANCE;
     }
 
@@ -203,6 +203,6 @@ public final class UnusedMethodRule extends AbstractPathBasedRule implements Pos
 
     private static final class LazyHolder {
         // Postpone initialization until first use
-        private static final UnusedMethodRule INSTANCE = new UnusedMethodRule();
+        private static final RemoveUnusedMethod INSTANCE = new RemoveUnusedMethod();
     }
 }
