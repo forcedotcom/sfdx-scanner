@@ -12,6 +12,21 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.15.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.15.0) (08-02-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.15.0...v3.14.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): To improve your code performance, we added two new path-based Salesforce Graph Engine rules.
+	- AvoidDatabaseOperationInLoop rule detects database operations in loops that degrade performance.
+	- UseWithSharingOnDatabaseOperation rule detects database operations outside `with-sharing` annotated classes.
+* NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available and has been renamed: AvoidMultipleMassSchemaLookups (formerly MultipleMassSchemaLookupRule).
+* NEW (GraphEngine): We renamed the UnusedMethodRule (pilot) to RemoveUnusedMethod.
+* NEW (CodeAnalyzer): To provide you with more guidance on building your own custom rules, we added a sample [Java-based PMD rules repo](https://github.com/forcedotcom/sfdx-scanner/tree/dev/sample-code/pmd-example-ruleslink). Use the sample repo along with the recommendations in [Authoring Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/author/) to build your custom rules.
+
+
 ## [v3.14.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.14.0) (07-06-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.14.0...v3.13.0)
