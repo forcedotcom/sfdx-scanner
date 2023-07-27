@@ -12,7 +12,7 @@ public final class UserFacingMessages {
                 "Identifies Apex operations that dereference null objects and throw NullPointerExceptions.";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
-        public static final String UNUSED_METHOD_RULE =
+        public static final String REMOVE_UNUSED_METHOD =
                 "Identifies methods that aren't invoked from recognized entry points.";
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
@@ -32,7 +32,7 @@ public final class UserFacingMessages {
         // Format: First %s is either "abstract class" or "interface".
         //         Second %s is the name of a class or interface.
         public static final String UNIMPLEMENTED_TYPE_RULE = "Extend, implement, or delete %s %s";
-        public static final String UNUSED_METHOD_RULE =
+        public static final String REMOVE_UNUSED_METHOD =
                 "Method %s in class %s isn't used in any path from any recognized entry point.";
         public static final String LIMIT_REACHED_VIOLATION_MESSAGE =
                 "%s. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine and target this entry method with a larger heap space.";

@@ -71,7 +71,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
             if (!usageTracker.isUsed(methodVertex.generateUniqueKey())) {
                 String violationMsg =
                         String.format(
-                                UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,
+                                UserFacingMessages.RuleViolationTemplates.REMOVE_UNUSED_METHOD,
                                 methodVertex.getName(),
                                 methodVertex.getDefiningType());
                 Violation.PathBasedRuleViolation violation =
@@ -183,7 +183,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.UNUSED_METHOD_RULE;
+        return UserFacingMessages.RuleDescriptions.REMOVE_UNUSED_METHOD;
     }
 
     @Override
