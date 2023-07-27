@@ -1,11 +1,13 @@
 package com.salesforce.rules.usewithsharingondatabaseoperation;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 /**
  * tests instantiating and calling a method with a database operation method inside a class that is
- * a subclass of the current class
+ * a subclass of the current class. Plus, a test to ensure warning messages correctly reference
+ * subclasses.
  */
 public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOperationTest {
 
@@ -181,5 +183,37 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
                 RULE,
                 sourceCode,
                 expectWarning(SINK_LINE, SharingPolicyUtil.InheritanceType.CALLING, MY_CLASS));
+    }
+
+    /**
+     * test to ensure warning messages correctly reference inner classes (in this case,
+     * MyClass.InnerCaller instead of just InnerCaller).
+     */
+    @Test
+    public void testCorrectSubclassNameWarning() {
+        // spotless:off
+        String sourceCode =
+            "public class " + MY_CLASS + " {\n" +
+                "public void foo() {\n" +
+                "   new InnerCaller().doTheThing();\n" +
+                "}\n" +
+                "public with sharing class InnerCaller {\n" +
+                "   public void doTheThing() {\n" +
+                "       new InnerCallee().doTheThing();\n" +
+                "   }\n" +
+                "}\n" +
+                "public class InnerCallee {\n" +
+                "   public void doTheThing() {\n" +
+                "       Account a = [SELECT Name FROM Account WITH USER_NODE LIMIT 1];\n" +
+                "   }\n" +
+                "}\n" +
+            "}\n";
+        // spotless:on
+
+        assertViolations(
+                RULE,
+                sourceCode,
+                expectWarning(
+                        12, SharingPolicyUtil.InheritanceType.CALLING, "MyClass.InnerCaller"));
     }
 }

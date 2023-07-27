@@ -292,7 +292,7 @@ public class UseWithSharingOnDatabaseOperationVisitor extends DefaultNoOpPathVer
                                         SharingPolicyUtil.InheritanceType.PARENT,
                                         effectiveBoundary
                                                 .getApplicableSuperclassPolicyVertex()
-                                                .getName()),
+                                                .getDefiningType()),
                                 sourceVertex,
                                 sinkVertex));
             }
@@ -370,7 +370,7 @@ public class UseWithSharingOnDatabaseOperationVisitor extends DefaultNoOpPathVer
                                         SharingPolicyUtil.InheritanceType.PARENT,
                                         currentBoundary
                                                 .getApplicableSuperclassPolicyVertex()
-                                                .getName()),
+                                                .getDefiningType()),
                                 sourceVertex,
                                 sinkVertex));
             }
@@ -431,7 +431,7 @@ public class UseWithSharingOnDatabaseOperationVisitor extends DefaultNoOpPathVer
                                         UserFacingMessages.SharingPolicyRuleTemplates
                                                 .WARNING_TEMPLATE,
                                         SharingPolicyUtil.InheritanceType.CALLING,
-                                        classInheritedFrom.getName()),
+                                        classInheritedFrom.getDefiningType()),
                                 sourceVertex,
                                 sinkVertex));
             }
