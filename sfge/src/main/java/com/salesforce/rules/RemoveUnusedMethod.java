@@ -42,7 +42,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
     private static final String URL =
-            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UnusedMethodRule";
+            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#pilot-rules";
 
     private RemoveUnusedMethod() {}
 
@@ -71,7 +71,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
             if (!usageTracker.isUsed(methodVertex.generateUniqueKey())) {
                 String violationMsg =
                         String.format(
-                                UserFacingMessages.RuleViolationTemplates.UNUSED_METHOD_RULE,
+                                UserFacingMessages.RuleViolationTemplates.REMOVE_UNUSED_METHOD,
                                 methodVertex.getName(),
                                 methodVertex.getDefiningType());
                 Violation.PathBasedRuleViolation violation =
@@ -183,7 +183,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
 
     @Override
     protected String getDescription() {
-        return UserFacingMessages.RuleDescriptions.UNUSED_METHOD_RULE;
+        return UserFacingMessages.RuleDescriptions.REMOVE_UNUSED_METHOD;
     }
 
     @Override
