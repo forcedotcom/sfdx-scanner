@@ -77,7 +77,7 @@ describe('scanner:run:dfa', function () {
 					])
 					.it('Including flag activates pilot rules', ctx => {
 						// Verify that there's a violation somewhere for an experimental rule.
-						verifyContains(ctx.stdout, "UnusedMethodRule");
+						verifyContains(ctx.stdout, "RemoveUnusedMethod");
 					});
 
 				setupCommandTest
@@ -88,7 +88,7 @@ describe('scanner:run:dfa', function () {
 					])
 					.it('Omitting flag disables pilot rules', ctx => {
 						// Verify that there's a NOT violation somewhere for an experimental rule.
-						verifyNotContains(ctx.stdout, "UnusedMethodRule");
+						verifyNotContains(ctx.stdout, "RemoveUnusedMethod");
 					});
 			});
 		});
