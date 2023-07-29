@@ -12,6 +12,9 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSo
 
 public final class UseWithSharingOnDatabaseOperation extends AbstractPathTraversalRule {
 
+    private static final String URL =
+            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#UseWithSharingOnDatabaseOperation";
+
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
 
@@ -56,6 +59,11 @@ public final class UseWithSharingOnDatabaseOperation extends AbstractPathTravers
     @Override
     protected String getCategory() {
         return CATEGORY.SECURITY.name;
+    }
+
+    @Override
+    protected String getUrl() {
+        return URL;
     }
 
     // lazy holder

@@ -15,6 +15,9 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
     private static final ImmutableSet<ApexPathSource.Type> SOURCE_TYPES =
             ImmutableSet.copyOf(ApexPathSource.Type.values());
 
+    private static final String URL =
+            "https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/rules/#AvoidDatabaseOperationInLoop";
+
     private final AvoidDatabaseOperationInLoopHandler ruleHandler;
 
     private AvoidDatabaseOperationInLoop() {
@@ -54,6 +57,11 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
     @Override
     protected String getCategory() {
         return CATEGORY.PERFORMANCE.name;
+    }
+
+    @Override
+    protected String getUrl() {
+        return URL;
     }
 
     @Override
