@@ -23,18 +23,21 @@ To run the path-based rules run: `scanner:run:dfa --projectdir MyDirectory`.
 **Example:**
   
 ```sfdx scanner:run:dfa --projectdir /project/dir --target /project/dir/target1```
+
 <br>
 To run graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
 
 **Example:**
   
 ```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
 <br>
 To run a specific category of rules, include the category.
   
 **Example:**
   
 ```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
+
 <br>
 ## Running Graph Engine Pilot Rules
 
@@ -45,12 +48,14 @@ To run all Graph Engine rules and all pilot rules, run: ```sfdx scanner:run:dfa 
 **Example**:
 
 ```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
 <br>
 To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
 
 **Example**:
   
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+
 <br>
 ## Generally Available Rules
 
