@@ -24,7 +24,7 @@ We publish the latest Code Analyzer monthly.
 	- UseWithSharingOnDatabaseOperation rule detects database operations outside `with-sharing` annotated classes.
 * NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available and has been renamed: AvoidMultipleMassSchemaLookups (formerly MultipleMassSchemaLookupRule).
 * NEW (GraphEngine): We renamed the UnusedMethodRule (pilot) to RemoveUnusedMethod.
-* NEW (CodeAnalyzer): To provide you with more guidance on building your own custom rules, we added a sample [Java-based PMD rules repo](https://github.com/forcedotcom/sfdx-scanner/tree/dev/sample-code/pmd-example-ruleslink). Use the sample repo along with the recommendations in [Authoring Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/author/) to build your custom rules.
+* NEW (CodeAnalyzer): To provide you with more guidance on building your own custom rules, we added a sample [Java-based PMD rules repo](https://github.com/forcedotcom/sfdx-scanner/tree/dev/sample-code/pmd-example-rules). Use the sample repo along with the recommendations in [Authoring Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/author/) to build your custom rules.
 
 
 ## [v3.14.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.14.0) (07-06-2023)
