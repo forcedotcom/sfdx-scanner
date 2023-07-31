@@ -300,15 +300,35 @@ To remediate database operation violations, move these operations outside of loo
 
 * Instead of querying objects within a loop, use a SOQL For Loop to iterate over a query’s results..
 
-	For example, instead of: ```for (String name : names) {Account[] accs = [SELECT Name FROM Account WHERE Name =: name];```
+For example, instead of:
 
-	Use: ```for (Account[] accs : [SELECT Name FROM Account WHERE Name IN :names]) {```
+```
+for (String name : names) {
+   Account[] accs = [SELECT Name FROM Account WHERE Name =: name];
+```
+
+   Use:
+```
+for (Account[] accs : [SELECT Name FROM Account WHERE Name IN :names]) {
+```
 
 * Instead of putting database operations within a loop, use the loop to iteratively construct lists of objects, and then perform the database operation on the full list after the loop.
-  
-	For example, instead of: ```for (String n : names) {insert new Account(Name = n);```
 
-	Use: ```Account[] accs = new List<Account>(); for (String n : names) { accs.add(new Account(Name = n));} insert accs;```
+For example, instead of:
+
+```
+for (String n : names) {
+   insert new Account(Name = n);
+```
+
+   Use:
+```
+Account[] accs = new List<Account>();
+for (String n : names) {
+   accs.add(new Account(Name = n));
+}
+insert accs;
+```
 
 #### Definition
 
