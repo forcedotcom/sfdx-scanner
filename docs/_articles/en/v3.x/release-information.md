@@ -19,7 +19,7 @@ We publish the latest Code Analyzer monthly.
 ### Release Summary
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
-* NEW (GraphEngine): To improve your code performance, we added two new path-based Salesforce Graph Engine rules.
+* NEW (GraphEngine): To improve your code performance, we added two new pilot path-based Salesforce Graph Engine rules.
 	- AvoidDatabaseOperationInLoop rule detects database operations in loops that degrade performance.
 	- UseWithSharingOnDatabaseOperation rule detects database operations outside `with-sharing` annotated classes.
 * NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available and has been renamed: AvoidMultipleMassSchemaLookups (formerly MultipleMassSchemaLookupRule).
