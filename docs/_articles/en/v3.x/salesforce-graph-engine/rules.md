@@ -15,7 +15,7 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | UnimplementedTypeRule | Graph-based analysis | Performance | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
 | UseWithSharingOnDatabaseOperation | Path-based analysis | Security | Pilot | Detects database operations outside with-sharing-annotated classes. |
 
-## Running Graph Engine GA Rules <a name='RunningGraphEngineGARules'>#</a>
+## Running Graph Engine GA Rules
 Run all Graph Engine rules against your code, or run a subset of rules by type or by category.
 
 To run the path-based rules run: `scanner:run:dfa --projectdir MyDirectory`.
@@ -36,7 +36,7 @@ To run a specific category of rules, include the category.
   
 ```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
 <br>
-## Running Graph Engine Pilot Rules <a name='Running GraphEnginePilotRules'>#</a>
+## Running Graph Engine Pilot Rules
 
 To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
 
@@ -52,7 +52,7 @@ To run a specific category of rules including the pilot rules in that category, 
   
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 <br>
-## Generally Available Rules <a name='GenerallyAvailableRules'>#</a>
+## Generally Available Rules
 
 ### ApexFlsViolationRule <a name='ApexFlsViolationRule'>#</a>
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
