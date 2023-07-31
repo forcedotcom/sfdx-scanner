@@ -15,44 +15,46 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | UnimplementedTypeRule | Graph-based analysis | Performance | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
 | UseWithSharingOnDatabaseOperation | Path-based analysis | Security | Pilot | Detects database operations outside with-sharing-annotated classes. |
 
-## Running Graph Engine GA Rules
+## Running Graph Engine GA Rules <a name='RunningGraphEngineGARules'>#</a>
 Run all Graph Engine rules against your code, or run a subset of rules by type or by category.
 
-* To run the path-based rules run: scanner:run:dfa --projectdir MyDirectory.
+To run the path-based rules run: `scanner:run:dfa --projectdir MyDirectory`.
 
-	**Example:**
+**Example:**
   
-	```sfdx scanner:run:dfa --projectdir /project/dir --target /project/dir/target1```
+```sfdx scanner:run:dfa --projectdir /project/dir --target /project/dir/target1```
+<br>
+To run graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
 
-* To run graph-based analysis rules run: scanner:run --engine sfge --projectdir MyDirectory.
-
-	**Example:**
+**Example:**
   
-	```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
-
-* To run a category of rules, run: `scanner:run:dfa --category "Security"`
+```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
+<br>
+To run a specific category of rules, include the category.
   
-	**Example:**
+**Example:**
   
-	```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
-
-## Running Graph Engine Pilot Rules
+```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
+<br>
+## Running Graph Engine Pilot Rules <a name='Running GraphEnginePilotRules'>#</a>
 
 To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
 
-* To run all Graph Engine rules and all pilot rules, run:
+To run all Graph Engine rules and all pilot rules, run: ```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir MyDirectory```.
 
-	```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+**Example**:
 
-* To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
+```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+<br>
+To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
 
-	**Example**:
+**Example**:
   
-	```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+<br>
+## Generally Available Rules <a name='GenerallyAvailableRules'>#</a>
 
-## Generally Available Rules
-
-### ApexFlsViolationRule
+### ApexFlsViolationRule <a name='ApexFlsViolationRule'>#</a>
 ApexFlsViolationRule detects [Create, Read, Update, and Delete (CRUD) and Field-Level Security (FLS) violations](https://www.youtube.com/watch?v=1ZYjpjPTIn8).
 
 #### Definitions
@@ -128,7 +130,7 @@ Graph Engine encountered an error while walking this path. Manually verify that 
 - [Filter SOQL Queries Using WITH SECURITY_ENFORCED](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_classes_with_security_enforced.htm)
 - [Frequently Asked Questions](./en/v3.x/faq/)
 
-### ApexNullPointerExceptionRule
+### ApexNullPointerExceptionRule <a name='ApexNullPointerExceptionRule'>#</a>
 
 ApexNullPointerExceptionRule identifies Apex operations that dereference null objects and throw NullPointerExceptions. NullPointerExceptions generally indicate underlying problems in your code to address. 
 
@@ -198,7 +200,7 @@ Explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-### AvoidMultipleMassSchemaLookups Rule
+### AvoidMultipleMassSchemaLookups Rule <a name='AvoidMultipleMassSchemaLookups'>#</a>
 
 AvoidMultipleMassSchemaLookups is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
 
@@ -264,7 +266,7 @@ Explanation:
 
 `Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code.
 
-### UnimplementedTypeRule
+### UnimplementedTypeRule <a name='UnimplementedTypeRule'>#</a>
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
 
@@ -290,7 +292,7 @@ Because UnimplementedType rule excludes `global` scoped classes from considerati
 
 ## Pilot Rules
 
-### AvoidDatabaseOperationInLoop
+### AvoidDatabaseOperationInLoop <a name='AvoidDatabaseOperationInLoop'>#</a>
 
 AvoidDatabaseOperationInLoop detects database operations that occur inside loops and which cause performance degradation. Database operations within loops cause performance degradations and exceed Salesforce Governor Limits. 
 
@@ -298,23 +300,15 @@ To remediate database operation violations, move these operations outside of loo
 
 * Instead of querying objects within a loop, use a SOQL For Loop to iterate over a query’s results..
 
-	For example, instead of:
-	```for (String name : names) {
-		Account[] accs = [SELECT Name FROM Account WHERE Name =: name];```
-	Use:
-	```for (Account[] accs : [SELECT Name FROM Account WHERE Name IN :names]) {```
+	For example, instead of: ```for (String name : names) {Account[] accs = [SELECT Name FROM Account WHERE Name =: name];```
+
+	Use: ```for (Account[] accs : [SELECT Name FROM Account WHERE Name IN :names]) {```
 
 * Instead of putting database operations within a loop, use the loop to iteratively construct lists of objects, and then perform the database operation on the full list after the loop.
   
-	For example, instead of:
-	```for (String n : names) {
-  	  insert new Account(Name = n);```
-	Use:
-	```Account[] accs = new List<Account>();
-	for (String n : names) {
-   	 accs.add(new Account(Name = n));
-	}
-	insert accs;```
+	For example, instead of: ```for (String n : names) {insert new Account(Name = n);```
+
+	Use: ```Account[] accs = new List<Account>(); for (String n : names) { accs.add(new Account(Name = n));} insert accs;```
 
 #### Definition
 
@@ -343,9 +337,9 @@ Explanation:
 
 Your code executes a database operation inside a loop statement. Modify your code to move the database operation outside the loop, then rescan your code.
 
-### RemoveUnusedMethod Rule
+### RemoveUnusedMethod Rule <a name='RemoveUnusedMethod'>#</a>
 
-RemoveUnusedMethod is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. RemoveUnusedMethod detects methods contained in your code that aren’t invoked. It detects:
+RemoveUnusedMethod is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. It detects:
 
 - static methods
 - instance methods
@@ -383,13 +377,13 @@ Because no invocations of the indicated method were found in the paths originati
 - Global methods are intentionally excluded because their external usage is assumed.
 - If the set of files included in `--target` is smaller than the files included in `--projectdir`, then `RemoveUnusedMethod` can return unexpected results. For that reason, we recommend running this rule against your whole codebase, not against individual files.
 
-### UseWithSharingOnDatabaseOperation
+### UseWithSharingOnDatabaseOperation <a name='UseWithSharingOnDatabaseOperation'>#</a>
 
 The UseWithSharingOnDatabaseOperation rule identifies database operations in classes annotated as `without sharing`. It also warns of database operations in classes that inherit with sharing implicitly instead of explicitly using `inherited sharing`. 
 
 With Salesforce sharing rules, you can control who has access to which records, but it is your responsibility to ensure that your Apex code respects sharing rules. To do this, declare classes with a sharing model.
 
-* `with sharing` causes database transactions in a class to respect sharing rules. It is the default.
+* `with sharing` causes database transactions in a class to respect sharing rules. It is the default recommendation.
 * `without sharing` causes database transactions in a class to ignore sharing rules. Use with caution.
 * `inherited sharing` causes database transactions in a class to inherit the sharing model of the class that called it. Use for classes that require flexibility.
 
