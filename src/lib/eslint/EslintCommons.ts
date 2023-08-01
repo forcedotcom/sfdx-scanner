@@ -8,8 +8,10 @@ import {stringArrayTypeGuard} from '../util/Utils';
 
 
 // Defining a function signature that will be returned by EslintStrategy.processRuleViolation()
-// This provides a safe way to pass around the callback function
-export interface ProcessRuleViolationType { (fileName: string, ruleViolation: RuleViolation): void}
+// This provides a safe way to pass around the callback function.
+// The functions should perform any post-processing on the provided violation as a side-effect,
+// and return a boolean indicating whether the violation should be kept (true) or discarded (false).
+export interface ProcessRuleViolationType { (fileName: string, ruleViolation: RuleViolation): boolean}
 
 export enum RuleDefaultStatus {
 	ENABLED = 'enabled',
@@ -103,7 +105,7 @@ export class EslintProcessHelper {
 		results: RuleResult[],
 		esResults: ESLint.LintResult[],
 		ruleMap: Map<string,ESRuleMetadata>,
-		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): void {
+		processRuleViolation: ProcessRuleViolationType): void {
 		esResults.forEach(r => {
 			if (r.messages && r.messages.length > 0) {
 				results.push(this.toRuleResult(engineName, r.filePath, r.messages, ruleMap, processRuleViolation));
@@ -116,31 +118,32 @@ export class EslintProcessHelper {
 		fileName: string,
 		messages: Linter.LintMessage[],
 		ruleMap: Map<string, ESRuleMetadata>,
-		processRuleViolation: (fileName: string, ruleViolation: RuleViolation) => void): RuleResult {
-		return {
+		processRuleViolation: ProcessRuleViolationType): RuleResult {
+		const ruleResult: RuleResult = {
 			engine: engineName,
 			fileName,
-			violations: messages.map(
-				(v: Linter.LintMessage): RuleViolation => {
-					const ruleMeta = ruleMap.get(v.ruleId);
-					const category = ruleMeta ? ruleMeta.type : "problem";
-					const url = ruleMeta ? ruleMeta.docs.url : "";
-					const violation: RuleViolation = {
-						line: v.line,
-						column: v.column,
-						severity: v.severity,
-						message: v.message,
-						ruleName: v.ruleId,
-						category,
-						url
-					};
-
-					processRuleViolation(fileName, violation);
-
-					return violation;
-				}
-			)
+			violations: []
+		};
+		for (const message of messages) {
+			const ruleMeta = ruleMap.get(message.ruleId);
+			const category = ruleMeta ? ruleMeta.type : "problem";
+			const url = ruleMeta ? ruleMeta.docs.url : "";
+			const violation: RuleViolation = {
+				// Certain pseudo-violations might lack positioning, so default to 0.
+				line: message.line || 0,
+				column: message.column || 0,
+				severity: message.severity,
+				message: message.message,
+				ruleName: message.ruleId,
+				category,
+				url
+			};
+			// Call the processor callback on the violation, and keep it if instructed to do so.
+			if (processRuleViolation(fileName, violation)) {
+				ruleResult.violations.push(violation);
+			}
 		}
+		return ruleResult;
 	}
 
 }

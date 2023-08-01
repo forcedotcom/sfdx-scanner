@@ -48,7 +48,7 @@ public class AnotherPathViolationDetector extends SinkCentricDuplicateMethodCall
     Set<MultipleMassSchemaLookupInfo> getViolations() {
         if (!(sinkVertex instanceof MethodCallExpressionVertex)) {
             throw new ProgrammingException(
-                    "MultipleMassSchemaLookupRule does not have non-method call sinks. sinkVertex="
+                    "AvoidMultipleMassSchemaLookups does not have non-method call sinks. sinkVertex="
                             + sinkVertex);
         }
         final MethodCallExpressionVertex sinkMethodCallVertex =

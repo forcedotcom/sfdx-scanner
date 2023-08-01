@@ -1,26 +1,26 @@
-[![CircleCI](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master.svg?style=shield)](https://circleci.com/gh/forcedotcom/sfdx-scanner/tree/master)
 [![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/master/package.json)
 
-# Salesforce CLI Scanner Plug-in
-The Salesforce CLI Scanner plug-in is a unified tool for static analysis of source code, in multiple languages (including Apex), with a consistent command-line interface and report output. We currently support the PMD rule engine and ESLint. We may add support for more rule engines in the future.
+# Salesforce Code Analyzer
+Salesforce Code Analyzer is a unified tool for static analysis of source code.
+Code Analyzer analyzes multiple languages.
+It relies on a consistent command-line interface and produces a results file of rule violations.
+Use the results to review and improve your code.
 
-The Salesforce CLI Scanner Plug-in creates "Rule Violations" when the scanner identifies issues. Developers use this information as feedback to fix their code.
+If you're listing a managed package on AppExchange, it must pass security review.
+You're also required to upload your Salesforce Code Analyzer scan reports.
+Attach your Code Analyzer reports to your submission in the AppExchange Security Review Wizard.
+For more info, read [Scan Your Code with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) and [AppExchange Security Review](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_overview.htm).
 
-You can integrate this plug-in into your CI/CD solution to enforce the rules and expect high-quality code.
+Code Analyzer current supports the PMD rule engine, PMD Copy Paste Detector, ESLint, RetireJS, and Salesforce Graph Engine.
 
-# Official Documentation
-All the official documentation on the Salesforce CLI Scanner plug-in is hosted on [GitHub Pages](https://forcedotcom.github.io/sfdx-scanner/). These documents include instructions on how to install the plug-in, the command reference, writing and managing custom rules and an overview of the architecture of the plug-in.
+Integrate Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) process to enforce rules that you define and to produce high-quality code.
 
-### Document Link
-https://forcedotcom.github.io/sfdx-scanner/
+# Salesforce Code Analyzer Documentation
+Read [Salesforce Code Analyzer](https://forcedotcom.github.io/sfdx-scanner/) documentation to learn:
+* how to install Code Analyzer
+* what is included in the Code Analyzer command reference
+* the structure of Code Analyzer architecture
+* how to write and manage custom rules
 
-### Building/Contributing
-Instructions [here](CONTRIBUTING.md).
-
-=======
-
-# Usage
-
-Here is the information on [How to Install the plugin](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/getting-started/install/)
-
-Please check out the [Salesforce CLI Scanner Plug-In Command Reference](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/scanner-commands/run/) for usage and demo of the plugin. 
+### Contribute to Salesforce Code Analyzer
+Read these instructions to [contribute to Code Analyzer](https://github.com/forcedotcom/sfdx-scanner/blob/dev/CONTRIBUTING.md)

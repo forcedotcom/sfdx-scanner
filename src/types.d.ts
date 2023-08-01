@@ -1,5 +1,6 @@
 import {JSONSchema4} from 'json-schema';
 import {Linter} from 'eslint';
+import {TargetType} from './Constants';
 
 export type Rule = {
 	engine: string;
@@ -50,7 +51,7 @@ export type RuleGroup = {
 
 export type RuleTarget = {
 	target: string;
-	isDirectory?: boolean;
+	targetType: TargetType;
 	paths: string[];
 	methods?: string[];
 }

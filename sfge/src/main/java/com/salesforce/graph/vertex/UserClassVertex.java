@@ -81,4 +81,8 @@ public class UserClassVertex extends FieldWithModifierVertex
                                 .order(Scope.global)
                                 .by(Schema.CHILD_INDEX, Order.asc));
     }
+
+    public String getSharingPolicy() {
+        return getModifierNode().getSharingPolicy();
+    }
 }

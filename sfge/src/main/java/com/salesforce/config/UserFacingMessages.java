@@ -12,10 +12,14 @@ public final class UserFacingMessages {
                 "Identifies Apex operations that dereference null objects and throw NullPointerExceptions.";
         public static final String UNIMPLEMENTED_TYPE_RULE =
                 "Identifies abstract classes and interfaces that are non-global and don't have implementations or extensions.";
-        public static final String UNUSED_METHOD_RULE =
+        public static final String REMOVE_UNUSED_METHOD =
                 "Identifies methods that aren't invoked from recognized entry points.";
         public static final String MULTIPLE_MASS_SCHEMA_LOOKUP_RULE =
                 "Detects mass schema lookups that can cause performance degradation if made more than once in a path. These methods are: Schema.getGlobalDescribe() and Schema.describeSObjects(...). Flagged lookups include those within a loop or multiple invocations in a path.";
+        public static final String AVOID_DATABASE_OPERATION_IN_LOOP =
+                "Detects database operations inside loops, which can cause degraded performance.";
+        public static final String SHARING_RULE =
+                "Identifies a database operation executed outside of a \"with sharing\" policy. Warns when DML or SOQL operations inherit sharing rules implicitly instead of explicitly";
     }
 
     public static final class RuleViolationTemplates {
@@ -28,7 +32,7 @@ public final class UserFacingMessages {
         // Format: First %s is either "abstract class" or "interface".
         //         Second %s is the name of a class or interface.
         public static final String UNIMPLEMENTED_TYPE_RULE = "Extend, implement, or delete %s %s";
-        public static final String UNUSED_METHOD_RULE =
+        public static final String REMOVE_UNUSED_METHOD =
                 "Method %s in class %s isn't used in any path from any recognized entry point.";
         public static final String LIMIT_REACHED_VIOLATION_MESSAGE =
                 "%s. The analysis preemptively stopped running on this path to prevent an OutOfMemory error. Rerun Graph Engine and target this entry method with a larger heap space.";
@@ -78,7 +82,7 @@ public final class UserFacingMessages {
         public static final String EXCEPTION_FORMAT_TEMPLATE = "%s, Caused by:\n%s";
     }
 
-    public static final class MultipleMassSchemaLookupRuleTemplates {
+    public static final class OccurrenceInfoTemplates {
         /**
          * String Param 1: Vertex or MethodCall information String Param 2: Class name Number Param:
          * Line-number in code
@@ -86,6 +90,9 @@ public final class UserFacingMessages {
          * <p>Example: ForEachStatement at MyClass:23
          */
         public static final String OCCURRENCE_TEMPLATE = "%s at %s:%d";
+    }
+
+    public static final class MultipleMassSchemaLookupRuleTemplates {
 
         /** Indicates when an expensive schema lookup operation happened inside a loop. */
         public static final String LOOP_MESSAGE_TEMPLATE = "was called inside a loop";
@@ -109,8 +116,8 @@ public final class UserFacingMessages {
          * <p>String Param 2: Text corresponding to occurrence type ({@link #LOOP_MESSAGE_TEMPLATE},
          * {@link #PRECEDED_BY_MESSAGE_TEMPLATE}, {@link #CALL_STACK_TEMPLATE})
          *
-         * <p>String Param 3: Occurrence information using {@link #OCCURRENCE_TEMPLATE}. Can be more
-         * than one occurrence.
+         * <p>String Param 3: Occurrence information using {@link
+         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Can be more than one occurrence.
          */
         public static final String MESSAGE_TEMPLATE = "%1$s %2$s. %3$s";
 
@@ -119,5 +126,33 @@ public final class UserFacingMessages {
          * Meant for violation messages that don't include the name of the expensive method.
          */
         public static final String METHODLESS_MESSAGE_TEMPLATE = "%2$s. %3$s";
+    }
+
+    public static final class AvoidDatabaseOperationInLoopTemplates {
+
+        /**
+         * String Param 1: an {@link com.salesforce.rules.ops.OccurrenceInfo} which converts into
+         * occurrence information in the format of an {@link
+         * OccurrenceInfoTemplates#OCCURRENCE_TEMPLATE}. Only one occurrence is supported.
+         */
+        public static final String MESSAGE_TEMPLATE =
+                "A database operation occurred inside a loop. [%1$s]";
+    }
+
+    public static final class SharingPolicyRuleTemplates {
+        /**
+         * String param: the type of DML/SOQL operation (see {@link
+         * com.salesforce.apex.jorje.ASTConstants.NodeType})
+         */
+        public static final String MESSAGE_TEMPLATE =
+                "Database operation must be executed from a class that enforces sharing rules.";
+
+        /**
+         * String param 1: "parent class" or "calling class"
+         *
+         * <p>String param 2: a class name
+         */
+        public static final String WARNING_TEMPLATE =
+                "Database operation executed in a class that implicitly inherits a sharing policy from %s %s. Explicitly assign a sharing policy instead.";
     }
 }

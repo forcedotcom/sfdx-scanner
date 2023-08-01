@@ -9,18 +9,18 @@ import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
 import com.salesforce.graph.visitor.ApexPathWalker;
-import com.salesforce.rules.MultipleMassSchemaLookupRule;
+import com.salesforce.rules.AvoidMultipleMassSchemaLookups;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 
-/** Executes internals of {@link MultipleMassSchemaLookupRule} */
+/** Executes internals of {@link AvoidMultipleMassSchemaLookups} */
 public class MultipleMassSchemaLookupRuleHandler {
 
     /**
      * @param vertex to consider for analysis
      * @return true if the vertex parameter requires to be treated as a target vertex for {@link
-     *     MultipleMassSchemaLookupRule}.
+     *     AvoidMultipleMassSchemaLookups}.
      */
     public boolean test(BaseSFVertex vertex) {
         return vertex instanceof MethodCallExpressionVertex

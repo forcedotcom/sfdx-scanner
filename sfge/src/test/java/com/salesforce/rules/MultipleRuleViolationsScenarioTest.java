@@ -33,7 +33,7 @@ public class MultipleRuleViolationsScenarioTest extends BasePathBasedRuleTest {
                         "foo",
                         false,
                         ApexFlsViolationRule.getInstance(),
-                        MultipleMassSchemaLookupRule.getInstance());
+                        AvoidMultipleMassSchemaLookups.getInstance());
 
         // Including an additional step that happens in the actual process.
         // Any missed field in the violation would show up here as a NPE on comparator.

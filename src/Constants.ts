@@ -36,6 +36,12 @@ export enum RuleType {
 	DFA = "dfa"
 }
 
+export enum TargetType {
+	FILE,
+	DIRECTORY,
+	GLOB
+}
+
 /**
  * Main engine types that have more than one variation
  */
@@ -107,6 +113,10 @@ export enum CUSTOM_CONFIG {
 export const HARDCODED_RULES = {
 	FILES_MUST_COMPILE: {
 		name: 'files-must-compile',
+		category: 'Scanner Internal'
+	},
+	FILE_IGNORED: {
+		name: 'file-ignored',
 		category: 'Scanner Internal'
 	}
 };

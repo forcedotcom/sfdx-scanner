@@ -1,13 +1,14 @@
-import { expect } from 'chai';
+import { assert, expect } from 'chai';
 import { CustomEslintEngine } from '../../../src/lib/eslint/CustomEslintEngine';
 import * as DataGenerator from './EslintTestDataGenerator';
-import { CUSTOM_CONFIG } from '../../../src/Constants';
+import { CUSTOM_CONFIG, HARDCODED_RULES } from '../../../src/Constants';
 import Mockito = require('ts-mockito');
 import { FileHandler } from '../../../src/lib/util/FileHandler';
-import { StaticDependencies } from '../../../src/lib/eslint/EslintCommons';
+import { StaticDependencies, ProcessRuleViolationType } from '../../../src/lib/eslint/EslintCommons';
 import { Messages } from '@salesforce/core';
 import { ESLint } from 'eslint';
-import { ENGINE } from '../../../src/Constants';
+import { ENGINE, TargetType } from '../../../src/Constants';
+import {RuleTarget, RuleViolation, PathlessRuleViolation} from '../../../src/types';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CustomEslintEngine');
@@ -161,7 +162,7 @@ describe("Tests for CustomEslintEngine", () => {
 					[DataGenerator.getDummyTarget()],
 					engineOptionsWithEslintCustom);
 
-				// TODO: throw failure when exception is not thrown
+				assert.fail('Expected exception');
 			} catch (err) {
 				expect(err.message).to.equal(messages.getMessage('ConfigFileDoesNotExist', [configFilePath]));
 			}
@@ -182,7 +183,7 @@ describe("Tests for CustomEslintEngine", () => {
 					[target],
 					engineOptionsWithEslintCustom);
 
-				// TODO: throw failure when exception is not thrown
+				assert.fail('Expected exception');
 			} catch (err) {
 				expect(err.message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}.`);
 			}
@@ -207,6 +208,158 @@ describe("Tests for CustomEslintEngine", () => {
 			const result = results.pop();
 			expect(result.engine).equals(ENGINE.ESLINT_CUSTOM.valueOf());
 
+		});
+	});
+
+	describe('#processRuleViolation()', () => {
+
+		async function applyProcessor(target: RuleTarget, fileName: string, violation: RuleViolation): Promise<boolean> {
+			// Initialize our engine.
+			const engine = new CustomEslintEngine();
+			await engine.init();
+
+			// Use the engine to generate a processor for the provided target.
+			const processor: ProcessRuleViolationType = (engine as any).processRuleViolation(target);
+
+			// Apply the processor.
+			return processor(fileName, violation);
+		}
+
+		it('Standard violations are unchanged and kept', async () => {
+			// Create a spoofed target for a single file.
+			const target: RuleTarget = {
+				target: "/Users/me/path/to/somedirectory/somefile.js",
+				targetType: TargetType.FILE,
+				paths: [
+					"/Users/me/path/to/somedirectory/somefile.js"
+				]
+			};
+			// Create a violation and declare a file name.
+			const standardViolation: PathlessRuleViolation = {
+				ruleName: '@typescript-eslint/no-explicit-any',
+				severity: 1,
+				category: 'suggestion',
+				message: 'Unexpected any. Specify a different type.',
+				line: 219,
+				column: 14
+			};
+			const fileName = '/Users/me/path/to/somedirectory/somefile.js';
+			// Create a copy of the violation for test purposes.
+			const violationCopy: PathlessRuleViolation = JSON.parse(JSON.stringify(standardViolation));
+
+			// Apply the processor.
+			const shouldKeep = await applyProcessor(target, fileName, standardViolation);
+
+			// Verify that we should keep the violation, and that it was not changed.
+			expect(shouldKeep).to.equal(true, 'Should keep standard violations');
+			expect(standardViolation).to.eql(violationCopy);
+		});
+
+		describe('Ignore-pattern pseudo-violations', () => {
+			// These tests can all use the same pseudo-violation as a template.
+			const pseudoViolation: PathlessRuleViolation = {
+				ruleName: null,
+				severity: 1,
+				category: null,
+				line: 0,
+				column: 0,
+				message: 'File ignored because of a matching ignore pattern. Use "--no-ignore" to override'
+			};
+
+			it('Pseudo-violations for file targets are processed and kept', async () => {
+				// Create a spoofed target for a single file.
+				const target: RuleTarget = {
+					target: "/Users/me/path/to/somedirectory/somefile.js",
+					targetType: TargetType.FILE,
+					paths: [
+						"/Users/me/path/to/somedirectory/somefile.js"
+					]
+				};
+				// Create a copy of the violation, and declare a file name.
+				const fileName = '/Users/me/path/to/somedirectory/somefile.js';
+				const violationCopy: PathlessRuleViolation = JSON.parse(JSON.stringify(pseudoViolation));
+
+				// Apply the processing.
+				const shouldKeep = await applyProcessor(target, fileName, violationCopy);
+
+				// We expect that we should keep the violation.
+				expect(shouldKeep).to.equal(true, 'Should keep violation');
+				// We expect the violation to have been processed.
+				expect(violationCopy.ruleName).to.equal(HARDCODED_RULES.FILE_IGNORED.name, 'Wrong name applied');
+				expect(violationCopy.category).to.equal(HARDCODED_RULES.FILE_IGNORED.category, 'Wrong category applied');
+			});
+
+			it('Pseudo-violations for directory targets are discarded', async () => {
+				// Create a spoofed target for a directory.
+				const target: RuleTarget = {
+					target: '/Users/me/path/to/somedirectory',
+					targetType: TargetType.DIRECTORY,
+					paths: [
+						"/Users/me/path/to/somedirectory/somefile.js",
+						"/Users/me/path/to/somedirectory/anotherfile.js"
+					]
+				};
+				// Create a copy of the violation, and declare a file name.
+				const fileName = '/Users/me/path/to/somedirectory/somefile.js';
+				const violationCopy: PathlessRuleViolation = JSON.parse(JSON.stringify(pseudoViolation));
+
+				// Apply the processing.
+				const shouldKeep = await applyProcessor(target, fileName, violationCopy);
+
+				// We expect that we should discard the violation.
+				expect(shouldKeep).to.equal(false, 'Should discard violation');
+
+			});
+
+			it('Pseudo-violations for glob targets are discarded', async () => {
+				// Create a spoofed target for a glob.
+				const target: RuleTarget = {
+					target: './somedirectory/**/*.js',
+					targetType: TargetType.GLOB,
+					paths: [
+						"/Users/me/path/to/somedirectory/somefile.js",
+						"/Users/me/path/to/somedirectory/anotherfile.js"
+					]
+				};
+				// Create a copy of the violation, and declare a file name.
+				const fileName = '/Users/me/path/to/somedirectory/somefile.js';
+				const violationCopy: PathlessRuleViolation = JSON.parse(JSON.stringify(pseudoViolation));
+
+				// Apply the processing.
+				const shouldKeep = await applyProcessor(target, fileName, violationCopy);
+
+				// We expect that we should discard the violation.
+				expect(shouldKeep).to.equal(false, 'Should discard violation');
+			});
+		});
+
+		it('Parser errors are processed and kept', async () => {
+			// Create a spoofed target for a single file.
+			const target: RuleTarget = {
+				target: "/Users/me/path/to/somedirectory/somefile.js",
+				targetType: TargetType.FILE,
+				paths: [
+					"/Users/me/path/to/somedirectory/somefile.js"
+				]
+			};
+			// Create a parser error violation and declare a file name.
+			const parserViolation: PathlessRuleViolation = {
+				ruleName: null,
+				severity: 2,
+				category: null,
+				message: 'Parsing error: Unexpected token ;',
+				line: 219,
+				column: 14
+			};
+			const fileName = '/Users/me/path/to/somedirectory/somefile.js';
+
+			// Apply the processor.
+			const shouldKeep = await applyProcessor(target, fileName, parserViolation);
+
+			// Verify that we should keep the violation, and that it was properly processed.
+			expect(shouldKeep).to.equal(true, 'Should keep standard violations');
+			expect(parserViolation.ruleName).to.equal(HARDCODED_RULES.FILES_MUST_COMPILE.name, 'Wrong name assigned');
+			expect(parserViolation.category).to.equal(HARDCODED_RULES.FILES_MUST_COMPILE.category, 'Wrong category assigned');
 		});
 	});
 });

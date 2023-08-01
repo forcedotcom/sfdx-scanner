@@ -81,7 +81,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     @ValueSource(strings = {"sfge-disable-stack", "sfge-disable-next-line"})
     @ParameterizedTest(name = "{displayName}: Directive {0}")
     public void applyLineLevelDirective_expectNoAnalysis(String directive) {
-        String directiveLine = "/* " + directive + " UnusedMethodRule */";
+        String directiveLine = "/* " + directive + " RemoveUnusedMethod */";
         String sourceCode =
                 String.format(
                         DIRECTIVE_TEMPLATE,
@@ -106,7 +106,7 @@ public class IneligibleMethodExclusionTest extends BaseUnusedMethodTest {
     public void applyClassLevelDirective_expectNoAnalysis() {
         String sourceCode =
                 String.format(
-                        DIRECTIVE_TEMPLATE, "/* sfge-disable UnusedMethodRule */", "", "", "");
+                        DIRECTIVE_TEMPLATE, "/* sfge-disable RemoveUnusedMethod */", "", "", "");
         assertMethodIneligibility(
                 sourceCode,
                 new String[] {"MyClass", "MyClass", "MyClass"},

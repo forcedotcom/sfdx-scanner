@@ -3,8 +3,11 @@ package com.salesforce.testutils;
 import com.google.common.base.Objects;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.graph.ops.SoqlParserUtil;
-import com.salesforce.rules.MultipleMassSchemaLookupRule;
+import com.salesforce.rules.AvoidMultipleMassSchemaLookups;
+import com.salesforce.rules.UseWithSharingOnDatabaseOperation;
+import com.salesforce.rules.avoiddatabaseoperationinloop.AvoidDatabaseOperationInLoopUtil;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.rules.fls.apex.operations.FlsStripInaccessibleWarningInfo;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
@@ -12,10 +15,9 @@ import com.salesforce.rules.fls.apex.operations.FlsViolationMessageUtil;
 import com.salesforce.rules.fls.apex.operations.UnresolvedCrudFlsViolationInfo;
 import com.salesforce.rules.multiplemassschemalookup.MassSchemaLookupInfoUtil;
 import com.salesforce.rules.multiplemassschemalookup.MmslrUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
+import com.salesforce.rules.ops.OccurrenceInfo;
+import com.salesforce.rules.usewithsharingondatabaseoperation.SharingPolicyUtil;
+import java.util.*;
 import java.util.function.Function;
 
 /** Wrapper around Violation to help comparing only the violation message and line numbers */
@@ -202,11 +204,11 @@ public class ViolationWrapper {
         }
     }
 
-    /** Message builder to help with testing {@link MultipleMassSchemaLookupRule}. */
+    /** Message builder to help with testing {@link AvoidMultipleMassSchemaLookups}. */
     public static class MassSchemaLookupInfoBuilder extends ViolationBuilder {
         private final String sinkMethodName;
         private final MmslrUtil.RepetitionType repetitionType;
-        private final List<MassSchemaLookupInfoUtil.OccurrenceInfo> occurrenceInfoList;
+        private final List<OccurrenceInfo> occurrenceInfoList;
 
         private MassSchemaLookupInfoBuilder(
                 int sinkLine, String sinkMethodName, MmslrUtil.RepetitionType type) {
@@ -231,8 +233,7 @@ public class ViolationWrapper {
          */
         public MassSchemaLookupInfoBuilder withOccurrence(
                 String label, String definingType, int line) {
-            this.occurrenceInfoList.add(
-                    new MassSchemaLookupInfoUtil.OccurrenceInfo(label, definingType, line));
+            this.occurrenceInfoList.add(new OccurrenceInfo(label, definingType, line));
             return this;
         }
 
@@ -240,6 +241,82 @@ public class ViolationWrapper {
         public String getMessage() {
             return MassSchemaLookupInfoUtil.getMessage(
                     sinkMethodName, repetitionType, occurrenceInfoList);
+        }
+    }
+
+    /**
+     * Message builder to help with testing {@link
+     * com.salesforce.rules.AvoidDatabaseOperationInLoop}.
+     */
+    public static class AvoidDatabaseInLoopInfoBuilder extends ViolationBuilder {
+
+        private final OccurrenceInfo occurrenceInfo;
+
+        public AvoidDatabaseInLoopInfoBuilder(int line, OccurrenceInfo occurrenceInfo) {
+            super(line);
+            this.occurrenceInfo = occurrenceInfo;
+        }
+
+        public static AvoidDatabaseInLoopInfoBuilder get(
+                int sinkLine, OccurrenceInfo occurrenceInfo) {
+            return new AvoidDatabaseInLoopInfoBuilder(sinkLine, occurrenceInfo);
+        }
+
+        @Override
+        public String getMessage() {
+            return AvoidDatabaseOperationInLoopUtil.getMessage(occurrenceInfo);
+        }
+    }
+
+    /** Message builder to help with testing {@link UseWithSharingOnDatabaseOperation}. */
+    public static class SharingPolicyViolationBuilder extends ViolationBuilder {
+        private final boolean warning;
+        private final SharingPolicyUtil.InheritanceType inheritanceType;
+        private final String classInheritedFrom;
+
+        public SharingPolicyViolationBuilder(int sinkLine) {
+            super(sinkLine);
+            this.warning = false;
+            this.inheritanceType = null;
+            this.classInheritedFrom = null;
+        }
+
+        public SharingPolicyViolationBuilder(
+                int sinkLine,
+                SharingPolicyUtil.InheritanceType inheritanceType,
+                String classInheritedFrom) {
+            super(sinkLine);
+            this.warning = true;
+            this.inheritanceType = inheritanceType;
+            this.classInheritedFrom = classInheritedFrom;
+        }
+
+        public static SharingPolicyViolationBuilder get(int sinkLine) {
+            return new SharingPolicyViolationBuilder(sinkLine);
+        }
+
+        public static SharingPolicyViolationBuilder getWarning(
+                int sinkLine,
+                SharingPolicyUtil.InheritanceType inheritanceType,
+                String classInheritedFrom) {
+            return new SharingPolicyViolationBuilder(sinkLine, inheritanceType, classInheritedFrom);
+        }
+
+        @Override
+        public String getMessage() {
+            if (warning) {
+                if (this.inheritanceType == null || this.classInheritedFrom == null) {
+                    throw new ProgrammingException(
+                            "SharingPolicyInfoBuilder cannot build a warning violation without both an inheritance type and a class inherited from.");
+                }
+
+                return String.format(
+                        UserFacingMessages.SharingPolicyRuleTemplates.WARNING_TEMPLATE,
+                        this.inheritanceType,
+                        this.classInheritedFrom);
+            } else {
+                return UserFacingMessages.SharingPolicyRuleTemplates.MESSAGE_TEMPLATE;
+            }
         }
     }
 

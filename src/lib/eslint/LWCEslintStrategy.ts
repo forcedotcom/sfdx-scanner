@@ -95,7 +95,7 @@ export class LWCEslintStrategy implements EslintStrategy {
 
 	// TODO: Submit PR against eslint-plugin-lwc
 	processRuleViolation(): ProcessRuleViolationType {
-		return (fileName: string, ruleViolation: RuleViolation): void => {
+		return (fileName: string, ruleViolation: RuleViolation): boolean => {
 			const url: string = ruleViolation.url || '';
 			const repoName = 'eslint-plugin-lwc';
 
@@ -115,6 +115,8 @@ export class LWCEslintStrategy implements EslintStrategy {
 				ruleViolation.category = HARDCODED_RULES.FILES_MUST_COMPILE.category;
 				ruleViolation.message = ruleViolation.message.split('\n')[0];
 			}
+			// Always keep our violations.
+			return true;
 		}
 	}
 }

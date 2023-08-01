@@ -55,7 +55,8 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
     /**
      * This case is specific to method calls on ForEach loop definition. These methods are called
      * only once even though they are technically under a loop definition. We create this boundary
-     * to show that calls here are not actually called multiple times.
+     * to show that calls here are not actually called multiple times. Fully implemented in {@link
+     * #_visit(BaseSFVertex, SymbolProvider)}
      *
      * <p>For example, <code>getValues()</code> in this forEach gets called only once: <code>
      * for (String s: getValues())</code>
@@ -66,6 +67,34 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
      */
     @Override
     public boolean visit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        return _visit(vertex, symbols);
+    }
+
+    /**
+     * This case is specific to SOQL statements in a ForEach loop definition. These queries are
+     * called only once even though they are technically under a loop definition. We create this
+     * boundary to show that calls here are not actually called multiple times. Fully implemented in
+     * {@link #_visit(BaseSFVertex, SymbolProvider)}
+     *
+     * <p>For example, <code>[SELECT Id, Name FROM account]</code> in this forEach gets called only
+     * once: <code>
+     * for (String s: [SELECT Id, Name FROM account])</code>
+     *
+     * @param vertex SOQL Query in question
+     * @param symbols SymbolProvider at this state
+     * @return true to visit the children
+     */
+    @Override
+    public boolean visit(SoqlExpressionVertex vertex, SymbolProvider symbols) {
+        return _visit(vertex, symbols);
+    }
+
+    /**
+     * Internal method used by {@link #visit(SoqlExpressionVertex, SymbolProvider)} and {@link
+     * #visit(MethodCallExpressionVertex, SymbolProvider)} to ensure SOQL Queries and method calls
+     * in a ForEachLoopStatement declaration are not marked as loop violations.
+     */
+    private boolean _visit(BaseSFVertex vertex, SymbolProvider symbols) {
         // If already within a loop's boundary, get the loop item
         final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
         if (currentLoopBoundaryOpt.isPresent()) {
@@ -83,16 +112,28 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         return true;
     }
 
+    /**
+     * Prevent static blocks from being counted as loops. Should only be used for
+     * MethodCallExpressionVertex.
+     */
     private void createPermanentLoopExclusionIfApplicable(
-            MethodCallExpressionVertex vertex, SFVertex loopBoundaryItem) {
-        if (StaticBlockUtil.isStaticBlockMethodCall(vertex)) {
+            BaseSFVertex vertex, SFVertex loopBoundaryItem) {
+        if (vertex instanceof MethodCallExpressionVertex
+                && StaticBlockUtil.isStaticBlockMethodCall((MethodCallExpressionVertex) vertex)) {
             // All nested loops before this don't get counted as a loop context.
             loopBoundaryDetector.pushBoundary(new PermanentLoopExclusionBoundary(vertex));
         }
     }
 
-    private void createOverridableLoopExclusion(
-            MethodCallExpressionVertex vertex, SFVertex loopBoundaryItem) {
+    /**
+     * Creates a {@link OverridableLoopExclusionBoundary} when the provided vertex is the direct
+     * child of a {@link ForEachStatementVertex} (loopBoundaryItem)
+     *
+     * @param vertex the vertex to examine. In practice, this should only be either a
+     *     MethodCallExpressionVertex or a SoqlStatementVertex
+     * @param loopBoundaryItem the parent vertex, to check if parent is a ForEachStatementVertex
+     */
+    private void createOverridableLoopExclusion(BaseSFVertex vertex, SFVertex loopBoundaryItem) {
         // We are within a ForEach statement.
         // Check if the method calls parent is the same as this ForEach statement.
         // If they are the same, this method would get invoked only once.
@@ -105,8 +146,37 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         }
     }
 
+    /**
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider)} method to handle
+     * DML statements in loops, limiting what vertices are allowed in that method.
+     */
     @Override
     public void afterVisit(MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+        _afterLoopVisit(vertex, symbols);
+    }
+
+    /**
+     * Calls the internal {@link #_afterLoopVisit(BaseSFVertex, SymbolProvider)} method to handle
+     * DML statements in loops, limiting what vertices are allowed in that method.
+     */
+    @Override
+    public void afterVisit(SoqlExpressionVertex vertex, SymbolProvider symbols) {
+        _afterLoopVisit(vertex, symbols);
+    }
+
+    /**
+     * helper method to deal with removing the appropriate loop exclusion boundaries (see {@link
+     * #visit(MethodCallExpressionVertex, SymbolProvider)} and {@link #visit(SoqlExpressionVertex,
+     * SymbolProvider)})
+     */
+    private void _afterLoopVisit(BaseSFVertex vertex, SymbolProvider symbols) {
+        if (!(vertex instanceof SoqlExpressionVertex
+                || vertex instanceof MethodCallExpressionVertex)) {
+            throw new ProgrammingException(
+                    "Cannot perform post-visit loop tasks on a vertex that is not "
+                            + "a SoqlExpressionVertex or MethodCallExpressionVertex. Provided vertex="
+                            + vertex);
+        }
         // If within a method call loop exclusion, pop boundary here.
         final Optional<LoopBoundary> currentLoopBoundaryOpt = loopBoundaryDetector.peek();
         if (currentLoopBoundaryOpt.isPresent()) {
@@ -128,8 +198,7 @@ public abstract class LoopDetectionVisitor extends DefaultNoOpPathVertexVisitor 
         // If the vertex has endScopes, pop out the loop items that match the end scopes.
         final List<String> vertexEndScopes = vertex.getEndScopes();
 
-        // Look at the list in reverse order to get the newest innermost scope first.
-        for (int i = vertexEndScopes.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < vertexEndScopes.size(); i++) {
             final String endScopeLabel = vertexEndScopes.get(i);
             // Continue processing only if this is a loop scope.
             if (LOOP_VERTICES_LABELS.contains(endScopeLabel)) {

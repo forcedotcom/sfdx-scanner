@@ -4,18 +4,18 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {RunOptions, RuleManager} from './RuleManager';
+import {RuleManager, RunOptions} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
+import {EVENTS, uxEvents} from './ScannerEvents';
+import {CONFIG_FILE, CUSTOM_CONFIG, ENGINE, TargetType} from '../Constants';
+import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
-import {uxEvents, EVENTS} from './ScannerEvents';
-import {CUSTOM_CONFIG, ENGINE, CONFIG_FILE} from '../Constants';
-import * as TelemetryUtil from './util/TelemetryUtil';
 
 Messages.importMessagesDirectory(__dirname);
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
@@ -294,8 +294,9 @@ export class DefaultRuleManager implements RuleManager {
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
 				// Filter the targets based on our target patterns.
 				const filteredTargets = await pm.filterPathsByPatterns(absoluteMatchingTargets);
-				const ruleTarget = {
+				const ruleTarget: RuleTarget = {
 					target: targetPath,
+					targetType: TargetType.GLOB,
 					paths: filteredTargets,
 					methods: []
 				};
@@ -308,9 +309,9 @@ export class DefaultRuleManager implements RuleManager {
 					// If the target is a directory, we should get everything in it, convert relative paths to absolute
 					// paths, and then filter based our matcher.
 					const relativePaths = await globby(targetPath);
-					const ruleTarget = {
+					const ruleTarget: RuleTarget = {
 						target: targetPath,
-						isDirectory: true,
+						targetType: TargetType.DIRECTORY,
 						paths: await pm.filterPathsByPatterns(relativePaths.map(t => path.resolve(t))),
 						methods: []
 					};
@@ -323,6 +324,7 @@ export class DefaultRuleManager implements RuleManager {
 					if (await pm.pathMatchesPatterns(absolutePath)) {
 						ruleTargets.push({
 							target: targetPath,
+							targetType: TargetType.FILE,
 							paths: [absolutePath],
 							// If the pattern has method-level targets, then they're delimited with a semi-colon.
 							methods: targetPortions.length === 1 ? [] : targetPortions[1].split(';')

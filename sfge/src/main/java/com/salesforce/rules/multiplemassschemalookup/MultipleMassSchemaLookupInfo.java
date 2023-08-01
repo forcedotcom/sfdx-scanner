@@ -5,12 +5,13 @@ import com.salesforce.exception.TodoException;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.NewObjectExpressionVertex;
 import com.salesforce.graph.vertex.SFVertex;
+import com.salesforce.rules.AvoidMultipleMassSchemaLookups;
 import com.salesforce.rules.RuleThrowable;
 import com.salesforce.rules.Violation;
 
 /**
  * Represents information required to create a violation from {@link
- * com.salesforce.rules.MultipleMassSchemaLookupRule}.
+ * AvoidMultipleMassSchemaLookups}.
  */
 public class MultipleMassSchemaLookupInfo implements RuleThrowable {
 

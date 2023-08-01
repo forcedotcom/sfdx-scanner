@@ -259,5 +259,12 @@ public final class ASTConstants {
         private TypeSuffix() {}
     }
 
+    public static final class SharingPolicy {
+        public static final String WITH_SHARING = "with sharing";
+        public static final String WITHOUT_SHARING = "without sharing";
+        public static final String INHERITED_SHARING = "inherited sharing";
+        public static final String OMITTED_DECLARATION = "";
+    }
+
     private ASTConstants() {}
 }
