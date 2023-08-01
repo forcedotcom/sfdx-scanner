@@ -1,5 +1,5 @@
-scanner: '3.14.0'
-releasedon: '07-06-2023'
+scanner: '3.15.0'
+releasedon: '08-02-2023'
 pmd: '6.55.0'
 cpd: '6.55.0'
 eslint: '8.x'

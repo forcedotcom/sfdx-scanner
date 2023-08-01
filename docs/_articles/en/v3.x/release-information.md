@@ -12,6 +12,42 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.15.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.15.0) (08-02-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.15.0...v3.14.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): To improve your code performance, we added two new pilot path-based Salesforce Graph Engine rules.
+	- AvoidDatabaseOperationInLoop rule detects database operations in loops that degrade performance.
+	- UseWithSharingOnDatabaseOperation rule detects database operations outside `with-sharing` annotated classes.
+* NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available and has been renamed: AvoidMultipleMassSchemaLookups (formerly MultipleMassSchemaLookupRule).
+* NEW (GraphEngine): We renamed the UnusedMethodRule (pilot) to RemoveUnusedMethod.
+* NEW (CodeAnalyzer): To provide you with more guidance on building your own custom rules, we added a sample [Java-based PMD rules repo](https://github.com/forcedotcom/sfdx-scanner/tree/dev/sample-code/pmd-example-rules). Use the sample repo along with the recommendations in [Authoring Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/author/) to build your custom rules.
+
+**Closed issues:**
+* [BUG] v3.12.0 - Attempted to resolve unregistered dependency token: "RuleManager"  [\#1077](https://github.com/forcedotcom/sfdx-scanner/issues/1077)
+* Running the scanner with category filter causes only the retirejs engine to be used [\#1131](https://github.com/forcedotcom/sfdx-scanner/issues/1131)
+* [BUG] Files matched with `.eslintignore` appeared in the list of violations with severity 1 [\#1101](https://github.com/forcedotcom/sfdx-scanner/issues/1101)
+* [BUG] Getting ESLINT-CUSTOM violations on .cls files when using custom eslintconfig [\#810](https://github.com/forcedotcom/sfdx-scanner/issues/810)
+* [BUG] Documentation for `Compile Java-Based PMD Custom Rules` is not sufficient  [\#1025](https://github.com/forcedotcom/sfdx-scanner/issues/1025)
+* [BUG] Trying to execute PMD XML rule with sfdx-scanner [\#1112](https://github.com/forcedotcom/sfdx-scanner/issues/1112)
+
+**Merged pull requests**
+* FIX (GraphEngine): @W-13848149@: Adjusted violation URLs so they point to the proper anchors. [\#1134](https://github.com/forcedotcom/sfdx-scanner/pull/1134)
+* FIX (GraphEngine): @W-13569669@: fixes bugs found in QA of UseWithSharingOnDatabaseOperation [\#1130](https://github.com/forcedotcom/sfdx-scanner/pull/1130)
+* CHANGE (GraphEngine): @W-13790909@: Adjusted url for RemoveUnusedMethod. [\#1128](https://github.com/forcedotcom/sfdx-scanner/pull/1128)
+* CHANGE (GraphEngine): @W-13720122@: Adjusted MMS rule URL to new value. [\#1127](https://github.com/forcedotcom/sfdx-scanner/pull/1127)
+* CHANGE (GraphEngine): @W-13790909@: Renamed UnusedMethodRule to RemoveUnusedMethod [\#1123](https://github.com/forcedotcom/sfdx-scanner/pull/1123)
+* NEW (GraphEngine): @W-13569669@: Adds new rule, UseWithSharingOnDatabaseOperation [\#1124](https://github.com/forcedotcom/sfdx-scanner/pull/1124)
+* CHANGE (ESLint): @W-8458220@: Custom ESLint config discards noisy violations from ignorefile. [\#1116](https://github.com/forcedotcom/sfdx-scanner/pull/1116)
+* CHANGE (GraphEngine): @W-13720122@: MultipleMassSchemaLookupRule going GA as AvoidMultipleMassSchemaLookups. [\#1125](https://github.com/forcedotcom/sfdx-scanner/pull/1125)
+* CHANGE (GraphEngine): @W-13569661@: Rename DmlInLoopRule to AvoidDatabaseOperationInLoop, update UI text [\#1121](https://github.com/forcedotcom/sfdx-scanner/pull/1121)
+* CHANGE (CodeAnalyzer): @W-13644357@: Updated README. [\#1114](https://github.com/forcedotcom/sfdx-scanner/pull/1114)
+* NEW (CodeAnalyzer): @W-12943227@: Adds sample project for writing Java-based PMD custom rules. [\#1113](https://github.com/forcedotcom/sfdx-scanner/pull/1113)
+* NEW (GraphEngine): @W-13569661@: Adds new rule, DmlInLoopRule [\#1110](https://github.com/forcedotcom/sfdx-scanner/pull/1110)
+
 ## [v3.14.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.14.0) (07-06-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.14.0...v3.13.0)
