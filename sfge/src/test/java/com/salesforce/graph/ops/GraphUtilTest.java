@@ -52,7 +52,7 @@ public class GraphUtilTest {
         MatcherAssert.assertThat(
                 ex.getMessage(), containsString("directory1" + File.separator + "MyClass.cls"));
         MatcherAssert.assertThat(
-                ex.getMessage(), containsString("directory2" + File.separator + "MYCLASS.cls"));
+                ex.getMessage(), containsString("directory2" + File.separator + "MyClass.cls"));
     }
 
     /** Verify that a trigger which is defined in multiple directories results in an exception. */
@@ -70,7 +70,7 @@ public class GraphUtilTest {
                 containsString("directory1" + File.separator + "BeforeInsertAccount.trigger"));
         MatcherAssert.assertThat(
                 ex.getMessage(),
-                containsString("directory2" + File.separator + "BEFOREINSERTACCOUNT.trigger"));
+                containsString("directory2" + File.separator + "BeforeInsertAccount.trigger"));
     }
 
     /** Verify that a class and a trigger with the same name does not result in an exception. */
