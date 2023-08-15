@@ -135,7 +135,7 @@ public final class GraphUtil {
         }
 
         // Verify TopLevelWrappers have appropriately unique names
-        final TreeMap<String, Util.CompilationDescriptor> uniqueClassNames =
+        final TreeMap<String, Util.CompilationDescriptor> uniqueClassEnumInterfaceNames =
                 CollectionUtil.newTreeMap();
         final TreeMap<String, Util.CompilationDescriptor> uniqueTriggerNames =
                 CollectionUtil.newTreeMap();
@@ -150,7 +150,7 @@ public final class GraphUtil {
                 } else {
                     // names of UserClassWrapper, UserInterfaceWrapper, UserEnumWrapper should
                     // be unique among all three object types
-                    previous = uniqueClassNames.put(definingType, comp);
+                    previous = uniqueClassEnumInterfaceNames.put(definingType, comp);
                 }
 
                 if (previous != null) {
