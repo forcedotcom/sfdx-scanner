@@ -6,10 +6,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.or;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 
-import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.apex.jorje.AstNodeWrapper;
-import com.salesforce.apex.jorje.JorjeUtil;
-import com.salesforce.apex.jorje.TopLevelWrapper;
+import com.salesforce.apex.jorje.*;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
@@ -137,13 +134,25 @@ public final class GraphUtil {
             comps.addAll(buildFolderComps(sourceFolder));
         }
 
-        // Verify all TopLevelWrappers have unique names
-        final TreeMap<String, Util.CompilationDescriptor> uniqueNames = CollectionUtil.newTreeMap();
+        // Verify TopLevelWrappers have appropriately unique names
+        final TreeMap<String, Util.CompilationDescriptor> uniqueClassEnumInterfaceNames =
+                CollectionUtil.newTreeMap();
+        final TreeMap<String, Util.CompilationDescriptor> uniqueTriggerNames =
+                CollectionUtil.newTreeMap();
         for (Util.CompilationDescriptor comp : comps) {
             final AstNodeWrapper<?> nodeWrapper = comp.getCompilation();
             if (nodeWrapper instanceof TopLevelWrapper) {
                 final String definingType = nodeWrapper.getDefiningType();
-                final Util.CompilationDescriptor previous = uniqueNames.put(definingType, comp);
+                final Util.CompilationDescriptor previous;
+                if (nodeWrapper instanceof UserTriggerWrapper) {
+                    // names of UserTriggerWrapper should be unique only among other triggers
+                    previous = uniqueTriggerNames.put(definingType, comp);
+                } else {
+                    // names of UserClassWrapper, UserInterfaceWrapper, UserEnumWrapper should
+                    // be unique among all three object types
+                    previous = uniqueClassEnumInterfaceNames.put(definingType, comp);
+                }
+
                 if (previous != null) {
                     throw new GraphLoadException(
                             definingType
