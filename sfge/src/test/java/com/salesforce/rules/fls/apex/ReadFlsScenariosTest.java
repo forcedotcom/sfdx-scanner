@@ -4,9 +4,11 @@ import com.salesforce.rules.ApexFlsViolationRule;
 import com.salesforce.rules.fls.apex.operations.FlsConstants;
 import com.salesforce.testutils.BaseFlsTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 public class ReadFlsScenariosTest extends BaseFlsTest {
     private ApexFlsViolationRule rule;
@@ -270,20 +272,61 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
         assertNoViolation(rule, sourceCode);
     }
 
-    @Test
-    public void testUnsafeDatabaseQueryCall() {
+    @ValueSource(
+            strings = {
+                "Database.query(query)",
+                "Database.query(query, System.AccessLevel.SYSTEM_MODE)",
+                "Database.query(query, AccessLevel.SYSTEM_MODE)",
+                "Database.query(query, getUnsafe())",
+                "Database.query(query, unsafeLevel)",
+            })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testUnsafeDatabaseQueryCall(String operation) {
+        // spotless:off
         String sourceCode =
                 "public class MyClass {\n"
-                        + "   public void foo() {\n"
-                        + "       String query = 'SELECT FirstName from Contact';\n"
-                        + "       List<Contact> contacts = Database.query(query);\n"
-                        + "   }\n"
-                        + "}\n";
+                    + "   public void foo() {\n"
+                    + "       String query = 'SELECT FirstName from Contact';\n"
+                    + "       System.AccessLevel safeLevel = System.AccessLevel.SYSTEM_MODE;\n"
+                    + "       List<Contact> contacts = " + operation + ";\n"
+                    + "   }\n"
+                    + "   private System.AccessLevel getUnsafe() {\n"
+                    + "      return AccessLevel.SYSTEM_MODE;\n"
+                    + "   }\n"
+                    + "}\n";
+        // spotless:on
 
         assertViolations(
                 rule,
                 sourceCode,
-                expect(4, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
+                expect(5, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
+    }
+
+    /** all of these execute in USER_MODE one way or another, so there should be no violations */
+    @ValueSource(
+            strings = {
+                "Database.query(query, System.AccessLevel.USER_MODE)",
+                "Database.query(query, AccessLevel.USER_MODE)",
+                "Database.query(query, getSafe())",
+                "Database.query(query, safeLevel)",
+            })
+    @ParameterizedTest(name = "{displayName}: {0}")
+    public void testSafeDatabaseQueryCall(String operation) {
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n"
+                + "   public void foo() {\n"
+                + "       String query = 'SELECT FirstName from Contact';\n"
+                + "       System.AccessLevel safeLevel = System.AccessLevel.USER_MODE;\n"
+                + "       List<Contact> contacts = " + operation + ";\n"
+                + "   }\n"
+                + "   private System.AccessLevel getSafe() {\n"
+                + "      return AccessLevel.USER_MODE;\n"
+                + "   }\n"
+                + "}\n";
+        // spotless:on
+
+        assertNoViolation(rule, sourceCode);
     }
 
     @Test
@@ -303,6 +346,41 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                 rule,
                 sourceCode,
                 expect(7, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
+    }
+
+    @Test
+    public void testIndeterminateDbQueryAsReturn() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo(System.AccessLevel lvl) {\n"
+                        + "       List<Contact> contacts = getData(lvl);\n"
+                        + "   }\n"
+                        + "   public List<Contact> getData(System.AccessLevel lvl) {\n"
+                        + "       String query = 'SELECT FirstName from Contact';\n"
+                        + "       return Database.query(query, lvl);\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(7, FlsConstants.FlsValidationType.READ, "Contact").withField("FirstName"));
+    }
+
+    @Test
+    public void testSafeDbQueryAsReturn_accessLevel() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo() {\n"
+                        + "       List<Contact> contacts = getData();\n"
+                        + "   }\n"
+                        + "   public List<Contact> getData() {\n"
+                        + "       String query = 'SELECT FirstName from Contact';\n"
+                        + "       return Database.query(query, AccessLevel.USER_MODE);\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertNoViolation(rule, sourceCode);
     }
 
     @Test
@@ -564,5 +642,32 @@ public class ReadFlsScenariosTest extends BaseFlsTest {
                 rule,
                 sourceCode,
                 expect(4, FlsConstants.FlsValidationType.READ, "Account").withField("Name"));
+    }
+
+    /**
+     * This is an example test for methods in the Database class beyond the 6 basic ones (insert,
+     * query, merge, update, upsert, and undelete). It should be enabled when operations like
+     * Database.queryWithBinds and Database.insertAsync are supported. This may involve merging
+     * {@link FlsConstants.FlsValidationType} with {@link
+     * com.salesforce.rules.ops.DatabaseOperationUtil.DatabaseOperation}.
+     *
+     * <p>Currently, this is a false negative: there should be violation, but there isn't. This test
+     * should be enabled as part of implementing work record W-14044615.
+     */
+    @Disabled
+    @Test
+    public void testUnsafeQueryWithBinds() {
+        String sourceCode =
+                "public class MyClass {\n"
+                        + "   public void foo() {\n"
+                        + "       List<Account> accs = Database.queryWithBinds('SELECT Name, Age FROM Account WHERE Age =: i LIMIT 1', "
+                        + "             new Map<String, Object>{'i' => 3}, System.AccessLevel.SYSTEM_MODE);\n"
+                        + "   }\n"
+                        + "}\n";
+
+        assertViolations(
+                rule,
+                sourceCode,
+                expect(3, FlsConstants.FlsValidationType.READ, "Account").withField("name"));
     }
 }

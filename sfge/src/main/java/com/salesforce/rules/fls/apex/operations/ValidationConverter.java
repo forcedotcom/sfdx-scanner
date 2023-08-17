@@ -34,9 +34,20 @@ import org.apache.logging.log4j.Logger;
 public class ValidationConverter {
     private static final Logger LOGGER = LogManager.getLogger(ValidationConverter.class);
     private final FlsValidationType validationType;
+    private final boolean userModeOverride;
 
     public ValidationConverter(FlsValidationType validationType) {
+        this(validationType, false);
+    }
+
+    /**
+     * @param validationType the {@link FlsValidationType} to check for
+     * @param isUserModeOverride indicates whether the operation is accompanied by a User Mode
+     *     access level
+     */
+    public ValidationConverter(FlsValidationType validationType, boolean isUserModeOverride) {
         this.validationType = validationType;
+        this.userModeOverride = isUserModeOverride;
     }
 
     /** Converts SoqlExpressions to Validation representations */
@@ -50,7 +61,7 @@ public class ValidationConverter {
         return holder.getValidationReps();
     }
 
-    /** Converts given apexvalue to Validation Representations */
+    /** Converts given apexValue to Validation Representations. */
     public Set<FlsValidationRepresentation> convertToExpectedValidations(ApexValue<?> apexValue) {
         final ValidationHolder holder =
                 this.getHolder(apexValue, validationType.getProcessFields());
@@ -213,6 +224,7 @@ public class ValidationConverter {
         return apexValue;
     }
 
+    /** check if validation is necessary. if so, add it to holder. */
     private void convertSoqlQueryInfo(
             ValidationHolder holder,
             ProcessFields defaultProcessFields,
@@ -241,6 +253,15 @@ public class ValidationConverter {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info(
                             "A query that has \"WITH USER_MODE\" clause is inherently protected",
+                            queryInfo);
+                }
+                continue;
+            }
+
+            if (this.userModeOverride) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info(
+                            "A method in the Database class with \"USER_MODE\" accessLevel is inherently protected",
                             queryInfo);
                 }
                 continue;
