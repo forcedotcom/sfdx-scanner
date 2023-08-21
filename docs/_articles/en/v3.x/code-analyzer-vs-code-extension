@@ -1,6 +1,6 @@
 # Salesforce Code Analyzer Visual Studio Code Extension (Beta)
 
-The Salesforce Code Analyzer Visual Studio (VS) Code Extension is an extension that integrates many of Code Analyzer's most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
+The Salesforce Code Analyzer Visual Studio (VS) Code Extension (beta) is an extension that integrates many of Code Analyzer's most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
 
 Note: If you’re listing a managed package on AppExchange, it must pass security review. You’re also required to upload your Salesforce Code Analyzer scan reports. Run Code Analyzer via the VS Code extension and update your code. Next, to produce the required scan reports for your AppExchange listing, you must run Code Analyzer via the command line either within VS Code or as standalone. Attach your scan reports to your submission in the AppExchange Security Review Wizard. Read Scan Your Solution with Salesforce Code Analyzer for details.
 Using the Code Analyzer VS Code Extension
@@ -47,34 +47,41 @@ Regardless of which option you chose, the progress bar notifies you that the sca
 
 After your scan is complete, note how many files were scanned and how many violations were produced.
 
-## Act Upon Your Code Analyzer Results and Rescan Your Code
+![The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.](/assets/images/vscode-images/CodeAnalyzerViolationsProgressBar.png)
+
+#### Act Upon Your Code Analyzer Results and Rescan Your Code
 
 When your scan is complete, you see a scrollable list of violations that Code Analyzer found.
 
-[alt text: Sample VS Code code and Salesforce Code Analyzer scan results]
+![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](/assets/images/vscode-images/CodeAnalyzerViolationImage.png)
 
-Each violation message reveals the violation severity and details about the violation found in this pattern: SevX: [Violation message]
-Example: 
+Each violation message reveals the violation severity and details about the violation found in this pattern: `SevX: [Violation message]`
 
-Sev3. Validate CRUD permission before SOQL/DML operation or enforce user mode. (PMD via Code Analyzer)
+*Example:*
+
+```Sev3. Validate CRUD permission before SOQL/DML operation or enforce user mode. (PMD via Code Analyzer)```
 
 To address the violations found and to rescan your code, follow these steps:
 
-Scroll through the results that Code Analyzer found.
-Update your code directly in VS Code.
-When your edits are complete, rescan your code using your preferred method.
-Produce Code Analyzer Reports for AppExchange Security Review
+1. Scroll through the results that Code Analyzer found.
+2. Update your code directly in VS Code.
+3. When your edits are complete, rescan your code using your preferred method.
 
-Point use to existing documentation
-Use a Quick Fix to Suppress a Code Analyzer PMD Violation
+#### Produce Code Analyzer Reports for AppExchange Security Review
+
+If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Salesforce Code Analyzer and provide test results in your solution’s AppExchange Security Review submission. Follow the instructions in (Scan Your Solution with Salesforce Code Analyzer)[https://developer.salesforce.com/docs/atlas.en-us.244.0.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm] to produce the required reports.
+
+#### Use a Quick Fix to Suppress a Code Analyzer PMD Violation
+
 After you scan your code with Code Analyzer, there can be situations where you want to suppress a PMD violation that was identified. 
 
 To use a quick fix to suppress a PMD violation on a line of code, follow these steps:
 
-Mouse over the identified problem.
-Click Quick Fix in the pop-up.
-Click Suppress violations on this line.
-Replace Code Analyzer’s PMD Config File with a Custom PMD Config
+1. Mouse over the identified problem.
+2. Click **Quick Fix** in the pop-up.
+3. Click **Suppress violations on this line**.
+
+#### Replace Code Analyzer’s PMD Config File with a Custom PMD Config
 
 By default, Code Analyzer runs all of PMD's default rules against your Apex and VisualForce files. However, you may have a custom PMD configuration that better suits your specific needs, and wish to substitute your configuration in place of ours.
 
@@ -82,56 +89,42 @@ By default, Code Analyzer runs all of PMD's default rules against your Apex and 
 
 To use your own custom PMD ruleset in Code Analyzer, follow these instructions:
 
-In VS Code, go to Preferences > Settings.
-Click the User or Workspace tab.
+1. In VS Code, go to Preferences > Settings.
+2. Click the **User** or **Workspace** tab.
 
-Choose User to override the configuration on the current project.
-Choose Workspace to override the configuration in all projects.
+	* Choose User to override the configuration on the current project.
+	* Choose Workspace to override the configuration in all projects.
 
-Expand the Extensions section and scroll to Salesforce Code Analyzer.
-In Code Analyzer > PMD > Custom Config File, enter the absolute path to your custom PMD configuration.
+3. Expand the Extensions section and scroll to Salesforce Code Analyzer.
+4. In Code Analyzer > PMD > Custom Config File, enter the absolute path to your custom PMD configuration.
 
-Example: /Users/MyUsername/Code/sfdx-scanner/
-Salesforce Graph Engine
+	*Example*: /Users/MyUsername/Code/sfdx-scanner/
+
+### Salesforce Graph Engine
 
 To perform a Graph Engine path-based analysis on a single method follow these instructions:
 
-Open a file in the VS Code editor.
-Right-click on the method you want to scan.
-Select SFDX: Scan selected method with Graph Engine path-based analysis.
+1. Open a file in the VS Code editor.
+2. Right-click on the method you want to scan.
+3. Select **SFDX: Scan selected method with Graph Engine path-based analysis**.
 
 The progress bar notifies you that the scan of your current file is active.
 
-
-[alt text: The VS Code progress bar displaying a Scanning targets notification.]
-
 After your scan is complete, a new tab opens with the files that were scanned and how many violations were produced.
 
+#### Act Upon Your Graph Engine Results and Rescan Your Code
 
-[alt text: The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.]
-Act Upon Your Graph Engine Results and Rescan Your Code
 When your scan is complete, a new tab opens with an html display of the violations found.
 
-
-[alt text: A sample Salesforce Graph Engine pop-up window with an html list of violations found]
-
 Each violation message reveals the violation severity and details about the violation found in this pattern: SevX: [Violation message]
-Example: 
 
-Sev3. Validate CRUD permission before SOQL/DML operation or enforce user mode. (PMD via Code Analyzer)
+*Example*: 
+
+```Sev3. Validate CRUD permission before SOQL/DML operation or enforce user mode. (PMD via Code Analyzer)```
 
 To address the violations found and to rescan your code, follow these steps:
 
-On the VS Code tab with your Graph Engine results, review the violations that Graph Engine found.
-On the VS Code tab with your code file open, update your code.
+1. On the VS Code tab with your Graph Engine results, review the violations that Graph Engine found.
+2. On the VS Code tab with your code file open, update your code.
+
 When your edits are complete, rescan your code.
-
-Produce Graph Engine Reports for AppExchange Security Review
-
-In VS Code’s built-in command line, run: sfdx scanner:run:dfa with the –outfile and –category “Security” options to produce your AppExchange security review scan reports.
-
-Example:
-
-
-sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target --outfile
-
