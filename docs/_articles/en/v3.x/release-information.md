@@ -12,6 +12,18 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.16.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.16.0) (09-02-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.16.0...v3.15.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): To improve your code performance, we added one new pilot path-based Salesforce Graph Engine rule: PerformNullCheckOnSoqlVariables. This rule determines when a variable is noticed in the WHERE clause of a SOQL query and is missing a null check.
+* NEW (GraphEngine): Two recently released Graph Engine pilot rules are now generally available: AvoidDatabaseOperationInLoop and UseWithSharingOnDatabaseOperation.
+
+**Closed issues:**
+
 ## [v3.15.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.15.0) (08-02-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.15.0...v3.14.0)
