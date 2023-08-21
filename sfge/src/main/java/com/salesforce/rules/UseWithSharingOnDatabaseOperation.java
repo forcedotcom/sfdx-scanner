@@ -42,6 +42,11 @@ public final class UseWithSharingOnDatabaseOperation extends AbstractPathTravers
     }
 
     @Override
+    protected boolean isPilot() {
+        return false;
+    }
+
+    @Override
     public ImmutableSet<ApexPathSource.Type> getSourceTypes() {
         return SOURCE_TYPES;
     }
