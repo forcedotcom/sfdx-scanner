@@ -69,6 +69,11 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
         return true;
     }
 
+    @Override
+    protected boolean isPilot() {
+        return false;
+    }
+
     public static AvoidDatabaseOperationInLoop getInstance() {
         return AvoidDatabaseOperationInLoop.LazyHolder.INSTANCE;
     }
