@@ -96,6 +96,10 @@
         en: Try it yourself
       url: /v3.x/salesforce-graph-engine/try-it-yourself
 - title:
+    en: Code Analyzer VS Code Extension
+    url: /v3.x/code-analyzer-vs-code-extension
+    new: true
+- title:
     en: CI/CD Integration
   url: /v3.x/ci-cd-integration
 - title:
