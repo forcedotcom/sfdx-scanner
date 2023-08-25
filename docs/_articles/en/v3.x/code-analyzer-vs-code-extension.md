@@ -52,17 +52,17 @@ Complete one of these options to perform a Code Analyzer scan.
 
 Regardless of which option you chose, the progress bar notifies you that the scan of your current file is active.
 
-![The VS Code progress bar displaying a Code Analyzer is analyzing targets message.](/docs/assets/images/vscode-images/AnalyzingTargets.png)
+![The VS Code progress bar displaying a Code Analyzer is analyzing targets message.](./assets/images/vscode-images/AnalyzingTargets.png)
 
 After your scan is complete, note how many files were scanned and how many violations were produced.
 
-![The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.](/docs/assets/images/vscode-images/CodeAnalyzerViolationsProgressBar.png)
+![The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.](./assets/images/vscode-images/CodeAnalyzerViolationsProgressBar.png)
 
 #### Address Your Code Analyzer Results and Rescan Your Code
 
 When your scan is complete, click the scan summary in the progress bar (1). You see a scrollable list of violations that Code Analyzer found (2).
 
-![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](/docs/assets/images/vscode-images/ScanSummary.png)
+![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](./assets/images/vscode-images/ScanSummary.png)
 
 Each violation message reveals the violation severity and details about the violation found in this pattern: `SevX: [Violation message]`
 
@@ -109,7 +109,7 @@ To use your custom PMD ruleset in Code Analyzer, complete these steps.
 
 	*Example*: /Users/MyUsername/Code/sfdx-scanner/
 
-![alt text: Salesforce Code Analyzer Settings with Code Analyzer > PMD Custom Config File section and a sample file location](/docs/assets/images/vscode-images/SettingsTwoBubbles.png)
+![alt text: Salesforce Code Analyzer Settings with Code Analyzer > PMD Custom Config File section and a sample file location](./assets/images/vscode-images/SettingsTwoBubbles.png)
 
 ### Salesforce Graph Engine
 
@@ -121,13 +121,13 @@ To perform a Graph Engine path-based analysis on a single method complete these 
 
 The progress bar notifies you that the scan of your current file is active.
 
-![alt text: The VS Code progress bar displaying a Scanning targets notification.](/docs/assets/images/vscode-images/RunningGraphEngineAnalysis.png)
+![alt text: The VS Code progress bar displaying a Scanning targets notification.](./assets/images/vscode-images/RunningGraphEngineAnalysis.png)
 
 #### Address Your Graph Engine Results and Rescan Your Code
 
 When your scan is complete, a new tab opens with an HTML display of the violations found.
 
-![alt text: A sample Salesforce Graph Engine pop-up window with an html list of violations found](/docs/assets/images/vscode-images/GraphEngineResultsBlur.png)
+![alt text: A sample Salesforce Graph Engine pop-up window with an html list of violations found](./assets/images/vscode-images/GraphEngineResultsBlur.png)
 
 Each violation message reveals the violation severity and details about the violation.
 
