@@ -125,7 +125,7 @@ To perform a Graph Engine path-based analysis on a single method complete these 
 
 The progress bar notifies you that the scan of your current file is active.
 
-![alt text: The VS Code progress bar displaying a Scanning targets notification.](./assets/images/vscode-images/RunningGraphEngineAnalysis.png)
+![alt text: The VS Code progress bar displaying a Running Graph Engine analysis notification.](./assets/images/vscode-images/GraphEngineRunningAnalysis.png)
 
 #### Address Your Graph Engine Results and Rescan Your Code
 
