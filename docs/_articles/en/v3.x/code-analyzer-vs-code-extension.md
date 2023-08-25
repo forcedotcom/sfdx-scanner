@@ -1,27 +1,31 @@
-# Salesforce Code Analyzer Visual Studio Code Extension (Beta)
+---
+title: Salesforce Code Analyzer Visual Studio Code Extension (Beta)
+lang: en
+redirect_from: /en/code-analyzer-vs-code-extension
+---
 
 The Salesforce Code Analyzer (Code Analyzer) Visual Studio (VS) Code extension is an extension that integrates many of Code Analyzer’s most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
 
-> **_NOTE:_** If you’re listing a managed package on AppExchange, it must pass security review. You’re also required to upload your Salesforce Code Analyzer scan reports. Run Code Analyzer via the VS Code extension and update your code. Next, to produce the required scan reports for your AppExchange listing, you must run Code Analyzer via the command line either within VS Code or as standalone. Attach your scan reports to your submission in the AppExchange Security Review Wizard. Read (Scan Your Solution with Salesforce Code Analyzer)[https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm] for details.
+> **_NOTE:_** If you’re listing a managed package on AppExchange, it must pass security review. You’re also required to upload your Salesforce Code Analyzer scan reports. Run Code Analyzer via the VS Code extension and update your code. Next, to produce the required scan reports for your AppExchange listing, you must run Code Analyzer via the command line either within VS Code or as standalone. Attach your scan reports to your submission in the AppExchange Security Review Wizard. Read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) for details.
 
 ## Using Code Analyzer VS Code Extension (beta)
 
 Use Code Analyzer VS Code extension (beta) to scan multiple languages:
 
-* (PMD rule engine)[https://pmd.github.io/]
-* (RetireJS)[https://retirejs.github.io/retire.js/]
-* (Salesforce Graph Engine)[https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/] (Generally Available rules only)
+* [PMD rule engine](https://pmd.github.io/)
+* [RetireJS](https://retirejs.github.io/retire.js/)
+* [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) (Generally Available rules only)
 
-You can also enable the extension to scan these languages:
+You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y) these languages in Salesforce Code Analyzer settings:
 
 * Java
 * XML code
 
 ## Set Up
 
-* Install (Salesforce CLI)[https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm].
-* In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`.
-* Install (Salesforce Code Analyzer VS Code extension(beta))[https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode].
+* Install [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm).
+* In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
+* Install [Salesforce Code Analyzer VS Code extension(beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
 ## Launch Code Analyzer Extension and Scan Your Code
 
@@ -33,7 +37,7 @@ Complete these steps to launch the Code Analyzer extension and scan your code.
 4. Rescan your code. 
 5. Scan individual methods within your code with Code Analyzer’s Graph Engine path-based analysis. 
 6. Rescan your code with Graph Engine.
-7. If you’re listing a managed package on AppExchange, follow the instructions in (Scan Your Solution with Code Analyzer)[https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm] to produce the required scan reports.
+7. If you’re listing a managed package on AppExchange, follow the instructions in [Scan Your Solution with Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) to produce the required scan reports.
 
 ### Code Analyzer Scans
 
@@ -52,17 +56,17 @@ Complete one of these options to perform a Code Analyzer scan.
 
 Regardless of which option you chose, the progress bar notifies you that the scan of your current file is active.
 
-![alt text: The VS Code progress bar displaying a Code Analyzer is analyzing targets message.](/assets/images/vscode-images/AnalyzingTargets.png)
+![The VS Code progress bar displaying a Code Analyzer is analyzing targets message.](./assets/images/vscode-images/AnalyzingTargets.png)
 
 After your scan is complete, note how many files were scanned and how many violations were produced.
 
-![The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.](/assets/images/vscode-images/CodeAnalyzerViolationsProgressBar.png)
+![The VS Code progress bar displaying a Scanned 1 files, 7 violations found in 1 files completion message.](./assets/images/vscode-images/CodeAnalyzerViolationsProgressBar.png)
 
-#### Act Upon Your Code Analyzer Results and Rescan Your Code
+#### Address Your Code Analyzer Results and Rescan Your Code
 
-When your scan is complete, you see a scrollable list of violations that Code Analyzer found.
+When your scan is complete, click the scan summary in the progress bar (1). You see a scrollable list of violations that Code Analyzer found (2).
 
-![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](/assets/images/vscode-images/CodeAnalyzerViolationImage.png)
+![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](./assets/images/vscode-images/ScanSummary.png)
 
 Each violation message reveals the violation severity and details about the violation found in this pattern: `SevX: [Violation message]`
 
@@ -78,7 +82,7 @@ To address the violations found and to rescan your code, follow these steps:
 
 #### Produce Code Analyzer Reports for AppExchange Security Review
 
-If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Salesforce Code Analyzer and provide test results in your solution’s AppExchange Security Review submission. To produce the required reports, follow the instructions in (Scan Your Solution with Salesforce Code Analyzer)[https://developer.salesforce.com/docs/atlas.en-us.244.0.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm].
+If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Salesforce Code Analyzer and provide test results in your solution’s AppExchange Security Review submission. To produce the required reports, follow the instructions in [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.244.0.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm).
 
 #### Use a Quick Fix to Suppress a Code Analyzer PMD Violation
 
@@ -109,7 +113,7 @@ To use your custom PMD ruleset in Code Analyzer, complete these steps.
 
 	*Example*: /Users/MyUsername/Code/sfdx-scanner/
 
-![alt text: Salesforce Code Analyzer Settings with Code Analyzer > PMD Custom Config File section and a sample file location](/assets/images/vscode-images/SettingsTwoBubbles.png)
+![alt text: Salesforce Code Analyzer Settings with Code Analyzer > PMD Custom Config File section and a sample file location](./assets/images/vscode-images/SettingsTwoBubbles.png)
 
 ### Salesforce Graph Engine
 
@@ -121,13 +125,13 @@ To perform a Graph Engine path-based analysis on a single method complete these 
 
 The progress bar notifies you that the scan of your current file is active.
 
-![alt text: The VS Code progress bar displaying a Scanning targets notification.](/assets/images/vscode-images/RunningGraphEngineAnalysis.png)
+![alt text: The VS Code progress bar displaying a Scanning targets notification.](./assets/images/vscode-images/RunningGraphEngineAnalysis.png)
 
 #### Address Your Graph Engine Results and Rescan Your Code
 
 When your scan is complete, a new tab opens with an HTML display of the violations found.
 
-![alt text: A sample Salesforce Graph Engine pop-up window with an html list of violations found](/assets/images/vscode-images/GraphEngineResultsBlur.png)
+![alt text: A sample Salesforce Graph Engine pop-up window with an html list of violations found](./assets/images/vscode-images/GraphEngineResultsBlur.png)
 
 Each violation message reveals the violation severity and details about the violation.
 

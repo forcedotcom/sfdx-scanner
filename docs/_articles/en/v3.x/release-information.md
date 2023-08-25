@@ -20,8 +20,10 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (GraphEngine): To improve your code performance, we added one new pilot path-based Salesforce Graph Engine rule: PerformNullCheckOnSoqlVariables. This rule determines when a variable is noticed in the WHERE clause of a SOQL query and is missing a null check.
-* NEW (GraphEngine): Two recently released Graph Engine pilot rules are now generally available: AvoidDatabaseOperationInLoop and UseWithSharingOnDatabaseOperation.
-* NEW (CodeAnalyzer): To scan your code easily, we released the [Salesforce Code Analyzer Visual Studio Code extension (beta)](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/code-analyzer-vs-code-extension). 
+* NEW (GraphEngine): Two recently released Graph Engine pilot rules are now generally available.
+	- AvoidDatabaseOperationInLoop
+	- UseWithSharingOnDatabaseOperation
+* NEW (CodeAnalyzer): To scan your code easily, we released the [Salesforce Code Analyzer Visual Studio Code extension (beta)](./en/v3.x/code-analyzer-vs-code-extension). 
 
 **Closed issues:**
 

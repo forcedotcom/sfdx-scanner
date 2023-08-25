@@ -411,7 +411,7 @@ This warning is thrown when a database operation occurs in a class that has no e
 
 ## Pilot Rules
 
-### PerformNullCheckOnSoqlVariables#
+### PerformNullCheckOnSoqlVariables <a name='PerformNullCheckOnSoqlVariables'>#</a>
 
 PerformNullCheckOnSoqlVariables identifies SOQL queries with variables in WHERE clauses that lack null checks. 
 SOQL queries with variables on WHERE clauses become expensive when the variable value is unintentionally null. When the variable value is null, an O(1) operation turns into an O(n) operation. The entire table is scanned, but returns no results. 
