@@ -1,4 +1,8 @@
---- title: Salesforce Code Analyzer Visual Studio Code Extension (Beta) lang: en redirect_from: /en/code-analyzer-vs-code-extension ---
+---
+title: Salesforce Code Analyzer Visual Studio Code Extension (Beta)
+lang: en
+redirect_from: /en/code-analyzer-vs-code-extension
+---
 
 The Salesforce Code Analyzer (Code Analyzer) Visual Studio (VS) Code extension is an extension that integrates many of Code Analyzer’s most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
 
@@ -10,9 +14,9 @@ Use Code Analyzer VS Code extension (beta) to scan multiple languages:
 
 * [PMD rule engine](https://pmd.github.io/)
 * [RetireJS](https://retirejs.github.io/retire.js/)
-* [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/) (Generally Available rules only)
+* [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) (Generally Available rules only)
 
-You can also [enable]([https://forcedotcom.github.io/sfdx-scanner/en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y]) these languages in Salesforce Code Analyzer settings:
+You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y) these languages in Salesforce Code Analyzer settings:
 
 * Java
 * XML code
