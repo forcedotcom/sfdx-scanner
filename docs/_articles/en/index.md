@@ -21,7 +21,7 @@ lang: en
 
 <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-text-heading_small slds-text-align_center slds-theme_success" role="alert">
   <span class="slds-assistive-text">success</span>
-  	Salesforce Code Analyzer Visual Studio Code Extension (v{{ site.data.versions-v3.extension }}) is available. Requires Code Analyzer v{{ site.data.versions-v3.extensioncompatiblescanner }} Release date: {{ site.data.versions-v3.releasedon }} &nbsp;&nbsp;<a href="./en/v3.x/release-information/">Release Information</a>
+  	Salesforce Code Analyzer Visual Studio Code Extension (v{{ site.data.versions-v3.extension }}) is available. Requires Code Analyzer v{{ site.data.versions-v3.extensioncompatiblescanner }} Release date: {{ site.data.versions-v3.releasedon }}
 </div>
 <br>
 
