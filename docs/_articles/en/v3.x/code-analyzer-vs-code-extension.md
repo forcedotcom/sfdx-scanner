@@ -1,4 +1,4 @@
-# Salesforce Code Analyzer Visual Studio Code Extension (Beta)
+--- title: Salesforce Code Analyzer Visual Studio Code Extension (Beta) lang: en redirect_from: /en/code-analyzer-vs-code-extension ---
 
 The Salesforce Code Analyzer (Code Analyzer) Visual Studio (VS) Code extension is an extension that integrates many of Code Analyzer’s most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
 
