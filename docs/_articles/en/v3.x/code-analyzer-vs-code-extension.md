@@ -12,7 +12,7 @@ Use Code Analyzer VS Code extension (beta) to scan multiple languages:
 * [RetireJS](https://retirejs.github.io/retire.js/)
 * [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/) (Generally Available rules only)
 
-You can also enable the extension to scan these languages:
+Additionhally, you can also [enable]([sfdx-scanner/en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y]) these languages in Salesforce Code Analyzer settings:
 
 * Java
 * XML code
