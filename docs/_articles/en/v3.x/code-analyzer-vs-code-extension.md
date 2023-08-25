@@ -24,7 +24,7 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 ## Set Up
 
 * Install [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm).
-* In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version 3.16.0 or later.
+* In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
 * Install [Salesforce Code Analyzer VS Code extension(beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
 ## Launch Code Analyzer Extension and Scan Your Code
