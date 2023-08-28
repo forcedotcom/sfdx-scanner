@@ -518,7 +518,15 @@ public final class MethodUtil {
                 apexValue = SystemSchema.getInstance();
             } else {
                 // Symbolic method call such as c.myMethod()
-                apexValue = symbols.getApexValue(symbolicName).orElse(null);
+
+                // if this is a variable, resolve to the class instance's variable if it contains a
+                // "this." e.g. this.varName
+                if ((vertex instanceof VariableExpressionVertex)
+                        && ((VariableExpressionVertex) vertex).isThisReference()) {
+                    apexValue = symbols.getApexValueFromInstanceScope(symbolicName).orElse(null);
+                } else {
+                    apexValue = symbols.getApexValue(symbolicName).orElse(null);
+                }
             }
         }
 

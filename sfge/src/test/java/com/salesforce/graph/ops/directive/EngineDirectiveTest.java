@@ -13,6 +13,7 @@ import com.salesforce.collections.CollectionUtil;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.ops.expander.ApexPathExpanderConfig;
 import com.salesforce.graph.symbols.ContextProviders;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.AbstractVisitingVertexPredicate;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.DmlStatementVertex;
@@ -501,7 +502,7 @@ public class EngineDirectiveTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider symbols) {
                         if (vertex instanceof MethodCallExpressionVertex) {
                             MethodCallExpressionVertex methodCallExpression =
                                     (MethodCallExpressionVertex) vertex;
@@ -562,7 +563,7 @@ public class EngineDirectiveTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider symbols) {
                         if (vertex instanceof MethodCallExpressionVertex) {
                             MethodCallExpressionVertex methodCallExpression =
                                     (MethodCallExpressionVertex) vertex;
@@ -612,7 +613,7 @@ public class EngineDirectiveTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider symbols) {
                         if (vertex instanceof MethodCallExpressionVertex) {
                             MethodCallExpressionVertex methodCallExpression =
                                     (MethodCallExpressionVertex) vertex;

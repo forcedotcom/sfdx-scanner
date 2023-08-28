@@ -545,7 +545,7 @@ class ApexPathExpander
             // allowing the caller to know which predicate is interested in
             // which vertex without the need to call
             // #test a second time
-            if (predicate.test(predicateVertex)) {
+            if (predicate.test(predicateVertex, symbolProviderVisitor.getSymbolProvider())) {
                 predicate.accept(
                         new VertexPredicateVisitor() {
                             @Override

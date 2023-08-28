@@ -19,7 +19,9 @@ public final class UserFacingMessages {
         public static final String AVOID_DATABASE_OPERATION_IN_LOOP =
                 "Detects database operations inside loops, which can cause degraded performance.";
         public static final String SHARING_RULE =
-                "Identifies a database operation executed outside of a \"with sharing\" policy. Warns when DML or SOQL operations inherit sharing rules implicitly instead of explicitly";
+                "Identifies a database operation executed outside of a \"with sharing\" policy. Warns when DML or SOQL operations inherit sharing rules implicitly instead of explicitly.";
+        public static final String PERFORM_NULL_CHECK_ON_SOQL_VARIABLE =
+                "Identifies SOQL queries with variables in WHERE clauses that lack null checks.";
     }
 
     public static final class RuleViolationTemplates {
@@ -154,5 +156,11 @@ public final class UserFacingMessages {
          */
         public static final String WARNING_TEMPLATE =
                 "Database operation executed in a class that implicitly inherits a sharing policy from %s %s. Explicitly assign a sharing policy instead.";
+    }
+
+    public static final class PerformNullCheckOnSoqlVariablesTemplates {
+        /** String param: name of variable */
+        public static final String MESSAGE_TEMPLATE =
+                "Null check is missing for variable %s used in SOQL query.";
     }
 }

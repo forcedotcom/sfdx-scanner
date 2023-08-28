@@ -51,6 +51,12 @@ public interface SymbolProvider {
     Optional<ApexValue<?>> getApexValue(String key);
 
     /**
+     * Get the ApexValue represented by {@code key} in the <b>class instance scope</b> at this
+     * moment. Resolving it to the most specific value.
+     */
+    Optional<ApexValue<?>> getApexValueFromInstanceScope(String key);
+
+    /**
      * Get the resolved value at the time the method was invoked. This is used to resolve what was
      * invoked during object constructors
      */
