@@ -92,4 +92,31 @@ public class GraphUtilTest {
     public void testInterfaceAndTriggerSameNameOK(TestInfo testInfo) {
         Assertions.assertDoesNotThrow(() -> TestUtil.compileTestFiles(g, testInfo));
     }
+
+    /**
+     * Verify that .sfdx directories in both the project dir and its subdirs are not
+     * compiled/analyzed.
+     */
+    @Test
+    public void testSkipsSfdxFolders(TestInfo testInfo) {
+        Assertions.assertDoesNotThrow(() -> TestUtil.compileTestFiles(g, testInfo));
+    }
+
+    /**
+     * Verify that node_modules directories in both the project dir and its subdirs are not
+     * compiled/analyzed.
+     */
+    @Test
+    public void testSkipsNodeModulesFolders(TestInfo testInfo) {
+        Assertions.assertDoesNotThrow(() -> TestUtil.compileTestFiles(g, testInfo));
+    }
+
+    /**
+     * Verify that .sf directories in both the project dir and its subdirs are not
+     * compiled/analyzed.
+     */
+    @Test
+    public void testSkipsSfFolders(TestInfo testInfo) {
+        Assertions.assertDoesNotThrow(() -> TestUtil.compileTestFiles(g, testInfo));
+    }
 }
