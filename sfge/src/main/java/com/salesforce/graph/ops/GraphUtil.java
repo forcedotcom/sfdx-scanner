@@ -1,10 +1,6 @@
 package com.salesforce.graph.ops;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.inE;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.or;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
 import com.salesforce.apex.jorje.*;
 import com.salesforce.collections.CollectionUtil;
@@ -21,16 +17,9 @@ import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -41,6 +30,8 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 public final class GraphUtil {
     private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
+    private static final Set<String> EXCLUDED_SUBDIRECTORIES =
+            new HashSet<>(Arrays.asList(".sfdx", ".sf", "node_modules"));
 
     /**
      * Retrieve a properly configured graph. All code should use this method instead of directly
@@ -182,7 +173,8 @@ public final class GraphUtil {
             throws GraphLoadException {
         List<Util.CompilationDescriptor> comps = new ArrayList<>();
         Path path = new File(sourceFolder).toPath();
-        SourceFileVisitor sourceFileVisitor = new SourceFileVisitor(comps);
+        SourceFileVisitor sourceFileVisitor =
+                new SourceFileVisitor(path, EXCLUDED_SUBDIRECTORIES, comps);
         try {
             Files.walkFileTree(path, sourceFileVisitor);
         } catch (IOException ex) {
@@ -233,14 +225,33 @@ public final class GraphUtil {
 
     private static final class SourceFileVisitor extends SimpleFileVisitor<Path> {
         private final List<Util.CompilationDescriptor> comps;
+        private final Path projectDir;
+        private final Set<String> excludedDirs;
         private Path lastVisitedFile;
 
         /**
+         * @param projectDir - the {@link Path} of the root directory of the project
          * @param comps - The master list of compilation descriptors, which will be built out by
          *     this class's #visitFile() method.
          */
-        private SourceFileVisitor(List<Util.CompilationDescriptor> comps) {
+        private SourceFileVisitor(
+                Path projectDir, Set<String> excludedDirs, List<Util.CompilationDescriptor> comps) {
             this.comps = comps;
+            this.projectDir = projectDir;
+            this.excludedDirs = new HashSet<>();
+            excludedDirs.forEach(
+                    excludedDir ->
+                            this.excludedDirs.add(projectDir + File.separator + excludedDir));
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) {
+            // First, check if this is a .sdfx folder
+            if (excludedDirs.contains(dir.toString())) {
+                LOGGER.info("Skipping subtree of path=" + dir);
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            return FileVisitResult.CONTINUE;
         }
 
         @Override
