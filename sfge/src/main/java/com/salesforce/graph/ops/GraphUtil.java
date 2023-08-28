@@ -30,8 +30,10 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 public final class GraphUtil {
     private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
-    private static final Set<String> EXCLUDED_SUBDIRECTORIES =
-            new HashSet<>(Arrays.asList(".sfdx", ".sf", "node_modules"));
+    // TODO MAKE THIS LIST OF EXCLUDED FOLDERS CONFIGURABLE
+    private static final Set<Path> EXCLUDED_SUBDIRECTORIES =
+            new HashSet<>(
+                    Arrays.asList(Paths.get(".sfdx"), Paths.get(".sf"), Paths.get("node_modules")));
 
     /**
      * Retrieve a properly configured graph. All code should use this method instead of directly
@@ -173,8 +175,7 @@ public final class GraphUtil {
             throws GraphLoadException {
         List<Util.CompilationDescriptor> comps = new ArrayList<>();
         Path path = new File(sourceFolder).toPath();
-        SourceFileVisitor sourceFileVisitor =
-                new SourceFileVisitor(path, EXCLUDED_SUBDIRECTORIES, comps);
+        SourceFileVisitor sourceFileVisitor = new SourceFileVisitor(comps);
         try {
             Files.walkFileTree(path, sourceFileVisitor);
         } catch (IOException ex) {
@@ -225,29 +226,21 @@ public final class GraphUtil {
 
     private static final class SourceFileVisitor extends SimpleFileVisitor<Path> {
         private final List<Util.CompilationDescriptor> comps;
-        private final Path projectDir;
-        private final Set<String> excludedDirs;
         private Path lastVisitedFile;
 
         /**
-         * @param projectDir - the {@link Path} of the root directory of the project
          * @param comps - The master list of compilation descriptors, which will be built out by
          *     this class's #visitFile() method.
          */
-        private SourceFileVisitor(
-                Path projectDir, Set<String> excludedDirs, List<Util.CompilationDescriptor> comps) {
+        private SourceFileVisitor(List<Util.CompilationDescriptor> comps) {
             this.comps = comps;
-            this.projectDir = projectDir;
-            this.excludedDirs = new HashSet<>();
-            excludedDirs.forEach(
-                    excludedDir ->
-                            this.excludedDirs.add(projectDir + File.separator + excludedDir));
         }
 
         @Override
         public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) {
-            // First, check if this is a .sdfx folder
-            if (excludedDirs.contains(dir.toString())) {
+            // exclude any instances of a directory matching those in the EXCLUDED_SUBDIRECTORIES
+            // set. Even nested folders like project1/src/.sdfx etc.
+            if (EXCLUDED_SUBDIRECTORIES.contains(dir.getName(dir.getNameCount() - 1))) {
                 LOGGER.info("Skipping subtree of path=" + dir);
                 return FileVisitResult.SKIP_SUBTREE;
             }
