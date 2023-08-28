@@ -40,6 +40,11 @@ public abstract class AbstractDefaultNoOpScope implements MutableSymbolProvider 
     }
 
     @Override
+    public Optional<ApexValue<?>> getApexValueFromInstanceScope(String key) {
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<ApexValue<?>> getReturnedValue(InvocableVertex vertex) {
         return Optional.empty();
     }

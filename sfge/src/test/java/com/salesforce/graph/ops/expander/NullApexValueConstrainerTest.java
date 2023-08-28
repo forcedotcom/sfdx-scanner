@@ -9,6 +9,7 @@ import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.ApexPathVertexMetaInfo;
 import com.salesforce.graph.ops.ApexPathUtil;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.apex.ApexStringValue;
 import com.salesforce.graph.symbols.apex.Constraint;
 import com.salesforce.graph.vertex.AbstractVisitingVertexPredicate;
@@ -94,7 +95,7 @@ public class NullApexValueConstrainerTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
                         return vertex instanceof StandardConditionVertex;
                     }
                 };
@@ -183,7 +184,7 @@ public class NullApexValueConstrainerTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
                         return vertex instanceof StandardConditionVertex;
                     }
                 };

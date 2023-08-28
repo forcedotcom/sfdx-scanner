@@ -170,7 +170,7 @@ public final class JSONDeserializeFactory {
     /** Indicates that a path contains {@link MethodCallExpressionVertex} */
     private static final class MethodCallExpressionPredicate implements VertexPredicate {
         @Override
-        public boolean test(BaseSFVertex vertex) {
+        public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
             return vertex instanceof MethodCallExpressionVertex;
         }
 

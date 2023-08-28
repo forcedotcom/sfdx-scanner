@@ -59,6 +59,11 @@ public final class CloningSymbolProvider implements SymbolProvider {
     }
 
     @Override
+    public Optional<ApexValue<?>> getApexValueFromInstanceScope(String key) {
+        return delegate.getApexValueFromInstanceScope(key).map(a -> a.deepClone());
+    }
+
+    @Override
     public ChainedVertex getValueAtTimeOfInvocation(InvocableVertex vertex, ChainedVertex value) {
         // Vertices are singletons
         return delegate.getValueAtTimeOfInvocation(vertex, value);
