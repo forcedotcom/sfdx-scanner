@@ -11,7 +11,7 @@ const CATALOG_START = 'CATALOG_START';
 const CATALOG_END = 'CATALOG_END';
 const VIOLATIONS_START = "VIOLATIONS_START";
 const VIOLATIONS_END = "VIOLATIONS_END";
-const ERROR_START = "SfgeErrorStart\n";
+const ERROR_START = "SfgeErrorStart";
 
 
 type SfgePartialRule = {
@@ -290,7 +290,8 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 		} else {
 			// If the error start string is present, it means we exited cleanly and everything prior
 			// to the string is noise that can be omitted.
-			return output.slice(errorStart + ERROR_START.length);
+			// Note: The substring is basically guaranteed to start with some whitespace, so just lop that off.
+			return output.slice(errorStart + ERROR_START.length).trimStart();
 		}
 	}
 

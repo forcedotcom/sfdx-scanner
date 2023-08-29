@@ -61,7 +61,7 @@ describe('SfgeDfaEngine', () => {
 			await testEngine.init();
 			const spoofedOutput = fs.readFileSync(path.join('test', 'code-fixtures', 'sfge-results', 'delineated_error_without_partial_results.txt')).toString();
 			// ASSUMPTION: Line 21 of the spoofed output is where the delineation is.
-			const expectedError = spoofedOutput.split('\n').slice(21).join('\n');
+			const expectedError = spoofedOutput.split('\n').slice(21).join('\n').trimStart();
 
 			// ==== TESTED METHOD ====
 			const errorMessage = testEngine.parseError(spoofedOutput);
@@ -115,7 +115,7 @@ describe('SfgeDfaEngine', () => {
 			const spoofedOutput = fs.readFileSync(path.join('test', 'code-fixtures', 'sfge-results', 'delineated_error_without_partial_results.txt')).toString();
 			const uxSpy = Sinon.spy((testEngine as any).eventCreator, 'createUxErrorMessage');
 			// ASSUMPTION: Line 21 of the spoofed output is where the delineation is.
-			const expectedError = spoofedOutput.split('\n').slice(21).join('\n');
+			const expectedError = spoofedOutput.split('\n').slice(21).join('\n').trimStart();
 
 			// ==== TESTED METHOD ====
 			let err: string = null;
