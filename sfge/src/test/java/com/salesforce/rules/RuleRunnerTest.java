@@ -267,7 +267,6 @@ public class RuleRunnerTest {
                     && vertex.getParentClass().get().getDefiningType().startsWith("MyClass");
         }
 
-
         public static PathTraversalTestRule getInstance() {
             return LazyHolder.INSTANCE;
         }

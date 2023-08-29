@@ -215,16 +215,44 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 		try {
 			// Execute graph engine
 			const output = await SfgeExecuteWrapper.runSfge(targets, filteredRules, sfgeConfig);
-			results = this.processStdout(output);
+			// If the transaction succeeded, then just use whatever results we find
+			// inside the output.
+			results = this.parseViolations(output);
 		} catch (e) {
-			// Handle errors thrown
-			const message = e instanceof Error ? e.message : e as string;
-			this.logger.trace(`${this.getSubVariantName()} evaluation failed. ${message}`);
-			await this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [AbstractSfgeEngine.processStderr(message)]);
-			// Handle output results no matter the outcome.
-			results = this.processStdout(message);
+			// Get the message from the error.
+			const message: string = e instanceof Error ? e.message : e as string;
+			// The error message contains both stdout and stderr, so we have to process
+			// it as both of those things.
+			results = await this.processExecutionFailure(message);
 		}
 		this.logger.trace(`Found ${results.length} results for ${this.getSubVariantName()}`);
+		return results;
+	}
+
+	/**
+	 * Accepts the complete output of a failed transaction.
+	 * If partial results can be found in the output, they are returned and any errors
+	 * are logged to the console.
+	 * If no partial results are found, then the error is rethrown.
+	 * @param rawErrorMessage Per {@link SfgeExecuteWrapper.handleResults}, the concatenated {@code stdout} and {@code stderr} from a failed execution.
+	 * @protected
+	 */
+	protected async processExecutionFailure(rawErrorMessage: string): Promise<RuleResult[]> {
+		this.logger.trace(`${this.getSubVariantName()} evaluation failed. ${rawErrorMessage}`);
+		// Try to pull partial results from the message.
+		const results: RuleResult[] = this.parseViolations(rawErrorMessage);
+		// Pull the error from the message.
+		const errorMessage = AbstractSfgeEngine.parseError(rawErrorMessage);
+
+		// If there are no results, then we assume the error was fatal and rethrow it,
+		// to forcibly bring it to the user's attention.
+		if (results.length === 0) {
+			throw new Error(errorMessage);
+		}
+
+		// If there are results, then the error was definitely non-fatal, but results are incomplete.
+		// Log the error to the console, but still return the partial results.
+		await this.eventCreator.createUxErrorMessage('error.external.sfgeIncompleteAnalysis', [errorMessage]);
 		return results;
 	}
 
@@ -246,7 +274,13 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 		return await this.config.isEngineEnabled(AbstractSfgeEngine.ENGINE_ENUM);
 	}
 
-	private static processStderr(output: string): string {
+	/**
+	 * Parses {@code output} to find an error message, or returns the entire string if no
+	 * designated error can be found.
+	 * @param output String containing (possibly among other things) the {@code stderr} from a failed transaction.
+	 * @protected
+	 */
+	protected static parseError(output: string): string {
 		// We should handle errors by checking for our error start string.
 		const errorStart = output.indexOf(ERROR_START);
 		if (errorStart === -1) {
@@ -260,17 +294,25 @@ export abstract class AbstractSfgeEngine extends AbstractRuleEngine {
 		}
 	}
 
-	protected processStdout(output: string): RuleResult[] {
-		// Pull the violation objects from the output.
+	/**
+	 * Seeks and returns violations within {@code output}, returning an empty array if none can be found.
+	 * @param output String containing (possibly among other things) the {@code stdout} from a transaction.
+	 * @protected
+	 */
+	protected parseViolations(output: string): RuleResult[] {
+		// Figure out where the violations start.
 		const violationsStart = output.indexOf(VIOLATIONS_START);
+		// If we can't find the start character, return an empty list.
 		if (violationsStart === -1) {
 			return [];
 		}
 
+		// Pull the raw SFGE violations out of the output.
 		const violationsEnd = output.indexOf(VIOLATIONS_END);
 		const violationsJson = output.slice(violationsStart + VIOLATIONS_START.length, violationsEnd);
 		const sfgeViolations: SfgeViolation[] = JSON.parse(violationsJson) as SfgeViolation[];
 
+		// If there are no SFGE violatiosn, return an empty list.
 		if (!sfgeViolations || sfgeViolations.length === 0) {
 			// Exit early for no results.
 			return [];
