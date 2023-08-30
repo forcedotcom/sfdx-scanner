@@ -17,7 +17,7 @@ public final class ApexSoqlValueFactory {
                 if (QUERY.equalsIgnoreCase(methodName)
                         && chainedNames.size() == 1
                         && DATABASE.equalsIgnoreCase(chainedNames.get(0))) {
-                    if (vertex.getParameters().size() != 1) {
+                    if (vertex.getParameters().isEmpty() || vertex.getParameters().size() > 2) {
                         throw new UnexpectedException(vertex);
                     }
                     // Do not resolve this parameter, it will be resolved in #setConcreteType
