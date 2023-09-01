@@ -28,21 +28,11 @@ export class RunOutputProcessor {
 
 
 	public processRunOutput(rrr: RecombinedRuleResults): AnyJson {
-		const {minSev, summaryMap, results} = rrr;
-		// If the results are an empty string, it means no violations were found.
-		if (results === '') {
-			// Build an appropriate message...
-			const msg = messages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
-			// ...log it to the console...
-			this.ux.log(msg);
-			// ...and return it for use with the --json flag.
-			return msg;
-		}
+		const {minSev, results} = rrr;
 
-		// If we actually have violations, there's some stuff we need to do with them. We'll build an array of message parts,
-		// and then log them all at the end.
+		// With the list of violations, we'll build an array of message parts, and then log them all at the end.
 		let msgComponents: string[] = [];
-		// We need a summary of the information we were provided.
+		// We need a summary of the information we were provided (blank/empty if no violations).
 		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(rrr)];
 		// We need to surface the results directly to the user, then add a message describing what we did.
 		msgComponents.push(this.opts.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
