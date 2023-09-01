@@ -5,8 +5,8 @@ lang: en
 
 Salesforce Graph Engine includes path-based and data-flow analysis rules.
 
-| Rule | Type | Catgegory | Status | Description |
-| -------- | ----------- | ----------- |----------- | ----------- |
+| Rule | Type | Category | Status | Description |
+| -------- | ----------- | ---------- |----------- | ----------- |
 | ApexFlsViolationRule | Path-based analysis | Security | Generally Available (GA) | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
 | ApexNullPointerExceptionRule | Path-based analysis | Error-Prone | GA | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
 | AvoidDatabaseOperationInLoop | Path-based analysis | Performance | GA | Detects database operations in loops that degrade performance. |

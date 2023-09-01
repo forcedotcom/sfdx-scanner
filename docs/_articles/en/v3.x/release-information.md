@@ -12,7 +12,7 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
-## [v3.16.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.16.0) (09-02-2023)
+## [v3.16.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.16.0) (09-05-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.16.0...v3.15.0)
 
@@ -26,6 +26,24 @@ We publish the latest Code Analyzer monthly.
 * NEW (CodeAnalyzer): To scan your code easily, we released the [Salesforce Code Analyzer Visual Studio Code extension (beta)](./en/v3.x/code-analyzer-vs-code-extension). 
 
 **Closed issues:**
+* [BUG] ERROR: Class is defined in multiple files [\#1129](https://github.com/forcedotcom/sfdx-scanner/issues/1129)
+* [BUG] [\#1163](https://github.com/forcedotcom/sfdx-scanner/issues/1163)
+* [BUG] InternalExecutionError - Database.query with AccessLevel [\#1122](https://github.com/forcedotcom/sfdx-scanner/issues/1122)
+* [BUG]  sfdx scanner:run:dfa not working [\#1160](https://github.com/forcedotcom/sfdx-scanner/issues/1160)
+* [BUG] eslint-lwc engines never runs  [\#1151](https://github.com/forcedotcom/sfdx-scanner/issues/1151)
+* JAVA_HOME error [\#1126](https://github.com/forcedotcom/sfdx-scanner/issues/1126)
+* [BUG] Installation problem in Apple M1 Pro [\#1141](https://github.com/forcedotcom/sfdx-scanner/issues/1141)
+* [BUG] Method-level targeting isn't supported with this command. [\#1139](https://github.com/forcedotcom/sfdx-scanner/issues/1139)
+* Getting 'sourceCode.getScope is not a function' during js file validation [\#1102](https://github.com/forcedotcom/sfdx-scanner/issues/1102)
+
+**Merged pull requests**
+* NEW (GraphEngine): @W-13569674@: Create PerformNullCheckOnSoqlVariables rule, fix instance variable resolution [\#1149](https://github.com/forcedotcom/sfdx-scanner/pull/1149)
+* FIX (GraphEngine): @W-13869734@: Fix crash on explicit access level specified in Database.query method [\#1154](https://github.com/forcedotcom/sfdx-scanner/pull/1154)
+* FIX (GraphEngine): @W-14009712@: GraphEngine rethrows fatal errors instead of logging them. [\#1162](https://github.com/forcedotcom/sfdx-scanner/pull/1162)
+* FIX (GraphEngine): @W-14011226@: Allow graph engine to skip .sfdx, .sf, and node_modules folders when expanding paths [\#1159](https://github.com/forcedotcom/sfdx-scanner/pull/1159)
+* CHANGE (GraphEngine): @W-13959843@: UseWithSharingOnDatabaseOperation now GA. [\#1156](https://github.com/forcedotcom/sfdx-scanner/pull/1156)
+* CHANGE (GraphEngine): @W-13959834@: AvoidDatabaseOperationInLoop now GA. [\#1155](https://github.com/forcedotcom/sfdx-scanner/pull/1155)
+* FIX (GraphEngine): @W-13845614@: Fix bug where trigger and class with same name are not allowed [\#1152](https://github.com/forcedotcom/sfdx-scanner/pull/1152)
 
 ## [v3.15.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.15.0) (08-02-2023)
 
