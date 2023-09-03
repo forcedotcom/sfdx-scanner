@@ -1,6 +1,13 @@
-[![License](https://img.shields.io/npm/l/scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/master/package.json)
-
 # Salesforce Code Analyzer
+
+[![Version](https://img.shields.io/npm/v/@salesforce/sfdx-scanner.svg)](https://npmjs.org/package/@salesforce/sfdx-scanner)
+[![Downloads/week](https://img.shields.io/npm/dw/@salesforce/sfdx-scanner.svg)](https://npmjs.org/package/@salesforce/sfdx-scanner)
+[![Downloads/total](https://img.shields.io/npm/dt/@salesforce/sfdx-scanner.svg)](https://npmjs.org/package/@salesforce/sfdx-scanner)
+[![GitHub stars](https://img.shields.io/github/stars/forcedotcom/sfdx-scanner)](https://gitHub.com/forcedotcom/sfdx-scanner/stargazers/)
+[![GitHub contributors](https://img.shields.io/github/contributors/forcedotcom/sfdx-scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/graphs/contributors/)
+[![License](https://img.shields.io/npm/l/@salesforce/sfdx-scanner.svg)](https://github.com/forcedotcom/sfdx-scanner/blob/main/LICENSE.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
 Salesforce Code Analyzer is a unified tool for static analysis of source code.
 Code Analyzer analyzes multiple languages.
 It relies on a consistent command-line interface and produces a results file of rule violations.
