@@ -5,15 +5,16 @@ lang: en
 
 Salesforce Graph Engine includes path-based and data-flow analysis rules.
 
-| Rule | Type | Catgegory | Status | Description |
-| -------- | ----------- | ----------- |----------- | ----------- |
+| Rule | Type | Category | Status | Description |
+| -------- | ----------- | ---------- |----------- | ----------- |
 | ApexFlsViolationRule | Path-based analysis | Security | Generally Available (GA) | Detects Create, Read, Update, and Delete (CRUD) and Field-Level Security violations. |
 | ApexNullPointerExceptionRule | Path-based analysis | Error-Prone | GA | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
-| AvoidDatabaseOperationInLoop | Path-based analysis | Performance | Pilot | Detects database operations in loops that degrade performance. |
+| AvoidDatabaseOperationInLoop | Path-based analysis | Performance | GA | Detects database operations in loops that degrade performance. |
 | AvoidMultipleMassSchemaLookups | Path-based analysis | Performance | GA | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
+| PerformNullCheckOnSoqlVariables | Path-based analysis | Performance | Pilot | Identifies SOQL queries with variables in WHERE clauses that lack null checks. |
 | RemoveUnusedMethod | Path-based analysis | Performance | Pilot | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 | UnimplementedTypeRule | Graph-based analysis | Performance | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
-| UseWithSharingOnDatabaseOperation | Path-based analysis | Security | Pilot | Detects database operations outside with-sharing-annotated classes. |
+| UseWithSharingOnDatabaseOperation | Path-based analysis | Security | GA | Detects database operations outside with-sharing-annotated classes. |
 
 ## Running Graph Engine GA Rules
 Run all Graph Engine rules against your code, or run a subset of rules by type or by category.
@@ -205,98 +206,6 @@ Explanation:
 
 The operation dereferences a null object and throws a NullPointerException. Review your code and add a null check.
 
-### AvoidMultipleMassSchemaLookups Rule <a name='AvoidMultipleMassSchemaLookups'>#</a>
-
-AvoidMultipleMassSchemaLookups is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
-
-These methods are identified by AvoidMultipleMassSchemaLookups.
-
-* `Schema.getGlobalDescribe()`
-* `Schema.describeSObjects(...)`
-
-Flagged lookups include:
-
-* Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
-* Multiple expensive schema lookups that are invoked
-* An expensive schema lookup that is executed multiple times
-
-These common scenarios trigger a violation from AvoidMultipleMassSchemaLookups.
-* `Schema.getGlobalDescribe()` within a loop
-* `Schema.describeSObjects(...)` within a loop
-* `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
-* `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
-
-#### Definitions
-
-| Rule Component | Definition                                  																		|
-| ---------		 | ---------                                															  			|
-|**Source**		 |																													|
-|		 	  	 | `@AuraEnabled`-annotated methods     																			|
-|				 |`@InvocableMethod`-annotated methods																			  	|
-|     			 | `@NamespaceAccessible`-annotated methods 																		|
-| 				 |`@RemoteAction`-annotated methods																				  	|
-|				 |Any method returning a `PageReference` object																	  	|
-|				 |`public`-scoped methods on Visualforce Controllers																|
-|				 |`global`-scoped methods on any class																			  	|
-|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation																				|
-| **Sink**		 | 																													|
-| 		  	  	 |`Schema.getGlobalDescribe()`													|
-|				 |`Schema.describeSObjects(...)`																										|
-
-#### Interpreting AvoidMultipleMassSchemaLookups Results
-Match any violation message that you receive with these cases to understand more about the violation.
-
-##### Loop Case
-
-> `Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
-
-Explanation:
-
-Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` outside the loop, then rescan your code. 
-
-##### Multiple Schema Lookups Are Invoked Case
-
-> Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
-
-Explanation:
-
-Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObjects`. Modify your code so that only one expensive schema lookup is invoked.
-
-##### More Than One Execution in a Path Case
-
-> `Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
-
-Explanation:
-
-`Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code.
-
-### UnimplementedTypeRule <a name='UnimplementedTypeRule'>#</a>
-
-UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
-
-#### Definition
-
-UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
-
-#### Interpreting UnimplementedTypeRule Results
-
-Match any violation message that you receive with this case to understand more about the violation.
-
-*Common Case*
-
-> Extend, implement, or delete %s %s
-
-Explanation:
-
-Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
-
-#### UnimplementedTypeRule Limitations
-
-Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
-
-## Pilot Rules
-
 ### AvoidDatabaseOperationInLoop <a name='AvoidDatabaseOperationInLoop'>#</a>
 
 AvoidDatabaseOperationInLoop detects database operations that occur inside loops and which cause performance degradation. Database operations within loops cause performance degradations and exceed Salesforce Governor Limits. 
@@ -362,45 +271,94 @@ Explanation:
 
 Your code executes a database operation inside a loop statement. Modify your code to move the database operation outside the loop, then rescan your code.
 
-### RemoveUnusedMethod Rule <a name='RemoveUnusedMethod'>#</a>
+### AvoidMultipleMassSchemaLookups Rule <a name='AvoidMultipleMassSchemaLookups'>#</a>
 
-RemoveUnusedMethod is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. It detects:
+AvoidMultipleMassSchemaLookups is a path-based rule that detects scenarios where expensive schema lookups are made more than one time in a path and cause performance degradation. 
 
-- static methods
-- instance methods
+These methods are identified by AvoidMultipleMassSchemaLookups.
 
-RemoveUnusedMethod recognizes these entry points.
+* `Schema.getGlobalDescribe()`
+* `Schema.describeSObjects(...)`
 
-* @AuraEnabled-annotated methods
-* @InvocableMethod-annotated methods
-* @NamespaceAccessible-annotated methods
-* @RemoteAction-annotated methods
-* Any method returning a PageReference object
-* Public-scoped methods on Visualforce Controllers
-* Global-scoped methods on any class
-* Messaging.InboundEmailResult handleInboundEmail() methods on implementations of Messaging.InboundEmailHandler
-* Any method targeted during invocation
+Flagged lookups include:
+
+* Lookups within these types of loops: ForLoopStatement, ForEachLoopStatement, DoWhileStatement, and WhileLoopStatement
+* Multiple expensive schema lookups that are invoked
+* An expensive schema lookup that is executed multiple times
+
+These common scenarios trigger a violation from AvoidMultipleMassSchemaLookups.
+* `Schema.getGlobalDescribe()` within a loop
+* `Schema.describeSObjects(...)` within a loop
+* `Schema.getGlobalDescribe()` preceding a `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` method call anywhere in the path
+* `Schema.describeSObjects(...)` preceding a `Schema.describeSObjects(...)` or `Schema.getGlobalDescribe()` method call anywhere in the path
+
+#### Definitions
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |`Schema.getGlobalDescribe()`													|
+|				 |`Schema.describeSObjects(...)`																					|
+
+#### Interpreting AvoidMultipleMassSchemaLookups Results
+Match any violation message that you receive with these cases to understand more about the violation.
+
+##### Loop Case
+
+> `Schema.getGlobalDescribe` was called inside a loop. `[ForEachStatement at AuraEnabledFls:27]`
+
+Explanation:
+
+Your code calls `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` inside a loop statement. Modify your code to move the `Schema.getGlobalDescribe()` or `Schema.describeSObjects(...)` outside the loop, then rescan your code. 
+
+##### Multiple Schema Lookups Are Invoked Case
+
+> Multiple expensive schema lookups are invoked. `[Schema.describeSObjects at AuraEnabledFls:27]`
+
+Explanation:
+
+Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObjects`. Modify your code so that only one expensive schema lookup is invoked.
+
+##### More Than One Execution in a Path Case
+
+> `Schema.getGlobalDescribe` executed multiple times in the call stack. `[getFields at AuraEnabledFls:27, getFields at AuraEnabledFls:28, getFields at AuraEnabledFls:29]`
+
+Explanation:
+
+`Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code
+### UnimplementedTypeRule <a name='UnimplementedTypeRule'>#</a>
+
+UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
 
 #### Definition
-RemoveUnusedMethod uses sources like ApexFlsViolationRule does, but the RemoveUnusedMethod sinks are different. Instead of seeking DML operations that occur in the course of a path, RemoveUnusedMethod sinks track all method invocations that occur on that path and use that information to identify methods that are never invoked.
 
-#### Interpreting RemoveUnusedMethod Results
+UnimplementedTypeRule is a traditional static analysis rule where a violation occurs at a point in the code where the interface or abstract class is declared. It doesn’t use sources or sinks.
+
+#### Interpreting UnimplementedTypeRule Results
 
 Match any violation message that you receive with this case to understand more about the violation.
 
 *Common Case*
 
-> Method %s in class %s isn’t used in any path from any recognized entry point.
- 
+> Extend, implement, or delete %s %s
+
 Explanation:
 
-Because no invocations of the indicated method were found in the paths originating from the identified entry points, the method is unnecessary and can be deleted.
+Because this abstract class or interface has no implementations or extensions, it can’t be instantiated. It’s unnecessary and can be deleted.
 
-#### RemoveUnusedMethod Limitations
+#### UnimplementedTypeRule Limitations
 
-- RemoveUnusedMethod works on static methods and instance methods. Constructors aren't detected.
-- Global methods are intentionally excluded because their external usage is assumed.
-- If the set of files included in `--target` is smaller than the files included in `--projectdir`, then `RemoveUnusedMethod` can return unexpected results. For that reason, we recommend running this rule against your whole codebase, not against individual files.
+Because UnimplementedType rule excludes `global` scoped classes from consideration, these classes are prevented from being thrown as false positives and aren’t false negatives.
 
 ### UseWithSharingOnDatabaseOperation <a name='UseWithSharingOnDatabaseOperation'>#</a>
 
@@ -450,6 +408,93 @@ The database operation occurs in a `without sharing` context, either because it 
 Explanation:
 
 This warning is thrown when a database operation occurs in a class that has no explicitly declared sharing model, and therefore it implicitly inherits `with sharing` from its calling class. Even though the operation is secure in this specific case, it isn’t secure by default. Explicitly assign this class a sharing model to make it secure by default.
+
+## Pilot Rules
+
+### PerformNullCheckOnSoqlVariables <a name='PerformNullCheckOnSoqlVariables'>#</a>
+
+PerformNullCheckOnSoqlVariables identifies SOQL queries with variables in WHERE clauses that lack null checks. 
+SOQL queries with variables on WHERE clauses become expensive when the variable value is unintentionally null. When the variable value is null, an O(1) operation turns into an O(n) operation. The entire table is scanned, but returns no results. 
+
+#### Definition
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |Any database operation													|						
+| **Sanitizer**	 |				                                  														      		|
+|                |Null checks (`if (x != null) {`)|
+|				 |Explicit assignment to non-null (`String x = 'asdf'`) |
+|		  		 |Checks for specific non-null values (`if (x == 7) {`) |
+
+
+#### Interpreting PerformNullCheckOnSoqlVariables Results
+
+*Code Example*
+
+```
+public Account[] getAccountsMatchingName(String targetName) {
+	return [SELECT Id, Name FROM Account WHERE Name := targetName;
+}
+```
+
+*Common Case*
+
+> Null check is missing for variable targetName used in SOQL query.
+
+*Parameter Explanation*
+
+The mentioned variable is referenced by a SOQL query, and the variable is missing a null check. This behavior is expensive. Instead, explicitly perform  a null check on this variable, or assign it to a specific non-null value.
+
+### RemoveUnusedMethod Rule <a name='RemoveUnusedMethod'>#</a>
+
+RemoveUnusedMethod is a path-based analysis rule that detects many methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. It detects:
+
+- static methods
+- instance methods
+
+RemoveUnusedMethod recognizes these entry points.
+
+* @AuraEnabled-annotated methods
+* @InvocableMethod-annotated methods
+* @NamespaceAccessible-annotated methods
+* @RemoteAction-annotated methods
+* Any method returning a PageReference object
+* Public-scoped methods on Visualforce Controllers
+* Global-scoped methods on any class
+* Messaging.InboundEmailResult handleInboundEmail() methods on implementations of Messaging.InboundEmailHandler
+* Any method targeted during invocation
+
+#### Definition
+RemoveUnusedMethod uses sources like ApexFlsViolationRule does, but the RemoveUnusedMethod sinks are different. Instead of seeking DML operations that occur in the course of a path, RemoveUnusedMethod sinks track all method invocations that occur on that path and use that information to identify methods that are never invoked.
+
+#### Interpreting RemoveUnusedMethod Results
+
+Match any violation message that you receive with this case to understand more about the violation.
+
+*Common Case*
+
+> Method %s in class %s isn’t used in any path from any recognized entry point.
+ 
+Explanation:
+
+Because no invocations of the indicated method were found in the paths originating from the identified entry points, the method is unnecessary and can be deleted.
+
+#### RemoveUnusedMethod Limitations
+
+- RemoveUnusedMethod works on static methods and instance methods. Constructors aren't detected.
+- Global methods are intentionally excluded because their external usage is assumed.
+- If the set of files included in `--target` is smaller than the files included in `--projectdir`, then `RemoveUnusedMethod` can return unexpected results. For that reason, we recommend running this rule against your whole codebase, not against individual files.
 
 ## Roadmap	
 
