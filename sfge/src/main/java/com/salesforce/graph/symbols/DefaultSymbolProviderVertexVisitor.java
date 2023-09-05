@@ -154,6 +154,14 @@ public class DefaultSymbolProviderVertexVisitor
     }
 
     @Override
+    public Optional<ApexValue<?>> getApexValueFromInstanceScope(String key) {
+        // implementation of #getApexValueFromInstance should correctly walk up stack of scopes
+        // with #getClosestClassInstanceScope to find the relevant class instance, so here we can
+        // just call #getApexValueFromInstance on the first scope on the stack
+        return scopeStack.peek().getMutableSymbolProvider().getApexValueFromInstanceScope(key);
+    }
+
+    @Override
     public Optional<ApexValue<?>> getReturnedValue(InvocableVertex vertex) {
         return scopeStack.peek().getMutableSymbolProvider().getReturnedValue(vertex);
     }

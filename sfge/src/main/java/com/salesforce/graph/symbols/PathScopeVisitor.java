@@ -319,6 +319,18 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
     }
 
     @Override
+    public Optional<ApexValue<?>> getApexValueFromInstanceScope(String key) {
+        // resolve the apex value from the scope that is a ClassInstanceScope, not via the stack
+        Optional<AbstractClassInstanceScope> classInstanceScopeOpt = getClosestClassInstanceScope();
+
+        if (classInstanceScopeOpt.isPresent()) {
+            return classInstanceScopeOpt.get().getApexValue(key);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<ApexValue<?>> getApexValue(String key) {
         Optional<ApexValue<?>> result;
 
@@ -371,7 +383,15 @@ public abstract class PathScopeVisitor extends BaseScopeVisitor<PathScopeVisitor
     public Optional<ApexValue<?>> getApexValue(VariableExpressionVertex var) {
         String symbolicName = var.getSymbolicName().orElseThrow(() -> new UnexpectedException(var));
 
-        ApexValue<?> result = getApexValue(symbolicName).orElse(null);
+        // Since getApexValue(..) only resolves values from the most recent scope, manually check to
+        // see
+        // if this variable contains a "this." reference and handle it appropriately.
+        ApexValue<?> result;
+        if (var.isThisReference()) {
+            result = getApexValueFromInstanceScope(symbolicName).orElse(null);
+        } else {
+            result = getApexValue(symbolicName).orElse(null);
+        }
 
         // Handle references to static class references
         String[] keys = var.getFullName().split("\\.");

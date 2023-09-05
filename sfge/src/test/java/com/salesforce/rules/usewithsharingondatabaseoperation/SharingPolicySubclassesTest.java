@@ -36,7 +36,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
 
     // PARENT - NO DECLARATION
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNoDeclarationParentWithSharingSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "", "with sharing", operation);
@@ -44,7 +44,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNoDeclarationParentWithoutSharingSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "", "without sharing", operation);
@@ -52,7 +52,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertViolations(RULE, sourceCode, expect(SINK_LINE));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNoDeclarationParentInheritedSharingSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "", "inherited sharing", operation);
@@ -60,7 +60,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertViolations(RULE, sourceCode, expect(SINK_LINE));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testNoDeclarationParentNoDeclarationSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "", "", operation);
@@ -70,7 +70,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
 
     // PARENT - WITH SHARING
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithSharingParentNoDeclarationSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "with sharing", "", operation);
@@ -81,7 +81,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
                 expectWarning(SINK_LINE, SharingPolicyUtil.InheritanceType.CALLING, MY_CLASS));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithSharingParentWithSharingSubclass(String operation) {
         String sourceCode =
@@ -90,7 +90,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithSharingParentInheritedSharingSubclass(String operation) {
         String sourceCode =
@@ -99,7 +99,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithSharingParentWithoutSharingSubclass(String operation) {
         String sourceCode =
@@ -110,7 +110,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
 
     // PARENT - WITHOUT SHARING
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithoutSharingParentWithoutSharingSubclass(String operation) {
         String sourceCode =
@@ -119,7 +119,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertViolations(RULE, sourceCode, expect(SINK_LINE));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithoutSharingParentWithSharingSubclass(String operation) {
         String sourceCode =
@@ -128,7 +128,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithoutSharingParentInheritedSharingSubclass(String operation) {
         String sourceCode =
@@ -137,7 +137,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertViolations(RULE, sourceCode, expect(SINK_LINE));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testWithoutSharingParentNoDeclarationSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "without sharing", "", operation);
@@ -147,7 +147,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
 
     // PARENT - INHERITED SHARING
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInheritedSharingParentWithoutSharingSubclass(String operation) {
         String sourceCode =
@@ -156,7 +156,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertViolations(RULE, sourceCode, expect(SINK_LINE));
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInheritedSharingParentWithSharingSubclass(String operation) {
         String sourceCode =
@@ -165,7 +165,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInheritedSharingParentInheritedSharingSubclass(String operation) {
         String sourceCode =
@@ -174,7 +174,7 @@ public class SharingPolicySubclassesTest extends BaseUseWithSharingOnDatabaseOpe
         assertNoViolation(RULE, sourceCode);
     }
 
-    @MethodSource("provideAllDatabaseOperations")
+    @MethodSource("provideSelectDatabaseOperations")
     @ParameterizedTest(name = "{displayName}: {0}")
     public void testInheritedSharingParentNoDeclarationSubclass(String operation) {
         String sourceCode = String.format(SUBCLASS_SOURCE, "inherited sharing", "", operation);

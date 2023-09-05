@@ -4,17 +4,15 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.salesforce.config.SfgeConfigProvider;
+import com.salesforce.exception.ProgrammingException;
 import com.salesforce.exception.UnexpectedException;
+import com.salesforce.graph.ops.MethodUtil;
 import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.symbols.apex.ApexValue;
-import com.salesforce.graph.vertex.BaseSFVertex;
-import com.salesforce.graph.vertex.ChainedVertex;
-import com.salesforce.graph.vertex.DmlStatementVertex;
-import com.salesforce.graph.vertex.MethodCallExpressionVertex;
-import com.salesforce.graph.vertex.SFVertex;
-import com.salesforce.graph.vertex.SoqlExpressionVertex;
+import com.salesforce.graph.vertex.*;
 import com.salesforce.rules.fls.apex.operations.FlsConstants.FlsValidationType;
+import com.salesforce.rules.ops.DatabaseOperationUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +33,10 @@ public class FlsValidationCentral {
     private static final Logger LOGGER = LogManager.getLogger(FlsValidationCentral.class);
     private final boolean IS_WARNING_VIOLATION_DISABLED =
             SfgeConfigProvider.get().isWarningViolationDisabled();
+
+    private static final String USER_MODE = "USER_MODE";
+    private static final String ACCESS_LEVEL = "AccessLevel";
+    private static final String SYSTEM = "System";
 
     private final Set<FlsValidationRepresentation.Info> existingSchemaBasedValidations;
     private final Set<FlsViolationInfo> violations;
@@ -208,7 +210,9 @@ public class FlsValidationCentral {
         }
 
         ChainedVertex parameter = parameters.get(0);
-        final ValidationConverter validationConverter = new ValidationConverter(validationType);
+        final ValidationConverter validationConverter =
+                new ValidationConverter(
+                        validationType, hasUserModeAccessLevelSpecified(vertex, symbols));
 
         final Optional<ApexValue<?>> apexValueOptional =
                 ScopeUtil.resolveToApexValue(symbols, parameter);
@@ -244,6 +248,82 @@ public class FlsValidationCentral {
                 expectedValidations.addAll(validationReps);
             }
         }
+    }
+
+    /**
+     * Check if a {@link MethodCallExpressionVertex} (of the form Database.whateverOperation()) has
+     * System.AccessLevel.USER_MODE as its last parameter. This would force the query to operate
+     * safely and not require FLS checks.
+     */
+    private boolean hasUserModeAccessLevelSpecified(
+            MethodCallExpressionVertex method, SymbolProvider symbols) {
+        // the only way DatabaseOperationUtil.isDatabaseOperation returns true on a
+        // MethodCallExpressionVertex is if it is a Database.whateverOperation method. Therefore,
+        // this effectively checks to make sure we are only looking at methods in the Database
+        // class.
+        if (!DatabaseOperationUtil.isDatabaseOperation(method)) {
+            throw new ProgrammingException(
+                    "hasUserModeAccessLevel should only be called on Database.dmlOperation() methods.");
+        }
+
+        List<ChainedVertex> params = method.getParameters();
+
+        // access level is at least the 2nd parameter, never the first
+        if (params.size() < 2) {
+            return false;
+        }
+
+        // access level param is always the last parameter in Database.whateverMethod(...)
+        ChainedVertex possibleAccessLevelParam = params.get(params.size() - 1);
+        Optional<ChainedVertex> resolvedChainedVertexOpt;
+        // legitimate options for the accessLevel parameter are a method call and a variable
+        if (possibleAccessLevelParam instanceof MethodCallExpressionVertex) {
+            // if the parameter contains a method call, try to resolve it to an ApexValue
+            resolvedChainedVertexOpt =
+                    MethodUtil.getApexValue(possibleAccessLevelParam, symbols)
+                            .flatMap(ApexValue::getValueVertex);
+        } else if (possibleAccessLevelParam instanceof VariableExpressionVertex) {
+            // vertex is not a method call; check to see if it is System.AccessLevel.USER_MODE
+            if (isUserModeAccessVariableVertex(
+                    (VariableExpressionVertex) possibleAccessLevelParam)) {
+                return true;
+            }
+
+            // vertex is another variable, so try to resolve it to an ApexValue
+            resolvedChainedVertexOpt =
+                    ScopeUtil.resolveToApexValue(symbols, possibleAccessLevelParam)
+                            .flatMap(ApexValue::getValueVertex);
+        } else {
+            return false;
+        }
+
+        // check to see if the resolved ApexValue is System.AccesLevel.USER_MODE
+        if (resolvedChainedVertexOpt.isPresent()
+                && resolvedChainedVertexOpt.get() instanceof VariableExpressionVertex) {
+            return isUserModeAccessVariableVertex(
+                    (VariableExpressionVertex) resolvedChainedVertexOpt.get());
+        }
+        return false;
+    }
+
+    /**
+     * Check if a given {@link VariableExpressionVertex} is System.AccessLevel.USER_MODE (or
+     * AccessLevel.USER_MODE).
+     */
+    private boolean isUserModeAccessVariableVertex(VariableExpressionVertex vertex) {
+        if (!vertex.getName().equals(USER_MODE)) {
+            return false;
+        }
+
+        if (vertex.getChainedNames().size() == 1) {
+            // check for AccessLevel.USER_MODE
+            return vertex.getChainedNames().get(0).equalsIgnoreCase(ACCESS_LEVEL);
+        } else if (vertex.getChainedNames().size() == 2) {
+            // check for System.AccessLevel.USER_MODE
+            return vertex.getChainedNames().get(0).equalsIgnoreCase(SYSTEM)
+                    && vertex.getChainedNames().get(1).equalsIgnoreCase(ACCESS_LEVEL);
+        }
+        return false;
     }
 
     /**

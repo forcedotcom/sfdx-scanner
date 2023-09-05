@@ -43,7 +43,7 @@ public abstract class BaseUseWithSharingOnDatabaseOperationTest extends BasePath
      * com.salesforce.graph.vertex.SoqlExpressionVertex}
      */
     public static final String[] SOQL_STATEMENTS = {
-        "Account b = [SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1]",
+        "Account b = [SELECT Name, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1]",
     };
 
     /**
@@ -66,15 +66,16 @@ public abstract class BaseUseWithSharingOnDatabaseOperationTest extends BasePath
         "Database.getAsyncLocator(Database.deleteAsync(List.of(a), false))",
         "Database.getAsyncSaveResult(Database.insert(a))",
         "Database.getDeleted('account__c', Datetime.now().addHours(-1), Datetime.now())",
-        "Database.getQueryLocator('SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1')",
-        "Database.getQueryLocatorWithBinds('SELECT Id, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1', new Map<String, Object>{'name' => 'KENSINGTON'})",
+        "Database.getQueryLocator('SELECT Name, NumberOfEmployees FROM account WHERE NumberOfEmployees = 3 LIMIT 1')",
+        "Database.getQueryLocatorWithBinds('SELECT Name, NumberOfEmployees FROM account WHERE NumberOfEmployees = :i LIMIT 1', new Map<String, Object>{'i' => 3})",
         "Database.getUpdated('account__c', Datetime.now().addHours(-1), Datetime.now())",
         "Database.insert(a)",
         "Database.insertAsync(a, nothing())",
         "Database.insertImmediate(a)",
         "Database.merge(a, new Account(name = 'Benjamin'))",
-        "Database.query('SELECT Id, NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100 LIMIT 1')",
-        "Database.queryWithBinds('SELECT ID, NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100', new Map<String, Object>{'Name' => 'WOLVES'})",
+        "Database.query('SELECT NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100 LIMIT 1')",
+        "Database.query('SELECT NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = 100 LIMIT 1', System.AccessLevel.USER_MODE)",
+        "Database.queryWithBinds('SELECT NumberOfEmployees, Name FROM Account WHERE NumberOfEmployees = :i', new Map<String, Object>{'i' => 100})",
         "Database.rollback(Database.setSavepoint())",
         "Database.undelete(a, false)",
         "Database.update(a, false)",

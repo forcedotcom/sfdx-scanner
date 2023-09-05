@@ -70,7 +70,7 @@ public class ApexPathUtilTest {
         VertexPredicate predicate =
                 new AbstractVisitingVertexPredicate() {
                     @Override
-                    public boolean test(BaseSFVertex vertex) {
+                    public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
                         return vertex instanceof MethodCallExpressionVertex;
                     }
                 };

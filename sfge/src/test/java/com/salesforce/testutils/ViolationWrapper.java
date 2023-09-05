@@ -320,6 +320,22 @@ public class ViolationWrapper {
         }
     }
 
+    public static class SoqlNullViolationBuilder extends ViolationBuilder {
+        private final String variableName;
+
+        public SoqlNullViolationBuilder(int sinkLine, String varname) {
+            super(sinkLine);
+            this.variableName = varname;
+        }
+
+        @Override
+        public String getMessage() {
+            return String.format(
+                    UserFacingMessages.PerformNullCheckOnSoqlVariablesTemplates.MESSAGE_TEMPLATE,
+                    this.variableName);
+        }
+    }
+
     public static class MessageBuilder {
         private final int line;
         private final String violationMsg;

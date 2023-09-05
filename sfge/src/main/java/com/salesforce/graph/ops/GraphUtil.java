@@ -1,15 +1,8 @@
 package com.salesforce.graph.ops;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.inE;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.or;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.*;
 
-import com.salesforce.apex.jorje.ASTConstants;
-import com.salesforce.apex.jorje.AstNodeWrapper;
-import com.salesforce.apex.jorje.JorjeUtil;
-import com.salesforce.apex.jorje.TopLevelWrapper;
+import com.salesforce.apex.jorje.*;
 import com.salesforce.collections.CollectionUtil;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.exception.SfgeException;
@@ -24,16 +17,9 @@ import com.salesforce.rules.ops.ProgressListener;
 import com.salesforce.rules.ops.ProgressListenerProvider;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -44,6 +30,10 @@ import org.apache.tinkerpop.gremlin.tinkergraph.structure.TinkerGraph;
 
 public final class GraphUtil {
     private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
+    // TODO MAKE THIS LIST OF EXCLUDED FOLDERS CONFIGURABLE
+    private static final Set<Path> EXCLUDED_SUBDIRECTORIES =
+            new HashSet<>(
+                    Arrays.asList(Paths.get(".sfdx"), Paths.get(".sf"), Paths.get("node_modules")));
 
     /**
      * Retrieve a properly configured graph. All code should use this method instead of directly
@@ -137,13 +127,25 @@ public final class GraphUtil {
             comps.addAll(buildFolderComps(sourceFolder));
         }
 
-        // Verify all TopLevelWrappers have unique names
-        final TreeMap<String, Util.CompilationDescriptor> uniqueNames = CollectionUtil.newTreeMap();
+        // Verify TopLevelWrappers have appropriately unique names
+        final TreeMap<String, Util.CompilationDescriptor> uniqueClassEnumInterfaceNames =
+                CollectionUtil.newTreeMap();
+        final TreeMap<String, Util.CompilationDescriptor> uniqueTriggerNames =
+                CollectionUtil.newTreeMap();
         for (Util.CompilationDescriptor comp : comps) {
             final AstNodeWrapper<?> nodeWrapper = comp.getCompilation();
             if (nodeWrapper instanceof TopLevelWrapper) {
                 final String definingType = nodeWrapper.getDefiningType();
-                final Util.CompilationDescriptor previous = uniqueNames.put(definingType, comp);
+                final Util.CompilationDescriptor previous;
+                if (nodeWrapper instanceof UserTriggerWrapper) {
+                    // names of UserTriggerWrapper should be unique only among other triggers
+                    previous = uniqueTriggerNames.put(definingType, comp);
+                } else {
+                    // names of UserClassWrapper, UserInterfaceWrapper, UserEnumWrapper should
+                    // be unique among all three object types
+                    previous = uniqueClassEnumInterfaceNames.put(definingType, comp);
+                }
+
                 if (previous != null) {
                     throw new GraphLoadException(
                             definingType
@@ -232,6 +234,17 @@ public final class GraphUtil {
          */
         private SourceFileVisitor(List<Util.CompilationDescriptor> comps) {
             this.comps = comps;
+        }
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attr) {
+            // exclude any instances of a directory matching those in the EXCLUDED_SUBDIRECTORIES
+            // set. Even nested folders like project1/src/.sdfx etc.
+            if (EXCLUDED_SUBDIRECTORIES.contains(dir.getName(dir.getNameCount() - 1))) {
+                LOGGER.info("Skipping subtree of path=" + dir);
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            return FileVisitResult.CONTINUE;
         }
 
         @Override

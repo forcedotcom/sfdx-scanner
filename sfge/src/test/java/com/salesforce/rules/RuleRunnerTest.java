@@ -18,6 +18,7 @@ import com.salesforce.graph.cache.VertexCache;
 import com.salesforce.graph.cache.VertexCacheProvider;
 import com.salesforce.graph.cache.VertexCacheTestProvider;
 import com.salesforce.graph.source.ApexPathSource;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.MethodVertex;
 import com.salesforce.graph.vertex.ReturnStatementVertex;
@@ -259,7 +260,7 @@ public class RuleRunnerTest {
         }
 
         @Override
-        public boolean test(BaseSFVertex vertex) {
+        public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
             // The test should show interest in the return statement for any method defined in the
             // "MyClass" class.
             return vertex instanceof ReturnStatementVertex

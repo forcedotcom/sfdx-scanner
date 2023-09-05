@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.source.ApexPathSource.Type;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.rules.fls.apex.operations.FlsViolationInfo;
 import java.util.*;
@@ -113,7 +114,7 @@ public final class ApexFlsViolationRule extends AbstractPathTraversalRule {
     }
 
     @Override
-    public boolean test(BaseSFVertex vertex) {
+    public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
         // Return true when any rule handler is interested in this vertex
         return ruleHandlers.stream().anyMatch(ruleHandler -> ruleHandler.test(vertex));
     }

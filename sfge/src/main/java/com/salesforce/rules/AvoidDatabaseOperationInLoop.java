@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.salesforce.config.UserFacingMessages;
 import com.salesforce.graph.ApexPath;
 import com.salesforce.graph.source.ApexPathSource;
+import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.rules.avoiddatabaseoperationinloop.AvoidDatabaseOperationInLoopHandler;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
 
     /** check if a certain vertex is of interest to this rule */
     @Override
-    public boolean test(BaseSFVertex vertex) {
+    public boolean test(BaseSFVertex vertex, SymbolProvider provider) {
         return ruleHandler.test(vertex);
     }
 
@@ -67,6 +68,11 @@ public final class AvoidDatabaseOperationInLoop extends AbstractPathTraversalRul
     @Override
     protected boolean isEnabled() {
         return true;
+    }
+
+    @Override
+    protected boolean isPilot() {
+        return false;
     }
 
     public static AvoidDatabaseOperationInLoop getInstance() {
