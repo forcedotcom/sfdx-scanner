@@ -402,7 +402,7 @@ describe('scanner:run', function () {
 				.it('When --outfile is provided and no violations are detected, HTML file with no violations should be created', ctx => {
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
 					expect(fs.existsSync(outputFile)).to.be.true;
-					const fileContents = fs.readFileSync('testout.html').toString();
+					const fileContents = fs.readFileSync(outputFile).toString();
 					validateNoViolationsHtmlOutput(fileContents);
 				});
 		});
