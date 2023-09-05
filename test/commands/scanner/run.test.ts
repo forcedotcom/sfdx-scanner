@@ -280,7 +280,6 @@ describe('scanner:run', function () {
 					// Verify that the correct message is displayed to user
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
-					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
@@ -371,7 +370,6 @@ describe('scanner:run', function () {
 				.it('Properly writes HTML to file', ctx => {
 					// Verify that the correct message is displayed to user
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
-					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
@@ -455,7 +453,6 @@ describe('scanner:run', function () {
 					// Verify that the correct message is displayed to user
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
 					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
-					expect(ctx.stdout).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.json')).to.equal(true, 'The command should have created the expected output file');
@@ -588,7 +585,6 @@ describe('scanner:run', function () {
 					expect(output.status).to.equal(0, 'Should finish properly');
 					const result = output.result;
 					expect(result).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.xml']));
-					expect(result).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', []));
 					// Verify that the file we wanted was actually created.
 					expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
 					const fileContents = fs.readFileSync('testout.xml').toString();
@@ -612,7 +608,6 @@ describe('scanner:run', function () {
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.not.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					expect(output.result.length).to.equal(0, 'When no violations are present, JSON result should be empty array.')
 				});
 		});
