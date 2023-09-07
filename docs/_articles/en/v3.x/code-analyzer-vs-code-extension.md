@@ -27,6 +27,10 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 * In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
 * Install [Salesforce Code Analyzer VS Code extension(beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
+## Contribute to Salesforce Code Analyzer VS Code Extension
+
+To report issues with the Salesforce Code Analyzer VS Code Extension, create a [bug on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D). To suggest a feature enhancement, create a [request on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=%5BFeature+Request%5D).
+
 ## Launch Code Analyzer Extension and Scan Your Code
 
 Complete these steps to launch the Code Analyzer extension and scan your code.
@@ -94,7 +98,7 @@ To use a quick fix to suppress a PMD violation on a line of code, complete these
 2. Click **Quick Fix** in the pop-up.
 3. Click **Suppress violations on this line**.
 
-#### Replace Code Analyzer’s PMD Config File with a Custom PMD Configg
+#### Replace Code Analyzer’s PMD Config File with a Custom PMD Config
 
 By default, Code Analyzer runs all of PMD's default rules against your Apex and VisualForce files. However, if you have a custom PMD configuration that better suits your needs, you can substitute your configuration in place of ours.
 
