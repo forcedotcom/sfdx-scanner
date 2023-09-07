@@ -98,7 +98,7 @@ To use a quick fix to suppress a PMD violation on a line of code, complete these
 2. Click **Quick Fix** in the pop-up.
 3. Click **Suppress violations on this line**.
 
-#### Replace Code Analyzer’s PMD Config File with a Custom PMD Configg
+#### Replace Code Analyzer’s PMD Config File with a Custom PMD Config
 
 By default, Code Analyzer runs all of PMD's default rules against your Apex and VisualForce files. However, if you have a custom PMD configuration that better suits your needs, you can substitute your configuration in place of ours.
 
