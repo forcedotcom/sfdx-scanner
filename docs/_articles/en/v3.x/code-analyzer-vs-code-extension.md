@@ -29,7 +29,7 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 
 ## Contribute to Salesforce Code Analyzer VS Code Extension
 
-To report issues with the Salesforce Code Analyzer VS Code Extension, create a [bug on Github](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode). To suggest a feature enhancement, create a [request on Github](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
+To report issues with the Salesforce Code Analyzer VS Code Extension, create a [bug on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D). To suggest a feature enhancement, create a [request on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=%5BFeature+Request%5D).
 
 ## Launch Code Analyzer Extension and Scan Your Code
 
