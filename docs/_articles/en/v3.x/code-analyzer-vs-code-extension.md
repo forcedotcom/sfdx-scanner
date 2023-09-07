@@ -27,6 +27,10 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 * In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
 * Install [Salesforce Code Analyzer VS Code extension(beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
+## Contribute to Salesforce Code Analyzer VS Code Extension
+
+To report issues with the Salesforce Code Analyzer VS Code Extension, create a [bug on Github](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode). To suggest a feature enhancement, create a [request on Github](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
+
 ## Launch Code Analyzer Extension and Scan Your Code
 
 Complete these steps to launch the Code Analyzer extension and scan your code.
