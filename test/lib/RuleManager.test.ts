@@ -389,13 +389,13 @@ describe('RuleManager', () => {
 			})
 
 			describe('Edge Cases', () => {
-				it('When no rules match the given criteria, an empty string is returned', async () => {
+				it('When no rules match the given criteria, an empty summary is returned', async () => {
 					// Define our preposterous filter array.
 					const filters = [new CategoryFilter(['beebleborp'])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
-					expect(results).to.equal('[]', `Output ${results} should have been an empty string`);
+					expect(results).to.equal('[]', `Output ${results} should have been an empty summary (empty array)`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 

@@ -32,11 +32,8 @@ describe('scanner:run', function () {
 
 			function validateNoViolationsXmlOutput(xml: string): void {
 				// We'll split the output by the <violation> tag, so we can get individual violations.
-				const violations = xml.split('<violation');
-				// The first list item is going to be the header, so we need to pull that off.
-				violations.shift();
 				// we expect no violations
-				expect(violations.length).to.equal(0, `Should be no violations detected in the file:\n ${xml}`);
+				expect(xml.indexOf('<violation')).to.equal(-1, `Should be no violations detected in the file:\n ${xml}`);
 			}
 
 			describe('Test Case: Running rules against a single file', () => {
@@ -189,6 +186,7 @@ describe('scanner:run', function () {
 						const fileContents = fs.readFileSync('testout.xml').toString();
 						validateXmlOutput(fileContents);
 					});
+
 				setupCommandTest
 					.command(['scanner:run',
 						'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
@@ -244,13 +242,11 @@ describe('scanner:run', function () {
 					expect(summary).to.not.equal(null, 'Expected summary to be not null');
 					expect(summary).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
 				}
-				// Since it's a CSV, the rows themselves are separated by newline characters, and there's a header row we
-				// need to discard.
-				const rows = csv.trim().split('\n');
-				rows.shift();
 
-				// There should be no rows (besides the header) because there are no violations.
-				expect(rows.length).to.equal(0, 'Should be two violations detected');
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// Test to check there are no violations.
+				// There should be a header and no other lines, meaning no newline characters.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			}
 
 			setupCommandTest
@@ -737,13 +733,10 @@ describe('scanner:run', function () {
 				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
 				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
 
-				// Since it's a CSV, the rows themselves are separated by newline characters, and there's a header row we
-				// need to discard.
-				const rows = csv.trim().split('\n');
-				rows.shift();
-
-				// There should be no rows (besides the header) because there are no violations.
-				expect(rows.length).to.equal(0, 'Should be two violations detected');
+				// Confirm there are no violations.
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// The header should not have any newline characters after it. There should be no violation rows.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
@@ -773,13 +766,10 @@ describe('scanner:run', function () {
 				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
 				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
 
-				// Since it's a CSV, the rows themselves are separated by newline characters, and there's a header row we
-				// need to discard.
-				const rows = csv.trim().split('\n');
-				rows.shift();
-
-				// There should be no rows (besides the header) because there are no violations.
-				expect(rows.length).to.equal(0, 'Should be two violations detected');
+				// Confirm there are no violations.
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// The header should not have any newline characters after it. There should be no violation rows.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 	});
 

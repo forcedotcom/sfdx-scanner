@@ -146,9 +146,7 @@ describe('RunOutputProcessor', () => {
 				};
 				const rop = new RunOutputProcessor(opts, testUx);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
-				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
-				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
-				const fakeTableResults: RecombinedRuleResults = {minSev: 1, results: EMPTY_TABLE_OUTPUT, summaryMap: new Map()}
+				const fakeTableResults: RecombinedRuleResults = {minSev: 1, results: EMPTY_TABLE_OUTPUT, summaryMap: summaryMap}
 
 				// THIS IS THE PART BEING TESTED.
 				const output: AnyJson = rop.processRunOutput(fakeTableResults);
@@ -259,7 +257,7 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 				// NOTE: This next test is based on the implementation of run-summary messages in W-8388246, which was known
 				// to be incomplete. When we flesh out that implementation with summaries for other formats, this test might
 				// need to change.
-				it('JSON-type output should NOT be followed by summary', async () => {
+				it('JSON-type output with no violations should output be an empty violation set', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.JSON
 					};

@@ -22,13 +22,10 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
 				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
 
-				// Since it's a CSV, the rows themselves are separated by newline characters, and there's a header row we
-				// need to discard.
-				const rows = csv.trim().split('\n');
-				rows.shift();
-
-				// There should be no rows (besides the header) because there are no violations.
-				expect(rows.length).to.equal(0, 'Should be no violations detected');
+				// Confirm there are no violations.
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// The header should not have any newline characters after it. There should be no violation rows.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 
 		setupCommandTest
