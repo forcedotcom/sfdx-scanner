@@ -20,7 +20,9 @@ describe('scanner:run', function () {
 					'--severity-threshold', '3'
 				])
 				.it('When no violations are found, no error is thrown', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+					const output = JSON.parse(ctx.stdout);
+					// There should be no violations (nor any exceptions).
+					expect(output.length).to.equal(0, 'Should be no violations from one engine');
 					expect(ctx.stderr).to.not.contain(processorMessages.getMessage('output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 

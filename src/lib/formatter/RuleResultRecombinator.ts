@@ -110,12 +110,7 @@ export class RuleResultRecombinator {
 	private static constructXml(results: RuleResult[]): string {
 		let resultXml = ``;
 
-		// If the results were just an empty string, we can return it.
-		if (results.length === 0) {
-			return resultXml;
-		}
-
-		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
+		const normalizeSeverity: boolean = results[0]?.violations.length > 0 && !(results[0]?.violations[0].normalizedSeverity === undefined)
 
 		let problemCount = 0;
 
@@ -188,10 +183,6 @@ export class RuleResultRecombinator {
 	}
 
 	private static constructJunit(results: RuleResult[]): string {
-		// If there are no results, we can just return an empty string.
-		if (!results || results.length === 0) {
-			return '';
-		}
 
 		// Otherwise, we'll need to start constructing our JUnit XML. To do that, we'll need a map from file names to
 		// lists of the <failure> tags generated from violations found in the corresponding file.
@@ -279,10 +270,6 @@ URL: ${url}`;
 	}
 
 	private static constructTable(results: RuleResult[]): RecombinedData {
-		// If the results were just an empty string, we can return it.
-		if (results.length === 0) {
-			return '';
-		}
 		const columns = this.violationsAreDfa(results)
 			? ['Source Location', 'Sink Location', 'Description', 'Category', 'URL']
 			: ['Location', 'Description', 'Category', 'URL'];
@@ -341,10 +328,6 @@ URL: ${url}`;
 	}
 
 	private static constructJson(results: RuleResult[], verboseViolations = false): string {
-		if (results.length === 0) {
-			return '';
-		}
-
 		if (verboseViolations) {
 			const resultsVerbose = JSON.parse(JSON.stringify(results)) as RuleResult[];
 			for (const result of resultsVerbose) {
@@ -363,12 +346,7 @@ URL: ${url}`;
 	}
 
 	private static async constructHtml(results: RuleResult[], verboseViolations = false): Promise<string> {
-		// If the results were just an empty string, we can return it.
-		if (results.length === 0) {
-			return '';
-		}
-
-		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined);
+		const normalizeSeverity: boolean = results[0]?.violations.length > 0 && !(results[0]?.violations[0].normalizedSeverity === undefined);
 		const isDfa = this.violationsAreDfa(results);
 
 
@@ -434,12 +412,8 @@ URL: ${url}`;
 	}
 
 	private static async constructCsv(results: RuleResult[]): Promise<string> {
-		// If the results were just an empty list, we can return an empty string
-		if (results.length === 0) {
-			return '';
-		}
 		const isDfa: boolean = this.violationsAreDfa(results);
-		const normalizeSeverity: boolean = results[0].violations.length > 0 && !(results[0].violations[0].normalizedSeverity === undefined)
+		const normalizeSeverity: boolean = results[0]?.violations.length > 0 && !(results[0]?.violations[0].normalizedSeverity === undefined)
 
 		const csvRows = [];
 		// There will always be columns for the problem counter and the severity.

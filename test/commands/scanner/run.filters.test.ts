@@ -19,7 +19,13 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				'--engine', 'eslint-lwc'
 			])
 			.it('LWC Engine Successfully parses LWC code', ctx => {
-				expect(ctx.stdout).to.contain('No rule violations found.');
+				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
+				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
+
+				// Confirm there are no violations.
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// The header should not have any newline characters after it. There should be no violation rows.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 
 		setupCommandTest
