@@ -63,8 +63,8 @@ describe('scanner:run', function () {
 						'--ruleset', 'ApexUnit',
 						'--format', 'xml'
 					])
-					.it('When the file contains no violations, XML with no violations is logged to the console', ctx => {
-						validateNoViolationsXmlOutput(ctx.stdout);
+					.it('When the file contains no violations, a message is logged to the console', ctx => {
+						expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 					});
 			});
 
@@ -180,7 +180,7 @@ describe('scanner:run', function () {
 							fs.unlinkSync('testout.xml');
 						}
 					})
-					.it('The violations are written to the file as an XML', ctx => {
+					.it('Violations are written to file as XML', ctx => {
 						// Verify that the file we wanted was actually created.
 						expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
 						const fileContents = fs.readFileSync('testout.xml').toString();
@@ -199,7 +199,7 @@ describe('scanner:run', function () {
 							fs.unlinkSync('testout.xml');
 						}
 					})
-					.it('An XML file with no violations is created', ctx => {
+					.it('Absence of violations yields empty XML file', ctx => {
 						// Verify that an empty XML file was actually created.
 						expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created an empty output file');
 						const fileContents = fs.readFileSync('testout.xml').toString();
@@ -289,8 +289,8 @@ describe('scanner:run', function () {
 					'--ruleset', 'ApexUnit',
 					'--format', 'csv'
 				])
-				.it('When no violations are detected, empty CSV is printed to the console', ctx => {
-					validateNoViolationsCsvOutput(ctx.stdout, false);
+				.it('When no violations are detected, a message is logged to the console', ctx => {
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -379,8 +379,8 @@ describe('scanner:run', function () {
 					'--ruleset', 'ApexUnit',
 					'--format', 'html'
 				])
-				.it('When no violations are detected, HTML with no violations is logged to the console', ctx => {
-					validateNoViolationsHtmlOutput(ctx.stdout);
+				.it('When no violations are detected, a message is logged to the console', ctx => {
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -462,8 +462,8 @@ describe('scanner:run', function () {
 					'--ruleset', 'ApexUnit',
 					'--format', 'json'
 				])
-				.it('When no violations are detected, JSON with no violations is logged to the console', ctx => {
-					validateNoViolationsJsonOutput(ctx.stdout);
+				.it('When no violations are detected, a message is logged to the console', ctx => {
+					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 
 			setupCommandTest
@@ -604,7 +604,7 @@ describe('scanner:run', function () {
 				.it('--json flag wraps message about no violations occuring', ctx => {
 					const output = JSON.parse(ctx.stdout);
 					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result.length).to.equal(0, 'When no violations are present, JSON result should be empty array.')
+					expect(output.result).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
 				});
 		});
 
@@ -730,13 +730,8 @@ describe('scanner:run', function () {
 				'--format', 'csv'
 			])
 			.it('The baseConfig enables the usage of default Javascript Types', ctx => {
-				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
-				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
-
-				// Confirm there are no violations.
-				// Since it's a CSV, the rows themselves are separated by newline characters.
-				// The header should not have any newline characters after it. There should be no violation rows.
-				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
+				// There should be no violations.
+				expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
 			});
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
@@ -763,13 +758,7 @@ describe('scanner:run', function () {
 				'--env', '{"qunit": true}'
 			])
 			.it('Providing qunit in the --env override should resolve errors about that framework', ctx => {
-				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
-				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
-
-				// Confirm there are no violations.
-				// Since it's a CSV, the rows themselves are separated by newline characters.
-				// The header should not have any newline characters after it. There should be no violation rows.
-				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
+				expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
 			});
 	});
 

@@ -28,9 +28,25 @@ export class RunOutputProcessor {
 
 
 	public processRunOutput(rrr: RecombinedRuleResults): AnyJson {
-		const {minSev, results} = rrr;
+		const {minSev, results, summaryMap} = rrr;
 
-		// With the list of violations, we'll build an array of message parts, and then log them all at the end.
+		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
+
+		// If there are neither violations nor an outfile, then we want to avoid writing empty
+		// results to the console.
+		// NOTE: If there's an outfile, we skip this part. This is because we still want to generate
+		//       an empty outfile
+		if (!this.opts.outfile && !hasViolations) {
+			// Build a message indicating which engines were run...
+			const msg = messages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
+			// ...log it to the console...
+			this.ux.log(msg);
+			// ...and return it for use with the --json flag.
+			return msg;
+		}
+
+		// If we have violations (or an outfile but no violations), we'll build an array of
+		// message parts, and then log them all at the end.
 		let msgComponents: string[] = [];
 		// We need a summary of the information we were provided (blank/empty if no violations).
 		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(rrr)];
