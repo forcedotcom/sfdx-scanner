@@ -62,16 +62,6 @@ const FAKE_TABLE_OUTPUT = {
 	]
 };
 
-const EMPTY_TABLE_OUTPUT = {
-	"columns": [
-		"Location",
-		"Description",
-		"Category",
-		"URL"
-	],
-	"rows": []
-};
-
 const FAKE_CSV_OUTPUT = `"Problem","File","Severity","Line","Column","Rule","Description","URL","Category","Engine"
 "1","/Users/jfeingold/ts-sample-project/src/file-with-problems.ts","2","3","7","no-unused-vars","'UNUSED' is assigned a value but never used.","https://eslint.org/docs/rules/no-unused-vars","Variables","eslint-typescript"
 "2","/Users/jfeingold/ts-sample-project/src/file-with-problems.ts","2","3","7","@typescript-eslint/no-unused-vars","'UNUSED' is assigned a value but never used.","https://github.com/typescript-eslint/typescript-eslint/blob/v2.33.0/packages/eslint-plugin/docs/rules/no-unused-vars.md","Variables","eslint-typescript"
@@ -146,18 +136,19 @@ describe('RunOutputProcessor', () => {
 				};
 				const rop = new RunOutputProcessor(opts, testUx);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
-				const fakeTableResults: RecombinedRuleResults = {minSev: 1, results: EMPTY_TABLE_OUTPUT, summaryMap: summaryMap}
+				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
+				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
+				const fakeRes: RecombinedRuleResults = {minSev: 0, summaryMap, results: ''};
 
 				// THIS IS THE PART BEING TESTED.
-				const output: AnyJson = rop.processRunOutput(fakeTableResults);
+				const output: AnyJson = rop.processRunOutput(fakeRes);
 
-				const expectedTableSummary = `${processorMessages.getMessage('output.writtenToConsole')}`;
-				// We expect that an empty table should be logged to the console and that the output should be an empty array
+				// We expect that the message logged to the console and the message returned should both be the default
+				const expectedMsg = processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint']);
 				Sinon.assert.callCount(logSpy, 1);
-				Sinon.assert.callCount(tableSpy, 1);
-				Sinon.assert.calledWith(logSpy, expectedTableSummary);
-				// TODO is there a better way to check for empty array? output is an empty array, but typed as AnyJson.
-				expect(output.toString()).to.equal('', 'Should have returned empty results');
+				Sinon.assert.callCount(tableSpy, 0);
+				Sinon.assert.calledWith(logSpy, expectedMsg);
+				expect(output).to.equal(expectedMsg, 'Should have returned expected message');
 			});
 
 			describe('Test Case: Table', () => {
