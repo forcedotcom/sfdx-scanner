@@ -211,11 +211,14 @@ jobs:
         run: |
           # We need to determine the tarball's name first.
           TARBALL_NAME=$(ls ~/downloads/tarball | grep salesforce-sfdx-scanner-[0-9]*\\.[0-9]*\\.[0-9]*\\.tgz)
+          echo $TARBALL_NAME
           # We need to determine where the tarball is located.
           # Get the path to the folder, and swap out any backslashes for forward slashes (needed for Windows).
           RAW_TARBALL_PATH=`echo '${{ steps.download.outputs.download-path }}' | tr '\\' '/'`
+          echo $RAW_TARBALL_PATH
           # If the path starts with C:, we need to rip that off (needed for Windows).
           ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
+          echo $ADJUSTED_TARBALL_PATH
           # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
           echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
       # The results directory needs to exist.
