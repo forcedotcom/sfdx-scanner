@@ -62,6 +62,11 @@ public final class PerformNullCheckOnSoqlVariables extends AbstractPathTraversal
         return true;
     }
 
+    @Override
+    protected boolean isPilot() {
+        return false;
+    }
+
     /**
      * Tests a vertex using a symbol provider to check if it violates this rule.
      *
