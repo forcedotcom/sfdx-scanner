@@ -73,6 +73,17 @@ abstract class AbstractApexVertexBuilder {
         final Set<Vertex> verticesAddressed = new HashSet<>();
         verticesAddressed.add(vNode);
 
+        if (ConstructorUtil.isImplicitlyDelegatedConstructorBody(g, node)) {
+            // If this node is the body of a constructor that implicitly delegates to another
+            // constructor, synthesize vertices representing that delegation.
+            Vertex syntheticExpression = ConstructorUtil.synthesizeSuperCall(g, node, vNode);
+            verticesAddressed.add(syntheticExpression);
+            // Since the synthetic delegation is at the start, map its vertex as the 0th child
+            // and recompute the indices for the rest of the children.
+            childVerticesByIndex.put(0, syntheticExpression);
+            node.computeChildIndices(1, false);
+        }
+
         for (int i = 0; i < children.size(); i++) {
             final JorjeNode child = children.get(i);
             final Vertex vChild = g.addV(child.getLabel()).next();

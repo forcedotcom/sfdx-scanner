@@ -145,16 +145,16 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      */
     @ValueSource(ints = {0, 1})
     @ParameterizedTest(name = "{displayName}: arity {0}")
-    @Disabled // TODO: FIX AND ENABLE THIS TEST
     public void constructorImplicitlyCalledByGrandchild_expectNoViolation(Integer arity) {
         // spotless:off
         String[] sourceCodes = new String[]{
             "global virtual class ParentClass {\n"
-            // Declare a constructor with the expected arity that does nothing in particular.
-          + "    protected ParentClass(" + StringUtils.repeat("boolean b", arity) + ") {}\n"
+            // Declare a constructor with 0-arity that does nothing in particular.
+          + "    protected ParentClass() {}\n"
           + "}",
             "global virtual class ChildClass extends ParentClass {\n"
             // Declare a constructor with the expected arity that does nothing in particular.
+            // (This constructor will implicitly call `super()`, since we didn't tell it to do something else).
           + "    public ChildClass(" + StringUtils.repeat("boolean b", arity) + ") {}\n"
           + "}",
             "global class GrandchildClass extends ChildClass {\n"
