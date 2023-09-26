@@ -66,8 +66,10 @@ abstract class AbstractApexVertexBuilder {
             vNode.property(Schema.FILE_NAME, fileName);
         }
 
-        Vertex vPreviousSibling = null;
         final List<JorjeNode> children = node.getChildren();
+        // Synthetic vertices create the possibility that children will be processed out of order.
+        // So instead of using an ArrayList, we use a HashMap whose keys are the indices.
+        final Map<Integer, Vertex> childVerticesByIndex = new HashMap<>();
         final Set<Vertex> verticesAddressed = new HashSet<>();
         verticesAddressed.add(vNode);
 
@@ -84,19 +86,43 @@ abstract class AbstractApexVertexBuilder {
             if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
                 final Vertex parentVertexForChild =
                         StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);
+                // The child vertex is made a child of the synthetic vertex instead of its original
+                // parent.
                 GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
                 verticesAddressed.add(parentVertexForChild);
             } else {
                 GremlinVertexUtil.addParentChildRelationship(g, vNode, vChild);
             }
 
-            if (vPreviousSibling != null) {
-                g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
-            }
-            vPreviousSibling = vChild;
+            // Map this vertex as the Nth child vertex of the parent.
+            // TODO: This might be a bug. It's possible we should actually be using the synthetic
+            //       vertex if we create one. Do more investigating around that!
+            childVerticesByIndex.put(child.getChildIndex(), vChild);
 
             // To save memory in the graph, don't pass the source name into recursive calls.
             buildVertices(child, vChild, null);
+        }
+
+        // If any child vertices were created, they need to be properly linked as siblings.
+        if (!childVerticesByIndex.isEmpty()) {
+            Vertex vLastChild = null;
+            int linkedChildren = 0;
+            int childCount = childVerticesByIndex.size();
+            int i = 0;
+            while (linkedChildren < childCount) {
+                Vertex vNextChild = childVerticesByIndex.get(i++);
+                // Theoretically, there should be no gaps in the indexing. However, it's possible
+                // that synthetic vertices or the like could cause gaps. This shouldn't be a problem
+                // as long as the ordering itself remains valid.
+                if (vNextChild == null) {
+                    continue;
+                }
+                if (vLastChild != null) {
+                    g.addE(Schema.NEXT_SIBLING).from(vLastChild).to(vNextChild).iterate();
+                }
+                vLastChild = vNextChild;
+                linkedChildren += 1;
+            }
         }
         // Execute afterInsert() on each vertex we addressed
         for (Vertex vertex : verticesAddressed) {

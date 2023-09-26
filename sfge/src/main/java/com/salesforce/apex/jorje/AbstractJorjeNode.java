@@ -48,6 +48,11 @@ abstract class AbstractJorjeNode implements JorjeNode {
     }
 
     @Override
+    public int getChildIndex() {
+        return this.childIndex;
+    }
+
+    @Override
     public void setFirstChild(boolean firstChild) {
         this.firstChild = firstChild;
     }
@@ -114,11 +119,24 @@ abstract class AbstractJorjeNode implements JorjeNode {
         endLine = positionInformation.getLineNumber(location.getEndIndex());
         beginColumn = location.getColumn();
 
+        computeChildIndices(0, false);
+    }
+
+    /**
+     * Computes (or recomputes) the indices associated with each of this node's children.
+     *
+     * @param startOffset Offset applied to the indices. Useful if synthetic vertices are inserted
+     *     at the head of the list.
+     * @param expectingSubsequentChildren If true, the final child's {@link #lastChild} property is
+     *     set to false.
+     */
+    @Override
+    public final void computeChildIndices(int startOffset, boolean expectingSubsequentChildren) {
         for (int i = 0; i < children.size(); i++) {
             final JorjeNode child = children.get(i);
-            child.setChildIndex(i);
-            child.setFirstChild(i == 0);
-            child.setLastChild(i == (children.size() - 1));
+            child.setChildIndex(i + startOffset);
+            child.setFirstChild(i + startOffset == 0);
+            child.setLastChild(!expectingSubsequentChildren && i == (children.size() - 1));
         }
     }
 
