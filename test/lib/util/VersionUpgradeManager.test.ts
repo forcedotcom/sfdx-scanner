@@ -329,5 +329,31 @@ describe('VersionUpgradeManager', () => {
 				expect(clonedConfig.currentVersion).to.equal('v3.6.0');
 			});
 		});
+
+		describe('v3.17.0', () => {
+			// Spoof a config that:
+			// - Appears to predate v3.17.0
+			// - Has a PMD config with '!**/*-meta.xml' in its target patterns
+			// - Has a RetireJS config with '!**/*-meta.xml' in its target patterns
+			const spoofedConfig: ConfigContent = {
+				currentVersion: '3.15.0',
+				engines: [{
+					name: ENGINE.PMD,
+					targetPatterns: ['**/*.apex', '**/*.xml', '!**/*-meta.xml'],
+					disabled: false
+				}, {
+					name: ENGINE.RETIRE_JS,
+					targetPatterns: ['**/beep/*.js', '!**/*-meta.xml', '!**/boop.js'],
+					disabled: false
+				}]
+			};
+
+			const testManagerAsAny = new VersionUpgradeManager() as any;
+			it('"!**/*-meta.xml" is removed from PMD config', async () => {
+				await testManagerAsAny.upgrade(spoofedConfig, spoofedConfig.currentVersion, 'v3.17.0');
+				expect(spoofedConfig.engines[0].targetPatterns).to.not.include('!**/*-meta.xml', 'Entry should be removed from PMD config');
+				expect(spoofedConfig.engines[1].targetPatterns).to.include('!**/*-meta.xml', 'Entry should not be removed from non-PMD config');
+			});
+		})
 	});
 });

@@ -37,7 +37,7 @@ const DEFAULT_CONFIG: ConfigContent = {
 			name: ENGINE.PMD,
 			targetPatterns: [
 				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
-				"!**/node_modules/**","!**/*-meta.xml"
+				"!**/node_modules/**"
 			],
 			supportedLanguages: ['apex', 'vf'],
 			disabled: false
