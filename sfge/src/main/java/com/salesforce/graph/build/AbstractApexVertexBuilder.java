@@ -82,6 +82,14 @@ abstract class AbstractApexVertexBuilder {
             // and recompute the indices for the rest of the children.
             childVerticesByIndex.put(0, syntheticExpression);
             node.computeChildIndices(1, false);
+        } else if (ConstructorUtil.isImpliedDefaultConstructor(node)) {
+            // If this node is the implicit declaration of a default constructor,
+            // then it is missing a body, and we need to synthesize one.
+            Vertex syntheticBody = ConstructorUtil.synthesizeDefaultConstructorBody(g, node, vNode);
+            // The synthetic body should be added at the end. So map its vertex as last, and
+            // recompute the indices for the rest of the children.
+            childVerticesByIndex.put(children.size(), syntheticBody);
+            node.computeChildIndices(0, true);
         }
 
         for (int i = 0; i < children.size(); i++) {

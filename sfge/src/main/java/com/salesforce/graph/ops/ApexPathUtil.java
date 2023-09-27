@@ -66,8 +66,8 @@ public final class ApexPathUtil {
         BlockStatementVertex blockStatement =
                 method.getOnlyChildOrNull(ASTConstants.NodeType.BLOCK_STATEMENT);
         if (blockStatement == null) {
-            // Default constructors don't have a block statement. Create a synthetic one
-            // TODO: Consider adding this to the graph instead
+            // If a method doesn't have a block statement, we'll create a synthetic one in memory.
+            // TODO: Identify cases where this is possible and add them to the graph instead.
             ApexPath apexPath = new ApexPath(method);
             HashMap<Object, Object> map = new HashMap<>();
             map.put(T.id, Long.valueOf(-1));

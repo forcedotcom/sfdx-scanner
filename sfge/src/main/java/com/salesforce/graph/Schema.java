@@ -35,6 +35,13 @@ public class Schema {
     public static final String INTERFACE_DEFINING_TYPES = "InterfaceDefiningTypes";
     public static final String INTERFACE_NAMES = "InterfaceNames";
     public static final String INVOCABLE_METHOD = "InvocableMethod";
+    /**
+     * Mark a vertex as Implicit. NOTE: An Implicit vertex is one that exists in the Jorje-generated
+     * AST, but doesn't correspond to an actual line of code in the corresponding file. This is
+     * different from {@link #IS_SYNTHETIC}, in that Synthetic vertices don't exist in the AST at
+     * all.
+     */
+    public static final String IS_IMPLICIT = "IsImplicit";
     /** True if this vertex is part of the Apex Standard Library */
     public static final String IS_STANDARD = "IsStandard";
     /**
@@ -83,7 +90,11 @@ public class Schema {
     public static final String PARENT = "Parent";
     public static final String NEXT_SIBLING = "NextSibling";
 
-    /** Mark a vertex as synthetic */
+    /**
+     * Mark a vertex as synthetic. NOTE: For our purposes, a "synthetic" vertex is one that doesn't
+     * actually exist in the Jorje-generated AST, but which we artificially insert into the graph to
+     * facilitate proper path expansion or traversal.
+     */
     public static final String IS_SYNTHETIC = "IsSynthetic";
     /** Indicates if a method is a synthetic static block method */
     public static final String IS_STATIC_BLOCK_METHOD = "IsStaticBlockMethod";

@@ -24,8 +24,7 @@ final class MethodWrapper extends AstNodeWrapper<Method> {
         properties.put(Schema.ARITY, methodInfo.getParameters().size());
         final String[] definingTypes = getDefiningType().split("\\.");
         // Handle differences in #getCanonicalName and #getName. #getCanonicalName sometimes is the
-        // same as the
-        // defining type. In this case we want to use #getName as the method name.
+        // same as the defining type. In this case we want to use #getName as the method name.
         // TODO: Investigate further
         if (methodInfo.getName().equals(definingTypes[definingTypes.length - 1])) {
             properties.put(Schema.NAME, methodInfo.getCanonicalName());
@@ -35,6 +34,10 @@ final class MethodWrapper extends AstNodeWrapper<Method> {
         if (isTestMethod()) {
             // Only add if it is present
             properties.put(Schema.IS_TEST, true);
+        }
+        if (isImplicitDefaultConstructor()) {
+            // Only add if necessary.
+            properties.put(Schema.IS_IMPLICIT, true);
         }
         properties.put(Schema.CONSTRUCTOR, methodInfo.isConstructor());
         properties.put(Schema.RETURN_TYPE, methodInfo.getReturnType().getApexName());
@@ -60,7 +63,13 @@ final class MethodWrapper extends AstNodeWrapper<Method> {
                 }
             }
         }
-
         return false;
+    }
+
+    private boolean isImplicitDefaultConstructor() {
+        final MethodInfo methodInfo = getNode().getMethodInfo();
+        return methodInfo.isConstructor()
+                && methodInfo.getParameters().isEmpty()
+                && !methodInfo.getGenerated().isUserDefined();
     }
 }

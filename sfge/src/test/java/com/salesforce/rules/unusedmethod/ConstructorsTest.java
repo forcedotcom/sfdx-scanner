@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -106,7 +105,6 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
      */
     @ValueSource(strings = {"public", "protected"})
     @ParameterizedTest(name = "{displayName}: parent constructor scope {0}")
-    @Disabled // TODO: FIX AND ENABLE THIS TEST
     public void constructorCalledViaImplicitSubclassConstructor_expectNoViolation(
             String visibility) {
         // spotless:off
