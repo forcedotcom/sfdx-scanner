@@ -63,7 +63,7 @@ upgradeScriptsByVersion.set('v3.6.0', async (config: ConfigContent): Promise<voi
 		}
 	}
 });
-upgradeScriptsByVersion.set('v3.17.0', async (config: ConfigContent): Promise<void> => {
+upgradeScriptsByVersion.set('v3.17.0', (config: ConfigContent): Promise<void> => {
 	// In v3.17.0, we're changing PMD's config so that it no longer excludes Salesforce metadata
 	// files by default. This will automatically apply to any newly-generated configs, but we also
 	// want to retroactively remove this exclusion for existing users.
@@ -71,6 +71,7 @@ upgradeScriptsByVersion.set('v3.17.0', async (config: ConfigContent): Promise<vo
 	if (pmdConfig) {
 		pmdConfig.targetPatterns = pmdConfig.targetPatterns.filter(s => s !== '!**/*-meta.xml');
 	}
+	return Promise.resolve();
 });
 
 
