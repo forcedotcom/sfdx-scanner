@@ -12,7 +12,7 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
-## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-04-2023)
+## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-03-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.17.0...v3.16.0)
 
