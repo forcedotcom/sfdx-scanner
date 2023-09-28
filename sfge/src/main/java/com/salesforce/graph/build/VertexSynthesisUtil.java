@@ -30,8 +30,13 @@ public class VertexSynthesisUtil {
         }
         properties.put(Schema.IS_SYNTHETIC, true);
         properties.put(Schema.DEFINING_TYPE, definingType);
-        // ASSUMPTION: We're only ever adding synthetic block statements to the tail of their
-        // parent.
+        // NOTE: We're hardcoding the index to 1 here, because the only known case for synthesizing
+        // a BlockStatement is for use as the body of a Method, and the only Methods that have been
+        // observed to lack a BlockStatement are ones with a Modifier vertex as their 0th child and
+        // no other children.
+        // If further use cases arise that require generating a BlockStatement for a vertex with
+        // two or more existing children, then this method will need a way of deriving or receiving
+        // the desired index.
         properties.put(Schema.CHILD_INDEX, 1);
         properties.put(Schema.FIRST_CHILD, false);
         properties.put(Schema.LAST_CHILD, true);

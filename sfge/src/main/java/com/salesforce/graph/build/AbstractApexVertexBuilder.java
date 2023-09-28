@@ -67,8 +67,9 @@ abstract class AbstractApexVertexBuilder {
         }
 
         final List<JorjeNode> children = node.getChildren();
-        // Synthetic vertices create the possibility that children will be processed out of order.
-        // So instead of using an ArrayList, we use a HashMap whose keys are the indices.
+        // We use this Map to connect newly-created child vertices to the index we expect them
+        // to have. We use a Map instead of a List because synthetic vertices introduce the
+        // possibility for vertices to be created out of order, and Lists can't have null indices.
         final Map<Integer, Vertex> childVerticesByIndex = new HashMap<>();
         final Set<Vertex> verticesAddressed = new HashSet<>();
         verticesAddressed.add(vNode);
@@ -78,8 +79,9 @@ abstract class AbstractApexVertexBuilder {
             // constructor, synthesize vertices representing that delegation.
             Vertex syntheticExpression = ConstructorUtil.synthesizeSuperCall(g, node, vNode);
             verticesAddressed.add(syntheticExpression);
-            // Since the synthetic delegation is at the start, map its vertex as the 0th child
-            // and recompute the indices for the rest of the children.
+            // Since the synthetic vertex represents an implicit call at the very start of
+            // the codeblock, we map the vertex as the 0th child and recompute the indices for
+            // the rest of the children.
             childVerticesByIndex.put(0, syntheticExpression);
             node.computeChildIndices(1, false);
         } else if (ConstructorUtil.isImpliedDefaultConstructor(node)) {
@@ -114,8 +116,9 @@ abstract class AbstractApexVertexBuilder {
             }
 
             // Map this vertex as the Nth child vertex of the parent.
-            // TODO: This might be a bug. It's possible we should actually be using the synthetic
-            //       vertex if we create one. Do more investigating around that!
+            // TODO: This may be the cause of W-14113545. It's possible that when a synthetic vertex
+            //       is created, it should replace the real vertex in the appropriate index.
+            //       We need to do some more investigation around this.
             childVerticesByIndex.put(child.getChildIndex(), vChild);
 
             // To save memory in the graph, don't pass the source name into recursive calls.
@@ -128,11 +131,13 @@ abstract class AbstractApexVertexBuilder {
             int linkedChildren = 0;
             int childCount = childVerticesByIndex.size();
             int i = 0;
+            // There shouldn't be gaps in the child indexing, but just in case, we're looping
+            // on `linkedChildren` instead of `i` to guarantee that we process every child.
             while (linkedChildren < childCount) {
                 Vertex vNextChild = childVerticesByIndex.get(i++);
-                // Theoretically, there should be no gaps in the indexing. However, it's possible
-                // that synthetic vertices or the like could cause gaps. This shouldn't be a problem
-                // as long as the ordering itself remains valid.
+                // Again, there shouldn't be any gaps, but we're being cautious and handling them
+                // anyway. Handle gaps by skipping them. As long as the vertices' relative order
+                // is preserved, it should all work out fine in the end.
                 if (vNextChild == null) {
                     continue;
                 }
