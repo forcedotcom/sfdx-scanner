@@ -20,6 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available: PerformNullCheckOnSoqlVariables.
+* CHANGE (CodeAnalyzer): We updated the PMD engine so that Salesforce metadata files are no longer excluded by default.
 
 * **Closed issues:**
 
