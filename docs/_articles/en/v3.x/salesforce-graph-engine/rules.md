@@ -25,6 +25,7 @@ To run the path-based rules run: `scanner:run:dfa --projectdir MyDirectory`.
   
 ```sfdx scanner:run:dfa --projectdir /project/dir --target /project/dir/target1```
 
+<br>
 To run graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
 
 **Example:**
