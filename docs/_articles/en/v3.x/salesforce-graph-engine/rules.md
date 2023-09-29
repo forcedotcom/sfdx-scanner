@@ -49,6 +49,7 @@ To run all Graph Engine rules and all pilot rules, run: ```sfdx scanner:run:dfa 
 
 ```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
+<br>
 To run a specific category of rules including the pilot rules in that category, include the category and the `--with-pilot` flag.
 
 **Example**:
