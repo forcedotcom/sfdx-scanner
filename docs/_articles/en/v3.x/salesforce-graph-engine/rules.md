@@ -11,7 +11,7 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 | ApexNullPointerExceptionRule | Path-based analysis | Error-Prone | GA | Identifies Apex operations that dereference null objects and throw NullPointerExceptions. |
 | AvoidDatabaseOperationInLoop | Path-based analysis | Performance | GA | Detects database operations in loops that degrade performance. |
 | AvoidMultipleMassSchemaLookups | Path-based analysis | Performance | GA | Detects scenarios where expensive schema lookups are made more than one time in a paths. |
-| PerformNullCheckOnSoqlVariables | Path-based analysis | Performance | Pilot | Identifies SOQL queries with variables in WHERE clauses that lack null checks. |
+| PerformNullCheckOnSoqlVariables | Path-based analysis | Performance | GA | Identifies SOQL queries with variables in WHERE clauses that lack null checks. |
 | RemoveUnusedMethod | Path-based analysis | Performance | Pilot | Detects methods contained in your code that aren’t invoked from any entry points that Graph Engine recognizes. |
 | UnimplementedTypeRule | Graph-based analysis | Performance | GA | Detects abstract classes and interfaces that are non-global and missing implementations or extensions. |
 | UseWithSharingOnDatabaseOperation | Path-based analysis | Security | GA | Detects database operations outside with-sharing-annotated classes. |
@@ -38,8 +38,8 @@ To run a specific category of rules, include the category.
 **Example:**
   
 ```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
-
 <br>
+
 ## Running Graph Engine Pilot Rules
 
 To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
@@ -51,13 +51,12 @@ To run all Graph Engine rules and all pilot rules, run: ```sfdx scanner:run:dfa 
 ```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
 <br>
-To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
+To run a specific category of rules including the pilot rules in that category, include the category and the `--with-pilot` flag.
 
 **Example**:
   
 ```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
-<br>
 ## Generally Available Rules
 
 ### ApexFlsViolationRule <a name='ApexFlsViolationRule'>#</a>
@@ -336,6 +335,52 @@ Your code invokes `Schema.getGlobalDescribe()` preceded by `Schema.describeSObje
 Explanation:
 
 `Schema.getGlobalDescribe` or `Schema.describeSObjects` is executed multiple times in a single path. Reduce the execution of the method to one time, then rescan your code
+
+### PerformNullCheckOnSoqlVariables <a name='PerformNullCheckOnSoqlVariables'>#</a>
+
+PerformNullCheckOnSoqlVariables identifies SOQL queries with variables in WHERE clauses that lack null checks. 
+SOQL queries with variables on WHERE clauses become expensive when the variable value is unintentionally null. When the variable value is null, an O(1) operation turns into an O(n) operation. The entire table is scanned, but returns no results. 
+
+#### Definition
+
+| Rule Component | Definition                                  																		|
+| ---------		 | ---------                                															  			|
+|**Source**		 |																													|
+|		 	  	 | `@AuraEnabled`-annotated methods     																			|
+|				 |`@InvocableMethod`-annotated methods																			  	|
+|     			 | `@NamespaceAccessible`-annotated methods 																		|
+| 				 |`@RemoteAction`-annotated methods																				  	|
+|				 |Any method returning a `PageReference` object																	  	|
+|				 |`public`-scoped methods on Visualforce Controllers																|
+|				 |`global`-scoped methods on any class																			  	|
+|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
+|				 |Any method targeted during invocation																				|
+| **Sink**		 | 																													|
+| 		  	  	 |Any database operation													|						
+| **Sanitizer**	 |				                                  														      		|
+|                |Null checks (`if (x != null) {`)|
+|				 |Explicit assignment to non-null (`String x = 'asdf'`) |
+|		  		 |Checks for specific non-null values (`if (x == 7) {`) |
+
+
+#### Interpreting PerformNullCheckOnSoqlVariables Results
+
+*Code Example*
+
+```
+public Account[] getAccountsMatchingName(String targetName) {
+	return [SELECT Id, Name FROM Account WHERE Name := targetName;
+}
+```
+
+*Common Case*
+
+> Null check is missing for variable targetName used in SOQL query.
+
+*Parameter Explanation*
+
+The mentioned variable is referenced by a SOQL query, and the variable is missing a null check. This behavior is expensive. Instead, explicitly perform  a null check on this variable, or assign it to a specific non-null value.
+
 ### UnimplementedTypeRule <a name='UnimplementedTypeRule'>#</a>
 
 UnimplementedTypeRule detects abstract classes and interfaces that are non-global and missing implementations or extensions.
@@ -410,51 +455,6 @@ Explanation:
 This warning is thrown when a database operation occurs in a class that has no explicitly declared sharing model, and therefore it implicitly inherits `with sharing` from its calling class. Even though the operation is secure in this specific case, it isn’t secure by default. Explicitly assign this class a sharing model to make it secure by default.
 
 ## Pilot Rules
-
-### PerformNullCheckOnSoqlVariables <a name='PerformNullCheckOnSoqlVariables'>#</a>
-
-PerformNullCheckOnSoqlVariables identifies SOQL queries with variables in WHERE clauses that lack null checks. 
-SOQL queries with variables on WHERE clauses become expensive when the variable value is unintentionally null. When the variable value is null, an O(1) operation turns into an O(n) operation. The entire table is scanned, but returns no results. 
-
-#### Definition
-
-| Rule Component | Definition                                  																		|
-| ---------		 | ---------                                															  			|
-|**Source**		 |																													|
-|		 	  	 | `@AuraEnabled`-annotated methods     																			|
-|				 |`@InvocableMethod`-annotated methods																			  	|
-|     			 | `@NamespaceAccessible`-annotated methods 																		|
-| 				 |`@RemoteAction`-annotated methods																				  	|
-|				 |Any method returning a `PageReference` object																	  	|
-|				 |`public`-scoped methods on Visualforce Controllers																|
-|				 |`global`-scoped methods on any class																			  	|
-|				 |`Messaging.InboundEmailResult handleInboundEmail()` methods on implementations of `Messaging.InboundEmailHandler`	|
-|				 |Any method targeted during invocation																				|
-| **Sink**		 | 																													|
-| 		  	  	 |Any database operation													|						
-| **Sanitizer**	 |				                                  														      		|
-|                |Null checks (`if (x != null) {`)|
-|				 |Explicit assignment to non-null (`String x = 'asdf'`) |
-|		  		 |Checks for specific non-null values (`if (x == 7) {`) |
-
-
-#### Interpreting PerformNullCheckOnSoqlVariables Results
-
-*Code Example*
-
-```
-public Account[] getAccountsMatchingName(String targetName) {
-	return [SELECT Id, Name FROM Account WHERE Name := targetName;
-}
-```
-
-*Common Case*
-
-> Null check is missing for variable targetName used in SOQL query.
-
-*Parameter Explanation*
-
-The mentioned variable is referenced by a SOQL query, and the variable is missing a null check. This behavior is expensive. Instead, explicitly perform  a null check on this variable, or assign it to a specific non-null value.
 
 ### RemoveUnusedMethod Rule <a name='RemoveUnusedMethod'>#</a>
 

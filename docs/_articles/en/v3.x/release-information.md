@@ -4,13 +4,25 @@ lang: en
 redirect_from: /en/release-information
 ---
 
-Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer).
+Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer) and the Salesforce Code Analyzer (beta) Visual Studio (VS) Code extension.
 
 We publish the latest Code Analyzer monthly. 
 
-* Run `sfdx plugin` to display the version of Code Analyzer installed on your computer. 
-* Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
+* Run `sfdx plugins` to display the version of Code Analyzer installed on your computer. 
+* Run `sfdx plugins:update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
+
+## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-03-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.17.0...v3.16.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available: PerformNullCheckOnSoqlVariables.
+* CHANGE (CodeAnalyzer): We updated the PMD engine so that Salesforce metadata files are no longer excluded by default.
+
+* **Closed issues:**
 
 ## [v3.16.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.16.0) (09-05-2023)
 
