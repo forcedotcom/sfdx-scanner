@@ -1,22 +1,22 @@
 ---
-title: Salesforce Code Analyzer Visual Studio Code Extension (Beta)
+title: Salesforce Code Analyzer (Beta) Visual Studio Code Extension 
 lang: en
 redirect_from: /en/code-analyzer-vs-code-extension
 ---
 
-The Salesforce Code Analyzer (Code Analyzer) Visual Studio (VS) Code extension is an extension that integrates many of Code Analyzer’s most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
+The Salesforce Code Analyzer (beta) Visual Studio (VS) Code integrates many of Code Analyzer’s most useful features into VS Code, allowing them to be easily run with clicks instead of terminal commands.
 
 > **_NOTE:_** If you’re listing a managed package on AppExchange, it must pass security review. You’re also required to upload your Salesforce Code Analyzer scan reports. Run Code Analyzer via the VS Code extension and update your code. Next, to produce the required scan reports for your AppExchange listing, you must run Code Analyzer via the command line either within VS Code or as standalone. Attach your scan reports to your submission in the AppExchange Security Review Wizard. Read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) for details.
 
-## Using Code Analyzer VS Code Extension (beta)
+## Using Salesforce Code Analyzer (beta)
 
-Use Code Analyzer VS Code extension (beta) to scan multiple languages:
+Use Salesforce Code Analyzer (Code Analyzer) to scan multiple languages:
 
 * [PMD rule engine](https://pmd.github.io/)
 * [RetireJS](https://retirejs.github.io/retire.js/)
 * [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/) (Generally Available rules only)
 
-You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y) these languages in Salesforce Code Analyzer settings:
+You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-for-language-y) these languages in Code Analyzer (beta) settings:
 
 * Java
 * XML code
@@ -25,27 +25,27 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 
 * Install [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm).
 * In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
-* Install [Salesforce Code Analyzer VS Code extension(beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
+* Install [Code Analyzer (beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
-## Contribute to Salesforce Code Analyzer VS Code Extension
+## Contribute to Code Analyzer (beta)
 
-To report issues with the Salesforce Code Analyzer VS Code Extension, create a [bug on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D). To suggest a feature enhancement, create a [request on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=%5BFeature+Request%5D).
+To report issues with Code Analyzer (beta), create a [bug on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=%5BBUG%5D). To suggest a feature enhancement, create a [request on Github](https://github.com/forcedotcom/sfdx-code-analyzer-vscode/issues/new?assignees=&labels=&projects=&template=feature_request.md&title=%5BFeature+Request%5D).
 
-## Launch Code Analyzer Extension and Scan Your Code
+## Launch Code Analyzer (beta) and Scan Your Code
 
-Complete these steps to launch the Code Analyzer extension and scan your code.
+Complete these steps to launch Code Analyzer (beta) and scan your code.
 
 1. Open your project in VS Code.
-2. Scan your code with Code Analyzer.
+2. Scan your code with Code Analyzer (beta).
 3. Update your code based on the findings.
 4. Rescan your code. 
 5. Scan individual methods within your code with Code Analyzer’s Graph Engine path-based analysis. 
 6. Rescan your code with Graph Engine.
 7. If you’re listing a managed package on AppExchange, follow the instructions in [Scan Your Solution with Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) to produce the required scan reports.
 
-### Code Analyzer Scans
+### Code Analyzer (beta) Scans
 
-Complete one of these options to perform a Code Analyzer scan.
+Complete one of these options to perform a Code Analyzer (beta) scan.
 
 * To scan selected files or folders:
 
@@ -68,9 +68,9 @@ After your scan is complete, note how many files were scanned and how many viola
 
 #### Address Your Code Analyzer Results and Rescan Your Code
 
-When your scan is complete, click the scan summary in the progress bar (1). You see a scrollable list of violations that Code Analyzer found (2).
+When your scan is complete, click the scan summary in the progress bar (1). You see a scrollable list of violations that Code Analyzer (beta) found (2).
 
-![alt text: Sample VS Code code and Salesforce Code Analyzer scan results](./assets/images/vscode-images/ScanSummary.png)
+![alt text: Sample Salesforce Code Analyzer (beta) scan results](./assets/images/vscode-images/ScanSummary.png)
 
 Each violation message reveals the violation severity and details about the violation found in this pattern: `SevX: [Violation message]`
 
@@ -80,17 +80,17 @@ Each violation message reveals the violation severity and details about the viol
 
 To address the violations found and to rescan your code, follow these steps:
 
-1. Scroll through the results that Code Analyzer found.
+1. Scroll through the results that Code Analyzer (beta) found.
 2. Update your code directly in VS Code.
 3. When your edits are complete, rescan your code using your preferred method.
 
-#### Produce Code Analyzer Reports for AppExchange Security Review
+#### Produce Salesforce Code Analyzer Reports for AppExchange Security Review
 
-If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Salesforce Code Analyzer and provide test results in your solution’s AppExchange Security Review submission. To produce the required reports, follow the instructions in [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.244.0.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm).
+If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Code Analyzer (beta) and provide test results in your solution’s AppExchange Security Review submission. To produce the required reports, follow the instructions in [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.244.0.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm).
 
 #### Use a Quick Fix to Suppress a Code Analyzer PMD Violation
 
-After you scan your code with Code Analyzer, there can be situations where you want to suppress a PMD violation that was identified. 
+After you scan your code with Code Analyzer (beta), there can be situations where you want to suppress a PMD violation that was identified. 
 
 To use a quick fix to suppress a PMD violation on a line of code, complete these steps.
 
@@ -100,12 +100,12 @@ To use a quick fix to suppress a PMD violation on a line of code, complete these
 
 #### Replace Code Analyzer’s PMD Config File with a Custom PMD Config
 
-By default, Code Analyzer runs all of PMD's default rules against your Apex and VisualForce files. However, if you have a custom PMD configuration that better suits your needs, you can substitute your configuration in place of ours.
+By default, Code Analyzer (beta) runs all of PMD's default rules against your Apex and VisualForce files. However, if you have a custom PMD configuration that better suits your needs, you can substitute your configuration in place of ours.
 
 To use your custom PMD ruleset in Code Analyzer, complete these steps.
 
 1. In VS Code, click **Extensions**.
-2. Select **Salesforce Code Analyzer VS Code Extension**.
+2. Select **Salesforce Code Analyzer (beta)**.
 3. Click **Settings**.
 4. Click **Extension Settings**. 
 5. Click the **User** or **Workspace** tab (1).

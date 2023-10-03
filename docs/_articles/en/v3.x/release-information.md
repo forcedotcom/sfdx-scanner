@@ -4,13 +4,41 @@ lang: en
 redirect_from: /en/release-information
 ---
 
-Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer).
+Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer) and the Salesforce Code Analyzer (beta) Visual Studio (VS) Code extension.
 
 We publish the latest Code Analyzer monthly. 
 
-* Run `sfdx plugin` to display the version of Code Analyzer installed on your computer. 
-* Run `sfdx plugins:update` and `sfdx plugins:update --help` to update Code Analyzer and help to the latest version.
+* Run `sfdx plugins` to display the version of Code Analyzer installed on your computer. 
+* Run `sfdx plugins:update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
+
+## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-03-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.17.0...v3.16.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (GraphEngine): One recently released Graph Engine pilot rule is now generally available: PerformNullCheckOnSoqlVariables.
+* CHANGE (CodeAnalyzer): We updated the PMD engine so that Salesforce metadata files are no longer excluded by default.
+
+**Closed issues:**
+* [BUG] Unable to register and execute custom XML rules [\#1104](https://github.com/forcedotcom/sfdx-scanner/issues/1104)
+* [BUG] ApexCRUDViolation false positive reported on dynamic sObject [\#1147](https://github.com/forcedotcom/sfdx-scanner/issues/1147)
+* [BUG] [\#1192](https://github.com/forcedotcom/sfdx-scanner/issues/1192)
+* [BUG] java.util.concurrent.ExecutionException: java.lang.OutOfMemoryError [\#825](https://github.com/forcedotcom/sfdx-scanner/issues/825)
+* [BUG] Avoid operations in loop [\#1182](https://github.com/forcedotcom/sfdx-scanner/issues/1182)
+* No output file if there are no violations [\#1157](https://github.com/forcedotcom/sfdx-scanner/issues/1157)
+* [BUG] Install fails, `Couldn't find any versions for "@babel/types" that matches "^7.22.18"` [\#1179](https://github.com/forcedotcom/sfdx-scanner/issues/1179)
+* [BUG] Unable to Install SFDX CLI Scanner in Win 10 Enterprise Edition [\#1066](https://github.com/forcedotcom/sfdx-scanner/issues/1066)
+* [Feature Request] Provide first class native support in VSCode for Salesforce CLI Scanner [\#252](https://github.com/forcedotcom/sfdx-scanner/issues/252)
+* [BUG] pmd seemingly not found [\#1172](https://github.com/forcedotcom/sfdx-scanner/issues/1172)
+
+**Merged pull requests:**
+* CHANGE (CodeAnalyzer): @W-14198199@: PMD no longer excludes SF metadata files by default. [\#1198](https://github.com/forcedotcom/sfdx-scanner/pull/1198)
+* CHANGE (GraphEngine): @W-14139399@: PerformNullcheckOnSoqlVariables now GA. [\#1190](https://github.com/forcedotcom/sfdx-scanner/pull/1190)
+* FIX (CodeAnalyzer): @W-14096244@: Restored behavior for violationless output on console. [\#1176](https://github.com/forcedotcom/sfdx-scanner/pull/1176)
+* CHANGE (CodeAnalyzer): @W-14009441@: create output file when no violations are found [\#1170](https://github.com/forcedotcom/sfdx-scanner/pull/1170)
 
 ## [v3.16.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.16.0) (09-05-2023)
 
