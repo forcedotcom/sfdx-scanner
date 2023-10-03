@@ -248,7 +248,7 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 				// NOTE: This next test is based on the implementation of run-summary messages in W-8388246, which was known
 				// to be incomplete. When we flesh out that implementation with summaries for other formats, this test might
 				// need to change.
-				it('JSON-type output should NOT be followed by summary', async () => {
+				it('JSON-type output with no violations should output be an empty violation set', async () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.JSON
 					};
@@ -297,17 +297,20 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
-				const fakeRes: RecombinedRuleResults = {minSev: 0, summaryMap, results: ''};
+				const fakeRes: RecombinedRuleResults = {minSev: 0, summaryMap, results: '"Problem","Severity","File","Line","Column","Rule","Description","URL","Category","Engine"'};
 
 				// THIS IS THE PART BEING TESTED.
 				const output: AnyJson = rop.processRunOutput(fakeRes);
 
-				// We expect that the message logged to the console and the message returned should both be the default
-				const expectedMsg = processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint']);
+				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
+				const expectedMsg = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 0, 0])}
+${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint', 0, 0])}
+${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+
 				Sinon.assert.callCount(logSpy, 1);
 				Sinon.assert.callCount(tableSpy, 0);
 				Sinon.assert.calledWith(logSpy, expectedMsg);
-				expect(fakeFiles.length).to.equal(0, 'No files should be created');
+				expect(fakeFiles.length).to.equal(1, 'A CSV file with only a header should be created');
 				expect(output).to.equal(expectedMsg, 'Should have returned expected message');
 			});
 

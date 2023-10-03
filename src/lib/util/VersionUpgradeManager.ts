@@ -38,7 +38,7 @@ upgradeScriptsByVersion.set('v2.7.0', (config: ConfigContent): Promise<void> => 
 	return Promise.resolve();
 });
 upgradeScriptsByVersion.set('v3.0.0', (config: ConfigContent): Promise<void> => {
-	// In v3.0.0, we're changing RetireJS from a supplemental engine that must be manually enabled to an enabled-byu-default
+	// In v3.0.0, we're changing RetireJS from a supplemental engine that must be manually enabled to an enabled-by-default
 	// engine. So we need to change its `disabled` config value from true to false.
 	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS);
 	if (retireJsConfig) {
@@ -62,6 +62,16 @@ upgradeScriptsByVersion.set('v3.6.0', async (config: ConfigContent): Promise<voi
 			config.engines = pilotConfig.engines;
 		}
 	}
+});
+upgradeScriptsByVersion.set('v3.17.0', (config: ConfigContent): Promise<void> => {
+	// In v3.17.0, we're changing PMD's config so that it no longer excludes Salesforce metadata
+	// files by default. This will automatically apply to any newly-generated configs, but we also
+	// want to retroactively remove this exclusion for existing users.
+	const pmdConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.PMD);
+	if (pmdConfig) {
+		pmdConfig.targetPatterns = pmdConfig.targetPatterns.filter(s => s !== '!**/*-meta.xml');
+	}
+	return Promise.resolve();
 });
 
 

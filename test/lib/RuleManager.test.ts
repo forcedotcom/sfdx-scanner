@@ -273,7 +273,7 @@ describe('RuleManager', () => {
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('');
+					expect(results).to.equal('[]');
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -389,13 +389,13 @@ describe('RuleManager', () => {
 			})
 
 			describe('Edge Cases', () => {
-				it('When no rules match the given criteria, an empty string is returned', async () => {
+				it('When no rules match the given criteria, an empty summary is returned', async () => {
 					// Define our preposterous filter array.
 					const filters = [new CategoryFilter(['beebleborp'])];
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
-					expect(results).to.equal('', `Output ${results} should have been an empty string`);
+					expect(results).to.equal('[]', `Output ${results} should have been an empty summary (empty array)`);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -407,7 +407,7 @@ describe('RuleManager', () => {
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('');
+					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -422,7 +422,7 @@ describe('RuleManager', () => {
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('');
+					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -436,7 +436,7 @@ describe('RuleManager', () => {
 
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('');
+					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
