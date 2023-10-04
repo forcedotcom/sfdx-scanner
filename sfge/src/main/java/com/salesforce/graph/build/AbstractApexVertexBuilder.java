@@ -66,10 +66,33 @@ abstract class AbstractApexVertexBuilder {
             vNode.property(Schema.FILE_NAME, fileName);
         }
 
-        Vertex vPreviousSibling = null;
         final List<JorjeNode> children = node.getChildren();
+        // We use this Map to connect newly-created child vertices to the index we expect them
+        // to have. We use a Map instead of a List because synthetic vertices introduce the
+        // possibility for vertices to be created out of order, and Lists can't have null indices.
+        final Map<Integer, Vertex> childVerticesByIndex = new HashMap<>();
         final Set<Vertex> verticesAddressed = new HashSet<>();
         verticesAddressed.add(vNode);
+
+        if (ConstructorUtil.isImplicitlyDelegatedConstructorBody(g, node)) {
+            // If this node is the body of a constructor that implicitly delegates to another
+            // constructor, synthesize vertices representing that delegation.
+            Vertex syntheticExpression = ConstructorUtil.synthesizeSuperCall(g, node, vNode);
+            verticesAddressed.add(syntheticExpression);
+            // Since the synthetic vertex represents an implicit call at the very start of
+            // the codeblock, we map the vertex as the 0th child and recompute the indices for
+            // the rest of the children.
+            childVerticesByIndex.put(0, syntheticExpression);
+            node.computeChildIndices(1, false);
+        } else if (ConstructorUtil.isImpliedDefaultConstructor(node)) {
+            // If this node is the implicit declaration of a default constructor,
+            // then it is missing a body, and we need to synthesize one.
+            Vertex syntheticBody = ConstructorUtil.synthesizeDefaultConstructorBody(g, node, vNode);
+            // The synthetic body should be added at the end. So map its vertex as last, and
+            // recompute the indices for the rest of the children.
+            childVerticesByIndex.put(children.size(), syntheticBody);
+            node.computeChildIndices(0, true);
+        }
 
         for (int i = 0; i < children.size(); i++) {
             final JorjeNode child = children.get(i);
@@ -84,19 +107,46 @@ abstract class AbstractApexVertexBuilder {
             if (StaticBlockUtil.isStaticBlockStatement(node, child)) {
                 final Vertex parentVertexForChild =
                         StaticBlockUtil.createSyntheticStaticBlockMethod(g, vNode, i);
+                // The child vertex is made a child of the synthetic vertex instead of its original
+                // parent.
                 GremlinVertexUtil.addParentChildRelationship(g, parentVertexForChild, vChild);
                 verticesAddressed.add(parentVertexForChild);
             } else {
                 GremlinVertexUtil.addParentChildRelationship(g, vNode, vChild);
             }
 
-            if (vPreviousSibling != null) {
-                g.addE(Schema.NEXT_SIBLING).from(vPreviousSibling).to(vChild).iterate();
-            }
-            vPreviousSibling = vChild;
+            // Map this vertex as the Nth child vertex of the parent.
+            // TODO: This may be the cause of W-14113545. It's possible that when a synthetic vertex
+            //       is created, it should replace the real vertex in the appropriate index.
+            //       We need to do some more investigation around this.
+            childVerticesByIndex.put(child.getChildIndex(), vChild);
 
             // To save memory in the graph, don't pass the source name into recursive calls.
             buildVertices(child, vChild, null);
+        }
+
+        // If any child vertices were created, they need to be properly linked as siblings.
+        if (!childVerticesByIndex.isEmpty()) {
+            Vertex vLastChild = null;
+            int linkedChildren = 0;
+            int childCount = childVerticesByIndex.size();
+            int i = 0;
+            // There shouldn't be gaps in the child indexing, but just in case, we're looping
+            // on `linkedChildren` instead of `i` to guarantee that we process every child.
+            while (linkedChildren < childCount) {
+                Vertex vNextChild = childVerticesByIndex.get(i++);
+                // Again, there shouldn't be any gaps, but we're being cautious and handling them
+                // anyway. Handle gaps by skipping them. As long as the vertices' relative order
+                // is preserved, it should all work out fine in the end.
+                if (vNextChild == null) {
+                    continue;
+                }
+                if (vLastChild != null) {
+                    g.addE(Schema.NEXT_SIBLING).from(vLastChild).to(vNextChild).iterate();
+                }
+                vLastChild = vNextChild;
+                linkedChildren += 1;
+            }
         }
         // Execute afterInsert() on each vertex we addressed
         for (Vertex vertex : verticesAddressed) {

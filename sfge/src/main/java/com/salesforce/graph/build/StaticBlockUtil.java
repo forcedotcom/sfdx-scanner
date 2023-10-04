@@ -64,7 +64,8 @@ import org.apache.tinkerpop.gremlin.structure.Vertex;
  *          SyntheticStaticBlock_2();
  *     }
  * }
- * </code>
+ * </code> TODO: Some of the helper methods in this class can be pulled into {@link
+ * VertexSynthesisUtil}.
  */
 public final class StaticBlockUtil {
     private static final Logger LOGGER = LogManager.getLogger(StaticBlockUtil.class);

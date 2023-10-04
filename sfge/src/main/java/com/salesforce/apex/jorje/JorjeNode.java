@@ -38,7 +38,11 @@ public interface JorjeNode {
 
     void setMetaInformation(PositionInformation positionInformation);
 
+    void computeChildIndices(int startOffset, boolean expectingSubsequentChildren);
+
     void setChildIndex(int childIndex);
+
+    int getChildIndex();
 
     void setFirstChild(boolean firstChild);
 
