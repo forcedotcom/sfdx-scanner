@@ -1,0 +1,15 @@
+name: gha-test
+on:
+  workflow_call:
+
+jobs:
+  do_the_thing:
+    runs-on: ubuntu-latest
+    name: Test the new actions
+    steps:
+      - uses: actions/checkout@v3
+      - uses: rmohan20/code-analyzer-action
+        with:
+          render-results: true
+          runtype: simple
+          target: "."
