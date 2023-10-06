@@ -18,3 +18,5 @@ jobs:
   # Separately, we also need to run all of our tests.
   run_tests:
     uses: ./.github/workflows/run-tests.yml
+  run_new_action:
+    uses: ./.github/workflows/gha-test.yml
