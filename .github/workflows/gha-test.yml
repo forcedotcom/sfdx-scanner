@@ -12,4 +12,4 @@ jobs:
         with:
           render-results: true
           runtype: simple
-          target: "./test/code-fixtures/*.cls"
+          target: "./test/code-fixtures/**/*.cls"
