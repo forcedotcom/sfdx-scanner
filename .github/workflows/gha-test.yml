@@ -8,7 +8,7 @@ jobs:
     name: Test the new actions
     steps:
       - uses: actions/checkout@v3
-      - uses: rmohan20/code-analyzer-action
+      - uses: rmohan20/code-analyzer-action@main
         with:
           render-results: true
           runtype: simple
