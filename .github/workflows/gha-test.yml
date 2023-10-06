@@ -12,4 +12,5 @@ jobs:
         with:
           render-results: true
           runtype: simple
+          engine: eslint-typescript
           target: "./src/**/*.ts"
