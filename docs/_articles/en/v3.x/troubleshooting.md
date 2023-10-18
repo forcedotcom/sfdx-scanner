@@ -197,11 +197,7 @@ Follow these guidelines to resolve InternalExecution errors:
 4. Delete your `~/.sfdx-scanner/sfge`.log file, and then rerun the command. This action produces a clean log file containing just the logs from the most recent execution. Read those logs. Look for:
 - Exceptions and stack traces. The exception often provides more information such as DefiningTypes. If you log an issue, it’s important to include the stack trace.
 - ```TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence=[X, Y, Z]``` This message indicates that your code has a reference chain of length 3 or greater. Graph Engine is unable to process these references and treats them as indeterminate values. It’s possible that fixing these references can fix your issue.
-	- For example, instead of this reference:
-		`String s = someObj.innerObj.someString;`
-	- Try:
-		`InnerObj o = someObj.innerObj;`
-		`String s = o.someString;`
+- For example, instead of this reference:<br> `String s = someObj.innerObj.someString;`<br> Try: <br> `InnerObj o = someObj.innerObj;`<br> `String s = o.someString;`
 5. Attempt to reproduce the issue in simpler code. The process of figuring out how to reproduce it gives you valuable insight into potential workarounds  or fixes.
 6. If you’re still blocked, [log an issue](https://github.com/forcedotcom/sfdx-scanner/issues/new/choose), and include:
 - a clean log 
