@@ -223,7 +223,7 @@ To complete the execution within the timeout period, you can also reduce the num
 
 ### My `scanner:run:dfa` execution ran into this error: `java.lang.LimitReachedError: Java heap space`.
 
-This `LimitReachedError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/##understand-limitreached-errors) to reduce the probability of experiencing the heap space error.
+This `LimitReachedError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors) to reduce the probability of experiencing the heap space error.
 
 ---
 
