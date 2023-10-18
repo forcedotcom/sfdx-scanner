@@ -123,12 +123,12 @@ public Integer foo(String input) {
 **Result:** A Graph Engine analysis attempt on this code path results in a User Action Violation on this path. Analysis on other paths can proceed. Sometimes other violations are returned. This message is returned: ```Rename or delete this reused variable to proceed with the analysis```.
 
 
-## Understand OutOfMemory Errors
+## Understand LimitReached Errors
 
-When Graph Engine analyzes highly complex code, it runs out of heap space, which  results in an `OutOfMemory` error. To decrease the occurrence of `OutOfMemory` errors and to complete as much analysis as possible within a shorter period, we added processing limits on Graph Engine. These limits help Graph Engine to fail fast when a path’s analysis is approaching an `OutOfMemory` error. This fail-fast process includes preemptively aborting a path analysis when Graph Engine encounters a path that’s too complex.
+When Graph Engine analyzes highly complex code, it runs out of heap space, which  results in a `LimitReached` error. To decrease the occurrence of `LimitReached` errors and to complete as much analysis as possible within a shorter period, we added processing limits on Graph Engine. These limits help Graph Engine to fail fast when a path’s analysis is approaching a `LimitReached` error. This fail-fast process includes preemptively aborting a path analysis when Graph Engine encounters a path that’s too complex.
 
-### Recommended Steps to Reduce OutOfMemory Error Occurrences
-To proactively reduce the chances of an `OutOfMemory` error in your scans, take these steps.
+### Recommended Steps to Reduce LimitReached Error Occurrences
+To proactively reduce the chances of a `LimitReached` error in your scans, take these steps.
 
 1. Execute `scanner:run:dfa` with default heap space settings and collect the results to a file using the `--outfile` parameter. The output file contains the majority of the actionable items.
 2. Filter your output file on the `LimitReached` violation and group these violations into sets of targets. `LimitReached` violations are the more complex paths that need more heap space and time. 

@@ -187,6 +187,25 @@ Remove any languages besides the languages in PMD engine’s `supportedLanguages
 
 ## Issues using Salesforce Graph Engine
 
+### Troubleshooting InternalExecution Errors
+
+Follow these guidelines to resolve InternalExecution errors:
+
+1. Read the error message that you received.
+2. Does the error message mention a specific vertex with a DefiningType and BeginLine? These values correspond to an Apex class and line number. Check what’s happening in that line of code, and re-read the error message. With the additional context, is there any debugging that you can do or refactoring that you can try to work around the issue?
+3. Does the error message mention the name of a specific method, variable, or property in your code? Search your codebase for references to it. Then re-read the error message.
+4. Delete your `~/.sfdx-scanner/sfge`.log file, and then rerun the command. This action produces a clean log file containing just the logs from the most recent execution. Read those logs. Look for:
+	- Exceptions and stack traces. The exception often provides more information such as DefiningTypes. If you log an issue, it’s important to include the stack trace.
+	- ```TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence=[X, Y, Z]``` This message indicates that your code has a reference chain of length 3 or greater. Graph Engine is unable to process these references and treats them as indeterminate values. It’s possible that fixing these references can fix your issue. <br> For example, instead of this reference:<br> `String s = someObj.innerObj.someString;`<br> Try: <br> `InnerObj o = someObj.innerObj;`<br> `String s = o.someString;`
+5. Attempt to reproduce the issue in simpler code. The process of figuring out how to reproduce it gives you valuable insight into potential workarounds  or fixes.
+6. If you’re still blocked, [log an issue](https://github.com/forcedotcom/sfdx-scanner/issues/new/choose), and include:
+- a clean log 
+- exceptions
+- stack traces
+- specific code that can be used to reproduce the issue
+- clear details about how to write the code. 
+- if the error message indicated a specific vertex, include the line of code the vertex refers to.
+
 ### My `scanner:run:dfa` execution ran for a long time and ended with a timeout.
 
 Depending on the complexity of the source code, Graph Engine can take a long time to complete. 
@@ -201,6 +220,9 @@ Both methods take int values of the number of milliseconds to wait. The default 
 To complete the execution within the timeout period, you can also reduce the number of files sent as `--target`, which reduces the number of entry points scanned per run.
 
 
-### My `scanner:run:dfa` execution ran into this error: `java.lang.OutOfMemoryError: Java heap space`.
+### My `scanner:run:dfa` execution ran into this error: `java.lang.LimitReachedError: Java heap space`.
 
-This `OutOfMemoryError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) to reduce the probability of experiencing the heap space error.
+This `LimitReachedError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors) to reduce the probability of experiencing the heap space error.
+
+---
+
