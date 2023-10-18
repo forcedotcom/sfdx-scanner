@@ -31,14 +31,6 @@ You can specify the rules that you invoke on PMD using `--pmdconfig`. Using `–
 
 ```$ sfdx scanner:run --engine "eslint-typescript,pmd" --pmdconfig "/path/to/ruleref.xml" --target "/path/to/target"```
 
-## PMD Restrictions
-
-PMD configurations in Code Analyzer have these restrictions.
-
-* Rule filters such as ```--category``` and ```--ruleset``` aren’t evaluated.
-* If your PMD configuration contains custom rules, first run ```scanner:rule:add``` to add your custom rules to Code Analyzer to ensure that your rules are supported by Code Analyzer.
-* When ```--pmdconfig``` is used, default PMD rules don’t run. However, default ESLint rules continue to run.
-
 ## See Also
 
 - [PMD Source Code Analyzer Project: Making rulesets](https://pmd.github.io/latest/pmd_userdocs_making_rulesets.html)
