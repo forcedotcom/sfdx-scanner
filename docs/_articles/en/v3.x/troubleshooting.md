@@ -195,9 +195,9 @@ Follow these guidelines to resolve InternalExecution errors:
 2. Does the error message mention a specific vertex with a DefiningType and BeginLine? These values correspond to an Apex class and line number. Check what’s happening in that line of code, and re-read the error message. With the additional context, is there any debugging that you can do or refactoring that you can try to work around the issue?
 3. Does the error message mention the name of a specific method, variable, or property in your code? Search your codebase for references to it. Then re-read the error message.
 4. Delete your `~/.sfdx-scanner/sfge`.log file, and then rerun the command. This action produces a clean log file containing just the logs from the most recent execution. Read those logs. Look for:
-- Exceptions and stack traces. The exception often provides more information such as DefiningTypes. If you log an issue, it’s important to include the stack trace.
-- ```TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence=[X, Y, Z]``` This message indicates that your code has a reference chain of length 3 or greater. Graph Engine is unable to process these references and treats them as indeterminate values. It’s possible that fixing these references can fix your issue.
-- For example, instead of this reference:<br> `String s = someObj.innerObj.someString;`<br> Try: <br> `InnerObj o = someObj.innerObj;`<br> `String s = o.someString;`
+	- Exceptions and stack traces. The exception often provides more information such as DefiningTypes. If you log an issue, it’s important to include the stack trace.
+	- ```TODO: PathScopeVisitor.getApexValue() can currently only support chains of length 2 or lower. keySequence=[X, Y, Z]``` This message indicates that your code has a reference chain of length 3 or greater. Graph Engine is unable to process these references and treats them as indeterminate values. It’s possible that fixing these references can fix your issue.
+	- For example, instead of this reference:<br> `String s = someObj.innerObj.someString;`<br> Try: <br> `InnerObj o = someObj.innerObj;`<br> `String s = o.someString;`
 5. Attempt to reproduce the issue in simpler code. The process of figuring out how to reproduce it gives you valuable insight into potential workarounds  or fixes.
 6. If you’re still blocked, [log an issue](https://github.com/forcedotcom/sfdx-scanner/issues/new/choose), and include:
 - a clean log 
