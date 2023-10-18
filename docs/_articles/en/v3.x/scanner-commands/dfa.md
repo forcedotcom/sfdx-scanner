@@ -8,7 +8,7 @@ Scans codebase with all DFA rules by default. Specify the format of output and p
 
 This command runs for a longer time than `scanner:run`. Also, ```scanner:run:dfa``` requires a target code context path.
 
-Important: If your codebase is complex, increase the Java heap space to avoid OutOfMemory Errors. For more information, read [OutOfMemory: Java heap space Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-java-heap-space-error).
+Important: If your codebase is complex, increase the Java heap space to avoid OutOfMemory Errors. For more information, read [OutOfMemory: Java heap space Error](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors).
 
 ## Usage
 ```bash
