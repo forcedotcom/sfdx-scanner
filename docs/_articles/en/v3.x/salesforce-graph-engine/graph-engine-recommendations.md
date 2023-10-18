@@ -10,7 +10,7 @@ Graph Engine is a powerful tool for code analysis, but it has its own set of lim
 **Note**: Some suggested refactors in this guide can conflict with accepted best practices for Apex. Read through the options, and update your code as appropriate.
 
 ## Who Should Read This Guide?
-If you have a highly complex codebase, and you tried the existing mechanisms for [avoiding timeouts](./en/v3.x/troubleshooting/#issues-using-salesforce-graph-engine) and [path expansion limits](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-outofmemory-errors), this guide is for you. Use the suggestions in this guide to refactor your code, be more compatible with Graph Engine's architecture, and find performance gains.
+If you have a highly complex codebase, and you tried the existing mechanisms for [avoiding timeouts](./en/v3.x/troubleshooting/#issues-using-salesforce-graph-engine) and [path expansion limits](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors), this guide is for you. Use the suggestions in this guide to refactor your code, be more compatible with Graph Engine's architecture, and find performance gains.
 
 ## Understanding Salesforce Graph Engine
 
