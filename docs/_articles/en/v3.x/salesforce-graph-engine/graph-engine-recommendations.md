@@ -1,4 +1,9 @@
-# Writing Graph Engine-Friendly Code
+---
+title: 'Writing Graph Engine-Friendly Code'
+lang: en
+---
+	  
+## Writing Graph Engine-Friendly Code
 
 Graph Engine is a powerful tool for code analysis, but it has its own set of limitations. Read this guide to learn about Graph Engine’s nuanced architecture, and learn how to make small refactors to your code to significantly improve Graph Engine's performance.
 
@@ -24,7 +29,8 @@ To understand how to decrease the number of paths in a given entry point, let’
 
 **Example**:
 
-```public void foo(boolean b1, boolean b2) {
+```
+public void foo(boolean b1, boolean b2) {
     if (b1) {
         System.debug('b1 is true');
     } else {
@@ -51,7 +57,7 @@ If an entry point’s complexity causes it to encounter timeouts or memory probl
 Refactoring entry points to redistribute paths is low effort and low risk, but it is also powerful in its ability to make your code more compatible with Graph Engine.
 
 
-### Code Example: One Inefficient Entry Point, One Path
+### Code Example: One Inefficient Entry Point
 Let’s look at an example with an Aura-Enabled method. Graph Engine considers this method an entry point.
 
 **Example**:
@@ -79,11 +85,11 @@ public void foo(boolean b1, boolean b2, boolean b3) {
 
 The values of all three parameters, `b1`, `b2`, and `b3`, are unknown, so each conditional `if` expression causes paths to fork. If we assume that each helper method contains exactly one unique path, then the total number of possible paths is 8, or 1 x 2 x 2 x 2. That number of paths is unlikely to exceed time or memory limits. 
 
-### Code Example: One Inefficient Entry Point, Ten Paths
+### Code Example: One Inefficient Entry Point and an Explosion of Paths
 
 Now let’s use the same example but assume that each helper method contains 10 unique paths. Then each conditional `if` expression actually creates 20 unique paths instead of just two. The total number of paths is then 8,000, or 1 x 20 x 20 x 20, which is an excessive number of paths.
 
-### Code Example with Two Efficient Entry Points, Fewer Paths
+### Code Example: Two Efficient Entry Points Reduces Paths
 
 Let’s refactor the code from our previous example. We turn the single entry point into two entry points that include fewer paths. Our code now looks something like this.
 
