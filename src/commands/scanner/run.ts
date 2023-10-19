@@ -24,8 +24,6 @@ export default class Run extends ScannerRunCommand {
 		messages.getMessage('examples')
 	];
 
-	public static args = [{name: 'file'}];
-
 	// This defines the flags accepted by this command.
 	protected static flagsConfig = {
 		// Include all common flags from the super class.
