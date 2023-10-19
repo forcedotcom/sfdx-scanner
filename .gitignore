@@ -147,6 +147,9 @@ build
 .project
 .settings
 
+# OCLIF lockfile auto-generated during publishing
+oclif.lock
+
 pmd-cataloger/bin
 
 sfge*.log.gz

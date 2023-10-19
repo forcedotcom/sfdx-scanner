@@ -28,8 +28,6 @@ export default class Dfa extends ScannerRunCommand {
 		messages.getMessage('examples')
 	];
 
-	public static args = [{name: 'file'}];
-
 	// This defines the flags accepted by this command.
 	// NOTE: Unlike the other classes that extend ScannerCommand, this class has no flags for specifying rules. This is
 	// because the command currently supports only a single engine with a single rule. So no such flags are currently
