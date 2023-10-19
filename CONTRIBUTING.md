@@ -14,9 +14,9 @@ yarn --ignore-scripts && yarn build
 ```
 
 ### Running
-Run any sfdx scanner command by replacing `sfdx` with `bin/run` from sfdx-scanner directory. For example, you can invoke `list` command with:
+Run any sfdx scanner command by replacing `sfdx` with `bin/run.js` or `bin/run.cmd` from sfdx-scanner directory. For example, you can invoke `list` command with:
 ```
-bin/run scanner:rule:list
+bin/run.js scanner:rule:list
 ```
 
 ### Making changes
@@ -43,9 +43,9 @@ If you linked your plugin to the sfdx cli, call your command with the `dev-suspe
 $ sfdx scanner:rule:list --dev-suspend
 ```
   
-Alternatively, to call your command using the `bin/run` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
+Alternatively, to call your command using the `bin/run.js` or `bin/run.cmd` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
 ```sh-session
-$ NODE_OPTIONS=--inspect-brk bin/run scanner:rule:list
+$ NODE_OPTIONS=--inspect-brk bin/run.js scanner:rule:list
 ```
 
 2. Set some breakpoints in your command code
