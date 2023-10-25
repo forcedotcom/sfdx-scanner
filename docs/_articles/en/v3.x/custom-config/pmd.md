@@ -5,33 +5,31 @@ redirect_from: /en/custom-config/pmd
 ---
 
 ## PMD Custom Configuration
-Apply your PMD knowledge to build your own Salesforce Code Analyzer (Code Analyzer) rule reference file. Use PMD to run a custom subset of rules or define property values for rules. 
+By default, Salesforce Code Analyzer's catalog of PMD rules includes PMD’s built-in rules and any custom rules that you added with `scanner:rule:add`. Filter which rules are run using flags like `--category`. 
 
-You can:
+To replace the catalog with your own custom catalog, use `--pmdconfig`. With this flag, you can:
 
-* Create rulesets, modify properties, or explicitly disable existing rules. 
-* Create Xpath rules, and reference new rules in ruleset configurations.
+* Indicate a specific set of rules to run without using filtering flags like `--category`.
+* Modify the properties of existing rules to meet your needs.
+* Define and run new XPath-based rules without permanently adding them to the catalog.
 
-Your new rules or rulesets must be in XML format. Add new rules or rulesets using ```scanner:rule:add```.
+Create your custom rules file just like another other PMD category or [ruleset file](https://docs.pmd-code.org/latest/pmd_userdocs_making_rulesets.html#creating-a-ruleset). Keep these limitations in mind.
 
-To invoke your rulesets in Code Analyzer, run ```scanner:run --pmdconfig```, and pass the path to your rule reference file.
+* PMD's built-in rules can be freely referenced with the ref property.
+* Custom rules defined in other files can be referenced through the ref property only if they’re bundled into a JAR as described in [Authoring Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/author/) and registered via `scanner:rule:add` as described in [Managing Custom Rules](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/custom-rules/manage/). This constraint applies to XPath-based and Java-based rules.
+* Custom XPath-based rules can be declared inline.
+
+**Note**: Because `--pmdconfig` replaces our catalog with yours, rule filter flags such as `--category` and `--ruleset` aren’t applied to PMD rules, though they’re still applied to other engines. Only the PMD rules that you specify in your config file are evaluated.
+
+To invoke your rulesets in Code Analyzer, run `scanner:run --pmdconfig “filename”`, and pass the path to your rule reference file.
 
 ```$ sfdx scanner:run —target “/path/to/your/target” —pmdconfig “/path/to/rule_reference.xml”```
 
-You can specify the rules that you invoke on PMD using ```--pmdconfig```. Using ```–pmdconfig``` causes other filter parameters to be ignored, such as ```–category``` and ```–ruleset```. 
+You can specify the rules that you invoke on PMD using `--pmdconfig`. Using `–pmdconfig` causes other filter parameters to be ignored, such as `–category` and `–ruleset`.
 
-Example:
+**Example**:
 
 ```$ sfdx scanner:run --engine "eslint-typescript,pmd" --pmdconfig "/path/to/ruleref.xml" --target "/path/to/target"```
-
-
-## PMD Restrictions
-
-PMD rulesets in Code Analyzer have these restrictions.
-
-* Rule filters such as ```--category``` and ```--ruleset``` aren’t evaluated.
-* If your PMD ruleset contains custom rules, first run ```scanner:rule:add``` to add your custom rules to Code Analyzer to ensure that your rules are supported by Code Analyzer.
-* When ```--pmdconfig``` is used, default PMD rules don’t run. However, default ESLint rules continue to run.
 
 ## See Also
 

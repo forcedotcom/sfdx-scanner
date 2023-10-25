@@ -13,7 +13,7 @@ Because PMD and ESLint are different engines, their custom rules are handled dif
 ## PMD Custom Rules
 ### Add Rules
 
-Use the ```scanner:rule:add``` [command](./en/v3.x/scanner-commands/add/) to add a custom rule to Salesforce Code Analyzer (Code Analyzer). Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the ```-p|--path``` parameter to specify a directory that contains multiple JAR or XML files.
+Use the ```scanner:rule:add``` [command](./en/v3.x/scanner-commands/add/) to add a custom rule to Salesforce Code Analyzer (Code Analyzer) catalog. Rules added in this way can then be invoked with ```scanner:run``` the same way that PMD default rules are invoked. Use the ```-p|--path``` parameter to specify the XML file containing your XPath-based rules, or the JAR containing your Java-based rules. You can specify multiple files to add multiple custom rules for a single language. You can also use the ```-p|--path``` parameter to specify a directory that contains multiple JAR or XML files.
 
 To add one or more custom rules to multiple languages, use a separate ```scanner:rule:add``` for each language.
 
@@ -45,9 +45,9 @@ The command output indicates which JAR files were found and added to Code Analyz
 
 ### Run Rules
 
-After you add your rules to Code Analyzer with ```scanner:rule:add```, run ```scanner:rule:list``` [command](./en/v3.x/scanner-commands/list/) to review your rule list. Your custom rules are displayed under the category names that you defined in your XML rule definition files, and they’re ready to use.
+After you add your rules to Code Analyzer with ```scanner:rule:add```, run ```scanner:rule:list``` [command](./en/v3.x/scanner-commands/list/) to review the complete catalog of existing PMD rules and your latest additions. Your custom rules are displayed under the category names that you defined in your XML rule definition files, and they’re ready to use.
 
-Run your custom rules using `scanner:run` the same way you'd run PMD's built-in rules: `scanner:run --category MyCustomCategory`. You don't need the `--pmdconfig` flag to run your custom rules.
+Run your custom rules using `scanner:run` the same way you run PMD's built-in rules: `scanner:run --category MyCustomCategory`. You don't need the `--pmdconfig` flag to run your custom rules.
 
 ### Remove Rules
 
