@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Ux, Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
@@ -19,6 +19,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
 
@@ -27,49 +28,52 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	/**
 	 * There are flags that are common to all variants of the run command. We can define those flags
 	 * here to avoid duplicate code.
-	 * @protected
 	 */
-	protected static flagsConfig = {
-		verbose: flags.builtin(),
+	public static readonly flags = {
+		verbose: Flags.boolean({
+			summary: commonMessages.getMessage('flags.verboseSummary')
+		}),
 		// BEGIN: Filter-related flags.
-		category: flags.array({
+		category: Flags.custom<string[]>({
 			char: 'c',
-			description: messages.getMessage('flags.categoryDescription'),
-			longDescription: messages.getMessage('flags.categoryDescriptionLong')
-		}),
+			summary: messages.getMessage('flags.categoryDescription'),
+			description: messages.getMessage('flags.categoryDescriptionLong'),
+			delimiter: ',',
+			multiple: true
+		})(),
 		// BEGIN: Flags related to results processing.
-		format: flags.enum({
+		format: Flags.custom<OUTPUT_FORMAT>({
 			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
-		}),
-		outfile: flags.string({
+			summary: messages.getMessage('flags.formatDescription'),
+			description: messages.getMessage('flags.formatDescriptionLong'),
+			options: Object.values(OUTPUT_FORMAT)
+		})(),
+		outfile: Flags.string({
 			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+			summary: messages.getMessage('flags.outfileDescription'),
+			description: messages.getMessage('flags.outfileDescriptionLong')
 		}),
-		'severity-threshold': flags.integer({
+		'severity-threshold': Flags.integer({
 			char: 's',
-			description: messages.getMessage('flags.sevthresholdDescription'),
-			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
+			summary: messages.getMessage('flags.sevthresholdDescription'),
+			description: messages.getMessage('flags.sevthresholdDescriptionLong'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
 		}),
-		'normalize-severity': flags.boolean({
-			description: messages.getMessage('flags.normalizesevDescription'),
-			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
+		'normalize-severity': Flags.boolean({
+			summary: messages.getMessage('flags.normalizesevDescription'),
+			description: messages.getMessage('flags.normalizesevDescriptionLong')
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
-		projectdir: flags.array({
+		projectdir: Flags.custom<string[]>({
 			char: 'p',
-			description: messages.getMessage('flags.projectdirDescription'),
-			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
+			summary: messages.getMessage('flags.projectdirDescription'),
+			description: messages.getMessage('flags.projectdirDescriptionLong'),
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			map: d => normalize(untildify(d))
-		}),
+			parse: val => Promise.resolve(val.split(',').map(d => normalize(untildify(d))))
+		})(),
 		// END: Flags related to targeting.
 	};
 
@@ -116,7 +120,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			format: runOptions.format,
 			severityForError: this.flags['severity-threshold'] as number,
 			outfile: this.flags.outfile as string
-		}, this.ux)
+		}, new Ux({jsonEnabled: this.jsonEnabled()}))
 			.processRunOutput(output);
 	}
 
@@ -164,7 +168,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
 			if (chosenFormat !== inferredOutfileFormat) {
-				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, inferredOutfileFormat]));
+				this.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, inferredOutfileFormat]));
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-import {UX} from '@salesforce/command';
+import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Messages, SfError} from '@salesforce/core';
 import fs = require('fs');
@@ -19,9 +19,9 @@ export type RunOutputOptions = {
 
 export class RunOutputProcessor {
 	private opts: RunOutputOptions;
-	private ux: UX;
+	private ux: Ux;
 
-	public constructor(opts: RunOutputOptions, ux: UX) {
+	public constructor(opts: RunOutputOptions, ux: Ux) {
 		this.opts = opts;
 		this.ux = ux;
 	}

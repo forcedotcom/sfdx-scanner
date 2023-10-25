@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {LooseObject} from '../../types';
 import {PathlessEngineFilters} from '../../Constants';
@@ -17,68 +17,74 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandDescription');
+	public static description = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples')
 	];
 
 	// This defines the flags accepted by this command.
-	protected static flagsConfig = {
+	public static readonly flags = {
 		// Include all common flags from the super class.
-		...ScannerRunCommand.flagsConfig,
+		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
-		ruleset: flags.array({
+		ruleset: Flags.custom<string[]>({
 			char: 'r',
 			deprecated: {
-				messageOverride: messages.getMessage('rulesetDeprecation')
+				message: messages.getMessage('rulesetDeprecation')
 			},
-			description: messages.getMessage('flags.rulesetDescription'),
-			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
-		}),
-		engine: flags.array({
+			summary: messages.getMessage('flags.rulesetDescription'),
+			description: messages.getMessage('flags.rulesetDescriptionLong'),
+			delimiter: ',',
+			multiple: true
+		})(),
+		engine: Flags.custom<string[]>({
 			char: 'e',
-			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [...PathlessEngineFilters]
-		}),
+			summary: messages.getMessage('flags.engineDescription'),
+			description: messages.getMessage('flags.engineDescriptionLong'),
+			options: [...PathlessEngineFilters],
+			delimiter: ',',
+			multiple: true
+		})(),
 		// END: Filter-related flags.
 		// BEGIN: Targeting-related flags.
-		target: flags.array({
+		target: Flags.custom<string[]>({
 			char: 't',
-			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			summary: messages.getMessage('flags.targetDescription'),
+			description: messages.getMessage('flags.targetDescriptionLong'),
+			delimiter: ',',
+			multiple: true,
 			required: true
-		}),
+		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
-		tsconfig: flags.string({
-			description: messages.getMessage('flags.tsconfigDescription'),
-			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		tsconfig: Flags.string({
+			summary: messages.getMessage('flags.tsconfigDescription'),
+			description: messages.getMessage('flags.tsconfigDescriptionLong')
 		}),
-		eslintconfig: flags.string({
-			description: messages.getMessage('flags.eslintConfigDescription'),
-			longDescription: messages.getMessage('flags.eslintConfigDescriptionLong')
+		eslintconfig: Flags.string({
+			summary: messages.getMessage('flags.eslintConfigDescription'),
+			description: messages.getMessage('flags.eslintConfigDescriptionLong')
 		}),
-		pmdconfig: flags.string({
-			description: messages.getMessage('flags.pmdConfigDescription'),
-			longDescription: messages.getMessage('flags.pmdConfigDescriptionLong')
+		pmdconfig: Flags.string({
+			summary: messages.getMessage('flags.pmdConfigDescription'),
+			description: messages.getMessage('flags.pmdConfigDescriptionLong')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
-		env: flags.string({
-			description: messages.getMessage('flags.envDescription'),
-			longDescription: messages.getMessage('flags.envDescriptionLong'),
+		env: Flags.string({
+			summary: messages.getMessage('flags.envDescription'),
+			description: messages.getMessage('flags.envDescriptionLong'),
 			deprecated: {
-				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+				message: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
-		"verbose-violations": flags.boolean({
-			description: messages.getMessage('flags.verboseViolationsDescription'),
-			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
+		"verbose-violations": Flags.boolean({
+			summary: messages.getMessage('flags.verboseViolationsDescription'),
+			description: messages.getMessage('flags.verboseViolationsDescriptionLong')
 		})
 		// END: Flags related to results processing.
 	};
@@ -89,7 +95,7 @@ export default class Run extends ScannerRunCommand {
 		}
 
 		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
+			this.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (this.flags.target as string[])) {

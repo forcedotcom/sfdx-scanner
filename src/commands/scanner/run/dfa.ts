@@ -1,5 +1,5 @@
 import globby = require('globby');
-import {flags} from '@salesforce/command';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {CUSTOM_CONFIG} from '../../../Constants';
 import {SfgeConfig} from '../../../types';
@@ -21,8 +21,8 @@ const BOOLEAN_ENVARS_BY_FLAG: Map<string,string> = new Map([
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandDescription');
+	public static description = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples')
@@ -32,50 +32,52 @@ export default class Dfa extends ScannerRunCommand {
 	// NOTE: Unlike the other classes that extend ScannerCommand, this class has no flags for specifying rules. This is
 	// because the command currently supports only a single engine with a single rule. So no such flags are currently
 	// needed. If, at some point, we add additional rules or engines to this command, those flags will need to be added.
-	protected static flagsConfig = {
+	public static readonly flags = {
 		// Include all common flags from the super class.
-		...ScannerRunCommand.flagsConfig,
+		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
-		'with-pilot': flags.boolean({
-			description: messages.getMessage('flags.withpilotDescription'),
-			longDescription: messages.getMessage('flags.withpilotDescriptionLong')
+		'with-pilot': Flags.boolean({
+			summary: messages.getMessage('flags.withpilotDescription'),
+			description: messages.getMessage('flags.withpilotDescriptionLong')
 		}),
 		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
 		// NOTE: All run commands have a `--target` flag, but they have differing functionalities,
 		// and therefore different descriptions, so each command defines this flag separately.
-		target: flags.array({
+		target: Flags.custom<string[]>({
 			char: 't',
-			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			summary: messages.getMessage('flags.targetDescription'),
+			description: messages.getMessage('flags.targetDescriptionLong'),
+			delimiter: ',',
+			multiple: true,
 			required: true
-		}),
+		})(),
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
-		'rule-thread-count': flags.integer({
-			description: messages.getMessage('flags.rulethreadcountDescription'),
-			longDescription: messages.getMessage('flags.rulethreadcountDescriptionLong'),
+		'rule-thread-count': Flags.integer({
+			summary: messages.getMessage('flags.rulethreadcountDescription'),
+			description: messages.getMessage('flags.rulethreadcountDescriptionLong'),
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
-		'rule-thread-timeout': flags.integer({
-			description: messages.getMessage('flags.rulethreadtimeoutDescription'),
-			longDescription: messages.getMessage('flags.rulethreadtimeoutDescriptionLong'),
+		'rule-thread-timeout': Flags.integer({
+			summary: messages.getMessage('flags.rulethreadtimeoutDescription'),
+			description: messages.getMessage('flags.rulethreadtimeoutDescriptionLong'),
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
-		[RULE_DISABLE_WARNING_VIOLATION_FLAG]: flags.boolean({
-			description: messages.getMessage('flags.ruledisablewarningviolationDescription'),
-			longDescription: messages.getMessage('flags.ruledisablewarningviolationDescriptionLong')
+		[RULE_DISABLE_WARNING_VIOLATION_FLAG]: Flags.boolean({
+			summary: messages.getMessage('flags.ruledisablewarningviolationDescription'),
+			description: messages.getMessage('flags.ruledisablewarningviolationDescriptionLong')
 		}),
-		'sfgejvmargs': flags.string({
-			description: messages.getMessage('flags.sfgejvmargsDescription'),
-			longDescription: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
+		'sfgejvmargs': Flags.string({
+			summary: messages.getMessage('flags.sfgejvmargsDescription'),
+			description: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
 			env: 'SFGE_JVM_ARGS'
 		}),
-		'pathexplimit': flags.integer({
-			description: messages.getMessage('flags.pathexplimitDescription'),
-			longDescription: messages.getMessage('flags.pathexplimitDescriptionLong'),
+		'pathexplimit': Flags.integer({
+			summary: messages.getMessage('flags.pathexplimitDescription'),
+			description: messages.getMessage('flags.pathexplimitDescriptionLong'),
 			env: 'SFGE_PATH_EXPANSION_LIMIT'
 		})
 		// END: Config-overrideable engine flags.

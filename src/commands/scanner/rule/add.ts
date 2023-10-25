@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
@@ -17,26 +17,28 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 export default class Add extends ScannerCommand {
 
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandDescription');
+	public static description = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples')
 	];
 
-	protected static flagsConfig = {
-		language: flags.string({
+	public static readonly flags = {
+		language: Flags.string({
 			char: 'l',
-			description: messages.getMessage('flags.languageDescription'),
-			longDescription: messages.getMessage('flags.languageDescriptionLong'),
+			summary: messages.getMessage('flags.languageDescription'),
+			description: messages.getMessage('flags.languageDescriptionLong'),
 			required: true
 		}),
-		path: flags.array({
+		path: Flags.custom<string[]>({
 			char: 'p',
-			description: messages.getMessage('flags.pathDescription'),
-			longDescription: messages.getMessage('flags.pathDescriptionLong'),
+			summary: messages.getMessage('flags.pathDescription'),
+			description: messages.getMessage('flags.pathDescriptionLong'),
+			multiple: true,
+			delimiter: ',',
 			required: true
-		})
+		})()
 	};
 
 	async runInternal(): Promise<AnyJson> {
@@ -51,8 +53,8 @@ export default class Add extends ScannerCommand {
 		// Add to Custom Classpath registry
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
-		this.ux.log(`Successfully added rules for ${language}.`);
-		this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
+		this.log(`Successfully added rules for ${language}.`);
+		this.log(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
 		return {success: true, language, path: classpathEntries};
 	}
 
