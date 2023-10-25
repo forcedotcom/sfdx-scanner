@@ -13,17 +13,8 @@ import {SfgePathlessEngine} from './lib/sfge/SfgePathlessEngine';
 import {CustomPmdEngine, PmdEngine} from './lib/pmd/PmdEngine';
 import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
-import {ProdOverrides, Services} from './Constants';
+import {Services} from './Constants';
 import {CpdEngine} from "./lib/cpd/CpdEngine";
-
-function setupProd(): void {
-	// This method may be called more than once in unit test scenarios where
-	// the test sets up the ioc container and the oclif testing framework is used.
-	// The first caller wins. In production this will be called once.
-	if (!container.isRegistered(Services.EnvOverridable)) {
-		container.register(Services.EnvOverridable, ProdOverrides);
-	}
-}
 
 /**
  * Initialize the ioc container with singletons common to test and prod
@@ -52,6 +43,5 @@ export function registerAll(): void {
  * Initialize the ioc container for a production environment
  */
 export function initContainer(): void {
-	setupProd();
 	registerAll();
 }
