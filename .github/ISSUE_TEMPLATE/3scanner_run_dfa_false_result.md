@@ -1,6 +1,6 @@
 ---
 name: Report a scanner:run:dfa False Result
-about: Report false positives or false negatives returned in scanner:run:dfa scan reports. If you're submitting your managed package for AppExchange security review, be sure to document your false positives and include that documentation with your submission. Graph engine commands: scanner:run:dfa or scanner:run --engine sfge.
+about: Report false results returned in scanner:run:dfa scan reports. If you’re submitting for AppExchange security review, include documentation of your false results with your submission.
 title: "[False Result]"
 labels: ''
 assignees: ''
