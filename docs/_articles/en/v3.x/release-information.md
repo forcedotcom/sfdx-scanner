@@ -12,6 +12,16 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.18.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.18.0) (11-01-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.18.0...v3.17.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (VS Code Extension): Salesforce Code Analyzer VS Code extension is now available on the [OpenVSX marketplace](https://open-vsx.org/extension/salesforce/sfdx-code-analyzer-vscode).
+* CHANGE (CodeAnalyzer): To provide you with more information and accurate help, we expanded and improved our [issues templates](https://github.com/forcedotcom/sfdx-scanner/issues/new/choose) and our [Troubleshooting Common Issues](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/troubleshooting/) guide.
+
 ## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-03-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.17.0...v3.16.0)
