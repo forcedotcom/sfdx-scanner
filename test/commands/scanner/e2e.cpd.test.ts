@@ -1,5 +1,6 @@
 import { expect } from "@salesforce/command/lib/test";
-import { setupCommandTest } from "../../TestUtils";
+// @ts-ignore
+import { runCommand } from "../../TestUtils";
 import path = require("path");
 import { ENGINE } from "../../../src/Constants";
 import { RuleResult } from "../../../src/types";
@@ -11,238 +12,133 @@ const Vf_File2 = path.join(Cpd_Test_Code_Path, "myVfPage2.page");
 const Apex_File1 = path.join(Cpd_Test_Code_Path, "SomeApex1.cls");
 const Apex_File2 = path.join(Cpd_Test_Code_Path, "SomeApex2.cls");
 
+const MINIMUM_TOKENS_ENV_VAR = 'SFDX_SCANNER_CPD_MINIMUM_TOKENS';
+
 describe("End to end tests for CPD engine", () => {
 
-	describe("scanner:run", () => {
+	describe("Integration with `scanner run` command", () => {
 		describe("Invoking CPD engine", () => {
-			setupCommandTest
-				.command([
-					"scanner:run",
-					"--target", Cpd_Test_Code_Path,
-				])
-				.it("CPD engine should not be invoked by default", (ctx) => {
-					expect(ctx.stdout).to.not.contain("Executed cpd");
-				});
+			it("CPD engine should not be invoked by default", () => {
+				const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path}`);
+				expect(output.shellOutput.stdout).to.not.contain("Executed cpd");
+			});
 
-			setupCommandTest
-				.command([
-					"scanner:run",
-					"--target", Cpd_Test_Code_Path,
-					"--engine", "cpd",
-				])
-				.it("CPD engine should be invoked using --engine", (ctx) => {
-					expect(ctx.stdout).to.contain("Executed cpd");
-				});
+			it("CPD engine should be invocable using --engine flag", () => {
+				const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd`);
+				expect(output.shellOutput.stdout).to.contain("Executed cpd");
+			});
 		});
 
-		describe("CPD execution", () => {
-			setupCommandTest
-				.command([
-					"scanner:run",
-					"--target", Cpd_Test_Code_Path,
-					"--engine", ENGINE.CPD,
-					"--format", "json"
-				])
-				.it("Verify CPD results", (ctx) => {
-					const ruleResults: RuleResult[] = extractRuleResults(ctx);
+		it("Produces correct results in simple case", () => {
+			const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+			const ruleResults: RuleResult[] = extractRuleResults(output.shellOutput);
 
-					//verify rule results
-					expect(ruleResults.length).greaterThan(0);
-					for (const ruleResult of ruleResults) {
-						expect(ruleResult.engine).equals(ENGINE.CPD);
-						expect(ruleResult.fileName).is.not.empty;
-						expect(ruleResult.violations).is.not.empty;
+			// Verify number of results.
+			expect(ruleResults).to.have.lengthOf(2);
+			// Verify that each result is well-formed.
+			expect(ruleResults[0].engine).to.equal(ENGINE.CPD);
+			expect(ruleResults[0].fileName).to.not.be.empty;
+			expect(ruleResults[1].engine).to.equal(ENGINE.CPD);
+			expect(ruleResults[1].fileName).to.not.be.empty;
 
-						//verify rule violations
-						for (const violation of ruleResult.violations) {
-							expect(violation.ruleName).equals(CpdRuleName);
-							expect(violation.category).equals(CpdRuleCategory);
-							expect(violation.severity).equals(CpdViolationSeverity);
-						}
-					}
+			// Verify that the violations are well-formed and consistent.
+			expect(ruleResults[0].violations).to.have.lengthOf(1);
+			expect(ruleResults[0].violations[0].ruleName).to.equal(CpdRuleName);
+			expect(ruleResults[0].violations[0].category).to.equal(CpdRuleCategory);
+			expect(ruleResults[0].violations[0].severity).to.equal(CpdViolationSeverity);
+			expect(ruleResults[1].violations).to.have.lengthOf(1);
+			expect(ruleResults[1].violations[0].ruleName).to.equal(CpdRuleName);
+			expect(ruleResults[1].violations[0].category).to.equal(CpdRuleCategory);
+			expect(ruleResults[1].violations[0].severity).to.equal(CpdViolationSeverity);
 
-				});
+			// Verify that the violation messages are well-formed.
+			const violationMsg1 = ruleResults[0].violations[0].message;
+			const violationMsg2 = ruleResults[1].violations[0].message;
 
+			// confirm that the checksum is the same
+			const checksum1 = violationMsg1.substr(0, violationMsg1.indexOf(":"));
+			const checksum2 = violationMsg2.substr(0, violationMsg2.indexOf(":"));
+			expect(checksum2).equals(checksum1);
+
+			// confirm lines and tokens identified are the same
+			const lineAndToken1 = violationMsg1.substr(violationMsg1.indexOf("detected."));
+			const lineAndToken2 = violationMsg2.substr(violationMsg2.indexOf("detected."));
+			expect(lineAndToken2).equals(lineAndToken1);
+
+			// confirm total count of duplications
+			const totalCount1 = violationMsg1.substr(violationMsg1.indexOf("of "), violationMsg1.indexOf(" duplication"));
+			const totalCount2 = violationMsg2.substr(violationMsg2.indexOf("of "), violationMsg2.indexOf(" duplication"));
+			expect(totalCount2).equals(totalCount1);
 		});
 
 		describe("Processing Minimum Tokens value", () => {
-
-			describe("Minimum tokens value from env", () => {
-				before(() => {
-					process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'] = '50';
-				});
-
-				after(() => {
-					delete process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'];
-				});
-
-				setupCommandTest
-					.command([
-						"scanner:run",
-						"--target", Cpd_Test_Code_Path,
-						"--engine", ENGINE.CPD,
-						"--format", "json"
-					])
-					.it("Picks up minimum tokens from Environment variable when found", ctx => {
-						verifyEnvVarIsUsedForMinimumTokens(ctx);
-					});
+			afterEach(() => {
+				delete process.env[MINIMUM_TOKENS_ENV_VAR];
 			});
 
-			describe("Minimum tokens value from config", () => {
-
-				before(() => {
-					// delete property if it exists
-					delete process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'];
+			describe("Pulls value from environment variable if it is...", () => {
+				it("...a wholly numeric string", () => {
+					process.env[MINIMUM_TOKENS_ENV_VAR] = '50';
+					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					verifyEnvVarIsUsedForMinimumTokens(output.shellOutput);
 				});
 
-				setupCommandTest
-					.command([
-						"scanner:run",
-						"--target", Cpd_Test_Code_Path,
-						"--engine", ENGINE.CPD,
-						"--format", "json"
-					])
-					.it("Picks up minimum tokens from Config when Environment variable is not found", ctx => {
-						verifyDefaultConfigIsUsedForMinimumTokens(ctx);
-					});
+				it("...a partly numeric string", () => {
+					// The environment variable processing will strip non-numeric characters, making this "50".
+					process.env[MINIMUM_TOKENS_ENV_VAR] = 'My5String0';
+					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					verifyEnvVarIsUsedForMinimumTokens(output.shellOutput);
+				});
 			});
 
-			describe("Invalid String Minimum tokens value from env", () => {
-				before(() => {
-					process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'] = 'Some String';
+			describe("Pulls value from config if environment variable is...", () => {
+				it("...undefined", () => {
+					delete process.env[MINIMUM_TOKENS_ENV_VAR];
+					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					verifyDefaultConfigIsUsedForMinimumTokens(output.shellOutput);
 				});
 
-				after(() => {
-					delete process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'];
+				it("...a wholly non-numeric string", () => {
+					process.env[MINIMUM_TOKENS_ENV_VAR] = 'Some String';
+					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					verifyDefaultConfigIsUsedForMinimumTokens(output.shellOutput);
 				});
 
-				setupCommandTest
-					.command([
-						"scanner:run",
-						"--target", Cpd_Test_Code_Path,
-						"--engine", ENGINE.CPD,
-						"--format", "json"
-					])
-					.it("Uses config value when environment variable is not a number", ctx => {
-						verifyDefaultConfigIsUsedForMinimumTokens(ctx);
-					});
+				it('...an empty string', () => {
+					process.env[MINIMUM_TOKENS_ENV_VAR] = '';
+					const output = runCommand(`scanner run --target ${Cpd_Test_Code_Path} --engine cpd --format json`);
+					verifyDefaultConfigIsUsedForMinimumTokens(output.shellOutput);
+				});
 			});
-
-			describe("Invalid empty Minimum tokens value from env", () => {
-				before(() => {
-					process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'] = '';
-				});
-
-				after(() => {
-					delete process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'];
-				});
-
-				setupCommandTest
-					.command([
-						"scanner:run",
-						"--target", Cpd_Test_Code_Path,
-						"--engine", ENGINE.CPD,
-						"--format", "json"
-					])
-					.it("Uses config value when environment variable is not empty", ctx => {
-						verifyDefaultConfigIsUsedForMinimumTokens(ctx);
-					});
-			});
-
-			describe("String and digit Minimum tokens value from env", () => {
-				before(() => {
-					process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'] = 'My5String0';
-				});
-
-				after(() => {
-					delete process.env['SFDX_SCANNER_CPD_MINIMUM_TOKENS'];
-				});
-
-				setupCommandTest
-					.command([
-						"scanner:run",
-						"--target", Cpd_Test_Code_Path,
-						"--engine", ENGINE.CPD,
-						"--format", "json"
-					])
-					.it("Uses config value when environment variable is not a number", ctx => {
-						verifyEnvVarIsUsedForMinimumTokens(ctx);
-					});
-			});
-
-		});
-
-		describe("Violation message content", () => {
-			setupCommandTest
-				.command([
-					"scanner:run",
-					"--target", Cpd_Test_Code_Path,
-					"--engine", ENGINE.CPD,
-					"--format", "json"
-				])
-				.it("Has expected violation message", (ctx) => {
-					const ruleResults = extractRuleResults(ctx);
-
-					// for default 100 minimum tokens, we should have one duplication with two entries
-					expect(ruleResults.length).equals(2);
-					const violationMsg1 = ruleResults[0].violations[0].message;
-					const violationMsg2 = ruleResults[1].violations[0].message;
-
-					// confirm that the checksum is the same
-					const checksum1 = violationMsg1.substr(0, violationMsg1.indexOf(":"));
-					const checksum2 = violationMsg2.substr(0, violationMsg2.indexOf(":"));
-					expect(checksum2).equals(checksum1);
-
-					// confirm lines and tokens identified are the same
-					const lineAndToken1 = violationMsg1.substr(violationMsg1.indexOf("detected."));
-					const lineAndToken2 = violationMsg2.substr(violationMsg2.indexOf("detected."));
-					expect(lineAndToken2).equals(lineAndToken1);
-
-					// confirm total count of duplications
-					const totalCount1 = violationMsg1.substr(violationMsg1.indexOf("of "), violationMsg1.indexOf(" duplication"));
-					const totalCount2 = violationMsg2.substr(violationMsg2.indexOf("of "), violationMsg2.indexOf(" duplication"));
-					expect(totalCount2).equals(totalCount1);
-				});
 		});
 	});
 
-	describe("scanner:rule:list", () => {
+	describe("Integration with `scanner rule list` command", () => {
 			describe("Invoking CPD engine", () => {
-				setupCommandTest
-					.command([
-						"scanner:rule:list",
-						"--json"
-					])
-					.it("CPD engine should not be listed by default", (ctx) => {
-						const output = JSON.parse(ctx.stdout);
-						const results = output.result;
-						expect(results.length).greaterThan(0);
+				it("CPD engine rules should not be displayed by default", () => {
+					const output = runCommand(`scanner rule list --json`);
+					const results = output.jsonOutput.result as any[];
+					expect(results.length).to.be.greaterThan(0);
 
-						const cpdCatalogs = results.filter(row => row.engine == ENGINE.CPD);
-						expect(cpdCatalogs.length).equals(0);
-					});
-	
-				setupCommandTest
-					.command([
-						"scanner:rule:list",
-						"--engine", "cpd",
-						"--json"
-					])
-					.it("CPD engine should be listed when using --engine", (ctx) => {
-						const output = JSON.parse(ctx.stdout);
-						const results = output.result;
-						expect(results.length).equals(1);
+					const cpdCatalogs = results.filter(row => row.engine === ENGINE.CPD);
+					expect(cpdCatalogs).to.have.lengthOf(0);
+				});
 
-						//verify contents of Rule
-						const rule = results[0];
-						expect(rule.engine).equals(ENGINE.CPD);
-						expect(rule.sourcepackage).equals(ENGINE.CPD);
-						expect(rule.name).equals(CpdRuleName);
-						expect(rule.description).equals(CpdRuleDescription);
-						expect(rule.categories).contains(CpdRuleCategory);
-						expect(rule.languages).has.same.members(CpdLanguagesSupported);
-						expect(rule.defaultEnabled).equals(true);
-					});
+				it("CPD engine rules should be displayed when using `--engine cpd`", () => {
+					const output = runCommand(`scanner rule list --engine cpd --json`);
+					const results = output.jsonOutput.result as any[];
+					expect(results.length).equals(1);
+
+					// Verify properties of rule.
+					const rule = results[0];
+					expect(rule.engine).equals(ENGINE.CPD);
+					expect(rule.sourcepackage).equals(ENGINE.CPD);
+					expect(rule.name).equals(CpdRuleName);
+					expect(rule.description).equals(CpdRuleDescription);
+					expect(rule.categories).contains(CpdRuleCategory);
+					expect(rule.languages).has.same.members(CpdLanguagesSupported);
+					expect(rule.defaultEnabled).equals(true);
+				});
 			});
 	});
 });
