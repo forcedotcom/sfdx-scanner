@@ -3,7 +3,7 @@ import path = require('path');
 
 export const PMD_VERSION = '6.55.0';
 export const SFGE_VERSION = '1.0.1-pilot';
-export const DEFAULT_SCANNER_PATH = path.join(os.homedir(), 'sfdx-scanner');
+export const DEFAULT_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
 export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_PILOT_FILE = 'Config-pilot.json';
