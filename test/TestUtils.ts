@@ -1,6 +1,14 @@
 import fs = require('fs');
 import path = require('path');
+import {AnyJson} from '@salesforce/ts-types';
+import {
+	execCmd,
+	ExecCmdResult,
+	execInteractiveCmd,
+	InteractiveCommandExecutionResult, PromptAnswers
+} from '@salesforce/cli-plugins-testkit';
 import { test } from '@salesforce/command/lib/test';
+// @ts-ignore
 import * as TestOverrides from './test-related-lib/TestOverrides';
 import Sinon = require('sinon');
 import LocalCatalog from '../src/lib/services/LocalCatalog';
@@ -32,6 +40,16 @@ export function stubCatalogFixture(): void {
 	Sinon.stub(LocalCatalog.prototype, 'getCatalog').callsFake(async () => {
 		return JSON.parse(fs.readFileSync(CATALOG_FIXTURE_PATH).toString());
 	});
+}
+
+export function runCommand(command: string): ExecCmdResult<AnyJson> {
+	TestOverrides.initializeTestSetup();
+	return execCmd(command);
+}
+
+export function runInteractiveCommand(command: string, answers: PromptAnswers): Promise<InteractiveCommandExecutionResult> {
+	TestOverrides.initializeTestSetup();
+	return execInteractiveCmd(command, answers);
 }
 
 /**
