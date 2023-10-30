@@ -22,6 +22,21 @@ We publish the latest Code Analyzer monthly.
 * NEW (VS Code Extension): Salesforce Code Analyzer VS Code extension is now available on the [OpenVSX marketplace](https://open-vsx.org/extension/salesforce/sfdx-code-analyzer-vscode).
 * CHANGE (CodeAnalyzer): To provide you with more information and accurate help, we expanded and improved our [issues templates](https://github.com/forcedotcom/sfdx-scanner/issues/new/choose) and our [Troubleshooting Common Issues](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/troubleshooting/) guide.
 
+**Closed issues:**
+* [BUG] Operator is not handled for conditional clause: -: [\#1008](https://github.com/forcedotcom/sfdx-scanner/issues/1008)
+* [BUG] TypeError: Cannot read properties of undefined (reading 'prototype') [\#1006](https://github.com/forcedotcom/sfdx-scanner/issues/1006)
+* [Feature Request] Overview of Engines available [\#993](https://github.com/forcedotcom/sfdx-scanner/issues/993)
+* [BUG] Specifying a target path that contains escape characters doesn't work [\#952](https://github.com/forcedotcom/sfdx-scanner/issues/952)
+* [Feature Request] Create empty files if no violaitons found [\#1213](https://github.com/forcedotcom/sfdx-scanner/issues/1213)
+* [Feature Request] enable remove eslint rules from rule list [\#264](https://github.com/forcedotcom/sfdx-scanner/issues/264)
+* [BUG] False positive "Definition for rule '@lwc/lwc/no-async-operation' was not found" [\#1161](https://github.com/forcedotcom/sfdx-scanner/issues/1161)
+
+**Merged pull requests:**
+* CHANGE (CodeAnalyzer): @W-14204096@: Adjusted  section in false report templates. [\#1227](https://github.com/forcedotcom/sfdx-scanner/pull/1227)
+* CHANGE (CodeAnalyzer): @W-14204096@: Reworked Issue templates. [\#1221](https://github.com/forcedotcom/sfdx-scanner/pull/1221)
+* CHANGE (CodeAnalyzer): @W-14329682@: Updated OCLIF dependencies. [\#1223](https://github.com/forcedotcom/sfdx-scanner/pull/1223)
+* CHANGE (GraphEngine): @W-12705540@: Added synthetic vertices for default/delegate constructors. [\#1193](https://github.com/forcedotcom/sfdx-scanner/pull/1193)
+
 ## [v3.17.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.17.0) (10-03-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.17.0...v3.16.0)
