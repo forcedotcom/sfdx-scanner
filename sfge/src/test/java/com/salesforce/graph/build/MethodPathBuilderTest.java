@@ -154,7 +154,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 path.verticesInCurrentMethod().get(1), instanceOf(ExpressionStatementVertex.class));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(1)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
         assertEndScopes(BLOCK, ExpressionStatementVertex.class, 3);
 
         GraphBuildTestUtil.walkAllPaths(g, "doSomething");
@@ -232,7 +232,7 @@ public class MethodPathBuilderTest {
         List<ApexPath> paths = ApexPathUtil.getForwardPaths(g, methodVertex);
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
         // System.debug('Hello');
         String[] expectedScopes =
                 new String[] {
@@ -326,7 +326,7 @@ public class MethodPathBuilderTest {
         List<ApexPath> paths = ApexPathUtil.getForwardPaths(g, methodVertex);
         MatcherAssert.assertThat(paths, hasSize(equalTo(3)));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(5)));
 
         // System.debug('Hello')
         assertEndScopes(BLOCK_IF_BLOCK_IF, ExpressionStatementVertex.class, 5);
@@ -427,7 +427,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(negativePath.lastVertex().getChildren(), hasSize(equalTo(0)));
 
         // These statements end both of the if scopes
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug('Hello');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 4);
@@ -532,7 +532,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.lastVertex(), instanceOf(ExpressionStatementVertex.class));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug('Hello');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 4);
@@ -679,7 +679,7 @@ public class MethodPathBuilderTest {
                 expressionLine8Path.verticesInCurrentMethod().get(5),
                 instanceOf(StandardConditionVertex.Negative.class));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // System.debug('Hello');
         assertEndScopes(BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 4);
@@ -806,7 +806,7 @@ public class MethodPathBuilderTest {
                 expressionLine10Path.verticesInCurrentMethod().get(3),
                 instanceOf(StandardConditionVertex.Negative.class));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // System.debug('X is 10');
         assertEndScopes(BLOCK_IF_BLOCK_IF_BLOCK, ExpressionStatementVertex.class, 5);
@@ -933,7 +933,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(6), equalTo(expressionStatementLine7));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // System.debug('Hello');
         assertEndScopes(BLOCK_IF, ExpressionStatementVertex.class, 5);
@@ -1096,7 +1096,7 @@ public class MethodPathBuilderTest {
                 fourSystemDebugs.verticesInCurrentMethod().get(12),
                 equalTo(expressionStatementLine10));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(5)));
 
         // System.debug('Hello-2'). The next vertex to execute is System.debug('After'). This
         // requires popping two scopes
@@ -1175,7 +1175,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(11), equalTo(expressionStatementLine8));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FOREACH_BLOCK, ExpressionStatementVertex.class, 6);
@@ -1248,7 +1248,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(12), equalTo(expressionStatementLine9));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 7);
@@ -1325,7 +1325,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(10), equalTo(expressionStatementLine10));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 8);
@@ -1400,7 +1400,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(12), equalTo(expressionStatementLine10));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 8);
@@ -1478,7 +1478,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(11), equalTo(expressionStatementLine10));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP_BLOCK, ExpressionStatementVertex.class, 8);
@@ -1578,7 +1578,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(12), equalTo(expressionStatementLine9));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF_BLOCK_FORLOOP, ExpressionStatementVertex.class, 7);
@@ -1613,7 +1613,7 @@ public class MethodPathBuilderTest {
 
         GraphBuildTestUtil.buildGraph(g, sourceCode);
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(5)));
 
         // System.debug(fieldToCheck);
         assertEndScopes(BLOCK_IF, ExpressionStatementVertex.class, 7);
@@ -1732,7 +1732,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(5), equalTo(expressionStatementLine6));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // return
         assertEndScopes(BLOCK_IF_BLOCK, ReturnStatementVertex.class, 4);
@@ -1849,7 +1849,7 @@ public class MethodPathBuilderTest {
         MatcherAssert.assertThat(
                 negativePath.verticesInCurrentMethod().get(5), equalTo(expressionStatementLine6));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // throw
         assertEndScopes(BLOCK_IF_BLOCK, ThrowStatementVertex.class, 4);
@@ -2027,7 +2027,7 @@ public class MethodPathBuilderTest {
         paths = ApexPathUtil.getReversePaths(g, dmlInsertStatementVertex);
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(5)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(6)));
 
         // return
         assertEndScopes(BLOCK_IF_BLOCK, ReturnStatementVertex.class, 5);
@@ -2076,7 +2076,7 @@ public class MethodPathBuilderTest {
         paths = ApexPathUtil.getReversePaths(g, dmlInsertStatementVertex);
         MatcherAssert.assertThat(paths, hasSize(equalTo(1)));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(5)));
 
         // insert
         assertEndScopes(BLOCK, DmlInsertStatementVertex.class, 4);
@@ -2185,7 +2185,7 @@ public class MethodPathBuilderTest {
 
         MatcherAssert.assertThat(TestUtil.getPathSizes(paths), contains(4, 5));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(2)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
 
         // System.debug('Hello');
         assertEndScopes(
@@ -2299,7 +2299,7 @@ public class MethodPathBuilderTest {
         List<Edge> edges = g.V().outE(Schema.CFG_PATH).toList();
         MatcherAssert.assertThat(edges, hasSize(9));
 
-        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(3)));
+        MatcherAssert.assertThat(getVerticesWithEndScope(), hasSize(equalTo(4)));
 
         // System.debug('Hello');
         assertEndScopes(

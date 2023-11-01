@@ -45,7 +45,7 @@ public class CustomerApexVertexBuilderTest {
         bvb.build();
 
         // Validate the expected number of vertices
-        assertEquals(Long.valueOf(9), g.V().not(has(Schema.IS_STANDARD, true)).count().next());
+        assertEquals(Long.valueOf(10), g.V().not(has(Schema.IS_STANDARD, true)).count().next());
         assertEquals(
                 Long.valueOf(1),
                 g.V()

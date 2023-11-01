@@ -33,10 +33,11 @@ public class GlobalMethodSupplier extends AbstractSourceSupplier {
                                         out(Schema.CHILD)
                                                 .hasLabel(ASTConstants.NodeType.MODIFIER_NODE)
                                                 .has(Schema.GLOBAL, true),
-                                        // Ignore any standard methods, otherwise will get a ton
-                                        // of
-                                        // extra results.
-                                        __.not(__.has(Schema.IS_STANDARD, true)))));
+                                        // Ignore any standard and implicit methods, otherwise will
+                                        // get a ton
+                                        // of extra results.
+                                        __.not(__.has(Schema.IS_STANDARD, true)),
+                                        __.not(__.has(Schema.IS_IMPLICIT, true)))));
     }
 
     @Override
