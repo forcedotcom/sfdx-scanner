@@ -40,8 +40,8 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 
 		describe('Negative constraints', () => {
 			it('Case: Negate one category', () => {
-				const category = '\'!Code Style\'';
-				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category ${category}`);
+				const category = 'Code Style';
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "!${category}"`);
 				const stdout = output.shellOutput.stdout;
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 
@@ -58,7 +58,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				const nonExpectedCategories: Set<string> = new Set<string>();
 				nonExpectedCategories.add('Code Style').add('Security');
 
-				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category ${category}`);
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
 				const stdout = output.shellOutput.stdout;
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results.length).greaterThan(0);
@@ -79,7 +79,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 
 		it('Case: Mixing positive and negative constraints', () => {
 			const category = `'!Code Style,Security'`;
-			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category ${category}`);
+			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
 			expect(output.shellOutput.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.MixedTypes', ['Category']), 'Cannot mix positive and negative constraints');
 		});
 	});
@@ -138,7 +138,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 
 		it('Case: --engine pmd --category \'Code Style\'', () => {
 			const category = 'Code Style';
-			const commandOutput = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --engine pmd --category '${category}'`);
+			const commandOutput = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --engine pmd --category "${category}"`);
 			const stdout = commandOutput.shellOutput.stdout;
 			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 			expect(output.length).to.equal(1, 'Should only be violations from one file');
