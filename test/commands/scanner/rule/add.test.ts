@@ -131,7 +131,7 @@ describe('scanner rule add', () => {
 
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			it('should complain about empty language entry', () => {
-				const output = runCommand(`scanner rule add --language '' --path /some/local/path`);
+				const output = runCommand(`scanner rule add --language "" --path /some/local/path`);
 				expect(output.shellOutput.stderr).to.contain(messages.getMessage('validations.languageCannotBeEmpty'));
 			});
 		});
