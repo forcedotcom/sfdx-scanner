@@ -78,7 +78,7 @@ describe('scanner rule list', () => {
 			const negatedCategories = positiveCategories.map(c => `!${c}`);
 
 			it('Filtering by one category returns only the rules in that category for enabled engines', async () => {
-				const output = runCommand(`scanner rule list --category '${positiveCategories[0]}' --json`);
+				const output = runCommand(`scanner rule list --category "${positiveCategories[0]}" --json`);
 				const targetRuleCount = await getRulesFilteredByCategoryCount(true, [positiveCategories[0]]);
 
 				// Parse the output back into a JSON, and make sure it has the right number of rules.
@@ -92,7 +92,7 @@ describe('scanner rule list', () => {
 			})
 
 			it('Filtering by multiple categories returns any rule in either category', async () => {
-				const output = runCommand(`scanner rule list --category '${positiveCategories.join(',')}' --json`);
+				const output = runCommand(`scanner rule list --category "${positiveCategories.join(',')}" --json`);
 				const targetRuleCount = await getRulesFilteredByCategoryCount(true, positiveCategories);
 
 				// Parse the output back into a JSON, and make sure it has the right number of rules.
@@ -110,7 +110,7 @@ describe('scanner rule list', () => {
 			});
 
 			it('Excluding by one category excludes all rules from that category', async () => {
-				const output = runCommand(`scanner rule list --category '${negatedCategories[0]}' --json`);
+				const output = runCommand(`scanner rule list --category "${negatedCategories[0]}" --json`);
 				const targetRuleCount = await getRulesFilteredByCategoryCount(false, [], [positiveCategories[0]]);
 
 				// Parse the output back into a JSON, and make sure it has the right number of rules.
@@ -124,7 +124,7 @@ describe('scanner rule list', () => {
 			});
 
 			it('Excluding by multiple categories excludes all rules from those categories', async () => {
-				const output = runCommand(`scanner rule list --category '${negatedCategories.join(',')}' --json`);
+				const output = runCommand(`scanner rule list --category "${negatedCategories.join(',')}" --json`);
 				const targetRuleCount = await getRulesFilteredByCategoryCount(false, [], positiveCategories);
 
 				// Parse the output back into a JSON, and make sure it has the right number of rules.
@@ -272,7 +272,7 @@ describe('scanner rule list', () => {
 
 		describe('Test Case: Applying multiple filter types', () => {
 			it('Filtering on multiple columns only returns rows that satisfy BOTH filters', () => {
-				const output = runCommand(`scanner rule list --category 'Best Practices' --language apex --json`);
+				const output = runCommand(`scanner rule list --category "Best Practices" --language apex --json`);
 				// Count how many rules in the catalog fit all criteria.
 				const targetRuleCount = getCatalogJson().rules.filter(rule => rule.categories.includes('Best Practices') && rule.languages.includes('apex')).length;
 
