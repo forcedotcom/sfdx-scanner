@@ -54,7 +54,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 			});
 
 			it('Case: Negate multiple categories', () => {
-				const category = `'!Code Style,!Security'`;
+				const category = `!Code Style,!Security`;
 				const nonExpectedCategories: Set<string> = new Set<string>();
 				nonExpectedCategories.add('Code Style').add('Security');
 
@@ -78,7 +78,7 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 		});
 
 		it('Case: Mixing positive and negative constraints', () => {
-			const category = `'!Code Style,Security'`;
+			const category = `!Code Style,Security`;
 			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
 			expect(output.shellOutput.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.MixedTypes', ['Category']), 'Cannot mix positive and negative constraints');
 		});
