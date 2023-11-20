@@ -55,7 +55,7 @@
 		"@istanbuljs/nyc-config-typescript": "^1.0.1",
 		"@oclif/plugin-help": "^5",
 		"@oclif/test": "^2",
-		"@salesforce/cli-plugins-testkit": "^4.4.10",
+		"@salesforce/cli-plugins-testkit": "^5.0.4",
 		"@salesforce/dev-config": "^3",
 		"@salesforce/ts-sinon": "^1.1.2",
 		"@types/chai": "^4",
