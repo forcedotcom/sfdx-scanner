@@ -7,7 +7,6 @@ import {
 	execInteractiveCmd,
 	InteractiveCommandExecutionResult, PromptAnswers
 } from '@salesforce/cli-plugins-testkit';
-import { test } from '@salesforce/command/lib/test';
 // @ts-ignore
 import * as TestOverrides from './test-related-lib/TestOverrides';
 import Sinon = require('sinon');
@@ -51,20 +50,5 @@ export function runInteractiveCommand(command: string, answers: PromptAnswers): 
 	TestOverrides.initializeTestSetup();
 	return execInteractiveCmd(command, answers);
 }
-
-/**
- * Initial setup needed by all oclif command unit tests.
- *
- * Example:
- * setupCommandTest
- * 	.command(['scanner:run', '-t', 'test-code'])
- * 	.it('Scanner Run Relative Path Succeeds', ctx => {
- * 		expect(ctx.stdout).to.contain('No rule violations found.');
- * 	});
- */
-export const setupCommandTest = test
-	.do(() => TestOverrides.initializeTestSetup())
-	.stdout()
-	.stderr();
 
 
