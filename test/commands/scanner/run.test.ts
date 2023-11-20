@@ -1,5 +1,6 @@
 import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest} from '../../TestUtils';
+// @ts-ignore
+import {runCommand} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import fs = require('fs');
 import path = require('path');
@@ -12,9 +13,13 @@ const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Run
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
 
-describe('scanner:run', function () {
-	this.timeout(10000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
+const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
+const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
+const pathToSomeOtherTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeOtherTestClass.cls');
+const pathToAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls');
+const pathToYetAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls');
 
+describe('scanner:run', function () {
 	describe('E2E', () => {
 		describe('Output Type: XML', () => {
 			function validateXmlOutput(xml: string): void {
@@ -37,174 +42,122 @@ describe('scanner:run', function () {
 			}
 
 			describe('Test Case: Running rules against a single file', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('When the file contains violations, they are logged out as an XML', ctx => {
-						validateXmlOutput(ctx.stdout);
-					});
+				it('When the file contaisn violations, they are logged out as an XML', () => {
+					const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format xml`);
+					validateXmlOutput(output.shellOutput.stdout);
+				});
 
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('.', 'test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('Target path may be relative or absolute', ctx => {
-						validateXmlOutput(ctx.stdout);
-					});
+				it('Target path may be relative or absolute', () => {
+					const output = runCommand(`scanner run --target ${path.join('.', pathToSomeTestClass)} --ruleset ApexUnit --format xml`);
+					validateXmlOutput(output.shellOutput.stdout);
+				});
 
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('When the file contains no violations, a message is logged to the console', ctx => {
-						expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-					});
+				it('When the file contains no violations, a message is logged to the console', () => {
+					const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format xml`);
+					expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+				});
 			});
 
 			describe('Test Case: Running rules against multiple specified files', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls') + ',' + path.join('test', 'code-fixtures', 'apex', 'SomeOtherTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('Both files are evaluated, and any violations are logged', ctx => {
-						// We'll split the output by the <file> tag first, so we can get each file that violated rules.
-						const results = ctx.stdout.split('<result ');
-						results.shift();
-						// Verify that each set of violations corresponds to the expected file.
-						expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
-						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
+				it('Both files are evaluated, and any violations are logged', () => {
+					const output = runCommand(`scanner run --target "${pathToSomeTestClass},${pathToSomeOtherTestClass}" --ruleset ApexUnit --format xml`);
+					// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+					const results = output.shellOutput.stdout.split('<result ');
+					results.shift();
+					// Verify that each set of violations corresponds to the expected file.
+					expect(results.length).to.equal(2, 'Only two files should have violated the rules');
+					expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
+					expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
 
-						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-						const firstFileViolations = results[0].split('<violation');
-						firstFileViolations.shift();
-						expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
-						expect(firstFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+					const firstFileViolations = results[0].split('<violation');
+					firstFileViolations.shift();
+					expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
+					expect(firstFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
-						const secondFileViolations = results[1].split('<violation');
-						secondFileViolations.shift();
-						expect(secondFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(secondFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					});
+					const secondFileViolations = results[1].split('<violation');
+					secondFileViolations.shift();
+					expect(secondFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(secondFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				});
 			});
 
 			describe('Test Case: Running rules against a folder', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('Any violations in the folder are logged as an XML', ctx => {
-						// We'll split the output by the <file> tag first, so we can get each file that violated rules.
-						const results = ctx.stdout.split('<result ');
-						// The first list item is going to be the header, so we need to pull that off.
-						results.shift();
-						// Verify that each set of violations corresponds to the expected file.
-						expect(results.length).to.equal(3, 'Only three files should have violated the rules');
-						expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AnotherTestClass.cls"/);
-						expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
-						expect(results[2]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
+				it('Any violations in the folder are logged as an XML', () => {
+					const output = runCommand(`scanner run --target ${pathToApexFolder} --ruleset ApexUnit --format xml`);
+					// We'll split the output by the <file> tag first, so we can get each file that violated rules.
+					const results = output.shellOutput.stdout.split('<result ');
+					// The first list item is going to be the header, so we need to pull that off.
+					results.shift();
+					// Verify that each set of violations corresponds to the expected file.
+					expect(results.length).to.equal(3, 'Only three files should have violated the rules');
+					expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AnotherTestClass.cls"/);
+					expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
+					expect(results[2]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
 
-						// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-						const firstFileViolations = results[0].split('<violation');
-						firstFileViolations.shift();
-						expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in AnotherTestClass.cls');
-						expect(firstFileViolations[0]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
+					const firstFileViolations = results[0].split('<violation');
+					firstFileViolations.shift();
+					expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in AnotherTestClass.cls');
+					expect(firstFileViolations[0]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
-						const secondFileViolations = results[1].split('<violation');
-						secondFileViolations.shift();
-						expect(secondFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
-						expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					const secondFileViolations = results[1].split('<violation');
+					secondFileViolations.shift();
+					expect(secondFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
+					expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 
-						const thirdFileViolations = results[2].split('<violation');
-						thirdFileViolations.shift();
-						expect(thirdFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(thirdFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(thirdFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					});
+					const thirdFileViolations = results[2].split('<violation');
+					thirdFileViolations.shift();
+					expect(thirdFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(thirdFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(thirdFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				});
 			});
 
 			describe('Test Case: Running multiple rulesets at once', () => {
-				setupCommandTest
-					.command(['scanner:run', '--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'])
-					.it('--ruleset option shows deprecation warning', ctx => {
-						expect(ctx.stderr).contains(runMessages.getMessage('rulesetDeprecation'));
-					});
-
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
-						'--ruleset', 'ApexUnit,Style',
-						'--format', 'xml'
-					])
-					.it('Violations from each rule are logged as an XML', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="3".+rule="VariableNamingConventions"/);
-						expect(violations[1]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					});
+				it('Violations from each rule are logged as an XML', () => {
+					const output = runCommand(`scanner run --target ${pathToAnotherTestClass} --ruleset ApexUnit,Style --format xml`);
+					expect(output.shellOutput.stderr).contains(runMessages.getMessage('rulesetDeprecation'), 'Expected ruleset deprecation message');
+					// We'll split the output by the <violation> tag, so we can get individual violations.
+					const violations = output.shellOutput.stdout.split('<violation');
+					// The first list item is going to be the header, so we need to pull that off.
+					violations.shift();
+					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(violations[0]).to.match(/line="3".+rule="VariableNamingConventions"/);
+					expect(violations[1]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				});
 			});
 
 			describe('Test Case: Writing XML results to a file', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--outfile', 'testout.xml'
-					])
-					.finally(ctx => {
-						// Regardless of what happens in the test itself, we need to delete the file we created.
-						if (fs.existsSync('testout.xml')) {
-							fs.unlinkSync('testout.xml');
-						}
-					})
-					.it('Violations are written to file as XML', ctx => {
-						// Verify that the file we wanted was actually created.
-						expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
-						const fileContents = fs.readFileSync('testout.xml').toString();
-						validateXmlOutput(fileContents);
-					});
+				const testout = 'testout.xml';
+				afterEach(() => {
+					if (fs.existsSync(testout)) {
+						fs.unlinkSync(testout);
+					}
+				});
 
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-						'--ruleset', 'ApexUnit',
-						'--outfile', 'testout.xml'
-					])
-					.finally(ctx => {
-						// Regardless of what happens in the test itself, we need to delete the file we created.
-						if (fs.existsSync('testout.xml')) {
-							fs.unlinkSync('testout.xml');
-						}
-					})
-					.it('Absence of violations yields empty XML file', ctx => {
-						// Verify that an empty XML file was actually created.
-						expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created an empty output file');
-						const fileContents = fs.readFileSync('testout.xml').toString();
-						validateNoViolationsXmlOutput(fileContents);
-					});
+				it('Returned violations are written to file as XML', () => {
+					runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout}`);
+					// Verify that the file we wanted was actually created.
+					expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
+					const fileContents = fs.readFileSync(testout).toString();
+					validateXmlOutput(fileContents);
+				});
+
+				it('Absence of violations yields empty XML file', () => {
+					runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${testout}`);
+					// Verify that an empty XML file was actually created.
+					expect(fs.existsSync(testout)).to.equal(true, 'The command should have created an empty output file');
+					const fileContents = fs.readFileSync(testout).toString();
+					validateNoViolationsXmlOutput(fileContents);
+				});
 			});
 		});
 
@@ -249,69 +202,44 @@ describe('scanner:run', function () {
 				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			}
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'csv'
-				])
-				.it('Properly writes CSV to console', ctx => {
-					// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
-					validateCsvOutput(ctx.stdout, false);
-				});
+			const testout = 'testout.csv';
+			afterEach(() => {
+				if (fs.existsSync(testout)) {
+					fs.unlinkSync(testout);
+				}
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', 'testout.csv'
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('testout.csv')) {
-						fs.unlinkSync('testout.csv');
-					}
-				})
-				.it('Properly writes CSV to file', ctx => {
-					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
+			it('Properly writes CSV to console', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format csv`);
+				// Split the output by newline characters and throw away the first entry, so we're left with just the rows.
+				validateCsvOutput(output.shellOutput.stdout, false);
+			});
 
-					// Verify that the file we wanted was actually created.
-					expect(fs.existsSync('testout.csv')).to.equal(true, 'The command should have created the expected output file');
-					const fileContents = fs.readFileSync('testout.csv').toString();
-					validateCsvOutput(fileContents, false);
-				});
+			it('Properly writes CSV to file', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout}`);
+				// Verify that the correct message is displayed to user
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [testout]));
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'csv'
-				])
-				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-				});
+				// Verify that the file we wanted was actually created.
+				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
+				const fileContents = fs.readFileSync(testout).toString();
+				validateCsvOutput(fileContents, false);
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', 'testout.csv'
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('testout.csv')) {
-						fs.unlinkSync('testout.csv');
-					}
-				})
-				.it('When --outfile is provided and no violations are detected, CSV file with no violations is created', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.csv']));
+			it('When no violations are detected, a message is logged to the console', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format csv`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+			});
 
-					const fileContents = fs.readFileSync('testout.csv').toString();
-					expect(fs.existsSync('testout.csv')).to.be.true;
-					validateNoViolationsCsvOutput(fileContents, false);
-				});
+			it('When --outfile is provided and no violations are detected, CSV file with no violations is created', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${testout}`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [testout]));
+
+				const fileContents = fs.readFileSync(testout).toString();
+				expect(fs.existsSync(testout)).to.be.true;
+				validateNoViolationsCsvOutput(fileContents, false);
+			});
 		});
 
 		describe('Output Type: HTML', () => {
@@ -340,67 +268,41 @@ describe('scanner:run', function () {
 				expect(emptyResult).to.be.not.null;
 			}
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'html'
-				])
-				.it('Properly writes HTML to console', ctx => {
-					// Parse out the HTML results
-					validateHtmlOutput(ctx.stdout);
-				});
+			afterEach(() => {
+				if (fs.existsSync(outputFile)) {
+					fs.unlinkSync(outputFile);
+				}
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', outputFile
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync(outputFile)) {
-						fs.unlinkSync(outputFile);
-					}
-				})
-				.it('Properly writes HTML to file', ctx => {
-					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
+			it('Properly writes HTML to console', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format html`);
+				// Parse out the HTML results
+				validateHtmlOutput(output.shellOutput.stdout);
+			});
 
-					// Verify that the file we wanted was actually created.
-					expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
-					const fileContents = fs.readFileSync(outputFile).toString();
-					validateHtmlOutput(fileContents);
-				});
+			it('Properly writes HTML to file', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${outputFile}`);
+				// Verify that the correct message is displayed to user
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'html'
-				])
-				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-				});
+				// Verify that the file we wanted was actually created.
+				expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
+				const fileContents = fs.readFileSync(outputFile).toString();
+				validateHtmlOutput(fileContents);
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', outputFile
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync(outputFile)) {
-						fs.unlinkSync(outputFile);
-					}
-				})
-				.it('When --outfile is provided and no violations are detected, HTML file with no violations should be created', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
-					expect(fs.existsSync(outputFile)).to.be.true;
-					const fileContents = fs.readFileSync(outputFile).toString();
-					validateNoViolationsHtmlOutput(fileContents);
-				});
+			it('When no violations are detected, a message is logged to the console', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format html`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+			});
+
+			it('When --outfile is provided and no violations are detected, HTML file with no violations should be created', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${outputFile}`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [outputFile]));
+				expect(fs.existsSync(outputFile)).to.be.true;
+				const fileContents = fs.readFileSync(outputFile).toString();
+				validateNoViolationsHtmlOutput(fileContents);
+			});
 		});
 
 		describe('Output Type: JSON', () => {
@@ -421,415 +323,308 @@ describe('scanner:run', function () {
 				expect(output.length).to.equal(0, 'Should be no violations from one engine');
 			}
 
+			const testout = 'testout.json';
+			afterEach(() => {
+				if (fs.existsSync(testout)) {
+					fs.unlinkSync(testout);
+				}
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'json'
-				])
-				.it('Properly writes JSON to console', ctx => {
-					const stdout = ctx.stdout;
-					validateJsonOutput(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-				});
+			it('Properly writes JSON to console', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format json`);
+				const stdout = output.shellOutput.stdout;
+				validateJsonOutput(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', 'testout.json'
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('testout.json')) {
-						fs.unlinkSync('testout.json');
-					}
-				})
-				.it('Properly writes JSON to file', ctx => {
-					// Verify that the correct message is displayed to user
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
+			it('Properly writes JSON to file', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout}`);
+				// Verify that the correct message is displayed to user
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [testout]));
 
-					// Verify that the file we wanted was actually created.
-					expect(fs.existsSync('testout.json')).to.equal(true, 'The command should have created the expected output file');
-					const fileContents = fs.readFileSync('testout.json').toString();
-					validateJsonOutput(fileContents);
-				});
+				// Verify that the file we wanted was actually created.
+				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
+				const fileContents = fs.readFileSync(testout).toString();
+				validateJsonOutput(fileContents);
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'json'
-				])
-				.it('When no violations are detected, a message is logged to the console', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-				});
+			it('When no violations are detected, a message is logged to the console', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format json`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', 'testout.json'
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('testout.json')) {
-						fs.unlinkSync('testout.json');
-					}
-				})
-				.it('When --outfile is provided and no violations are detected, a JSON file with no violations is created', ctx => {
-					expect(ctx.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.json']));
-					expect(fs.existsSync('testout.json')).to.be.true;
-					const fileContents = fs.readFileSync('testout.json').toString();
-					validateNoViolationsJsonOutput(fileContents);
-				});
+			it('When --outfile is provided and no violations are detected, a JSON file with no violations is created', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${testout}`);
+				expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.writtenToOutFile', [testout]));
+				expect(fs.existsSync(testout)).to.be.true;
+				const fileContents = fs.readFileSync(testout).toString();
+				validateNoViolationsJsonOutput(fileContents);
+			});
 
 		});
 
 		describe('Output Type: Table', () => {
 			// The table can't be written to a file, so we're just testing the console.
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'table'
-				])
-				.it('Properly writes table to the console', ctx => {
-					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
-					// That will leave us with just the rows.
-					const rows = ctx.stdout.trim().split('\n');
+			it('Properly writes table to the console', () => {
+				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format table`);
+				// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+				// That will leave us with just the rows.
+				const rows = output.shellOutput.stdout.trim().split('\n');
 
-					// Assert rows have the right error on the right line.
-					expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
-					expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
-				});
+				// Assert rows have the right error on the right line.
+				expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
+				expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'table'
-				])
-				.it('When no violations are detected, an empty table is logged to the console', ctx => {
-					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
-					// That will leave us with just the rows.
-					const rows = ctx.stdout.trim().split('\n');
+			it('When no violations are detected, an empty table is logged to the console', () => {
+				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format table`);
+				// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+				// That will leave us with just the rows.
+				const rows = output.shellOutput.stdout.trim().split('\n');
 
-					// Expect to find no violations listing this class.
-					expect(rows.find(r => r.indexOf("SomeTestClass.cls") > 0)).to.equal(undefined, "more rows??");
-				});
+				// Expect to find no violations listing this class.
+				expect(rows.find(r => r.indexOf("SomeTestClass.cls") > 0)).to.equal(undefined, "more rows??");
+			});
 		});
 
 		describe('--json flag', () => {
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--json'
-				])
-				.it('--json flag uses default format of JSON', ctx => {
-					const output = JSON.parse(ctx.stdout);
-					expect(output.status).to.equal(0, 'Should have finished properly');
-					const result = output.result;
-					// Only PMD rules should have run.
-					expect(result.length).to.equal(1, 'Should only be violations from one engine');
-					expect(result[0].engine).to.equal('pmd', 'Engine should be PMD');
+			const testout = 'testout.xml';
+			afterEach(() => {
+				if (fs.existsSync(testout)) {
+					fs.unlinkSync(testout);
+				}
+			});
 
-					expect(result[0].violations.length).to.equal(2, 'Should be 2 violations');
-					expect(result[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
-					expect(result[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
-				});
+			it('--json flag uses default format of JSON', () => {
+				const commandOutput = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --json`)
+				const output = JSON.parse(commandOutput.shellOutput.stdout);
+				expect(output.status).to.equal(0, 'Should have finished properly');
+				const result = output.result;
+				// Only PMD rules should have run.
+				expect(result.length).to.equal(1, 'Should only be violations from one engine');
+				expect(result[0].engine).to.equal('pmd', 'Engine should be PMD');
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--format', 'xml',
-					'--json'
-				])
-				.it('--json flag wraps other formats in a string', ctx => {
-					const output = JSON.parse(ctx.stdout);
-					expect(output.status).to.equal(0, 'Should have finished properly');
-					// We'll split the output by the <violation> tag, so we can get individual violations.
-					const violations = output.result.split('<violation');
-					// The first list item is going to be the header, so we need to pull that off.
-					violations.shift();
-					// There should be two violations.
-					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-					// expected order.
-					expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-				});
+				expect(result[0].violations.length).to.equal(2, 'Should be 2 violations');
+				expect(result[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
+				expect(result[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--outfile', 'testout.xml',
-					'--json'
-				])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('testout.xml')) {
-						fs.unlinkSync('testout.xml');
-					}
-				})
-				.it('--json flag wraps message about writing to outfile', ctx => {
-					const output = JSON.parse(ctx.stdout);
-					expect(output.status).to.equal(0, 'Should finish properly');
-					const result = output.result;
-					expect(result).to.contain(processorMessages.getMessage('output.writtenToOutFile', ['testout.xml']));
-					// Verify that the file we wanted was actually created.
-					expect(fs.existsSync('testout.xml')).to.equal(true, 'The command should have created the expected output file');
-					const fileContents = fs.readFileSync('testout.xml').toString();
-					// We'll split the output by the <violation> tag, so we can get individual violations.
-					const violations = fileContents.split('<violation');
-					// The first list item is going to be the header, so we need to pull that off.
-					violations.shift();
-					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-					// expected order.
-					expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-				});
+			it('--json flag wraps other formats in a string', () => {
+				const commandOutput = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format xml --json`);
+				const output = JSON.parse(commandOutput.shellOutput.stdout);
+				expect(output.status).to.equal(0, 'Should have finished properly');
+				// We'll split the output by the <violation> tag, so we can get individual violations.
+				const violations = output.result.split('<violation');
+				// The first list item is going to be the header, so we need to pull that off.
+				violations.shift();
+				// There should be two violations.
+				expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
+				// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+				// expected order.
+				expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+			});
 
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-					'--ruleset', 'ApexUnit',
-					'--json'
-				])
-				.it('--json flag wraps message about no violations occuring', ctx => {
-					const output = JSON.parse(ctx.stdout);
-					expect(output.status).to.equal(0, 'Should have finished properly');
-					expect(output.result).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
-				});
-		});
+			it('--json flag wraps message about writing to outfile', () => {
+				const commandOutput = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout} --json`);
+				const output = JSON.parse(commandOutput.shellOutput.stdout);
+				expect(output.status).to.equal(0, 'Should finish properly');
+				const result = output.result;
+				expect(result).to.contain(processorMessages.getMessage('output.writtenToOutFile', [testout]));
+				// Verify that the file we wanted was actually created.
+				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
+				const fileContents = fs.readFileSync(testout).toString();
+				// We'll split the output by the <violation> tag, so we can get individual violations.
+				const violations = fileContents.split('<violation');
+				// The first list item is going to be the header, so we need to pull that off.
+				violations.shift();
+				expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
+				// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+				// expected order.
+				expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+			});
 
-		// TODO: this test has become more of an integration test, than just testing the run command. break it up to make it more manageable, maybe based on engine or flags.
-
-		describe('--engine flag', () => {
+			it('--json flag wraps message about no violations occuring', () => {
+				const commandOutput = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --json`);
+				const output = JSON.parse(commandOutput.shellOutput.stdout);
+				expect(output.status).to.equal(0, 'Should have finished properly');
+				expect(output.result).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, retire-js']));
+			})
 		});
 
 		describe('Dynamic Input', () => {
 
 			describe('Test Case: Using ~/ shorthand in target', () => {
 				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'SomeTestClass.cls'));
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', pathWithTilde,
-						'--ruleset', 'ApexUnit',
-						'--format', 'xml'
-					])
-					.it('Tilde is expanded to full directory', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-						// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-						// expected order.
-						expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-						expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					});
+
+				it('Tilde is expanded to full directory', () => {
+					const output = runCommand(`scanner run --target ${pathWithTilde} --ruleset ApexUnit --format xml`);
+					// We'll split the output by the <violation> tag, so we can get individual violations.
+					const violations = output.shellOutput.stdout.split('<violation');
+					// The first list item is going to be the header, so we need to pull that off.
+					violations.shift();
+					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
+					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+					// expected order.
+					expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+					expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+				})
 			});
 		});
 
 		describe('Edge Cases', () => {
 			describe('Test case: No output specified', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls'),
-						'--ruleset', 'ApexUnit'
-					])
-					.it('When no format is specified, we default to a TABLE', ctx => {
-						// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
-						// That will leave us with just the rows.
-						const rows = ctx.stdout.trim().split('\n');
-						rows.shift();
-						rows.shift();
+				it('When no format is specified, we default to a TABLE', () => {
+					const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit`);
+					// Split the output by newline characters and throw away the first two rows, which are the column names and a separator.
+					// That will leave us with just the rows.
+					const rows = output.shellOutput.stdout.trim().split('\n');
+					rows.shift();
+					rows.shift();
 
-						// Assert rows have the right error on the right line.
-						expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
-						expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
-					});
+					// Assert rows have the right error on the right line.
+					expect(rows.find(r => r.indexOf("SomeTestClass.cls:11") > 0)).to.contain('Apex unit tests should System.assert()');
+					expect(rows.find(r => r.indexOf("SomeTestClass.cls:19") > 0)).to.contain('Apex unit tests should System.assert()');
+				})
 			});
 
 			describe('Test Case: No rules specified', () => {
-				setupCommandTest
-					.command(['scanner:run',
-						'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
-						'--format', 'xml'
-					])
-					.it('When no rules are explicitly specified, all rules are run', ctx => {
-						// We'll split the output by the <violation> tag, so we can get individual violations.
-						const violations = ctx.stdout.split('<violation');
-						// The first list item is going to be the header, so we need to pull that off.
-						violations.shift();
-						// ApexUnitTestClassShouldHaveAsserts, FieldNamingConventions, UnusedLocalVariable, and VariableNamingConventions
-						// We'll just make sure that we have the right number of them.
-						expect(violations.length).greaterThan(0);
-					});
+				it('When no rules are explicitly specified, all rules are run', () => {
+					const output = runCommand(`scanner run --target ${pathToAnotherTestClass} --format xml`);
+					// We'll split the output by the <violation> tag, so we can get individual violations.
+					const violations = output.shellOutput.stdout.split('<violation');
+					// The first list item is going to be the header, so we need to pull that off.
+					violations.shift();
+					// ApexUnitTestClassShouldHaveAsserts, FieldNamingConventions, UnusedLocalVariable, and VariableNamingConventions
+					// We'll just make sure that we have the right number of them.
+					expect(violations.length).greaterThan(0);
+				});
 			});
 		});
 
 		describe('Error handling', () => {
-			setupCommandTest
-				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'NotAValidFileName'])
-				.it('Error thrown when output file is malformed', ctx => {
-					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeValid')}`);
-				});
+			const notcsv = 'notcsv.xml';
+			afterEach(() => {
+				if (fs.existsSync(notcsv)) {
+					fs.unlinkSync(notcsv);
+				}
+			});
 
-			setupCommandTest
-				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--ruleset', 'ApexUnit', '--outfile', 'badtype.pdf'])
-				.it('Error thrown when output file is unsupported type', ctx => {
-					expect(ctx.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeSupportedType')}`);
-				});
 
-			setupCommandTest
-				.command(['scanner:run', '--target', 'path/that/does/not/matter', '--format', 'csv', '--outfile', 'notcsv.xml'])
-				.finally(ctx => {
-					// Regardless of what happens in the test itself, we need to delete the file we created.
-					if (fs.existsSync('notcsv.xml')) {
-						fs.unlinkSync('notcsv.xml');
-					}
-				})
-				.it('Warning logged when output file format does not match format', ctx => {
-					expect(ctx.stdout).to.contain(commonMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
-				});
+			it('Error thrown when output file is malformed', () => {
+				const output = runCommand(`scanner run --target path/that/does/notmatter --ruleset ApexUnit --outfile NotAValidFileName`);
+				expect(output.shellOutput.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeValid')}`);
+			});
+
+			it('Error thrown when output file is unsupported type', () => {
+				const output = runCommand(`scanner run --target path/that/does/not/matter --ruleset ApexUnit --outfile badtype.pdf`);
+				expect(output.shellOutput.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeSupportedType')}`);
+			})
+
+			it('Warning logged when output file format does not match format', () => {
+				const output = runCommand(`scanner run --target path/that/does/not/matter --format csv --outfile notcsv.xml`);
+				expect(output.shellOutput.stdout).to.contain(commonMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
+			});
 		});
 	});
 
 	describe('MultiEngine', () => {
 		describe('Project: JS', () => {
-			setupCommandTest
-				.do(() => process.chdir(path.join('test', 'code-fixtures', 'projects', 'app')))
-				.command(['scanner:run', '--target', '**/*.js,**/*.cls', '--format', 'json'])
-				.finally(() => process.chdir("../../../.."))
-				.it('Polyglot project triggers pmd and eslint rules', ctx => {
-					const results = JSON.parse(ctx.stdout.substring(ctx.stdout.indexOf("[{"), ctx.stdout.lastIndexOf("}]") + 2));
-					// Look through all of the results and gather a set of unique engines
-					const uniqueEngines = new Set(results.map(r => { return r.engine }));
-					expect(uniqueEngines).to.be.an("Set").that.has.length(2);
-					expect(uniqueEngines).to.contain("eslint");
-					expect(uniqueEngines).to.contain("pmd");
-					// Validate that all of the results have an expected property
-					for (const result of results) {
-						expect(result.violations[0], `Message is ${result.violations[0].message}\n ${ctx.stdout}`).to.have.property("ruleName").that.is.not.null;
-					}
-				});
+			it('Polyglot project triggers pmd and eslint rules', () => {
+				const pathToApp = path.join('test', 'code-fixtures', 'projects', 'app');
+				const allJsGlob = path.join(pathToApp, '**', '*.js');
+				const allApexGlob = path.join(pathToApp, '**', '*.cls');
+				const output = runCommand(`scanner run --target "${allJsGlob},${allApexGlob}" --format json`);
+				const results = JSON.parse(output.shellOutput.stdout.substring(output.shellOutput.stdout.indexOf("[{"), output.shellOutput.stdout.lastIndexOf("}]") + 2));
+				// Look through all of the results and gather a set of unique engines
+				const uniqueEngines = new Set(results.map(r => { return r.engine }));
+				expect(uniqueEngines).to.be.an("Set").that.has.length(2);
+				expect(uniqueEngines).to.contain("eslint");
+				expect(uniqueEngines).to.contain("pmd");
+				// Validate that all of the results have an expected property
+				for (const result of results) {
+					expect(result.violations[0], `Message is ${result.violations[0].message}\n ${output.shellOutput.stdout}`).to.have.property("ruleName").that.is.not.null;
+				}
+			});
 		});
 	});
 
 	describe('BaseConfig Environment Tests For Javascript', () => {
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js'),
-				'--format', 'csv'
-			])
-			.it('The baseConfig enables the usage of default Javascript Types', ctx => {
-				// There should be no violations.
-				expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
-			});
+		it('The baseConfig enables the usage of default Javascript Types', () => {
+			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')} --format csv`);
+			// There should be no violations.
+			expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
+		});
 
-		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 3.0.
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 4.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js'),
-				'--format', 'json'
-			])
-			.it('By default, frameworks such as QUnit are not included in the baseConfig', ctx => {
-				// We expect there to be 2 errors about qunit-related syntax being undefined.
-				const stdout = ctx.stdout;
-				const parsedCtx = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-				expect(parsedCtx[0].violations.length).to.equal(2, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
-				expect(parsedCtx[0].violations[0].message).to.contain("'QUnit' is not defined.");
-			});
+		it('By default, frameworks such as QUnit are not included in the baseConfig', () => {
+			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')} --format json`);
+			// We expect there to be 2 errors about qunit-related syntax being undefined.
+			const stdout = output.shellOutput.stdout;
+			const parsedCtx = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			expect(parsedCtx[0].violations.length).to.equal(2, `Should be 2 violations ${JSON.stringify(parsedCtx[0].violations)}`);
+			expect(parsedCtx[0].violations[0].message).to.contain("'QUnit' is not defined.");
+		});
 
-		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 3.0.
+		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL AND WE NEED TO REDO IT IN 4.0.
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js'),
-				'--format', 'json',
-				'--env', '{"qunit": true}'
-			])
-			.it('Providing qunit in the --env override should resolve errors about that framework', ctx => {
-				expect(ctx.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
-			});
+		it('Providing qunit in the --env override should resolve errors about that framework', () => {
+			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')} --format json --env "{\\"qunit\\": true}"`);
+			expect(output.shellOutput.stdout).to.contain(processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint, retire-js']));
+		});
 	});
 
 	describe('run with format --json', () => {
-		setupCommandTest
-		.command(['scanner:run',
-		'--target', path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls'),
-		'--format', 'json'
-	])
-	.it('provides only json in stdout', ctx => {
-		try {
-			JSON.parse(ctx.stdout);
-		} catch (error) {
-			expect.fail("Invalid JSON output from --format json: " + ctx.stdout, error);
-		}
+		it('provides only json in stdout', () => {
+			const output = runCommand(`scanner run --target ${pathToAnotherTestClass} --format json`);
+			try {
+				JSON.parse(output.shellOutput.stdout);
+			} catch (error) {
+				expect.fail("Invalid JSON output from --format json: " + output.shellOutput.stdout, error);
+			}
 
 		});
 	});
 
 	describe('Validation on custom config flags', () => {
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', '/some/path',
-				'--tsconfig', '/some/path/tsconfig.json',
-				'--eslintconfig', '/some/path/.eslintrc.json'
-			])
-			.it('Handle --tsconfig and --eslintconfig as mutially exclusive flags and throw an informative error message', ctx => {
-				expect(ctx.stderr).to.contain(runMessages.getMessage('validations.tsConfigEslintConfigExclusive'));
-			});
 
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', '/some/path',
-				'--pmdconfig', '/some/path/ruleref.xml',
-				'--category', 'Security'
-			])
-			.it('Display informative message when rule filters are provided along with custom config - pmdconfig', ctx => {
-				expect(ctx.stdout).to.contain(runMessages.getMessage('output.filtersIgnoredCustom'));
-			});
+		it('Handle --tsconfig and --eslintconfig as mutially exclusive flags and throw an informative error message', () => {
+			const output = runCommand(`scanner run --target /some/path --tsconfig /some/path/tsconfig.json --eslintconfig /some/path/.eslintrc.json`);
+			expect(output.shellOutput.stderr).to.contain(runMessages.getMessage('validations.tsConfigEslintConfigExclusive'));
+		});
 
-
+		it('Display informative message when rule filters are provided along with custom config - pmdconfig', () => {
+			const output = runCommand(`scanner run --target /some/path --pmdconfig /somepath/ruleref.xml --category Security`);
+			expect(output.shellOutput.stdout).to.contain(runMessages.getMessage('output.filtersIgnoredCustom'));
+		});
 	});
 
 	// Any commands that specify the --verbose cause subsequent commands to execute as if --verbose was specified.
 	// Put all --verbose commands at the end of this file.
 	describe('Verbose tests must come last. Verbose does not reset', () => {
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls'),
-				'--format', 'xml',
-				'--verbose'
-			])
-			.it('When the --verbose flag is supplied, info about implicitly run rules is logged', ctx => {
-				// We'll split the output by the <violation> tag, so we can get individual violations.
-				const violations = ctx.stdout.split('<violation');
-				// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
-				const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
-				const implicitMessages = violations[0].match(regex);
-				// if this test is not passing and the output seems very large, that's because the test reruns on failures,
-				// and the output accumulates each time, so the output on failure is not the true length of the output
-				// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
-				// there are five retries in addition to the initial run.
-				// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
-				// The following categories are implicitly included:
-				// - 8 PMD categories
-				// - 3 ESLint categories
-				// - 3 ESLint-Typescript categories
-				// - 1 RetireJS category
-				// For a total of 15
-				expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
-				// TODO: revisit test, should be improved because of issue above
-			});
+		it('When the --verbose flag is supplied, info about implicitly run rules is logged', () => {
+			const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --format xml --verbose`);
+			// We'll split the output by the <violation> tag, so we can get individual violations.
+			const violations = output.shellOutput.stdout.split('<violation');
+			// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
+			const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
+			const implicitMessages = violations[0].match(regex);
+			// if this test is not passing and the output seems very large, that's because the test reruns on failures,
+			// and the output accumulates each time, so the output on failure is not the true length of the output
+			// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
+			// there are five retries in addition to the initial run.
+			// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
+			// The following categories are implicitly included:
+			// - 8 PMD categories
+			// - 3 ESLint categories
+			// - 3 ESLint-Typescript categories
+			// - 1 RetireJS category
+			// For a total of 15
+			// TODO: revisit test, should be improved because of issue above
+			expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+
+		});
 	});
 });
