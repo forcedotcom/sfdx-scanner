@@ -11,7 +11,7 @@
 		"@lwc/eslint-plugin-lwc": "^1.1.2",
 		"@oclif/core": "^3.3.2",
 		"@salesforce/command": "^5",
-		"@salesforce/core": "^3",
+		"@salesforce/core": "^5",
 		"@salesforce/eslint-config-lwc": "^3.2.1",
 		"@salesforce/eslint-plugin-lightning": "^1.0.0",
 		"@typescript-eslint/eslint-plugin": "^5.14.0",
