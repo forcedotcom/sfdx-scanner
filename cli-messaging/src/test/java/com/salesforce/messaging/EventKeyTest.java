@@ -25,6 +25,8 @@ import java.util.stream.Stream;
  * are valid
  */
 public class EventKeyTest {
+    private static final String INFO_PREFIX = "info";
+    private static final String WARNING_PREFIX = "warning";
 	private static final String ERROR_EXTERNAL_PREFIX = "error.external";
 	private static final String ERROR_INTERNAL_PREFIX = "error.internal";
 
@@ -101,11 +103,12 @@ public class EventKeyTest {
     }
 
     public static Stream<EventKey> getAllInfoEventKeyValues() {
-        return getAllEventKeyValues().filter(eventKey -> eventKey.getMessageType() == MessageType.INFO);
+        return getAllEventKeyValues().filter(eventKey -> eventKey.getMessageKey().startsWith(INFO_PREFIX)
+            && eventKey != EventKey.INFO_TELEMETRY);
     }
 
     public static Stream<EventKey> getAllWarningEventKeyValues() {
-        return getAllEventKeyValues().filter(eventKey -> eventKey.getMessageType() == MessageType.WARNING);
+        return getAllEventKeyValues().filter(eventKey -> eventKey.getMessageKey().startsWith(WARNING_PREFIX));
     }
 
     public static Stream<EventKey> getAllErrorExternalEventKeyValues() {
