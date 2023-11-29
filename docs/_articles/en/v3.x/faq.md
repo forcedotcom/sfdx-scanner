@@ -13,7 +13,9 @@ A: Code Analyzer is a [Salesforce CLI](https://developer.salesforce.com/docs/atl
 To inspect your code, Code Analyzer uses multiple code analysis engines, including PMD, ESLint, RetireJS, and Salesforce Graph Engine. It identifies potential problems, from inconsistent naming to security vulnerabilities, including advanced vulnerabilities such as lack of Create Read Update Delete/Field-Level Security (CRUD/FLS) checks. Code Analyzer conveys these problems with easy-to-understand results. Run the code analyzer on-command in the CLI, or integrate it into your Continuous Integration/Continuous Development (CI/CD) framework so that you can run it against every code change or on a scheduled basis.
 
 #### Q: Is Code Analyzer part of the AppExchange security review process?
-A: Salesforce Code Analyzer is separate from the AppExchange security review process, but it enforces many of the same rules. It can be executed at-will, it provides results in minutes, and it helps you to find and fix problems quickly. As a result, you can be more confident in the code that you submit for security review.
+A: Salesforce Code Analyzer is a stand-alone product you can run against your code at any time whether or not you're preparing for AppExchange security review. It can be executed at-will, it provides results in minutes, and it helps you to find and fix problems quickly.
+
+If you're planning to list your solution on AppExchange–and if your solution is a managed package–it must pass a security review. In this case, you’re required to scan your solution using Salesforce Code Analyzer and submit comprehensive scan results in the AppExchange Security Review Wizard.  As a result, you can be more confident in the code that you submit for security review. For more information, read [Pass the AppExchange Security Review](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_guidelines.htm) in the ISVforce Guide.
 
 #### Q: Is Code Analyzer only for Salesforce CLI (sfdx) projects?
 A: Code Analyzer is compatible with any codebase.
