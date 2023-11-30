@@ -7,7 +7,6 @@ import {
 	execInteractiveCmd,
 	InteractiveCommandExecutionResult, PromptAnswers
 } from '@salesforce/cli-plugins-testkit';
-// @ts-ignore
 import * as TestOverrides from './test-related-lib/TestOverrides';
 import Sinon = require('sinon');
 import LocalCatalog from '../src/lib/services/LocalCatalog';

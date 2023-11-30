@@ -2,7 +2,7 @@
 	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
 	"compilerOptions": {
 		"outDir": "./lib",
-		"rootDir": "./src",
+		"rootDir": "./",
 		"allowJs": false,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true

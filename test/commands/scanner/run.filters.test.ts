@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-// @ts-ignore
 import {runCommand} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import path = require('path');

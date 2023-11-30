@@ -1,6 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
 import {Interaction} from '@salesforce/cli-plugins-testkit';
-// @ts-ignore
 import {runCommand, runInteractiveCommand} from '../../../TestUtils';
 import {Messages} from '@salesforce/core';
 import {Controller} from '../../../../src/Controller';

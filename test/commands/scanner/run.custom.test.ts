@@ -1,5 +1,4 @@
 import { Messages } from "@salesforce/core";
-// @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require('path');
 import { expect } from "@oclif/test";

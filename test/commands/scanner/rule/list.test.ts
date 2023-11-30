@@ -1,5 +1,4 @@
 import {expect} from '@salesforce/command/lib/test';
-// @ts-ignore
 import {runCommand} from '../../../TestUtils';
 import {Rule} from '../../../../src/types';
 import {CATALOG_FILE, ENGINE} from '../../../../src/Constants';

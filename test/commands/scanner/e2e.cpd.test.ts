@@ -1,5 +1,4 @@
 import { expect } from "@salesforce/command/lib/test";
-// @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require("path");
 import { ENGINE } from "../../../src/Constants";

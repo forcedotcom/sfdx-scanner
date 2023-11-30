@@ -1,6 +1,5 @@
 import {expect} from '@salesforce/command/lib/test';
 import {Messages} from '@salesforce/core';
-// @ts-ignore
 import {runCommand} from '../../../TestUtils';
 import * as os from 'os';
 import fs = require('fs');
