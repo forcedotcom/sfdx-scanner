@@ -6,12 +6,16 @@
 brew install ruby
 ```
 
-Add the following to your profile:
+Find where ruby was installed calling:
+```
+brew --prefix ruby
+```
+For example, you will most likely see: /opt/homebrew/opt/ruby
+
+Add this path to your profile (for example at the end of your ~/.zshrc file):
 
 ```
-export PATH="/usr/local/opt/ruby/bin:$PATH"
-export LDFLAGS="-L/usr/local/opt/ruby/lib"
-export CPPFLAGS="-I/usr/local/opt/ruby/include"
+export PATH="/opt/homebrew/opt/ruby:$PATH"
 ```
 
 ## Install Jekyll
@@ -21,6 +25,10 @@ https://jekyllrb.com/docs/
 ```
 cd docs
 gem install jekyll bundler
+```
+
+Finally, let's try to install the gems. If this fails for any reason, try first removing the Gemfile.lock and try again:
+```
 bundle install
 ```
 
