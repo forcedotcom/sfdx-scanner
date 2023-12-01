@@ -25,8 +25,7 @@ sfdx scanner:run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 One or more categories of rules to run. Specify multiple values as a comma-separated list.
 
  -e, --engine=_engine_
-Specifies one or more engines to run. Submit multiple values as a comma-separated list.
-Specify the location of eslintrc config to customize eslint engine.
+Specifies one or more engines to run. Submit multiple values as a comma-separated list. Specify the location of eslintrc config to customize eslint engine.
 
  -f, --format=(csv|html|json|junit|sarif|table|xml)
  Specifies output format with results written directly to the console.
