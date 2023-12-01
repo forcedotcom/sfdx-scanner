@@ -26,7 +26,6 @@ One or more categories of rules to run. Specify multiple values as a comma-separ
 
  -e, --engine=_engine_
 Specifies one or more engines to run. Submit multiple values as a comma-separated list.
-specify the location of eslintrc config to customize eslint engine
 
  -f, --format=(csv|html|json|junit|sarif|table|xml)
  Specifies output format with results written directly to the console.
@@ -57,9 +56,6 @@ specify the location of eslintrc config to customize eslint engine
 
  --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
  [default: warn] Logging level for this command invocation.
-
- --normalize-severity
- Returns normalized severity in addition to the engine specific severity. Normalized severity is: 1 (high), 2 (moderate), and 3 (low).
 
  --pmdconfig=_pmdconfig_
  Specifies the location of PMD rule reference XML file to customize rule selection.
