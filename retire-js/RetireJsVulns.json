@@ -8,11 +8,11 @@
           "CWE-477"
         ],
         "identifiers": {
+          "summary": "bug summary",
           "CVE": [
             "CVE-XXXX-XXXX"
           ],
-          "bug": "1234",
-          "summary": "bug summary"
+          "bug": "1234"
         },
         "info": [
           "http://github.com/eoftedal/retire.js/"
@@ -44,16 +44,16 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS with location.hash",
           "CVE": [
             "CVE-2011-4969"
           ],
-          "summary": "XSS with location.hash",
           "githubID": "GHSA-579v-mp3v-rrw5"
         },
         "info": [
-          "https://nvd.nist.gov/vuln/detail/CVE-2011-4969",
           "http://research.insecurelabs.org/jquery/test/",
-          "https://bugs.jquery.com/ticket/9521"
+          "https://bugs.jquery.com/ticket/9521",
+          "https://nvd.nist.gov/vuln/detail/CVE-2011-4969"
         ]
       },
       {
@@ -62,19 +62,19 @@
           "CWE-64",
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "Selector interpreted as HTML",
           "CVE": [
             "CVE-2012-6708"
           ],
           "bug": "11290",
-          "summary": "Selector interpreted as HTML",
           "githubID": "GHSA-2pqj-h3vj-pqgw"
         },
-        "severity": "medium",
         "info": [
           "http://bugs.jquery.com/ticket/11290",
-          "https://nvd.nist.gov/vuln/detail/CVE-2012-6708",
-          "http://research.insecurelabs.org/jquery/test/"
+          "http://research.insecurelabs.org/jquery/test/",
+          "https://nvd.nist.gov/vuln/detail/CVE-2012-6708"
         ]
       },
       {
@@ -82,14 +82,14 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "Versions of jquery prior to 1.9.0 are vulnerable to Cross-Site Scripting. The load method fails to recognize and remove \"<script>\" HTML tags that contain a whitespace character, i.e: \"</script >\", which results in the enclosed script logic to be executed. This allows attackers to execute arbitrary JavaScript in a victim's browser.\n\n\n## Recommendation\n\nUpgrade to version 1.9.0 or later.",
           "CVE": [
             "CVE-2020-7656"
           ],
-          "summary": "Versions of jquery prior to 1.9.0 are vulnerable to Cross-Site Scripting. The load method fails to recognize and remove \"<script>\" HTML tags that contain a whitespace character, i.e: \"</script >\", which results in the enclosed script logic to be executed. This allows attackers to execute arbitrary JavaScript in a victim's browser.\n\n\n## Recommendation\n\nUpgrade to version 1.9.0 or later.",
           "githubID": "GHSA-q4m3-2j7h-f7xw"
         },
-        "severity": "medium",
         "info": [
           "https://github.com/advisories/GHSA-q4m3-2j7h-f7xw",
           "https://nvd.nist.gov/vuln/detail/CVE-2020-7656"
@@ -101,42 +101,22 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
-          "issue": "2432",
           "summary": "3rd party CORS request may execute",
+          "issue": "2432",
           "CVE": [
             "CVE-2015-9251"
           ],
           "githubID": "GHSA-rmxg-73gg-4p98"
         },
-        "severity": "medium",
         "info": [
-          "https://github.com/jquery/jquery/issues/2432",
           "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
-          "http://research.insecurelabs.org/jquery/test/"
-        ]
-      },
-      {
-        "atOrAbove": "1.12.3",
-        "below": "3.0.0-beta1",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "issue": "2432",
-          "summary": "3rd party CORS request may execute",
-          "CVE": [
-            "CVE-2015-9251"
-          ],
-          "githubID": "GHSA-rmxg-73gg-4p98"
-        },
-        "severity": "medium",
-        "info": [
+          "http://research.insecurelabs.org/jquery/test/",
+          "https://bugs.jquery.com/ticket/11974",
+          "https://github.com/advisories/GHSA-rmxg-73gg-4p98",
           "https://github.com/jquery/jquery/issues/2432",
-          "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
-          "http://research.insecurelabs.org/jquery/test/"
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251"
         ]
       },
       {
@@ -145,19 +125,22 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "3rd party CORS request may execute",
+          "issue": "2432",
           "CVE": [
             "CVE-2015-9251"
           ],
-          "issue": "11974",
-          "summary": "parseHTML() executes scripts in event handlers",
           "githubID": "GHSA-rmxg-73gg-4p98"
         },
-        "severity": "medium",
         "info": [
+          "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
+          "http://research.insecurelabs.org/jquery/test/",
           "https://bugs.jquery.com/ticket/11974",
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
-          "http://research.insecurelabs.org/jquery/test/"
+          "https://github.com/advisories/GHSA-rmxg-73gg-4p98",
+          "https://github.com/jquery/jquery/issues/2432",
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251"
         ]
       },
       {
@@ -166,19 +149,60 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "3rd party CORS request may execute",
+          "issue": "2432",
           "CVE": [
             "CVE-2015-9251"
           ],
-          "issue": "11974",
-          "summary": "parseHTML() executes scripts in event handlers",
           "githubID": "GHSA-rmxg-73gg-4p98"
         },
-        "severity": "medium",
         "info": [
+          "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
+          "http://research.insecurelabs.org/jquery/test/",
           "https://bugs.jquery.com/ticket/11974",
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
-          "http://research.insecurelabs.org/jquery/test/"
+          "https://github.com/advisories/GHSA-rmxg-73gg-4p98",
+          "https://github.com/jquery/jquery/issues/2432",
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251"
+        ]
+      },
+      {
+        "below": "2.999.999",
+        "cwe": [
+          "CWE-1104"
+        ],
+        "severity": "low",
+        "identifiers": {
+          "summary": "jQuery 1.x and 2.x are End-of-Life and no longer receiving security updates",
+          "retid": "73"
+        },
+        "info": [
+          "https://github.com/jquery/jquery.com/issues/162"
+        ]
+      },
+      {
+        "atOrAbove": "1.12.3",
+        "below": "3.0.0-beta1",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "3rd party CORS request may execute",
+          "issue": "2432",
+          "CVE": [
+            "CVE-2015-9251"
+          ],
+          "githubID": "GHSA-rmxg-73gg-4p98"
+        },
+        "info": [
+          "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
+          "http://research.insecurelabs.org/jquery/test/",
+          "https://bugs.jquery.com/ticket/11974",
+          "https://github.com/advisories/GHSA-rmxg-73gg-4p98",
+          "https://github.com/jquery/jquery/issues/2432",
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251"
         ]
       },
       {
@@ -187,19 +211,22 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "3rd party CORS request may execute",
+          "issue": "2432",
           "CVE": [
             "CVE-2015-9251"
           ],
-          "issue": "11974",
-          "summary": "parseHTML() executes scripts in event handlers",
           "githubID": "GHSA-rmxg-73gg-4p98"
         },
-        "severity": "medium",
         "info": [
+          "http://blog.jquery.com/2016/01/08/jquery-2-2-and-1-12-released/",
+          "http://research.insecurelabs.org/jquery/test/",
           "https://bugs.jquery.com/ticket/11974",
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251",
-          "http://research.insecurelabs.org/jquery/test/"
+          "https://github.com/advisories/GHSA-rmxg-73gg-4p98",
+          "https://github.com/jquery/jquery/issues/2432",
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-9251"
         ]
       },
       {
@@ -208,14 +235,14 @@
         "cwe": [
           "CWE-400"
         ],
+        "severity": "high",
         "identifiers": {
+          "summary": "Denial of Service in jquery",
           "CVE": [
             "CVE-2016-10707"
           ],
-          "summary": "Denial of Service in jquery",
           "githubID": "GHSA-mhpp-875w-9cpv"
         },
-        "severity": "high",
         "info": [
           "https://nvd.nist.gov/vuln/detail/CVE-2016-10707"
         ]
@@ -227,72 +254,57 @@
           "CWE-1321",
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution",
           "CVE": [
             "CVE-2019-11358"
           ],
           "PR": "4333",
-          "summary": "jQuery before 3.4.0, as used in Drupal, Backdrop CMS, and other products, mishandles jQuery.extend(true, {}, ...) because of Object.prototype pollution",
           "githubID": "GHSA-6c3j-c64m-qhgq"
         },
-        "severity": "medium",
         "info": [
           "https://blog.jquery.com/2019/04/10/jquery-3-4-0-released/",
-          "https://nvd.nist.gov/vuln/detail/CVE-2019-11358",
-          "https://github.com/jquery/jquery/commit/753d591aea698e57d6db58c9f722cd0808619b1b"
+          "https://github.com/jquery/jquery/commit/753d591aea698e57d6db58c9f722cd0808619b1b",
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-11358"
         ]
       },
       {
+        "atOrAbove": "1.0.3",
         "below": "3.5.0",
-        "atOrAbove": "1.2.0",
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "passing HTML containing <option> elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code.",
+          "CVE": [
+            "CVE-2020-11023"
+          ],
+          "issue": "4647",
+          "githubID": "GHSA-jpcq-cgw6-v4j6"
+        },
+        "info": [
+          "https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/"
+        ]
+      },
+      {
+        "atOrAbove": "1.2.0",
+        "below": "3.5.0",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Regex in its jQuery.htmlPrefilter sometimes may introduce XSS",
           "CVE": [
             "CVE-2020-11022"
           ],
           "issue": "4642",
-          "summary": "Regex in its jQuery.htmlPrefilter sometimes may introduce XSS",
           "githubID": "GHSA-gxr4-xjj5-5px2"
         },
-        "severity": "medium",
         "info": [
           "https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/"
-        ]
-      },
-      {
-        "below": "3.5.0",
-        "atOrAbove": "1.0.3",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2020-11023",
-            "CVE-2020-23064"
-          ],
-          "issue": "4647",
-          "summary": "passing HTML containing <option> elements from untrusted sources - even after sanitizing it - to one of jQuery's DOM manipulation methods (i.e. .html(), .append(), and others) may execute untrusted code.",
-          "githubID": "GHSA-jpcq-cgw6-v4j6"
-        },
-        "severity": "medium",
-        "info": [
-          "https://blog.jquery.com/2020/04/10/jquery-3-5-0-released/"
-        ]
-      },
-      {
-        "below": "2.999.999",
-        "cwe": [
-          "CWE-1104"
-        ],
-        "identifiers": {
-          "retid": "73",
-          "summary": "jQuery 1.x and 2.x are End-of-Life and no longer receiving security updates"
-        },
-        "severity": "low",
-        "info": [
-          "https://github.com/jquery/jquery.com/issues/162"
         ]
       }
     ],
@@ -329,9 +341,9 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "cross-site-scripting",
           "issue": "36",
-          "release": "jQuery Migrate 1.2.0 Released",
-          "summary": "cross-site-scripting"
+          "release": "jQuery Migrate 1.2.0 Released"
         },
         "info": [
           "http://blog.jquery.com/2013/05/01/jquery-migrate-1-2-0-released/",
@@ -345,8 +357,8 @@
           "CWE-79"
         ],
         "identifiers": {
-          "bug": "11290",
-          "summary": "Selector interpreted as HTML"
+          "summary": "Selector interpreted as HTML",
+          "bug": "11290"
         },
         "info": [
           "http://bugs.jquery.com/ticket/11290",
@@ -372,21 +384,20 @@
     ],
     "vulnerabilities": [
       {
-        "below": "1.19.5",
+        "below": "1.19.3",
         "severity": "high",
         "cwe": [
-          "CWE-1333"
+          "CWE-400"
         ],
         "identifiers": {
+          "summary": "Regular Expression Denial of Service vulnerability",
           "CVE": [
-            "CVE-2022-31147"
+            "CVE-2021-21252"
           ],
-          "summary": "ReDoS vulnerability in url and URL2 validation",
-          "githubID": "GHSA-ffmh-x56j-9rc3"
+          "githubID": "GHSA-jxwx-85vp-gvwm"
         },
         "info": [
-          "https://github.com/jquery-validation/jquery-validation/commit/5bbd80d27fc6b607d2f7f106c89522051a9fb0dd",
-          "https://github.com/advisories/GHSA-ffmh-x56j-9rc3"
+          "https://github.com/jquery-validation/jquery-validation/blob/master/changelog.md#1193--2021-01-09"
         ]
       },
       {
@@ -396,11 +407,11 @@
           "CWE-1333"
         ],
         "identifiers": {
+          "summary": "ReDoS vulnerability in URL2 validation",
           "CVE": [
             "CVE-2021-43306"
           ],
           "issue": "2428",
-          "summary": "ReDoS vulnerability in URL2 validation",
           "githubID": "GHSA-j9m2-h2pv-wvph"
         },
         "info": [
@@ -408,20 +419,21 @@
         ]
       },
       {
-        "below": "1.19.3",
+        "below": "1.19.5",
         "severity": "high",
         "cwe": [
-          "CWE-400"
+          "CWE-1333"
         ],
         "identifiers": {
+          "summary": "ReDoS vulnerability in url and URL2 validation",
           "CVE": [
-            "CVE-2021-21252"
+            "CVE-2022-31147"
           ],
-          "summary": "Regular Expression Denial of Service vulnerability",
-          "githubID": "GHSA-jxwx-85vp-gvwm"
+          "githubID": "GHSA-ffmh-x56j-9rc3"
         },
         "info": [
-          "https://github.com/jquery-validation/jquery-validation/blob/master/changelog.md#1193--2021-01-09"
+          "https://github.com/advisories/GHSA-ffmh-x56j-9rc3",
+          "https://github.com/jquery-validation/jquery-validation/commit/5bbd80d27fc6b607d2f7f106c89522051a9fb0dd"
         ]
       }
     ],
@@ -450,29 +462,6 @@
     ],
     "vulnerabilities": [
       {
-        "below": "1.0RC2",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "osvdb": [
-            "94563",
-            "93562",
-            "94316",
-            "94561",
-            "94560"
-          ]
-        },
-        "info": [
-          "http://osvdb.org/show/osvdb/94563",
-          "http://osvdb.org/show/osvdb/94562",
-          "http://osvdb.org/show/osvdb/94316",
-          "http://osvdb.org/show/osvdb/94561",
-          "http://osvdb.org/show/osvdb/94560"
-        ]
-      },
-      {
         "below": "1.0.1",
         "severity": "high",
         "cwe": [
@@ -488,18 +477,41 @@
         ]
       },
       {
+        "below": "1.0RC2",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "osvdb": [
+            "94563",
+            "93562",
+            "94316",
+            "94561",
+            "94560"
+          ]
+        },
+        "info": [
+          "http://osvdb.org/show/osvdb/94316",
+          "http://osvdb.org/show/osvdb/94560",
+          "http://osvdb.org/show/osvdb/94561",
+          "http://osvdb.org/show/osvdb/94562",
+          "http://osvdb.org/show/osvdb/94563"
+        ]
+      },
+      {
         "below": "1.1.2",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "issue": "4787",
-          "release": "http://jquerymobile.com/changelog/1.1.2/",
-          "summary": "location.href cross-site scripting"
+          "summary": "location.href cross-site scripting",
+          "issue": "4787"
         },
         "info": [
           "http://jquerymobile.com/changelog/1.1.2/",
+          "http://jquerymobile.com/changelog/1.2.0/",
           "https://github.com/jquery/jquery-mobile/issues/4787"
         ]
       },
@@ -510,30 +522,12 @@
           "CWE-79"
         ],
         "identifiers": {
-          "issue": "4787",
-          "release": "http://jquerymobile.com/changelog/1.2.0/",
-          "summary": "location.href cross-site scripting"
+          "summary": "location.href cross-site scripting",
+          "issue": "4787"
         },
         "info": [
           "http://jquerymobile.com/changelog/1.2.0/",
           "https://github.com/jquery/jquery-mobile/issues/4787"
-        ]
-      },
-      {
-        "below": "100.0.0",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "blog": "sirdarckcat/unpatched-0day-jquery-mobile-xss",
-          "summary": "open redirect leads to cross site scripting",
-          "githubID": "GHSA-fj93-7wm4-8x2g"
-        },
-        "info": [
-          "http://sirdarckcat.blogspot.no/2017/02/unpatched-0day-jquery-mobile-xss.html",
-          "https://github.com/jquery/jquery-mobile/issues/8640",
-          "https://snyk.io/vuln/SNYK-JS-JQUERYMOBILE-174599"
         ]
       },
       {
@@ -543,11 +537,28 @@
           "CWE-79"
         ],
         "identifiers": {
-          "gist": "jupenur/e5d0c6f9b58aa81860bf74e010cf1685",
-          "summary": "Endpoint that reflect user input leads to cross site scripting"
+          "summary": "Endpoint that reflect user input leads to cross site scripting",
+          "gist": "jupenur/e5d0c6f9b58aa81860bf74e010cf1685"
         },
         "info": [
           "https://gist.github.com/jupenur/e5d0c6f9b58aa81860bf74e010cf1685"
+        ]
+      },
+      {
+        "below": "100.0.0",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "open redirect leads to cross site scripting",
+          "blog": "sirdarckcat/unpatched-0day-jquery-mobile-xss",
+          "githubID": "GHSA-fj93-7wm4-8x2g"
+        },
+        "info": [
+          "http://sirdarckcat.blogspot.no/2017/02/unpatched-0day-jquery-mobile-xss.html",
+          "https://github.com/jquery/jquery-mobile/issues/8640",
+          "https://snyk.io/vuln/SNYK-JS-JQUERYMOBILE-174599"
         ]
       }
     ],
@@ -572,24 +583,21 @@
     "npmname": "jquery-ui",
     "vulnerabilities": [
       {
-        "below": "1.13.2",
+        "below": "1.13.0",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "XSS when refreshing checkboxes if usercontrolled data in labels",
-          "issue": "2101",
+          "summary": "XSS in the `altField` option of the Datepicker widget",
           "CVE": [
-            "CVE-2022-31160"
+            "CVE-2021-41182"
           ],
-          "githubID": "GHSA-h6gj-6jjq-h8g9"
+          "githubID": "GHSA-9gj3-hwp5-pmwc"
         },
         "info": [
-          "https://github.com/jquery/jquery-ui/issues/2101",
-          "https://github.com/jquery/jquery-ui/commit/8cc5bae1caa1fcf96bf5862c5646c787020ba3f9",
-          "https://github.com/advisories/GHSA-h6gj-6jjq-h8g9",
-          "https://nvd.nist.gov/vuln/detail/CVE-2022-31160"
+          "https://github.com/jquery/jquery-ui/security/advisories/GHSA-9gj3-hwp5-pmwc",
+          "https://nvd.nist.gov/vuln/detail/CVE-2021-41182"
         ]
       },
       {
@@ -599,10 +607,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS in the `of` option of the `.position()` util",
           "CVE": [
             "CVE-2021-41184"
           ],
-          "summary": "XSS in the `of` option of the `.position()` util",
           "githubID": "GHSA-gpqq-952q-5327"
         },
         "info": [
@@ -617,34 +625,16 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS Vulnerability on text options of jQuery UI datepicker",
           "CVE": [
             "CVE-2021-41183"
           ],
           "bug": "15284",
-          "summary": "XSS Vulnerability on text options of jQuery UI datepicker",
           "githubID": "GHSA-j7qv-pgf6-hvh4"
         },
         "info": [
           "https://bugs.jqueryui.com/ticket/15284",
           "https://nvd.nist.gov/vuln/detail/CVE-2021-41183"
-        ]
-      },
-      {
-        "below": "1.13.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2021-41182"
-          ],
-          "summary": "XSS in the `altField` option of the Datepicker widget",
-          "githubID": "GHSA-9gj3-hwp5-pmwc"
-        },
-        "info": [
-          "https://github.com/jquery/jquery-ui/security/advisories/GHSA-9gj3-hwp5-pmwc",
-          "https://nvd.nist.gov/vuln/detail/CVE-2021-41182"
         ]
       },
       {
@@ -654,14 +644,17 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS when refreshing a checkboxradio with an HTML-like initial text label ",
           "CVE": [
             "CVE-2022-31160"
           ],
-          "summary": "XSS when refreshing a checkboxradio with an HTML-like initial text label ",
+          "issue": "2101",
           "githubID": "GHSA-h6gj-6jjq-h8g9"
         },
         "info": [
-          "https://github.com/jquery/jquery-ui/security/advisories/GHSA-h6gj-6jjq-h8g9",
+          "https://github.com/advisories/GHSA-h6gj-6jjq-h8g9",
+          "https://github.com/jquery/jquery-ui/commit/8cc5bae1caa1fcf96bf5862c5646c787020ba3f9",
+          "https://github.com/jquery/jquery-ui/issues/2101",
           "https://nvd.nist.gov/vuln/detail/CVE-2022-31160"
         ]
       }
@@ -692,11 +685,11 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Title cross-site scripting vulnerability",
           "CVE": [
             "CVE-2010-5312"
           ],
           "bug": "6016",
-          "summary": "Title cross-site scripting vulnerability",
           "githubID": "GHSA-wcm2-9c89-wmfm"
         },
         "info": [
@@ -711,11 +704,11 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS Vulnerability on closeText option",
           "CVE": [
             "CVE-2016-7103"
           ],
           "bug": "281",
-          "summary": "XSS Vulnerability on closeText option",
           "githubID": "GHSA-hpcf-8vf9-q4gj"
         },
         "info": [
@@ -767,11 +760,11 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Cross-site scripting (XSS) vulnerability in the default content option in jquery.ui.tooltip",
           "CVE": [
             "CVE-2012-6662"
           ],
           "bug": "8859",
-          "summary": "Cross-site scripting (XSS) vulnerability in the default content option in jquery.ui.tooltip",
           "githubID": "GHSA-qqxp-xp9v-vvx6"
         },
         "info": [
@@ -820,8 +813,8 @@
           "issue": "149"
         },
         "info": [
-          "https://github.com/scaron/prettyphoto/issues/149",
-          "https://blog.anantshri.info/forgotten_disclosure_dom_xss_prettyphoto"
+          "https://blog.anantshri.info/forgotten_disclosure_dom_xss_prettyphoto",
+          "https://github.com/scaron/prettyphoto/issues/149"
         ]
       }
     ],
@@ -953,17 +946,35 @@
     "npmname": "jplayer",
     "vulnerabilities": [
       {
+        "below": "2.2.20",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS vulnerabilities in actionscript/Jplayer.as in the Flash SWF component",
+          "CVE": [
+            "CVE-2013-1942"
+          ],
+          "release": "2.2.20"
+        },
+        "info": [
+          "http://jplayer.org/latest/release-notes/",
+          "https://nvd.nist.gov/vuln/detail/CVE-2013-1942"
+        ]
+      },
+      {
         "below": "2.3.1",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS vulnerability in actionscript/Jplayer.as in the Flash SWF component",
           "CVE": [
             "CVE-2013-2023"
           ],
-          "release": "2.3.1",
-          "summary": "XSS vulnerability in actionscript/Jplayer.as in the Flash SWF component"
+          "release": "2.3.1"
         },
         "info": [
           "http://jplayer.org/latest/release-notes/",
@@ -977,33 +988,15 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS vulnerabilities in actionscript/Jplayer.as in the Flash SWF component",
           "CVE": [
             "CVE-2013-2022"
           ],
-          "release": "2.3.23",
-          "summary": "XSS vulnerabilities in actionscript/Jplayer.as in the Flash SWF component"
+          "release": "2.3.23"
         },
         "info": [
           "http://jplayer.org/latest/release-notes/",
           "https://nvd.nist.gov/vuln/detail/CVE-2013-2022"
-        ]
-      },
-      {
-        "below": "2.2.20",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2013-1942"
-          ],
-          "release": "2.2.20",
-          "summary": "XSS vulnerabilities in actionscript/Jplayer.as in the Flash SWF component"
-        },
-        "info": [
-          "http://jplayer.org/latest/release-notes/",
-          "https://nvd.nist.gov/vuln/detail/CVE-2013-1942"
         ]
       }
     ],
@@ -1024,8 +1017,8 @@
           "CWE-79"
         ],
         "identifiers": {
-          "issue": "1244",
           "summary": "XSS injection point in attr name binding for browser IE7 and older",
+          "issue": "1244",
           "CVE": [
             "CVE-2019-14862"
           ],
@@ -1058,8 +1051,8 @@
           "CWE-79"
         ],
         "identifiers": {
-          "tenable": "98645",
-          "summary": "Unsanitized data passed to eval()"
+          "summary": "Unsanitized data passed to eval()",
+          "tenable": "98645"
         },
         "info": [
           "http://www.thomasfrank.se/sessionvars.html"
@@ -1131,20 +1124,6 @@
         ]
       },
       {
-        "below": "4.2.4",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "xss issues with media plugin not properly filtering out some script attributes.",
-          "retid": "61"
-        },
-        "info": [
-          "https://www.tinymce.com/docs/changelog/"
-        ]
-      },
-      {
         "below": "4.2.0",
         "severity": "medium",
         "cwe": [
@@ -1153,6 +1132,20 @@
         "identifiers": {
           "summary": "FIXED so script elements gets removed by default to prevent possible XSS issues in default config implementations",
           "retid": "62"
+        },
+        "info": [
+          "https://www.tinymce.com/docs/changelog/"
+        ]
+      },
+      {
+        "below": "4.2.4",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "xss issues with media plugin not properly filtering out some script attributes.",
+          "retid": "61"
         },
         "info": [
           "https://www.tinymce.com/docs/changelog/"
@@ -1179,16 +1172,20 @@
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "TinyMCE before 4.9.7 and 5.x before 5.1.4 allows XSS in the core parser, the paste plugin, and the visualchars plugin by using the clipboard or APIs to insert content into the editor.",
-          "githubID": "GHSA-p7j5-4mwm-hv86"
+          "summary": "The vulnerability allowed arbitrary JavaScript execution when inserting a specially crafted piece of content into the editor via the clipboard or APIs",
+          "githubID": "GHSA-27gm-ghr9-4v95",
+          "CVE": [
+            "CVE-2020-17480",
+            "CVE-2020-23066"
+          ]
         },
         "info": [
-          "https://github.com/tinymce/tinymce/security/advisories/GHSA-p7j5-4mwm-hv86"
+          "https://github.com/advisories/GHSA-27gm-ghr9-4v95",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-27gm-ghr9-4v95"
         ]
       },
       {
-        "below": "5.1.4",
-        "atOrAbove": "5.0.0",
+        "below": "4.9.7",
         "severity": "high",
         "cwe": [
           "CWE-79"
@@ -1198,6 +1195,7 @@
           "githubID": "GHSA-p7j5-4mwm-hv86"
         },
         "info": [
+          "https://github.com/advisories/GHSA-p7j5-4mwm-hv86",
           "https://github.com/tinymce/tinymce/security/advisories/GHSA-p7j5-4mwm-hv86"
         ]
       },
@@ -1215,24 +1213,7 @@
           ]
         },
         "info": [
-          "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
-        ]
-      },
-      {
-        "atOrAbove": "5.0.0",
-        "below": "5.2.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "cross-site scripting (XSS) vulnerability was discovered in: the core parser and `media` plugin. ",
-          "githubID": "GHSA-c78w-2gw7-gjv3",
-          "CVE": [
-            "CVE-2019-1010091"
-          ]
-        },
-        "info": [
+          "https://github.com/advisories/GHSA-c78w-2gw7-gjv3",
           "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
         ]
       },
@@ -1250,30 +1231,13 @@
           ]
         },
         "info": [
+          "https://github.com/advisories/GHSA-vrv8-v4w8-f95h",
           "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
         ]
       },
       {
-        "below": "5.4.1",
         "atOrAbove": "5.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Cross-site scripting vulnerability in TinyMCE",
-          "githubID": "GHSA-vrv8-v4w8-f95h",
-          "CVE": [
-            "CVE-2020-12648"
-          ]
-        },
-        "info": [
-          "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
-        ]
-      },
-      {
         "below": "5.1.4",
-        "atOrAbove": "5.0.0",
         "severity": "high",
         "cwe": [
           "CWE-79"
@@ -1282,28 +1246,29 @@
           "summary": "The vulnerability allowed arbitrary JavaScript execution when inserting a specially crafted piece of content into the editor via the clipboard or APIs",
           "githubID": "GHSA-27gm-ghr9-4v95",
           "CVE": [
-            "CVE-2020-17480"
+            "CVE-2020-17480",
+            "CVE-2020-23066"
           ]
         },
         "info": [
+          "https://github.com/advisories/GHSA-27gm-ghr9-4v95",
           "https://github.com/tinymce/tinymce/security/advisories/GHSA-27gm-ghr9-4v95"
         ]
       },
       {
-        "below": "4.9.7",
+        "atOrAbove": "5.0.0",
+        "below": "5.1.4",
         "severity": "high",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "The vulnerability allowed arbitrary JavaScript execution when inserting a specially crafted piece of content into the editor via the clipboard or APIs",
-          "githubID": "GHSA-27gm-ghr9-4v95",
-          "CVE": [
-            "CVE-2020-17480"
-          ]
+          "summary": "TinyMCE before 4.9.7 and 5.x before 5.1.4 allows XSS in the core parser, the paste plugin, and the visualchars plugin by using the clipboard or APIs to insert content into the editor.",
+          "githubID": "GHSA-p7j5-4mwm-hv86"
         },
         "info": [
-          "https://github.com/tinymce/tinymce/security/advisories/GHSA-27gm-ghr9-4v95"
+          "https://github.com/advisories/GHSA-p7j5-4mwm-hv86",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-p7j5-4mwm-hv86"
         ]
       },
       {
@@ -1335,6 +1300,25 @@
         ]
       },
       {
+        "atOrAbove": "5.0.0",
+        "below": "5.2.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "cross-site scripting (XSS) vulnerability was discovered in: the core parser and `media` plugin. ",
+          "githubID": "GHSA-c78w-2gw7-gjv3",
+          "CVE": [
+            "CVE-2019-1010091"
+          ]
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-c78w-2gw7-gjv3",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
+        ]
+      },
+      {
         "below": "5.4.0",
         "severity": "low",
         "cwe": [
@@ -1349,18 +1333,22 @@
         ]
       },
       {
-        "below": "5.6.0",
+        "atOrAbove": "5.0.0",
+        "below": "5.4.1",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "security issue where URLs in attributes weren’t correctly sanitized. security issue in the codesample plugin",
-          "retid": "67",
-          "githubID": "GHSA-w7jx-j77m-wp65"
+          "summary": "Cross-site scripting vulnerability in TinyMCE",
+          "githubID": "GHSA-vrv8-v4w8-f95h",
+          "CVE": [
+            "CVE-2020-12648"
+          ]
         },
         "info": [
-          "https://www.tiny.cloud/docs/release-notes/release-notes56/#securityfixes"
+          "https://github.com/advisories/GHSA-vrv8-v4w8-f95h",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-vrv8-v4w8-f95h"
         ]
       },
       {
@@ -1372,6 +1360,21 @@
         "identifiers": {
           "summary": "Regex denial of service vulnerability in codesample plugin",
           "githubID": "GHSA-h96f-fc7c-9r55"
+        },
+        "info": [
+          "https://www.tiny.cloud/docs/release-notes/release-notes56/#securityfixes"
+        ]
+      },
+      {
+        "below": "5.6.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "security issue where URLs in attributes weren’t correctly sanitized. security issue in the codesample plugin",
+          "retid": "67",
+          "githubID": "GHSA-w7jx-j77m-wp65"
         },
         "info": [
           "https://www.tiny.cloud/docs/release-notes/release-notes56/#securityfixes"
@@ -1430,84 +1433,131 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "A cross-site scripting (XSS) vulnerability in TinyMCE alerts which allowed arbitrary JavaScript execution was found and fixed.",
           "CVE": [
             "CVE-2022-23494"
           ],
-          "summary": "A cross-site scripting (XSS) vulnerability in TinyMCE alerts which allowed arbitrary JavaScript execution was found and fixed.",
           "githubID": "GHSA-gg8r-xjwq-4w92"
         },
         "info": [
-          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06",
-          "https://www.cve.org/CVERecord?id=CVE-2022-23494"
+          "https://github.com/advisories/GHSA-gg8r-xjwq-4w92",
+          "https://www.cve.org/CVERecord?id=CVE-2022-23494",
+          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06"
         ]
       },
       {
+        "below": "5.10.8",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "TinyMCE XSS vulnerability in notificationManager.open API",
+          "CVE": [
+            "CVE-2023-45819"
+          ],
+          "githubID": "GHSA-hgqx-r2hp-jr38"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-hgqx-r2hp-jr38",
+          "https://www.cve.org/CVERecord?id=CVE-2022-23494",
+          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06"
+        ]
+      },
+      {
+        "below": "5.10.8",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "TinyMCE mXSS vulnerability in undo/redo, getContent API, resetContent API, and Autosave plugin",
+          "CVE": [
+            "CVE-2023-45818"
+          ],
+          "githubID": "GHSA-v65r-p3vv-jjfv"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-v65r-p3vv-jjfv"
+        ]
+      },
+      {
+        "atOrAbove": "0",
+        "below": "5.10.9",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "TinyMCE vulnerable to mutation Cross-site Scripting via special characters in unescaped text nodes",
+          "CVE": [
+            "CVE-2023-48219"
+          ],
+          "githubID": "GHSA-v626-r774-j7f8"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-v626-r774-j7f8",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-v626-r774-j7f8",
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-48219",
+          "https://github.com/tinymce/tinymce",
+          "https://github.com/tinymce/tinymce/releases/tag/5.10.9",
+          "https://github.com/tinymce/tinymce/releases/tag/6.7.3",
+          "https://tiny.cloud/docs/release-notes/release-notes5109/",
+          "https://tiny.cloud/docs/tinymce/6/6.7.3-release-notes/"
+        ]
+      },
+      {
+        "atOrAbove": "6.0.0",
         "below": "6.3.1",
-        "atOrAbove": "6.0.0",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "A cross-site scripting (XSS) vulnerability in TinyMCE alerts which allowed arbitrary JavaScript execution was found and fixed.",
           "CVE": [
             "CVE-2022-23494"
           ],
-          "summary": "A cross-site scripting (XSS) vulnerability in TinyMCE alerts which allowed arbitrary JavaScript execution was found and fixed.",
           "githubID": "GHSA-gg8r-xjwq-4w92"
         },
         "info": [
-          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06",
-          "https://www.cve.org/CVERecord?id=CVE-2022-23494"
+          "https://github.com/advisories/GHSA-gg8r-xjwq-4w92",
+          "https://www.cve.org/CVERecord?id=CVE-2022-23494",
+          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06"
         ]
       },
       {
-        "below": "6.7.1",
         "atOrAbove": "6.0.0",
+        "below": "6.7.1",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "TinyMCE XSS vulnerability in notificationManager.open API",
           "CVE": [
             "CVE-2023-45819"
           ],
-          "summary": "TinyMCE XSS vulnerability in notificationManager.open API",
           "githubID": "GHSA-hgqx-r2hp-jr38"
         },
         "info": [
-          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06",
-          "https://www.cve.org/CVERecord?id=CVE-2022-23494"
+          "https://github.com/advisories/GHSA-hgqx-r2hp-jr38",
+          "https://www.cve.org/CVERecord?id=CVE-2022-23494",
+          "https://www.tiny.cloud/docs/changelog/#5107-2022-12-06"
         ]
       },
       {
-        "below": "5.10.8",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2023-45819"
-          ],
-          "summary": "TinyMCE XSS vulnerability in notificationManager.open API",
-          "githubID": "GHSA-hgqx-r2hp-jr38"
-        },
-        "info": [
-          "https://github.com/advisories/GHSA-hgqx-r2hp-jr38"
-        ]
-      },
-      {
-        "below": "6.7.1",
         "atOrAbove": "6.0.0",
+        "below": "6.7.1",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "TinyMCE mXSS vulnerability in undo/redo, getContent API, resetContent API, and Autosave plugin",
           "CVE": [
             "CVE-2023-45818"
           ],
-          "summary": "TinyMCE mXSS vulnerability in undo/redo, getContent API, resetContent API, and Autosave plugin",
           "githubID": "GHSA-v65r-p3vv-jjfv"
         },
         "info": [
@@ -1515,20 +1565,28 @@
         ]
       },
       {
-        "below": "5.10.8",
-        "severity": "medium",
+        "atOrAbove": "6.0.0",
+        "below": "6.7.3",
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
+          "summary": "TinyMCE vulnerable to mutation Cross-site Scripting via special characters in unescaped text nodes",
           "CVE": [
-            "CVE-2023-45818"
+            "CVE-2023-48219"
           ],
-          "summary": "TinyMCE mXSS vulnerability in undo/redo, getContent API, resetContent API, and Autosave plugin",
-          "githubID": "GHSA-v65r-p3vv-jjfv"
+          "githubID": "GHSA-v626-r774-j7f8"
         },
         "info": [
-          "https://github.com/advisories/GHSA-v65r-p3vv-jjfv"
+          "https://github.com/advisories/GHSA-v626-r774-j7f8",
+          "https://github.com/tinymce/tinymce/security/advisories/GHSA-v626-r774-j7f8",
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-48219",
+          "https://github.com/tinymce/tinymce",
+          "https://github.com/tinymce/tinymce/releases/tag/5.10.9",
+          "https://github.com/tinymce/tinymce/releases/tag/6.7.3",
+          "https://tiny.cloud/docs/release-notes/release-notes5109/",
+          "https://tiny.cloud/docs/tinymce/6/6.7.3-release-notes/"
         ]
       }
     ],
@@ -1554,136 +1612,7 @@
     "npmname": "yui",
     "vulnerabilities": [
       {
-        "atOrAbove": "3.5.0",
-        "below": "3.9.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2013-4942"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2013-4942/"
-        ]
-      },
-      {
-        "atOrAbove": "3.2.0",
-        "below": "3.9.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2013-4941"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2013-4941/"
-        ]
-      },
-      {
-        "atOrAbove": "3.0.0",
-        "below": "3.10.3",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2013-4940"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2013-4940/"
-        ]
-      },
-      {
-        "atOrAbove": "3.0.0",
-        "below": "3.10.3",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2013-4939"
-          ],
-          "githubID": "GHSA-mj87-8xf8-fp4w"
-        },
-        "info": [
-          "https://clarle.github.io/yui3/support/20130515-vulnerability/",
-          "http://www.cvedetails.com/cve/CVE-2013-4939/"
-        ]
-      },
-      {
-        "atOrAbove": "2.8.0",
-        "below": "2.9.1",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2012-5883"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2012-5883/"
-        ]
-      },
-      {
-        "atOrAbove": "2.5.0",
-        "below": "2.9.1",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2012-5882"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2012-5882/"
-        ]
-      },
-      {
         "atOrAbove": "2.4.0",
-        "below": "2.9.1",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2012-5881"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2012-5881/"
-        ]
-      },
-      {
-        "below": "2.9.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2010-4710"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2010-4710/"
-        ]
-      },
-      {
-        "atOrAbove": "2.8.0",
         "below": "2.8.2",
         "severity": "medium",
         "cwe": [
@@ -1691,11 +1620,11 @@
         ],
         "identifiers": {
           "CVE": [
-            "CVE-2010-4209"
+            "CVE-2010-4207"
           ]
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2010-4209/"
+          "http://www.cvedetails.com/cve/CVE-2010-4207/"
         ]
       },
       {
@@ -1715,7 +1644,7 @@
         ]
       },
       {
-        "atOrAbove": "2.4.0",
+        "atOrAbove": "2.8.0",
         "below": "2.8.2",
         "severity": "medium",
         "cwe": [
@@ -1723,11 +1652,140 @@
         ],
         "identifiers": {
           "CVE": [
-            "CVE-2010-4207"
+            "CVE-2010-4209"
           ]
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2010-4207/"
+          "http://www.cvedetails.com/cve/CVE-2010-4209/"
+        ]
+      },
+      {
+        "below": "2.9.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2010-4710"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2010-4710/"
+        ]
+      },
+      {
+        "atOrAbove": "2.4.0",
+        "below": "2.9.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2012-5881"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2012-5881/"
+        ]
+      },
+      {
+        "atOrAbove": "2.5.0",
+        "below": "2.9.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2012-5882"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2012-5882/"
+        ]
+      },
+      {
+        "atOrAbove": "2.8.0",
+        "below": "2.9.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2012-5883"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2012-5883/"
+        ]
+      },
+      {
+        "atOrAbove": "3.2.0",
+        "below": "3.9.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2013-4941"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2013-4941/"
+        ]
+      },
+      {
+        "atOrAbove": "3.5.0",
+        "below": "3.9.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2013-4942"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2013-4942/"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.10.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2013-4939"
+          ],
+          "githubID": "GHSA-mj87-8xf8-fp4w"
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2013-4939/",
+          "https://clarle.github.io/yui3/support/20130515-vulnerability/"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.10.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2013-4940"
+          ]
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2013-4940/"
         ]
       }
     ],
@@ -1750,6 +1808,22 @@
     ],
     "vulnerabilities": [
       {
+        "below": "1.5.1.2",
+        "severity": "high",
+        "cwe": [
+          "CWE-942"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2008-7220"
+          ]
+        },
+        "info": [
+          "http://prototypejs.org/2008/01/25/prototype-1-6-0-2-bug-fixes-performance-improvements-and-security/",
+          "http://www.cvedetails.com/cve/CVE-2008-7220/"
+        ]
+      },
+      {
         "atOrAbove": "1.6.0",
         "below": "1.6.0.2",
         "severity": "high",
@@ -1762,24 +1836,8 @@
           ]
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2008-7220/",
-          "http://prototypejs.org/2008/01/25/prototype-1-6-0-2-bug-fixes-performance-improvements-and-security/"
-        ]
-      },
-      {
-        "below": "1.5.1.2",
-        "severity": "high",
-        "cwe": [
-          "CWE-942"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2008-7220"
-          ]
-        },
-        "info": [
-          "http://www.cvedetails.com/cve/CVE-2008-7220/",
-          "http://prototypejs.org/2008/01/25/prototype-1-6-0-2-bug-fixes-performance-improvements-and-security/"
+          "http://prototypejs.org/2008/01/25/prototype-1-6-0-2-bug-fixes-performance-improvements-and-security/",
+          "http://www.cvedetails.com/cve/CVE-2008-7220/"
         ]
       }
     ],
@@ -1800,311 +1858,31 @@
   "ember": {
     "vulnerabilities": [
       {
-        "atOrAbove": "4.9.0-alpha.1",
-        "below": "4.9.0-beta.3",
+        "below": "0.9.7",
         "severity": "high",
         "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "55"
-        },
-        "info": [
-          "https://blog.emberjs.com/ember-4-8-1-released/"
-        ]
-      },
-      {
-        "atOrAbove": "4.5.0",
-        "below": "4.8.1",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "56"
-        },
-        "info": [
-          "https://blog.emberjs.com/ember-4-8-1-released/"
-        ]
-      },
-      {
-        "atOrAbove": "4.0.0",
-        "below": "4.4.4",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "57"
-        },
-        "info": [
-          "https://blog.emberjs.com/ember-4-8-1-released/"
-        ]
-      },
-      {
-        "atOrAbove": "3.25.0",
-        "below": "3.28.10",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "58"
-        },
-        "info": [
-          "https://blog.emberjs.com/ember-4-8-1-released/"
-        ]
-      },
-      {
-        "below": "3.24.7",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "59"
-        },
-        "info": [
-          "https://blog.emberjs.com/ember-4-8-1-released/"
-        ]
-      },
-      {
-        "atOrAbove": "1.8.0",
-        "below": "1.11.4",
-        "severity": "medium",
-        "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
+          "summary": "Bound attributes aren't escaped properly",
+          "bug": "699"
         },
         "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+          "https://github.com/emberjs/ember.js/issues/699"
         ]
       },
       {
-        "atOrAbove": "1.12.0",
-        "below": "1.12.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
-        ]
-      },
-      {
-        "atOrAbove": "1.13.0",
-        "below": "1.13.12",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
-        ]
-      },
-      {
-        "atOrAbove": "2.0.0",
-        "below": "2.0.3",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
-        ]
-      },
-      {
-        "atOrAbove": "2.1.0",
-        "below": "2.1.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
-        ]
-      },
-      {
-        "atOrAbove": "2.2.0",
-        "below": "2.2.1",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2015-7565"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
-        ]
-      },
-      {
-        "below": "1.5.0",
+        "below": "0.9.7.1",
         "severity": "low",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "CVE": [
-            "CVE-2014-0046"
-          ],
-          "summary": "ember-routing-auto-location can be forced to redirect to another domain"
+          "summary": "More rigorous XSS escaping from bindAttr",
+          "retid": "60"
         },
         "info": [
-          "https://github.com/emberjs/ember.js/blob/v1.5.0/CHANGELOG.md"
-        ]
-      },
-      {
-        "atOrAbove": "1.3.0-*",
-        "below": "1.3.2",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0046"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/1h6FRgr8lXQ"
-        ]
-      },
-      {
-        "atOrAbove": "1.2.0-*",
-        "below": "1.2.2",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0046"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/1h6FRgr8lXQ"
-        ]
-      },
-      {
-        "atOrAbove": "1.4.0-*",
-        "below": "1.4.0-beta.2",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0013",
-            "CVE-2014-0014"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
-          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
-        ]
-      },
-      {
-        "atOrAbove": "1.3.0-*",
-        "below": "1.3.1",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0013",
-            "CVE-2014-0014"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
-          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
-        ]
-      },
-      {
-        "atOrAbove": "1.2.0-*",
-        "below": "1.2.1",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0013",
-            "CVE-2014-0014"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
-          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
-        ]
-      },
-      {
-        "atOrAbove": "1.1.0-*",
-        "below": "1.1.3",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0013",
-            "CVE-2014-0014"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
-          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
-        ]
-      },
-      {
-        "atOrAbove": "1.0.0-*",
-        "below": "1.0.1",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2014-0013",
-            "CVE-2014-0014"
-          ]
-        },
-        "info": [
-          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
-          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
+          "https://github.com/emberjs/ember.js/blob/master/CHANGELOG.md"
         ]
       },
       {
@@ -2204,31 +1982,316 @@
         ]
       },
       {
-        "below": "0.9.7.1",
+        "atOrAbove": "1.0.0",
+        "below": "1.0.1",
         "severity": "low",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "retid": "60",
-          "summary": "More rigorous XSS escaping from bindAttr"
+          "CVE": [
+            "CVE-2014-0013",
+            "CVE-2014-0014"
+          ]
         },
         "info": [
-          "https://github.com/emberjs/ember.js/blob/master/CHANGELOG.md"
+          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
+          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
         ]
       },
       {
-        "below": "0.9.7",
-        "severity": "high",
+        "atOrAbove": "1.1.0",
+        "below": "1.1.3",
+        "severity": "low",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "bug": "699",
-          "summary": "Bound attributes aren't escaped properly"
+          "CVE": [
+            "CVE-2014-0013",
+            "CVE-2014-0014"
+          ]
         },
         "info": [
-          "https://github.com/emberjs/ember.js/issues/699"
+          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
+          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
+        ]
+      },
+      {
+        "atOrAbove": "1.2.0",
+        "below": "1.2.1",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2014-0013",
+            "CVE-2014-0014"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
+          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
+        ]
+      },
+      {
+        "atOrAbove": "1.2.0",
+        "below": "1.2.2",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "ember-routing-auto-location can be forced to redirect to another domain",
+          "CVE": [
+            "CVE-2014-0046"
+          ]
+        },
+        "info": [
+          "https://github.com/emberjs/ember.js/blob/v1.5.0/CHANGELOG.md",
+          "https://groups.google.com/forum/#!topic/ember-security/1h6FRgr8lXQ"
+        ]
+      },
+      {
+        "atOrAbove": "1.3.0",
+        "below": "1.3.1",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2014-0013",
+            "CVE-2014-0014"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
+          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
+        ]
+      },
+      {
+        "atOrAbove": "1.3.0",
+        "below": "1.3.2",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "ember-routing-auto-location can be forced to redirect to another domain",
+          "CVE": [
+            "CVE-2014-0046"
+          ]
+        },
+        "info": [
+          "https://github.com/emberjs/ember.js/blob/v1.5.0/CHANGELOG.md",
+          "https://groups.google.com/forum/#!topic/ember-security/1h6FRgr8lXQ"
+        ]
+      },
+      {
+        "atOrAbove": "1.4.0",
+        "below": "1.4.0-beta.2",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2014-0013",
+            "CVE-2014-0014"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/2kpXXCxISS4",
+          "https://groups.google.com/forum/#!topic/ember-security/PSE4RzTi6l4"
+        ]
+      },
+      {
+        "below": "1.5.0",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "ember-routing-auto-location can be forced to redirect to another domain",
+          "CVE": [
+            "CVE-2014-0046"
+          ]
+        },
+        "info": [
+          "https://github.com/emberjs/ember.js/blob/v1.5.0/CHANGELOG.md",
+          "https://groups.google.com/forum/#!topic/ember-security/1h6FRgr8lXQ"
+        ]
+      },
+      {
+        "atOrAbove": "1.8.0",
+        "below": "1.11.4",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "atOrAbove": "1.12.0",
+        "below": "1.12.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "atOrAbove": "1.13.0",
+        "below": "1.13.12",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "atOrAbove": "2.0.0",
+        "below": "2.0.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "atOrAbove": "2.1.0",
+        "below": "2.1.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "atOrAbove": "2.2.0",
+        "below": "2.2.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2015-7565"
+          ]
+        },
+        "info": [
+          "https://groups.google.com/forum/#!topic/ember-security/OfyQkoSuppY"
+        ]
+      },
+      {
+        "below": "3.24.7",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "59"
+        },
+        "info": [
+          "https://blog.emberjs.com/ember-4-8-1-released/"
+        ]
+      },
+      {
+        "atOrAbove": "3.25.0",
+        "below": "3.28.10",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "58"
+        },
+        "info": [
+          "https://blog.emberjs.com/ember-4-8-1-released/"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.4.4",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "57"
+        },
+        "info": [
+          "https://blog.emberjs.com/ember-4-8-1-released/"
+        ]
+      },
+      {
+        "atOrAbove": "4.5.0",
+        "below": "4.8.1",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "56"
+        },
+        "info": [
+          "https://blog.emberjs.com/ember-4-8-1-released/"
+        ]
+      },
+      {
+        "atOrAbove": "4.9.0-alpha.1",
+        "below": "4.9.0-beta.3",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "55"
+        },
+        "info": [
+          "https://blog.emberjs.com/ember-4-8-1-released/"
         ]
       }
     ],
@@ -2262,17 +2325,21 @@
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
           "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
           "http://www.cvedetails.com/cve/CVE-2010-2276/",
-          "http://www.cvedetails.com/cve/CVE-2010-2272/"
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2283,18 +2350,37 @@
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
           "http://dojotoolkit.org/blog/dojo-security-advisory",
-          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
           "http://www.cvedetails.com/cve/CVE-2010-2274/",
-          "http://www.cvedetails.com/cve/CVE-2010-2273/"
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
+        ]
+      },
+      {
+        "below": "1.1.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2008-6681"
+          ],
+          "githubID": "GHSA-39cx-xcwj-3rc4"
+        },
+        "info": [
+          "http://www.cvedetails.com/cve/CVE-2008-6681/"
         ]
       },
       {
@@ -2305,18 +2391,21 @@
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
           "http://dojotoolkit.org/blog/dojo-security-advisory",
-          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
           "http://www.cvedetails.com/cve/CVE-2010-2274/",
-          "http://www.cvedetails.com/cve/CVE-2010-2273/"
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2327,18 +2416,21 @@
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
           "http://dojotoolkit.org/blog/dojo-security-advisory",
-          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
           "http://www.cvedetails.com/cve/CVE-2010-2274/",
-          "http://www.cvedetails.com/cve/CVE-2010-2273/"
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2349,40 +2441,21 @@
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
           "http://dojotoolkit.org/blog/dojo-security-advisory",
-          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
           "http://www.cvedetails.com/cve/CVE-2010-2274/",
-          "http://www.cvedetails.com/cve/CVE-2010-2273/"
-        ]
-      },
-      {
-        "atOrAbove": "1.4",
-        "below": "1.4.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
-            "CVE-2010-2273"
-          ],
-          "githubID": "GHSA-536q-8gxx-m782"
-        },
-        "info": [
-          "http://dojotoolkit.org/blog/dojo-security-advisory",
           "http://www.cvedetails.com/cve/CVE-2010-2276/",
-          "http://www.cvedetails.com/cve/CVE-2010-2274/",
-          "http://www.cvedetails.com/cve/CVE-2010-2273/"
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2401,19 +2474,28 @@
         ]
       },
       {
-        "below": "1.1.0",
+        "atOrAbove": "1.4",
+        "below": "1.4.2",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "PR": "307",
           "CVE": [
-            "CVE-2008-6681"
+            "CVE-2010-2273"
           ],
-          "githubID": "GHSA-39cx-xcwj-3rc4"
+          "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2008-6681/"
+          "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2442,15 +2524,19 @@
         "identifiers": {
           "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
-          "https://github.com/dojo/dojo/pull/307",
-          "https://dojotoolkit.org/blog/dojo-1-14-released"
+          "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
         ]
       },
       {
@@ -2463,15 +2549,38 @@
         "identifiers": {
           "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
-          "https://github.com/dojo/dojo/pull/307",
-          "https://dojotoolkit.org/blog/dojo-1-14-released"
+          "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
+        ]
+      },
+      {
+        "below": "1.11.10",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321",
+          "CWE-74",
+          "CWE-94"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-5258"
+          ],
+          "githubID": "GHSA-jxfh-8wgv-vfr2"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
+          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
       {
@@ -2484,15 +2593,39 @@
         "identifiers": {
           "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
-          "https://github.com/dojo/dojo/pull/307",
-          "https://dojotoolkit.org/blog/dojo-1-14-released"
+          "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
+        ]
+      },
+      {
+        "atOrAbove": "1.12.0",
+        "below": "1.12.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321",
+          "CWE-74",
+          "CWE-94"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-5258"
+          ],
+          "githubID": "GHSA-jxfh-8wgv-vfr2"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
+          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
       {
@@ -2505,15 +2638,39 @@
         "identifiers": {
           "PR": "307",
           "CVE": [
-            "CVE-2010-2276",
-            "CVE-2010-2274",
             "CVE-2010-2273"
           ],
           "githubID": "GHSA-536q-8gxx-m782"
         },
         "info": [
-          "https://github.com/dojo/dojo/pull/307",
-          "https://dojotoolkit.org/blog/dojo-1-14-released"
+          "http://dojotoolkit.org/blog/dojo-security-advisory",
+          "http://www.cvedetails.com/cve/CVE-2010-2272/",
+          "http://www.cvedetails.com/cve/CVE-2010-2273/",
+          "http://www.cvedetails.com/cve/CVE-2010-2274/",
+          "http://www.cvedetails.com/cve/CVE-2010-2276/",
+          "https://dojotoolkit.org/blog/dojo-1-14-released",
+          "https://github.com/advisories/GHSA-536q-8gxx-m782",
+          "https://github.com/dojo/dojo/pull/307"
+        ]
+      },
+      {
+        "atOrAbove": "1.13.0",
+        "below": "1.13.7",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321",
+          "CWE-74",
+          "CWE-94"
+        ],
+        "identifiers": {
+          "CVE": [
+            "CVE-2020-5258"
+          ],
+          "githubID": "GHSA-jxfh-8wgv-vfr2"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
+          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
       {
@@ -2532,64 +2689,8 @@
         ]
       },
       {
-        "below": "1.11.10",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321",
-          "CWE-74",
-          "CWE-94"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2020-5258"
-          ],
-          "githubID": "GHSA-jxfh-8wgv-vfr2"
-        },
-        "info": [
-          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
-        ]
-      },
-      {
-        "below": "1.12.8",
-        "atOrAbove": "1.12.0",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321",
-          "CWE-74",
-          "CWE-94"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2020-5258"
-          ],
-          "githubID": "GHSA-jxfh-8wgv-vfr2"
-        },
-        "info": [
-          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
-        ]
-      },
-      {
-        "below": "1.13.7",
-        "atOrAbove": "1.13.0",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321",
-          "CWE-74",
-          "CWE-94"
-        ],
-        "identifiers": {
-          "CVE": [
-            "CVE-2020-5258"
-          ],
-          "githubID": "GHSA-jxfh-8wgv-vfr2"
-        },
-        "info": [
-          "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
-        ]
-      },
-      {
-        "below": "1.14.6",
         "atOrAbove": "1.14.0",
+        "below": "1.14.6",
         "severity": "high",
         "cwe": [
           "CWE-1321",
@@ -2603,12 +2704,13 @@
           "githubID": "GHSA-jxfh-8wgv-vfr2"
         },
         "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
           "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
       {
-        "below": "1.15.3",
         "atOrAbove": "1.15.0",
+        "below": "1.15.3",
         "severity": "high",
         "cwe": [
           "CWE-1321",
@@ -2622,12 +2724,13 @@
           "githubID": "GHSA-jxfh-8wgv-vfr2"
         },
         "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
           "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
       {
-        "below": "1.16.2",
         "atOrAbove": "1.16.0",
+        "below": "1.16.2",
         "severity": "high",
         "cwe": [
           "CWE-1321",
@@ -2641,6 +2744,7 @@
           "githubID": "GHSA-jxfh-8wgv-vfr2"
         },
         "info": [
+          "https://github.com/advisories/GHSA-jxfh-8wgv-vfr2",
           "https://github.com/dojo/dojo/security/advisories/GHSA-jxfh-8wgv-vfr2"
         ]
       },
@@ -2693,6 +2797,149 @@
     "npmname": "angular",
     "vulnerabilities": [
       {
+        "atOrAbove": "1.0.0",
+        "below": "1.2.30",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "The attribute usemap can be used as a security exploit",
+          "retid": "50"
+        },
+        "info": [
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#1230-patronal-resurrection-2016-07-21"
+        ]
+      },
+      {
+        "below": "1.5.0-beta.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS through xlink:href attributes",
+          "CVE": [
+            "CVE-2019-14863"
+          ],
+          "githubID": "GHSA-r5fx-8r73-v86c"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-r5fx-8r73-v86c",
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#150-beta1-dense-dispersion-2015-09-29"
+        ]
+      },
+      {
+        "atOrAbove": "1.3.0",
+        "below": "1.5.0-rc2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "The attribute usemap can be used as a security exploit",
+          "retid": "49"
+        },
+        "info": [
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#1230-patronal-resurrection-2016-07-21"
+        ]
+      },
+      {
+        "below": "1.6.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Cross-Site Scripting via JSONP",
+          "githubID": "GHSA-28hp-fgcr-2r4h"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-28hp-fgcr-2r4h"
+        ]
+      },
+      {
+        "below": "1.6.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-400"
+        ],
+        "identifiers": {
+          "summary": "DOS in $sanitize",
+          "retid": "52"
+        },
+        "info": [
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md",
+          "https://github.com/angular/angular.js/pull/15699"
+        ]
+      },
+      {
+        "below": "1.6.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-942"
+        ],
+        "identifiers": {
+          "summary": "Universal CSP bypass via add-on in Firefox",
+          "retid": "51"
+        },
+        "info": [
+          "http://pastebin.com/raw/kGrdaypP",
+          "https://github.com/mozilla/addons-linter/issues/1000#issuecomment-282083435"
+        ]
+      },
+      {
+        "below": "1.6.5",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS in $sanitize in Safari/Firefox",
+          "retid": "53"
+        },
+        "info": [
+          "https://github.com/angular/angular.js/commit/8f31f1ff43b673a24f84422d5c13d6312b2c4d94"
+        ]
+      },
+      {
+        "atOrAbove": "1.5.0",
+        "below": "1.6.9",
+        "severity": "low",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS through SVG if enableSvg is set",
+          "retid": "48"
+        },
+        "info": [
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
+          "https://vulnerabledoma.in/ngSanitize1.6.8_bypass.html"
+        ]
+      },
+      {
+        "below": "1.7.9",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321",
+          "CWE-20",
+          "CWE-915"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "47",
+          "githubID": "GHSA-89mq-4x47-5v83",
+          "CVE": [
+            "CVE-2019-10768"
+          ]
+        },
+        "info": [
+          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#179-pollution-eradication-2019-11-19",
+          "https://github.com/angular/angular.js/commit/726f49dcf6c23106ddaf5cfd5e2e592841db743a"
+        ]
+      },
+      {
         "below": "1.8.0",
         "severity": "medium",
         "cwe": [
@@ -2720,184 +2967,8 @@
           "githubID": "GHSA-mhp6-pxh8-r675"
         },
         "info": [
-          "https://github.com/advisories/GHSA-5cp4-xmrw-59wf"
-        ]
-      },
-      {
-        "below": "1.8.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "angular.js prior to 1.8.0 allows cross site scripting. The regex-based input HTML replacement may turn sanitized code into unsanitized one.",
-          "CVE": [
-            "CVE-2020-7676"
-          ],
-          "githubID": "GHSA-mhp6-pxh8-r675"
-        },
-        "info": [
+          "https://github.com/advisories/GHSA-5cp4-xmrw-59wf",
           "https://nvd.nist.gov/vuln/detail/CVE-2020-7676"
-        ]
-      },
-      {
-        "below": "1.7.9",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321",
-          "CWE-20",
-          "CWE-915"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "47",
-          "githubID": "GHSA-89mq-4x47-5v83",
-          "CVE": [
-            "CVE-2019-10768"
-          ]
-        },
-        "info": [
-          "https://github.com/angular/angular.js/commit/726f49dcf6c23106ddaf5cfd5e2e592841db743a",
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#179-pollution-eradication-2019-11-19"
-        ]
-      },
-      {
-        "atOrAbove": "1.5.0",
-        "below": "1.6.9",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS through SVG if enableSvg is set",
-          "retid": "48"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#169-fiery-basilisk-2018-02-02",
-          "https://vulnerabledoma.in/ngSanitize1.6.8_bypass.html"
-        ]
-      },
-      {
-        "below": "1.5.0-beta.1",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS through xlink:href attributes",
-          "CVE": [
-            "CVE-2019-14863"
-          ],
-          "githubID": "GHSA-r5fx-8r73-v86c"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#150-beta1-dense-dispersion-2015-09-29",
-          "https://github.com/advisories/GHSA-r5fx-8r73-v86c"
-        ]
-      },
-      {
-        "atOrAbove": "1.3.0",
-        "below": "1.5.0-rc2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "The attribute usemap can be used as a security exploit",
-          "retid": "49"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#1230-patronal-resurrection-2016-07-21"
-        ]
-      },
-      {
-        "atOrAbove": "1.0.0",
-        "below": "1.2.30",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "The attribute usemap can be used as a security exploit",
-          "retid": "50"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md#1230-patronal-resurrection-2016-07-21"
-        ]
-      },
-      {
-        "below": "1.6.3",
-        "severity": "medium",
-        "cwe": [
-          "CWE-942"
-        ],
-        "identifiers": {
-          "summary": "Universal CSP bypass via add-on in Firefox",
-          "retid": "51"
-        },
-        "info": [
-          "https://github.com/mozilla/addons-linter/issues/1000#issuecomment-282083435",
-          "http://pastebin.com/raw/kGrdaypP"
-        ]
-      },
-      {
-        "below": "1.6.3",
-        "severity": "medium",
-        "cwe": [
-          "CWE-400"
-        ],
-        "identifiers": {
-          "summary": "DOS in $sanitize",
-          "retid": "52"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/blob/master/CHANGELOG.md",
-          "https://github.com/angular/angular.js/pull/15699"
-        ]
-      },
-      {
-        "below": "1.6.5",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS in $sanitize in Safari/Firefox",
-          "retid": "53"
-        },
-        "info": [
-          "https://github.com/angular/angular.js/commit/8f31f1ff43b673a24f84422d5c13d6312b2c4d94"
-        ]
-      },
-      {
-        "below": "1.6.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Cross-Site Scripting via JSONP",
-          "githubID": "GHSA-28hp-fgcr-2r4h"
-        },
-        "info": [
-          "https://github.com/advisories/GHSA-28hp-fgcr-2r4h"
-        ]
-      },
-      {
-        "below": "999",
-        "severity": "medium",
-        "cwe": [
-          "CWE-1333"
-        ],
-        "identifiers": {
-          "summary": "angular vulnerable to regular expression denial of service via the <input type=\"url\"> element",
-          "githubID": "GHSA-qwqh-hm9m-p5hr",
-          "CVE": [
-            "CVE-2023-26118"
-          ]
-        },
-        "info": [
-          "https://github.com/advisories/GHSA-qwqh-hm9m-p5hr"
         ]
       },
       {
@@ -2918,36 +2989,17 @@
         "below": "999",
         "severity": "medium",
         "cwe": [
-          "CWE-79"
+          "CWE-1333"
         ],
         "identifiers": {
-          "summary": "Angular (deprecated package) Cross-site Scripting",
+          "summary": "angular vulnerable to regular expression denial of service via the $resource service",
           "CVE": [
-            "CVE-2022-25869"
+            "CVE-2023-26117"
           ],
-          "githubID": "GHSA-prc3-vjfx-vhm9"
+          "githubID": "GHSA-2qqx-w9hr-q5gx"
         },
         "info": [
-          "https://github.com/advisories/GHSA-prc3-vjfx-vhm9"
-        ]
-      },
-      {
-        "below": "999",
-        "atOrAbove": "1.7.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-1333",
-          "CWE-770"
-        ],
-        "identifiers": {
-          "summary": "angular vulnerable to regular expression denial of service (ReDoS)",
-          "CVE": [
-            "CVE-2022-25844"
-          ],
-          "githubID": "GHSA-m2h2-264f-f486"
-        },
-        "info": [
-          "https://github.com/advisories/GHSA-m2h2-264f-f486"
+          "https://github.com/advisories/GHSA-2qqx-w9hr-q5gx"
         ]
       },
       {
@@ -2971,17 +3023,53 @@
         "below": "999",
         "severity": "medium",
         "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Angular (deprecated package) Cross-site Scripting",
+          "CVE": [
+            "CVE-2022-25869"
+          ],
+          "githubID": "GHSA-prc3-vjfx-vhm9"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-prc3-vjfx-vhm9"
+        ]
+      },
+      {
+        "below": "999",
+        "severity": "medium",
+        "cwe": [
           "CWE-1333"
         ],
         "identifiers": {
-          "summary": "angular vulnerable to regular expression denial of service via the $resource service",
+          "summary": "angular vulnerable to regular expression denial of service via the <input type=\"url\"> element",
+          "githubID": "GHSA-qwqh-hm9m-p5hr",
           "CVE": [
-            "CVE-2023-26117"
-          ],
-          "githubID": "GHSA-2qqx-w9hr-q5gx"
+            "CVE-2023-26118"
+          ]
         },
         "info": [
-          "https://github.com/advisories/GHSA-2qqx-w9hr-q5gx"
+          "https://github.com/advisories/GHSA-qwqh-hm9m-p5hr"
+        ]
+      },
+      {
+        "atOrAbove": "1.7.0",
+        "below": "999",
+        "severity": "medium",
+        "cwe": [
+          "CWE-1333",
+          "CWE-770"
+        ],
+        "identifiers": {
+          "summary": "angular vulnerable to regular expression denial of service (ReDoS)",
+          "CVE": [
+            "CVE-2022-25844"
+          ],
+          "githubID": "GHSA-m2h2-264f-f486"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-m2h2-264f-f486"
         ]
       }
     ],
@@ -3005,7 +3093,7 @@
       "backbone"
     ],
     "npmname": "backbone",
-    "basePurl": "npm:npm/backbone",
+    "basePurl": "pkg:npm/backbone",
     "vulnerabilities": [
       {
         "below": "0.5.0",
@@ -3014,8 +3102,8 @@
           "CWE-79"
         ],
         "identifiers": {
-          "release": "0.5.0",
           "summary": "cross-site scripting vulnerability",
+          "release": "0.5.0",
           "retid": "46",
           "githubID": "GHSA-j6p2-cx3w-6jcp",
           "CVE": [
@@ -3047,7 +3135,7 @@
       "mustache"
     ],
     "npmname": "mustache",
-    "basePurl": "npm:npm/mustache",
+    "basePurl": "pkg:npm/mustache",
     "vulnerabilities": [
       {
         "below": "0.3.1",
@@ -3056,8 +3144,8 @@
           "CWE-79"
         ],
         "identifiers": {
-          "bug": "112",
-          "summary": "execution of arbitrary javascript"
+          "summary": "execution of arbitrary javascript",
+          "bug": "112"
         },
         "info": [
           "https://github.com/janl/mustache.js/issues/112"
@@ -3070,16 +3158,16 @@
           "CWE-79"
         ],
         "identifiers": {
-          "bug": "pull request 530",
           "summary": "weakness in HTML escaping",
+          "PR": "530",
           "githubID": "GHSA-w3w8-37jv-2c58",
           "CVE": [
             "CVE-2015-8862"
           ]
         },
         "info": [
-          "https://github.com/janl/mustache.js/releases/tag/v2.2.1",
-          "https://github.com/janl/mustache.js/pull/530"
+          "https://github.com/janl/mustache.js/pull/530",
+          "https://github.com/janl/mustache.js/releases/tag/v2.2.1"
         ]
       }
     ],
@@ -3120,6 +3208,107 @@
         ]
       },
       {
+        "below": "3.0.7",
+        "severity": "high",
+        "cwe": [
+          "CWE-471"
+        ],
+        "identifiers": {
+          "summary": "A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template",
+          "issue": "1495",
+          "githubID": "GHSA-q42p-pg8m-cqh6"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-q42p-pg8m-cqh6",
+          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e",
+          "https://github.com/wycats/handlebars.js/issues/1495",
+          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183"
+        ]
+      },
+      {
+        "below": "3.0.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.2 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting).\n\nThe following template can be used to demonstrate the vulnerability:  \n```{{#with \"constructor\"}}\n\t{{#with split as |a|}}\n\t\t{{pop (push \"alert('Vulnerable Handlebars JS');\")}}\n\t\t{{#with (concat (lookup join (slice 0 1)))}}\n\t\t\t{{#each (slice 2 3)}}\n\t\t\t\t{{#with (apply 0 a)}}\n\t\t\t\t\t{{.}}\n\t\t\t\t{{/with}}\n\t\t\t{{/each}}\n\t\t{{/with}}\n\t{{/with}}\n{{/with}}```\n\n\n## Recommendation\n\nUpgrade to version 3.0.8, 4.5.2 or later.",
+          "githubID": "GHSA-2cf5-4w76-r9qv"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-2cf5-4w76-r9qv",
+          "https://www.npmjs.com/advisories/1316"
+        ]
+      },
+      {
+        "below": "3.0.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-94"
+        ],
+        "identifiers": {
+          "summary": "Handlebars before 3.0.8 and 4.x before 4.5.3 is vulnerable to Arbitrary Code Execution. The lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript. This can be used to run arbitrary code on a server processing Handlebars templates or in a victim's browser (effectively serving as XSS).",
+          "githubID": "GHSA-3cqr-58rm-57f8",
+          "CVE": [
+            "CVE-2019-20920"
+          ]
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-3cqr-58rm-57f8",
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-20920"
+        ]
+      },
+      {
+        "below": "3.0.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "45",
+          "githubID": "GHSA-g9r4-xpmj-mj65"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-g9r4-xpmj-mj65",
+          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
+        ]
+      },
+      {
+        "below": "3.0.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It is due to an incomplete fix for a [previous issue](https://www.npmjs.com/advisories/1316). This vulnerability can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting)",
+          "githubID": "GHSA-q2c6-c6pm-g3gh"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-q2c6-c6pm-g3gh",
+          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
+        ]
+      },
+      {
+        "below": "3.0.8",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321",
+          "CWE-74"
+        ],
+        "identifiers": {
+          "summary": "Disallow calling helperMissing and blockHelperMissing directly",
+          "retid": "44",
+          "CVE": [
+            "CVE-2019-19919"
+          ],
+          "githubID": "GHSA-w457-6q6x-cgp9"
+        },
+        "info": [
+          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v430---september-24th-2019"
+        ]
+      },
+      {
         "below": "4.0.0",
         "severity": "medium",
         "cwe": [
@@ -3149,25 +3338,8 @@
           "retid": "43"
         },
         "info": [
-          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-173692",
-          "https://github.com/wycats/handlebars.js/commit/7372d4e9dffc9d70c09671aa28b9392a1577fd86"
-        ]
-      },
-      {
-        "below": "3.0.7",
-        "severity": "high",
-        "cwe": [
-          "CWE-471"
-        ],
-        "identifiers": {
-          "summary": "A prototype pollution vulnerability in handlebars is exploitable if an attacker can control the template",
-          "issue": "1495",
-          "githubID": "GHSA-q42p-pg8m-cqh6"
-        },
-        "info": [
-          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183",
-          "https://github.com/wycats/handlebars.js/issues/1495",
-          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e"
+          "https://github.com/wycats/handlebars.js/commit/7372d4e9dffc9d70c09671aa28b9392a1577fd86",
+          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-173692"
         ]
       },
       {
@@ -3183,9 +3355,10 @@
           "githubID": "GHSA-q42p-pg8m-cqh6"
         },
         "info": [
-          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183",
+          "https://github.com/advisories/GHSA-q42p-pg8m-cqh6",
+          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e",
           "https://github.com/wycats/handlebars.js/issues/1495",
-          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e"
+          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183"
         ]
       },
       {
@@ -3201,12 +3374,14 @@
           "githubID": "GHSA-q42p-pg8m-cqh6"
         },
         "info": [
-          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183",
+          "https://github.com/advisories/GHSA-q42p-pg8m-cqh6",
+          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e",
           "https://github.com/wycats/handlebars.js/issues/1495",
-          "https://github.com/wycats/handlebars.js/commit/cd38583216dce3252831916323202749431c773e"
+          "https://snyk.io/vuln/SNYK-JS-HANDLEBARS-174183"
         ]
       },
       {
+        "atOrAbove": "4.0.0",
         "below": "4.3.0",
         "severity": "high",
         "cwe": [
@@ -3226,112 +3401,37 @@
         ]
       },
       {
-        "below": "3.0.8",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "45",
-          "githubID": "GHSA-g9r4-xpmj-mj65"
-        },
-        "info": [
-          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
-        ]
-      },
-      {
-        "below": "4.5.3",
         "atOrAbove": "4.0.0",
+        "below": "4.4.5",
         "severity": "high",
         "cwe": [
-          "CWE-1321"
+          "CWE-400"
         ],
         "identifiers": {
-          "summary": "Prototype pollution",
-          "retid": "45",
-          "githubID": "GHSA-g9r4-xpmj-mj65"
-        },
-        "info": [
-          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
-        ]
-      },
-      {
-        "below": "3.0.8",
-        "severity": "high",
-        "cwe": [
-          "CWE-94"
-        ],
-        "identifiers": {
-          "summary": "Handlebars before 3.0.8 and 4.x before 4.5.3 is vulnerable to Arbitrary Code Execution. The lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript. This can be used to run arbitrary code on a server processing Handlebars templates or in a victim's browser (effectively serving as XSS).",
-          "githubID": "GHSA-3cqr-58rm-57f8",
+          "summary": "Regular Expression Denial of Service in Handlebars",
+          "githubID": "GHSA-62gr-4qp9-h98f",
           "CVE": [
-            "CVE-2019-20920"
+            "CVE-2019-20922"
           ]
         },
         "info": [
-          "https://nvd.nist.gov/vuln/detail/CVE-2019-20920"
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-20922"
         ]
       },
       {
         "atOrAbove": "4.0.0",
-        "below": "4.5.3",
-        "severity": "high",
+        "below": "4.4.5",
+        "severity": "medium",
         "cwe": [
-          "CWE-94"
+          "CWE-400"
         ],
         "identifiers": {
-          "summary": "Handlebars before 3.0.8 and 4.x before 4.5.3 is vulnerable to Arbitrary Code Execution. The lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript. This can be used to run arbitrary code on a server processing Handlebars templates or in a victim's browser (effectively serving as XSS).",
-          "githubID": "GHSA-3cqr-58rm-57f8",
-          "CVE": [
-            "CVE-2019-20920"
-          ]
+          "summary": "Affected versions of `handlebars` are vulnerable to Denial of Service. The package's parser may be forced into an endless loop while processing specially-crafted templates. This may allow attackers to exhaust system resources leading to Denial of Service.\n\n\n## Recommendation\n\nUpgrade to version 4.4.5 or later.",
+          "retid": "75",
+          "githubID": "GHSA-f52g-6jhx-586p"
         },
         "info": [
-          "https://nvd.nist.gov/vuln/detail/CVE-2019-20920"
-        ]
-      },
-      {
-        "below": "3.0.8",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It is due to an incomplete fix for a [previous issue](https://www.npmjs.com/advisories/1316). This vulnerability can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting)",
-          "githubID": "GHSA-q2c6-c6pm-g3gh"
-        },
-        "info": [
-          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
-        ]
-      },
-      {
-        "below": "4.5.3",
-        "atOrAbove": "4.0.0",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It is due to an incomplete fix for a [previous issue](https://www.npmjs.com/advisories/1316). This vulnerability can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting)",
-          "githubID": "GHSA-q2c6-c6pm-g3gh"
-        },
-        "info": [
-          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
-        ]
-      },
-      {
-        "below": "3.0.8",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.2 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting).\n\nThe following template can be used to demonstrate the vulnerability:  \n```{{#with \"constructor\"}}\n\t{{#with split as |a|}}\n\t\t{{pop (push \"alert('Vulnerable Handlebars JS');\")}}\n\t\t{{#with (concat (lookup join (slice 0 1)))}}\n\t\t\t{{#each (slice 2 3)}}\n\t\t\t\t{{#with (apply 0 a)}}\n\t\t\t\t\t{{.}}\n\t\t\t\t{{/with}}\n\t\t\t{{/each}}\n\t\t{{/with}}\n\t{{/with}}\n{{/with}}```\n\n\n## Recommendation\n\nUpgrade to version 3.0.8, 4.5.2 or later.",
-          "githubID": "GHSA-2cf5-4w76-r9qv"
-        },
-        "info": [
-          "https://www.npmjs.com/advisories/1316"
+          "https://github.com/handlebars-lang/handlebars.js/commit/f0589701698268578199be25285b2ebea1c1e427"
         ]
       },
       {
@@ -3346,7 +3446,60 @@
           "githubID": "GHSA-2cf5-4w76-r9qv"
         },
         "info": [
+          "https://github.com/advisories/GHSA-2cf5-4w76-r9qv",
           "https://www.npmjs.com/advisories/1316"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.5.3",
+        "severity": "high",
+        "cwe": [
+          "CWE-94"
+        ],
+        "identifiers": {
+          "summary": "Handlebars before 3.0.8 and 4.x before 4.5.3 is vulnerable to Arbitrary Code Execution. The lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript. This can be used to run arbitrary code on a server processing Handlebars templates or in a victim's browser (effectively serving as XSS).",
+          "githubID": "GHSA-3cqr-58rm-57f8",
+          "CVE": [
+            "CVE-2019-20920"
+          ]
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-3cqr-58rm-57f8",
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-20920"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.5.3",
+        "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype pollution",
+          "retid": "45",
+          "githubID": "GHSA-g9r4-xpmj-mj65"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-g9r4-xpmj-mj65",
+          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.5.3",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Versions of `handlebars` prior to 3.0.8 or 4.5.3 are vulnerable to Arbitrary Code Execution. The package's lookup helper fails to properly validate templates, allowing attackers to submit templates that execute arbitrary JavaScript in the system. It is due to an incomplete fix for a [previous issue](https://www.npmjs.com/advisories/1316). This vulnerability can be used to run arbitrary code in a server processing Handlebars templates or on a victim's browser (effectively serving as Cross-Site Scripting)",
+          "githubID": "GHSA-q2c6-c6pm-g3gh"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-q2c6-c6pm-g3gh",
+          "https://github.com/wycats/handlebars.js/blob/master/release-notes.md#v453---november-18th-2019"
         ]
       },
       {
@@ -3396,40 +3549,6 @@
         },
         "info": [
           "https://nvd.nist.gov/vuln/detail/CVE-2021-23369"
-        ]
-      },
-      {
-        "atOrAbove": "4.0.0",
-        "below": "4.4.5",
-        "severity": "medium",
-        "cwe": [
-          "CWE-400"
-        ],
-        "identifiers": {
-          "summary": "Affected versions of `handlebars` are vulnerable to Denial of Service. The package's parser may be forced into an endless loop while processing specially-crafted templates. This may allow attackers to exhaust system resources leading to Denial of Service.\n\n\n## Recommendation\n\nUpgrade to version 4.4.5 or later.",
-          "retid": "71",
-          "githubID": "GHSA-f52g-6jhx-586p"
-        },
-        "info": [
-          "https://github.com/handlebars-lang/handlebars.js/commit/f0589701698268578199be25285b2ebea1c1e427"
-        ]
-      },
-      {
-        "atOrAbove": "4.0.0",
-        "below": "4.4.5",
-        "severity": "high",
-        "cwe": [
-          "CWE-400"
-        ],
-        "identifiers": {
-          "summary": "Regular Expression Denial of Service in Handlebars",
-          "githubID": "GHSA-62gr-4qp9-h98f",
-          "CVE": [
-            "CVE-2019-20922"
-          ]
-        },
-        "info": [
-          "https://nvd.nist.gov/vuln/detail/CVE-2019-20922"
         ]
       }
     ],
@@ -3596,36 +3715,6 @@
         ]
       },
       {
-        "below": "3.1.3",
-        "atOrAbove": "3.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-434"
-        ],
-        "identifiers": {
-          "summary": "Fixed security vulnerability by adding die calls to all php files to prevent them from being executed unless modified.",
-          "retid": "36"
-        },
-        "info": [
-          "https://github.com/moxiecode/plupload/releases/tag/v3.1.3"
-        ]
-      },
-      {
-        "below": "3.1.4",
-        "atOrAbove": "3.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Fixed a potential security issue with not entity encoding the file names in the html in the queue/ui widgets.",
-          "retid": "37"
-        },
-        "info": [
-          "https://github.com/moxiecode/plupload/releases/tag/v3.1.4"
-        ]
-      },
-      {
         "below": "2.3.8",
         "severity": "medium",
         "cwe": [
@@ -3637,21 +3726,6 @@
         },
         "info": [
           "https://github.com/moxiecode/plupload/releases/tag/v2.3.8"
-        ]
-      },
-      {
-        "below": "3.1.5",
-        "atOrAbove": "3.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-434"
-        ],
-        "identifiers": {
-          "summary": "Fixed another case of html entities not being encoded that could be exploded by uploading a file name with html in it.",
-          "retid": "41"
-        },
-        "info": [
-          "https://github.com/moxiecode/plupload/releases/tag/v3.1.5"
         ]
       },
       {
@@ -3671,6 +3745,51 @@
         },
         "info": [
           "https://github.com/moxiecode/plupload/releases/tag/v2.3.9"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.1.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-434"
+        ],
+        "identifiers": {
+          "summary": "Fixed security vulnerability by adding die calls to all php files to prevent them from being executed unless modified.",
+          "retid": "36"
+        },
+        "info": [
+          "https://github.com/moxiecode/plupload/releases/tag/v3.1.3"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.1.4",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Fixed a potential security issue with not entity encoding the file names in the html in the queue/ui widgets.",
+          "retid": "37"
+        },
+        "info": [
+          "https://github.com/moxiecode/plupload/releases/tag/v3.1.4"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.1.5",
+        "severity": "medium",
+        "cwe": [
+          "CWE-434"
+        ],
+        "identifiers": {
+          "summary": "Fixed another case of html entities not being encoded that could be exploded by uploading a file name with html in it.",
+          "retid": "41"
+        },
+        "info": [
+          "https://github.com/moxiecode/plupload/releases/tag/v3.1.5"
         ]
       }
     ],
@@ -3748,6 +3867,29 @@
         },
         "info": [
           "https://github.com/cure53/DOMPurify/releases/tag/0.9.0"
+        ]
+      },
+      {
+        "atOrAbove": "0",
+        "below": "1.0.11",
+        "cwe": [
+          "CWE-601"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "DOMPurify Open Redirect vulnerability",
+          "CVE": [
+            "CVE-2019-25155"
+          ],
+          "githubID": "GHSA-8hgg-xxm5-3873"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-8hgg-xxm5-3873",
+          "https://nvd.nist.gov/vuln/detail/CVE-2019-25155",
+          "https://github.com/cure53/DOMPurify/pull/337",
+          "https://github.com/cure53/DOMPurify/commit/7601c33a57e029cce51d910eda5179a3f1b51c83",
+          "https://github.com/cure53/DOMPurify",
+          "https://github.com/cure53/DOMPurify/compare/1.0.10...1.0.11"
         ]
       },
       {
@@ -3905,14 +4047,15 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability can arise when using user data as a key",
           "CVE": [
             "CVE-2013-7035"
           ],
-          "summary": "potential XSS vulnerability can arise when using user data as a key",
           "githubID": "GHSA-g53w-52xc-2j85"
         },
         "info": [
-          "https://facebook.github.io/react/blog/2013/12/18/react-v0.5.2-v0.4.2.html"
+          "https://facebook.github.io/react/blog/2013/12/18/react-v0.5.2-v0.4.2.html",
+          "https://github.com/advisories/GHSA-g53w-52xc-2j85"
         ]
       },
       {
@@ -3923,19 +4066,20 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability can arise when using user data as a key",
           "CVE": [
             "CVE-2013-7035"
           ],
-          "summary": "potential XSS vulnerability can arise when using user data as a key",
           "githubID": "GHSA-g53w-52xc-2j85"
         },
         "info": [
-          "https://facebook.github.io/react/blog/2013/12/18/react-v0.5.2-v0.4.2.html"
+          "https://facebook.github.io/react/blog/2013/12/18/react-v0.5.2-v0.4.2.html",
+          "https://github.com/advisories/GHSA-g53w-52xc-2j85"
         ]
       },
       {
-        "below": "0.14.0",
         "atOrAbove": "0.0.1",
+        "below": "0.14.0",
         "severity": "high",
         "cwe": [
           "CWE-79"
@@ -3958,10 +4102,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability when the attacker controls an attribute name",
           "CVE": [
             "CVE-2018-6341"
-          ],
-          "summary": "potential XSS vulnerability when the attacker controls an attribute name"
+          ]
         },
         "info": [
           "https://github.com/facebook/react/blob/master/CHANGELOG.md",
@@ -3976,10 +4120,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability when the attacker controls an attribute name",
           "CVE": [
             "CVE-2018-6341"
-          ],
-          "summary": "potential XSS vulnerability when the attacker controls an attribute name"
+          ]
         },
         "info": [
           "https://github.com/facebook/react/blob/master/CHANGELOG.md",
@@ -3994,10 +4138,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability when the attacker controls an attribute name",
           "CVE": [
             "CVE-2018-6341"
-          ],
-          "summary": "potential XSS vulnerability when the attacker controls an attribute name"
+          ]
         },
         "info": [
           "https://github.com/facebook/react/blob/master/CHANGELOG.md",
@@ -4012,10 +4156,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability when the attacker controls an attribute name",
           "CVE": [
             "CVE-2018-6341"
-          ],
-          "summary": "potential XSS vulnerability when the attacker controls an attribute name"
+          ]
         },
         "info": [
           "https://github.com/facebook/react/blob/master/CHANGELOG.md",
@@ -4030,10 +4174,10 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "potential XSS vulnerability when the attacker controls an attribute name",
           "CVE": [
             "CVE-2018-6341"
-          ],
-          "summary": "potential XSS vulnerability when the attacker controls an attribute name"
+          ]
         },
         "info": [
           "https://github.com/facebook/react/blob/master/CHANGELOG.md",
@@ -4045,9 +4189,123 @@
       "filecontent": [
         "/\\*\\*\n +\\* React \\(with addons\\) ?v(§§version§§)",
         "/\\*\\*\n +\\* React v(§§version§§)",
+        "/\\*\\* @license React v(§§version§§)[\\s]*\\* react\\.",
         "\"\\./ReactReconciler\":[0-9]+,\"\\./Transaction\":[0-9]+,\"fbjs/lib/invariant\":[0-9]+\\}\\],[0-9]+:\\[function\\(require,module,exports\\)\\{\"use strict\";module\\.exports=\"(§§version§§)\"\\}",
         "ReactVersion\\.js[\\*! \\\\/\n\r]{0,100}function\\(e,t\\)\\{\"use strict\";e\\.exports=\"(§§version§§)\"",
         "expected a ReactNode.[\\s\\S]{0,1800}?function\\(e,t\\)\\{\"use strict\";e\\.exports=\"(§§version§§)\""
+      ]
+    }
+  },
+  "react-dom": {
+    "vulnerabilities": [
+      {
+        "atOrAbove": "16.0.0",
+        "below": "16.0.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Affected versions of `react-dom` are vulnerable to Cross-Site Scripting (XSS). The package fails to validate attribute names in HTML tags which may lead to Cross-Site Scripting in specific scenarios",
+          "CVE": [
+            "CVE-2018-6341"
+          ],
+          "githubID": "GHSA-mvjj-gqq2-p4hw"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6341",
+          "https://reactjs.org/blog/2018/08/01/react-v-16-4-2.html"
+        ]
+      },
+      {
+        "atOrAbove": "16.1.0",
+        "below": "16.1.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Affected versions of `react-dom` are vulnerable to Cross-Site Scripting (XSS). The package fails to validate attribute names in HTML tags which may lead to Cross-Site Scripting in specific scenarios",
+          "CVE": [
+            "CVE-2018-6341"
+          ],
+          "githubID": "GHSA-mvjj-gqq2-p4hw"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6341",
+          "https://reactjs.org/blog/2018/08/01/react-v-16-4-2.html"
+        ]
+      },
+      {
+        "atOrAbove": "16.2.0",
+        "below": "16.2.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Affected versions of `react-dom` are vulnerable to Cross-Site Scripting (XSS). The package fails to validate attribute names in HTML tags which may lead to Cross-Site Scripting in specific scenarios",
+          "CVE": [
+            "CVE-2018-6341"
+          ],
+          "githubID": "GHSA-mvjj-gqq2-p4hw"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6341",
+          "https://reactjs.org/blog/2018/08/01/react-v-16-4-2.html"
+        ]
+      },
+      {
+        "atOrAbove": "16.3.0",
+        "below": "16.3.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Affected versions of `react-dom` are vulnerable to Cross-Site Scripting (XSS). The package fails to validate attribute names in HTML tags which may lead to Cross-Site Scripting in specific scenarios",
+          "CVE": [
+            "CVE-2018-6341"
+          ],
+          "githubID": "GHSA-mvjj-gqq2-p4hw"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6341",
+          "https://reactjs.org/blog/2018/08/01/react-v-16-4-2.html"
+        ]
+      },
+      {
+        "atOrAbove": "16.4.0",
+        "below": "16.4.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Affected versions of `react-dom` are vulnerable to Cross-Site Scripting (XSS). The package fails to validate attribute names in HTML tags which may lead to Cross-Site Scripting in specific scenarios",
+          "CVE": [
+            "CVE-2018-6341"
+          ],
+          "githubID": "GHSA-mvjj-gqq2-p4hw"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-mvjj-gqq2-p4hw",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-6341",
+          "https://reactjs.org/blog/2018/08/01/react-v-16-4-2.html"
+        ]
+      }
+    ],
+    "extractors": {
+      "uri": [
+        "/react-dom@(§§version§§)/"
+      ],
+      "filecontent": [
+        "version:\"(§§version§§)[a-z0-9\\-]*\"[\\s,]*rendererPackageName:\"react-dom\"",
+        "/\\*\\* @license React v(§§version§§)[\\s]*\\* react-dom\\."
       ]
     }
   },
@@ -4109,12 +4367,11 @@
           ]
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2014-5326/",
           "http://www.cvedetails.com/cve/CVE-2014-5326/"
         ]
       },
       {
-        "above": "3",
+        "atOrAbove": "3",
         "below": "3.0.RC3",
         "severity": "medium",
         "cwe": [
@@ -4127,7 +4384,6 @@
           ]
         },
         "info": [
-          "http://www.cvedetails.com/cve/CVE-2014-5326/",
           "http://www.cvedetails.com/cve/CVE-2014-5326/"
         ]
       }
@@ -4193,9 +4449,9 @@
           "githubID": "GHSA-446m-mv8f-q348"
         },
         "info": [
-          "https://security.snyk.io/vuln/npm:moment:20170905",
           "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-18214",
-          "https://github.com/moment/moment/issues/4163"
+          "https://github.com/moment/moment/issues/4163",
+          "https://security.snyk.io/vuln/npm:moment:20170905"
         ]
       },
       {
@@ -4217,8 +4473,8 @@
         ]
       },
       {
-        "below": "2.29.4",
         "atOrAbove": "2.18.0",
+        "below": "2.29.4",
         "severity": "high",
         "cwe": [
           "CWE-1333",
@@ -4227,13 +4483,14 @@
         "identifiers": {
           "summary": "Regular Expression Denial of Service (ReDoS), Affecting moment package, versions >=2.18.0 <2.29.4",
           "CVE": [
-            "CVE-2022-31129"
+            "CVE-2022-31129",
+            "CVE-2023-22467"
           ],
           "githubID": "GHSA-wc69-rhjr-hc9g"
         },
         "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-MOMENT-2944238",
-          "https://github.com/moment/moment/security/advisories/GHSA-wc69-rhjr-hc9g"
+          "https://github.com/moment/moment/security/advisories/GHSA-wc69-rhjr-hc9g",
+          "https://security.snyk.io/vuln/SNYK-JS-MOMENT-2944238"
         ]
       }
     ],
@@ -4262,8 +4519,8 @@
     "npmname": "underscore",
     "vulnerabilities": [
       {
-        "below": "1.12.1",
         "atOrAbove": "1.3.2",
+        "below": "1.12.1",
         "severity": "high",
         "cwe": [
           "CWE-94"
@@ -4292,60 +4549,17 @@
   "bootstrap": {
     "vulnerabilities": [
       {
-        "below": "4.3.1",
-        "atOrAbove": "4.0.0",
+        "below": "2.1.0",
+        "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "issue": "28236",
-          "summary": "XSS in data-template, data-content and data-title properties of tooltip/popover",
-          "CVE": [
-            "CVE-2019-8331"
-          ],
-          "githubID": "GHSA-9v3m-8fp8-mj99"
+          "summary": "cross-site scripting vulnerability",
+          "issue": "3421"
         },
-        "severity": "medium",
         "info": [
-          "https://github.com/twbs/bootstrap/issues/28236"
-        ]
-      },
-      {
-        "atOrAbove": "3.0.0",
-        "below": "3.4.1",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "issue": "28236",
-          "summary": "XSS in data-template, data-content and data-title properties of tooltip/popover",
-          "CVE": [
-            "CVE-2019-8331"
-          ],
-          "githubID": "GHSA-9v3m-8fp8-mj99"
-        },
-        "severity": "medium",
-        "info": [
-          "https://github.com/twbs/bootstrap/issues/28236"
-        ]
-      },
-      {
-        "below": "4.1.2",
-        "atOrAbove": "4.0.0",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "issue": "20184",
-          "summary": "XSS in data-target property of scrollspy",
-          "CVE": [
-            "CVE-2018-14041"
-          ],
-          "githubID": "GHSA-pj7m-g53m-7638"
-        },
-        "severity": "medium",
-        "info": [
-          "https://github.com/twbs/bootstrap/issues/20184"
+          "https://github.com/twbs/bootstrap/pull/3421"
         ]
       },
       {
@@ -4353,71 +4567,35 @@
         "cwe": [
           "CWE-79"
         ],
-        "identifiers": {
-          "issue": "20184",
-          "summary": "XSS in data-target property of scrollspy",
-          "CVE": [
-            "CVE-2018-14041"
-          ],
-          "githubID": "GHSA-pj7m-g53m-7638"
-        },
         "severity": "medium",
-        "info": [
-          "https://github.com/twbs/bootstrap/issues/20184"
-        ]
-      },
-      {
-        "below": "4.1.2",
-        "atOrAbove": "4.0.0",
-        "cwe": [
-          "CWE-79"
-        ],
         "identifiers": {
-          "issue": "20184",
-          "summary": "XSS in collapse data-parent attribute",
-          "CVE": [
-            "CVE-2018-14040"
-          ],
-          "githubID": "GHSA-3wqf-4x89-9g79"
-        },
-        "severity": "medium",
-        "info": [
-          "https://github.com/twbs/bootstrap/issues/20184"
-        ]
-      },
-      {
-        "below": "3.4.0",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "issue": "27044",
           "summary": "In Bootstrap before 3.4.0, XSS is possible in the tooltip data-viewport attribute.",
+          "issue": "27044",
           "CVE": [
             "CVE-2018-20676"
           ],
           "githubID": "GHSA-3mgp-fx93-9xv5"
         },
-        "severity": "medium",
         "info": [
           "https://nvd.nist.gov/vuln/detail/CVE-2018-20676"
         ]
       },
       {
-        "below": "4.1.2",
-        "atOrAbove": "4.0.0",
+        "below": "3.4.0",
         "cwe": [
           "CWE-79"
         ],
-        "identifiers": {
-          "issue": "20184",
-          "summary": "XSS in data-container property of tooltip",
-          "CVE": [
-            "CVE-2018-14042"
-          ]
-        },
         "severity": "medium",
+        "identifiers": {
+          "summary": "XSS in data-target property of scrollspy",
+          "issue": "20184",
+          "CVE": [
+            "CVE-2018-14041"
+          ],
+          "githubID": "GHSA-pj7m-g53m-7638"
+        },
         "info": [
+          "https://github.com/advisories/GHSA-pj7m-g53m-7638",
           "https://github.com/twbs/bootstrap/issues/20184"
         ]
       },
@@ -4426,14 +4604,14 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
-          "issue": "20184",
           "summary": "XSS in data-container property of tooltip",
+          "issue": "20184",
           "CVE": [
             "CVE-2018-14042"
           ]
         },
-        "severity": "medium",
         "info": [
           "https://github.com/twbs/bootstrap/issues/20184"
         ]
@@ -4474,6 +4652,40 @@
         ]
       },
       {
+        "atOrAbove": "3.0.0",
+        "below": "3.4.1",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "XSS in data-template, data-content and data-title properties of tooltip/popover",
+          "issue": "28236",
+          "CVE": [
+            "CVE-2019-8331"
+          ],
+          "githubID": "GHSA-9v3m-8fp8-mj99"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-9v3m-8fp8-mj99",
+          "https://github.com/twbs/bootstrap/issues/28236"
+        ]
+      },
+      {
+        "below": "3.999.999",
+        "severity": "low",
+        "cwe": [
+          "CWE-1104"
+        ],
+        "identifiers": {
+          "summary": "Bootstrap before 4.0.0 is end-of-life and no longer maintained.",
+          "retid": "72"
+        },
+        "info": [
+          "https://github.com/twbs/bootstrap/issues/20631"
+        ]
+      },
+      {
         "atOrAbove": "4.0.0-beta",
         "below": "4.0.0-beta.2",
         "severity": "medium",
@@ -4492,31 +4704,80 @@
         ]
       },
       {
-        "below": "2.1.0",
-        "severity": "medium",
+        "atOrAbove": "4.0.0",
+        "below": "4.1.2",
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
-          "summary": "cross-site scripting vulnerability",
-          "issue": "3421"
+          "summary": "XSS in collapse data-parent attribute",
+          "issue": "20184",
+          "CVE": [
+            "CVE-2018-14040"
+          ],
+          "githubID": "GHSA-3wqf-4x89-9g79"
         },
         "info": [
-          "https://github.com/twbs/bootstrap/pull/3421"
+          "https://github.com/twbs/bootstrap/issues/20184"
         ]
       },
       {
-        "below": "3.999.999",
-        "severity": "low",
+        "atOrAbove": "4.0.0",
+        "below": "4.1.2",
         "cwe": [
-          "CWE-1104"
+          "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
-          "retid": "72",
-          "summary": "Bootstrap before 4.0.0 is end-of-life and no longer maintained."
+          "summary": "XSS in data-target property of scrollspy",
+          "issue": "20184",
+          "CVE": [
+            "CVE-2018-14041"
+          ],
+          "githubID": "GHSA-pj7m-g53m-7638"
         },
         "info": [
-          "https://github.com/twbs/bootstrap/issues/20631"
+          "https://github.com/advisories/GHSA-pj7m-g53m-7638",
+          "https://github.com/twbs/bootstrap/issues/20184"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.1.2",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "XSS in data-container property of tooltip",
+          "issue": "20184",
+          "CVE": [
+            "CVE-2018-14042"
+          ]
+        },
+        "info": [
+          "https://github.com/twbs/bootstrap/issues/20184"
+        ]
+      },
+      {
+        "atOrAbove": "4.0.0",
+        "below": "4.3.1",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "XSS in data-template, data-content and data-title properties of tooltip/popover",
+          "issue": "28236",
+          "CVE": [
+            "CVE-2019-8331"
+          ],
+          "githubID": "GHSA-9v3m-8fp8-mj99"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-9v3m-8fp8-mj99",
+          "https://github.com/twbs/bootstrap/issues/28236"
         ]
       }
     ],
@@ -4564,7 +4825,10 @@
         ],
         "identifiers": {
           "summary": "Cross-Site Scripting in bootstrap-select",
-          "githubID": "GHSA-9r7h-6639-v5mw"
+          "githubID": "GHSA-9r7h-6639-v5mw",
+          "CVE": [
+            "CVE-2019-20921"
+          ]
         },
         "info": [
           "https://github.com/snapappointments/bootstrap-select/issues/2199"
@@ -4588,11 +4852,11 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS",
           "retid": "13"
         },
-        "severity": "medium",
         "info": [
           "https://github.com/ckeditor/ckeditor-dev/blob/master/CHANGES.md#ckeditor-443"
         ]
@@ -4602,11 +4866,11 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS",
           "retid": "14"
         },
-        "severity": "medium",
         "info": [
           "https://github.com/ckeditor/ckeditor-dev/blob/master/CHANGES.md#ckeditor-446"
         ]
@@ -4616,11 +4880,11 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS",
           "retid": "15"
         },
-        "severity": "medium",
         "info": [
           "https://github.com/ckeditor/ckeditor-dev/blob/master/CHANGES.md#ckeditor-448"
         ]
@@ -4630,26 +4894,26 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS",
           "retid": "16"
         },
-        "severity": "medium",
         "info": [
           "https://github.com/ckeditor/ckeditor-dev/blob/master/CHANGES.md#ckeditor-4511"
         ]
       },
       {
-        "below": "4.9.2",
         "atOrAbove": "4.5.11",
+        "below": "4.9.2",
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS if the enhanced image plugin is installed",
           "retid": "17"
         },
-        "severity": "medium",
         "info": [
           "https://ckeditor.com/blog/CKEditor-4.9.2-with-a-security-patch-released/",
           "https://ckeditor.com/cke4/release-notes"
@@ -4661,6 +4925,7 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS vulnerability in the HTML parser",
           "retid": "18",
@@ -4669,24 +4934,9 @@
           ],
           "githubID": "GHSA-g68x-vvqq-pvw3"
         },
-        "severity": "medium",
         "info": [
           "https://ckeditor.com/blog/CKEditor-4.11-with-emoji-dropdown-and-auto-link-on-typing-released/",
           "https://snyk.io/vuln/SNYK-JS-CKEDITOR-72618"
-        ]
-      },
-      {
-        "below": "4.15.1",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS-type attack inside CKEditor 4 by persuading a victim to paste a specially crafted HTML code into the Color Button dialog",
-          "retid": "19"
-        },
-        "severity": "medium",
-        "info": [
-          "https://github.com/ckeditor/ckeditor4/blob/major/CHANGES.md#ckeditor-4151"
         ]
       },
       {
@@ -4694,13 +4944,27 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "XSS",
           "retid": "20"
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor4/blob/major/CHANGES.md#ckeditor-414"
+        ]
+      },
+      {
+        "below": "4.15.1",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "XSS-type attack inside CKEditor 4 by persuading a victim to paste a specially crafted HTML code into the Color Button dialog",
+          "retid": "19"
+        },
+        "info": [
+          "https://github.com/ckeditor/ckeditor4/blob/major/CHANGES.md#ckeditor-4151"
         ]
       },
       {
@@ -4708,11 +4972,11 @@
         "cwe": [
           "CWE-1333"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "ReDoS vulnerability in Autolink plugin and Advanced Tab for Dialogs plugin",
           "retid": "21"
         },
-        "severity": "low",
         "info": [
           "https://ckeditor.com/cke4/release/CKEditor-4.16.0"
         ]
@@ -4722,29 +4986,13 @@
         "cwe": [
           "CWE-79"
         ],
-        "identifiers": {
-          "summary": "XSS vulnerability in the Clipboard plugin",
-          "CVE": [
-            "CVE-2021-32809"
-          ]
-        },
         "severity": "low",
-        "info": [
-          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-7889-rm5j-hpgg"
-        ]
-      },
-      {
-        "below": "4.16.2",
-        "cwe": [
-          "CWE-79"
-        ],
         "identifiers": {
           "summary": "XSS vulnerability in the Widget plugin",
           "CVE": [
             "CVE-2021-32808"
           ]
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-6226-h7ff-ch6c"
         ]
@@ -4754,13 +5002,29 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "low",
+        "identifiers": {
+          "summary": "XSS vulnerability in the Clipboard plugin",
+          "CVE": [
+            "CVE-2021-32809"
+          ]
+        },
+        "info": [
+          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-7889-rm5j-hpgg"
+        ]
+      },
+      {
+        "below": "4.16.2",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS vulnerability in the Fake Objects plugin",
           "CVE": [
             "CVE-2021-37695"
           ]
         },
-        "severity": "medium",
         "info": [
           "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-m94c-37g6-cjhc"
         ]
@@ -4770,6 +5034,7 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "medium",
         "identifiers": {
           "summary": "XSS vulnerabilities in the core module",
           "CVE": [
@@ -4777,10 +5042,9 @@
             "CVE-2021-41165"
           ]
         },
-        "severity": "medium",
         "info": [
-          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-pvmx-g8h5-cprj",
-          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-7h26-63m7-qhf2"
+          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-7h26-63m7-qhf2",
+          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-pvmx-g8h5-cprj"
         ]
       },
       {
@@ -4788,20 +5052,20 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "Inject malformed URL to bypass content sanitization for XSS",
           "CVE": [
             "CVE-2022-24728"
           ]
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-f6rf-9m92-x2hh"
         ]
       },
       {
         "below": "4.21.0",
-        "severity": "Medium",
+        "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
@@ -4813,8 +5077,8 @@
         },
         "info": [
           "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-28439",
-          "https://nvd.nist.gov/vuln/detail/CVE-2023-28439",
-          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-vh5c-xwqv-cv9g"
+          "https://github.com/ckeditor/ckeditor4/security/advisories/GHSA-vh5c-xwqv-cv9g",
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-28439"
         ]
       }
     ],
@@ -4839,13 +5103,13 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "XSS in the link package",
           "CVE": [
             "CVE-2018-11093"
           ]
         },
-        "severity": "low",
         "info": [
           "https://ckeditor.com/blog/CKEditor-5-v10.0.1-released/"
         ]
@@ -4855,13 +5119,13 @@
         "cwe": [
           "CWE-1333"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "ReDos in several packages",
           "CVE": [
             "CVE-2021-21254"
           ]
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor5/security/advisories/GHSA-hgmg-hhc8-g5wr"
         ]
@@ -4871,13 +5135,13 @@
         "cwe": [
           "CWE-1333"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "ReDos in several packages",
           "CVE": [
             "CVE-2021-21391"
           ]
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor5/security/advisories/GHSA-3rh3-wfr4-76mj"
         ]
@@ -4887,13 +5151,13 @@
         "cwe": [
           "CWE-79"
         ],
+        "severity": "low",
         "identifiers": {
           "summary": "security fix for the Markdown GFM, HTML support and HTML embed packages",
           "CVE": [
             "CVE-2022-31175"
           ]
         },
-        "severity": "low",
         "info": [
           "https://github.com/ckeditor/ckeditor5/compare/v34.2.0...v35.0.0",
           "https://github.com/ckeditor/ckeditor5/security/advisories/GHSA-42wq-rch8-6f6j"
@@ -4917,17 +5181,17 @@
   "vue": {
     "vulnerabilities": [
       {
-        "below": "2.6.11",
+        "below": "2.4.3",
         "severity": "medium",
         "cwe": [
-          "CWE-94"
+          "CWE-79"
         ],
         "identifiers": {
-          "summary": "Bump vue-server-renderer's dependency of serialize-javascript to 2.1.2",
-          "retid": "10"
+          "summary": "possible xss vector",
+          "retid": "12"
         },
         "info": [
-          "https://github.com/vuejs/vue/releases/tag/v2.6.11"
+          "https://github.com/vuejs/vue/releases/tag/v2.4.3"
         ]
       },
       {
@@ -4945,17 +5209,17 @@
         ]
       },
       {
-        "below": "2.4.3",
+        "below": "2.6.11",
         "severity": "medium",
         "cwe": [
-          "CWE-79"
+          "CWE-94"
         ],
         "identifiers": {
-          "summary": "possible xss vector",
-          "retid": "12"
+          "summary": "Bump vue-server-renderer's dependency of serialize-javascript to 2.1.2",
+          "retid": "10"
         },
         "info": [
-          "https://github.com/vuejs/vue/releases/tag/v2.4.3"
+          "https://github.com/vuejs/vue/releases/tag/v2.6.11"
         ]
       }
     ],
@@ -4981,21 +5245,23 @@
   "ExtJS": {
     "vulnerabilities": [
       {
-        "below": "6.6.0",
-        "atOrAbove": "4.0.0",
+        "atOrAbove": "3.0.0",
+        "below": "4.0.0",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS vulnerability in ExtJS charts.swf",
           "CVE": [
-            "CVE-2018-8046"
-          ],
-          "summary": "XSS in Sencha Ext JS 4 to 6 via getTip() method of Action Columns"
+            "CVE-2010-4207",
+            "CVE-2012-5881"
+          ]
         },
         "info": [
-          "http://seclists.org/fulldisclosure/2018/Jul/8",
-          "https://nvd.nist.gov/vuln/detail/CVE-2018-8046"
+          "https://typo3.org/security/advisory/typo3-core-sa-2014-001/",
+          "https://www.acunetix.com/vulnerabilities/web/extjs-charts-swf-cross-site-scripting",
+          "https://www.akawebdesign.com/2018/08/14/should-js-frameworks-prevent-xss/"
         ]
       },
       {
@@ -5005,35 +5271,33 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Directory traversal and arbitrary file read",
           "CVE": [
             "CVE-2007-2285"
-          ],
-          "summary": "Directory traversal and arbitrary file read"
+          ]
         },
         "info": [
-          "https://www.cvedetails.com/cve/CVE-2007-2285/",
           "https://packetstormsecurity.com/files/132052/extjs-Arbitrary-File-Read.html",
-          "https://www.akawebdesign.com/2018/08/14/should-js-frameworks-prevent-xss/"
+          "https://www.akawebdesign.com/2018/08/14/should-js-frameworks-prevent-xss/",
+          "https://www.cvedetails.com/cve/CVE-2007-2285/"
         ]
       },
       {
-        "below": "4.0.0",
-        "atOrAbove": "3.0.0",
+        "atOrAbove": "4.0.0",
+        "below": "6.6.0",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "XSS in Sencha Ext JS 4 to 6 via getTip() method of Action Columns",
           "CVE": [
-            "CVE-2010-4207",
-            "CVE-2012-5881"
-          ],
-          "summary": "XSS vulnerability in ExtJS charts.swf"
+            "CVE-2018-8046"
+          ]
         },
         "info": [
-          "https://www.acunetix.com/vulnerabilities/web/extjs-charts-swf-cross-site-scripting",
-          "https://typo3.org/security/advisory/typo3-core-sa-2014-001/",
-          "https://www.akawebdesign.com/2018/08/14/should-js-frameworks-prevent-xss/"
+          "http://seclists.org/fulldisclosure/2018/Jul/8",
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-8046"
         ]
       }
     ],
@@ -5054,21 +5318,17 @@
   "svelte": {
     "vulnerabilities": [
       {
-        "below": "3.49.0",
+        "below": "2.9.8",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
           "summary": "XSS",
-          "issue": "7530",
-          "githubID": "GHSA-wv8q-r932-8hc7",
-          "CVE": [
-            "CVE-2022-25875"
-          ]
+          "retid": "9"
         },
         "info": [
-          "https://github.com/sveltejs/svelte/pull/7530"
+          "https://github.com/sveltejs/svelte/pull/1623"
         ]
       },
       {
@@ -5086,17 +5346,21 @@
         ]
       },
       {
-        "below": "2.9.8",
+        "below": "3.49.0",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
           "summary": "XSS",
-          "retid": "9"
+          "issue": "7530",
+          "githubID": "GHSA-wv8q-r932-8hc7",
+          "CVE": [
+            "CVE-2022-25875"
+          ]
         },
         "info": [
-          "https://github.com/sveltejs/svelte/pull/1623"
+          "https://github.com/sveltejs/svelte/pull/7530"
         ]
       }
     ],
@@ -5118,22 +5382,22 @@
   "axios": {
     "vulnerabilities": [
       {
-        "below": "0.21.3",
+        "below": "0.18.1",
         "severity": "high",
         "cwe": [
-          "CWE-1333",
-          "CWE-400"
+          "CWE-20",
+          "CWE-755"
         ],
         "identifiers": {
-          "summary": "Axios is vulnerable to Inefficient Regular Expression Complexity",
+          "summary": "Axios up to and including 0.18.0 allows attackers to cause a denial of service (application crash) by continuing to accepting content after maxContentLength is exceeded",
           "CVE": [
-            "CVE-2021-3749"
+            "CVE-2019-10742"
           ],
-          "githubID": "GHSA-cph5-m8f7-6c5x"
+          "githubID": "GHSA-42xw-2xvc-qx8m"
         },
         "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1579269",
-          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3749"
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-10742",
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-174505"
         ]
       },
       {
@@ -5150,27 +5414,52 @@
           "githubID": "GHSA-4w2v-q235-vp99"
         },
         "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1038255",
-          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28168"
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28168",
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1038255"
         ]
       },
       {
-        "below": "0.18.1",
+        "below": "0.21.3",
         "severity": "high",
         "cwe": [
-          "CWE-20",
-          "CWE-755"
+          "CWE-1333",
+          "CWE-400"
         ],
         "identifiers": {
-          "summary": "Axios up to and including 0.18.0 allows attackers to cause a denial of service (application crash) by continuing to accepting content after maxContentLength is exceeded",
+          "summary": "Axios is vulnerable to Inefficient Regular Expression Complexity",
           "CVE": [
-            "CVE-2019-10742"
+            "CVE-2021-3749"
           ],
-          "githubID": "GHSA-42xw-2xvc-qx8m"
+          "githubID": "GHSA-cph5-m8f7-6c5x"
         },
         "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-174505",
-          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-10742"
+          "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-3749",
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-1579269"
+        ]
+      },
+      {
+        "atOrAbove": "0.8.1",
+        "below": "1.6.0",
+        "cwe": [
+          "CWE-352"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Axios Cross-Site Request Forgery Vulnerability",
+          "CVE": [
+            "CVE-2023-45857"
+          ],
+          "githubID": "GHSA-wf5p-g6vw-rhxx"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-wf5p-g6vw-rhxx",
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-45857",
+          "https://github.com/axios/axios/issues/6006",
+          "https://github.com/axios/axios/issues/6022",
+          "https://github.com/axios/axios/pull/6028",
+          "https://github.com/axios/axios/commit/96ee232bd3ee4de2e657333d4d2191cd389e14d0",
+          "https://github.com/axios/axios/releases/tag/v1.6.0",
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-6032459"
         ]
       }
     ],
@@ -5189,54 +5478,20 @@
   "markdown-it": {
     "vulnerabilities": [
       {
-        "below": "12.3.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-1333",
-          "CWE-400"
-        ],
-        "identifiers": {
-          "summary": "Regular Expression Denial of Service (ReDoS)",
-          "CVE": [
-            "CVE-2022-21670"
-          ],
-          "githubID": "GHSA-6vfc-qv3f-vr6c"
-        },
-        "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-2331914",
-          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md",
-          "https://nvd.nist.gov/vuln/detail/CVE-2022-21670"
-        ]
-      },
-      {
-        "below": "10.0.0",
-        "severity": "medium",
+        "below": "3.0.0",
+        "severity": "high",
         "cwe": [
           "CWE-1333"
         ],
         "identifiers": {
-          "summary": "Regular Expression Denial of Service (ReDoS)",
-          "retid": "6"
-        },
-        "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-459438",
-          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md"
-        ]
-      },
-      {
-        "below": "4.3.1",
-        "atOrAbove": "4.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
           "summary": "Cross-site Scripting (XSS)",
-          "retid": "7"
+          "CVE": [
+            "CVE-2015-10005"
+          ],
+          "githubID": "GHSA-j5p7-jf4q-742q"
         },
         "info": [
-          "https://security.snyk.io/vuln/npm:markdown-it:20150702",
-          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md"
+          "https://nvd.nist.gov/vuln/detail/CVE-2015-10005"
         ]
       },
       {
@@ -5252,26 +5507,60 @@
           ]
         },
         "info": [
-          "https://security.snyk.io/vuln/npm:markdown-it:20160912",
           "https://cve.mitre.org/cgi-bin/cvename.cgi?name=2015-3295",
-          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md"
+          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md",
+          "https://security.snyk.io/vuln/npm:markdown-it:20160912"
         ]
       },
       {
-        "below": "3.0.0",
-        "severity": "high",
+        "atOrAbove": "4.0.0",
+        "below": "4.3.1",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Cross-site Scripting (XSS)",
+          "retid": "7"
+        },
+        "info": [
+          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md",
+          "https://security.snyk.io/vuln/npm:markdown-it:20150702"
+        ]
+      },
+      {
+        "below": "10.0.0",
+        "severity": "medium",
         "cwe": [
           "CWE-1333"
         ],
         "identifiers": {
-          "summary": "Cross-site Scripting (XSS)",
-          "CVE": [
-            "CVE-2015-10005"
-          ],
-          "githubID": "GHSA-j5p7-jf4q-742q"
+          "summary": "Regular Expression Denial of Service (ReDoS)",
+          "retid": "6"
         },
         "info": [
-          "https://nvd.nist.gov/vuln/detail/CVE-2015-10005"
+          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md",
+          "https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-459438"
+        ]
+      },
+      {
+        "below": "12.3.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-1333",
+          "CWE-400"
+        ],
+        "identifiers": {
+          "summary": "Regular Expression Denial of Service (ReDoS)",
+          "CVE": [
+            "CVE-2022-21670"
+          ],
+          "githubID": "GHSA-6vfc-qv3f-vr6c"
+        },
+        "info": [
+          "https://github.com/markdown-it/markdown-it/blob/master/CHANGELOG.md",
+          "https://nvd.nist.gov/vuln/detail/CVE-2022-21670",
+          "https://security.snyk.io/vuln/SNYK-JS-MARKDOWNIT-2331914"
         ]
       }
     ],
@@ -5290,6 +5579,45 @@
   "jszip": {
     "vulnerabilities": [
       {
+        "below": "2.7.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype Pollution",
+          "CVE": [
+            "CVE-2021-23413"
+          ],
+          "githubID": "GHSA-jg8v-48h5-wgxg"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-jg8v-48h5-wgxg",
+          "https://nvd.nist.gov/vuln/detail/CVE-2021-23413",
+          "https://security.snyk.io/vuln/SNYK-JS-JSZIP-1251497"
+        ]
+      },
+      {
+        "atOrAbove": "3.0.0",
+        "below": "3.7.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "Prototype Pollution",
+          "CVE": [
+            "CVE-2021-23413"
+          ],
+          "githubID": "GHSA-jg8v-48h5-wgxg"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-jg8v-48h5-wgxg",
+          "https://nvd.nist.gov/vuln/detail/CVE-2021-23413",
+          "https://security.snyk.io/vuln/SNYK-JS-JSZIP-1251497"
+        ]
+      },
+      {
         "below": "3.8.0",
         "severity": "high",
         "cwe": [
@@ -5305,43 +5633,6 @@
         },
         "info": [
           "https://stuk.github.io/jszip/CHANGES.html"
-        ]
-      },
-      {
-        "below": "3.7.0",
-        "atOrAbove": "3.0.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype Pollution",
-          "CVE": [
-            "CVE-2021-23413"
-          ],
-          "githubID": "GHSA-jg8v-48h5-wgxg"
-        },
-        "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-JSZIP-1251497",
-          "https://nvd.nist.gov/vuln/detail/CVE-2021-23413"
-        ]
-      },
-      {
-        "below": "2.7.0",
-        "severity": "medium",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "Prototype Pollution",
-          "CVE": [
-            "CVE-2021-23413"
-          ],
-          "githubID": "GHSA-jg8v-48h5-wgxg"
-        },
-        "info": [
-          "https://security.snyk.io/vuln/SNYK-JS-JSZIP-1251497",
-          "https://nvd.nist.gov/vuln/detail/CVE-2021-23413"
         ]
       }
     ],
@@ -5367,8 +5658,8 @@
           "CWE-94"
         ],
         "identifiers": {
-          "bug": "SNYK-JS-ALASQL-1082932",
-          "summary": "An arbitrary code execution exists as AlaSQL doesn't sanitize input when characters are placed between square brackets [] or preceded with a backtik (accent grave) ` character. Versions older that 0.7.0 were deprecated in March of 2021 and should no longer be used."
+          "summary": "An arbitrary code execution exists as AlaSQL doesn't sanitize input when characters are placed between square brackets [] or preceded with a backtik (accent grave) ` character. Versions older that 0.7.0 were deprecated in March of 2021 and should no longer be used.",
+          "bug": "SNYK-JS-ALASQL-1082932"
         },
         "info": [
           "https://security.snyk.io/vuln/SNYK-JS-ALASQL-1082932"
@@ -5391,20 +5682,21 @@
     "npmname": "datatables.net",
     "vulnerabilities": [
       {
-        "below": "1.11.3",
-        "severity": "medium",
+        "below": "1.10.10",
+        "severity": "high",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "Cross site scripting in datatables.net",
+          "summary": "XSS",
           "CVE": [
-            "CVE-2021-23445"
-          ],
-          "githubID": "GHSA-h73q-5wmj-q8pj"
+            "CVE-2015-6584"
+          ]
         },
         "info": [
-          "https://github.com/advisories/GHSA-h73q-5wmj-q8pj"
+          "https://github.com/DataTables/DataTablesSrc/commit/ccf86dc5982bd8e16d",
+          "https://github.com/advisories/GHSA-4mv4-gmmf-q382",
+          "https://www.invicti.com/web-applications-advisories/cve-2015-6384-xss-vulnerability-identified-in-datatables/"
         ]
       },
       {
@@ -5425,36 +5717,6 @@
         ]
       },
       {
-        "below": "1.11.3",
-        "severity": "low",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "possible XSS",
-          "retid": "2"
-        },
-        "info": [
-          "https://github.com/DataTables/Dist-DataTables/commit/59a8d3f8a3c1138ab08704e783bc52bfe88d7c9b",
-          "https://cdn.datatables.net/1.11.3/"
-        ]
-      },
-      {
-        "below": "1.10.23",
-        "severity": "high",
-        "cwe": [
-          "CWE-1321"
-        ],
-        "identifiers": {
-          "summary": "prototype pollution",
-          "retid": "3"
-        },
-        "info": [
-          "https://github.com/DataTables/DataTablesSrc/commit/a51cbe99fd3d02aa5582f97d4af1615d11a1ea03",
-          "https://cdn.datatables.net/1.10.23/"
-        ]
-      },
-      {
         "below": "1.10.22",
         "severity": "medium",
         "cwe": [
@@ -5469,21 +5731,50 @@
         ]
       },
       {
-        "below": "1.10.10",
+        "below": "1.10.23",
         "severity": "high",
+        "cwe": [
+          "CWE-1321"
+        ],
+        "identifiers": {
+          "summary": "prototype pollution",
+          "retid": "3"
+        },
+        "info": [
+          "https://cdn.datatables.net/1.10.23/",
+          "https://github.com/DataTables/DataTablesSrc/commit/a51cbe99fd3d02aa5582f97d4af1615d11a1ea03"
+        ]
+      },
+      {
+        "below": "1.11.3",
+        "severity": "low",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "CVE": [
-            "CVE-2015-6584"
-          ],
-          "summary": "XSS"
+          "summary": "possible XSS",
+          "retid": "2"
         },
         "info": [
-          "https://github.com/DataTables/DataTablesSrc/commit/ccf86dc5982bd8e16d",
-          "https://www.invicti.com/web-applications-advisories/cve-2015-6384-xss-vulnerability-identified-in-datatables/",
-          "https://github.com/advisories/GHSA-4mv4-gmmf-q382"
+          "https://cdn.datatables.net/1.11.3/",
+          "https://github.com/DataTables/Dist-DataTables/commit/59a8d3f8a3c1138ab08704e783bc52bfe88d7c9b"
+        ]
+      },
+      {
+        "below": "1.11.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "Cross site scripting in datatables.net",
+          "CVE": [
+            "CVE-2021-23445"
+          ],
+          "githubID": "GHSA-h73q-5wmj-q8pj"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-h73q-5wmj-q8pj"
         ]
       }
     ],
@@ -5505,21 +5796,181 @@
     "npmname": "next",
     "vulnerabilities": [
       {
-        "atOrAbove": "10.0.0",
-        "below": "12.1.0",
-        "severity": "medium",
+        "atOrAbove": "1.0.0",
+        "below": "2.4.1",
+        "severity": "high",
         "cwe": [
-          "CWE-451"
+          "CWE-22"
         ],
         "identifiers": {
-          "summary": "Improper CSP in Image Optimization API",
+          "summary": "Next.js Directory Traversal Vulnerability",
           "CVE": [
-            "CVE-2022-23646"
+            "CVE-2017-16877"
           ],
-          "githubID": "GHSA-fmvm-x8mv-47mj"
+          "githubID": "GHSA-3f5c-4qxj-vmpf"
         },
         "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-fmvm-x8mv-47mj"
+          "https://github.com/vercel/next.js/security/advisories/GHSA-3f5c-4qxj-vmpf"
+        ]
+      },
+      {
+        "atOrAbove": "1.0.0",
+        "below": "4.2.3",
+        "cwe": [
+          "CWE-22"
+        ],
+        "severity": "high",
+        "identifiers": {
+          "summary": "Directory traversal vulnerability in Next.js",
+          "CVE": [
+            "CVE-2018-6184"
+          ],
+          "githubID": "GHSA-m34x-wgrh-g897"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-m34x-wgrh-g897"
+        ]
+      },
+      {
+        "atOrAbove": "0.9.9",
+        "below": "5.1.0",
+        "cwe": [
+          "CWE-20"
+        ],
+        "severity": "high",
+        "identifiers": {
+          "summary": "Remote Code Execution in next",
+          "githubID": "GHSA-5vj8-3v2h-h38v"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-5vj8-3v2h-h38v"
+        ]
+      },
+      {
+        "atOrAbove": "7.0.0",
+        "below": "7.0.2",
+        "cwe": [
+          "CWE-79"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Next.js has cross site scripting (XSS) vulnerability via the 404 or 500 /_error page",
+          "CVE": [
+            "CVE-2018-18282"
+          ],
+          "githubID": "GHSA-qw96-mm2g-c8m7"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-qw96-mm2g-c8m7"
+        ]
+      },
+      {
+        "below": "9.3.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-23"
+        ],
+        "identifiers": {
+          "summary": "Directory Traversal in Next.js",
+          "CVE": [
+            "CVE-2020-5284"
+          ],
+          "githubID": "GHSA-fq77-7p7r-83rj"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-fq77-7p7r-83rj"
+        ]
+      },
+      {
+        "atOrAbove": "9.5.0",
+        "below": "9.5.4",
+        "severity": "medium",
+        "cwe": [
+          "CWE-601"
+        ],
+        "identifiers": {
+          "summary": "Open Redirect in Next.js",
+          "CVE": [
+            "CVE-2020-15242"
+          ],
+          "githubID": "GHSA-x56p-c8cg-q435"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-x56p-c8cg-q435"
+        ]
+      },
+      {
+        "atOrAbove": "0.9.9",
+        "below": "11.1.0",
+        "severity": "medium",
+        "cwe": [
+          "CWE-601"
+        ],
+        "identifiers": {
+          "summary": "Open Redirect in Next.js",
+          "CVE": [
+            "CVE-2021-37699"
+          ],
+          "githubID": "GHSA-vxf5-wxwp-m7g9"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-vxf5-wxwp-m7g9"
+        ]
+      },
+      {
+        "atOrAbove": "10.0.0",
+        "below": "11.1.1",
+        "severity": "high",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS in Image Optimization API",
+          "CVE": [
+            "CVE-2021-39178"
+          ],
+          "githubID": "GHSA-9gr3-7897-pp7m"
+        },
+        "info": [
+          "https://github.com/vercel/next.js/security/advisories/GHSA-9gr3-7897-pp7m"
+        ]
+      },
+      {
+        "atOrAbove": "0.9.9",
+        "below": "11.1.3",
+        "severity": "high",
+        "cwe": [
+          "CWE-20"
+        ],
+        "identifiers": {
+          "summary": "Unexpected server crash in Next.js versions",
+          "CVE": [
+            "CVE-2021-43803"
+          ],
+          "githubID": "GHSA-25mp-g6fv-mqxx"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-25mp-g6fv-mqxx",
+          "https://github.com/vercel/next.js/security/advisories/GHSA-25mp-g6fv-mqxx"
+        ]
+      },
+      {
+        "atOrAbove": "12.0.0",
+        "below": "12.0.5",
+        "severity": "high",
+        "cwe": [
+          "CWE-20"
+        ],
+        "identifiers": {
+          "summary": "Unexpected server crash in Next.js versions",
+          "CVE": [
+            "CVE-2021-43803"
+          ],
+          "githubID": "GHSA-25mp-g6fv-mqxx"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-25mp-g6fv-mqxx",
+          "https://github.com/vercel/next.js/security/advisories/GHSA-25mp-g6fv-mqxx"
         ]
       },
       {
@@ -5542,115 +5993,26 @@
         ]
       },
       {
-        "atOrAbove": "0.9.9",
-        "below": "11.1.3",
-        "severity": "high",
-        "cwe": [
-          "CWE-20"
-        ],
-        "identifiers": {
-          "summary": "Unexpected server crash in Next.js versions",
-          "CVE": [
-            "CVE-2021-43803"
-          ],
-          "githubID": "GHSA-25mp-g6fv-mqxx"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-25mp-g6fv-mqxx"
-        ]
-      },
-      {
-        "atOrAbove": "12.0.0",
-        "below": "12.0.5",
-        "severity": "high",
-        "cwe": [
-          "CWE-20"
-        ],
-        "identifiers": {
-          "summary": "Unexpected server crash in Next.js versions",
-          "CVE": [
-            "CVE-2021-43803"
-          ],
-          "githubID": "GHSA-25mp-g6fv-mqxx"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-25mp-g6fv-mqxx"
-        ]
-      },
-      {
         "atOrAbove": "10.0.0",
-        "below": "11.1.1",
-        "severity": "high",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS in Image Optimization API",
-          "CVE": [
-            "CVE-2021-39178"
-          ],
-          "githubID": "GHSA-9gr3-7897-pp7m"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-9gr3-7897-pp7m"
-        ]
-      },
-      {
-        "below": "11.1.0",
-        "atOrAbove": "0.9.9",
+        "below": "12.1.0",
         "severity": "medium",
         "cwe": [
-          "CWE-601"
+          "CWE-451"
         ],
         "identifiers": {
-          "summary": "Open Redirect in Next.js",
+          "summary": "Improper CSP in Image Optimization API",
           "CVE": [
-            "CVE-2021-37699"
+            "CVE-2022-23646"
           ],
-          "githubID": "GHSA-vxf5-wxwp-m7g9"
+          "githubID": "GHSA-fmvm-x8mv-47mj"
         },
         "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-vxf5-wxwp-m7g9"
+          "https://github.com/vercel/next.js/security/advisories/GHSA-fmvm-x8mv-47mj"
         ]
       },
       {
-        "atOrAbove": "9.5.0",
-        "below": "9.5.4",
-        "severity": "medium",
-        "cwe": [
-          "CWE-601"
-        ],
-        "identifiers": {
-          "summary": "Open Redirect in Next.js",
-          "CVE": [
-            "CVE-2020-15242"
-          ],
-          "githubID": "GHSA-x56p-c8cg-q435"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-x56p-c8cg-q435"
-        ]
-      },
-      {
-        "below": "9.3.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-23"
-        ],
-        "identifiers": {
-          "summary": "Directory Traversal in Next.js",
-          "CVE": [
-            "CVE-2020-5284"
-          ],
-          "githubID": "GHSA-fq77-7p7r-83rj"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-fq77-7p7r-83rj"
-        ]
-      },
-      {
-        "below": "12.2.4",
         "atOrAbove": "12.2.3",
+        "below": "12.2.4",
         "cwe": [
           "CWE-248",
           "CWE-754"
@@ -5668,72 +6030,21 @@
         ]
       },
       {
-        "below": "7.0.2",
-        "atOrAbove": "7.0.0",
-        "cwe": [
-          "CWE-79"
-        ],
-        "severity": "medium",
-        "identifiers": {
-          "summary": "Next.js has cross site scripting (XSS) vulnerability via the 404 or 500 /_error page",
-          "CVE": [
-            "CVE-2018-18282"
-          ],
-          "githubID": "GHSA-qw96-mm2g-c8m7"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-qw96-mm2g-c8m7"
-        ]
-      },
-      {
-        "below": "4.2.3",
-        "atOrAbove": "1.0.0",
-        "cwe": [
-          "CWE-22"
-        ],
-        "severity": "high",
-        "identifiers": {
-          "summary": "Directory traversal vulnerability in Next.js",
-          "CVE": [
-            "CVE-2018-6184"
-          ],
-          "githubID": "GHSA-m34x-wgrh-g897"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-m34x-wgrh-g897"
-        ]
-      },
-      {
-        "below": "5.1.0",
         "atOrAbove": "0.9.9",
+        "below": "13.4.20-canary.13",
         "cwe": [
-          "CWE-20"
+          "CWE-525"
         ],
-        "severity": "high",
+        "severity": "low",
         "identifiers": {
-          "summary": "Remote Code Execution in next",
-          "githubID": "GHSA-5vj8-3v2h-h38v"
-        },
-        "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-5vj8-3v2h-h38v"
-        ]
-      },
-      {
-        "below": "2.4.1",
-        "atOrAbove": "1.0.0",
-        "severity": "high",
-        "cwe": [
-          "CWE-22"
-        ],
-        "identifiers": {
-          "summary": "Next.js Directory Traversal Vulnerability",
+          "summary": "Next.js missing cache-control header may lead to CDN caching empty reply",
           "CVE": [
-            "CVE-2017-16877"
+            "CVE-2023-46298"
           ],
-          "githubID": "GHSA-3f5c-4qxj-vmpf"
+          "githubID": "GHSA-c59h-r6p8-q9wc"
         },
         "info": [
-          "https://github.com/vercel/next.js/security/advisories/GHSA-3f5c-4qxj-vmpf"
+          "https://github.com/advisories/GHSA-c59h-r6p8-q9wc"
         ]
       }
     ],
@@ -5781,21 +6092,48 @@
     "npmname": "froala-editor",
     "vulnerabilities": [
       {
-        "below": "4.0.11",
+        "below": "3.2.2",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "XSS vulnerability in [insert video]",
-          "issue": "3880",
-          "githubID": "GHSA-97x5-cc53-cv4v",
+          "summary": "Security issue: XSS via pasted content",
+          "issue": "3880"
+        },
+        "info": [
+          "https://froala.com/wysiwyg-editor/changelog/#3.2.2"
+        ]
+      },
+      {
+        "below": "3.2.2",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "XSS Issue In Link Insertion",
+          "issue": "3270"
+        },
+        "info": [
+          "https://github.com/froala/wysiwyg-editor/issues/3270"
+        ]
+      },
+      {
+        "below": "3.2.3",
+        "severity": "medium",
+        "cwe": [
+          "CWE-79"
+        ],
+        "identifiers": {
+          "summary": "DOM-based cross-site scripting in Froala Editor",
+          "githubID": "GHSA-h236-g5gh-vq6c",
           "CVE": [
-            "CVE-2020-22864"
+            "CVE-2019-19935"
           ]
         },
         "info": [
-          "https://github.com/froala/wysiwyg-editor/releases/tag/v4.0.11"
+          "https://github.com/advisories/GHSA-h236-g5gh-vq6c"
         ]
       },
       {
@@ -5832,48 +6170,21 @@
         ]
       },
       {
-        "below": "3.2.3",
+        "below": "4.0.11",
         "severity": "medium",
         "cwe": [
           "CWE-79"
         ],
         "identifiers": {
-          "summary": "DOM-based cross-site scripting in Froala Editor",
-          "githubID": "GHSA-h236-g5gh-vq6c",
+          "summary": "XSS vulnerability in [insert video]",
+          "issue": "3880",
+          "githubID": "GHSA-97x5-cc53-cv4v",
           "CVE": [
-            "CVE-2019-19935"
+            "CVE-2020-22864"
           ]
         },
         "info": [
-          "https://github.com/advisories/GHSA-h236-g5gh-vq6c"
-        ]
-      },
-      {
-        "below": "3.2.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "Security issue: XSS via pasted content",
-          "issue": "3880"
-        },
-        "info": [
-          "https://froala.com/wysiwyg-editor/changelog/#3.2.2"
-        ]
-      },
-      {
-        "below": "3.2.2",
-        "severity": "medium",
-        "cwe": [
-          "CWE-79"
-        ],
-        "identifiers": {
-          "summary": "XSS Issue In Link Insertion",
-          "issue": "3270"
-        },
-        "info": [
-          "https://github.com/froala/wysiwyg-editor/issues/3270"
+          "https://github.com/froala/wysiwyg-editor/releases/tag/v4.0.11"
         ]
       }
     ],
@@ -5914,17 +6225,17 @@
   "highcharts": {
     "vulnerabilities": [
       {
-        "below": "9.0.0",
+        "below": "6.1.0",
         "severity": "high",
         "cwe": [
-          "CWE-79"
+          "CWE-1333"
         ],
         "identifiers": {
-          "summary": "Cross-site Scripting (XSS) and Prototype Pollution in Highcharts < 9.0.0",
+          "summary": "Regular Expression Denial of Service in highcharts",
           "CVE": [
-            "CVE-2021-29489"
+            "CVE-2018-20801"
           ],
-          "githubID": "GHSA-8j65-4pcq-xq95"
+          "githubID": "GHSA-xmc8-cjfr-phx3"
         },
         "info": [
           "https://security.snyk.io/vuln/SNYK-JS-HIGHCHARTS-1290057"
@@ -5941,12 +6252,13 @@
           "githubID": "GHSA-gr4j-r575-g665"
         },
         "info": [
+          "https://github.com/advisories/GHSA-gr4j-r575-g665",
           "https://github.com/highcharts/highcharts/issues/13559"
         ]
       },
       {
-        "below": "8.1.1",
         "atOrAbove": "8.0.0",
+        "below": "8.1.1",
         "severity": "high",
         "cwe": [
           "CWE-79"
@@ -5956,21 +6268,22 @@
           "githubID": "GHSA-gr4j-r575-g665"
         },
         "info": [
+          "https://github.com/advisories/GHSA-gr4j-r575-g665",
           "https://github.com/highcharts/highcharts/issues/13559"
         ]
       },
       {
-        "below": "6.1.0",
+        "below": "9.0.0",
         "severity": "high",
         "cwe": [
-          "CWE-1333"
+          "CWE-79"
         ],
         "identifiers": {
-          "summary": "Regular Expression Denial of Service in highcharts",
+          "summary": "Cross-site Scripting (XSS) and Prototype Pollution in Highcharts < 9.0.0",
           "CVE": [
-            "CVE-2018-20801"
+            "CVE-2021-29489"
           ],
-          "githubID": "GHSA-xmc8-cjfr-phx3"
+          "githubID": "GHSA-8j65-4pcq-xq95"
         },
         "info": [
           "https://security.snyk.io/vuln/SNYK-JS-HIGHCHARTS-1290057"
@@ -5988,6 +6301,7 @@
     }
   },
   "dont check": {
+    "vulnerabilities": [],
     "extractors": {
       "uri": [
         "^http[s]?://(ssl|www).google-analytics.com/ga.js",
