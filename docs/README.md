@@ -15,7 +15,7 @@ For example, you will most likely see: /opt/homebrew/opt/ruby
 Add this path to your profile (for example at the end of your ~/.zshrc file):
 
 ```
-export PATH="/opt/homebrew/opt/ruby:$PATH"
+export PATH=/opt/homebrew/opt/ruby/bin:$PATH
 ```
 
 ## Install Jekyll
