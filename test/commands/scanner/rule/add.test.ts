@@ -1,4 +1,4 @@
-import {expect} from '@salesforce/command/lib/test';
+import {expect} from 'chai';
 import {Messages} from '@salesforce/core';
 // @ts-ignore
 import {runCommand} from '../../../TestUtils';

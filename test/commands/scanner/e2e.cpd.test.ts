@@ -1,4 +1,4 @@
-import { expect } from "@salesforce/command/lib/test";
+import { expect } from "chai";
 // @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require("path");

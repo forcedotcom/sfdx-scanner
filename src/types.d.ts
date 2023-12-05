@@ -1,5 +1,6 @@
 import {JSONSchema4} from 'json-schema';
 import {Linter} from 'eslint';
+import {Ux} from '@salesforce/sf-plugins-core';
 import {TargetType} from './Constants';
 
 export type Rule = {
@@ -82,7 +83,26 @@ export type EngineExecutionSummary = {
 	violationCount: number;
 };
 
-export type RecombinedData = string | {columns: string[]; rows: {[key: string]: string|number}[]};
+export type ResultTableRow = {
+	description: string;
+	category: string;
+	url: string;
+	/**
+	 * {@code location} applies solely to non-DFA violations, which are considered to occur
+	 * at only a single point.
+	 */
+	location?: string;
+	/**
+	 * {@code sourceLocation} applies solely to DFA violations.
+	 */
+	sourceLocation?: string;
+	/**
+	 * {@code sinkLocation} applies solely to DFA violations.
+	 */
+	sinkLocation?: string;
+}
+
+export type RecombinedData = string | {columns: Ux.Table.Columns<ResultTableRow>; rows: ResultTableRow[]};
 
 export type RecombinedRuleResults = {
 	minSev: number;

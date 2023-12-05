@@ -1,4 +1,4 @@
-import {expect} from '@salesforce/command/lib/test';
+import {expect} from 'chai';
 import {Interaction} from '@salesforce/cli-plugins-testkit';
 // @ts-ignore
 import {runCommand, runInteractiveCommand} from '../../../TestUtils';
