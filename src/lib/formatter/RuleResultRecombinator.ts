@@ -1,6 +1,7 @@
 import {SfError} from '@salesforce/core';
 import * as path from 'path';
-import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, RuleResult, RuleViolation} from '../../types';
+import {Ux} from '@salesforce/sf-plugins-core';
+import {EngineExecutionSummary, RecombinedData, RecombinedRuleResults, ResultTableRow, RuleResult, RuleViolation} from '../../types';
 import {ENGINE} from '../../Constants';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import * as wrap from 'word-wrap';
@@ -11,28 +12,27 @@ import { stringify } from 'csv-stringify';
 import { constructSarif } from './SarifFormatter';
 import {isPathlessViolation} from '../util/Utils';
 
-type BaseTableRow = {
-	Rule: string;
-	Description: string;
-	URL: string;
-	Category: string;
-	Severity: number;
-	Engine: string;
+const BASE_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
+	description: {},
+	category: {},
+	url: {
+		header: "URL"
+	}
 };
 
-type PathlessTableRow = BaseTableRow & {
-	Location: string;
-	Line: number;
-	Column: number;
+const DFA_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
+	sourceLocation: {
+		header: 'Source Location'
+	},
+	sinkLocation: {
+		header: 'Sink Location'
+	},
+	...BASE_COLUMNS
 };
 
-type DfaTableRow = BaseTableRow & {
-	"Source Location": string;
-	"Source Line": number;
-	"Source Column": number;
-	"Sink Location": string|null;
-	"Sink Line": number|null;
-	"Sink Column": number|null;
+export const PATHLESS_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
+	location: {},
+	...BASE_COLUMNS
 };
 
 export class RuleResultRecombinator {
@@ -271,55 +271,41 @@ URL: ${url}`;
 
 	private static constructTable(results: RuleResult[]): RecombinedData {
 		const columns = this.violationsAreDfa(results)
-			? ['Source Location', 'Sink Location', 'Description', 'Category', 'URL']
-			: ['Location', 'Description', 'Category', 'URL'];
+			? DFA_COLUMNS
+			: PATHLESS_COLUMNS
 
 		// Build the rows.
-		const rows: (PathlessTableRow|DfaTableRow)[] = [];
+		const rows: ResultTableRow[] = [];
 		for (const result of results) {
 			const fileName = result.fileName;
 			for (const violation of result.violations) {
 				const message = violation.message.trim();
 				const relativeFile = path.relative(process.cwd(), fileName);
 				// Instantiate our Row object.
-				const baseRow: BaseTableRow = {
-					Rule: violation.ruleName,
-					Description: wrap(message),
-					URL: violation.url,
-					Category: violation.category,
-					Severity: violation.severity,
-					Engine: result.engine
+				const baseRow: ResultTableRow = {
+					description: wrap(message),
+					category: violation.category,
+					url: violation.url
 				};
 				// A pathless violation can be trivially converted into a row.
 				if (isPathlessViolation(violation)) {
 					rows.push({
 						...baseRow,
-						Location: `${relativeFile}:${violation.line}`,
-						Line: violation.line,
-						Column: violation.column
+						location: `${relativeFile}:${violation.line}`
 					});
 				} else if (!(violation.sinkFileName)) {
 					// If the violation is path-based but has no sink file, then the violation indicates an error of some
-					// kind. So use the source information we were given, but use null for everything else.
+					// kind. So use the source information we were given, but omit sink information.
 					rows.push({
 						...baseRow,
-						"Source Location": `${relativeFile}:${violation.sourceLine}`,
-						"Source Line": violation.sourceLine,
-						"Source Column": violation.sourceColumn,
-						"Sink Location": "",
-						"Sink Line": null,
-						"Sink Column": null
+						sourceLocation: `${relativeFile}:${violation.sourceLine}`
 					});
 				} else {
 					const relativeSinkFile = path.relative(process.cwd(), violation.sinkFileName);
 					rows.push({
 						...baseRow,
-						"Source Location": `${relativeFile}:${violation.sourceLine}`,
-						"Source Line": violation.sourceLine,
-						"Source Column": violation.sourceColumn,
-						"Sink Location": `${relativeSinkFile}:${violation.sinkLine}`,
-						"Sink Line": violation.sinkLine,
-						"Sink Column": violation.sinkColumn
+						sourceLocation: `${relativeFile}:${violation.sourceLine}`,
+						sinkLocation: `${relativeSinkFile}:${violation.sinkLine}`
 					});
 				}
 			}

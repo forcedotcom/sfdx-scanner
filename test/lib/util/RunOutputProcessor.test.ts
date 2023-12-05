@@ -3,9 +3,10 @@ import {expect} from 'chai';
 import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOutputProcessor';
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
+import {PATHLESS_COLUMNS} from '../../../src/lib/formatter/RuleResultRecombinator';
 
 import {Messages} from '@salesforce/core';
-import {UX} from '@salesforce/command';
+import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 
@@ -19,45 +20,25 @@ FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
 FAKE_SUMMARY_MAP.set('eslint-typescript', {fileCount: 1, violationCount: 2});
 
 const FAKE_TABLE_OUTPUT = {
-	"columns": [
-		"Location",
-		"Description",
-		"Category",
-		"URL"
-	],
+	"columns": PATHLESS_COLUMNS,
 	"rows": [
 		{
-			"Location": "src/file-with-problems.ts:3",
-			"Rule": "no-unused-vars",
-			"Description": "  'UNUSED' is assigned a value but never used.",
-			"URL": "https://eslint.org/docs/rules/no-unused-vars",
-			"Category": "Variables",
-			"Severity": 2,
-			"Line": 3,
-			"Column": 7,
-			"Engine": "eslint-typescript"
+			location: "src/file-with-problems.ts:3",
+			description: "  'UNUSED' is assigned a value but never used.",
+			url: "https://eslint.org/docs/rules/no-unused-vars",
+			category: "Variables",
 		},
 		{
-			"Location": "src/file-with-problems.ts:3",
-			"Rule": "@typescript-eslint/no-unused-vars",
-			"Description": "  'UNUSED' is assigned a value but never used.",
-			"URL": "https://github.com/typescript-eslint/typescript-eslint/blob/v2.33.0/packages/eslint-plugin/docs/rules/no-unused-vars.md",
-			"Category": "Variables",
-			"Severity": 2,
-			"Line": 3,
-			"Column": 7,
-			"Engine": "eslint-typescript"
+			location: "src/file-with-problems.ts:3",
+			description: "  'UNUSED' is assigned a value but never used.",
+			url: "https://github.com/typescript-eslint/typescript-eslint/blob/v2.33.0/packages/eslint-plugin/docs/rules/no-unused-vars.md",
+			category: "Variables",
 		},
 		{
-			"Location": "src/some-apex-file.cls:15",
-			"Rule": "EmptyIfStmt",
-			"Description": "  Avoid empty 'if' statements",
-			"URL": "Who cares",
-			"Category": "Error Prone",
-			"Severity": 1,
-			"Line": 15,
-			"Column": 3,
-			"Engine": "pmd"
+			location: "src/some-apex-file.cls:15",
+			description: "  Avoid empty 'if' statements",
+			url: "Who cares",
+			category: "Error Prone",
 		}
 	]
 };
@@ -104,12 +85,12 @@ const FAKE_JSON_OUTPUT = `[{
 
 describe('RunOutputProcessor', () => {
 	let fakeFiles: {path; data}[] = [];
-	let testUx: UX = null;
+	let testUx: Ux = null;
 	let logSpy = null;
 	let tableSpy = null;
 
-	beforeEach(async () => {
-		testUx = await UX.create();
+	beforeEach(() => {
+		testUx = new Ux({jsonEnabled: false});
 
 		Sinon.createSandbox();
 
