@@ -12,6 +12,25 @@ We publish the latest Code Analyzer monthly.
 * Run `sfdx plugins:update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.19.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.19.0) (12-05-2023)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.19.0...v3.18.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (VS Code Extension): Code Analyzer dependencies are now shrink-wrapped when installed as part of Salesforce CLI `sf` commands and parameters.
+
+**Closed issues:**
+* [BUG]When executing a custom ESlint rule with the scanner [\#1233](https://github.com/forcedotcom/sfdx-scanner/issues/1233)
+* How to get the call graph/program graph from SFDX? [\#1239](https://github.com/forcedotcom/sfdx-scanner/issues/1239)
+* Cannot install SFDX Scanner [\#1236](https://github.com/forcedotcom/sfdx-scanner/issues/1236)
+
+**Merged pull requests:**
+* CHANGE (OTHER): @W-14573108@: Turn on test logging for cli-messaging [\#1256](https://github.com/forcedotcom/sfdx-scanner/pull/1256)
+* CHANGE (OTHER): @W-14573108@: Fix cli-messaging tests and make subprojects use same gradle version as root [\#1254](https://github.com/forcedotcom/sfdx-scanner/pull/1254)
+* FIX (CodeAnalyzer): @W-14204096@: Fixed missing close-comment tag in issue template. [\#1238](https://github.com/forcedotcom/sfdx-scanner/pull/1238)
+
 ## [v3.18.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.18.0) (11-01-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.18.0...v3.17.0)
