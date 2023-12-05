@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Flags, Ux} from '@salesforce/sf-plugins-core';
 import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
@@ -14,6 +14,7 @@ Messages.importMessagesDirectory(__dirname);
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
 const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
+const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
 type DescribeStyledRule = Rule & {
 	runWith: string;
@@ -22,8 +23,8 @@ type DescribeStyledRule = Rule & {
 
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandDescription');
+	public static description = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples.normalExample')
@@ -31,14 +32,16 @@ export default class Describe extends ScannerCommand {
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
 	// is what's printed when the -h/--help flag is supplied.
-	protected static flagsConfig = {
-		rulename: flags.string({
+	public static readonly flags = {
+		rulename: Flags.string({
 			char: 'n',
-			description: messages.getMessage('flags.rulenameDescription'),
-			longDescription: messages.getMessage('flags.rulenameDescriptionLong'),
+			summary: messages.getMessage('flags.rulenameDescription'),
+			description: messages.getMessage('flags.rulenameDescriptionLong'),
 			required: true
 		}),
-		verbose: flags.builtin()
+		verbose: Flags.boolean({
+			summary: commonMessages.getMessage('flags.verboseSummary')
+		})
 	};
 
 	async runInternal(): Promise<AnyJson> {
@@ -50,13 +53,13 @@ export default class Describe extends ScannerCommand {
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
-			this.ux.warn(messages.getMessage('output.noMatchingRules', [this.flags.rulename as string]));
+			this.warn(messages.getMessage('output.noMatchingRules', [this.parsedFlags.rulename as string]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.flags.rulename as string]);
-			this.ux.warn(msg);
+			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.parsedFlags.rulename as string]);
+			this.warn(msg);
 			rules.forEach((rule, idx) => {
-				this.ux.styledHeader(`Rule #${idx + 1}`);
+				this.styledHeader(`Rule #${idx + 1}`);
 				this.logStyledRule(rule);
 			});
 		} else {
@@ -90,6 +93,7 @@ export default class Describe extends ScannerCommand {
 	}
 
 	private logStyledRule(rule: DescribeStyledRule): void {
-		this.ux.styledObject(rule, ['name', 'engine', 'runWith', 'isPilot', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
+		new Ux({jsonEnabled: this.jsonEnabled()})
+			.styledObject(rule, ['name', 'engine', 'runWith', 'isPilot', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
 	}
 }

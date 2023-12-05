@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Flags, Ux} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
@@ -18,7 +18,8 @@ Messages.importMessagesDirectory(__dirname);
 
 // Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
 // or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
 
@@ -29,47 +30,50 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 * here to avoid duplicate code.
 	 * @protected
 	 */
-	protected static flagsConfig = {
-		verbose: flags.builtin(),
+	public static readonly flags = {
+		verbose: Flags.boolean({
+			summary: commonMessages.getMessage('flags.verboseSummary')
+		}),
 		// BEGIN: Filter-related flags.
-		category: flags.array({
+		category: Flags.custom<string[]>({
 			char: 'c',
-			description: messages.getMessage('flags.categoryDescription'),
-			longDescription: messages.getMessage('flags.categoryDescriptionLong')
-		}),
+			summary: runMessages.getMessage('flags.categoryDescription'),
+			description: runMessages.getMessage('flags.categoryDescriptionLong'),
+			delimiter: ',',
+			multiple: true
+		})(),
 		// BEGIN: Flags related to results processing.
-		format: flags.enum({
+		format: Flags.custom<OUTPUT_FORMAT>({
 			char: 'f',
-			description: messages.getMessage('flags.formatDescription'),
-			longDescription: messages.getMessage('flags.formatDescriptionLong'),
-			options: [OUTPUT_FORMAT.CSV, OUTPUT_FORMAT.HTML, OUTPUT_FORMAT.JSON, OUTPUT_FORMAT.JUNIT, OUTPUT_FORMAT.SARIF, OUTPUT_FORMAT.TABLE, OUTPUT_FORMAT.XML]
-		}),
-		outfile: flags.string({
+			summary: runMessages.getMessage('flags.formatDescription'),
+			description: runMessages.getMessage('flags.formatDescriptionLong'),
+			options: Object.values(OUTPUT_FORMAT)
+		})(),
+		outfile: Flags.string({
 			char: 'o',
-			description: messages.getMessage('flags.outfileDescription'),
-			longDescription: messages.getMessage('flags.outfileDescriptionLong')
+			summary: runMessages.getMessage('flags.outfileDescription'),
+			description: runMessages.getMessage('flags.outfileDescriptionLong')
 		}),
-		'severity-threshold': flags.integer({
+		'severity-threshold': Flags.integer({
 			char: 's',
-			description: messages.getMessage('flags.sevthresholdDescription'),
-			longDescription: messages.getMessage('flags.sevthresholdDescriptionLong'),
+			summary: runMessages.getMessage('flags.sevthresholdDescription'),
+			description: runMessages.getMessage('flags.sevthresholdDescriptionLong'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
 		}),
-		'normalize-severity': flags.boolean({
-			description: messages.getMessage('flags.normalizesevDescription'),
-			longDescription: messages.getMessage('flags.normalizesevDescriptionLong')
+		'normalize-severity': Flags.boolean({
+			summary: runMessages.getMessage('flags.normalizesevDescription'),
+			description: runMessages.getMessage('flags.normalizesevDescriptionLong')
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
-		projectdir: flags.array({
+		projectdir: Flags.custom<string[]>({
 			char: 'p',
-			description: messages.getMessage('flags.projectdirDescription'),
-			longDescription: messages.getMessage('flags.projectdirDescriptionLong'),
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			map: d => normalize(untildify(d))
-		}),
+			summary: runMessages.getMessage('flags.projectdirDescription'),
+			description: runMessages.getMessage('flags.projectdirDescriptionLong'),
+			parse: val => Promise.resolve(val.split(',').map(d => normalize(untildify(d))))
+		})(),
 		// END: Flags related to targeting.
 	};
 
@@ -78,7 +82,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		await this.validateFlags();
 
 		// If severity-threshold is used, that implicitly normalizes the severity.
-		const normalizeSeverity: boolean = (this.flags['normalize-severity'] || this.flags['severity-threshold']) as boolean;
+		const normalizeSeverity: boolean = (this.parsedFlags['normalize-severity'] || this.parsedFlags['severity-threshold']) as boolean;
 
 		// Next, we need to build our input.
 		const filters = this.buildRuleFilters();
@@ -90,7 +94,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			format: this.determineOutputFormat(),
 			normalizeSeverity: normalizeSeverity,
 			runDfa: this.pathBasedEngines(),
-			withPilot: this.flags['with-pilot'] as boolean,
+			withPilot: this.parsedFlags['with-pilot'] as boolean,
 			sfdxVersion: this.config.version
 		};
 
@@ -98,7 +102,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
-		const target = (this.flags.target || []) as string[];
+		const target = (this.parsedFlags.target || []) as string[];
 		const targetPaths = target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 
 		const engineOptions = this.gatherEngineOptions();
@@ -114,9 +118,9 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 
 		return new RunOutputProcessor({
 			format: runOptions.format,
-			severityForError: this.flags['severity-threshold'] as number,
-			outfile: this.flags.outfile as string
-		}, this.ux)
+			severityForError: this.parsedFlags['severity-threshold'] as number,
+			outfile: this.parsedFlags.outfile as string
+		}, new Ux({jsonEnabled: this.jsonEnabled()}))
 			.processRunOutput(output);
 	}
 
@@ -140,43 +144,43 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		const fh = new FileHandler();
 		// If there's a --projectdir flag, its entries must be non-glob paths pointing
 		// to existing directories.
-		if (this.flags.projectdir) {
-			for (const dir of (this.flags.projectdir as string[])) {
+		if (this.parsedFlags.projectdir) {
+			for (const dir of (this.parsedFlags.projectdir as string[])) {
 				if (globby.hasMagic(dir)) {
-					throw new SfError(messages.getMessage('validations.projectdirCannotBeGlob', []));
+					throw new SfError(runMessages.getMessage('validations.projectdirCannotBeGlob', []));
 				} else if (!(await fh.exists(dir))) {
-					throw new SfError(messages.getMessage('validations.projectdirMustExist', []));
+					throw new SfError(runMessages.getMessage('validations.projectdirMustExist', []));
 				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw new SfError(messages.getMessage('validations.projectdirMustBeDir', []));
+					throw new SfError(runMessages.getMessage('validations.projectdirMustBeDir', []));
 				}
 			}
 		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
-		if (this.flags.format && this.flags.outfile) {
+		if (this.parsedFlags.format && this.parsedFlags.outfile) {
 			const inferredOutfileFormat = this.inferFormatFromOutfile();
 			// For the purposes of this validation, we treat junit as xml.
-			const chosenFormat = this.flags.format === 'junit' ? 'xml' : this.flags.format as string;
+			const chosenFormat = this.parsedFlags.format === 'junit' ? 'xml' : this.parsedFlags.format as string;
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw new SfError(messages.getMessage('validations.cannotWriteTableToFile', []));
+				throw new SfError(runMessages.getMessage('validations.cannotWriteTableToFile', []));
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
 			if (chosenFormat !== inferredOutfileFormat) {
-				this.ux.log(messages.getMessage('validations.outfileFormatMismatch', [this.flags.format as string, inferredOutfileFormat]));
+				this.log(runMessages.getMessage('validations.outfileFormatMismatch', [this.parsedFlags.format as string, inferredOutfileFormat]));
 			}
 		}
 	}
 
 	protected determineOutputFormat(): OUTPUT_FORMAT {
 		// If an output format is explicitly specified, use that.
-		if (this.flags.format) {
-			return this.flags.format as OUTPUT_FORMAT;
-		} else if (this.flags.outfile) {
+		if (this.parsedFlags.format) {
+			return this.parsedFlags.format as OUTPUT_FORMAT;
+		} else if (this.parsedFlags.outfile) {
 			// Else If an outfile is explicitly specified, infer the format from its extension.
 			return this.inferFormatFromOutfile();
-		} else if (this.flags.json) {
+		} else if (this.parsedFlags.json) {
 			// Else If the --json flag is present, then we'll default to JSON format.
 			return OUTPUT_FORMAT.JSON;
 		} else {
@@ -186,11 +190,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	}
 
 	private inferFormatFromOutfile(): OUTPUT_FORMAT {
-		const outfile = this.flags.outfile as string;
+		const outfile = this.parsedFlags.outfile as string;
 		const lastPeriod = outfile.lastIndexOf('.');
 		// If the outfile is malformed, we're already hosed.
 		if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-			throw new SfError(messages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(runMessages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 		} else {
 			// Look at the file extension, and infer a corresponding output format.
 			const fileExtension = outfile.slice(lastPeriod + 1).toLowerCase();
@@ -202,7 +206,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 				case OUTPUT_FORMAT.XML:
 					return fileExtension;
 				default:
-					throw new SfError(messages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
+					throw new SfError(runMessages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 	}
@@ -224,9 +228,9 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	private gatherCommonEngineOptions(): Map<string,string> {
 		const options: Map<string,string> = new Map();
 		// We should only add a GraphEngine config if we were given a --projectdir flag.
-		if (this.flags.projectdir && (this.flags.projectdir as string[]).length > 0) {
+		if (this.parsedFlags.projectdir && (this.parsedFlags.projectdir as string[]).length > 0) {
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: (this.flags.projectdir as string[]).map(p => path.resolve(p))
+				projectDirs: (this.parsedFlags.projectdir as string[]).map(p => path.resolve(p))
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}

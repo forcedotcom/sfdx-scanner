@@ -2,7 +2,7 @@ import { Messages } from "@salesforce/core";
 // @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require('path');
-import { expect } from "@oclif/test";
+import { expect } from 'chai';
 import {ENGINE} from '../../../src/Constants';
 import normalize = require('normalize-path');
 
