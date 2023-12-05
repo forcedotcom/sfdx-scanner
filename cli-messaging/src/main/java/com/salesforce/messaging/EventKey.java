@@ -39,7 +39,7 @@ public enum EventKey {
     WARNING_GENERAL("warning.sfgeWarnLog", 1, MessageType.WARNING, MessageHandler.UX, true),
 	WARNING_MULTIPLE_METHOD_TARGET_MATCHES("warning.multipleMethodTargetMatches", 3, MessageType.WARNING, MessageHandler.UX, false),
 	WARNING_NO_METHOD_TARGET_MATCHES("warning.noMethodTargetMatches", 2, MessageType.WARNING, MessageHandler.UX, false),
-    ERROR_GENERAL("error.internal.sfgeErrorLog", 1, MessageType.ERROR, MessageHandler.UX, false),
+    ERROR_GENERAL("error.external.sfgeErrorLog", 1, MessageType.ERROR, MessageHandler.UX, false),
 
     /** GENERAL PURPOSE */
     INFO_TELEMETRY("info.telemetry", 1, MessageType.TELEMETRY, MessageHandler.INTERNAL, false);

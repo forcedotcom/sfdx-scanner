@@ -39,8 +39,7 @@ module.exports = {
 			"mainInvalidArgument": "INTERNAL ERROR: Invalid arguments passed to Main. Details: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
 			"jsonWriteFailed": "INTERNAL ERROR: Failed to write JSON to file: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
 			"classpathDoesNotExist": "INTERNAL ERROR: Path does not exist: %s. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
-			"xmlMissingInClasspath": "INTERNAL ERROR: XML resource [%s] found in jar, but not in Classpath. Please log an issue with us at github.com/forcedotcom/sfdx-scanner.",
-			"sfgeErrorLog": "%s"
+			"xmlMissingInClasspath": "INTERNAL ERROR: XML resource [%s] found in jar, but not in Classpath. Please log an issue with us at github.com/forcedotcom/sfdx-scanner."
 		},
 		"external": {
 			"errorMessageAbove": "Please see error details displayed above.",
@@ -52,7 +51,8 @@ module.exports = {
 			"xmlNotReadable": "ERROR: Error occurred while reading file [%s]: %s",
 			"xmlNotParsable": "ERROR: Could not parse XML file [%s]: %s",
 			"duplicateXmlPath": "ERROR: XML path [%s] defined in jar [%s] collides with previously defined path in jar [%s]. You will need to remove one of the jars by executing the following command 'sfdx scanner:rule:remove --force --path <jar-to-remove>'",
-			"sfgeIncompleteAnalysis": "ERROR: Salesforce Graph Engine encountered an error and couldn't complete analysis: %s"
+			"sfgeIncompleteAnalysis": "ERROR: Salesforce Graph Engine encountered an error and couldn't complete analysis: %s",
+			"sfgeErrorLog": "%s"
 		}
 	}
 
