@@ -2,7 +2,8 @@ import {SfCommand} from '@salesforce/sf-plugins-core';
 import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {initContainer} from '../ioc.config';
-import {AnyJson, isArray} from '@salesforce/ts-types';
+import {AnyJson} from '@salesforce/ts-types';
+import {stringArrayTypeGuard} from './util/Utils';
 import {LooseObject} from '../types';
 
 import {Logger, Messages} from '@salesforce/core';
@@ -47,17 +48,17 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> {
 	protected buildRuleFilters(): RuleFilter[] {
 		const filters: RuleFilter[] = [];
 		// Create a filter for any provided categories.
-		if (this.parsedFlags.category && isArray<string>(this.parsedFlags.category) && this.parsedFlags.category.length) {
+		if (this.parsedFlags.category && stringArrayTypeGuard(this.parsedFlags.category) && this.parsedFlags.category.length) {
 			filters.push(new CategoryFilter(this.parsedFlags.category));
 		}
 
 		// Create a filter for any provided rulesets.
-		if (this.parsedFlags.ruleset && isArray<string>(this.parsedFlags.ruleset) && this.parsedFlags.ruleset.length) {
+		if (this.parsedFlags.ruleset && stringArrayTypeGuard(this.parsedFlags.ruleset) && this.parsedFlags.ruleset.length) {
 			filters.push(new RulesetFilter(this.parsedFlags.ruleset));
 		}
 
 		// Create a filter for any provided languages.
-		if (this.parsedFlags.language && isArray<string>(this.parsedFlags.language) && this.parsedFlags.language.length) {
+		if (this.parsedFlags.language && stringArrayTypeGuard(this.parsedFlags.language) && this.parsedFlags.language.length) {
 			filters.push(new LanguageFilter(this.parsedFlags.language));
 		}
 
@@ -68,7 +69,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> {
 		}
 
 		// Create a filter for any provided engines.
-		if (this.parsedFlags.engine && isArray<string>(this.parsedFlags.engine) && this.parsedFlags.engine.length) {
+		if (this.parsedFlags.engine && stringArrayTypeGuard(this.parsedFlags.engine) && this.parsedFlags.engine.length) {
 			filters.push(new EngineFilter(this.parsedFlags.engine));
 		}
 

@@ -1,6 +1,7 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
-import {AnyJson, isArray} from '@salesforce/ts-types';
+import {AnyJson} from '@salesforce/ts-types';
+import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
 import path = require('path');
 import untildify = require('untildify');
@@ -62,7 +63,7 @@ export default class Add extends ScannerCommand {
 			throw new SfError(messages.getMessage('validations.languageCannotBeEmpty', []));
 		}
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.parsedFlags.path && isArray<string>(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
+		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
 			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty', []));
 		}
 	}

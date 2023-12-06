@@ -1,10 +1,11 @@
 import {FileHandler} from './FileHandler';
 import {Logger, LoggerLevel, Messages, SfError} from '@salesforce/core';
+import {isBoolean, isNumber} from '@salesforce/ts-types';
 import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import { uxEvents, EVENTS } from '../ScannerEvents';
-import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
+import {deepCopy, stringArrayTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
 
 Messages.importMessagesDirectory(__dirname);
@@ -203,11 +204,11 @@ export class Config {
 	}
 
 	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
-		return this.getConfigValue<boolean>(propertyName, engine, booleanTypeGuard, 'InvalidBooleanValue');
+		return this.getConfigValue<boolean>(propertyName, engine, isBoolean, 'InvalidBooleanValue');
 	}
 
 	protected getNumberConfigValue(propertyName: string, engine: ENGINE): Promise<number> {
-		return this.getConfigValue<number>(propertyName, engine, numberTypeGuard, 'InvalidNumberValue');
+		return this.getConfigValue<number>(propertyName, engine, isNumber, 'InvalidNumberValue');
 	}
 
 	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {
