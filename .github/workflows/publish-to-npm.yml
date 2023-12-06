@@ -73,13 +73,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11' # For now, Java version is hardcoded.
-      # Install SFDX, and the release candidate version.
-      - run: npm install -g sfdx-cli
-      - run: sfdx plugins:install @salesforce/sfdx-scanner@latest-rc
+      # Install SF, and the release candidate version.
+      - run: npm install -g @salesforce/cli
+      - run: sf plugins install @salesforce/sfdx-scanner@latest-rc
       # Log the installed plugins for easier debugging.
-      - run: sfdx plugins
+      - run: sf plugins
       # Attempt to run the smoke tests.
-      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
       # Upload the smoke test result as an artifact, so it's visible for later.
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
