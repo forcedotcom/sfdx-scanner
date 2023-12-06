@@ -12,7 +12,7 @@ describe('scanner rule describe', () => {
 			const formattedWarning = messages.getMessage('output.noMatchingRules', ['DefinitelyFakeRule']);
 			it('Correct warning is displayed', () => {
 				const output = runCommand(`scanner rule describe --rulename DefinitelyFakeRule`);
-				expect(output.shellOutput.stderr).to.contain(`WARNING: ${formattedWarning}`, 'Warning message should match');
+				expect(output.shellOutput.stderr.toLowerCase()).to.contain(`WARNING: ${formattedWarning}`.toLowerCase(), 'Warning message should match');
 			});
 
 			it('--json flag yields correct results', () => {
@@ -60,7 +60,7 @@ describe('scanner rule describe', () => {
 				const output = runCommand(`scanner rule describe --rulename constructor-super`);
 				const ctx = output.shellOutput;
 				// First, verify that the warning was printed at the start like it should have been.
-				expect(ctx.stderr).to.contain('WARNING: ' + formattedWarning, 'Warning message should be formatted correctly');
+				expect(ctx.stderr.toLowerCase()).to.contain(`WARNING: ${formattedWarning}`.toLowerCase(), 'Warning message should be formatted correctly');
 
 				// Next, verify that there are rule descriptions that are distinctly identified.
 				const regex = /=== Rule #1\n\nname:\s+constructor-super(.*\n)*=== Rule #2\n\nname:\s+constructor-super(.*\n)*=== Rule #3\n\nname:\s+constructor-super/g;
@@ -82,7 +82,7 @@ describe('scanner rule describe', () => {
 		describe('Error handling', () => {
 			it('Must input a rule name', () => {
 				const output = runCommand(`scanner rule describe`);
-				expect(output.shellOutput.stderr).to.contain(`ERROR running scanner:rule:describe:  The following error occurred:
+				expect(output.shellOutput.stderr).to.contain(`The following error occurred:
   Missing required flag rulename`);
 			});
 		});

@@ -50,12 +50,12 @@ describe('scanner:run', function () {
 			describe('Input validation', () => {
 				it('Input cannot be less than 1', () => {
 					const commandOutput = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls')} --format json --severity-threshold -1`);
-					expect(commandOutput.shellOutput.stderr).to.contain('Expected integer greater than or equal to 1 but received -1');
+					expect(commandOutput.shellOutput.stderr).to.contain('Expected an integer greater than or equal to 1 but received: -1');
 				});
 
 				it('Input cannot be greater than 3', () => {
 					const commandOutput = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls')} --format json --severity-threshold 5`);
-					expect(commandOutput.shellOutput.stderr).to.contain('Expected integer less than or equal to 3 but received 5');
+					expect(commandOutput.shellOutput.stderr).to.contain('Expected an integer less than or equal to 3 but received: 5');
 				});
 			});
 		});

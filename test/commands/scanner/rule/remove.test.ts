@@ -51,8 +51,7 @@ describe('scanner rule remove', () => {
 				expect(output.shellOutput.stdout).to.contain(messages.getMessage('output.dryRunOutput', [3, expectedRuleSummary]), 'All paths should be logged');
 			});
 
-			// TODO: THIS TEST CANNOT BE ENABLED UNTIL WE SWITCH FROM `SfdxCommand` TO `SfCommand`!
-			xit('By default, rule removal must be confirmed', async () => {
+			it('By default, rule removal must be confirmed', async () => {
 				const output = await runInteractiveCommand(`scanner rule remove --path ${pathToApexJar1}`, {
 					'These rules will be unregistered': Interaction.Yes
 				});
@@ -68,8 +67,7 @@ describe('scanner rule remove', () => {
 				}, `Deletion should have been persisted ${JSON.stringify(updatedCustomPathJson)}`);
 			});
 
-			// TODO: THIS TEST CANNOT BE ENABLED UNTIL WE SWITCH FROM `SfdxCommand` TO `SfCommand`!
-			xit('Rule removal can be safely aborted', async () => {
+			it('Rule removal can be safely aborted', async () => {
 				const output = await runInteractiveCommand(`scanner rule remove --path ${pathToApexJar1}`, {
 					'These rules will be unregistered': Interaction.No
 				});
