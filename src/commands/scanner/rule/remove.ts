@@ -1,6 +1,7 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
-import {AnyJson, isArray} from '@salesforce/ts-types';
+import {AnyJson} from '@salesforce/ts-types';
+import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
 import {RuleFilter, SourcePackageFilter} from '../../../lib/RuleFilter';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
@@ -107,7 +108,7 @@ export default class Remove extends ScannerCommand {
 
 	private validateFlags(): void {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.parsedFlags.path && isArray<string>(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
+		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
 			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty'));
 		}
 	}
