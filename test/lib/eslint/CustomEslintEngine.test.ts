@@ -185,7 +185,7 @@ describe("Tests for CustomEslintEngine", () => {
 
 				assert.fail('Expected exception');
 			} catch (err) {
-				expect(err.message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}.`);
+				expect(err.message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}`);
 			}
 
 		});
