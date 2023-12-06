@@ -14,9 +14,9 @@ yarn --ignore-scripts && yarn build
 ```
 
 ### Running
-Run any sfdx scanner command by replacing `sfdx` with `bin/run.js` or `bin/run.cmd` from sfdx-scanner directory. For example, you can invoke `list` command with:
+Run any sfdx scanner command by replacing `sfdx` with `bin/dev.js` or `bin/dev.cmd` from sfdx-scanner directory. For example, you can invoke `list` command with:
 ```
-bin/run.js scanner:rule:list
+bin/dev.js scanner rule list
 ```
 
 ### Making changes
@@ -43,9 +43,9 @@ If you linked your plugin to the sfdx cli, call your command with the `dev-suspe
 $ sfdx scanner:rule:list --dev-suspend
 ```
   
-Alternatively, to call your command using the `bin/run.js` or `bin/run.cmd` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
+Alternatively, to call your command using the `bin/dev.js` or `bin/dev.cmd` script, set the `NODE_OPTIONS` environment variable to `--inspect-brk` when starting the debugger:
 ```sh-session
-$ NODE_OPTIONS=--inspect-brk bin/run.js scanner:rule:list
+$ NODE_OPTIONS=--inspect-brk bin/dev.js scanner rule list
 ```
 
 2. Set some breakpoints in your command code
@@ -58,7 +58,7 @@ Congrats, you are debugging!
 
 ### Pushing your changes
 Create PR with work item name in the title - this would look like:
-`@W-1234567@ Descriptive title of work`
+`@W-1234567@ Descriptive title of work``
 
 Also, add helpful information about your changes so that reviewers can navigate easily and know what to look for.
 
