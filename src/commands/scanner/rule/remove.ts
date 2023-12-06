@@ -123,7 +123,7 @@ export default class Remove extends ScannerCommand {
 		// We'll want to create a list of short strings containing the name of each rule and where it's defined, so we
 		// can log that out to the user.
 		const ruleDescriptions: string[] = rules.map(rule => messages.getMessage('output.ruleTemplate', [rule.name, rule.sourcepackage]));
-		return messages.getMessage('output.deletionPrompt', [rules.length, ruleDescriptions.join('\n')]);
+		return messages.getMessage('output.deletionPrompt', [ruleDescriptions.join('\n')]);
 	}
 
 	private generateDryRunOutput(paths: string[]): string {
