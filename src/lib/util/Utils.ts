@@ -14,16 +14,8 @@ const stringArrayTypeGuard = (object): object is string[] => {
 	return !object.some(entry => typeof entry !== 'string');
 }
 
-const booleanTypeGuard = (object): object is boolean => {
-	return typeof object === 'boolean';
-}
-
-const numberTypeGuard = (object): object is number => {
-	return typeof object === 'number';
-}
-
 const isPathlessViolation = (v: RuleViolation): v is PathlessRuleViolation => {
 	return 'line' in v;
 }
 
-export { booleanTypeGuard, deepCopy, numberTypeGuard, stringArrayTypeGuard, isPathlessViolation };
+export { deepCopy, stringArrayTypeGuard, isPathlessViolation };
