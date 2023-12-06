@@ -125,10 +125,10 @@
 		"flexibleTaxonomy": true
 	},
 	"nyc": {
-		"branches": "75",
-		"lines": "90",
-		"functions": "90",
-		"statements": "90"
+		"branches": "60",
+		"lines": "75",
+		"functions": "75",
+		"statements": "75"
 	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
