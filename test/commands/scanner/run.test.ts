@@ -514,16 +514,16 @@ describe('scanner:run', function () {
 
 			it('Error thrown when output file is malformed', () => {
 				const output = runCommand(`scanner run --target path/that/does/notmatter --ruleset ApexUnit --outfile NotAValidFileName`);
-				expect(output.shellOutput.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeValid')}`);
+				expect(output.shellOutput.stderr).to.contain(`Error (1): ${commonMessages.getMessage('validations.outfileMustBeValid')}`);
 			});
 
 			it('Error thrown when output file is unsupported type', () => {
 				const output = runCommand(`scanner run --target path/that/does/not/matter --ruleset ApexUnit --outfile badtype.pdf`);
-				expect(output.shellOutput.stderr).to.contain(`ERROR running scanner:run:  ${commonMessages.getMessage('validations.outfileMustBeSupportedType')}`);
+				expect(output.shellOutput.stderr).to.contain(`Error (1): ${commonMessages.getMessage('validations.outfileMustBeSupportedType')}`);
 			})
 
 			it('Warning logged when output file format does not match format', () => {
-				const output = runCommand(`scanner run --target path/that/does/not/matter --format csv --outfile notcsv.xml`);
+				const output = runCommand(`scanner run --target path/that/does/not/matter --format csv --outfile ${notcsv}`);
 				expect(output.shellOutput.stdout).to.contain(commonMessages.getMessage('validations.outfileFormatMismatch', ['csv', 'xml']));
 			});
 		});
