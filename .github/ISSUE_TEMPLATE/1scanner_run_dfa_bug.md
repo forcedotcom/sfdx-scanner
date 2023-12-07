@@ -1,14 +1,14 @@
 ---
-name: Report a Bug with scanner:run:dfa
-about: Report an issue with the scanner:run:dfa command.
+name: Report a Bug with scanner run dfa
+about: Report an issue with the scanner run dfa command.
 title: "[BUG]"
 labels: ''
 assignees: ''
 ---
 <!--
-### Try These Steps to Resolve Issues with `scanner:run:dfa`
+### Try These Steps to Resolve Issues with `scanner run dfa`
 
-Oftentimes, you can resolve `scanner:run:dfa` issues on your own. Follow these steps.
+Oftentimes, you can resolve `scanner run dfa` issues on your own. Follow these steps.
 
 1. Read the error message.
 2. Read [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/) documentation.
@@ -27,15 +27,15 @@ If you're listing a managed package on AppExchange, prepare for the security rev
 
 **Note: In your scan report, if you see an InternalExecutionError or a LimitReached error, you can still submit for AppExchange security review. These errors aren't blockers.**
 
-### Log a `scanner:run:dfa` Issue
-If you're still having trouble after following the troubleshooting steps and checking that there's no existing issue that covers your situation, log a new `scanner:run:dfa` issue.
+### Log a `scanner run dfa` Issue
+If you're still having trouble after following the troubleshooting steps and checking that there's no existing issue that covers your situation, log a new `scanner run dfa` issue.
 
-1. Fill out the `scanner:run:dfa` Issue Template.
+1. Fill out the `scanner run dfa` Issue Template.
 2. Attach your code with your issue.
 3. If you can't publicly share the code that causes the issue, reproduce it in code that you can publicly share. Attach this substitute code to your issue.
 4. Give your issue a clear and specific title. Example: InternalExecutionError when scanning XYZ code.
 -->
-### `scanner:run:dfa` Issue Template
+### `scanner run dfa` Issue Template
 
 Fill out this template to submit your Code Analyzer issue.
 

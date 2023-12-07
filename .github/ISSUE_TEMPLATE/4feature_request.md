@@ -7,7 +7,7 @@ assignees: ''
 ---
 
 **Is your feature request related to an issue that you encountered with Salesforce Code Analyzer?**
-<!--Provide a clear and concise description of what the problem is. Example: When I run `scanner:run:describe`, I want to see a sorted list of commands.-->
+<!--Provide a clear and concise description of what the problem is. Example: When I run `scanner run describe`, I want to see a sorted list of commands.-->
 
 **Describe the solution that you want:**
 <!--Describe the clear and concise description of the result that you expect from your feature request.-->

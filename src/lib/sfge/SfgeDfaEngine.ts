@@ -26,7 +26,7 @@ export class SfgeDfaEngine extends AbstractSfgeEngine {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string,string>): boolean {
 		// If the engine was requested, there's no reason not to run it.
-		// By virtue of the constraints imposed on the `scanner:run:dfa` command, all necessary
+		// By virtue of the constraints imposed on the `scanner run dfa` command, all necessary
 		// config info is guaranteed to be present.
 		return true;
 	}

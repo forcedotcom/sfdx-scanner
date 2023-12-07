@@ -378,13 +378,24 @@ URL: ${url}`;
 		const fileHandler = new FileHandler();
 		const templateName = isDfa ? 'dfa-simple.mustache' : 'simple.mustache';
 		const template = await fileHandler.readFile(path.resolve(__dirname, '..', '..', '..', 'html-templates', templateName));
-		const args = ['sfdx', process.argv[2]];
-		for (const arg of process.argv.slice(3)) {
+		// Quirk: This should work fine in production, but in development it will lead to `dev` or `run`.
+		const exeName = path.parse(process.argv[1]).name;
+		const args = [exeName];
+		let parsingCommand = true;
+		for (const arg of process.argv.slice(2)) {
+			// If the argument starts with a `-`, then it's a flag.
 			if (arg.startsWith('-')) {
-				// Pass flags as-is
+				// Note that we're done parsing the command itself.
+				parsingCommand = false;
+				// Pass flags as-is instead of wrapping in quotes.
+				args.push(arg);
+			} else if (parsingCommand) {
+				// If we're still parsing the command, then the arg gets passed in as-is instead
+				// of being wrapped in quotes.
 				args.push(arg);
 			} else {
-				// Wrag flag parameters in quotes
+				// If we're not parsing a flag or the command, then we're parsing a flag parameter.
+				// Wrap it in quotes.
 				args.push(`"${arg}"`);
 			}
 		}

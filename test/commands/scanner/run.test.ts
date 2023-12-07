@@ -20,7 +20,7 @@ const pathToSomeOtherTestClass = path.join('test', 'code-fixtures', 'apex', 'Som
 const pathToAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls');
 const pathToYetAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls');
 
-describe('scanner:run', function () {
+describe('scanner run', function () {
 	describe('E2E', () => {
 		describe('Output Type: XML', () => {
 			function validateXmlOutput(xml: string): void {

@@ -11,7 +11,7 @@ Messages.importMessagesDirectory(__dirname);
 const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 
-describe('scanner:run with custom config E2E', () => {
+describe('scanner run with custom config E2E', () => {
 	const customPmdConfig =  path.join('.', 'test', 'code-fixtures', 'config', 'pmd_custom_config.xml');
 	const customEslintConfig = path.join('test', 'code-fixtures', 'config', 'custom_eslint_config.json');
 
