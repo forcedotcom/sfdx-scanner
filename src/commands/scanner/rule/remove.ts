@@ -19,8 +19,8 @@ const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common
 
 export default class Remove extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
-	public static summary = messages.getMessage('commandDescription');
-	public static description = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandSummary');
+	public static description = messages.getMessage('commandDescription');
 
 	public static examples = [
 		messages.getMessage('examples')
@@ -34,13 +34,13 @@ export default class Remove extends ScannerCommand {
 		}),
 		force: Flags.boolean({
 			char: 'f',
-			summary: messages.getMessage('flags.forceDescription'),
-			description: messages.getMessage('flags.forceDescriptionLong')
+			summary: messages.getMessage('flags.forceSummary'),
+			description: messages.getMessage('flags.forceDescription')
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
-			summary: messages.getMessage('flags.pathDescription'),
-			description: messages.getMessage('flags.pathDescriptionLong'),
+			summary: messages.getMessage('flags.pathSummary'),
+			description: messages.getMessage('flags.pathDescription'),
 			delimiter: ',',
 			multiple: true
 		})()

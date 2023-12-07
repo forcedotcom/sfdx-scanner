@@ -17,8 +17,8 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandDescription');
-	public static description = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandSummary');
+	public static description = messages.getMessage('commandDescription');
 
 	public static examples = [
 		messages.getMessage('examples')
@@ -34,15 +34,15 @@ export default class Run extends ScannerRunCommand {
 			deprecated: {
 				message: messages.getMessage('rulesetDeprecation')
 			},
-			summary: messages.getMessage('flags.rulesetDescription'),
-			description: messages.getMessage('flags.rulesetDescriptionLong'),
+			summary: messages.getMessage('flags.rulesetSummary'),
+			description: messages.getMessage('flags.rulesetDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		engine: Flags.custom<string[]>({
 			char: 'e',
-			summary: messages.getMessage('flags.engineDescription'),
-			description: messages.getMessage('flags.engineDescriptionLong'),
+			summary: messages.getMessage('flags.engineSummary'),
+			description: messages.getMessage('flags.engineDescription'),
 			options: [...PathlessEngineFilters],
 			delimiter: ',',
 			multiple: true
@@ -51,8 +51,8 @@ export default class Run extends ScannerRunCommand {
 		// BEGIN: Targeting-related flags.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: messages.getMessage('flags.targetDescription'),
-			description: messages.getMessage('flags.targetDescriptionLong'),
+			summary: messages.getMessage('flags.targetSummary'),
+			description: messages.getMessage('flags.targetDescription'),
 			delimiter: ',',
 			multiple: true,
 			required: true
@@ -60,22 +60,22 @@ export default class Run extends ScannerRunCommand {
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
 		tsconfig: Flags.string({
-			summary: messages.getMessage('flags.tsconfigDescription'),
-			description: messages.getMessage('flags.tsconfigDescriptionLong')
+			summary: messages.getMessage('flags.tsconfigSummary'),
+			description: messages.getMessage('flags.tsconfigDescription')
 		}),
 		eslintconfig: Flags.string({
-			summary: messages.getMessage('flags.eslintConfigDescription'),
-			description: messages.getMessage('flags.eslintConfigDescriptionLong')
+			summary: messages.getMessage('flags.eslintConfigSummary'),
+			description: messages.getMessage('flags.eslintConfigDescription')
 		}),
 		pmdconfig: Flags.string({
-			summary: messages.getMessage('flags.pmdConfigDescription'),
-			description: messages.getMessage('flags.pmdConfigDescriptionLong')
+			summary: messages.getMessage('flags.pmdConfigSummary'),
+			description: messages.getMessage('flags.pmdConfigDescription')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
 		env: Flags.string({
-			summary: messages.getMessage('flags.envDescription'),
-			description: messages.getMessage('flags.envDescriptionLong'),
+			summary: messages.getMessage('flags.envSummary'),
+			description: messages.getMessage('flags.envDescription'),
 			deprecated: {
 				message: messages.getMessage('flags.envParamDeprecationWarning')
 			}
@@ -83,8 +83,8 @@ export default class Run extends ScannerRunCommand {
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
 		"verbose-violations": Flags.boolean({
-			summary: messages.getMessage('flags.verboseViolationsDescription'),
-			description: messages.getMessage('flags.verboseViolationsDescriptionLong')
+			summary: messages.getMessage('flags.verboseViolationsSummary'),
+			description: messages.getMessage('flags.verboseViolationsDescription')
 		})
 		// END: Flags related to results processing.
 	};

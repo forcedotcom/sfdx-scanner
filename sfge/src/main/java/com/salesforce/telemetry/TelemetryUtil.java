@@ -65,7 +65,7 @@ public final class TelemetryUtil {
         return MAIN_THREAD_NAME.equalsIgnoreCase(Thread.currentThread().getName());
     }
 
-    /** An object that can be used as the base for an SFDX telemetry event. */
+    /** An object that can be used as the base for a Salesforce CLI telemetry event. */
     private static class TelemetryData {
         /** Necessary property for telemetry objects. */
         private final String eventName = "SFGE_TELEMETRY";

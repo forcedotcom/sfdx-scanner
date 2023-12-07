@@ -21,8 +21,8 @@ const BOOLEAN_ENVARS_BY_FLAG: Map<string,string> = new Map([
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandDescription');
-	public static description = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandSummary');
+	public static description = messages.getMessage('commandDescription');
 
 	public static examples = [
 		messages.getMessage('examples')
@@ -37,8 +37,8 @@ export default class Dfa extends ScannerRunCommand {
 		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
 		'with-pilot': Flags.boolean({
-			summary: messages.getMessage('flags.withpilotDescription'),
-			description: messages.getMessage('flags.withpilotDescriptionLong')
+			summary: messages.getMessage('flags.withpilotSummary'),
+			description: messages.getMessage('flags.withpilotDescription')
 		}),
 		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
@@ -46,8 +46,8 @@ export default class Dfa extends ScannerRunCommand {
 		// and therefore different descriptions, so each command defines this flag separately.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: messages.getMessage('flags.targetDescription'),
-			description: messages.getMessage('flags.targetDescriptionLong'),
+			summary: messages.getMessage('flags.targetSummary'),
+			description: messages.getMessage('flags.targetDescription'),
 			required: true,
 			delimiter: ',',
 			multiple: true
@@ -55,29 +55,29 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': Flags.integer({
-			summary: messages.getMessage('flags.rulethreadcountDescription'),
-			description: messages.getMessage('flags.rulethreadcountDescriptionLong'),
+			summary: messages.getMessage('flags.rulethreadcountSummary'),
+			description: messages.getMessage('flags.rulethreadcountDescription'),
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
 		'rule-thread-timeout': Flags.integer({
-			summary: messages.getMessage('flags.rulethreadtimeoutDescription'),
-			description: messages.getMessage('flags.rulethreadtimeoutDescriptionLong'),
+			summary: messages.getMessage('flags.rulethreadtimeoutSummary'),
+			description: messages.getMessage('flags.rulethreadtimeoutDescription'),
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
 		[RULE_DISABLE_WARNING_VIOLATION_FLAG]: Flags.boolean({
-			summary: messages.getMessage('flags.ruledisablewarningviolationDescription'),
-			description: messages.getMessage('flags.ruledisablewarningviolationDescriptionLong')
+			summary: messages.getMessage('flags.ruledisablewarningviolationSummary'),
+			description: messages.getMessage('flags.ruledisablewarningviolationDescription')
 		}),
 		'sfgejvmargs': Flags.string({
-			summary: messages.getMessage('flags.sfgejvmargsDescription'),
-			description: messages.getMessage('flags.sfgejvmargsDescriptionLong'),
+			summary: messages.getMessage('flags.sfgejvmargsSummary'),
+			description: messages.getMessage('flags.sfgejvmargsDescription'),
 			env: 'SFGE_JVM_ARGS'
 		}),
 		'pathexplimit': Flags.integer({
-			summary: messages.getMessage('flags.pathexplimitDescription'),
-			description: messages.getMessage('flags.pathexplimitDescriptionLong'),
+			summary: messages.getMessage('flags.pathexplimitSummary'),
+			description: messages.getMessage('flags.pathexplimitDescription'),
 			env: 'SFGE_PATH_EXPANSION_LIMIT'
 		})
 		// END: Config-overrideable engine flags.

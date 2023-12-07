@@ -139,7 +139,7 @@ export class DefaultRuleManager implements RuleManager {
 
 
 		this.validateRunDescriptors(runDescriptorList);
-		await this.emitRunTelemetry(runDescriptorList, runOptions.sfdxVersion);
+		await this.emitRunTelemetry(runDescriptorList, runOptions.sfVersion);
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
 
@@ -173,7 +173,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 	}
 
-	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfdxVersion: string): Promise<void> {
+	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfVersion: string): Promise<void> {
 		// Get the name of every engine being executed.
 		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
 		// Build the base telemetry data.
@@ -185,7 +185,7 @@ export class DefaultRuleManager implements RuleManager {
 			// Creating a string of all the executed engines would yield data useful for metrics.
 			// Note: Calling `.sort()` without an argument causes a simple less-than to be used.
 			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort()),
-			sfdxVersion
+			sfVersion
 		};
 
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();

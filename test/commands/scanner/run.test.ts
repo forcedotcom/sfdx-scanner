@@ -6,12 +6,13 @@ import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
-import events = require('../../../messages/EventKeyTemplates');
+//import events = require('../../../messages/EventKeyTemplates');
 
 Messages.importMessagesDirectory(__dirname);
 const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
 const runMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
+const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
 const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
@@ -609,7 +610,7 @@ describe('scanner:run', function () {
 			// We'll split the output by the <violation> tag, so we can get individual violations.
 			const violations = output.shellOutput.stdout.split('<violation');
 			// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
-			const regex = new RegExp(events.info.categoryImplicitlyRun.replace(/%s/g, '.*'), 'g');
+			const regex = new RegExp(eventMessages.getMessage('info.categoryImplicitlyRun', ['.*', '.*']), 'g');
 			const implicitMessages = violations[0].match(regex);
 			// if this test is not passing and the output seems very large, that's because the test reruns on failures,
 			// and the output accumulates each time, so the output on failure is not the true length of the output

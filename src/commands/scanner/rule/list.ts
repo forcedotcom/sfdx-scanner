@@ -49,8 +49,8 @@ const MSG_NO = messages.getMessage('no');
 
 export default class List extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
-	public static summary = messages.getMessage('commandDescription');
-	public static description = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandSummary');
+	public static description = messages.getMessage('commandDescription');
 
 	public static examples = [
 		messages.getMessage('examples')
@@ -66,8 +66,8 @@ export default class List extends ScannerCommand {
 		// These flags are how you choose which rules are listed.
 		category: Flags.custom<string[]>({
 			char: 'c',
-			summary: messages.getMessage('flags.categoryDescription'),
-			description: messages.getMessage('flags.categoryDescriptionLong'),
+			summary: messages.getMessage('flags.categorySummary'),
+			description: messages.getMessage('flags.categoryDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
@@ -76,22 +76,22 @@ export default class List extends ScannerCommand {
 			deprecated: {
 				message: messages.getMessage('rulesetDeprecation')
 			},
-			summary: messages.getMessage('flags.rulesetDescription'),
-			description: messages.getMessage('flags.rulesetDescriptionLong'),
+			summary: messages.getMessage('flags.rulesetSummary'),
+			description: messages.getMessage('flags.rulesetDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		language: Flags.custom<string[]>({
 			char: 'l',
-			summary: messages.getMessage('flags.languageDescription'),
-			description: messages.getMessage('flags.languageDescriptionLong'),
+			summary: messages.getMessage('flags.languageSummary'),
+			description: messages.getMessage('flags.languageDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		engine: Flags.custom<string[]>({
 			char: 'e',
-			summary: messages.getMessage('flags.engineDescription'),
-			description: messages.getMessage('flags.engineDescriptionLong'),
+			summary: messages.getMessage('flags.engineSummary'),
+			description: messages.getMessage('flags.engineDescription'),
 			options: [...AllowedEngineFilters],
 			delimiter: ',',
 			multiple: true
@@ -101,7 +101,7 @@ export default class List extends ScannerCommand {
 
 	async runInternal(): Promise<Rule[]> {
 		const ruleFilters = this.buildRuleFilters();
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
+		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
 		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);

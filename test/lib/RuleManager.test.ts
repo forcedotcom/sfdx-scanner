@@ -194,7 +194,7 @@ describe('RuleManager', () => {
 				normalizeSeverity: false,
 				runDfa: false,
 				withPilot: false,
-				sfdxVersion: 'test'
+				sfVersion: 'test'
 			};
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
