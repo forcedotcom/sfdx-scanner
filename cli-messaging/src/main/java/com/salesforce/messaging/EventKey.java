@@ -2,7 +2,7 @@ package com.salesforce.messaging;
 import static com.salesforce.messaging.Message.*;
 
 public enum EventKey {
-	// MAKE SURE `messageKey` OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.js'!
+	// MAKE SURE `messageKey` OF EVERY VALUE ADDED HERE HAS AN ENTRY IN 'messages/EventKeyTemplates.md'!
 
     /** PMD-CATALOGER RELATED **/
 	INFO_GENERAL_INTERNAL_LOG("info.generalInternalLog", 1, MessageType.INFO, MessageHandler.INTERNAL, true),

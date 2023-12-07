@@ -9,9 +9,9 @@ import com.google.gson.Gson;
 
 public class CliMessager {
 	// The START string gives us something to scan for when we're processing output.
-	private static final String START = "SFDX-START";
+	private static final String START = "SF-START";
 	// The END string lets us know when a message stops, which should prevent bugs involving multi-line output.
-	private static final String END = "SFDX-END";
+	private static final String END = "SF-END";
 
     private static final String REALTIME_START = "SFCA-REALTIME-START";
     private static final String REALTIME_END = "SFCA-REALTIME-END";

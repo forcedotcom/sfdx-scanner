@@ -37,41 +37,41 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		// BEGIN: Filter-related flags.
 		category: Flags.custom<string[]>({
 			char: 'c',
-			summary: runMessages.getMessage('flags.categoryDescription'),
-			description: runMessages.getMessage('flags.categoryDescriptionLong'),
+			summary: runMessages.getMessage('flags.categorySummary'),
+			description: runMessages.getMessage('flags.categoryDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		// BEGIN: Flags related to results processing.
 		format: Flags.custom<OUTPUT_FORMAT>({
 			char: 'f',
-			summary: runMessages.getMessage('flags.formatDescription'),
-			description: runMessages.getMessage('flags.formatDescriptionLong'),
+			summary: runMessages.getMessage('flags.formatSummary'),
+			description: runMessages.getMessage('flags.formatDescription'),
 			options: Object.values(OUTPUT_FORMAT)
 		})(),
 		outfile: Flags.string({
 			char: 'o',
-			summary: runMessages.getMessage('flags.outfileDescription'),
-			description: runMessages.getMessage('flags.outfileDescriptionLong')
+			summary: runMessages.getMessage('flags.outfileSummary'),
+			description: runMessages.getMessage('flags.outfileDescription')
 		}),
 		'severity-threshold': Flags.integer({
 			char: 's',
-			summary: runMessages.getMessage('flags.sevthresholdDescription'),
-			description: runMessages.getMessage('flags.sevthresholdDescriptionLong'),
+			summary: runMessages.getMessage('flags.sevthresholdSummary'),
+			description: runMessages.getMessage('flags.sevthresholdDescription'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
 		}),
 		'normalize-severity': Flags.boolean({
-			summary: runMessages.getMessage('flags.normalizesevDescription'),
-			description: runMessages.getMessage('flags.normalizesevDescriptionLong')
+			summary: runMessages.getMessage('flags.normalizesevSummary'),
+			description: runMessages.getMessage('flags.normalizesevDescription')
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
 		projectdir: Flags.custom<string[]>({
 			char: 'p',
-			summary: runMessages.getMessage('flags.projectdirDescription'),
-			description: runMessages.getMessage('flags.projectdirDescriptionLong'),
+			summary: runMessages.getMessage('flags.projectdirSummary'),
+			description: runMessages.getMessage('flags.projectdirDescription'),
 			parse: val => Promise.resolve(val.split(',').map(d => normalize(untildify(d))))
 		})(),
 		// END: Flags related to targeting.
@@ -95,7 +95,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			normalizeSeverity: normalizeSeverity,
 			runDfa: this.pathBasedEngines(),
 			withPilot: this.parsedFlags['with-pilot'] as boolean,
-			sfdxVersion: this.config.version
+			sfVersion: this.config.version
 		};
 
 		const ruleManager = await Controller.createRuleManager();
@@ -111,7 +111,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		try {
 			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 		} catch (e) {
-			// Rethrow any errors as SFDX errors.
+			// Rethrow any errors as SF errors.
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}

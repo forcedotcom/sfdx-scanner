@@ -23,8 +23,8 @@ type DescribeStyledRule = Rule & {
 
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandDescription');
-	public static description = messages.getMessage('commandDescriptionLong');
+	public static summary = messages.getMessage('commandSummary');
+	public static description = messages.getMessage('commandDescription');
 
 	public static examples = [
 		messages.getMessage('examples.normalExample')
@@ -35,8 +35,8 @@ export default class Describe extends ScannerCommand {
 	public static readonly flags = {
 		rulename: Flags.string({
 			char: 'n',
-			summary: messages.getMessage('flags.rulenameDescription'),
-			description: messages.getMessage('flags.rulenameDescriptionLong'),
+			summary: messages.getMessage('flags.rulenameSummary'),
+			description: messages.getMessage('flags.rulenameDescription'),
 			required: true
 		}),
 		verbose: Flags.boolean({
@@ -46,7 +46,7 @@ export default class Describe extends ScannerCommand {
 
 	async runInternal(): Promise<AnyJson> {
 		const ruleFilters = this.buildRuleFilters();
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfdxError that we can
+		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
 		const rules: DescribeStyledRule[] = await this.styleRules(ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters));

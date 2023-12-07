@@ -98,12 +98,13 @@
 	],
 	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
 	"keywords": [
-		"sfdx-plugin"
+		"sfdx-plugin",
+		"sf-plugin"
 	],
 	"license": "MIT",
 	"oclif": {
 		"commands": "./lib/commands",
-		"bin": "sfdx",
+		"bin": "sf",
 		"topics": {
 			"scanner": {
 				"description": "scan code to detect code quality issues and security vulnerabilities",

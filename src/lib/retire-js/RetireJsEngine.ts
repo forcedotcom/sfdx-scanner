@@ -83,7 +83,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 	// module, and then use that to derive a path to the CLI-executable JS script.
 	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
 	// We also can't assume that the user actually has Node globally installed on their machine. So we need to figure out
-	// the version of node that's being executed right now (which may or may not be the version bundled with SFDX), so we
+	// the version of node that's being executed right now (which may or may not be the version bundled with Salesforce CLI), so we
 	// can use that.
 	private static NODE_EXEC_PATH: string = process.execPath;
 	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
@@ -310,7 +310,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			// Once we exit the loop, we can return all of the results in our Map.
 			return Array.from(ruleResultsByFile.values());
 		} catch (e) {
-			// Rethrow any errors as Sfdx errors.
+			// Rethrow any errors as SF errors.
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfError(message);
 		}
