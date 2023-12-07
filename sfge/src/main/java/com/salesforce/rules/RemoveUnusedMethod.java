@@ -35,7 +35,7 @@ import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
  *   <li>The method is not annotated with an engine directive that silences this rule.
  * </ol>
  */
-public final class RemoveUnusedMethod extends AbstractPathBasedRule implements PostProcessingRule {
+public final class RemoveUnusedMethod extends AbstractPathBasedRule {
     private static final Logger LOGGER = LogManager.getLogger(RemoveUnusedMethod.class);
     // UnusedMethodRule cares about all sources, since they're all equally capable of using a
     // method.
@@ -60,6 +60,7 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
      * Create violations for every eligible {@link MethodVertex} for which an invocation was never
      * found.
      */
+    @Override
     public List<Violation> postProcess(GraphTraversalSource g) {
         // Create an empty result list.
         List<Violation> results = new ArrayList<>();
@@ -97,10 +98,6 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
                                 .hasLabel(NodeType.METHOD)
                                 // The "<clinit>" method is ineligible.
                                 .has(Schema.NAME, P.neq("<clinit>"))
-                                // TODO: FOR NOW, WE'RE IGNORING CONSTRUCTORS TO CUT DOWN ON NOISE.
-                                //       IN THE FULLNESS OF TIME, AS WE FIX RELEVANT BUGS, WE'LL
-                                //       REMOVE THIS RESTRICTION.
-                                .has(Schema.NAME, P.neq("<init>"))
                                 // Getters are typically used by VF controllers rather than Apex,
                                 // and setters are often private to render the property immutable.
                                 // As such, including these methods is likely to generate
@@ -132,7 +129,9 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule implements P
                                 .where(
                                         __.or(
                                                 __.hasNot(Schema.IS_TEST),
-                                                __.has(Schema.IS_TEST, false))));
+                                                __.has(Schema.IS_TEST, false)))
+                            	// Implicit methods are ineligible
+                            	.where(__.not(__.has(Schema.IS_IMPLICIT, true))));
         // Other eligibility exclusions are more easily applied to the returned list.
         return methods.stream()
                 .filter(

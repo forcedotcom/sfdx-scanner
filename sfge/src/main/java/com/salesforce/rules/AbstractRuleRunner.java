@@ -113,9 +113,7 @@ public abstract class AbstractRuleRunner {
         }
         Result res = ThreadableRuleExecutor.run(submissions);
         for (AbstractPathBasedRule rule : rules) {
-            if (rule instanceof PostProcessingRule) {
-                res.addViolations(((PostProcessingRule) rule).postProcess(g));
-            }
+            res.addViolations(rule.postProcess(g));
         }
         return res;
     }
@@ -128,7 +126,7 @@ public abstract class AbstractRuleRunner {
             GraphTraversalSource fullGraph,
             MethodVertex pathEntry,
             List<AbstractPathBasedRule> rules) {
-        return new RuleRunnerSubmission(g, pathEntry, rules);
+        return new RuleRunnerSubmission(fullGraph, pathEntry, rules);
     }
 
     protected class RuleRunnerSubmission

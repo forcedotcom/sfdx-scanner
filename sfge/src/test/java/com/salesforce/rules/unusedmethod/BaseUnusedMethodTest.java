@@ -1,6 +1,8 @@
 package com.salesforce.rules.unusedmethod;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
 
 import com.google.common.collect.Lists;
 import com.salesforce.TestUtil;
@@ -11,6 +13,8 @@ import com.salesforce.graph.vertex.SFVertexFactory;
 import com.salesforce.rules.*;
 import com.salesforce.rules.unusedmethod.operations.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -255,25 +259,36 @@ public class BaseUnusedMethodTest {
             String entryMethod,
             Collection<String> usedMethodKeys,
             Collection<String> unusedMethodKeys) {
-        TestUtil.buildGraph(g, sourceCodes);
 
+        //TODO: This method attempts to simulate what AbstractRuleRunner.runRules does minus all the thread specific code
+        //      We should refactor the AbstractRuleRunner so that the Thread Specific parts can be injected as a strategy
+        //      and then for testing we would inject a strategy that executes without threads so that we can simply
+        //      call through to the top level rule runner here in the tests. Doing this refactoring would help us
+        //      prevent accidentally forgetting to update this code when changes occur somewhere deep down
+        //      inside of the runner's logic (like calling postProcess for example).
+
+        TestUtil.buildGraph(g, sourceCodes);
         RemoveUnusedMethod rule = RemoveUnusedMethod.getInstance();
         MethodVertex entryMethodVertex =
                 TestUtil.getMethodVertex(g, entryDefiningType, entryMethod);
         PathBasedRuleRunner runner =
                 new PathBasedRuleRunner(g, Lists.newArrayList(rule), entryMethodVertex);
-        // Violations aren't actually generated during the `runRules()` call.
         List<Violation> violations = new ArrayList<>(runner.runRules());
+        violations.addAll(rule.postProcess(g)); // Important! This is where the violations are created for this rule
+
         UsageTracker usageTracker = new UsageTracker();
         for (String usedMethodKey : usedMethodKeys) {
             assertTrue(
                     usageTracker.isUsed(usedMethodKey),
                     "Expected usage of method " + usedMethodKey);
         }
+
+        Set<String> unusedMethodsFoundByRule = violations.stream()
+            .map(v -> v.getSourceDefiningType() + "#" + v.getSourceVertexName() + "@" + v.getSourceLineNumber() )
+            .collect(Collectors.toSet());
         for (String unusedMethodKey : unusedMethodKeys) {
-            assertFalse(
-                    UsageTrackerDataProvider.contains(unusedMethodKey),
-                    "Expected non-usage of method " + unusedMethodKey);
+            assertThat("Expected non-usage violation for " + unusedMethodKey,
+                unusedMethodsFoundByRule, hasItem(unusedMethodKey));
         }
     }
 

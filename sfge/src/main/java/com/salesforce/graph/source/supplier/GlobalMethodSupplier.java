@@ -5,6 +5,7 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
+import com.salesforce.graph.vertex.ModifierNodeVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -22,8 +23,7 @@ public class GlobalMethodSupplier extends AbstractSourceSupplier {
                         .filter(
                                 __.and(
                                         // If a method has at least one block statement, then it
-                                        // is
-                                        // definitely actually declared, as
+                                        // is not definitely undeclared, as
                                         // opposed to being an implicit method.
                                         out(Schema.CHILD)
                                                 .hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
@@ -42,6 +42,6 @@ public class GlobalMethodSupplier extends AbstractSourceSupplier {
 
     @Override
     public boolean isPotentialSource(MethodVertex methodVertex) {
-        return methodVertex.getModifierNode().isGlobal();
+        return methodVertex.getModifierNode().isGlobal() && !methodVertex.isImplicit();
     }
 }
