@@ -8,7 +8,7 @@ import * as TestUtils from '../../TestUtils';
 Messages.importMessagesDirectory(__dirname);
 const exceptionMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Exceptions');
 
-describe('scanner:run tests that result in the use of RuleFilters', function () {
+describe('scanner run tests that result in the use of RuleFilters', function () {
 	describe('Single filter', () => {
 		describe('Positive constraints', () => {
 			it('Case: --engine eslint-lwc against clean LWC code', () => {

@@ -114,7 +114,7 @@ export class OutputProcessor extends AsyncCreatable {
 		// by default:
 		// - node version
 		// - plugin version
-		// - executed command (e.g., `scanner:run`)
+		// - executed command (e.g., `scanner run`)
 		await TelemetryUtil.emitTelemetry(telemetryObject);
 	}
 

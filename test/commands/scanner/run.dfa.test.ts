@@ -44,7 +44,7 @@ function verifyNotContains(output: string, substring: string): void {
 	expect(isSubstr(output, substring), `Output "${output}" should not contain substring "${substring}"`).is.false;
 }
 
-describe('scanner:run:dfa', function () {
+describe('scanner run dfa', function () {
 	this.timeout(20000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('End to end', () => {

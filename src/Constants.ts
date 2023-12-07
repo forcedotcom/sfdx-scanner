@@ -49,7 +49,7 @@ export const EngineBase = {
 
 /**
  * These are the filter values that can be used with the --engine flag in contexts where all engines are available.
- * (e.g., `scanner:rule:list`).
+ * (e.g., `scanner rule list`).
  */
 export const AllowedEngineFilters = [
 	ENGINE.ESLINT,
@@ -64,7 +64,7 @@ export const AllowedEngineFilters = [
 /**
  * These are the filter values that can be used with the --engine flag in contexts where only non-path engines should be
  * available.
- * (e.g., `scanner:run`).
+ * (e.g., `scanner run`).
  */
 export const PathlessEngineFilters = [
 	ENGINE.ESLINT,

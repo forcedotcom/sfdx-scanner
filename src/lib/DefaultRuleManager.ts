@@ -199,7 +199,7 @@ export class DefaultRuleManager implements RuleManager {
 		// by default:
 		// - node version
 		// - plugin version
-		// - executed command (e.g., `scanner:run`)
+		// - executed command (e.g., `scanner run`)
 		await TelemetryUtil.emitTelemetry(runTelemetryObject);
 	}
 

@@ -8,7 +8,7 @@ import path = require('path');
 Messages.importMessagesDirectory(__dirname);
 const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
 
-describe('scanner:run', function () {
+describe('scanner run', function () {
 
 	describe('E2E', () => {
 
