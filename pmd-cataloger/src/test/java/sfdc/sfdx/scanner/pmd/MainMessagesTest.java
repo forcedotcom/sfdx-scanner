@@ -1,25 +1,29 @@
 package sfdc.sfdx.scanner.pmd;
 
-import static org.junit.Assert.*;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import com.salesforce.messaging.EventKey;
-import com.salesforce.messaging.MessagePassableException;
-import com.salesforce.messaging.Message;
-import com.salesforce.messaging.CliMessager;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.Message;
+import com.salesforce.messaging.MessagePassableException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class MainMessagesTest {
 
-	@Before
-	@After
+	@BeforeEach
+	@AfterEach
 	public void clearMessages() {
 		CliMessager.getInstance().resetMessages();
 	}
@@ -38,12 +42,12 @@ public class MainMessagesTest {
 
 		// Validate
 		final List<Message> messages = getMessages();
-		assertEquals("Unexpected count of messages", 1, messages.size());
+		assertEquals(1, messages.size(), "Unexpected count of messages");
 		final Message actualMessage = messages.get(0);
 
 		// Validate message
-		assertEquals("Unexpected eventKey in message", expectedEventKey.getMessageKey(), actualMessage.getMessageKey());
-		assertEquals("Unexpected args in message", actualMessage.getArgs().get(0), expectedArgs[0]);
+		assertEquals(expectedEventKey.getMessageKey(), actualMessage.getMessageKey(), "Unexpected eventKey in message");
+		assertEquals(actualMessage.getArgs().get(0), expectedArgs[0], "Unexpected args in message");
 	}
 
 	@Test
@@ -56,13 +60,13 @@ public class MainMessagesTest {
 
 		// Validate
 		List<Message> messages = getMessages();
-		assertEquals("Unexpected count of messages", 1, messages.size());
+		assertEquals(1, messages.size(), "Unexpected count of messages");
 		final Message actualMessage = messages.get(0);
 
 		// Validate message
-		assertEquals("Unexpected eventKey in message when handling uncaught exception", EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey());
+		assertEquals(EventKey.ERROR_INTERNAL_UNEXPECTED.getMessageKey(), actualMessage.getMessageKey(), "Unexpected eventKey in message when handling uncaught exception");
 		final String actualLog = actualMessage.getInternalLog();
-		assertTrue("log field of message should contain message from actual exception", actualLog.contains(exception.getMessage()));
+		assertTrue(actualLog.contains(exception.getMessage()), "log field of message should contain message from actual exception");
 	}
 
 	private Main.Dependencies setupMockToThrowException(Exception exception) {
