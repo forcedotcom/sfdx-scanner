@@ -37,7 +37,7 @@ To provide a uniform experience while using multiple rule engines, Code Analyzer
 
 Each rule engine has a different set of rules and different formats for representing them. Code Analyzer communicates with each rule engine separately to pull the default rules that they offer and to populate them together into a rule catalog. This catalog contains the name of a rule, a short description, its classification category, and the code source language that the rule can analyze.
 
-Run the ```scanner:rule:list``` command to view the rule catalog. The command’s output includes the rule engine name that a particular rule belongs to.
+Run the ```scanner rule list``` command to view the rule catalog. The command’s output includes the rule engine name that a particular rule belongs to.
 
 Example:
 
