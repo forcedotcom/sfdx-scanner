@@ -24,40 +24,40 @@ sf scanner run -t <array> [-c <array>] [-r <array>] [-e <array>] [-f
 -c, --category=_category_
 One or more categories of rules to run. Specify multiple values as a comma-separated list.
 
--e, --engine=_engine_
+ -e, --engine=_engine_
 Specifies one or more engines to run. Submit multiple values as a comma-separated list.
 
---env=_env_
+ --env=_env_
  Overrides ESLint’s default environment variables, in JSON-formatted string.
 
---eslintconfig=_eslintconfig_
+ --eslintconfig=_eslintconfig_
  Specifies the location of eslintrc config to customize eslint engine.
 
--f, --format=(csv|html|json|junit|sarif|table|xml)
+ -f, --format=(csv|html|json|junit|sarif|table|xml)
  Specifies output format with results written directly to the console.
 
---json
+ --json
  Formats output as JSON.
 
---loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
+ --loglevel=(trace|debug|info|warn|error|fatal|TRACE|DEBUG|INFO|WARN|ERROR|FATAL)
  [default: warn] Logging level for this command invocation.
 
---normalize-severity
+ --normalize-severity
  Returns normalized severity 1 (high), 2 (moderate), and 3 (low) and the engine-specific severity. For the html option, the normalized severity is displayed instead of the engine severity.
 
--o, --outfile=_outfile_
+ -o, --outfile=_outfile_
  Writes output to a file.
 
---pmdconfig=_pmdconfig_
+ --pmdconfig=_pmdconfig_
  Specifies the location of PMD rule reference XML file to customize rule selection.
 
--r, --ruleset=_ruleset_
+ -r, --ruleset=_ruleset_
  [deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
 
--s, --severity-threshold=_severity-threshold_
+ -s, --severity-threshold=_severity-threshold_
  Throws an error when violations are found with equal or greater severity than the provided value. –normalize-severity is invoked and severity levels are reset to the baseline. Normalized severity values are: 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation.
 
--t, --target=_target_
+ -t, --target=_target_
  (required) Source code location. May use glob patterns. Specify multiple values as a comma-separated list.
 
  --tsconfig=_tsconfig_
