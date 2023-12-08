@@ -139,7 +139,7 @@ To proactively reduce the chances of a `LimitReached` error in your scans, take 
 	**Example**: Sample command allocating max heap space of 20G
  
 	```
-	sfdx scanner:run:dfa --projectdir /path/to/full/project --target /path/to/a/source/file#optionalSpecificEntryMethod --sfgejvmargs "-Xmx20g" --outfile result_2.csv
+	sf scanner run dfa --projectdir /path/to/full/project --target /path/to/a/source/file#optionalSpecificEntryMethod --sfgejvmargs "-Xmx20g" --outfile result_2.csv
 	```
 To optimize your `LimitReached` scans, follow these recommendations.
 
@@ -164,7 +164,7 @@ Use the `--sfgejvmargs` parameter to modify your Java Virtual Machine (JVM) defa
 
 For example, to allocate 2 G heap space:
 
-	`sfdx scanner:run:dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>`
+	`sf scanner run dfa --sfgejvmargs "-Xmx2g" <rest of your parameters>`
 
 To maximize your heap space balance with Graph Engine performance, follow these recommendations.
 
