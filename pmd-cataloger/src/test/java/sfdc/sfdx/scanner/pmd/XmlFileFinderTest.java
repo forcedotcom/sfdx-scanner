@@ -1,28 +1,24 @@
 package sfdc.sfdx.scanner.pmd;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static sfdc.sfdx.scanner.TestConstants.*;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit tests for {@link XmlFileFinder}
  */
 public class XmlFileFinderTest {
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	@Test
 	public void testAllJarsInDiretory() {
 		XmlFileFinder xmlFileFinder = new XmlFileFinder();
@@ -103,8 +99,10 @@ public class XmlFileFinderTest {
 	@Test
 	public void testFindingNonExistentFile_ExpectError() {
 		XmlFileFinder xmlFileFinder = new XmlFileFinder();
-		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST, new String[]{"nonexistentfile.xml"}));
 
-		List<XmlFileFinder.XmlContainer> xmlContainers = xmlFileFinder.findXmlFilesInPath("nonexistentfile.xml");
+        MessagePassableException ex = assertThrows(MessagePassableException.class,
+            () -> xmlFileFinder.findXmlFilesInPath("nonexistentfile.xml"));
+        assertThat(ex.getEventKey(), is(EventKey.ERROR_INTERNAL_CLASSPATH_DOES_NOT_EXIST));
+        assertThat(ex.getArgs(), is(new String[]{"nonexistentfile.xml"}));
 	}
 }

@@ -1,35 +1,31 @@
 package sfdc.sfdx.scanner.pmd;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static sfdc.sfdx.scanner.TestConstants.*;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-
-import com.salesforce.messaging.EventKey;
 import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 
 /**
@@ -38,21 +34,19 @@ import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 public class PmdRuleCatalogerTest {
 	private static final String TEST_CATALOG_DIR = "./test/path/to/a/directory";
 	private static final String TEST_CATALOG_FILE = "PmdCatalog.json";
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
 	public ArgumentCaptor<String> jsonContentsCaptor;
 	public ArgumentCaptor<Path> directoryPathCaptor;
 	public ArgumentCaptor<String> fileNameCaptor;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		System.setProperty("catalogHome", TEST_CATALOG_DIR);
 		System.setProperty("catalogName", TEST_CATALOG_FILE);
 		CliMessager.getInstance().resetMessages();
 	}
 
-	@After
+	@AfterEach
 	public void teardown() {
 		System.clearProperty("catalogHome");
 		System.clearProperty("catalogName");
@@ -152,10 +146,13 @@ public class PmdRuleCatalogerTest {
 				COLLISION_JAR_2.toAbsolutePath().toString()));
 		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
 
-		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
-				new String[] { "category/joshapex/somecat.xml", COLLISION_JAR_2.toAbsolutePath().toString(),
-						COLLISION_JAR_1.toAbsolutePath().toString() }));
-
-		pmdRuleCataloger.catalogRules();
+        MessagePassableException ex = assertThrows(MessagePassableException.class,
+            () -> pmdRuleCataloger.catalogRules());
+        assertThat(ex.getEventKey(), is(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH));
+        assertThat(ex.getArgs(), is(new String[] {
+            "category/joshapex/somecat.xml",
+            COLLISION_JAR_2.toAbsolutePath().toString(),
+            COLLISION_JAR_1.toAbsolutePath().toString() }
+        ));
 	}
 }

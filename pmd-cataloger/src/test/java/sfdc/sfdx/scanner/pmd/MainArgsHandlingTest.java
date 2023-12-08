@@ -1,13 +1,15 @@
 package sfdc.sfdx.scanner.pmd;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-import com.salesforce.messaging.MessagePassableException;
-import com.salesforce.messaging.EventKey;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 import java.util.Map;
+
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import org.junit.jupiter.api.Test;
 
 public class MainArgsHandlingTest {
 
@@ -24,13 +26,13 @@ public class MainArgsHandlingTest {
 		final Map<String, List<String>> stringListMap = main.parseArguments(args);
 
 		// Validate
-		assertEquals("Unexpected number of items in parsed map", 1, stringListMap.size());
-		assertTrue("Language not found in parsed map", stringListMap.containsKey(language));
+		assertEquals(1, stringListMap.size(), "Unexpected number of items in parsed map");
+		assertTrue(stringListMap.containsKey(language), "Language not found in parsed map");
 
 		final List<String> parsedPaths = stringListMap.get(language);
-		assertEquals("Unexpected number of paths in parsed map", paths.length, parsedPaths.size());
+		assertEquals(paths.length, parsedPaths.size(), "Unexpected number of paths in parsed map");
 		for (String path : paths) {
-			assertTrue("Path not found in parsed map: " + path, parsedPaths.contains(path));
+			assertTrue(parsedPaths.contains(path), "Path not found in parsed map: " + path);
 		}
 	}
 
@@ -73,8 +75,8 @@ public class MainArgsHandlingTest {
 			main.parseArguments(args);
 			fail(failureMessage);
 		} catch (MessagePassableException e) {
-			assertEquals("Unexpected eventKey on exception", EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, e.getEventKey());
-			assertEquals("Unexpected arg list on exception", expectedArgForMessage, e.getArgs()[0]);
+			assertEquals(EventKey.ERROR_INTERNAL_MAIN_INVALID_ARGUMENT, e.getEventKey(), "Unexpected eventKey on exception");
+			assertEquals(expectedArgForMessage, e.getArgs()[0], "Unexpected arg list on exception");
 		}
 	}
 }

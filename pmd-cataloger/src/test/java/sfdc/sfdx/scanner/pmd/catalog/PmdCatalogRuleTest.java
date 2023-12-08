@@ -1,30 +1,26 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
-import com.salesforce.messaging.EventKey;
-import org.json.simple.JSONObject;
-
-import static org.junit.Assert.*;
-
-import org.junit.Rule;
-import org.junit.Test;
-
-import static org.mockito.Mockito.*;
-
-import org.junit.rules.ExpectedException;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import sfdc.sfdx.scanner.pmd.MessagePassableExceptionMatcher;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import org.json.simple.JSONObject;
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 
 public class PmdCatalogRuleTest {
-
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
 
 	private static final String NAME = "Name";
 	private static final String MESSAGE = "Some message";
@@ -47,17 +43,17 @@ public class PmdCatalogRuleTest {
 
 
 		// Validate
-		assertEquals("Unexpected name on JSON", NAME, jsonObject.get(PmdCatalogJson.JSON_NAME));
+		assertEquals(NAME, jsonObject.get(PmdCatalogJson.JSON_NAME), "Unexpected name on JSON");
 
-		assertEquals("Unexpected message", MESSAGE, jsonObject.get(PmdCatalogJson.JSON_MESSAGE));
+		assertEquals(MESSAGE, jsonObject.get(PmdCatalogJson.JSON_MESSAGE), "Unexpected message");
 
 		final List<String> expectedLanguages = new ArrayList<>();
 		expectedLanguages.add(LANGUAGE);
-		assertEquals("Unexpected language", expectedLanguages, (List<String>) jsonObject.get(PmdCatalogJson.JSON_LANGUAGES));
+		assertEquals(expectedLanguages, (List<String>) jsonObject.get(PmdCatalogJson.JSON_LANGUAGES), "Unexpected language");
 
 		final List<String> expectedCategoryNames = new ArrayList<>();
 		expectedCategoryNames.add(CATEGORY_NAME);
-		assertEquals("Unexpected categories", expectedCategoryNames, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES));
+		assertEquals(expectedCategoryNames, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES), "Unexpected categories");
 
 	}
 
@@ -74,7 +70,7 @@ public class PmdCatalogRuleTest {
 		final JSONObject jsonObject = catalogRule.toJson();
 
 		// Validate
-		assertEquals("Unexpected description", emptyDescription, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION));
+		assertEquals(emptyDescription, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION), "Unexpected description");
 	}
 
 	@Test
@@ -89,7 +85,7 @@ public class PmdCatalogRuleTest {
 		final JSONObject jsonObject = catalogRule.toJson();
 
 		// Validate
-		assertEquals("Unexpected description", description, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION));
+		assertEquals(description, jsonObject.get(PmdCatalogJson.JSON_DESCRIPTION), "Unexpected description");
 	}
 
 	@Test
@@ -99,11 +95,11 @@ public class PmdCatalogRuleTest {
 
 		// Setup mock
 		final Element elementMock = getElementMock(Arrays.asList(description1, description2));
-		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC,
-			new String[]{CATEGORY.getPath() + "/" + NAME, "2"}
-		));
-		// Even initializing the object should be enough to trigger the expected exception.
-		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+
+        // Even initializing the object should be enough to trigger the expected exception.
+        MessagePassableException ex = assertThrows(MessagePassableException.class, () -> new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE));
+		assertThat(ex.getEventKey(), is(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC));
+        assertThat(ex.getArgs(), is(new String[]{CATEGORY.getPath() + "/" + NAME, "2"}));
 	}
 
 	private Element getElementMock(List<String> descriptions) {
