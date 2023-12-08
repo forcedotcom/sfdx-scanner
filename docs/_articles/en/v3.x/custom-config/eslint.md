@@ -8,7 +8,7 @@ redirect_from: /en/custom-config/eslint
 
 To bring in the power of any ESLint capabilities that aren’t supported by default in Salesforce Code Analyzer (Code Analyzer), use your own customized ```.eslintrc.json```. You have the flexibility to use different parsers or plug-ins, and you can define your own custom ESLint ruleset. 
 
-To invoke a customized ESLint file, pass in your config file filepath as a value to ```--eslintconfig``` flag in ```scanner run command```. 
+To invoke a customized ESLint file, pass in your config file filepath as a value to ```--eslintconfig``` flag in ```scanner run``` command. 
 
 For example:
 
