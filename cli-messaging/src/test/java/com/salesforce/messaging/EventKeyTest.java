@@ -40,7 +40,7 @@ public class EventKeyTest {
     Set<String> eventKeyTemplatesMdKeys = null;
 
     @BeforeEach
-    public void extractMessagesJson() throws IOException, ParseException {
+    public void extractMessageKeysFromTemplateFile() throws IOException, ParseException {
         final Path path = Paths.get(MESSAGES_FILE);
         assertThat("Invalid test setup. File does not exist: " + MESSAGES_FILE, Files.exists(path), is(true));
         final List<String> fileLines = Files.readAllLines(path);
@@ -54,7 +54,7 @@ public class EventKeyTest {
      */
     @ParameterizedTest(name = "eventKey={0}")
     @MethodSource("getAllEventKeyValues")
-    public void verifyKeyInJson(EventKey eventKey) {
+    public void verifyKeysMatchTemplateFile(EventKey eventKey) {
         final String messageKey = eventKey.getMessageKey();
         assertThat("EventKey." + eventKey.name() + "'s messageKey property is missing from `./messages/EventKeyTemplates.md.", messageKey, is(in(eventKeyTemplatesMdKeys)));
     }
