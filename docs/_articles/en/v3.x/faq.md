@@ -17,7 +17,7 @@ A: Salesforce Code Analyzer is a stand-alone product you can run against your co
 
 If you're planning to list your solution on AppExchange–and if your solution is a managed package–it must pass a security review. In this case, you’re required to scan your solution using Salesforce Code Analyzer and submit comprehensive scan results in the AppExchange Security Review Wizard.  As a result, you can be more confident in the code that you submit for security review. For more information, read [Pass the AppExchange Security Review](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_guidelines.htm) in the ISVforce Guide.
 
-#### Q: Is Code Analyzer only for Salesforce CLI (sfdx) projects?
+#### Q: Is Code Analyzer only for Salesforce CLI (sf) projects?
 A: Code Analyzer is compatible with any codebase.
 
 #### Q: Are there prerequisites to use Code Analyzer?
@@ -33,10 +33,10 @@ A: Use [this form](https://www.research.net/r/SalesforceCA) to give us your feed
 A: You must:
 
 * Update the plug-in to the latest version by following [these instructions](./en/v3.x/getting-started/install/#upgrade-plug-in).
-* To update to a specific version of the plug-in, run: `sfdx plugins:install @salesforce/sfdx-scanner@{{ site.data.versions-v2.scanner }}`
+* To update to a specific version of the plug-in, run: `sf plugins install @salesforce/sfdx-scanner@{{ site.data.versions-v2.scanner }}`
 
 #### Q: How can I use Code Analyzer in my CI/CD?
-A: Use the `sfdx scanner:run` command in any scripts used by your CI/CD. We also recommend that you:
+A: Use the `sf scanner run` command in any scripts used by your CI/CD. We also recommend that you:
 
 * Keep an artifact of the results. Use the `-o | --outfile` flag to write your results to a file.
 * If any violations meet or exceed the provided value, use the `-s | --severity-threshold` flag,. The `-v | --violations-cause-error` flag has been deprecated.
@@ -44,7 +44,7 @@ A: Use the `sfdx scanner:run` command in any scripts used by your CI/CD. We also
 ### Questions About Languages
 
 #### Q: What languages does Code Analyzer support?
-By default, Code Analyzer supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript. To add support for Lightning Web Components, invoke the `scanner:run` command with `--engine eslint-lwc`.
+By default, Code Analyzer supports code written in Apex, VisualForce, Java, JavaScript, XML, and TypeScript. To add support for Lightning Web Components, invoke the `scanner run` command with `--engine eslint-lwc`.
 
 #### Q: How do I get support for additional languages?
 A: Create a request in our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
