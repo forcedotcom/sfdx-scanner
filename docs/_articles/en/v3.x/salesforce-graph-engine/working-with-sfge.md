@@ -18,7 +18,7 @@ A source can lead to multiple sinks. Also, a sink can be reached through multipl
 For more information, read [Try it Yourself](./en/v3.x/salesforce-graph-engine/try-it-yourself/).
 
 ## Invoke Graph Engine through Code Analyzer
-Invoke data-flow-based rules through SFCA by running [scanner:run:dfa](./en/v3.x/scanner-commands/dfa/).
+Invoke data-flow-based rules through SFCA by running [scanner run dfa](./en/v3.x/scanner-commands/dfa/).
 
 ## Interpret Your Results
 
@@ -130,11 +130,11 @@ When Graph Engine analyzes highly complex code, it runs out of heap space, which
 ### Recommended Steps to Reduce LimitReached Error Occurrences
 To proactively reduce the chances of a `LimitReached` error in your scans, take these steps.
 
-1. Execute `scanner:run:dfa` with default heap space settings and collect the results to a file using the `--outfile` parameter. The output file contains the majority of the actionable items.
+1. Execute `scanner run dfa` with default heap space settings and collect the results to a file using the `--outfile` parameter. The output file contains the majority of the actionable items.
 2. Filter your output file on the `LimitReached` violation and group these violations into sets of targets. `LimitReached` violations are the more complex paths that need more heap space and time. 
 3. To determine your previous execution’s path expansion limit and maximum heap space allocated, search for this string in `/<home>/.sfdx-scanner/sfge.log`: “Path expansion limit”–You use these values later to control the complexity that Graph Engine can handle for your code.
-4. Execute `scanner:run:dfa` on each `LimitReached` target grouping that you created. 
-5. Run `scanner:run:dfa` iteratively with larger memory allocation each time to exclusively target complex areas. 
+4. Execute `scanner run dfa` on each `LimitReached` target grouping that you created. 
+5. Run `scanner run dfa` iteratively with larger memory allocation each time to exclusively target complex areas. 
 	
 	**Example**: Sample command allocating max heap space of 20G
  
@@ -169,11 +169,11 @@ For example, to allocate 2 G heap space:
 To maximize your heap space balance with Graph Engine performance, follow these recommendations.
 
 * Because the heap space value depends on the complexity of the target codebase, there’s no magic number. A very large heap space can degrade Graph Engine’s performance, so increase the heap space allocation in increments of 1 G. Experiment to see what works for your project.
-* Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner:run:dfa`command while keeping the same `--projectdir` value. This approach reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
+* Target a smaller set of files for analysis. Provide a subset of Apex files using the `--target` flag on the `scanner run dfa`command while keeping the same `--projectdir` value. This approach reduces the number of paths and reduces the likelihood of `OutOfMemory` errors.
 * To avoid large IF/ELSE-IF/ELSE conditional trees, simplify your code, which helps bring down the number of paths created.
 
 #### Set complexity-handling-limit Using`--pathexplimit` Parameter
-Heap space allocated for a `scanner:run:dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up.
+Heap space allocated for a `scanner run dfa` execution also dictates how much complexity Graph Engine can handle. If you ran our recommended steps earlier, grab the path expansion limit that you looked up.
 
 Override your path expansion limit using the `--pathexplimit` parameter. Or remove the limit by passing in this value as -1.
 
