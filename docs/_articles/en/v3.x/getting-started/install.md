@@ -11,23 +11,21 @@ redirect_from: /en/getting-started/install
 Install Salesforce Code Analyzer (Code Analyzer) with this simple line of code.
 
 ```bash
-$ sfdx plugins:install @salesforce/sfdx-scanner
-Installing plugin @salesforce/sfdx-scanner...
-installed v{{ site.data.versions-v3.scanner }} 
+$ sf plugins install @salesforce/sfdx-scanner
 ```
 By default, `latest` tag is installed: {{ site.data.versions-v3.scanner }}. 
 
 #### To check that Code Analyzer is installed, run this command.
 
 ```bash
-$ sfdx plugins
+$ sf plugins
 @salesforce/sfdx-scanner {{ site.data.versions-v3.scanner }}
 ```
 
 #### To install a specific Code Analyzer version, run this command.
 
 ```bash
-$ sfdx plugins:install @salesforce/sfdx-scanner@latest-pilot
+$ sf plugins install @salesforce/sfdx-scanner@latest-pilot
 Installing plugin @salesforce/sfdx-scanner... 
 installed v{{ site.data.versions-v3.scanner }}
 ``` 
@@ -35,19 +33,15 @@ installed v{{ site.data.versions-v3.scanner }}
 #### To display Code Analyzer usage and help, run this command.
 
 ```bash
-$ sfdx scanner --help
+$ sf scanner --help
 Scan code to detect code quality issues and security vulnerabilities.
 
 USAGE
-  $ sfdx scanner:COMMAND
+  $ sf scanner COMMAND
 
 COMMANDS
-  scanner:run  Evaluate a selection of rules against a codebase.
-
-TOPICS
-  Run help for each topic below to view subcommands
-
-  scanner:rule  View/add rules that are used to scan code.
+  scanner run  scan a codecase with a selection of rules.
+  scanner rule  View/add rules that are used to scan code.
 
 ```
 ## Update Code Analyzer v3.x
@@ -55,15 +49,15 @@ TOPICS
 To update Code Analyzer, run this command.
 
 ```bash
-$ sfdx plugins:update
-sfdx-cli: Updating plugins... done
+$ sf plugins update
+@salesforce/cli: Updating plugins... done
 ```
 ## Uninstall Code Analyzer v3.x
 
 To uninstall Code Analyzer, run this command.
 
 ```bash
-sfdx plugins:uninstall @salesforce/sfdx-scanner
+sf plugins uninstall @salesforce/sfdx-scanner
 ```
 
 ## See Also
