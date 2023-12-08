@@ -58,7 +58,7 @@ If the language isn’t already supported, create an issue in our [Github repo](
 A: Currently, you can only add custom rules for PMD. 
 
 * Ruleset files, and category files defining only XPath-based rules, are referenced as standalone XML files. 
-* Java-based rules must be bundled into a JAR. The JAR/XML can then be added to the rule registry with the `scanner:rule:add` command.
+* Java-based rules must be bundled into a JAR. The JAR/XML can then be added to the rule registry with the `scanner rule add` command.
 
 If the language isn’t already supported, create an issue on our [Github repo](https://github.com/forcedotcom/sfdx-scanner).
 
