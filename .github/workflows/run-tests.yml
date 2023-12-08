@@ -72,7 +72,7 @@ jobs:
       # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
       #       trouble than it's worth. If we see serious performance problems, we can
       #       reconsider that assessment.
-      - run: yarn
+      - run: yarn --network-timeout 600000
       # Download the dist artifact, to save ourselves the trouble of rebuilding our
       # Java dependencies from scratch.
       - uses: actions/download-artifact@v3
