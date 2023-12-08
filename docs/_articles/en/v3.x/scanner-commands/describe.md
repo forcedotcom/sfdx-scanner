@@ -4,13 +4,13 @@ lang: en
 redirect_from: /en/scanner-commands/describe
 ---
 
-## sfdx scanner:rule:describe
+## sf scanner rule describe
 Provides detailed information about a rule. Information includes the rule’s language (such as Apex or Java), the violation it detects, and example code of the violation. The command output also includes the rule's categories and rulesets.
 
 ## Usage
 
 ```bash
-$ sfdx scanner:rule:describe -n <string> [--verbose] [--json]
+$ sf scanner rule describe -n <string> [--verbose] [--json]
 ```
   
 ## Options
@@ -25,7 +25,7 @@ $ sfdx scanner:rule:describe -n <string> [--verbose] [--json]
 ## Example
 
 ```bash
-  $ sfdx scanner:rule:describe --rulename ExampleRule
+  $ sf scanner rule describe --rulename ExampleRule
      name:        ExampleRule
      categories:  ExampleCategory
      rulesets:    Ruleset1
