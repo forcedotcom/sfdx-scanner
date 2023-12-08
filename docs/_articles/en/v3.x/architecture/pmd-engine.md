@@ -7,7 +7,7 @@ redirect_from: /en/architecture/pmd-engine
 PMD is a source code analyzer that allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce. Its built-in rules detect common flaws in code, such as empty catch blocks or unused variables.
 
 ## How does Salesforce Code Analyzer (code Analyzer) use PMD?
-By default, the Code Analyzer ```scanner:run``` command executes PMD’s default Apex and Visualforce rules against compatible files. 
+By default, the Code Analyzer ```scanner run``` command executes PMD’s default Apex and Visualforce rules against compatible files. 
 
 You can change which rules are executed by using the flags described in the Code Analyzer Command Reference.
 
