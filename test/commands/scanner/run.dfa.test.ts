@@ -1,5 +1,6 @@
-import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest} from '../../TestUtils';
+import {expect} from 'chai';
+// @ts-ignore
+import {runCommand} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import * as path from 'path';
 import Dfa from '../../../src/commands/scanner/run/dfa';
@@ -26,6 +27,7 @@ const startGraphBuildMessage = sfgeMessages.getMessage('info.sfgeStartedBuilding
 const endGraphBuildMessage = sfgeMessages.getMessage('info.sfgeFinishedBuildingGraph');
 const identifiedEntryMessage = sfgeMessages.getMessage('info.sfgePathEntryPointsIdentified', [entryPointCount]);
 const completedAnalysisMessage = sfgeMessages.getMessage('info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
+const experimentalRuleName = "RemoveUnusedMethod";
 
 function isSubstr(output: string, substring: string): boolean {
 	const updatedSubstr = substring.replace('[', '\\[');
@@ -42,84 +44,67 @@ function verifyNotContains(output: string, substring: string): void {
 	expect(isSubstr(output, substring), `Output "${output}" should not contain substring "${substring}"`).is.false;
 }
 
-describe('scanner:run:dfa', function () {
+describe('scanner run dfa', function () {
 	this.timeout(20000); // TODO why do we get timeouts at the default of 5000?  What is so expensive here?
 
 	describe('End to end', () => {
-
-		describe('Output consistency', () => {
-			describe('run with --format json', () => {
-				setupCommandTest
-				.command(['scanner:run:dfa',
-				'--target', dfaTarget,
-				'--projectdir', projectdir,
-				'--format', 'json'
-			])
-			.it('provides only json in stdout', ctx => {
-				try {
-					JSON.parse(ctx.stdout);
-				} catch (error) {
-					expect.fail("dummy", "another dummy", "Invalid JSON output from --format json: " + ctx.stdout + ", error = " + error);
-				}
-
-				});
-			});
-		});
-
-		describe('Flags', () => {
-			describe('--with-pilot', () => {
-				setupCommandTest
-					.command(['scanner:run:dfa',
-						'--target', dfaTarget,
-						'--projectdir', projectdir,
-						'--format', 'json',
-						'--with-pilot'
-					])
-					.it('Including flag activates pilot rules', ctx => {
-						// Verify that there's a violation somewhere for an experimental rule.
-						verifyContains(ctx.stdout, "RemoveUnusedMethod");
-					});
-
-				setupCommandTest
-					.command(['scanner:run:dfa',
-						'--target', dfaTarget,
-						'--projectdir', projectdir,
-						'--format', 'json'
-					])
-					.it('Omitting flag disables pilot rules', ctx => {
-						// Verify that there's a NOT violation somewhere for an experimental rule.
-						verifyNotContains(ctx.stdout, "RemoveUnusedMethod");
-					});
-			});
-		});
-
-		describe('Progress output', () => {
+		describe('Without special flags', () => {
 			let sandbox;
 			let spy: sinon.SinonSpy;
-				before(() => {
-					sandbox = sinon.createSandbox();
-					spy = sandbox.spy(Dfa.prototype, "updateSpinner");
-				});
 
-				after(() => {
-					spy.restore();
-					sinon.restore();
-				});
+			before(() => {
+				sandbox = sinon.createSandbox();
+				spy = sandbox.spy(Dfa.prototype, "updateSpinner");
+			})
 
-			setupCommandTest
-				.command(['scanner:run:dfa',
-					'--target', dfaTarget,
-					'--projectdir', projectdir,
-					'--format', 'json'
-				])
-				.it('contains valid information when --verbose is not used', ctx => {
-					const output = ctx.stdout;
-					verifyNotContains(output, customSettingsMessage);
-					verifyNotContains(output, apexControllerMessage);
-					expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
-				});
+			after(() => {
+				spy.restore();
+				sinon.restore();
+			});
 
+			const output = runCommand(`scanner run dfa --target ${dfaTarget} --projectdir ${projectdir} --format json`);
+
+
+			it('Output is parsable JSON', () => {
+				try {
+					JSON.parse(output.shellOutput.stdout);
+				} catch (error) {
+					expect.fail(`Invalid JSON output from --format json: ${output.shellOutput.stdout}; error = ${error}`);
+				}
+			});
+
+			it('Pilot rules are not executed', () => {
+				// Verify that there's NOT a violation somewhere for an experimental rule.
+				verifyNotContains(output.shellOutput.stdout, experimentalRuleName);
+			});
+
+			it('Contains no verbose-only information', () => {
+				// The messages about loading various types of thing should only be logged when --verbose is used.
+				const stdout = output.shellOutput.stdout;
+				verifyNotContains(stdout, customSettingsMessage);
+				verifyNotContains(stdout, apexControllerMessage);
+				expect(spy.calledWith(compiledMessage, startGraphBuildMessage, endGraphBuildMessage, identifiedEntryMessage, completedAnalysisMessage));
+			});
 		});
 
+		describe('Using --with-pilot flag', () => {
+			const output = runCommand(`scanner run dfa --target ${dfaTarget} --projectdir ${projectdir} --format json --with-pilot`);
+
+			it('Executes experimental rules', () => {
+				// Verify that there's a violation somewhere in there for an experimental rule.
+				verifyContains(output.shellOutput.stdout, experimentalRuleName);
+			});
+		});
+
+		describe('Using --verbose flag', () => {
+			const output = runCommand(`scanner run dfa --target ${dfaTarget} --projectdir ${projectdir} --format json --verbose`);
+
+			it('Verbose information is logged', () => {
+				// The messages about loading various types of thing should only be logged when --verbose is used.
+				const stdout = output.shellOutput.stdout;
+				verifyContains(stdout, customSettingsMessage);
+				verifyContains(stdout, apexControllerMessage);
+			});
+		});
 	});
 });

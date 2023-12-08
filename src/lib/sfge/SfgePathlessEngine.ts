@@ -37,7 +37,7 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string,string>): boolean {
 		// For the non-DFA Graph Engine variant, we need to make sure that we have the
 		// necessary info to run the engine, since the relevant flags aren't required
-		// for `scanner:run`.
+		// for `scanner run`.
 		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
 			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
 			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {

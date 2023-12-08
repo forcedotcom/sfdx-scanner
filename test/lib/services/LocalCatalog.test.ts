@@ -358,7 +358,7 @@ describe('LocalCatalog', () => {
 				 * the same type, but in practice this could not happen. Each CLI flag is converted into a single filter.
 				 *
 				 * For example:
-				 * sfdx scanner:rule:list --language 'apex,javascript' --engine 'eslint,pmd' --category 'Best Practices,Security'
+				 * sf scanner rule list --language 'apex,javascript' --engine 'eslint,pmd' --category 'Best Practices,Security'
 				 *
 				 * Results in the expression:
 				 * (rule.language === 'apex' || rule.language === 'javascript') &&

@@ -16,7 +16,7 @@ export type RunOptions  = {
 	normalizeSeverity: boolean;
 	runDfa: boolean;
 	withPilot: boolean;
-	sfdxVersion: string;
+	sfVersion: string;
 }
 
 export interface RuleManager {

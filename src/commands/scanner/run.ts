@@ -1,4 +1,4 @@
-import {flags} from '@salesforce/command';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {LooseObject} from '../../types';
 import {PathlessEngineFilters} from '../../Constants';
@@ -17,82 +17,88 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
+	public static summary = messages.getMessage('commandSummary');
 	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples')
 	];
 
 	// This defines the flags accepted by this command.
-	protected static flagsConfig = {
+	public static readonly flags= {
 		// Include all common flags from the super class.
-		...ScannerRunCommand.flagsConfig,
+		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
-		ruleset: flags.array({
+		ruleset: Flags.custom<string[]>({
 			char: 'r',
 			deprecated: {
-				messageOverride: messages.getMessage('rulesetDeprecation')
+				message: messages.getMessage('rulesetDeprecation')
 			},
+			summary: messages.getMessage('flags.rulesetSummary'),
 			description: messages.getMessage('flags.rulesetDescription'),
-			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
-		}),
-		engine: flags.array({
+			delimiter: ',',
+			multiple: true
+		})(),
+		engine: Flags.custom<string[]>({
 			char: 'e',
+			summary: messages.getMessage('flags.engineSummary'),
 			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [...PathlessEngineFilters]
-		}),
+			options: [...PathlessEngineFilters],
+			delimiter: ',',
+			multiple: true
+		})(),
 		// END: Filter-related flags.
 		// BEGIN: Targeting-related flags.
-		target: flags.array({
+		target: Flags.custom<string[]>({
 			char: 't',
+			summary: messages.getMessage('flags.targetSummary'),
 			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			delimiter: ',',
+			multiple: true,
 			required: true
-		}),
+		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
-		tsconfig: flags.string({
-			description: messages.getMessage('flags.tsconfigDescription'),
-			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		tsconfig: Flags.string({
+			summary: messages.getMessage('flags.tsconfigSummary'),
+			description: messages.getMessage('flags.tsconfigDescription')
 		}),
-		eslintconfig: flags.string({
-			description: messages.getMessage('flags.eslintConfigDescription'),
-			longDescription: messages.getMessage('flags.eslintConfigDescriptionLong')
+		eslintconfig: Flags.string({
+			summary: messages.getMessage('flags.eslintConfigSummary'),
+			description: messages.getMessage('flags.eslintConfigDescription')
 		}),
-		pmdconfig: flags.string({
-			description: messages.getMessage('flags.pmdConfigDescription'),
-			longDescription: messages.getMessage('flags.pmdConfigDescriptionLong')
+		pmdconfig: Flags.string({
+			summary: messages.getMessage('flags.pmdConfigSummary'),
+			description: messages.getMessage('flags.pmdConfigDescription')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
-		env: flags.string({
+		env: Flags.string({
+			summary: messages.getMessage('flags.envSummary'),
 			description: messages.getMessage('flags.envDescription'),
-			longDescription: messages.getMessage('flags.envDescriptionLong'),
 			deprecated: {
-				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+				message: messages.getMessage('flags.envParamDeprecationWarning')
 			}
 		}),
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
-		"verbose-violations": flags.boolean({
-			description: messages.getMessage('flags.verboseViolationsDescription'),
-			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
+		"verbose-violations": Flags.boolean({
+			summary: messages.getMessage('flags.verboseViolationsSummary'),
+			description: messages.getMessage('flags.verboseViolationsDescription')
 		})
 		// END: Flags related to results processing.
 	};
 
 	protected validateVariantFlags(): Promise<void> {
-		if (this.flags.tsconfig && this.flags.eslintconfig) {
+		if (this.parsedFlags.tsconfig && this.parsedFlags.eslintconfig) {
 			throw new SfError(messages.getMessage('validations.tsConfigEslintConfigExclusive'));
 		}
 
-		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
+		if ((this.parsedFlags.pmdconfig || this.parsedFlags.eslintconfig) && (this.parsedFlags.category || this.parsedFlags.ruleset)) {
+			this.log(messages.getMessage('output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
-		for (const target of (this.flags.target as string[])) {
+		for (const target of (this.parsedFlags.target as string[])) {
 			if (target.indexOf('#') > -1) {
 				throw new SfError(messages.getMessage('validations.methodLevelTargetingDisallowed', [target]));
 			}
@@ -104,16 +110,16 @@ export default class Run extends ScannerRunCommand {
 	 * Gather engine options that are unique to each sub-variant.
 	 */
 	protected mergeVariantEngineOptions(options: Map<string,string>): void {
-		if (this.flags.tsconfig) {
-			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
+		if (this.parsedFlags.tsconfig) {
+			const tsconfig = normalize(untildify(this.parsedFlags.tsconfig as string));
 			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
 		}
 
 		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
 		//  engine-specific flags. Replace it in 3.0.
-		if (this.flags.env) {
+		if (this.parsedFlags.env) {
 			try {
-				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
+				const parsedEnv: LooseObject = JSON.parse(this.parsedFlags.env as string) as LooseObject;
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
 				throw new SfError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
@@ -121,19 +127,19 @@ export default class Run extends ScannerRunCommand {
 		}
 
 		// Capturing eslintconfig value, if provided
-		if (this.flags.eslintconfig) {
-			const eslintConfig = normalize(untildify(this.flags.eslintconfig as string));
+		if (this.parsedFlags.eslintconfig) {
+			const eslintConfig = normalize(untildify(this.parsedFlags.eslintconfig as string));
 			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
 		}
 
 		// Capturing pmdconfig value, if provided
-		if (this.flags.pmdconfig) {
-			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
+		if (this.parsedFlags.pmdconfig) {
+			const pmdConfig = normalize(untildify(this.parsedFlags.pmdconfig as string));
 			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
 		}
 
 		// Capturing verbose-violations flag value (used for RetireJS output)
-		if (this.flags["verbose-violations"]) {
+		if (this.parsedFlags["verbose-violations"]) {
 			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
 		}
 	}

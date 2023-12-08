@@ -4,7 +4,6 @@ import {Messages} from '@salesforce/core';
 import {Config} from '../../../src/lib/util/Config';
 import {LANGUAGE} from '../../../src/Constants';
 import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
-import messages = require('../../../messages/PmdLanguageManager');
 import { ENGINE } from '../../../src/Constants';
 import { Controller } from '../../../src/Controller';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
@@ -12,6 +11,7 @@ import * as TestOverrides from '../../test-related-lib/TestOverrides';
 TestOverrides.initializeTestSetup();
 
 Messages.importMessagesDirectory(__dirname);
+const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdLanguageManager');
 
 describe('PmdLanguageManager', () => {
 	describe('getSupportedLanguages()', () => {
@@ -71,7 +71,7 @@ describe('PmdLanguageManager', () => {
 					await PmdLanguageManager.getSupportedLanguages();
 					expect(true).to.equal(false, 'Error should have thrown');
 				} catch (e) {
-					expect(e.message).to.include(messages.InvalidLanguageAlias.replace('%s', (await Controller.getConfig()).getConfigFilePath()).replace('%s', 'NotRealLang'));
+					expect(e.message).to.include(messages.getMessage('InvalidLanguageAlias', [(await Controller.getConfig()).getConfigFilePath(), 'NotRealLang']));
 				}
 			});
 		});

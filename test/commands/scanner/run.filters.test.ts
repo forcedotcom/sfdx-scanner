@@ -1,5 +1,6 @@
-import {expect} from '@salesforce/command/lib/test';
-import {setupCommandTest} from '../../TestUtils';
+import {expect} from 'chai';
+// @ts-ignore
+import {runCommand} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import path = require('path');
 import * as TestUtils from '../../TestUtils';
@@ -7,20 +8,14 @@ import * as TestUtils from '../../TestUtils';
 Messages.importMessagesDirectory(__dirname);
 const exceptionMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Exceptions');
 
-/**
- * IMPORTANT. The oclif CLI test framework requires the .it to come after the .command
- */
-describe('scanner:run tests that result in the use of RuleFilters', function () {
-	describe('--engine flag', () => {
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'lwc'),
-				'--format', 'csv',
-				'--engine', 'eslint-lwc'
-			])
-			.it('LWC Engine Successfully parses LWC code', ctx => {
+describe('scanner run tests that result in the use of RuleFilters', function () {
+	describe('Single filter', () => {
+		describe('Positive constraints', () => {
+			it('Case: --engine eslint-lwc against clean LWC code', () => {
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'lwc')} --format csv --engine eslint-lwc`);
+				const stdout = output.shellOutput.stdout;
 				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
-				const [csv, _] = ctx.stdout.trim().split(/\n\r?\n/);
+				const [csv, _] = stdout.trim().split(/\n\r?\n/);
 
 				// Confirm there are no violations.
 				// Since it's a CSV, the rows themselves are separated by newline characters.
@@ -28,14 +23,9 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 
-		setupCommandTest
-			.command(['scanner:run',
-				'--target', path.join('test', 'code-fixtures', 'invalid-lwc'),
-				'--format', 'json',
-				'--engine', 'eslint-lwc'
-			])
-			.it('LWC Engine detects LWC errors', ctx => {
-				const stdout = ctx.stdout;
+			it('Case: --engine eslint-lwc against unclean LWC code', () => {
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'invalid-lwc')} --format json --engine eslint-lwc`);
+				const stdout = output.shellOutput.stdout;
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
 					.to.be.an('Array').that.has.length(1);
@@ -46,179 +36,119 @@ describe('scanner:run tests that result in the use of RuleFilters', function () 
 					expect(messages).to.contain(expectedMessage);
 				}
 			});
+		});
+
+		describe('Negative constraints', () => {
+			it('Case: Negate one category', () => {
+				const category = 'Code Style';
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "!${category}"`);
+				const stdout = output.shellOutput.stdout;
+				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+
+				expect(results.length).greaterThan(0);
+				for (const result of results) {
+					for (const violation of result.violations) {
+						expect(violation.category, TestUtils.prettyPrint(violation)).to.not.equal(category);
+					}
+				}
+			});
+
+			it('Case: Negate multiple categories', () => {
+				const category = `!Code Style,!Security`;
+				const nonExpectedCategories: Set<string> = new Set<string>();
+				nonExpectedCategories.add('Code Style').add('Security');
+
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
+				const stdout = output.shellOutput.stdout;
+				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+				expect(results.length).greaterThan(0);
+
+				for (const result of results) {
+					for (const violation of result.violations) {
+						expect(nonExpectedCategories.has(violation.category), TestUtils.prettyPrint(violation)).to.be.false;
+					}
+				}
+			});
+
+			it('Case: Negate non-negatable filter (--ruleset)', () => {
+				const ruleset = `'!some-value'`;
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --ruleset ${ruleset}`);
+				expect(output.shellOutput.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.PositiveOnly', ['Ruleset']), '--ruleset should not be negateable');
+			});
+		});
+
+		it('Case: Mixing positive and negative constraints', () => {
+			const category = `!Code Style,Security`;
+			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
+			expect(output.shellOutput.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.MixedTypes', ['Category']), 'Cannot mix positive and negative constraints');
+		});
 	});
 
-	describe('--category and --engine flag', () => {
-		describe('Eslint Javascript Engine --category flag', () => {
+	describe('Multiple filters', () => {
+		const pathToDomParserController = path.join('test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'dom_parser', 'dom_parserController.js');
+		it('Case: --engine eslint --category problem', () => {
 			const category = 'problem';
 			const expectedViolationCount = 3;
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'dom_parser', 'dom_parserController.js'),
-					'--format', 'json',
-					'--engine', 'eslint',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length).to.equal(1, 'Should only be violations from one file');
-					expect(output[0].engine).to.equal('eslint');
-					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
+			const commandOutput = runCommand(`scanner run --target ${pathToDomParserController} --format json --engine eslint --category ${category}`);
+			const stdout = commandOutput.shellOutput.stdout;
+			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			expect(output.length).to.equal(1, 'Should only be violations from one file');
+			expect(output[0].engine).to.equal('eslint');
+			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
 
-					// Make sure only violations are returned for the requested category
-					for (const v of output[0].violations) {
-						expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
-					}
-				});
+			// Make sure only violations are returned for the requested category
+			for (const v of output[0].violations) {
+				expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
+			}
 		});
 
-		describe('Eslint LWC Engine --category flag', () => {
+		it('Case: --engine eslint-lwc --category suggestion', () => {
 			const category = 'suggestion';
 			const expectedViolationCount = 36;
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'aura', 'dom_parser', 'dom_parserController.js'),
-					'--format', 'json',
-					'--engine', 'eslint-lwc',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length).to.equal(1, 'Should only be violations from one file');
-					expect(output[0].engine).to.equal('eslint-lwc');
-					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
+			const commandOutput = runCommand(`scanner run --target ${pathToDomParserController} --format json --engine eslint-lwc --category ${category}`)
+			const stdout = commandOutput.shellOutput.stdout;
+			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			expect(output.length).to.equal(1, 'Should only be violations from one file');
+			expect(output[0].engine).to.equal('eslint-lwc');
+			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
 
-					// Make sure only violations are returned for the requested category
-					for (const v of output[0].violations) {
-						expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
-					}
-				});
-
+			// Make sure only violations are returned for the requested category
+			for (const v of output[0].violations) {
+				expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
+			}
 		});
 
-		describe('Eslint Typescript Engine --category flag', () => {
+		it('Case: --engine eslint-typescript --category problem', () => {
 			const category = 'problem';
+			const target = path.join('test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts');
+			const config = path.join('test', 'code-fixtures', 'projects', 'tsconfig.json');
 			const expectedViolationCount = 4;
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts'),
-					'--tsconfig', path.join('test', 'code-fixtures', 'projects', 'tsconfig.json'),
-					'--format', 'json',
-					'--engine', 'eslint-typescript',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length).to.equal(1, 'Should only be violations from one file');
-					expect(output[0].engine).to.equal('eslint-typescript');
-					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
+			const commandOutput = runCommand(`scanner run --target ${target} --tsconfig ${config} --format json --engine eslint-typescript --category ${category}`);
+			const stdout = commandOutput.shellOutput.stdout;
+			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			expect(output.length).to.equal(1, 'Should only be violations from one file');
+			expect(output[0].engine).to.equal('eslint-typescript');
+			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(expectedViolationCount);
 
-					// Make sure only violations are returned for the requested category
-					for (const v of output[0].violations) {
-						expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
-					}
-				});
+			// Make sure only violations are returned for the requested category
+			for (const v of output[0].violations) {
+				expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
+			}
 		});
 
-		describe('PMD Engine --category flag', () => {
+		it('Case: --engine pmd --category \'Code Style\'', () => {
 			const category = 'Code Style';
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex'),
-					'--format', 'json',
-					'--engine', 'pmd',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length).to.equal(1, 'Should only be violations from one file');
-					expect(output[0].engine).to.equal('pmd');
-					expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(2);
+			const commandOutput = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --engine pmd --category "${category}"`);
+			const stdout = commandOutput.shellOutput.stdout;
+			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+			expect(output.length).to.equal(1, 'Should only be violations from one file');
+			expect(output[0].engine).to.equal('pmd');
+			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(2);
 
-					// Make sure only violations are returned for the requested category
-					for (const v of output[0].violations) {
-						expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
-					}
-				});
-		});
-	});
-
-	describe('Negated --category', () => {
-		describe('Single --category', () => {
-			const category = '!Code Style';
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex'),
-					'--format', 'json',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-
-					expect(output.length).greaterThan(0);
-					for (const result of output) {
-						for (const violation of result.violations) {
-							expect(violation.category, TestUtils.prettyPrint(violation)).to.not.equal(category);
-						}
-					}
-
-				});
-		});
-
-		describe('Multiple --category', () => {
-			const category = '!Code Style,!Security';
-			const expectedCategories: Set<string> = new Set<string>();
-			expectedCategories.add('Code Style').add('Security');
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex'),
-					'--format', 'json',
-					'--category', category
-				])
-				.it('Only correct categories are returned', ctx => {
-					const stdout = ctx.stdout;
-					const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
-					expect(output.length).greaterThan(0);
-
-					for (const result of output) {
-						for (const violation of result.violations) {
-							expect(expectedCategories.has(violation.category), TestUtils.prettyPrint(violation)).to.be.false;
-						}
-					}
-				});
-		});
-
-		describe('Invalid --category', () => {
-			// Positive and negative categories can't be mixed
-			const category = '!Code Style,Security';
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex'),
-					'--format', 'json',
-					'--category', category
-				])
-				.it('Positive and Negative Combinations throws an error', ctx => {
-					expect(ctx.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.MixedTypes', ['Category']));
-				});
-		});
-
-		describe('Invalid --engine', () => {
-			// Ruleset doesn't support negation
-			const ruleset = '!some-value';
-			setupCommandTest
-				.command(['scanner:run',
-					'--target', path.join('test', 'code-fixtures', 'apex'),
-					'--format', 'json',
-					'--ruleset', ruleset
-				])
-				.it('Negative filters that are not supported throws an error', ctx => {
-					expect(ctx.stderr).to.contain(exceptionMessages.getMessage('RuleFilter.PositiveOnly', ['Ruleset']));
-				});
+			// Make sure only violations are returned for the requested category
+			for (const v of output[0].violations) {
+				expect(v.category, TestUtils.prettyPrint(v)).to.equal(category);
+			}
 		});
 	});
 });

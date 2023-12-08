@@ -1,8 +1,8 @@
-import {flags} from '@salesforce/command';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {Messages, SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Controller} from '../../../Controller';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
+import {Controller} from '../../../Controller';
 import path = require('path');
 import untildify = require('untildify');
 import { ScannerCommand } from '../../../lib/ScannerCommand';
@@ -17,32 +17,34 @@ const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
 
 export default class Add extends ScannerCommand {
 
+	public static summary = messages.getMessage('commandSummary');
 	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
 
 	public static examples = [
 		messages.getMessage('examples')
 	];
 
-	protected static flagsConfig = {
-		language: flags.string({
+	public static readonly flags = {
+		language: Flags.string({
 			char: 'l',
+			summary: messages.getMessage('flags.languageSummary'),
 			description: messages.getMessage('flags.languageDescription'),
-			longDescription: messages.getMessage('flags.languageDescriptionLong'),
 			required: true
 		}),
-		path: flags.array({
+		path: Flags.custom<string[]>({
 			char: 'p',
+			summary: messages.getMessage('flags.pathSummary'),
 			description: messages.getMessage('flags.pathDescription'),
-			longDescription: messages.getMessage('flags.pathDescriptionLong'),
+			multiple: true,
+			delimiter: ',',
 			required: true
-		})
+		})()
 	};
 
 	async runInternal(): Promise<AnyJson> {
 		this.validateFlags();
 
-		const language = this.flags.language as string;
+		const language = this.parsedFlags.language as string;
 		const paths = this.resolvePaths();
 
 		this.logger.trace(`Language: ${language}`);
@@ -51,17 +53,17 @@ export default class Add extends ScannerCommand {
 		// Add to Custom Classpath registry
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
-		this.ux.log(`Successfully added rules for ${language}.`);
-		this.ux.log(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
+		this.log(`Successfully added rules for ${language}.`);
+		this.log(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
 		return {success: true, language, path: classpathEntries};
 	}
 
 	private validateFlags(): void {
-		if ((this.flags.language as string).length === 0) {
+		if ((this.parsedFlags.language as string).length === 0) {
 			throw new SfError(messages.getMessage('validations.languageCannotBeEmpty', []));
 		}
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.flags.path && stringArrayTypeGuard(this.flags.path) && (!this.flags.path.length || this.flags.path.includes(''))) {
+		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
 			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty', []));
 		}
 	}
@@ -69,6 +71,6 @@ export default class Add extends ScannerCommand {
 	private resolvePaths(): string[] {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.
-		return (this.flags.path as string[]).map(p => path.resolve(untildify(p)));
+		return (this.parsedFlags.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 }

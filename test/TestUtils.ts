@@ -1,6 +1,13 @@
 import fs = require('fs');
 import path = require('path');
-import { test } from '@salesforce/command/lib/test';
+import {AnyJson} from '@salesforce/ts-types';
+import {
+	execCmd,
+	ExecCmdResult,
+	execInteractiveCmd,
+	InteractiveCommandExecutionResult, PromptAnswers
+} from '@salesforce/cli-plugins-testkit';
+// @ts-ignore
 import * as TestOverrides from './test-related-lib/TestOverrides';
 import Sinon = require('sinon');
 import LocalCatalog from '../src/lib/services/LocalCatalog';
@@ -34,19 +41,14 @@ export function stubCatalogFixture(): void {
 	});
 }
 
-/**
- * Initial setup needed by all oclif command unit tests.
- *
- * Example:
- * setupCommandTest
- * 	.command(['scanner:run', '-t', 'test-code'])
- * 	.it('Scanner Run Relative Path Succeeds', ctx => {
- * 		expect(ctx.stdout).to.contain('No rule violations found.');
- * 	});
- */
-export const setupCommandTest = test
-	.do(() => TestOverrides.initializeTestSetup())
-	.stdout()
-	.stderr();
+export function runCommand(command: string): ExecCmdResult<AnyJson> {
+	TestOverrides.initializeTestSetup();
+	return execCmd(command);
+}
+
+export function runInteractiveCommand(command: string, answers: PromptAnswers): Promise<InteractiveCommandExecutionResult> {
+	TestOverrides.initializeTestSetup();
+	return execInteractiveCmd(command, answers);
+}
 
 

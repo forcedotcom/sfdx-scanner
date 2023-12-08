@@ -72,7 +72,7 @@ jobs:
       # NOTE: We're choosing not to cache Node dependencies, because it seems to be more
       #       trouble than it's worth. If we see serious performance problems, we can
       #       reconsider that assessment.
-      - run: yarn
+      - run: yarn --network-timeout 600000
       # Download the dist artifact, to save ourselves the trouble of rebuilding our
       # Java dependencies from scratch.
       - uses: actions/download-artifact@v3
@@ -196,7 +196,7 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }} # Java version is a matrix.
       # Install Salesforce CLI via NPM
-      - run: npm install -g sfdx-cli
+      - run: npm install -g @salesforce/cli
       # Download and install the tarball artifact built during setup.
       - uses: actions/download-artifact@v3
         id: download
@@ -217,11 +217,11 @@ jobs:
           # If the path starts with C:, we need to rip that off (needed for Windows).
           ADJUSTED_TARBALL_PATH=`[[ $RAW_TARBALL_PATH = C* ]] && echo $RAW_TARBALL_PATH | cut -d':' -f 2 || echo $RAW_TARBALL_PATH`
           # Pipe in a `y` to simulate agreeing to install an unsigned package. Use a URI of the file's full path.
-          echo y | sfdx plugins:install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
+          echo y | sf plugins install "file://${ADJUSTED_TARBALL_PATH}/${TARBALL_NAME}"
       # The results directory needs to exist.
       - run: mkdir smoke-test-results
       # Attempt to execute the smoke tests against the plugin, using the specified script.
-      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sfdx
+      - run: smoke-tests/smoke-test${{ matrix.os.exe }} sf
       - uses: actions/upload-artifact@v3
         if: ${{ always() }}
         with:
@@ -257,7 +257,7 @@ jobs:
       - run: mkdir test-results
       - name: Self-evaluation
         id: self-eval
-        run: bin/run.js scanner:run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
+        run: bin/dev.js scanner run --target ./src --format junit --outfile ./test-results/src.xml --severity-threshold 3
       # TODO: In the future, we could replace this step with a JS-based one that uses `core.setFailed()` to set a failure
       #       message in the annotations.
       - name: Log results

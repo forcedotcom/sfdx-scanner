@@ -1,14 +1,14 @@
 ---
-name: Report a Bug with scanner:run
-about: Report an issue with the scanner:run command.
+name: Report a Bug with scanner run
+about: Report an issue with the scanner run command.
 title: "[BUG]"
 labels: ''
 assignees: ''
 ---
 <!--
-### Try These Steps to Resolve Issues with `scanner:run`
+### Try These Steps to Resolve Issues with `scanner run`
 
-Oftentimes, you can resolve `scanner:run` issues on your own. Follow these steps.
+Oftentimes, you can resolve `scanner run` issues on your own. Follow these steps.
 
 1. Read the error message.
 2. Read [Salesforce Code Analyzer](https://forcedotcom.github.io/sfdx-scanner/) documentation.
@@ -22,15 +22,15 @@ Oftentimes, you can resolve `scanner:run` issues on your own. Follow these steps
 
 If you're listing a managed package on AppExchange, prepare for the security review by following the instructions in the [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) section of the ISVforce Guide.
 
-### Log a `scanner:run` Issue
-If you're still having trouble after following the troubleshooting steps and checking that there's no existing issue that covers your situation, log a new `scanner:run` issue.
+### Log a `scanner run` Issue
+If you're still having trouble after following the troubleshooting steps and checking that there's no existing issue that covers your situation, log a new `scanner run` issue.
 
-1. Fill out the `scanner:run` Issue Template.
+1. Fill out the `scanner run` Issue Template.
 2. Attach your code with your issue.
 3. If you can't publicly share the code that causes the issue, reproduce it in code that you can publicly share. Attach this substitute code to your issue.
 4. Give your issue a clear and specific title. Example: "InternalExecutionError when scanning XYZ code".
 -->
-### `scanner:run` Issue Template
+### `scanner run` Issue Template
 
 Fill out this template to submit your Code Analyzer issue.
 

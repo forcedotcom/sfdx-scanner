@@ -3,7 +3,7 @@ import "reflect-metadata";
 import {SfError, Messages} from '@salesforce/core';
 import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
-import {EnvOverridable, Services, AllowedEngineFilters} from './Constants';
+import {DEFAULT_SCANNER_PATH, ENV_VAR_NAMES, Services, AllowedEngineFilters} from './Constants';
 import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
@@ -41,8 +41,7 @@ export const Controller = {
 	},
 
 	getSfdxScannerPath: (): string => {
-		const envOverrides = container.resolve<EnvOverridable>(Services.EnvOverridable);
-		return envOverrides.getSfdxScannerPath();
+		return process.env[ENV_VAR_NAMES.SCANNER_PATH_OVERRIDE] || DEFAULT_SCANNER_PATH;
 	},
 
 	createRuleManager: async (): Promise<RuleManager> => {
