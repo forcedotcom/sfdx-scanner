@@ -68,6 +68,7 @@ public class Pmd7CompatibilityCheckerTest {
         // Use that category to create some good custom rules.
         List<PmdCatalogRule> rules = Arrays.asList(
             createXpathRule(nonstandardCategory, "net.sourceforge.pmd.lang.rule.XPathRule", true),
+            createXpathRule(nonstandardCategory, "net.sourceforge.pmd.lang.xml.rule.DomXPathRule", true),
             createJavaBasedRule(nonstandardCategory, true)
         );
 
