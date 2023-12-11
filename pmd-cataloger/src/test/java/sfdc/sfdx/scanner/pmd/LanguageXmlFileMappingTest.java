@@ -1,32 +1,31 @@
 package sfdc.sfdx.scanner.pmd;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-import static sfdc.sfdx.scanner.TestConstants.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static sfdc.sfdx.scanner.TestConstants.APEX;
+import static sfdc.sfdx.scanner.TestConstants.JAVA;
+import static sfdc.sfdx.scanner.TestConstants.SOMECAT_XML_FILE;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import com.salesforce.messaging.EventKey;
+import com.salesforce.messaging.MessagePassableException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit test for {@link LanguageXmlFileMapping}
  */
 public class LanguageXmlFileMappingTest {
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
-
 	private LanguageXmlFileMapping languageXmlFileMapping;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		languageXmlFileMapping = new LanguageXmlFileMapping();
 	}
@@ -122,10 +121,9 @@ public class LanguageXmlFileMappingTest {
 
 		languageXmlFileMapping.addPathsForLanguage(Arrays.asList(xmlContainer1), APEX);
 
-		thrown.expect(new MessagePassableExceptionMatcher(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH,
-				new String[] { collidingPath, jar2, jar1 }));
-
-		languageXmlFileMapping.addPathsForLanguage(Arrays.asList(xmlContainer2), APEX);
+        MessagePassableException ex = assertThrows(MessagePassableException.class, () -> languageXmlFileMapping.addPathsForLanguage(Arrays.asList(xmlContainer2), APEX));
+        assertThat(ex.getEventKey(), is(EventKey.ERROR_EXTERNAL_DUPLICATE_XML_PATH));
+        assertThat(ex.getArgs(), is(new String[] { collidingPath, jar2, jar1 }));
 	}
 
 	private void setupCategoriesAndRulesets() {

@@ -1,11 +1,11 @@
 package sfdc.sfdx.scanner.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static sfdc.sfdx.scanner.TestConstants.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static sfdc.sfdx.scanner.TestConstants.SOMECAT_XML_FILE;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
 /**
@@ -14,7 +14,7 @@ import org.w3c.dom.Document;
 public class XmlReaderTest {
 	private XmlReader xmlReader;
 
-	@Before
+    @BeforeEach
 	public void setup() {
 		xmlReader = new XmlReader();
 	}
