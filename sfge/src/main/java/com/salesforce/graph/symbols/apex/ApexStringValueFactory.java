@@ -152,12 +152,12 @@ public final class ApexStringValueFactory {
     }
 
     private static Optional<ApexValue<?>> stringFromCharArray(
-        ApexValueBuilder builder, MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+            ApexValueBuilder builder, MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         final List<ChainedVertex> parameters = vertex.getParameters();
         ApexValue.validateParameterSize(vertex, 1);
 
         final ApexValue<?> charArrayArg =
-            ScopeUtil.resolveToApexValue(symbols, parameters.get(0)).orElse(null);
+                ScopeUtil.resolveToApexValue(symbols, parameters.get(0)).orElse(null);
 
         if (charArrayArg instanceof ApexListValue) {
             final ApexListValue intListValue = (ApexListValue) charArrayArg;
@@ -167,17 +167,16 @@ public final class ApexStringValueFactory {
                 ApexValue<?> intValue = intListValue.get(i);
                 if (intValue instanceof ApexIntegerValue && intValue.isDeterminant()) {
                     ApexIntegerValue apexIntValue = (ApexIntegerValue) intValue;
-                    Integer primitiveValue = apexIntValue.getValue().orElse(Character.getNumericValue('?'));
+                    Integer primitiveValue =
+                            apexIntValue.getValue().orElse(Character.getNumericValue('?'));
                     charArray[i] = primitiveValue != null ? (char) (int) primitiveValue : '?';
                 } else {
-                    // TODO: Handle indeterminant values more appropriately here. For now, just return '?' characters
+                    // TODO: Handle indeterminant values more appropriately here. For now, just
+                    // return '?' characters
                     charArray[i] = '?';
                 }
             }
-            return Optional.of(
-                builder.valueVertex(vertex)
-                    .buildString(String.valueOf(charArray)));
-
+            return Optional.of(builder.valueVertex(vertex).buildString(String.valueOf(charArray)));
         }
 
         return Optional.empty();
@@ -237,12 +236,14 @@ public final class ApexStringValueFactory {
         }
     }
 
-    private static Optional<ApexValue<?>> stringValueOfGmt (
-        ApexValueBuilder builder, MethodCallExpressionVertex vertex, SymbolProvider symbols) {
+    private static Optional<ApexValue<?>> stringValueOfGmt(
+            ApexValueBuilder builder, MethodCallExpressionVertex vertex, SymbolProvider symbols) {
         final List<ChainedVertex> parameters = vertex.getParameters();
         ApexValue.validateParameterSize(vertex, 1);
-        // We currently do not formally support DateTime objects, so we should always return INDETERMINANT here for now.
-        return Optional.of(builder.valueVertex(vertex).withStatus(ValueStatus.INDETERMINANT).buildString());
+        // We currently do not formally support DateTime objects, so we should always return
+        // INDETERMINANT here for now.
+        return Optional.of(
+                builder.valueVertex(vertex).withStatus(ValueStatus.INDETERMINANT).buildString());
     }
 
     private ApexStringValueFactory() {}

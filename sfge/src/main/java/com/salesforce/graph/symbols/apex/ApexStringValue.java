@@ -14,11 +14,9 @@ import com.salesforce.graph.vertex.LiteralExpressionVertex;
 import com.salesforce.graph.vertex.MethodCallExpressionVertex;
 import com.salesforce.graph.vertex.Typeable;
 import com.salesforce.graph.vertex.VariableExpressionVertex;
-
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
@@ -30,7 +28,7 @@ import org.apache.commons.text.StringEscapeUtils;
 // TODO: Some methods are returning empty when they should return indeterminant instances of the
 // expected type
 public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, String>
-    implements DeepCloneable<ApexStringValue>, Typeable {
+        implements DeepCloneable<ApexStringValue>, Typeable {
     static final String TYPE = TypeInfos.STRING.getApexName();
     static final String METHOD_ABBREVIATE = "abbreviate";
     static final String METHOD_CAPITALIZE = "capitalize";
@@ -151,9 +149,9 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
     @Override
     public boolean matchesParameterType(Typeable parameterVertex) {
         return getCanonicalType().equalsIgnoreCase(parameterVertex.getCanonicalType())
-            ||
-            // Strings are also ids
-            ApexIdValue.TYPE.equalsIgnoreCase(parameterVertex.getCanonicalType());
+                ||
+                // Strings are also ids
+                ApexIdValue.TYPE.equalsIgnoreCase(parameterVertex.getCanonicalType());
     }
 
     /**
@@ -178,214 +176,287 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
     // instance if (o == null && o.length() > 10) will execute both side even if o is null
     // TODO: Short circuit the && condition like it would at runtime
     private static final Map<String, Function<ApexValueBuilder, IndeterminantValueProvider<?>>>
-        INDETERMINANT_VALUE_PROVIDERS = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_GET_S_OBJECT_TYPE, IndeterminantValueProvider.StringValueProvider::get),
-            Pair.of(METHOD_SPLIT, IndeterminantValueProvider.ListValueProvider::getStringList),
-        	Pair.of(METHOD_STRIP_HTML_TAGS, IndeterminantValueProvider.StringValueProvider::get));
+            INDETERMINANT_VALUE_PROVIDERS =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_GET_S_OBJECT_TYPE,
+                                    IndeterminantValueProvider.StringValueProvider::get),
+                            Pair.of(
+                                    METHOD_SPLIT,
+                                    IndeterminantValueProvider.ListValueProvider::getStringList),
+                            Pair.of(
+                                    METHOD_STRIP_HTML_TAGS,
+                                    IndeterminantValueProvider.StringValueProvider::get));
 
     private static final Map<String, Function<String, String>>
-        METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_CAPITALIZE, StringUtils::capitalize),
-            Pair.of(METHOD_DELETE_WHITESPACE, StringUtil::stripAllSpaces),
-            Pair.of(METHOD_ESCAPE_CSV, StringEscapeUtils::escapeCsv),
-            Pair.of(METHOD_ESCAPE_ECMA_SCRIPT, StringEscapeUtils::escapeEcmaScript),
-            Pair.of(METHOD_ESCAPE_HTML_3, StringEscapeUtils::escapeHtml3),
-            Pair.of(METHOD_ESCAPE_HTML_4, StringEscapeUtils::escapeHtml4),
-            Pair.of(METHOD_ESCAPE_JAVA, StringEscapeUtils::escapeJava),
-            Pair.of(METHOD_ESCAPE_SINGLE_QUOTES, s -> s.replace("'", "\\'")),
-            Pair.of(METHOD_ESCAPE_UNICODE, StringEscapeUtils::escapeJava), // escapeUnicode is the same as escapeJava
-            Pair.of(METHOD_ESCAPE_XML, StringEscapeUtils::escapeXml10),
-            Pair.of(METHOD_NORMALIZE_SPACE, StringUtils::normalizeSpace),
-            Pair.of(METHOD_REVERSE, StringUtils::reverse),
-            Pair.of(METHOD_SWAP_CASE, StringUtils::swapCase),
-            Pair.of(METHOD_TO_LOWER_CASE, StringUtils::toRootLowerCase),
-            Pair.of(METHOD_TO_UPPER_CASE, StringUtils::toRootUpperCase),
-            Pair.of(METHOD_TRIM, StringUtils::trim),
-            Pair.of(METHOD_UNCAPITALIZE, StringUtils::uncapitalize),
-            Pair.of(METHOD_UNESCAPE_CSV, StringEscapeUtils::unescapeCsv),
-            Pair.of(METHOD_UNESCAPE_ECMA_SCRIPT, StringEscapeUtils::unescapeEcmaScript),
-            Pair.of(METHOD_UNESCAPE_HTML_3, StringEscapeUtils::unescapeHtml3),
-            Pair.of(METHOD_UNESCAPE_HTML_4, StringEscapeUtils::unescapeHtml4),
-            Pair.of(METHOD_UNESCAPE_JAVA, StringEscapeUtils::unescapeJava),
-        	Pair.of(METHOD_UNESCAPE_UNICODE, StringEscapeUtils::unescapeJava), // unescapeUnicode is the same as unescapeJava
-        	Pair.of(METHOD_UNESCAPE_XML, StringEscapeUtils::unescapeXml));
+            METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_CAPITALIZE, StringUtils::capitalize),
+                            Pair.of(METHOD_DELETE_WHITESPACE, StringUtil::stripAllSpaces),
+                            Pair.of(METHOD_ESCAPE_CSV, StringEscapeUtils::escapeCsv),
+                            Pair.of(METHOD_ESCAPE_ECMA_SCRIPT, StringEscapeUtils::escapeEcmaScript),
+                            Pair.of(METHOD_ESCAPE_HTML_3, StringEscapeUtils::escapeHtml3),
+                            Pair.of(METHOD_ESCAPE_HTML_4, StringEscapeUtils::escapeHtml4),
+                            Pair.of(METHOD_ESCAPE_JAVA, StringEscapeUtils::escapeJava),
+                            Pair.of(METHOD_ESCAPE_SINGLE_QUOTES, s -> s.replace("'", "\\'")),
+                            Pair.of(METHOD_ESCAPE_UNICODE, StringEscapeUtils::escapeJava),
+                            Pair.of(METHOD_ESCAPE_XML, StringEscapeUtils::escapeXml10),
+                            Pair.of(METHOD_NORMALIZE_SPACE, StringUtils::normalizeSpace),
+                            Pair.of(METHOD_REVERSE, StringUtils::reverse),
+                            Pair.of(METHOD_SWAP_CASE, StringUtils::swapCase),
+                            Pair.of(METHOD_TO_LOWER_CASE, StringUtils::toRootLowerCase),
+                            Pair.of(METHOD_TO_UPPER_CASE, StringUtils::toRootUpperCase),
+                            Pair.of(METHOD_TRIM, StringUtils::trim),
+                            Pair.of(METHOD_UNCAPITALIZE, StringUtils::uncapitalize),
+                            Pair.of(METHOD_UNESCAPE_CSV, StringEscapeUtils::unescapeCsv),
+                            Pair.of(
+                                    METHOD_UNESCAPE_ECMA_SCRIPT,
+                                    StringEscapeUtils::unescapeEcmaScript),
+                            Pair.of(METHOD_UNESCAPE_HTML_3, StringEscapeUtils::unescapeHtml3),
+                            Pair.of(METHOD_UNESCAPE_HTML_4, StringEscapeUtils::unescapeHtml4),
+                            Pair.of(METHOD_UNESCAPE_JAVA, StringEscapeUtils::unescapeJava),
+                            Pair.of(METHOD_UNESCAPE_UNICODE, StringEscapeUtils::unescapeJava),
+                            Pair.of(METHOD_UNESCAPE_XML, StringEscapeUtils::unescapeXml));
 
     private static final Map<String, Function<String, Boolean>>
-        METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_CONTAINS_WHITESPACE, StringUtils::containsWhitespace),
-            Pair.of(METHOD_IS_ALL_LOWER_CASE, StringUtils::isAllLowerCase),
-            Pair.of(METHOD_IS_ALL_UPPER_CASE, StringUtils::isAllUpperCase),
-            Pair.of(METHOD_IS_ALPHA, StringUtils::isAlpha),
-            Pair.of(METHOD_IS_ALPHA_SPACE, StringUtils::isAlphaSpace),
-            Pair.of(METHOD_IS_ALPHANUMERIC, StringUtils::isAlphanumeric),
-            Pair.of(METHOD_IS_ALPHANUMERIC_SPACE, StringUtils::isAlphanumericSpace),
-            Pair.of(METHOD_IS_ASCII_PRINTABLE, StringUtils::isAsciiPrintable),
-            Pair.of(METHOD_IS_BLANK, StringUtils::isBlank),
-            Pair.of(METHOD_IS_EMPTY, StringUtils::isEmpty),
-            Pair.of(METHOD_IS_NOT_BLANK, StringUtils::isNotBlank),
-            Pair.of(METHOD_IS_NOT_EMPTY, StringUtils::isNotEmpty),
-            Pair.of(METHOD_IS_NUMERIC, StringUtils::isNumeric),
-            Pair.of(METHOD_IS_NUMERIC_SPACE, StringUtils::isNumericSpace),
-            Pair.of(METHOD_IS_WHITESPACE, StringUtils::isWhitespace));
+            METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_CONTAINS_WHITESPACE, StringUtils::containsWhitespace),
+                            Pair.of(METHOD_IS_ALL_LOWER_CASE, StringUtils::isAllLowerCase),
+                            Pair.of(METHOD_IS_ALL_UPPER_CASE, StringUtils::isAllUpperCase),
+                            Pair.of(METHOD_IS_ALPHA, StringUtils::isAlpha),
+                            Pair.of(METHOD_IS_ALPHA_SPACE, StringUtils::isAlphaSpace),
+                            Pair.of(METHOD_IS_ALPHANUMERIC, StringUtils::isAlphanumeric),
+                            Pair.of(METHOD_IS_ALPHANUMERIC_SPACE, StringUtils::isAlphanumericSpace),
+                            Pair.of(METHOD_IS_ASCII_PRINTABLE, StringUtils::isAsciiPrintable),
+                            Pair.of(METHOD_IS_BLANK, StringUtils::isBlank),
+                            Pair.of(METHOD_IS_EMPTY, StringUtils::isEmpty),
+                            Pair.of(METHOD_IS_NOT_BLANK, StringUtils::isNotBlank),
+                            Pair.of(METHOD_IS_NOT_EMPTY, StringUtils::isNotEmpty),
+                            Pair.of(METHOD_IS_NUMERIC, StringUtils::isNumeric),
+                            Pair.of(METHOD_IS_NUMERIC_SPACE, StringUtils::isNumericSpace),
+                            Pair.of(METHOD_IS_WHITESPACE, StringUtils::isWhitespace));
 
     private static final Map<String, Function<String, Integer>>
-		METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_HASH_CODE, String::length),
-    		Pair.of(METHOD_LENGTH, String::length));
+            METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_HASH_CODE, String::length),
+                            Pair.of(METHOD_LENGTH, String::length));
 
     private static final Map<String, Function<String, List<Integer>>>
-        METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD = CollectionUtil.newTreeMapOf(
-        	Pair.of(METHOD_GET_CHARS, s -> charArrayToIntegerList(s.toCharArray())));
+            METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_GET_CHARS,
+                                    s -> charArrayToIntegerList(s.toCharArray())));
 
     private static final Map<String, Function<String, List<String>>>
-    	METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD = CollectionUtil.newTreeMapOf(
-        	Pair.of(METHOD_SPLIT_BY_CHARACTER_TYPE, s -> Arrays.asList(StringUtils.splitByCharacterType(s))),
-        	Pair.of(METHOD_SPLIT_BY_CHARACTER_TYPE_CAMEL_CASE, s -> Arrays.asList(StringUtils.splitByCharacterTypeCamelCase(s))));
+            METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_SPLIT_BY_CHARACTER_TYPE,
+                                    s -> Arrays.asList(StringUtils.splitByCharacterType(s))),
+                            Pair.of(
+                                    METHOD_SPLIT_BY_CHARACTER_TYPE_CAMEL_CASE,
+                                    s ->
+                                            Arrays.asList(
+                                                    StringUtils.splitByCharacterTypeCamelCase(s))));
 
     private static final Map<String, BiFunction<String, String, Integer>>
-        METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_COMPARE_TO, StringUtils::compare),
-            Pair.of(METHOD_COUNT_MATCHES, StringUtils::countMatches),
-            Pair.of(METHOD_GET_LEVENSHTEIN_DISTANCE, StringUtils::getLevenshteinDistance),
-            Pair.of(METHOD_INDEX_OF, StringUtils::indexOf),
-            Pair.of(METHOD_INDEX_OF_ANY, StringUtils::indexOfAny),
-            Pair.of(METHOD_INDEX_OF_ANY_BUT, StringUtils::indexOfAnyBut),
-            Pair.of(METHOD_INDEX_OF_DIFFERENCE, StringUtils::indexOfDifference),
-            Pair.of(METHOD_INDEX_OF_IGNORE_CASE, StringUtils::indexOfIgnoreCase),
-            Pair.of(METHOD_LAST_INDEX_OF, StringUtils::lastIndexOf),
-            Pair.of(METHOD_LAST_INDEX_OF_IGNORE_CASE, StringUtils::lastIndexOfIgnoreCase));
+            METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_COMPARE_TO, StringUtils::compare),
+                            Pair.of(METHOD_COUNT_MATCHES, StringUtils::countMatches),
+                            Pair.of(
+                                    METHOD_GET_LEVENSHTEIN_DISTANCE,
+                                    StringUtils::getLevenshteinDistance),
+                            Pair.of(METHOD_INDEX_OF, StringUtils::indexOf),
+                            Pair.of(METHOD_INDEX_OF_ANY, StringUtils::indexOfAny),
+                            Pair.of(METHOD_INDEX_OF_ANY_BUT, StringUtils::indexOfAnyBut),
+                            Pair.of(METHOD_INDEX_OF_DIFFERENCE, StringUtils::indexOfDifference),
+                            Pair.of(METHOD_INDEX_OF_IGNORE_CASE, StringUtils::indexOfIgnoreCase),
+                            Pair.of(METHOD_LAST_INDEX_OF, StringUtils::lastIndexOf),
+                            Pair.of(
+                                    METHOD_LAST_INDEX_OF_IGNORE_CASE,
+                                    StringUtils::lastIndexOfIgnoreCase));
 
     private static final Map<String, BiFunction<String, Integer, Integer>>
-        METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_CHAR_AT, (s, i) -> Character.getNumericValue(s.charAt(i))),
-            Pair.of(METHOD_CODE_POINT_AT, String::codePointAt),
-            Pair.of(METHOD_CODE_POINT_BEFORE, String::codePointBefore),
-            Pair.of(METHOD_INDEX_OF_CHAR, String::indexOf),
-            Pair.of(METHOD_LAST_INDEX_OF_CHAR, StringUtils::lastIndexOf));
+            METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_CHAR_AT,
+                                    (s, i) -> Character.getNumericValue(s.charAt(i))),
+                            Pair.of(METHOD_CODE_POINT_AT, String::codePointAt),
+                            Pair.of(METHOD_CODE_POINT_BEFORE, String::codePointBefore),
+                            Pair.of(METHOD_INDEX_OF_CHAR, String::indexOf),
+                            Pair.of(METHOD_LAST_INDEX_OF_CHAR, StringUtils::lastIndexOf));
 
     private static final Map<String, BiFunction<String, Integer, String>>
-        METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_ABBREVIATE, StringUtils::abbreviate),
-            Pair.of(METHOD_CENTER, StringUtils::center),
-            Pair.of(METHOD_LEFT, StringUtils::left),
-            Pair.of(METHOD_LEFT_PAD, StringUtils::leftPad),
-            Pair.of(METHOD_RIGHT, StringUtils::right),
-            Pair.of(METHOD_RIGHT_PAD, StringUtils::rightPad),
-            Pair.of(METHOD_REPEAT, StringUtils::repeat),
-        	Pair.of(METHOD_SUB_STRING, StringUtils::substring));
+            METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_ABBREVIATE, StringUtils::abbreviate),
+                            Pair.of(METHOD_CENTER, StringUtils::center),
+                            Pair.of(METHOD_LEFT, StringUtils::left),
+                            Pair.of(METHOD_LEFT_PAD, StringUtils::leftPad),
+                            Pair.of(METHOD_RIGHT, StringUtils::right),
+                            Pair.of(METHOD_RIGHT_PAD, StringUtils::rightPad),
+                            Pair.of(METHOD_REPEAT, StringUtils::repeat),
+                            Pair.of(METHOD_SUB_STRING, StringUtils::substring));
 
     private static final Map<String, BiFunction<String, String, String>>
-        METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_DIFFERENCE, StringUtils::difference),
-            Pair.of(METHOD_REMOVE, StringUtils::remove),
-            Pair.of(METHOD_REMOVE_END, StringUtils::removeEnd),
-            Pair.of(METHOD_REMOVE_END_IGNORE_CASE, StringUtils::removeEndIgnoreCase),
-            Pair.of(METHOD_REMOVE_START, StringUtils::removeStart),
-            Pair.of(METHOD_REMOVE_START_IGNORE_CASE, StringUtils::removeStartIgnoreCase),
-            Pair.of(METHOD_SUB_STRING_AFTER, StringUtils::substringAfter),
-            Pair.of(METHOD_SUB_STRING_AFTER_LAST, StringUtils::substringAfterLast),
-            Pair.of(METHOD_SUB_STRING_BEFORE, StringUtils::substringBefore),
-            Pair.of(METHOD_SUB_STRING_BEFORE_LAST, StringUtils::substringBeforeLast),
-            Pair.of(METHOD_SUB_STRING_BETWEEN, StringUtils::substringBetween));
+            METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_DIFFERENCE, StringUtils::difference),
+                            Pair.of(METHOD_REMOVE, StringUtils::remove),
+                            Pair.of(METHOD_REMOVE_END, StringUtils::removeEnd),
+                            Pair.of(
+                                    METHOD_REMOVE_END_IGNORE_CASE,
+                                    StringUtils::removeEndIgnoreCase),
+                            Pair.of(METHOD_REMOVE_START, StringUtils::removeStart),
+                            Pair.of(
+                                    METHOD_REMOVE_START_IGNORE_CASE,
+                                    StringUtils::removeStartIgnoreCase),
+                            Pair.of(METHOD_SUB_STRING_AFTER, StringUtils::substringAfter),
+                            Pair.of(METHOD_SUB_STRING_AFTER_LAST, StringUtils::substringAfterLast),
+                            Pair.of(METHOD_SUB_STRING_BEFORE, StringUtils::substringBefore),
+                            Pair.of(
+                                    METHOD_SUB_STRING_BEFORE_LAST,
+                                    StringUtils::substringBeforeLast),
+                            Pair.of(METHOD_SUB_STRING_BETWEEN, StringUtils::substringBetween));
 
     private static final Map<String, BiFunction<String, String, List<String>>>
-    	METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD = CollectionUtil.newTreeMapOf(
-      		Pair.of(METHOD_SPLIT, (s, regExp) -> Arrays.asList(StringUtils.split(s, regExp))));
+            METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_SPLIT,
+                                    (s, regExp) -> Arrays.asList(StringUtils.split(s, regExp))));
 
     private static final Map<String, BiFunction<String, String, Boolean>>
-        METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_CONTAINS, StringUtils::contains),
-            Pair.of(METHOD_CONTAINS_ANY, StringUtils::containsAny),
-            Pair.of(METHOD_CONTAINS_IGNORE_CASE, StringUtils::containsIgnoreCase),
-            Pair.of(METHOD_CONTAINS_NONE, StringUtils::containsNone),
-            Pair.of(METHOD_CONTAINS_ONLY, StringUtils::containsOnly),
-            Pair.of(METHOD_ENDS_WITH, StringUtils::endsWith),
-            Pair.of(METHOD_ENDS_WITH_IGNORE_CASE, StringUtils::endsWithIgnoreCase),
-            Pair.of(METHOD_EQUALS, StringUtils::equals),
-            Pair.of(METHOD_EQUALS_IGNORE_CASE, StringUtils::equalsIgnoreCase),
-            Pair.of(METHOD_STARTS_WITH, StringUtils::startsWith),
-            Pair.of(METHOD_STARTS_WITH_IGNORE_CASE, StringUtils::startsWith));
+            METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_CONTAINS, StringUtils::contains),
+                            Pair.of(METHOD_CONTAINS_ANY, StringUtils::containsAny),
+                            Pair.of(METHOD_CONTAINS_IGNORE_CASE, StringUtils::containsIgnoreCase),
+                            Pair.of(METHOD_CONTAINS_NONE, StringUtils::containsNone),
+                            Pair.of(METHOD_CONTAINS_ONLY, StringUtils::containsOnly),
+                            Pair.of(METHOD_ENDS_WITH, StringUtils::endsWith),
+                            Pair.of(METHOD_ENDS_WITH_IGNORE_CASE, StringUtils::endsWithIgnoreCase),
+                            Pair.of(METHOD_EQUALS, StringUtils::equals),
+                            Pair.of(METHOD_EQUALS_IGNORE_CASE, StringUtils::equalsIgnoreCase),
+                            Pair.of(METHOD_STARTS_WITH, StringUtils::startsWith),
+                            Pair.of(METHOD_STARTS_WITH_IGNORE_CASE, StringUtils::startsWith));
 
     private static final Map<String, TriFunction<String, Integer, Integer, Integer>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_CODE_POINT_COUNT, String::codePointCount),
-            Pair.of(METHOD_INDEX_OF_CHAR, StringUtils::indexOf),
-            Pair.of(METHOD_LAST_INDEX_OF_CHAR, StringUtils::lastIndexOf),
-        	Pair.of(METHOD_OFFSET_BY_CODE_POINTS, String::offsetByCodePoints));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_CODE_POINT_COUNT, String::codePointCount),
+                            Pair.of(METHOD_INDEX_OF_CHAR, StringUtils::indexOf),
+                            Pair.of(METHOD_LAST_INDEX_OF_CHAR, StringUtils::lastIndexOf),
+                            Pair.of(METHOD_OFFSET_BY_CODE_POINTS, String::offsetByCodePoints));
 
     private static final Map<String, TriFunction<String, String, Integer, Integer>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_INDEX_OF, String::indexOf),
-            Pair.of(METHOD_INDEX_OF_IGNORE_CASE, StringUtils::indexOfIgnoreCase),
-            Pair.of(METHOD_LAST_INDEX_OF, StringUtils::lastIndexOf),
-            Pair.of(METHOD_LAST_INDEX_OF_IGNORE_CASE, StringUtils::lastIndexOfIgnoreCase));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_INDEX_OF, String::indexOf),
+                            Pair.of(METHOD_INDEX_OF_IGNORE_CASE, StringUtils::indexOfIgnoreCase),
+                            Pair.of(METHOD_LAST_INDEX_OF, StringUtils::lastIndexOf),
+                            Pair.of(
+                                    METHOD_LAST_INDEX_OF_IGNORE_CASE,
+                                    StringUtils::lastIndexOfIgnoreCase));
 
     private static final Map<String, TriFunction<String, Integer, Integer, String>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_ABBREVIATE, (s, maxWidth, offset) -> StringUtils.abbreviate(s, offset, maxWidth)), // notice order swap
-            Pair.of(METHOD_MID, StringUtils::mid),
-            Pair.of(METHOD_SUB_STRING, StringUtils::substring));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_ABBREVIATE,
+                                    (s, maxWidth, offset) ->
+                                            StringUtils.abbreviate(
+                                                    s, offset, maxWidth)), // notice order swap
+                            Pair.of(METHOD_MID, StringUtils::mid),
+                            Pair.of(METHOD_SUB_STRING, StringUtils::substring));
 
     private static final Map<String, TriFunction<String, Integer, String, String>>
-    	METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_LEFT_PAD, StringUtils::leftPad),
-        	Pair.of(METHOD_RIGHT_PAD, StringUtils::rightPad));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_LEFT_PAD, StringUtils::leftPad),
+                            Pair.of(METHOD_RIGHT_PAD, StringUtils::rightPad));
 
     private static final Map<String, TriFunction<String, String, Integer, String>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING = CollectionUtil.newTreeMapOf(
-        	Pair.of(METHOD_REPEAT, StringUtils::repeat));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING =
+                    CollectionUtil.newTreeMapOf(Pair.of(METHOD_REPEAT, StringUtils::repeat));
 
     private static final Map<String, TriFunction<String, String, String, String>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD = CollectionUtil.newTreeMapOf(
-            Pair.of(METHOD_REPLACE, StringUtils::replace),
-            Pair.of(METHOD_REPLACE_ALL, StringUtils::replaceAll),
-            Pair.of(METHOD_REPLACE_FIRST, StringUtils::replaceFirst));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(METHOD_REPLACE, StringUtils::replace),
+                            Pair.of(METHOD_REPLACE_ALL, StringUtils::replaceAll),
+                            Pair.of(METHOD_REPLACE_FIRST, StringUtils::replaceFirst));
 
     private static final Map<String, TriFunction<String, String, Integer, List<String>>>
-        METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD = CollectionUtil.newTreeMapOf(
-        	Pair.of(METHOD_SPLIT, (s, regExp, limit) ->  Arrays.asList(StringUtils.split(s, regExp, limit))));
+            METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD =
+                    CollectionUtil.newTreeMapOf(
+                            Pair.of(
+                                    METHOD_SPLIT,
+                                    (s, regExp, limit) ->
+                                            Arrays.asList(StringUtils.split(s, regExp, limit))));
 
     static {
         Set<String> booleanReturnMethods = new HashSet<>();
         booleanReturnMethods.addAll(METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD.keySet());
-        booleanReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD.keySet());
+        booleanReturnMethods.addAll(
+                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD.keySet());
         for (String methodName : booleanReturnMethods) {
-            INDETERMINANT_VALUE_PROVIDERS.put(methodName, IndeterminantValueProvider.BooleanValueProvider::get);
+            INDETERMINANT_VALUE_PROVIDERS.put(
+                    methodName, IndeterminantValueProvider.BooleanValueProvider::get);
         }
 
         Set<String> stringReturnMethods = new HashSet<>();
         stringReturnMethods.addAll(METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD.keySet());
         stringReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD.keySet());
         stringReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD.keySet());
-        stringReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD.keySet());
-        stringReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING.keySet());
-        stringReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING.keySet());
-        stringReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD.keySet());
+        stringReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD.keySet());
+        stringReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING.keySet());
+        stringReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING.keySet());
+        stringReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD.keySet());
         for (String methodName : stringReturnMethods) {
-            INDETERMINANT_VALUE_PROVIDERS.put(methodName, IndeterminantValueProvider.StringValueProvider::get);
+            INDETERMINANT_VALUE_PROVIDERS.put(
+                    methodName, IndeterminantValueProvider.StringValueProvider::get);
         }
 
         Set<String> integerReturnMethods = new HashSet<>();
         integerReturnMethods.addAll(METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD.keySet());
-        integerReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD.keySet());
-        integerReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD.keySet());
-        integerReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD.keySet());
-        integerReturnMethods.addAll(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD.keySet());
+        integerReturnMethods.addAll(
+                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD.keySet());
+        integerReturnMethods.addAll(
+                METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD.keySet());
+        integerReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD.keySet());
+        integerReturnMethods.addAll(
+                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD.keySet());
         for (String methodName : integerReturnMethods) {
-            INDETERMINANT_VALUE_PROVIDERS.put(methodName, IndeterminantValueProvider.IntegerValueProvider::get);
+            INDETERMINANT_VALUE_PROVIDERS.put(
+                    methodName, IndeterminantValueProvider.IntegerValueProvider::get);
         }
 
         Set<String> stringListReturnMethods = new HashSet<>();
         stringListReturnMethods.addAll(METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD.keySet());
-        stringListReturnMethods.addAll(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD.keySet());
+        stringListReturnMethods.addAll(
+                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD.keySet());
         for (String methodName : stringListReturnMethods) {
-            INDETERMINANT_VALUE_PROVIDERS.put(methodName, IndeterminantValueProvider.ListValueProvider::getStringList);
+            INDETERMINANT_VALUE_PROVIDERS.put(
+                    methodName, IndeterminantValueProvider.ListValueProvider::getStringList);
         }
 
         Set<String> integerListReturnMethods = new HashSet<>();
-        integerListReturnMethods.addAll(METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.keySet());
+        integerListReturnMethods.addAll(
+                METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.keySet());
         for (String methodName : integerListReturnMethods) {
-            INDETERMINANT_VALUE_PROVIDERS.put(methodName, IndeterminantValueProvider.ListValueProvider::getIntegerList);
+            INDETERMINANT_VALUE_PROVIDERS.put(
+                    methodName, IndeterminantValueProvider.ListValueProvider::getIntegerList);
         }
     }
 
@@ -408,9 +479,9 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
         final String methodName = vertex.getMethodName();
 
         if ((isValueNotPresent() || isIndeterminant())
-            && INDETERMINANT_VALUE_PROVIDERS.containsKey(methodName)) {
+                && INDETERMINANT_VALUE_PROVIDERS.containsKey(methodName)) {
             return Optional.ofNullable(
-                INDETERMINANT_VALUE_PROVIDERS.get(methodName).apply(builder).get());
+                    INDETERMINANT_VALUE_PROVIDERS.get(methodName).apply(builder).get());
         }
 
         int numParams = vertex.getParameters().size();
@@ -418,119 +489,214 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
         final String value = getValue().orElse(null);
         List<ChainedVertex> parameters = vertex.getParameters();
 
-        if (numParams == 0 && METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD.containsKey(methodName)) {
-            return Optional.of(builder.buildInteger(METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD
-                .get(methodName).apply(value)));
-        } else if (numParams == 0 && METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD.containsKey(methodName)) {
-            return Optional.of(builder.buildBoolean(METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD
-                .get(methodName).apply(value)));
-        } else if (numParams == 0 && METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD.containsKey(methodName)) {
-            return Optional.of(builder.buildString(METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD
-                .get(methodName).apply(value)));
-        } else if (numParams == 0 && METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.containsKey(methodName)) {
+        if (numParams == 0
+                && METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD.containsKey(methodName)) {
+            return Optional.of(
+                    builder.buildInteger(
+                            METHOD_NAME_TO_FUNCTION_STRING_INTEGER_METHOD
+                                    .get(methodName)
+                                    .apply(value)));
+        } else if (numParams == 0
+                && METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD.containsKey(methodName)) {
+            return Optional.of(
+                    builder.buildBoolean(
+                            METHOD_NAME_TO_FUNCTION_STRING_BOOLEAN_METHOD
+                                    .get(methodName)
+                                    .apply(value)));
+        } else if (numParams == 0
+                && METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD.containsKey(methodName)) {
+            return Optional.of(
+                    builder.buildString(
+                            METHOD_NAME_TO_FUNCTION_STRING_STRING_METHOD
+                                    .get(methodName)
+                                    .apply(value)));
+        } else if (numParams == 0
+                && METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.containsKey(methodName)) {
             ApexListValue apexListValue = builder.deepClone().buildList();
-            List<Integer> outList = METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.get(methodName).apply(value);
+            List<Integer> outList =
+                    METHOD_NAME_TO_FUNCTION_STRING_INTEGER_LIST_METHOD.get(methodName).apply(value);
             for (Integer result : outList) {
                 apexListValue.add(builder.deepClone().buildInteger(result));
             }
             return Optional.of(apexListValue);
-        } else if (numParams == 0 && METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD.containsKey(methodName)) {
+        } else if (numParams == 0
+                && METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD.containsKey(methodName)) {
             ApexListValue apexListValue = builder.deepClone().buildList();
-            List<String> outList = METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD.get(methodName).apply(value);
+            List<String> outList =
+                    METHOD_NAME_TO_FUNCTION_STRING_STRING_LIST_METHOD.get(methodName).apply(value);
             for (String result : outList) {
                 apexListValue.add(builder.deepClone().buildString(result));
             }
             return Optional.of(apexListValue);
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD.containsKey(methodName)) {
-            final Integer parameter = convertParameterToInteger(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD.containsKey(methodName)) {
+            final Integer parameter =
+                    convertParameterToInteger(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD
-                    .get(methodName).apply(value, parameter)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_STRING_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter)));
             }
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD.containsKey(methodName)) {
-            final String parameter = convertParameterToString(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD.containsKey(methodName)) {
+            final String parameter =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD
-                    .get(methodName).apply(value, parameter)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter)));
             }
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD.containsKey(methodName)) {
-            final String parameter = convertParameterToString(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD.containsKey(methodName)) {
+            final String parameter =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
-                return Optional.of(builder.buildBoolean(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD
-                    .get(methodName).apply(value, parameter)));
+                return Optional.of(
+                        builder.buildBoolean(
+                                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_BOOLEAN_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter)));
             }
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD.containsKey(methodName)) {
-            final String parameter = convertParameterToString(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD.containsKey(methodName)) {
+            final String parameter =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
-                return Optional.of(builder.buildInteger(METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD
-                    .get(methodName).apply(value, parameter)));
+                return Optional.of(
+                        builder.buildInteger(
+                                METHOD_NAME_TO_BIFUNCTION_STRING_STRING_INTEGER_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter)));
             }
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD.containsKey(methodName)) {
-            final Integer parameter = convertParameterToInteger(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD.containsKey(
+                        methodName)) {
+            final Integer parameter =
+                    convertParameterToInteger(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
-                return Optional.of(builder.buildInteger(METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD
-                    .get(methodName).apply(value, parameter)));
+                return Optional.of(
+                        builder.buildInteger(
+                                METHOD_NAME_TO_BIFUNCTION_STRING_INTEGER_INTEGER_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter)));
             }
-        } else if (numParams == 1 && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD.containsKey(methodName)) {
-            final String parameter = convertParameterToString(parameters.get(0), symbols).orElse(null);
+        } else if (numParams == 1
+                && METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD.containsKey(
+                        methodName)) {
+            final String parameter =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
             if (parameter != null) {
                 ApexListValue apexListValue = builder.deepClone().buildList();
-                List<String> outList = METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD.get(methodName)
-                    .apply(value, parameter);
+                List<String> outList =
+                        METHOD_NAME_TO_BIFUNCTION_STRING_STRING_STRING_LIST_METHOD
+                                .get(methodName)
+                                .apply(value, parameter);
                 for (String result : outList) {
                     apexListValue.add(builder.deepClone().buildString(result));
                 }
                 return Optional.of(apexListValue);
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD.containsKey(methodName)) {
-            final Integer parameter1 = convertParameterToInteger(parameters.get(0), symbols).orElse(null);
-            final Integer parameter2 = convertParameterToInteger(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD.containsKey(
+                        methodName)) {
+            final Integer parameter1 =
+                    convertParameterToInteger(parameters.get(0), symbols).orElse(null);
+            final Integer parameter2 =
+                    convertParameterToInteger(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildInteger(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildInteger(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_INTEGER_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD.containsKey(methodName)) {
-            final String parameter1 = convertParameterToString(parameters.get(0), symbols).orElse(null);
-            final Integer parameter2 = convertParameterToInteger(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD.containsKey(
+                        methodName)) {
+            final String parameter1 =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
+            final Integer parameter2 =
+                    convertParameterToInteger(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildInteger(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildInteger(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_INTEGER_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD.containsKey(methodName)) {
-            final String parameter1 = convertParameterToString(parameters.get(0), symbols).orElse(null);
-            final String parameter2 = convertParameterToString(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD.containsKey(
+                        methodName)) {
+            final String parameter1 =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
+            final String parameter2 =
+                    convertParameterToString(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_STRING_STRING_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING.containsKey(methodName)) {
-    		final Integer parameter1 = convertParameterToInteger(parameters.get(0), symbols).orElse(null);
-            final String parameter2 = convertParameterToString(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING.containsKey(
+                        methodName)) {
+            final Integer parameter1 =
+                    convertParameterToInteger(parameters.get(0), symbols).orElse(null);
+            final String parameter2 =
+                    convertParameterToString(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_STRING_STRING
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING.containsKey(methodName)) {
-            final String parameter1 = convertParameterToString(parameters.get(0), symbols).orElse(null);
-            final Integer parameter2 = convertParameterToInteger(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING.containsKey(
+                        methodName)) {
+            final String parameter1 =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
+            final Integer parameter2 =
+                    convertParameterToInteger(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD.containsKey(methodName)) {
-            final Integer parameter1 = convertParameterToInteger(parameters.get(0), symbols).orElse(null);
-            final Integer parameter2 = convertParameterToInteger(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD.containsKey(
+                        methodName)) {
+            final Integer parameter1 =
+                    convertParameterToInteger(parameters.get(0), symbols).orElse(null);
+            final Integer parameter2 =
+                    convertParameterToInteger(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
-                return Optional.of(builder.buildString(METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD
-                    .get(methodName).apply(value, parameter1, parameter2)));
+                return Optional.of(
+                        builder.buildString(
+                                METHOD_NAME_TO_TRIFUNCTION_STRING_INTEGER_INTEGER_STRING_METHOD
+                                        .get(methodName)
+                                        .apply(value, parameter1, parameter2)));
             }
-        } else if (numParams == 2 && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD.containsKey(methodName)) {
-            final String parameter1 = convertParameterToString(parameters.get(0), symbols).orElse(null);
-            final Integer parameter2 = convertParameterToInteger(parameters.get(1), symbols).orElse(null);
+        } else if (numParams == 2
+                && METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD.containsKey(
+                        methodName)) {
+            final String parameter1 =
+                    convertParameterToString(parameters.get(0), symbols).orElse(null);
+            final Integer parameter2 =
+                    convertParameterToInteger(parameters.get(1), symbols).orElse(null);
             if (parameter1 != null && parameter2 != null) {
                 ApexListValue apexListValue = builder.deepClone().buildList();
-                List<String> outList = METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD.get(methodName)
-                    .apply(value, parameter1, parameter2);
+                List<String> outList =
+                        METHOD_NAME_TO_TRIFUNCTION_STRING_STRING_INTEGER_STRING_LIST_METHOD
+                                .get(methodName)
+                                .apply(value, parameter1, parameter2);
                 for (String result : outList) {
                     apexListValue.add(builder.deepClone().buildString(result));
                 }
@@ -546,7 +712,7 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
         // typically because one or
         // more of the parameters could not be resolved.
         return Optional.ofNullable(
-            INDETERMINANT_VALUE_PROVIDERS.get(methodName).apply(builder).get());
+                INDETERMINANT_VALUE_PROVIDERS.get(methodName).apply(builder).get());
     }
 
     @Override
@@ -600,7 +766,7 @@ public final class ApexStringValue extends ApexSimpleValue<ApexStringValue, Stri
 
     private static List<Integer> charArrayToIntegerList(char[] charArr) {
         List<Integer> integerList = new ArrayList<>();
-        for (int i=0; i < charArr.length; i++) {
+        for (int i = 0; i < charArr.length; i++) {
             integerList.add(Character.getNumericValue(charArr[i]));
         }
         return integerList;

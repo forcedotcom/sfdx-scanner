@@ -1,7 +1,5 @@
 package com.salesforce.graph.symbols.apex;
 
-import static com.salesforce.graph.symbols.apex.ApexStringValueFactory.UNRESOLVED_ARGUMENT_PREFIX;
-
 import com.salesforce.exception.TodoException;
 import com.salesforce.exception.UnexpectedException;
 import com.salesforce.graph.DeepCloneable;
@@ -9,7 +7,6 @@ import com.salesforce.graph.ops.ApexValueUtil;
 import com.salesforce.graph.ops.CloneUtil;
 import com.salesforce.graph.ops.expander.NullValueAccessedException;
 import com.salesforce.graph.symbols.DefaultNoOpScope;
-import com.salesforce.graph.symbols.ScopeUtil;
 import com.salesforce.graph.symbols.SymbolProvider;
 import com.salesforce.graph.vertex.BaseSFVertex;
 import com.salesforce.graph.vertex.BinaryExpressionVertex;
@@ -31,8 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

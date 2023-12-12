@@ -59,7 +59,9 @@ public class IndeterminantValueProvider<T extends ApexValue<T>> {
         }
 
         public static ListValueProvider getIntegerList(ApexValueBuilder builder) {
-            String type = ApexStandardLibraryUtil.getListDeclaration(ApexStandardLibraryUtil.Type.INTEGER);
+            String type =
+                    ApexStandardLibraryUtil.getListDeclaration(
+                            ApexStandardLibraryUtil.Type.INTEGER);
             builder.declarationVertex(SyntheticTypedVertex.get(type));
             return new ListValueProvider(builder);
         }
