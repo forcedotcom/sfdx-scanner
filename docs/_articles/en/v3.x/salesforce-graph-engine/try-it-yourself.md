@@ -21,8 +21,6 @@ To see Graph Engine’s rules, run:
 sf scanner rule list --engine sfge
 ```
 
-Currently, just one rule is returned. [ApexFlsViolationRule](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule) identifies Create Read Update Delete/Field-Level Security (CRUD/FLS) vulnerabilities in your Apex code.
-
 ## Clone the Sample Project
 All our examples use our [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
 
