@@ -40,6 +40,3 @@ This example uses the `--force` flag to bypass the confirmation prompt, removing
 ```bash
 $ sf scanner rule remove --force --path "~/path/to/somerules.jar"
 ```
-
-## Demo
-![Remove Example](./assets/images/remove.gif) 
