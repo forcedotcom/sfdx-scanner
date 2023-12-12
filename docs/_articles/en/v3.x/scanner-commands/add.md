@@ -46,6 +46,3 @@ $ sf scanner rule add --language apex --path "/Users/me/rules"
          2 path(s) added:
          /Users/me/rules/SomeJar.jar,/Users/me/rules/category/apex/MyRules.xml
 ```
-
-## Demo
-![Add Example](./assets/images/add.gif) 
