@@ -106,7 +106,7 @@ This example targets individual methods within a file. It uses a suffix of the f
 
 This example uses `--normalize-severity` to output a normalized severity across all engines in addition to the engine-specific severity. Values are 1 (high), 2 (moderate), and 3 (low).
 
-  	$ sf scanner run dfa --target "/some-project/" --projectdir "/some-project/" --format csv --normalize-severity
+	$ sf scanner run dfa --target "/some-project/" --projectdir "/some-project/" --format csv --normalize-severity
 
 
 This example uses `--severity-threshold` to throw a non-zero exit code when rule violations of a specific normalized severity or 
