@@ -39,6 +39,8 @@ Scan code to detect code quality issues and security vulnerabilities.
 USAGE
   $ sf scanner COMMAND
 
+TOPICS
+
 COMMANDS
   scanner run  scan a codecase with a selection of rules.
   scanner rule  View/add rules that are used to scan code.
