@@ -22,4 +22,4 @@ RetireJS is a default engine along with PMD, ESLint, and ESLint-Typescript. To p
 We replaced the  `-v/--violations-cause-error` flag on `scanner run` with the `-s/--severity-threshold`.
 
 ## Installing version v3.x
-Follow [these](./en/v3.x/getting-started/install) steps to install the latest features in version<version wildcard>.
+Follow [these](./en/v3.x/getting-started/install) steps to install the latest features in version{{ site.data.versions-v3.scanner }}.
