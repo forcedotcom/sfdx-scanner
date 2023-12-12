@@ -25,7 +25,7 @@ $ sf plugins
 #### To install a specific Code Analyzer version, run this command.
 
 ```bash
-$ sf plugins install @salesforce/sfdx-scanner@3.19.0
+$ sf plugins install @salesforce/sfdx-scanner@{{ site.data.versions-v3.scanner }}
 Installing plugin @salesforce/sfdx-scanner... 
 installed v{{ site.data.versions-v3.scanner }}
 ``` 
