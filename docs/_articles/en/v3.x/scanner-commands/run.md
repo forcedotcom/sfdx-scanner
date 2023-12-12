@@ -158,6 +158,3 @@ This example uses --severity-threshold to throw a non-zero exit code when rule v
 ```bash
 $ sf scanner run --target "/some-project/" --severity-threshold 2
 ```
-
-## Demo
-![Run Example](./assets/images/run.gif)
