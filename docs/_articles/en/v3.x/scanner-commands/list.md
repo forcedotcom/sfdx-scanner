@@ -68,6 +68,3 @@ This example returns all rules except those in the Design or Best Practices cate
 ```bash
 $ sf scanner rule list --category '!Design,!Best Practices'
 ```
-
-## Demo
-![List Example](./assets/images/list.gif) 
