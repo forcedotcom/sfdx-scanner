@@ -34,7 +34,4 @@ $ sf scanner rule describe -n <string> [--verbose] [--json]
      languages:   apex
      description: Short description of rule
      message:     ExampleRule Violated.
-```  
-
-## Demo
-![Describe Example](./assets/images/describe.gif) 
+```
