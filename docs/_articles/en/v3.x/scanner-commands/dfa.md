@@ -127,6 +127,3 @@ This example uses `--rule-thread-timeout` to increase or decrease the maximum ru
 This example uses `--sfgejvmargs` to pass JVM args to override system defaults while executing Graph Engine's rules. It overrides the system's default heapspace allocation to 2 GB and decreases the likelihood of encountering an OutOfMemory error.
 		
     $ sf scanner run dfa --sfgejvmargs "-Xmx2g" ...
-
-## Demo
-![DFA Example](./assets/images/dfa.gif)
