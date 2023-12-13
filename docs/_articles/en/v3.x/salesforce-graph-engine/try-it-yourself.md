@@ -18,10 +18,8 @@ Next, run a command to view Graph Engine rules, then install our sample project 
 To see Graph Engine’s rules, run:
 
 ```bash
-sfdx scanner:rule:list --engine sfge
+sf scanner rule list --engine sfge
 ```
-
-Currently, just one rule is returned. [ApexFlsViolationRule](./en/v3.x/salesforce-graph-engine/rules/#apexflsviolationrule) identifies Create Read Update Delete/Field-Level Security (CRUD/FLS) vulnerabilities in your Apex code.
 
 ## Clone the Sample Project
 All our examples use our [sample app](https://github.com/forcedotcom/sfdx-scanner/tree/dev-3/test/code-fixtures/projects/sfge-working-app/force-app/main/default).
@@ -47,7 +45,7 @@ To run Graph Engine, start with a basic evaluation of all files.
 1. Navigate to the sample app root folder. 
 `test/code-fixtures/projects/sfge-working-app` 
 3. Run: 
-`sfdx scanner:run:dfa --target './force-app/main/default/classes' --projectdir './force-app/main/default' --format csv`
+`sf scanner run dfa --target './force-app/main/default/classes' --projectdir './force-app/main/default' --format csv`
 
 Review the results. Notice that each violation has a source and a sink vertex. 
 * The source vertex is the start of the path in question.
@@ -68,7 +66,7 @@ After you fix violations that Graph Engine identified in a specific file, run Gr
 To run Graph Engine against a single file, run:
 
 ```
-sfdx scanner:run:dfa --target './force-app/main/default/classes/AuraEnabledFls.cls' --projectdir './force-app/main/default' --format csv
+sf scanner run dfa --target './force-app/main/default/classes/AuraEnabledFls.cls' --projectdir './force-app/main/default' --format csv
 ```
 
 Keep in mind that:
@@ -95,7 +93,7 @@ After you fix the violations in a given method, sometimes you want to analyze th
 To analyze these two methods only, run:
 
 ```
-sfdx scanner:run:dfa --target './force-app/main/default/classes/AuraEnabledFls.cls#flsHelperGivenIncorrectObjectType;flsHelperMultipleInstances' --projectdir './force-app/main/default' --format csv
+sf scanner run dfa --target './force-app/main/default/classes/AuraEnabledFls.cls#flsHelperGivenIncorrectObjectType;flsHelperMultipleInstances' --projectdir './force-app/main/default' --format csv
 ```
 
 Running Graph Engine against specific methods has these limitations:

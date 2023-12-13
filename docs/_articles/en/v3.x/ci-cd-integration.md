@@ -8,10 +8,10 @@ We recommend that you integrate Salesforce Code Analyzer into your development p
 
 To integrate Salesforce Code Analyzer into your Continuous Integration/Continuous Development (CI/CD) tool, call the appropriate run command in any scripts used by your CI/CD. We recommend that you run:
 
-* `sfdx scanner:run` whenever CI/CD detects changes to code.
-* `sfdx scanner:run:dfa` with `--target=<all classes>` on a scheduled basis, such as nightly.
+* `sf scanner run` whenever CI/CD detects changes to code.
+* `sf scanner run dfa` with `--target=<all classes>` on a scheduled basis, such as nightly.
 
-Why do we recommend that `sfdx scanner:run:dfa` is executed only on a scheduled basis? Depending on the number of paths it generates, Salesforce Graph Engine can take some time to execute when you include all target classes. Alternatively, you can limit the number of paths and speed up Graph Engine execution in your CI/CD by reducing the number of targets using the flag `--target=<specific class>` as you can see [here](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/scanner-commands/dfa/).
+Why do we recommend that `sf scanner run dfa` is executed only on a scheduled basis? Depending on the number of paths it generates, Salesforce Graph Engine can take some time to execute when you include all target classes. Alternatively, you can limit the number of paths and speed up Graph Engine execution in your CI/CD by reducing the number of targets using the flag `--target=<specific class>` as you can see [here](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/scanner-commands/dfa/).
 
 Follow these CI/CD best practices
 

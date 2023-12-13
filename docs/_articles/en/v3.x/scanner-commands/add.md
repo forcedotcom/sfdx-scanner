@@ -4,7 +4,7 @@ lang: en
 redirect_from: /en/scanner-commands/add
 ---
 
-## sfdx scanner:rule:add
+## sf scanner rule add
 Adds custom rules to Salesforce Code Analyzer’s registry so that you can run them along with the built-in rules. Compile and test custom rules separately before adding them.
 
 See [Authoring Custom Rules](./en/v3.x/custom-rules/author/) for more information.
@@ -12,7 +12,7 @@ See [Authoring Custom Rules](./en/v3.x/custom-rules/author/) for more informatio
 ## Usage
 
 ```bash
-$ sfdx scanner:rule:add -l <string> -p <array> [--json]
+$ sf scanner rule add -l <string> -p <array> [--json]
 ```
   
 ## Options
@@ -32,7 +32,7 @@ See PMD's documentation for more information on writing rules.
 This example shows how to specify two JAR files directly. You can also specify a directory containing one or more JARs, all of which will be added.
 
 ```bash
-$ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml"
+$ sf scanner rule add --language apex --path "/Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml"
          Successfully added rules for apex.
          2 path(s) added:
          /Users/me/rules/Jar1.jar,/Users/me/rules/category/apex/MyRules.xml
@@ -41,11 +41,8 @@ $ sfdx scanner:rule:add --language apex --path "/Users/me/rules/Jar1.jar,/Users/
 This example shows how to specify a directory that contains one or more JAR files, all of which are added to the registry. 
 
 ```bash
-$ sfdx scanner:rule:add --language apex --path "/Users/me/rules"
+$ sf scanner rule add --language apex --path "/Users/me/rules"
          Successfully added rules for apex.
          2 path(s) added:
          /Users/me/rules/SomeJar.jar,/Users/me/rules/category/apex/MyRules.xml
 ```
-
-## Demo
-![Add Example](./assets/images/add.gif) 

@@ -6,27 +6,27 @@ redirect_from: /en/troubleshooting
 
 Follow these tips to fix common Salesforce Code Analyzer (Code Analyzer) issues.
 
-## Issues with `scanner:run`
+## Issues with `scanner run`
 
-### I sometimes see more rules violations when I specify categories with `scanner:run` command than when I execute it for the same target without filters. What is this inconsistency?
+### I sometimes see more rules violations when I specify categories with `scanner run` command than when I execute it for the same target without filters. What is this inconsistency?
 
-It’s actually working as designed. Some rules are default-enabled by ESLint, while some other rules aren’t. Executing `scanner:run` without filters causes only default-enabled rules to be invoked, and specifying a category filter with `scanner:run` includes all rules under the selected categories to be invoked irrespective of their default-enabled setting. As of today, we don’t provide a way to modify default-enable settings for rules.
+It’s actually working as designed. Some rules are default-enabled by ESLint, while some other rules aren’t. Executing `scanner run` without filters causes only default-enabled rules to be invoked, and specifying a category filter with `scanner run` includes all rules under the selected categories to be invoked irrespective of their default-enabled setting. As of today, we don’t provide a way to modify default-enable settings for rules.
 
-### The scanner:run command results in the `JavaScript heap out of memory` error.
+### The scanner run command results in the `JavaScript heap out of memory` error.
 
 Code Analyzer’s node process runs with a default limit of 2 GB of memory. This limit can be changed by configuring the `max-old-space-size` node option. The required memory depends on the files included in the `--target` parameter. This example increases the memory value to 4 GB for a single invocation of the Code Analyzer.
 
 ```bash
-$ NODE_OPTIONS="--max-old-space-size=4096" sfdx scanner:run --target "./**/*.ts"
+$ NODE_OPTIONS="--max-old-space-size=4096" sf scanner run --target "./**/*.ts"
 ```
 
-### The `scanner:run` command throws a ParseException when executing against my Visualforce files as target.
+### The `scanner run` command throws a ParseException when executing against my Visualforce files as target.
 
 Check to see if the affected Visualforce pages or components render correctly.
 
 If your Visualforce pages or components include HTML tags that include PMD attributes, review [PMD-Visualforce open issues](https://github.com/pmd/pmd/issues/2765). PMD can provide the fix for you.
 
-### The `scanner:run` command throws a warning about duplicate violations between ESLint and ESLint-LWC.
+### The `scanner run` command throws a warning about duplicate violations between ESLint and ESLint-LWC.
 
 If you invoke the `eslint` and `eslint-lwc` engines in the same run, and execute them on the same files, Code Analyzer returns duplicate violations.
 
@@ -75,16 +75,16 @@ Your path names likely contain characters that cause issues. We recommend that y
 | []        | None                                                                                                |
 | ()        | None                                                                                                |
 
-## Issues with `scanner:run` and `eslint-typescript`
+## Issues with `scanner run` and `eslint-typescript`
 
-### The `scanner:run` command output contains the message `'<file_name>' doesn’t reside in a location that is included by your tsconfig.json 'include' attribute`.
+### The `scanner run` command output contains the message `'<file_name>' doesn’t reside in a location that is included by your tsconfig.json 'include' attribute`.
 
 The ESLint engine requires that any scanned TypeScript files must be included by the `tsconfig`. Read more in the `typescript-eslint` [GitHub repo](https://github.com/typescript-eslint/typescript-eslint/releases/tag/v2.0.0).
 
 Update your `tsconfig`’s `include` attribute to include `<file_name>`.
 
 
-### The `scanner:run` command fails with the error `Unable to find 'tsconfig.json' in current directory X`, even though I'm not scanning any TypeScript files.
+### The `scanner run` command fails with the error `Unable to find 'tsconfig.json' in current directory X`, even though I'm not scanning any TypeScript files.
 
 The most likely cause is that you’re scanning TypeScript files without realizing it.
 
@@ -103,23 +103,23 @@ Make sure that the entries for ESLint and `eslint-typescript` in `${HOME}/.sfdx-
 * Check that the compilation CLASSPATH contains the correct version of the PMD binary.
 
 
-### I successfully created my rule XML and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn’t display my custom rules.
+### I successfully created my rule XML and added it using the `scanner rule add` command, but `scanner rule list` doesn’t display my custom rules.
 
 * Double-check that the rules in your XML are exclusively XPath-based. If any of the rules use custom Java, then a JAR is required.
 * Ensure that the XML’s path includes `category` as a directory.
 
-### I successfully created my JAR file and added it using the `scanner:rule:add` command, but `scanner:rule:list` doesn’t display my custom rules.
+### I successfully created my JAR file and added it using the `scanner rule add` command, but `scanner rule list` doesn’t display my custom rules.
 
 * Check that the XML rule definition file is included in the JAR. Run `jar tf /your/jar/file.JAR` to list the files in your JAR.
 * Make sure that your XML file is in a PATH that includes `category` as a directory.
 * Check that your class files are included in the JAR.
 * Confirm that the PATH to the class files reflects the package structure in the Java file.
 
-### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
+### The `scanner rule list` command displays my new custom rules in the catalog, but when I run them I get an error about the Java version.
 
 One possible reason is that the Java version you used to build your code is different from the version Code Analyzer uses to invoke PMD. Make sure that you compile your Java code with the same Java version and path that’s listed in the `java-home` key in `<HOME_DIR>/.sfdx-scanner/Config.json`.
 
-### The `scanner:rule:list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
+### The `scanner rule list` command displays my new custom rules in the catalog, but when I run a rule, I get a `ClassNotFoundException`.
 
 One possible reason is that you referenced a class in your custom rule Java code from the PMD library that’s not available in version {{ site.data.versions-v3.pmd }}. Make sure that you reference only PMD features and classes that are available in version  {{ site.data.versions-v3.pmd }}.
 
@@ -129,7 +129,7 @@ One possible reason is that you referenced a class in your custom rule Java code
 
 ### When using `--eslintconfig` flag, I get a Can’t find module `<some_module>` error
 
-In the directory where you execute the `scanner:run` command, install the required ESLint dependencies using npm install `<some_module>`.
+In the directory where you execute the `scanner run` command, install the required ESLint dependencies using npm install `<some_module>`.
 
 ---
 
@@ -206,7 +206,7 @@ Follow these guidelines to resolve InternalExecution errors:
 - clear details about how to write the code. 
 - if the error message indicated a specific vertex, include the line of code the vertex refers to.
 
-### My `scanner:run:dfa` execution ran for a long time and ended with a timeout.
+### My `scanner run dfa` execution ran for a long time and ended with a timeout.
 
 Depending on the complexity of the source code, Graph Engine can take a long time to complete. 
 
@@ -220,7 +220,7 @@ Both methods take int values of the number of milliseconds to wait. The default 
 To complete the execution within the timeout period, you can also reduce the number of files sent as `--target`, which reduces the number of entry points scanned per run.
 
 
-### My `scanner:run:dfa` execution ran into this error: `java.lang.LimitReachedError: Java heap space`.
+### My `scanner run dfa` execution ran into this error: `java.lang.LimitReachedError: Java heap space`.
 
 This `LimitReachedError` is a current, known Graph Engine issue. Refer to our [recommendations](./en/v3.x/salesforce-graph-engine/working-with-sfge/#understand-limitreached-errors) to reduce the probability of experiencing the heap space error.
 

@@ -7,7 +7,7 @@ redirect_from: /en/architecture/eslint-engine
 ESLint is a popular linting tool for JavaScript. It provides numerous static analysis rules that help developers write quality code.
 
 ## How does Salesforce Code Analyzer use ESLint?
-The Salesforce Code Analyzer (Code Analyzer) ```scanner:run``` uses ESLint to scan targeted JavaScript files. By default, all rules are executed, but you can change which rules are evaluated through Code Analyzer optional flags described in the Code Analyzer Command Reference.
+The Salesforce Code Analyzer (Code Analyzer) ```scanner run``` uses ESLint to scan targeted JavaScript files. By default, all rules are executed, but you can change which rules are evaluated through Code Analyzer optional flags described in the Code Analyzer Command Reference.
 
 Additionally, ESLint is highly configurable through plug-ins. Code Analyzer supports these plug-ins.
 
