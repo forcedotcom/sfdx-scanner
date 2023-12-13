@@ -1,0 +1,25 @@
+name: gha-test
+on:
+  workflow_call:
+
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+
+jobs:
+  do_the_thing:
+    runs-on: ubuntu-latest
+    name: Test the new actions
+    env:
+      NODE_OPTIONS: "--max_old_space_size=4096"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*' # Always use Node LTS for building dependencies.
+      - run: yarn
+      - uses: rmohan20/code-analyzer-action@main
+        with:
+          render-results: false
+          runtype: simple
+          engine: eslint-typescript
+          target: "./src/**/*.ts"

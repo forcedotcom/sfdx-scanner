@@ -1,2 +1,3 @@
 lib/**
 node_modules/**
+!node_modules/@salesforce/dev-config/tsconfig.json

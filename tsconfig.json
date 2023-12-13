@@ -1,5 +1,5 @@
 {
-	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
+	"extends": "@salesforce/dev-config/tsconfig",
 	"compilerOptions": {
 		"outDir": "./lib",
 		"rootDir": "./src",
@@ -8,6 +8,6 @@
 		"emitDecoratorMetadata": true
 	},
 	"include": [
-		"./src/**/*"
+		"./src/**/*",
 	]
 }

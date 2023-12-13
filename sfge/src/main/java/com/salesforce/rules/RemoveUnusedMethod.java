@@ -130,8 +130,8 @@ public final class RemoveUnusedMethod extends AbstractPathBasedRule {
                                         __.or(
                                                 __.hasNot(Schema.IS_TEST),
                                                 __.has(Schema.IS_TEST, false)))
-                            	// Implicit methods are ineligible
-                            	.where(__.not(__.has(Schema.IS_IMPLICIT, true))));
+                                // Implicit methods are ineligible
+                                .where(__.not(__.has(Schema.IS_IMPLICIT, true))));
         // Other eligibility exclusions are more easily applied to the returned list.
         return methods.stream()
                 .filter(
