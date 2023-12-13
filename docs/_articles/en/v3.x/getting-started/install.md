@@ -40,10 +40,11 @@ USAGE
   $ sf scanner COMMAND
 
 TOPICS
+  scanner rule  view or add rules to scan code
+  scanner run   scan a codebase with a selection of rules
 
 COMMANDS
-  scanner run  scan a codecase with a selection of rules.
-  scanner rule  View/add rules that are used to scan code.
+  scanner run  scan a codebase with a selection of rules
 
 ```
 ## Update Code Analyzer v3.x
