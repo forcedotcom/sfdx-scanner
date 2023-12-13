@@ -8,7 +8,6 @@ export const CATALOG_FILE = 'Catalog.json';
 export const CUSTOM_PATHS_FILE = 'CustomPaths.json';
 export const CONFIG_PILOT_FILE = 'Config-pilot.json';
 export const CONFIG_FILE = 'Config.json';
-export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 
 // TODO: We should flesh this one-off solution out into one that handles all the various env vars we use.
 //       E.g., the ones defined in `EnvironmentVariable.ts` and `dfa.ts`.

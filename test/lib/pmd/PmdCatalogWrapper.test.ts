@@ -40,7 +40,7 @@ describe('PmdCatalogWrapper', () => {
 					const thePath = path.join('dist', 'pmd-cataloger', 'lib');
 					const expectedParamList = [
 						`-DcatalogHome=`,
-						'-DcatalogName=PmdCatalog.json',
+						'-DcatalogName=',
 						'-cp',
 						thePath,
 						'sfdc.sfdx.scanner.pmd.Main'];
@@ -48,7 +48,7 @@ describe('PmdCatalogWrapper', () => {
 					const target = await TestablePmdCatalogWrapper.create({});
 					const params = (await target.buildCommandArray())[1];
 
-					expectedParamList.forEach((value: string, index: number, array: string[]) => {
+					expectedParamList.forEach((value: string, index: number) => {
 						expect(params[index]).contains(value, `Unexpected param value at position ${index}`);
 					});
 				});

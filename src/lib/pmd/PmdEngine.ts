@@ -457,8 +457,8 @@ export class PmdEngine extends BasePmdEngine {
 		return await this.runInternal(selectedRules, targets);
 	}
 
-	public async isEnabled(): Promise<boolean> {
-		return await this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
+	public isEnabled(): Promise<boolean> {
+		return this.config.isEngineEnabled(PmdEngine.THIS_ENGINE);
 	}
 }
 

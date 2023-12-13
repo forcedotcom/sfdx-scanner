@@ -9,8 +9,7 @@ import {PmdSupport} from './PmdSupport';
 import { PMD_LIB } from '../../Constants';
 import path = require('path');
 import {uxEvents, EVENTS} from '../ScannerEvents';
-import { Controller } from '../../Controller';
-import { PMD_CATALOG_FILE, PMD_VERSION } from '../../Constants';
+import { PMD_VERSION } from '../../Constants';
 import {BundleName, getMessage} from "../../MessageCatalog";
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
@@ -20,7 +19,7 @@ const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 export class PmdCatalogWrapper extends PmdSupport {
 	private logger: Logger; // TODO: add relevant trace logs
 	private initialized: boolean;
-	private sfdxScannerPath: string;
+	private catalogFilePath: path.ParsedPath;
 
 	protected async init(): Promise<void> {
 		if (this.initialized) {
@@ -28,8 +27,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		}
 		await super.init();
 		this.logger = await Logger.child('PmdCatalogWrapper');
-		this.sfdxScannerPath = Controller.getSfdxScannerPath();
-
+		this.catalogFilePath = path.parse(await new FileHandler().tmpFileWithCleanup());
 		this.initialized = true;
 	}
 
@@ -39,12 +37,8 @@ export class PmdCatalogWrapper extends PmdSupport {
 		return this.readCatalogFromFile();
 	}
 
-	private getCatalogPath(): string {
-		return path.join(this.sfdxScannerPath, PMD_CATALOG_FILE);
-	}
-
 	private async readCatalogFromFile(): Promise<Catalog> {
-		const rawCatalog = await new FileHandler().readFile(this.getCatalogPath());
+		const rawCatalog = await new FileHandler().readFile(path.format(this.catalogFilePath));
 		return JSON.parse(rawCatalog) as Catalog;
 	}
 
@@ -56,7 +50,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		// is intended for child_process.spawn(), which freaks out if you do that.
 		const classpathEntries = await this.buildClasspath();
 		const parameters = await this.buildCatalogerParameters();
-		const args = [`-DcatalogHome=${this.sfdxScannerPath}`, `-DcatalogName=${PMD_CATALOG_FILE}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
+		const args = [`-DcatalogHome=${this.catalogFilePath.dir}`, `-DcatalogName=${this.catalogFilePath.base}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
 
 		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
