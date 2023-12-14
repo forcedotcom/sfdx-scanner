@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: 'lts/*' # Always use Node LTS for building dependencies.
       - run: yarn
+      - run: yarn build
       - uses: rmohan20/code-analyzer-action@main
         with:
           render-results: false
