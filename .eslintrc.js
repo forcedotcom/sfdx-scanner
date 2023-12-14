@@ -1,6 +1,7 @@
 module.exports = {
 	parser: "@typescript-eslint/parser",
 	extends: [
+		"eslint-config-salesforce-typescript",
 		"eslint:recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:@typescript-eslint/recommended-requiring-type-checking",
