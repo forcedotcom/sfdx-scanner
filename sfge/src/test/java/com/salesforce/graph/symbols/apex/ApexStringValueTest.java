@@ -1844,4 +1844,24 @@ public class ApexStringValueTest {
         MatcherAssert.assertThat(value.isIndeterminant(), Matchers.equalTo(true));
         MatcherAssert.assertThat(value.getValue().isPresent(), Matchers.equalTo(false));
     }
+
+    /** ---- Test that null can be returned from a string method without crashing -------------- */
+    @Test
+    public void testAllowNullReturn() {
+        // spotless:off
+        String sourceCode =
+            "public class MyClass {\n"
+                + "    public static void doSomething() {\n"
+                + "        String s = 'Foo';\n"
+                + "        System.debug(s.substringBetween('bar'));\n"
+                + "    }\n"
+                + "}";
+        // spotless:on
+        TestRunner.Result<SystemDebugAccumulator> result = TestRunner.walkPath(g, sourceCode);
+
+        ApexStringValue value = result.getVisitor().getSingletonResult();
+        MatcherAssert.assertThat(value.isIndeterminant(), Matchers.equalTo(false));
+        // Although determinant, the isPresent is false because substringBetween returns null here
+        MatcherAssert.assertThat(value.getValue().isPresent(), Matchers.equalTo(false));
+    }
 }
