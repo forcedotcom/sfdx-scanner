@@ -62,7 +62,7 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
 ## Environment-variable-based Controls
 
 ### *SFGE_JVM_ARGS*
-Set SFGE_JVM_ARGS to work around [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) and other JVM issues while executing scanner:run:dfa command. Refer to JVM documentation for more info. The equivalent flag on the `scanner run dfa` command is `--sfgejvmargs`.
+Set SFGE_JVM_ARGS to work around [OutOfMemory errors](./en/v3.x/salesforce-graph-engine/working-with-sfge/#outofmemory-java-heap-space-error) and other JVM issues while executing `scanner run dfa` command. Refer to JVM documentation for more info. The equivalent flag on the `scanner run dfa` command is `--sfgejvmargs`.
 
 ### *SFGE_RULE_DISABLE_WARNING_VIOLATION*
 Set to true to suppress warning violations, such as those related to `StripInaccessable` READ access (default: false). The equivalent flag on the `scanner run dfa` command is `--rule-disable-warning-violation`.
