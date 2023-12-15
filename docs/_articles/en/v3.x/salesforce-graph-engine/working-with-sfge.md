@@ -159,7 +159,7 @@ Two Graph Engine parameters, `--sfgejvmargs` and `--pathexplimit`, act as knobs 
 Use the `--sfgejvmargs` parameter to modify your Java Virtual Machine (JVM) default max heap size.
 
 1. Look up your JVM `-Xmx` value, which is your allocated heap size. 
-2. Use the `--sfgejvmargs` parameter to increase your `-Xmx` value on `scanner:run:dfa command`. 
+2. Use the `--sfgejvmargs` parameter to increase your `-Xmx` value on `scanner run dfa` command. 
 3. Execute Graph Engine with a larger heap space than the default settings.
 
 For example, to allocate 2 G heap space:

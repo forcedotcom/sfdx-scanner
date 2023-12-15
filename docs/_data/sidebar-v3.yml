@@ -17,23 +17,23 @@
   baseUrl: /v3.x/scanner-commands/
   children:
     - title:
-        en: scanner:run
+        en: scanner run
       url: /v3.x/scanner-commands/run
     - title:
-        en: scanner:run:dfa
+        en: scanner run dfa
       url: /v3.x/scanner-commands/dfa
       new: true
     - title:
-        en: scanner:rule:list
+        en: scanner rule list
       url: /v3.x/scanner-commands/list
     - title:
-        en: scanner:rule:describe
+        en: scanner rule describe
       url: /v3.x/scanner-commands/describe
     - title:
-        en: scanner:rule:add
+        en: scanner rule add
       url: /v3.x/scanner-commands/add
     - title:
-        en: scanner:rule:remove
+        en: scanner rule remove
       url: /v3.x/scanner-commands/remove
 - title:
     en: Custom Configuration
