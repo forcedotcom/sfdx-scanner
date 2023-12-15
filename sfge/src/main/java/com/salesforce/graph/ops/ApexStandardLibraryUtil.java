@@ -91,6 +91,7 @@ public final class ApexStandardLibraryUtil {
 
     /** Standard Apex types */
     public static final class Type {
+        public static final String INTEGER = TypeInfos.INTEGER.getApexName();
         public static final String SCHEMA_DESCRIBE_FIELD_RESULT = "Schema.DescribeFieldResult";
         public static final String SCHEMA_DESCRIBE_S_OBJECT_RESULT = "Schema.DescribeSObjectResult";
         public static final String SCHEMA_FIELD_SET = "Schema.FieldSet";

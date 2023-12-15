@@ -5,7 +5,6 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import com.salesforce.apex.jorje.ASTConstants;
 import com.salesforce.graph.Schema;
 import com.salesforce.graph.vertex.MethodVertex;
-import com.salesforce.graph.vertex.ModifierNodeVertex;
 import com.salesforce.graph.vertex.SFVertexFactory;
 import java.util.List;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
