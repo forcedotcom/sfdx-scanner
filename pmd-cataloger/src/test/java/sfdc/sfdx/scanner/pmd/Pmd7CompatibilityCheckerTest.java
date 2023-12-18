@@ -31,6 +31,7 @@ public class Pmd7CompatibilityCheckerTest {
     private static final String NONSTANDARD_JAR = "/Users/me/some/path/to/MyRules.jar";
     private static final String STANDARD_CATPATH = "category/apex/bestpractices.xml";
     private static final String NONSTANDARD_CATPATH = "category/apex/somewildcat.xml";
+    private static final String MOCKED_ENGINE_NAME = "MockedEngineName";
 
     /**
      * Before and after each test, reset the CLI messages.
@@ -135,7 +136,7 @@ public class Pmd7CompatibilityCheckerTest {
         String classProp = "net.sourceforge.pmd.lang.apex.rule.codestyle.ClassNamingConventionsRule";
         String ruleXml = createRuleXml(classProp, hasLangProp, "");
         Element ruleElement = createRuleElement(ruleXml);
-        return new PmdCatalogRule(ruleElement, category, "apex");
+        return new PmdCatalogRule(ruleElement, category, "apex", MOCKED_ENGINE_NAME);
     }
 
     private PmdCatalogRule createXpathRule(PmdCatalogCategory category, String classProp, boolean hasLangProp) {
@@ -153,7 +154,7 @@ public class Pmd7CompatibilityCheckerTest {
                 + "</properties>";
         String ruleXml = createRuleXml(classProp, hasLangProp, propertiesTags);
         Element ruleElement = createRuleElement(ruleXml);
-        return new PmdCatalogRule(ruleElement, category, "apex");
+        return new PmdCatalogRule(ruleElement, category, "apex", MOCKED_ENGINE_NAME);
     }
 
     private String createRuleXml(String classProp, boolean hasLangProp, String innerXml) {

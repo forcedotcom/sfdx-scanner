@@ -11,11 +11,17 @@ const HEAP_SIZE = '-Xmx1024m';
 type PmdWrapperOptions = PmdSupportOptions & {
 	targets: string[];
 	rules: string;
+	/**
+	 * Any extra files that need to be added to the classpath, NOT including files that declare rules (since those files
+	 * are handled elsewhere).
+	 */
+	supplementalClasspath: string[];
 };
 
 export default class PmdWrapper extends PmdSupport {
 	private targets: string[];
-	private rules: string;
+	private readonly rules: string;
+	private supplementalClasspath: string[];
 	private logger: Logger;
 	private initialized: boolean;
 
@@ -23,6 +29,7 @@ export default class PmdWrapper extends PmdSupport {
 		super(opts);
 		this.targets = opts.targets;
 		this.rules = opts.rules;
+		this.supplementalClasspath = opts.supplementalClasspath;
 	}
 
 	protected async init(): Promise<void> {
@@ -45,7 +52,7 @@ export default class PmdWrapper extends PmdSupport {
 		// The classpath needs PMD's lib folder. There may be redundancy with the shared classpath, but having the
 		// same JAR in the classpath twice is fine. Also note that the classpath is not wrapped in quotes like how it
 		// would be if we invoked directly through the CLI, because child_process.spawn() hates that.
-		const classpath = [`${PMD_LIB}/*`, ...this.buildSharedClasspath()].join(path.delimiter);
+		const classpath = [...this.supplementalClasspath, `${PMD_LIB}/*`, ...this.buildSharedClasspath()].join(path.delimiter);
 		// Operating systems impose limits on the maximum length of a command line invocation. This can be problematic
 		// when scanning a large number of files. Store the list of files to scan in a temp file. Pass the location
 		// of the temp file to PMD. The temp file is cleaned up when the process exits.

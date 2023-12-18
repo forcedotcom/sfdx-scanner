@@ -19,26 +19,42 @@ import sfdc.sfdx.scanner.xml.XmlReader;
 import sfdc.sfdx.scanner.paths.PathManipulator;
 
 class PmdRuleCataloger {
-	private Map<String, List<String>> rulePathEntries;
+	private final Map<String, List<String>> rulePathEntries;
 
 	// Holds category and rulesets maps that provide files we need to scan for each language.
-	private LanguageXmlFileMapping languageXmlFileMapping = new LanguageXmlFileMapping();
+	private final LanguageXmlFileMapping languageXmlFileMapping = new LanguageXmlFileMapping();
 
 	// These maps are going to help us store intermediate objects in an easy-to-reference way.
-	private Map<String, List<PmdCatalogRule>> rulesByLanguage = new HashMap<>();
-	private Map<String, List<PmdCatalogRuleset>> rulesetsByLanguage = new HashMap<>();
+	private final Map<String, List<PmdCatalogRule>> rulesByLanguage = new HashMap<>();
+	private final Map<String, List<PmdCatalogRuleset>> rulesetsByLanguage = new HashMap<>();
 
 	// These lists are going to be the master lists that we ultimately use to build our JSON at the end.
-	private List<PmdCatalogCategory> masterCategoryList = new ArrayList<>();
-	private List<PmdCatalogRule> masterRuleList = new ArrayList<>();
-	private List<PmdCatalogRuleset> masterRulesetList = new ArrayList<>();
+	private final List<PmdCatalogCategory> masterCategoryList = new ArrayList<>();
+	private final List<PmdCatalogRule> masterRuleList = new ArrayList<>();
+	private final List<PmdCatalogRuleset> masterRulesetList = new ArrayList<>();
+
+    /**
+     * The directory in which the catalog file will be placed.
+     */
+    private final String catalogHome;
+    /**
+     * The name that the catalog file will be given.
+     */
+    private final String catalogName;
+    /**
+     * The specific PMD variant whose rules are being cataloged. (E.g., "pmd" vs "pmd-appexchange")
+     */
+    private final String engineSubvariant;
 
 
 	/**
 	 * @param rulePathEntries Map of languages and their file resources. Includes both inbuilt PMD and custom rules provided by user
 	 */
-	PmdRuleCataloger(Map<String, List<String>> rulePathEntries) {
+	PmdRuleCataloger(Map<String, List<String>> rulePathEntries, String catalogHome, String catalogName, String engineSubvariant) {
 		this.rulePathEntries = rulePathEntries;
+        this.catalogHome = catalogHome;
+        this.catalogName = catalogName;
+        this.engineSubvariant = engineSubvariant;
 	}
 
 
@@ -84,7 +100,7 @@ class PmdRuleCataloger {
         new Pmd7CompatibilityChecker().validatePmd7Readiness(masterRuleList);
 
 		// STEP 6: Build a JSON using all of our objects.
-		PmdCatalogJson json = new PmdCatalogJson(masterRuleList, masterCategoryList, masterRulesetList);
+		PmdCatalogJson json = new PmdCatalogJson(masterRuleList, masterCategoryList, masterRulesetList, engineSubvariant);
 
 		// STEP 7: Write the JSON to a file.
 		writeJsonToFile(json);
@@ -128,7 +144,7 @@ class PmdRuleCataloger {
 		int ruleCount = ruleNodes.getLength();
 		for (int i = 0; i < ruleCount; i++) {
 			Element ruleNode = (Element) ruleNodes.item(i);
-			PmdCatalogRule rule = new PmdCatalogRule(ruleNode, category, language);
+			PmdCatalogRule rule = new PmdCatalogRule(ruleNode, category, language, engineSubvariant);
 			rules.add(rule);
 		}
 		if (!this.rulesByLanguage.containsKey(language)) {
@@ -180,9 +196,7 @@ class PmdRuleCataloger {
 		}
 	}
 
-	void writeJsonToFile(PmdCatalogJson json) {
-		final String catalogHome = System.getProperty("catalogHome");
-		final String catalogName = System.getProperty("catalogName");
+	private void writeJsonToFile(PmdCatalogJson json) {
 		CliMessager.getInstance().addMessage(String.format("Received catalogHome as %s and catalogName as %s", catalogHome, catalogName), EventKey.INFO_GENERAL_INTERNAL_LOG, "PmdRuleCataloger.writeJsonToFile()");
 		Path catDirPath = Paths.get(catalogHome);
 		Gson prettyGson = new GsonBuilder().setPrettyPrinting().create();

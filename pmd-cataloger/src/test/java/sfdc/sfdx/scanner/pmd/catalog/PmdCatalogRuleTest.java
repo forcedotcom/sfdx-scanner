@@ -29,13 +29,14 @@ public class PmdCatalogRuleTest {
 	private static final String CATEGORY_NAME = "Best Practices";
 	private static final String CATEGORY_PATH = "/some/path";
 	private static final String CATEGORY_SOURCEJAR = "/path/to/sourcejar.jar";
+    private static final String MOCKED_ENGINE_NAME = "MockedEngineName";
 	private static final PmdCatalogCategory CATEGORY = new PmdCatalogCategory(CATEGORY_NAME, CATEGORY_PATH, CATEGORY_SOURCEJAR);
 
 	@Test
 	public void testCatalogRuleJsonConversion() {
 		// Setup mock
 		final Element elementMock = getElementMock(Collections.singletonList("description"));
-		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE, MOCKED_ENGINE_NAME);
 
 
 		// Execute
@@ -64,7 +65,7 @@ public class PmdCatalogRuleTest {
 
 		// Setup mock
 		final Element elementMock = getElementMock(Collections.singletonList(""));
-		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE, MOCKED_ENGINE_NAME);
 
 		// Execute
 		final JSONObject jsonObject = catalogRule.toJson();
@@ -79,7 +80,7 @@ public class PmdCatalogRuleTest {
 
 		// Setup mock
 		final Element elementMock = getElementMock(Collections.singletonList(description));
-		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE);
+		final PmdCatalogRule catalogRule = new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE, MOCKED_ENGINE_NAME);
 
 		// Execute
 		final JSONObject jsonObject = catalogRule.toJson();
@@ -97,7 +98,7 @@ public class PmdCatalogRuleTest {
 		final Element elementMock = getElementMock(Arrays.asList(description1, description2));
 
         // Even initializing the object should be enough to trigger the expected exception.
-        MessagePassableException ex = assertThrows(MessagePassableException.class, () -> new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE));
+        MessagePassableException ex = assertThrows(MessagePassableException.class, () -> new PmdCatalogRule(elementMock, CATEGORY, LANGUAGE, MOCKED_ENGINE_NAME));
 		assertThat(ex.getEventKey(), is(EventKey.ERROR_EXTERNAL_MULTIPLE_RULE_DESC));
         assertThat(ex.getArgs(), is(new String[]{CATEGORY.getPath() + "/" + NAME, "2"}));
 	}

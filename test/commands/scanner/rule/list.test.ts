@@ -222,7 +222,7 @@ describe('scanner rule list', () => {
 			it('Filtering by a single engine returns only rules applied to that engine', () => {
 				const output = runCommand(`scanner rule list --engine ${ENGINE.PMD} --json`);
 				// Count how many rules in the catalog fit the criteria.
-				const targetRuleCount = getCatalogJson().rules.filter(rule => rule.engine.includes(ENGINE.PMD)).length;
+				const targetRuleCount = getCatalogJson().rules.filter(rule => rule.engine === (ENGINE.PMD)).length;
 
 				// Parse the output back into a JSON and make sure it has the right number of rules.
 				const outputJson = output.jsonOutput;

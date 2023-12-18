@@ -11,13 +11,19 @@ import {BundleName, getMessage} from "../../MessageCatalog";
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
+type PmdCatalogWrapperOptions = PmdSupportOptions & {
+	catalogedEngineName: string;
+};
+
 export class PmdCatalogWrapper extends PmdSupport {
 	private logger: Logger;
 	private initialized: boolean;
 	private catalogFilePath: path.ParsedPath;
+	private readonly catalogedEngineName: string;
 
-	constructor(opts: PmdSupportOptions) {
+	constructor(opts: PmdCatalogWrapperOptions) {
 		super(opts);
+		this.catalogedEngineName = opts.catalogedEngineName;
 	}
 
 	protected async init(): Promise<void> {
@@ -51,7 +57,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 		const languageArgs: string[] = this.buildLanguageArgs();
 		this.logger.trace(`Cataloger parameters have been built: ${JSON.stringify(languageArgs)}`);
 
-		const args = [`-DcatalogHome=${this.catalogFilePath.dir}`, `-DcatalogName=${this.catalogFilePath.base}`, '-cp', classpath, MAIN_CLASS, ...languageArgs];
+		const args = [`-DcatalogHome=${this.catalogFilePath.dir}`, `-DcatalogName=${this.catalogFilePath.base}`, `-DcatalogedEngineName=${this.catalogedEngineName}`, '-cp', classpath, MAIN_CLASS, ...languageArgs];
 
 		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];

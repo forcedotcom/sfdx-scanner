@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
+import {APPEXCHANGE_PMD_LIB, PMD_APPEXCHANGE_VERSION, CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {EVENTS, uxEvents} from "../ScannerEvents";
@@ -82,10 +82,6 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 	protected eventCreator: EventCreator;
 	private initialized: boolean;
 
-	getTargetPatterns(): Promise<TargetPattern[]> {
-		return this.config.getTargetPatterns(ENGINE.PMD);
-	}
-
 	public matchPath(path: string): boolean {
 		// TODO implement this for realz
 		return path != null;
@@ -133,7 +129,7 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 		this.initialized = true;
 	}
 
-	protected async runInternal(selectedRules: string, targets: RuleTarget[], rulePathsByLanguage: Map<string, Set<string>>): Promise<RuleResult[]> {
+	protected async runInternal(selectedRules: string, targets: RuleTarget[], rulePathsByLanguage: Map<string, Set<string>>, supplementalClasspath: string[] = []): Promise<RuleResult[]> {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
@@ -148,7 +144,8 @@ abstract class AbstractPmdEngine extends AbstractRuleEngine {
 			const stdout = await (await PmdWrapper.create({
 				targets: targetPaths,
 				rules: selectedRules,
-				rulePathsByLanguage
+				rulePathsByLanguage,
+				supplementalClasspath
 			})).execute();
 			const results = this.processStdOut(stdout);
 			this.logger.trace(`Found ${results.length} for PMD`);
@@ -430,10 +427,15 @@ export class PmdEngine extends AbstractPmdEngine {
 		return PmdEngine.ENGINE_NAME;
 	}
 
+	getTargetPatterns(): Promise<TargetPattern[]> {
+		return this.config.getTargetPatterns(ENGINE.PMD);
+	}
+
 	async getCatalog(): Promise<Catalog> {
 		if (!this.catalogWrapper) {
 			this.catalogWrapper = await PmdCatalogWrapper.create({
-				rulePathsByLanguage: await (await _PmdRuleMapper.create({})).createStandardRuleMap()
+				rulePathsByLanguage: await (await _PmdRuleMapper.create({})).createStandardRuleMap(),
+				catalogedEngineName: PmdEngine.ENGINE_NAME
 			});
 		}
 		return this.catalogWrapper.getCatalog();
@@ -478,6 +480,11 @@ export class CustomPmdEngine extends AbstractPmdEngine {
 
 	getName(): string {
 		return CustomPmdEngine.THIS_ENGINE.valueOf();
+	}
+
+	getTargetPatterns(): Promise<TargetPattern[]> {
+		// The Custom variant shares the same target patterns as the standard variant.
+		return this.config.getTargetPatterns(ENGINE.PMD);
 	}
 
 	isEnabled(): Promise<boolean> {
@@ -536,7 +543,64 @@ export class CustomPmdEngine extends AbstractPmdEngine {
 
 		return configFile;
 	}
+}
 
+export class AppExchangePmdEngine extends AbstractPmdEngine {
+	private static readonly SUPPORTED_LANGUAGES = ['apex', 'html', 'javascript', 'visualforce', 'xml'];
+	private static ENGINE_ENUM = ENGINE.PMD_APPEXCHANGE;
+	public static ENGINE_NAME = AppExchangePmdEngine.ENGINE_ENUM.valueOf();
+	private catalogWrapper: PmdCatalogWrapper;
+
+	getName(): string {
+		return AppExchangePmdEngine.ENGINE_NAME;
+	}
+
+	getTargetPatterns(): Promise<TargetPattern[]> {
+		return this.config.getTargetPatterns(ENGINE.PMD_APPEXCHANGE);
+	}
+
+	async getCatalog(): Promise<Catalog> {
+		if (!this.catalogWrapper) {
+			this.catalogWrapper = await PmdCatalogWrapper.create({
+				rulePathsByLanguage: this.createRuleMap(),
+				catalogedEngineName: AppExchangePmdEngine.ENGINE_NAME
+			});
+		}
+		return this.catalogWrapper.getCatalog();
+	}
+
+	shouldEngineRun(
+		ruleGroups: RuleGroup[],
+		rules: Rule[],
+		target: RuleTarget[],
+		engineOptions: Map<string, string>): boolean {
+		// If this isn't a custom run, and there are rule groups for the engine to run,
+		// then we're good.
+		return !isCustomRun(engineOptions) && (ruleGroups.length > 0);
+	}
+
+	isEngineRequested(filterValues: string[], engineOptions: Map<string, string>): boolean {
+		// If the analyzer run isn't custom, then this engine counts as requested by default.
+		return !isCustomRun(engineOptions) && engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
+	}
+
+	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
+		const selectedRules = ruleGroups.map(np => np.paths).join(',');
+		return await this.runInternal(selectedRules, targets, this.createRuleMap(), [`${APPEXCHANGE_PMD_LIB}/*`]);
+	}
+
+	public isEnabled(): Promise<boolean> {
+		return this.config.isEngineEnabled(AppExchangePmdEngine.ENGINE_ENUM);
+	}
+
+	private createRuleMap(): Map<string, Set<string>> {
+		const rulePathsByLanguage = new Map<string, Set<string>>();
+		for (const language of AppExchangePmdEngine.SUPPORTED_LANGUAGES) {
+			const jarPath = path.join(`${APPEXCHANGE_PMD_LIB}`, `sfca-pmd-${language}-${PMD_APPEXCHANGE_VERSION}.jar`);
+			rulePathsByLanguage.set(language, new Set<string>([jarPath]));
+		}
+		return rulePathsByLanguage;
+	}
 }
 
 /**

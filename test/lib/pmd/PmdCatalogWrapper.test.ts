@@ -32,12 +32,14 @@ describe('PmdCatalogWrapper', () => {
 					const expectedParamList = [
 						`-DcatalogHome=`,
 						'-DcatalogName=',
+						'-DcatalogedEngineName=',
 						'-cp',
 						thePath,
 						'sfdc.sfdx.scanner.pmd.Main'];
 
 					const target = await TestablePmdCatalogWrapper.create({
-						rulePathsByLanguage: new Map<string, Set<string>>()
+						rulePathsByLanguage: new Map<string, Set<string>>(),
+						catalogedEngineName: 'TestVariant'
 					});
 					const params = (await target.buildCommandArray())[1];
 

@@ -27,6 +27,26 @@ export type EngineConfigContent = {
 	minimumTokens?: number;
 }
 
+/**
+ * An array of file extensions that can theoretically correspond to XML files when scanning a Salesforce Managed Package.
+ */
+const APPEXCHANGE_XML_EXTENSIONS = [
+	"app", "authprovider", "bot", "brandingSet", "cachePartition", "callCenter", "communityTemplateDefinition",
+	"communityThemeDefinition", "connectedApp", "ConversationVendorInformation", "corsWhitelistOrigin",
+	"cspTrustedSite", "customHelpMenuSection", "customPermission", "dashboard", "dataConnectorIngestApi",
+	"dataPackageKitDefinition", "DataPackageKitObject", "dataSource", "dataSourceBundleDefinition",
+	"dataSourceObject", "dataSrcDataModelFieldMap", "dataStreamDefinition", "dataStreamTemplate",
+	"duplicateRule", "externalDataConnector", "featureParameterBoolean", "featureParameterInteger",
+	"flexipage", "flow", "globalValueSet", "globalValueSetTranslation", "homePageComponent",
+	"homePageLayout", "indx", "labels", "layout", "letter", "lightningBolt", "lightningExperienceTheme",
+	"marketingappextension", "matchingRule", "md", "messageChannel", "mktDataTranObject", "mlDomain",
+	"namedCredential", "navigationMenu", "notiftype", "object", "objectSourceTargetMap", "objectTranslation",
+	"pathAssistant", "permissionset", "permissionsetgroup", "profile", "prompt", "quickAction", "remoteSite",
+	"report", "reportType", "sharingSet", "snapshot", "tab", "translation", "wapp", "wds", "weblink", "workflow",
+	"xmd"
+];
+
+
 const DEFAULT_CONFIG: ConfigContent = {
 	// It's typically bad practice to use `require` instead of `import`, but the former is much more straightforward
 	// in this case.
@@ -41,6 +61,21 @@ const DEFAULT_CONFIG: ConfigContent = {
 			],
 			supportedLanguages: ['apex', 'vf'],
 			disabled: false
+		},
+		{
+			name: ENGINE.PMD_APPEXCHANGE,
+			targetPatterns: [
+				// By default, the App Exchange PMD variant targets all the same patterns as the base PMD engine.
+				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
+				"!**/node_modules/**",
+				// It also targets JS files, since there are JS-specific rules.
+				"**/*.js",
+				// It also targets all the various extensions that, in a managed package, can represent XML files.
+				...(APPEXCHANGE_XML_EXTENSIONS.map(s => `**/*.${s}`)),
+			],
+			// The App Exchange PMD variant is disabled by default, since it's only relevant to users submitting
+			// for security review.
+			disabled: true
 		},
 		{
 			name: ENGINE.ESLINT,
