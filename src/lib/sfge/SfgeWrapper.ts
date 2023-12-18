@@ -121,10 +121,6 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 		this.initialized = true;
 	}
 
-	protected buildClasspath(): Promise<string[]> {
-		return Promise.resolve([`${SFGE_LIB}/*`]);
-	}
-
 	protected isSuccessfulExitCode(code: number): boolean {
 		return code === EXIT_NO_VIOLATIONS || code === EXIT_WITH_VIOLATIONS;
 	}
@@ -157,7 +153,7 @@ abstract class AbstractSfgeWrapper extends CommandLineSupport {
 	protected async buildCommandArray(): Promise<[string, string[]]> {
 		const javaHome = await JreSetupManager.verifyJreSetup();
 		const command = path.join(javaHome, 'bin', 'java');
-		const classpath = await this.buildClasspath();
+		const classpath = [`${SFGE_LIB}/*`];
 
 		const args = [`-Dsfge_log_name=${this.logFilePath}`, '-cp', classpath.join(path.delimiter)];
 		if (this.jvmArgs != null) {

@@ -1,15 +1,10 @@
 import {Logger} from '@salesforce/core';
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
-import * as PrettyPrinter from '../util/PrettyPrinter';
 import * as JreSetupManager from './../JreSetupManager';
 import {ResultHandlerArgs} from '../services/CommandLineSupport';
-import * as PmdLanguageManager from './PmdLanguageManager';
-import {PmdSupport} from './PmdSupport';
-import { PMD_LIB } from '../../Constants';
+import {PmdSupport, PmdSupportOptions} from './PmdSupport';
 import path = require('path');
-import {uxEvents, EVENTS} from '../ScannerEvents';
-import { PMD_VERSION } from '../../Constants';
 import {BundleName, getMessage} from "../../MessageCatalog";
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
@@ -17,9 +12,13 @@ const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-ca
 const MAIN_CLASS = 'sfdc.sfdx.scanner.pmd.Main';
 
 export class PmdCatalogWrapper extends PmdSupport {
-	private logger: Logger; // TODO: add relevant trace logs
+	private logger: Logger;
 	private initialized: boolean;
 	private catalogFilePath: path.ParsedPath;
+
+	constructor(opts: PmdSupportOptions) {
+		super(opts);
+	}
 
 	protected async init(): Promise<void> {
 		if (this.initialized) {
@@ -46,99 +45,34 @@ export class PmdCatalogWrapper extends PmdSupport {
 		const javaHome = await JreSetupManager.verifyJreSetup();
 		const command = path.join(javaHome, 'bin', 'java');
 
-		// NOTE: If we were going to run this command from the CLI directly, then we'd wrap the classpath in quotes, but this
-		// is intended for child_process.spawn(), which freaks out if you do that.
-		const classpathEntries = await this.buildClasspath();
-		const parameters = await this.buildCatalogerParameters();
-		const args = [`-DcatalogHome=${this.catalogFilePath.dir}`, `-DcatalogName=${this.catalogFilePath.base}`, '-cp', classpathEntries.join(path.delimiter), MAIN_CLASS, ...parameters];
+		// The classpath needs the cataloger's lib folder. Note that the classpath is not wrapped in quotes
+		// like it would be if we invoked through the CLI, because child_process.spawn() hates that.
+		const classpath: string = [`${PMD_CATALOGER_LIB}/*`, ...this.buildSharedClasspath()].join(path.delimiter);
+		const languageArgs: string[] = this.buildLanguageArgs();
+		this.logger.trace(`Cataloger parameters have been built: ${JSON.stringify(languageArgs)}`);
+
+		const args = [`-DcatalogHome=${this.catalogFilePath.dir}`, `-DcatalogName=${this.catalogFilePath.base}`, '-cp', classpath, MAIN_CLASS, ...languageArgs];
 
 		this.logger.trace(`Preparing to execute PMD Cataloger with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
 	}
 
-	protected async buildClasspath(): Promise<string[]> {
-		const catalogerLibs = `${PMD_CATALOGER_LIB}/*`;
-		const classpathEntries = await super.buildSharedClasspath();
-		classpathEntries.push(catalogerLibs);
-		return classpathEntries;
-	}
-
-	private async buildCatalogerParameters(): Promise<string[]> {
-		const pathSetMap = await this.getRulePathEntries();
-		const parameters: string[] = [];
-		const divider = '=';
-		const joiner = ',';
+	/**
+	 * Constructs the arguments for the PMD Cataloger so it knows which rules to catalog for which languages.
+	 * @private
+	 */
+	private buildLanguageArgs(): string[] {
+		const languageArgs: string[] = [];
 
 		// For each language, build an argument that looks like:
 		// "language=path1,path2,path3"
-		pathSetMap.forEach((entries, language) => {
-			const paths = Array.from(entries.values());
-
-			// add parameter only if paths are available for real
-			if (paths && paths.length > 0) {
-				parameters.push(language + divider + paths.join(joiner));
+		this.rulePathsByLanguage.forEach((rulePaths, language) => {
+			if (rulePaths && rulePaths.size > 0) {
+				languageArgs.push(`${language}=${[...rulePaths].join(',')}`);
 			}
 		});
-
-		this.logger.trace(`Cataloger parameters have been built: ${JSON.stringify(parameters)}`);
-		return parameters;
-	}
-
-	/**
-	 * Return a map where the key is the language and the value is a set of class/jar paths.  Start with the given
-	 * default values, if provided.
-	 */
-	protected async getRulePathEntries(): Promise<Map<string, Set<string>>> {
-		const pathSetMap = new Map<string, Set<string>>();
-
-		const customRulePaths: Map<string, Set<string>> = await this.getCustomRulePathEntries();
-		const fileHandler = new FileHandler();
-
-
-		// Iterate through the custom paths.
-		for (const [langKey, paths] of customRulePaths.entries()) {
-			// If the language by which these paths are mapped can be de-aliased into one of PMD's default-supported
-			// languages, we should use the name PMD recognizes. That way, if they have custom paths for 'ecmascript'
-			// and 'js', we'll turn both of those into 'javascript'.
-			// If we can't de-alias the key, we should at least convert it to lowercase. Otherwise 'python', 'PYTHON',
-			// and 'PyThOn' would all be considered different languages.
-			const lang = (await PmdLanguageManager.resolveLanguageAlias(langKey)) || langKey.toLowerCase();
-			this.logger.trace(`Custom paths mapped to ${langKey} are using converted key ${lang}`);
-
-			// Add this language's custom paths to the pathSetMap so they're cataloged properly.
-			const pathSet = pathSetMap.get(lang) || new Set<string>();
-			if (paths) {
-				for (const value of paths.values()) {
-					if (await fileHandler.exists(value)) {
-						pathSet.add(value);
-					} else {
-						// The catalog file may have been deleted or moved. Show the user a warning.
-						uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.EventKeyTemplates, 'warning.customRuleFileNotFound', [value, lang]));
-					}
-				}
-			}
-			pathSetMap.set(lang, pathSet);
-		}
-
-		// Now, we'll want to add the default PMD JARs for any activated languages.
-		const supportedLanguages = await PmdLanguageManager.getSupportedLanguages();
-		supportedLanguages.forEach((language) => {
-			const pmdJarName = PmdCatalogWrapper.derivePmdJarName(language);
-			const pathSet = pathSetMap.get(language) || new Set<string>();
-			pathSet.add(pmdJarName);
-			this.logger.trace(`Adding JAR ${pmdJarName}, the default PMD JAR for language ${language}`);
-			pathSetMap.set(language, pathSet);
-		});
-		this.logger.trace(`Found PMD rule paths ${PrettyPrinter.stringifyMapOfSets(pathSetMap)}`);
-		return pathSetMap;
-	}
-
-
-	/**
-	 * PMD library holds the same naming structure for each language
-	 */
-	private static derivePmdJarName(language: string): string {
-		return path.join(PMD_LIB, "pmd-" + language + "-" + PMD_VERSION + ".jar");
+		this.logger.trace(`Cataloger parameters have been built: ${JSON.stringify(languageArgs)}`);
+		return languageArgs;
 	}
 
 	protected isSuccessfulExitCode(code: number): boolean {

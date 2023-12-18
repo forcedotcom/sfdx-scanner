@@ -41,8 +41,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 		this.parentInitialized = true;
 	}
 
-	protected abstract buildClasspath(): Promise<string[]>;
-
 	/**
 	 * Returns a {@link SpinnerManager} implementation to be used while waiting for the child process to complete. This
 	 * default implementation returns a {@link NoOpSpinnerManager}, but subclasses may override to return another object
@@ -85,7 +83,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 						// hold onto data only if it was not processed
 						stdout += data;
 					}
-					
 				})();
 			});
 			cp.stderr.on('data', data => {
@@ -95,7 +92,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 						// hold onto data only if it was not processed
 						stderr += data;
 					}
-					
 				})();
 			});
 

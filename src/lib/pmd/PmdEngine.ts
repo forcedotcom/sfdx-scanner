@@ -4,14 +4,18 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {ENGINE, CUSTOM_CONFIG, EngineBase, HARDCODED_RULES, Severity} from '../../Constants';
+import {CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
-import {uxEvents, EVENTS} from "../ScannerEvents";
+import {EVENTS, uxEvents} from "../ScannerEvents";
 import {FileHandler} from '../util/FileHandler';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
 import {BundleName, getMessage} from "../../MessageCatalog";
+import * as PrettyPrinter from '../util/PrettyPrinter';
+import * as PmdLanguageManager from './PmdLanguageManager';
+import path = require('path');
+import {AsyncCreatable} from "@salesforce/kit";
 
 interface PmdViolation extends Element {
 	attributes: {
@@ -63,7 +67,7 @@ const HARDCODED_RULE_DETAILS: HardcodedRuleDetail[] = [
 ];
 
 
-abstract class BasePmdEngine extends AbstractRuleEngine {
+abstract class AbstractPmdEngine extends AbstractRuleEngine {
 	/**
 	 * As per our internal policies, we want to avoid significantly changing output in minor releases, except for
 	 * high-severity security rules.
@@ -75,7 +79,6 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 	protected logger: Logger;
 	protected config: Config;
 
-	protected pmdCatalogWrapper: PmdCatalogWrapper;
 	protected eventCreator: EventCreator;
 	private initialized: boolean;
 
@@ -126,12 +129,11 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		this.logger = await Logger.child(this.getName());
 
 		this.config = await Controller.getConfig();
-		this.pmdCatalogWrapper = await PmdCatalogWrapper.create({});
 		this.eventCreator = await EventCreator.create({});
 		this.initialized = true;
 	}
 
-	protected async runInternal(selectedRules: string, targets: RuleTarget[]): Promise<RuleResult[]> {
+	protected async runInternal(selectedRules: string, targets: RuleTarget[], rulePathsByLanguage: Map<string, Set<string>>): Promise<RuleResult[]> {
 		try {
 			const targetPaths: string[] = [];
 			for (const target of targets) {
@@ -143,8 +145,11 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 			}
 			this.logger.trace(`About to run PMD rules. Targets: ${targetPaths.length}, Selected rules: ${selectedRules}`);
 
-			const selectedTargets = targetPaths.join(',');
-			const stdout = await PmdWrapper.execute(selectedTargets, selectedRules);
+			const stdout = await (await PmdWrapper.create({
+				targets: targetPaths,
+				rules: selectedRules,
+				rulePathsByLanguage
+			})).execute();
 			const results = this.processStdOut(stdout);
 			this.logger.trace(`Found ${results.length} for PMD`);
 			return results;
@@ -416,16 +421,22 @@ function isCustomRun(engineOptions: Map<string, string>): boolean {
 	return engineUtils.isCustomRun(CUSTOM_CONFIG.PmdConfig, engineOptions);
 }
 
-export class PmdEngine extends BasePmdEngine {
+export class PmdEngine extends AbstractPmdEngine {
 	private static THIS_ENGINE = ENGINE.PMD;
 	public static ENGINE_NAME = PmdEngine.THIS_ENGINE.valueOf();
+	private catalogWrapper: PmdCatalogWrapper;
 
 	getName(): string {
 		return PmdEngine.ENGINE_NAME;
 	}
 
-	getCatalog(): Promise<Catalog> {
-		return this.pmdCatalogWrapper.getCatalog();
+	async getCatalog(): Promise<Catalog> {
+		if (!this.catalogWrapper) {
+			this.catalogWrapper = await PmdCatalogWrapper.create({
+				rulePathsByLanguage: await (await _PmdRuleMapper.create({})).createStandardRuleMap()
+			});
+		}
+		return this.catalogWrapper.getCatalog();
 	}
 
 	shouldEngineRun(
@@ -454,7 +465,7 @@ export class PmdEngine extends BasePmdEngine {
 		this.logger.trace(`${ruleGroups.length} Rules found for PMD engine`);
 
 		const selectedRules = ruleGroups.map(np => np.paths).join(',');
-		return await this.runInternal(selectedRules, targets);
+		return await this.runInternal(selectedRules, targets, await (await _PmdRuleMapper.create({})).createStandardRuleMap());
 	}
 
 	public isEnabled(): Promise<boolean> {
@@ -462,7 +473,7 @@ export class PmdEngine extends BasePmdEngine {
 	}
 }
 
-export class CustomPmdEngine extends BasePmdEngine {
+export class CustomPmdEngine extends AbstractPmdEngine {
 	private static THIS_ENGINE = ENGINE.PMD_CUSTOM;
 
 	getName(): string {
@@ -513,7 +524,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 			await this.eventCreator.createUxInfoAlwaysMessage('info.filtersIgnoredCustom', []);
 		}
 
-		return await this.runInternal(selectedRules, targets);
+		return await this.runInternal(selectedRules, targets, await (await _PmdRuleMapper.create({})).createStandardRuleMap());
 	}
 
 	private async getCustomConfig(engineOptions: Map<string, string>): Promise<string> {
@@ -528,4 +539,64 @@ export class CustomPmdEngine extends BasePmdEngine {
 
 }
 
+/**
+ * Helper class for PMD variants that need to catalog PMD's default rules and any user-registered rules.
+ */
+export class _PmdRuleMapper extends AsyncCreatable {
+	private initialized: boolean;
+	private logger: Logger;
 
+	public async init(): Promise<void> {
+		if (this.initialized) {
+			return;
+		}
+
+		this.logger = await Logger.child(this.constructor.name);
+	}
+
+	/**
+	 * Creates a mapping from language names to sets of files that define PMD rules for those languages.
+	 * The mapped files encompass PMD's default rules for activated languages, as well as any user-registered
+	 * custom rules.
+	 */
+	public async createStandardRuleMap(): Promise<Map<string, Set<string>>> {
+		const rulePathsByLanguage = new Map<string, Set<string>>();
+		// Add the default PMD jar for each activated language.
+		(await PmdLanguageManager.getSupportedLanguages()).forEach(language => {
+			const pmdJarPath = path.join(PMD_LIB, `pmd-${language}-${PMD_VERSION}.jar`);
+			const rulePaths = rulePathsByLanguage.get(language) || new Set<string>();
+			rulePaths.add(pmdJarPath);
+			this.logger.trace(`Adding JAR ${pmdJarPath}, the default PMD JAR for language ${language}`);
+			rulePathsByLanguage.set(language, rulePaths);
+		});
+
+		// Next, handle custom paths.
+		const fileHandler = new FileHandler();
+		const customRulePaths: Map<string, Set<string>> = (await Controller.createRulePathManager()).getRulePathEntries(PmdEngine.ENGINE_NAME);
+		for (const [languageKey, rulePathSet] of customRulePaths.entries()) {
+			// Attempt to de-alias the language key into one that PMD will recognize.
+			// If that doesn't work, just cast the key to lowercase.
+			const finalKey = (await PmdLanguageManager.resolveLanguageAlias(languageKey)) || languageKey.toLowerCase();
+			this.logger.trace(`Custom path language key ${languageKey} converted to cataloger language key ${finalKey}`);
+
+			// Next we want to do an existence check on each of the custom paths.
+			const mappedPathSet = rulePathsByLanguage.get(finalKey) || new Set<string>();
+			if (rulePathSet) {
+				for (const rulePath of rulePathSet.values()) {
+					if (await fileHandler.exists(rulePath)) {
+						// If the path matches an existing file/directory, add it to the map
+						// and the classpath.
+						mappedPathSet.add(rulePath);
+					} else {
+						// If the path doesn't match an existing file, then the file may have been
+						// deleted or moved. Warn the user about that.
+						uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.EventKeyTemplates, 'warning.customRuleFileNotFound', [rulePath, finalKey]));
+					}
+				}
+			}
+			rulePathsByLanguage.set(finalKey, mappedPathSet);
+		}
+		this.logger.trace(`Found PMD rule paths ${PrettyPrinter.stringifyMapOfSets(rulePathsByLanguage)}`);
+		return rulePathsByLanguage;
+	}
+}
