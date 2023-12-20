@@ -49,11 +49,11 @@ Specifies Java Virtual Machine arguments to override system defaults while execu
 
 # flags.targetSummary
 
-return location of source code
+source code location
 
 # flags.targetDescription
 
-Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list.
+Source code location. May use glob patterns. May specify individual methods with #-syntax. Specify multiple values as a comma-separated list.
 
 # flags.withpilotSummary
 

@@ -15,12 +15,14 @@ import LocalCatalog from './lib/services/LocalCatalog';
 import {Config} from './lib/util/Config';
 import {Services} from './Constants';
 import {CpdEngine} from "./lib/cpd/CpdEngine";
+import InjectionToken from "tsyringe/dist/typings/providers/injection-token";
+import {SfError} from "@salesforce/core";
+import {MessageCatalog} from "./MessageCatalog";
 
 /**
  * Initialize the ioc container with singletons common to test and prod
  */
 export function registerAll(): void {
-	// See #setupProd comment above
 	if (!container.isRegistered(Services.Config)) {
 		container.registerSingleton(Services.Config, Config);
 		container.registerSingleton(Services.RuleManager, DefaultRuleManager);
@@ -36,6 +38,7 @@ export function registerAll(): void {
 		container.registerSingleton(Services.RuleEngine, SfgePathlessEngine);
 		container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 		container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
+		container.registerSingleton(Services.MessageCatalog, MessageCatalog);
 	}
 }
 
@@ -44,4 +47,17 @@ export function registerAll(): void {
  */
 export function initContainer(): void {
 	registerAll();
+}
+
+/**
+ * Get a singleton from the ioc container (intializing if needed)
+ */
+export function getSingleton<T>(token: InjectionToken<T>): T {
+	if (!container.isRegistered<T>(token)) {
+		registerAll();
+		if (!container.isRegistered<T>(token)) {
+			throw new SfError("Could not find registered singleton: " + token.toString());
+		}
+	}
+	return container.resolve<T>(token);
 }

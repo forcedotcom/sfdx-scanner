@@ -86,6 +86,8 @@ tasks.named<Sync>("installDist") {
 }
 
 tasks.named("assemble") {
+
+  // TODO: These currently do not get cleaned with ./gradlew clean which can cause a lot of confusion.
   dependsOn("installDist")
   dependsOn("installPmd")
 }
@@ -97,7 +99,7 @@ tasks.test {
   testLogging {
     events("passed", "skipped", "failed")
   }
-  
+
   // Run tests in multiple threads
   maxParallelForks = Runtime.getRuntime().availableProcessors()/2 + 1
 

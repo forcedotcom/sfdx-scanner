@@ -1,27 +1,21 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {Messages, SfError} from '@salesforce/core';
-import {LooseObject} from '../../types';
 import {PathlessEngineFilters} from '../../Constants';
-import {CUSTOM_CONFIG} from '../../Constants';
-import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
-import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
-import untildify = require('untildify');
-import normalize = require('normalize-path');
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
+import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
+import {Config} from "@oclif/core";
+import {RuleFilterFactoryImpl} from "../../lib/RuleFilterFactory";
+import {RunOptionsFactoryImpl} from "../../lib/RunOptionsFactory";
+import {RunCommandInputValidatorFactory} from "../../lib/InputValidatorFactory";
+import {RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
+import {PathFactory, PathFactoryImpl} from "../../lib/PathFactory";
+import {BUNDLE, getBundledMessage} from "../../MessageCatalog";
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandSummary');
-	public static description = messages.getMessage('commandDescription');
+	public static summary = getBundledMessage(BUNDLE.RUN, 'commandSummary');
+	public static description = getBundledMessage(BUNDLE.RUN, 'commandDescription');
 
 	public static examples = [
-		messages.getMessage('examples')
+		getBundledMessage(BUNDLE.RUN, 'examples')
 	];
 
 	// This defines the flags accepted by this command.
@@ -32,17 +26,17 @@ export default class Run extends ScannerRunCommand {
 		ruleset: Flags.custom<string[]>({
 			char: 'r',
 			deprecated: {
-				message: messages.getMessage('rulesetDeprecation')
+				message: getBundledMessage(BUNDLE.RUN, 'rulesetDeprecation')
 			},
-			summary: messages.getMessage('flags.rulesetSummary'),
-			description: messages.getMessage('flags.rulesetDescription'),
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.rulesetSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.rulesetDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		engine: Flags.custom<string[]>({
 			char: 'e',
-			summary: messages.getMessage('flags.engineSummary'),
-			description: messages.getMessage('flags.engineDescription'),
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.engineSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.engineDescription'),
 			options: [...PathlessEngineFilters],
 			delimiter: ',',
 			multiple: true
@@ -51,8 +45,8 @@ export default class Run extends ScannerRunCommand {
 		// BEGIN: Targeting-related flags.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: messages.getMessage('flags.targetSummary'),
-			description: messages.getMessage('flags.targetDescription'),
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.targetSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.targetDescription'),
 			delimiter: ',',
 			multiple: true,
 			required: true
@@ -60,91 +54,42 @@ export default class Run extends ScannerRunCommand {
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
 		tsconfig: Flags.string({
-			summary: messages.getMessage('flags.tsconfigSummary'),
-			description: messages.getMessage('flags.tsconfigDescription')
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.tsconfigSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.tsconfigDescription')
 		}),
 		eslintconfig: Flags.string({
-			summary: messages.getMessage('flags.eslintConfigSummary'),
-			description: messages.getMessage('flags.eslintConfigDescription')
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.eslintConfigSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.eslintConfigDescription')
 		}),
 		pmdconfig: Flags.string({
-			summary: messages.getMessage('flags.pmdConfigSummary'),
-			description: messages.getMessage('flags.pmdConfigDescription')
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.pmdConfigSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.pmdConfigDescription')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
 		env: Flags.string({
-			summary: messages.getMessage('flags.envSummary'),
-			description: messages.getMessage('flags.envDescription'),
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.envSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.envDescription'),
 			deprecated: {
-				message: messages.getMessage('flags.envParamDeprecationWarning')
+				message: getBundledMessage(BUNDLE.RUN, 'flags.envParamDeprecationWarning')
 			}
 		}),
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
 		"verbose-violations": Flags.boolean({
-			summary: messages.getMessage('flags.verboseViolationsSummary'),
-			description: messages.getMessage('flags.verboseViolationsDescription')
+			summary: getBundledMessage(BUNDLE.RUN, 'flags.verboseViolationsSummary'),
+			description: getBundledMessage(BUNDLE.RUN, 'flags.verboseViolationsDescription')
 		})
 		// END: Flags related to results processing.
 	};
 
-	protected validateVariantFlags(): Promise<void> {
-		if (this.parsedFlags.tsconfig && this.parsedFlags.eslintconfig) {
-			throw new SfError(messages.getMessage('validations.tsConfigEslintConfigExclusive'));
-		}
-
-		if ((this.parsedFlags.pmdconfig || this.parsedFlags.eslintconfig) && (this.parsedFlags.category || this.parsedFlags.ruleset)) {
-			this.log(messages.getMessage('output.filtersIgnoredCustom', []));
-		}
-		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
-		for (const target of (this.parsedFlags.target as string[])) {
-			if (target.indexOf('#') > -1) {
-				throw new SfError(messages.getMessage('validations.methodLevelTargetingDisallowed', [target]));
-			}
-		}
-		return Promise.resolve();
-	}
-
-	/**
-	 * Gather engine options that are unique to each sub-variant.
-	 */
-	protected mergeVariantEngineOptions(options: Map<string,string>): void {
-		if (this.parsedFlags.tsconfig) {
-			const tsconfig = normalize(untildify(this.parsedFlags.tsconfig as string));
-			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
-		}
-
-		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
-		//  engine-specific flags. Replace it in 3.0.
-		if (this.parsedFlags.env) {
-			try {
-				const parsedEnv: LooseObject = JSON.parse(this.parsedFlags.env as string) as LooseObject;
-				options.set('env', JSON.stringify(parsedEnv));
-			} catch (e) {
-				throw new SfError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
-			}
-		}
-
-		// Capturing eslintconfig value, if provided
-		if (this.parsedFlags.eslintconfig) {
-			const eslintConfig = normalize(untildify(this.parsedFlags.eslintconfig as string));
-			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
-		}
-
-		// Capturing pmdconfig value, if provided
-		if (this.parsedFlags.pmdconfig) {
-			const pmdConfig = normalize(untildify(this.parsedFlags.pmdconfig as string));
-			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
-		}
-
-		// Capturing verbose-violations flag value (used for RetireJS output)
-		if (this.parsedFlags["verbose-violations"]) {
-			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
-		}
-	}
-
-	protected pathBasedEngines(): boolean {
-		return false;
+	public constructor(argv: string[], config: Config) {
+		const pathFactory: PathFactory = new PathFactoryImpl();
+		super(argv, config,
+			new RunCommandInputValidatorFactory(),
+			new RuleFilterFactoryImpl(),
+			new RunOptionsFactoryImpl(false, config.version),
+			pathFactory,
+			new RunEngineOptionsFactory(pathFactory));
 	}
 }

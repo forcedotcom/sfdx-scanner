@@ -97,7 +97,8 @@ export const Services = {
 	RuleEngine: "RuleEngine",
 	RuleCatalog: "RuleCatalog",
 	RulePathManager: "RulePathManager",
-	EnvOverridable: "EnvOverridable"
+	EnvOverridable: "EnvOverridable",
+	MessageCatalog: "MessageCatalog"
 };
 
 export enum CUSTOM_CONFIG {

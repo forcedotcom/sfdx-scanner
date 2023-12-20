@@ -7,6 +7,8 @@ import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {deepCopy} from '../../../lib/util/Utils';
 import Run from '../run';
 import Dfa from '../run/dfa';
+import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
+import {RuleFilter} from "../../../lib/RuleFilter";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
@@ -45,7 +47,9 @@ export default class Describe extends ScannerCommand {
 	};
 
 	async runInternal(): Promise<AnyJson> {
-		const ruleFilters = this.buildRuleFilters();
+		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
+		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(this.parsedFlags);
+
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();

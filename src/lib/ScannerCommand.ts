@@ -1,19 +1,18 @@
 import {SfCommand} from '@salesforce/sf-plugins-core';
-import {CategoryFilter, LanguageFilter, RuleFilter, RulesetFilter, RulenameFilter, EngineFilter} from './RuleFilter';
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {initContainer} from '../ioc.config';
 import {AnyJson} from '@salesforce/ts-types';
-import {stringArrayTypeGuard} from './util/Utils';
 import {LooseObject} from '../types';
 
 import {Logger, Messages} from '@salesforce/core';
+import {Loggable} from "./Loggable";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
 
-export abstract class ScannerCommand extends SfCommand<AnyJson> {
+export abstract class ScannerCommand extends SfCommand<AnyJson> implements Loggable {
 
 	/**
 	 * {@code parsedFlags} is declared as a {@link LooseObject}, which is equivalent to {@code @oclif/core}'s
@@ -43,37 +42,6 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> {
 		this.warn(commonMessages.getMessage('surveyRequestMessage'));
 		// Bootstrap the IOC container.
 		initContainer();
-	}
-
-	protected buildRuleFilters(): RuleFilter[] {
-		const filters: RuleFilter[] = [];
-		// Create a filter for any provided categories.
-		if (this.parsedFlags.category && stringArrayTypeGuard(this.parsedFlags.category) && this.parsedFlags.category.length) {
-			filters.push(new CategoryFilter(this.parsedFlags.category));
-		}
-
-		// Create a filter for any provided rulesets.
-		if (this.parsedFlags.ruleset && stringArrayTypeGuard(this.parsedFlags.ruleset) && this.parsedFlags.ruleset.length) {
-			filters.push(new RulesetFilter(this.parsedFlags.ruleset));
-		}
-
-		// Create a filter for any provided languages.
-		if (this.parsedFlags.language && stringArrayTypeGuard(this.parsedFlags.language) && this.parsedFlags.language.length) {
-			filters.push(new LanguageFilter(this.parsedFlags.language));
-		}
-
-		// Create a filter for provided rule names.
-		// NOTE: Only a single rule name can be provided. It will be treated as a singleton list.
-		if (this.parsedFlags.rulename && typeof this.parsedFlags.rulename === 'string') {
-			filters.push(new RulenameFilter([this.parsedFlags.rulename]));
-		}
-
-		// Create a filter for any provided engines.
-		if (this.parsedFlags.engine && stringArrayTypeGuard(this.parsedFlags.engine) && this.parsedFlags.engine.length) {
-			filters.push(new EngineFilter(this.parsedFlags.engine));
-		}
-
-		return filters;
 	}
 
 	protected displayInfo(msg: string, verboseOnly: boolean): void {

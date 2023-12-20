@@ -4,6 +4,8 @@ import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {AllowedEngineFilters} from '../../../Constants';
+import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
+import {RuleFilter} from "../../../lib/RuleFilter";
 
 
 // Initialize Messages with the current plugin directory
@@ -100,7 +102,9 @@ export default class List extends ScannerCommand {
 	};
 
 	async runInternal(): Promise<Rule[]> {
-		const ruleFilters = this.buildRuleFilters();
+		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
+		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(this.parsedFlags);
+
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.
 		const ruleManager = await Controller.createRuleManager();
