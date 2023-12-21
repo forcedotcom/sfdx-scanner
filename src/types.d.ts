@@ -31,6 +31,11 @@ export type LooseObject = {
 	[key: string]: any;
 }
 
+export type Inputs = {
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+	[key: string]: any;
+}
+
 /**
  * Alias for ESLint's{@link Linter.RuleEntry} type. Exported here to minimize the need to import directly from ESLint.
  */

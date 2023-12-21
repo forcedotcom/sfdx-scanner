@@ -1,4 +1,4 @@
-import {LooseObject} from "../types";
+import {Inputs} from "../types";
 import {FileHandler} from "./util/FileHandler";
 import {SfError} from "@salesforce/core";
 import {OUTPUT_FORMAT} from "./RuleManager";
@@ -8,7 +8,7 @@ import {Display} from "./Display";
 import {Bundle, getMessage} from "../MessageCatalog";
 
 export interface InputValidator {
-	validate(inputs: LooseObject): Promise<void>;
+	validate(inputs: Inputs): Promise<void>;
 }
 
 abstract class CommonRunCommandInputValidator implements InputValidator {
@@ -18,7 +18,7 @@ abstract class CommonRunCommandInputValidator implements InputValidator {
 		this.display = display;
 	}
 
-	public async validate(inputs: LooseObject): Promise<void> {
+	public async validate(inputs: Inputs): Promise<void> {
 		const fh = new FileHandler();
 		// If there's a --projectdir flag, its entries must be non-glob paths pointing to existing directories.
 		if (inputs.projectdir) {
@@ -56,7 +56,7 @@ export class RunCommandInputValidator extends CommonRunCommandInputValidator {
 		super(display);
 	}
 
-	public override async validate(inputs: LooseObject): Promise<void> {
+	public override async validate(inputs: Inputs): Promise<void> {
 		await super.validate(inputs);
 
 		if (inputs.tsconfig && inputs.eslintconfig) {
@@ -80,7 +80,7 @@ export class RunDfaCommandInputValidator extends CommonRunCommandInputValidator 
 		super(display);
 	}
 
-	public override async validate(inputs: LooseObject): Promise<void> {
+	public override async validate(inputs: Inputs): Promise<void> {
 		await super.validate(inputs);
 
 		const fh = new FileHandler();

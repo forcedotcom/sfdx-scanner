@@ -5,7 +5,7 @@ import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
 import {RuleFilter, SourcePackageFilter} from '../../../lib/RuleFilter';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
-import {Rule} from '../../../types';
+import {Inputs, Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
 import {Bundle, getMessage} from "../../../MessageCatalog";
@@ -39,12 +39,12 @@ export default class Remove extends ScannerCommand {
 		})()
 	};
 
-	async runInternal(): Promise<AnyJson> {
+	async runInternal(inputs: Inputs): Promise<AnyJson> {
 		// Step 1: Validate our input.
-		this.validateFlags();
+		this.validateFlags(inputs);
 
 		// Step 2: Pull out and process our flag.
-		const paths = this.parsedFlags.path ? this.resolvePaths() : null;
+		const paths = inputs.path ? this.resolvePaths(inputs) : null;
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
 
 		// Step 3: Get all rule entries matching the criteria they provided.
@@ -74,7 +74,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 6: Unless the --force flag was used, we'll want to identify all of the rules that are defined in the entries
 		// they want to delete, and force them to confirm that they're really sure.
-		if (!this.parsedFlags.force) {
+		if (!inputs.force) {
 			// Step 6a: We'll want to create filter criteria.
 			const filters: RuleFilter[] = [];
 			filters.push(new SourcePackageFilter(deletablePaths));
@@ -99,17 +99,17 @@ export default class Remove extends ScannerCommand {
 		return deletedPaths;
 	}
 
-	private validateFlags(): void {
+	private validateFlags(inputs: Inputs): void {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
+		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
 			throw new SfError(getMessage(Bundle.Remove, 'validations.pathCannotBeEmpty'));
 		}
 	}
 
-	private resolvePaths(): string[] {
+	private resolvePaths(inputs: Inputs): string[] {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.
-		return (this.parsedFlags.path as string[]).map(p => path.resolve(untildify(p)));
+		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 
 	private generateConfirmationPrompt(rules: Rule[]): string {

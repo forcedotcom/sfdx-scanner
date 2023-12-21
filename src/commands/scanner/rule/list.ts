@@ -1,6 +1,6 @@
 import {Flags, Ux} from '@salesforce/sf-plugins-core';
 import {Controller} from '../../../Controller';
-import {Rule} from '../../../types';
+import {Inputs, Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {AllowedEngineFilters} from '../../../Constants';
 import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
@@ -92,9 +92,9 @@ export default class List extends ScannerCommand {
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 	};
 
-	async runInternal(): Promise<Rule[]> {
+	async runInternal(inputs: Inputs): Promise<Rule[]> {
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
-		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(this.parsedFlags);
+		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(inputs);
 
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.

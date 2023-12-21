@@ -7,6 +7,7 @@ import path = require('path');
 import untildify = require('untildify');
 import { ScannerCommand } from '../../../lib/ScannerCommand';
 import {Bundle, getMessage} from "../../../MessageCatalog";
+import {Inputs} from "../../../types";
 
 export default class Add extends ScannerCommand {
 
@@ -34,11 +35,11 @@ export default class Add extends ScannerCommand {
 		})()
 	};
 
-	async runInternal(): Promise<AnyJson> {
-		this.validateFlags();
+	async runInternal(inputs: Inputs): Promise<AnyJson> {
+		this.validateFlags(inputs);
 
-		const language = this.parsedFlags.language as string;
-		const paths = this.resolvePaths();
+		const language = inputs.language as string;
+		const paths = this.resolvePaths(inputs);
 
 		this.logger.trace(`Language: ${language}`);
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
@@ -51,19 +52,19 @@ export default class Add extends ScannerCommand {
 		return {success: true, language, path: classpathEntries};
 	}
 
-	private validateFlags(): void {
-		if ((this.parsedFlags.language as string).length === 0) {
+	private validateFlags(inputs: Inputs): void {
+		if ((inputs.language as string).length === 0) {
 			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
 		}
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
+		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
 			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
 		}
 	}
 
-	private resolvePaths(): string[] {
+	private resolvePaths(inputs: Inputs): string[] {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.
-		return (this.parsedFlags.path as string[]).map(p => path.resolve(untildify(p)));
+		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 }

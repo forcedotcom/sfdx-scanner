@@ -1,13 +1,13 @@
-import {LooseObject} from "./../types";
+import {Inputs} from "./../types";
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulenameFilter, RulesetFilter} from "./RuleFilter";
 import {stringArrayTypeGuard} from "./util/Utils";
 
 export interface RuleFilterFactory {
-	createRuleFilters(inputs: LooseObject): RuleFilter[];
+	createRuleFilters(inputs: Inputs): RuleFilter[];
 }
 
 export class RuleFilterFactoryImpl implements RuleFilterFactory {
-	public createRuleFilters(inputs: LooseObject): RuleFilter[] {
+	public createRuleFilters(inputs: Inputs): RuleFilter[] {
 		const filters: RuleFilter[] = [];
 		// Create a filter for any provided categories.
 		if (inputs.category && stringArrayTypeGuard(inputs.category) && inputs.category.length) {

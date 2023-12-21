@@ -1,11 +1,11 @@
-import {LooseObject} from "../types";
+import {Inputs} from "../types";
 import {OUTPUT_FORMAT, RunOptions} from "./RuleManager";
 import {SfError} from "@salesforce/core";
 import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
 import {Bundle, getMessage} from "../MessageCatalog";
 
 export interface RunOptionsFactory {
-	createRunOptions(inputs: LooseObject): RunOptions;
+	createRunOptions(inputs: Inputs): RunOptions;
 }
 
 export class RunOptionsFactoryImpl implements RunOptionsFactory {
@@ -17,7 +17,7 @@ export class RunOptionsFactoryImpl implements RunOptionsFactory {
 		this.sfVersion = sfVersion;
 	}
 
-	public createRunOptions(inputs: LooseObject): RunOptions {
+	public createRunOptions(inputs: Inputs): RunOptions {
 		const runOptions: RunOptions = {
 			format: determineOutputFormat(inputs.format, inputs.outfile, inputs.json),
 			normalizeSeverity: (inputs['normalize-severity'] || inputs['severity-threshold']) as boolean,

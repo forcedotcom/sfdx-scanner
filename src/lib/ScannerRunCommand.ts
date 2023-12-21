@@ -2,7 +2,7 @@ import {Flags, Ux} from '@salesforce/sf-plugins-core';
 import {SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {ScannerCommand} from './ScannerCommand';
-import {LooseObject, RecombinedRuleResults} from '../types';
+import {Inputs, RecombinedRuleResults} from '../types';
 import {RunOutputOptions, RunOutputProcessor} from './util/RunOutputProcessor';
 import {Controller} from '../Controller';
 import {OUTPUT_FORMAT, RuleManager, RunOptions} from './RuleManager';
@@ -92,10 +92,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		this.engineOptionsFactory = enginOptionsFactory;
 	}
 
-	async runInternal(): Promise<AnyJson> {
-		// TODO: Refactor ScannerCommand so that the parsedFlags can be passed into runInternal to effectively remove the state
-		const inputs: LooseObject = this.parsedFlags;
-
+	async runInternal(inputs: Inputs): Promise<AnyJson> {
 		// Using this as the uxLogger
 		await this.inputValidatorFactory.createInputValidator(this.display).validate(inputs);
 

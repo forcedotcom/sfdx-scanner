@@ -1,4 +1,4 @@
-import {LooseObject, SfgeConfig} from "../types";
+import {Inputs, LooseObject, SfgeConfig} from "../types";
 import {CUSTOM_CONFIG} from "../Constants";
 import {PathFactory} from "./PathFactory";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
@@ -9,7 +9,7 @@ import untildify = require("untildify");
 import {Bundle, getMessage} from "../MessageCatalog";
 
 export interface EngineOptionsFactory {
-	createEngineOptions(inputs: LooseObject): Map<string,string>;
+	createEngineOptions(inputs: Inputs): Map<string,string>;
 }
 
 abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
@@ -19,7 +19,7 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		this.pathFactory = pathFactory;
 	}
 
-	createEngineOptions(inputs: LooseObject): Map<string, string> {
+	createEngineOptions(inputs: Inputs): Map<string, string> {
 		const options: Map<string,string> = new Map();
 
 		// We should only add a GraphEngine config if we were given a --projectdir flag.
@@ -41,7 +41,7 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 		super(pathFactory);
 	}
 
-	public override createEngineOptions(inputs: LooseObject): Map<string, string> {
+	public override createEngineOptions(inputs: Inputs): Map<string, string> {
 		const options: Map<string, string> = super.createEngineOptions(inputs);
 
 		if (inputs.tsconfig) {
@@ -86,7 +86,7 @@ export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
 		super(pathFactory);
 	}
 
-	public override createEngineOptions(inputs: LooseObject): Map<string,string> {
+	public override createEngineOptions(inputs: Inputs): Map<string,string> {
 		const options: Map<string, string> = super.createEngineOptions(inputs);
 
 		// The flags have been validated by now, meaning --projectdir is confirmed as present,
@@ -125,7 +125,7 @@ const BOOLEAN_ENVARS_BY_FLAG: Map<string,string> = new Map([
  * @returns true if the flag is set or the associated env-var is set to "true"; else false.
  * @protected
  */
-function getBooleanEngineOption(inputs: LooseObject, flagName: string): boolean {
+function getBooleanEngineOption(inputs: Inputs, flagName: string): boolean {
 	// Check the status of the flag first, since the flag being true should trump the environment variable's value.
 	if (inputs[flagName] != null) {
 		return inputs[flagName] as boolean;

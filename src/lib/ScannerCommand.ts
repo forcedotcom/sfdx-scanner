@@ -2,37 +2,31 @@ import {SfCommand} from '@salesforce/sf-plugins-core';
 import {uxEvents, EVENTS} from './ScannerEvents';
 import {initContainer} from '../ioc.config';
 import {AnyJson} from '@salesforce/ts-types';
-import {LooseObject} from '../types';
+import {Inputs} from '../types';
 import {Logger} from '@salesforce/core';
 import {Display, Displayable, UxDisplay} from "./Display";
 import {Bundle, getMessage} from "../MessageCatalog";
 
 
 export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
-
-	/**
-	 * {@code parsedFlags} is declared as a {@link LooseObject}, which is equivalent to {@code @oclif/core}'s
-	 * internal type {@code FlagOutput}, meaning we can use it for {@code this.parse()}.
-	 * @protected
-	 */
-	protected parsedFlags: LooseObject;
 	protected logger: Logger;
 	protected display: Display;
 
 	public async run(): Promise<AnyJson> {
 		this.logger = await Logger.child(this.ctor.name);
-		this.parsedFlags = (await this.parse(this.ctor)).flags;
-		this.display = new UxDisplay(this, this.spinner, this.parsedFlags.verbose);
+
+		const inputs: Inputs = (await this.parse(this.ctor)).flags;
+		this.display = new UxDisplay(this, this.spinner, inputs.verbose);
 
 		this.runCommonSteps();
-		return await this.runInternal();
+		return await this.runInternal(inputs);
 	}
 
 	/**
 	 * Command's should implement this method to add their
 	 * working steps.
 	 */
-	abstract runInternal(): Promise<AnyJson>;
+	abstract runInternal(inputs: Inputs): Promise<AnyJson>;
 
 	/**
 	 * Common steps that should be run before every command

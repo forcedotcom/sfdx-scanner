@@ -1,7 +1,7 @@
 import {Flags, Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
-import {Rule} from '../../../types';
+import {Inputs, Rule} from '../../../types';
 import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {deepCopy} from '../../../lib/util/Utils';
 import Run from '../run';
@@ -38,9 +38,9 @@ export default class Describe extends ScannerCommand {
 		})
 	};
 
-	async runInternal(): Promise<AnyJson> {
+	async runInternal(inputs: Inputs): Promise<AnyJson> {
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
-		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(this.parsedFlags);
+		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(inputs);
 
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.
@@ -49,10 +49,10 @@ export default class Describe extends ScannerCommand {
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
-			this.display.displayWarning(getMessage(Bundle.Describe, 'output.noMatchingRules', [this.parsedFlags.rulename as string]));
+			this.display.displayWarning(getMessage(Bundle.Describe, 'output.noMatchingRules', [inputs.rulename as string]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = getMessage(Bundle.Describe, 'output.multipleMatchingRules', [rules.length.toString(), this.parsedFlags.rulename as string]);
+			const msg = getMessage(Bundle.Describe, 'output.multipleMatchingRules', [rules.length.toString(), inputs.rulename as string]);
 			this.display.displayWarning(msg);
 			rules.forEach((rule, idx) => {
 				this.styledHeader(`Rule #${idx + 1}`);
