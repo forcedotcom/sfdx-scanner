@@ -3,8 +3,8 @@ import {expect} from 'chai';
 import {runCommand} from '../../TestUtils';
 import {Messages} from '@salesforce/core';
 import * as path from 'path';
-import Dfa from '../../../src/commands/scanner/run/dfa';
 import * as sinon from 'sinon';
+import {UxDisplay} from "../../../src/lib/Display";
 
 
 Messages.importMessagesDirectory(__dirname);
@@ -54,7 +54,7 @@ describe('scanner run dfa', function () {
 
 			before(() => {
 				sandbox = sinon.createSandbox();
-				spy = sandbox.spy(Dfa.prototype, "updateSpinner");
+				spy = sandbox.spy(UxDisplay.prototype, "spinnerUpdate");
 			})
 
 			after(() => {

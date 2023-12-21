@@ -1,18 +1,18 @@
 import {InputValidator, RunCommandInputValidator, RunDfaCommandInputValidator} from "./InputValidator";
-import {Loggable} from "./Loggable";
+import {Display} from "./Display";
 
 export interface InputValidatorFactory {
-	createInputValidator(uxLogger: Loggable): InputValidator;
+	createInputValidator(display: Display): InputValidator;
 }
 
 export class RunCommandInputValidatorFactory implements InputValidatorFactory {
-	public createInputValidator(uxLogger: Loggable): InputValidator {
-		return new RunCommandInputValidator(uxLogger);
+	public createInputValidator(display: Display): InputValidator {
+		return new RunCommandInputValidator(display);
 	}
 }
 
 export class RunDfaCommandInputValidatorFactory implements InputValidatorFactory {
-	public createInputValidator(uxLogger: Loggable): InputValidator {
-		return new RunDfaCommandInputValidator(uxLogger);
+	public createInputValidator(display: Display): InputValidator {
+		return new RunDfaCommandInputValidator(display);
 	}
 }

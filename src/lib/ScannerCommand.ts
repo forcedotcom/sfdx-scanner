@@ -5,14 +5,14 @@ import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject} from '../types';
 
 import {Logger, Messages} from '@salesforce/core';
-import {Loggable} from "./Loggable";
+import {Display, Displayable, UxDisplay} from "./Display";
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
 
 
-export abstract class ScannerCommand extends SfCommand<AnyJson> implements Loggable {
+export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
 
 	/**
 	 * {@code parsedFlags} is declared as a {@link LooseObject}, which is equivalent to {@code @oclif/core}'s
@@ -21,11 +21,14 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Logga
 	 */
 	protected parsedFlags: LooseObject;
 	protected logger: Logger;
+	protected display: Display;
 
 	public async run(): Promise<AnyJson> {
-		this.runCommonSteps();
 		this.logger = await Logger.child(this.ctor.name);
 		this.parsedFlags = (await this.parse(this.ctor)).flags;
+		this.display = new UxDisplay(this, this.spinner, this.parsedFlags.verbose);
+
+		this.runCommonSteps();
 		return await this.runInternal();
 	}
 
@@ -39,43 +42,9 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Logga
 	 * Common steps that should be run before every command
 	 */
 	protected runCommonSteps(): void {
-		this.warn(commonMessages.getMessage('surveyRequestMessage'));
-		// Bootstrap the IOC container.
+		this.display.displayWarning(commonMessages.getMessage('surveyRequestMessage'));
 		initContainer();
-	}
-
-	protected displayInfo(msg: string, verboseOnly: boolean): void {
-		if (!verboseOnly || this.parsedFlags.verbose) {
-			this.log(msg);
-		}
-	}
-
-	protected displayWarning(msg: string, verboseOnly: boolean): void {
-		if (!verboseOnly || this.parsedFlags.verbose) {
-			this.warn(msg);
-		}
-	}
-
-	protected displayError(msg: string): void {
-		this.error(msg);
-	}
-
-	protected startSpinner(msg: string, status="Please Wait"): void {
-		this.spinner.start(msg, status);
-	}
-
-	protected updateSpinner(msg: string): void {
-		this.spinner.status = msg;
-	}
-
-	/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-	protected waitOnSpinner(msg: string): void {
-		// msg variable is thrown away - please don't send anything here.
-		this.spinner.status += ' .';
-	}
-
-	protected stopSpinner(msg: string): void {
-		this.spinner.stop(msg);
+		this.buildEventListeners();
 	}
 
 	protected async init(): Promise<void> {
@@ -83,16 +52,16 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Logga
 		this.buildEventListeners();
 	}
 
+	// TODO: We should consider refactoring away from events and instead inject the "Display" as a dependency
+	// into all of the classes that emit events
 	protected buildEventListeners(): void {
-		uxEvents.on(EVENTS.INFO_ALWAYS, (msg: string) => this.displayInfo(msg, false));
-		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => this.displayInfo(msg, true));
-		uxEvents.on(EVENTS.WARNING_ALWAYS, (msg: string) => this.displayWarning(msg, false));
-		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => this.displayWarning(msg, true));
-		uxEvents.on(EVENTS.ERROR_ALWAYS, (msg: string) => this.displayError(msg));
-		uxEvents.on(EVENTS.ERROR_VERBOSE, (msg: string) => this.displayError(msg));
-		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => this.startSpinner(msg, status));
-		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => this.updateSpinner(msg));
-		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (msg: string) => this.waitOnSpinner(msg));
-		uxEvents.on(EVENTS.STOP_SPINNER, (msg: string) => this.stopSpinner(msg));
+		uxEvents.on(EVENTS.INFO_ALWAYS, (msg: string) => this.display.displayInfo(msg));
+		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => this.display.displayVerboseInfo(msg));
+		uxEvents.on(EVENTS.WARNING_ALWAYS, (msg: string) => this.display.displayWarning(msg));
+		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => this.display.displayVerboseWarning(msg));
+		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => this.display.spinnerStart(msg, status));
+		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => this.display.spinnerUpdate(msg));
+		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (msg: string) => this.display.spinnerWait());
+		uxEvents.on(EVENTS.STOP_SPINNER, (msg: string) => this.display.spinnerStop(msg));
 	}
 }

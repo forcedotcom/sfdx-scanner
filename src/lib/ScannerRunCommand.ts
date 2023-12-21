@@ -16,7 +16,6 @@ import {InputValidatorFactory} from "./InputValidatorFactory";
 import {PathFactory} from "./PathFactory";
 import {EngineOptionsFactory} from "./EngineOptionsFactory";
 import {BUNDLE, getBundledMessage} from "../MessageCatalog";
-import {Loggable} from "./Loggable";
 
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
@@ -98,8 +97,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		const inputs: LooseObject = this.parsedFlags;
 
 		// Using this as the uxLogger
-		const uxLogger: Loggable = this;
-		await this.inputValidatorFactory.createInputValidator(uxLogger).validate(inputs);
+		await this.inputValidatorFactory.createInputValidator(this.display).validate(inputs);
 
 		const filters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 		const runOptions: RunOptions = this.runOptionsFactory.createRunOptions(inputs);

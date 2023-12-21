@@ -7,8 +7,6 @@ export enum EVENTS {
 	INFO_VERBOSE = 'info-verbose',
 	WARNING_ALWAYS = 'warning-always',
 	WARNING_VERBOSE = 'warning-verbose',
-	ERROR_ALWAYS = 'error-always',
-	ERROR_VERBOSE = 'error-verbose',
 	// NOTE: If, for some reason, we eventually need verbose-only spinners, we'll need to split START_SPINNER into
 	// always/verbose variants, but the other two can be left alone. This is because they correspond to `ux.setSpinnerStatus()`
 	// and `ux.stopSpinner()`, which are both no-ops if there's not an active spinner.

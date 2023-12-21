@@ -67,7 +67,7 @@ export default class Remove extends ScannerCommand {
 			} else {
 				// If the flag wasn't used, then they're just doing a dry run. We should still let them know that they
 				// don't have anything, but it should be surfaced as a log instead of an error.
-				this.log(messages.getMessage('output.dryRunReturnedNoRules'));
+				this.display.displayInfo(messages.getMessage('output.dryRunReturnedNoRules'));
 				return [];
 			}
 		}
@@ -75,7 +75,7 @@ export default class Remove extends ScannerCommand {
 		// Step 5: If the --path flag was NOT used, they want to do a dry run. We should let them know all of the custom
 		// rules they've defined.
 		if (!paths) {
-			this.log(this.generateDryRunOutput(deletablePaths));
+			this.display.displayInfo(this.generateDryRunOutput(deletablePaths));
 			return [];
 		}
 
@@ -92,7 +92,7 @@ export default class Remove extends ScannerCommand {
 
 			// Step 6c: If any rules are found, ask the user to confirm that they actually want to delete them.
 			if (matchingRules.length > 0 && await this.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
-				this.log(messages.getMessage('output.aborted'));
+				this.display.displayInfo(messages.getMessage('output.aborted'));
 				return [];
 			}
 		}
@@ -102,7 +102,7 @@ export default class Remove extends ScannerCommand {
 
 		// Step 8: Output. We'll display a message indicating which entries were deleted, and we'll return that array for
 		// the --json flag.
-		this.log(messages.getMessage('output.resultSummary', [deletedPaths.join(', ')]));
+		this.display.displayInfo(messages.getMessage('output.resultSummary', [deletedPaths.join(', ')]));
 		return deletedPaths;
 	}
 

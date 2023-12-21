@@ -53,8 +53,8 @@ export default class Add extends ScannerCommand {
 		// Add to Custom Classpath registry
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
-		this.log(`Successfully added rules for ${language}.`);
-		this.log(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
+		this.display.displayInfo(`Successfully added rules for ${language}.`);
+		this.display.displayInfo(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
 		return {success: true, language, path: classpathEntries};
 	}
 

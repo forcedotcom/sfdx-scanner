@@ -4,7 +4,7 @@ import {Messages, SfError} from "@salesforce/core";
 import {OUTPUT_FORMAT} from "./RuleManager";
 import globby = require("globby");
 import {inferFormatFromOutfile} from "./RunOptionsFactory";
-import {Loggable} from "./Loggable";
+import {Display} from "./Display";
 
 export interface InputValidator {
 	validate(inputs: LooseObject): Promise<void>;
@@ -16,10 +16,10 @@ const runMessages: Messages<string> = Messages.loadMessages('@salesforce/sfdx-sc
 const runDfaMessages: Messages<string> = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
 
 abstract class CommonRunCommandInputValidator implements InputValidator {
-	protected readonly uxLogger: Loggable;
+	protected readonly display: Display;
 
-	protected constructor(uxLogger: Loggable) {
-		this.uxLogger = uxLogger;
+	protected constructor(display: Display) {
+		this.display = display;
 	}
 
 	public async validate(inputs: LooseObject): Promise<void> {
@@ -49,15 +49,15 @@ abstract class CommonRunCommandInputValidator implements InputValidator {
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
 			if (chosenFormat !== inferredOutfileFormat) {
-				this.uxLogger.log(commonRunMessages.getMessage('validations.outfileFormatMismatch', [inputs.format as string, inferredOutfileFormat]));
+				this.display.displayInfo(commonRunMessages.getMessage('validations.outfileFormatMismatch', [inputs.format as string, inferredOutfileFormat]));
 			}
 		}
 	}
 }
 
 export class RunCommandInputValidator extends CommonRunCommandInputValidator {
-	public constructor(uxLogger: Loggable) {
-		super(uxLogger);
+	public constructor(display: Display) {
+		super(display);
 	}
 
 	public override async validate(inputs: LooseObject): Promise<void> {
@@ -68,7 +68,7 @@ export class RunCommandInputValidator extends CommonRunCommandInputValidator {
 		}
 
 		if ((inputs.pmdconfig || inputs.eslintconfig) && (inputs.category || inputs.ruleset)) {
-			this.uxLogger.log(runMessages.getMessage('output.filtersIgnoredCustom', []));
+			this.display.displayInfo(runMessages.getMessage('output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
 		for (const target of (inputs.target as string[])) {
@@ -80,8 +80,8 @@ export class RunCommandInputValidator extends CommonRunCommandInputValidator {
 }
 
 export class RunDfaCommandInputValidator extends CommonRunCommandInputValidator {
-	public constructor(uxLogger: Loggable) {
-		super(uxLogger);
+	public constructor(display: Display) {
+		super(display);
 	}
 
 	public override async validate(inputs: LooseObject): Promise<void> {
