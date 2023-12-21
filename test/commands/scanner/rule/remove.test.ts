@@ -2,15 +2,12 @@ import {expect} from 'chai';
 import {Interaction} from '@salesforce/cli-plugins-testkit';
 // @ts-ignore
 import {runCommand, runInteractiveCommand} from '../../../TestUtils';
-import {Messages} from '@salesforce/core';
 import {Controller} from '../../../../src/Controller';
 import { CUSTOM_PATHS_FILE } from '../../../../src/Constants';
 import * as TestOverrides from './../../../test-related-lib/TestOverrides';
 import fs = require('fs');
 import path = require('path');
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
+import {Bundle, getMessage} from "../../../../src/MessageCatalog";
 
 function getSfdxScannerPath(): string {
 	return Controller.getSfdxScannerPath();
@@ -46,9 +43,9 @@ describe('scanner rule remove', () => {
 			it('Omitting --path outputs list of removeable paths', () => {
 				const output = runCommand(`scanner rule remove`);
 				const expectedRuleSummary = [pathToApexJar1, pathToApexJar2, pathToApexJar3]
-					.map(p => messages.getMessage('output.dryRunRuleTemplate', [p]))
+					.map(p => getMessage(Bundle.Remove, 'output.dryRunRuleTemplate', [p]))
 					.join('\n');
-				expect(output.shellOutput.stdout).to.contain(messages.getMessage('output.dryRunOutput', [3, expectedRuleSummary]), 'All paths should be logged');
+				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.Remove, 'output.dryRunOutput', [3, expectedRuleSummary]), 'All paths should be logged');
 			});
 
 			it('By default, rule removal must be confirmed', async () => {
@@ -56,7 +53,7 @@ describe('scanner rule remove', () => {
 					'These rules will be unregistered': Interaction.Yes
 				});
 				expect(output.stdout).to.contain(
-					messages.getMessage('output.resultSummary', [pathToApexJar1]),
+					getMessage(Bundle.Remove, 'output.resultSummary', [pathToApexJar1]),
 					'Console should report deletion.'
 				);
 				const updatedCustomPathJson = getCustomPathFileContent();
@@ -71,7 +68,7 @@ describe('scanner rule remove', () => {
 				const output = await runInteractiveCommand(`scanner rule remove --path ${pathToApexJar1}`, {
 					'These rules will be unregistered': Interaction.No
 				});
-				expect(output.stdout).to.contain(messages.getMessage('output.aborted'), 'Transaction should have been aborted');
+				expect(output.stdout).to.contain(getMessage(Bundle.Remove, 'output.aborted'), 'Transaction should have been aborted');
 				const updatedCustomPathJson = getCustomPathFileContent();
 				expect(updatedCustomPathJson).to.deep.equal(customPathDescriptor, 'Custom paths should not have changed');
 			});
@@ -81,7 +78,7 @@ describe('scanner rule remove', () => {
 			it('Successfully removes a single JAR', () => {
 				const output = runCommand(`scanner rule remove --path ${pathToApexJar1} --force`);
 				expect(output.shellOutput.stdout).to.contain(
-					messages.getMessage('output.resultSummary', [pathToApexJar1]),
+					getMessage(Bundle.Remove, 'output.resultSummary', [pathToApexJar1]),
 					'Console should report deletion.'
 				);
 				const updatedCustomPathJson = getCustomPathFileContent();
@@ -95,7 +92,7 @@ describe('scanner rule remove', () => {
 			it('Successfully removes multiple JARs at once', () => {
 				const output = runCommand(`scanner rule remove --path ${pathToApexJar1},${pathToApexJar2} --force`);
 				expect(output.shellOutput.stdout).to.contain(
-					messages.getMessage('output.resultSummary', [[pathToApexJar1, pathToApexJar2].join(', ')]),
+					getMessage(Bundle.Remove, 'output.resultSummary', [[pathToApexJar1, pathToApexJar2].join(', ')]),
 					'Console should report deletion'
 				);
 				const updatedCustomPathJson = getCustomPathFileContent();
@@ -109,7 +106,7 @@ describe('scanner rule remove', () => {
 			it('Successfully removes a whole folder', () => {
 				const output = runCommand(`scanner rule remove --path ${parentFolderForJars} --force`);
 				expect(output.shellOutput.stdout).to.contain(
-					messages.getMessage('output.resultSummary', [[pathToApexJar1, pathToApexJar2, pathToApexJar3].join(', ')]),
+					getMessage(Bundle.Remove, 'output.resultSummary', [[pathToApexJar1, pathToApexJar2, pathToApexJar3].join(', ')]),
 					'Console should report deletion'
 				);
 				const updatedCustomPathJson = getCustomPathFileContent();
@@ -122,14 +119,14 @@ describe('scanner rule remove', () => {
 
 			it('Throws error when requested path is not already registered', () => {
 				const output = runCommand(`scanner rule remove --path ${pathToApexJar4}`);
-				expect(output.shellOutput.stderr).to.contain(messages.getMessage('errors.noMatchingPaths'), 'Should throw expected error');
+				expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Remove, 'errors.noMatchingPaths'), 'Should throw expected error');
 			});
 		});
 
 		describe('Validations', () => {
 			it('Complains about empty --path', () => {
 				const output = runCommand(`scanner rule remove --path ''`);
-				expect(output.shellOutput.stderr).to.contain(messages.getMessage('validations.pathCannotBeEmpty'));
+				expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Remove, 'validations.pathCannotBeEmpty'));
 			});
 		});
 	});

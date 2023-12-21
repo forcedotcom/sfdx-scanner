@@ -5,13 +5,10 @@ import { CUSTOM_CONFIG, HARDCODED_RULES } from '../../../src/Constants';
 import Mockito = require('ts-mockito');
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import { StaticDependencies, ProcessRuleViolationType } from '../../../src/lib/eslint/EslintCommons';
-import { Messages } from '@salesforce/core';
 import { ESLint } from 'eslint';
 import { ENGINE, TargetType } from '../../../src/Constants';
 import {RuleTarget, RuleViolation, PathlessRuleViolation} from '../../../src/types';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CustomEslintEngine');
+import {Bundle, getMessage} from "../../../src/MessageCatalog";
 
 describe("Tests for CustomEslintEngine", () => {
 
@@ -164,7 +161,7 @@ describe("Tests for CustomEslintEngine", () => {
 
 				assert.fail('Expected exception');
 			} catch (err) {
-				expect(err.message).to.equal(messages.getMessage('ConfigFileDoesNotExist', [configFilePath]));
+				expect(err.message).to.equal(getMessage(Bundle.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFilePath]));
 			}
 
 		});

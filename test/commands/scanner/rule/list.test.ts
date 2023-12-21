@@ -6,10 +6,7 @@ import {CATALOG_FILE, ENGINE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 import { Controller } from '../../../../src/Controller';
-import { Messages } from '@salesforce/core';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'list');
+import {Bundle, getMessage} from "../../../../src/MessageCatalog";
 
 function getCatalogJson(): { rules: Rule[] } {
 	const sfdxScannerPath = Controller.getSfdxScannerPath();
@@ -144,7 +141,7 @@ describe('scanner rule list', () => {
 
 			it('--ruleset option shows deprecation warning', () => {
 				const output = runCommand(`scanner rule list --ruleset Braces`);
-				expect(output.shellOutput.stderr).contains(messages.getMessage('rulesetDeprecation'));
+				expect(output.shellOutput.stderr).contains(getMessage(Bundle.List, 'rulesetDeprecation'));
 			});
 
 			it('Filtering by a single ruleset returns only the rules in that ruleset', () => {

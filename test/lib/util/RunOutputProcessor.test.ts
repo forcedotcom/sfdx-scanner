@@ -4,16 +4,11 @@ import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOut
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
 import {PATHLESS_COLUMNS} from '../../../src/lib/formatter/RuleResultRecombinator';
-
-import {Messages} from '@salesforce/core';
 import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
-
 import fs = require('fs');
-
-Messages.importMessagesDirectory(__dirname);
-const processorMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
+import {Bundle, getMessage} from "../../../src/MessageCatalog";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -125,7 +120,7 @@ describe('RunOutputProcessor', () => {
 				const output: AnyJson = rop.processRunOutput(fakeRes);
 
 				// We expect that the message logged to the console and the message returned should both be the default
-				const expectedMsg = processorMessages.getMessage('output.noViolationsDetected', ['pmd, eslint']);
+				const expectedMsg = getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
 				Sinon.assert.callCount(logSpy, 1);
 				Sinon.assert.callCount(tableSpy, 0);
 				Sinon.assert.calledWith(logSpy, expectedMsg);
@@ -144,9 +139,9 @@ describe('RunOutputProcessor', () => {
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeTableResults);
 
-					const expectedTableSummary = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${processorMessages.getMessage('output.writtenToConsole')}`;
+					const expectedTableSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 					Sinon.assert.callCount(tableSpy, 1);
 					Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
@@ -170,10 +165,10 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.callCount(tableSpy, 1);
 						Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
 						Sinon.assert.callCount(logSpy, 0);
-						const expectedTableSummary = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${processorMessages.getMessage('output.sevThresholdSummary', [1])}
-${processorMessages.getMessage('output.writtenToConsole')}`;
+						const expectedTableSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						expect(e.message).to.equal(expectedTableSummary, 'Exception message incorrectly formed');
 					}
 				});
@@ -217,7 +212,7 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.callCount(tableSpy, 0);
 						Sinon.assert.callCount(logSpy, 1);
 						Sinon.assert.calledWith(logSpy, FAKE_CSV_OUTPUT);
-						expect(e.message).to.equal(processorMessages.getMessage('output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
 					}
 				});
 
@@ -261,7 +256,7 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 						Sinon.assert.callCount(tableSpy, 0);
 						Sinon.assert.callCount(logSpy, 1);
 						Sinon.assert.calledWith(logSpy, FAKE_JSON_OUTPUT);
-						expect(e.message).to.equal(processorMessages.getMessage('output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
 					}
 				});
 			});
@@ -284,9 +279,9 @@ ${processorMessages.getMessage('output.writtenToConsole')}`;
 				const output: AnyJson = rop.processRunOutput(fakeRes);
 
 				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
-				const expectedMsg = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 0, 0])}
-${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint', 0, 0])}
-${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+				const expectedMsg = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
+${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint', 0, 0])}
+${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 
 				Sinon.assert.callCount(logSpy, 1);
 				Sinon.assert.callCount(tableSpy, 0);
@@ -309,9 +304,9 @@ ${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
 
-					const expectedCsvSummary = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+					const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 					Sinon.assert.callCount(tableSpy, 0);
 					Sinon.assert.callCount(logSpy, 1);
 					Sinon.assert.calledWith(logSpy, expectedCsvSummary);
@@ -338,10 +333,10 @@ ${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
 						Sinon.assert.callCount(logSpy, 0);
 						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
-						const expectedCsvSummary = `${processorMessages.getMessage('output.engineSummaryTemplate', ['pmd', 1, 1])}
-${processorMessages.getMessage('output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${processorMessages.getMessage('output.sevThresholdSummary', [1])}
-${processorMessages.getMessage('output.writtenToOutFile', [fakeFilePath])}`;
+						const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
+${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 						expect(e.message).to.equal(expectedCsvSummary, 'Summary was wrong');
 					}
 				});
