@@ -2,14 +2,72 @@ import {Inputs} from "../types";
 import {FileHandler} from "./util/FileHandler";
 import {SfError} from "@salesforce/core";
 import {OUTPUT_FORMAT} from "./RuleManager";
-import globby = require("globby");
 import {inferFormatFromOutfile} from "./RunOptionsFactory";
 import {Display} from "./Display";
 import {Bundle, getMessage} from "../MessageCatalog";
+import {stringArrayTypeGuard} from "./util/Utils";
+import globby = require("globby");
+
+
+export interface InputValidatorFactory {
+	createInputValidator(display: Display): InputValidator;
+}
 
 export interface InputValidator {
 	validate(inputs: Inputs): Promise<void>;
 }
+
+
+export class NoOpInputValidator implements InputValidator {
+	public async validate(inputs: Inputs): Promise<void> {
+		return Promise.resolve();
+	}
+}
+
+export class NoOpInputValidatorFactory implements InputValidatorFactory {
+	public createInputValidator(display: Display): InputValidator {
+		return new NoOpInputValidator();
+	}
+}
+
+
+export class RuleAddCommandInputValidatorFactory implements InputValidatorFactory {
+	public createInputValidator(display: Display): InputValidator {
+		return new RuleAddCommandInputValidator();
+	}
+}
+
+export class RuleAddCommandInputValidator implements InputValidator {
+	public async validate(inputs: Inputs): Promise<void> {
+		if ((inputs.language as string).length === 0) {
+			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
+		}
+
+		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
+		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
+			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
+		}
+
+		return Promise.resolve();
+	}
+}
+
+
+export class RuleRemoveCommandInputValidatorFactory implements InputValidatorFactory {
+	public createInputValidator(display: Display): InputValidator {
+		return new RuleRemoveCommandInputValidator();
+	}
+}
+
+export class RuleRemoveCommandInputValidator implements InputValidator {
+	public async validate(inputs: Inputs): Promise<void> {
+		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
+		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
+			throw new SfError(getMessage(Bundle.Remove, 'validations.pathCannotBeEmpty'));
+		}
+	}
+}
+
 
 abstract class CommonRunCommandInputValidator implements InputValidator {
 	protected readonly display: Display;
@@ -51,6 +109,13 @@ abstract class CommonRunCommandInputValidator implements InputValidator {
 	}
 }
 
+
+export class RunCommandInputValidatorFactory implements InputValidatorFactory {
+	public createInputValidator(display: Display): InputValidator {
+		return new RunCommandInputValidator(display);
+	}
+}
+
 export class RunCommandInputValidator extends CommonRunCommandInputValidator {
 	public constructor(display: Display) {
 		super(display);
@@ -72,6 +137,13 @@ export class RunCommandInputValidator extends CommonRunCommandInputValidator {
 				throw new SfError(getMessage(Bundle.Run, 'validations.methodLevelTargetingDisallowed', [target]));
 			}
 		}
+	}
+}
+
+
+export class RunDfaCommandInputValidatorFactory implements InputValidatorFactory {
+	public createInputValidator(display: Display): InputValidator {
+		return new RunDfaCommandInputValidator(display);
 	}
 }
 

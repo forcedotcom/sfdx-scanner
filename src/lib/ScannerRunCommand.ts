@@ -9,13 +9,13 @@ import {OUTPUT_FORMAT, RuleManager, RunOptions} from './RuleManager';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
 import {RuleFilter} from "./RuleFilter";
-import {RuleFilterFactory} from "./RuleFilterFactory";
+import {RuleFilterFactoryImpl} from "./RuleFilterFactory";
 import {RunOptionsFactory} from "./RunOptionsFactory";
 import {Config} from "@oclif/core";
-import {InputValidatorFactory} from "./InputValidatorFactory";
-import {PathFactory} from "./PathFactory";
+import {PathResolver} from "./PathResolver";
 import {EngineOptionsFactory} from "./EngineOptionsFactory";
 import {Bundle, getMessage} from "../MessageCatalog";
+import {InputValidatorFactory} from "./InputValidator";
 
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
@@ -72,33 +72,25 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		// END: Flags related to targeting.
 	};
 
-	private readonly ruleFilterFactory: RuleFilterFactory;
+	private readonly pathResolver: PathResolver;
 	private readonly runOptionsFactory: RunOptionsFactory;
-	private readonly inputValidatorFactory: InputValidatorFactory;
-	private readonly pathFactory: PathFactory;
 	private readonly engineOptionsFactory: EngineOptionsFactory;
 
 	protected constructor(argv: string[], config: Config,
 						  inputValidatorFactory: InputValidatorFactory,
-						  ruleFilterFactory: RuleFilterFactory,
+						  pathResolver: PathResolver,
 						  runOptionsFactory: RunOptionsFactory,
-						  pathFactory: PathFactory,
 						  enginOptionsFactory: EngineOptionsFactory) {
-		super(argv, config);
-		this.ruleFilterFactory = ruleFilterFactory;
+		super(argv, config, inputValidatorFactory);
+		this.pathResolver = pathResolver;
 		this.runOptionsFactory = runOptionsFactory;
-		this.inputValidatorFactory = inputValidatorFactory;
-		this.pathFactory = pathFactory;
 		this.engineOptionsFactory = enginOptionsFactory;
 	}
 
 	async runInternal(inputs: Inputs): Promise<AnyJson> {
-		// Using this as the uxLogger
-		await this.inputValidatorFactory.createInputValidator(this.display).validate(inputs);
-
-		const filters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
+		const filters: RuleFilter[] = new RuleFilterFactoryImpl().createRuleFilters(inputs);
+		const targetPaths: string[] = this.pathResolver.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.runOptionsFactory.createRunOptions(inputs);
-		const targetPaths: string[] = this.pathFactory.createTargetPaths(inputs);
 		const engineOptions: Map<string, string> = this.engineOptionsFactory.createEngineOptions(inputs);
 
 		const ruleManager: RuleManager = await Controller.createRuleManager();

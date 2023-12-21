@@ -6,6 +6,9 @@ import {AllowedEngineFilters} from '../../../Constants';
 import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
 import {RuleFilter} from "../../../lib/RuleFilter";
 import {Bundle, getMessage} from "../../../MessageCatalog";
+import {Config} from "@oclif/core";
+
+import {InputValidatorFactory, NoOpInputValidatorFactory} from "../../../lib/InputValidator";
 
 const columns: Ux.Table.Columns<Rule> = {
 	name: {
@@ -92,9 +95,23 @@ export default class List extends ScannerCommand {
 		// END: Flags consumed by ScannerCommand#buildRuleFilters
 	};
 
+	private readonly ruleFilterFactory: RuleFilterFactory;
+
+	public constructor(argv: string[], config: Config,
+					   inputValidatorFactory?: InputValidatorFactory,
+					   ruleFilterFactory?: RuleFilterFactory) {
+		if (typeof inputValidatorFactory === 'undefined') {
+			inputValidatorFactory = new NoOpInputValidatorFactory();
+		}
+		if (typeof ruleFilterFactory === 'undefined') {
+			ruleFilterFactory = new RuleFilterFactoryImpl();
+		}
+		super(argv, config, inputValidatorFactory);
+		this.ruleFilterFactory = ruleFilterFactory;
+	}
+
 	async runInternal(inputs: Inputs): Promise<Rule[]> {
-		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
-		const ruleFilters: RuleFilter[] = ruleFilterFactory.createRuleFilters(inputs);
+		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 
 		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
 		// allow to boil over.

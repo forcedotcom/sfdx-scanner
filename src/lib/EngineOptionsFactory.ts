@@ -1,6 +1,6 @@
 import {Inputs, LooseObject, SfgeConfig} from "../types";
 import {CUSTOM_CONFIG} from "../Constants";
-import {PathFactory} from "./PathFactory";
+import {PathResolver} from "./PathResolver";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
 import {SfError} from "@salesforce/core";
 import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
@@ -13,17 +13,17 @@ export interface EngineOptionsFactory {
 }
 
 abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
-	private readonly pathFactory: PathFactory;
+	private readonly pathResolver: PathResolver;
 
-	protected constructor(pathFactory: PathFactory) {
-		this.pathFactory = pathFactory;
+	protected constructor(pathResolver: PathResolver) {
+		this.pathResolver = pathResolver;
 	}
 
 	createEngineOptions(inputs: Inputs): Map<string, string> {
 		const options: Map<string,string> = new Map();
 
 		// We should only add a GraphEngine config if we were given a --projectdir flag.
-		let projectDirPaths: string[] = this.pathFactory.createProjectDirPaths(inputs);
+		let projectDirPaths: string[] = this.pathResolver.resolveProjectDirPaths(inputs);
 		if (projectDirPaths.length > 0) {
 			const sfgeConfig: SfgeConfig = {
 				projectDirs: projectDirPaths
@@ -37,8 +37,8 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 }
 
 export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
-	public constructor(pathFactory: PathFactory) {
-		super(pathFactory);
+	public constructor(pathResolver: PathResolver) {
+		super(pathResolver);
 	}
 
 	public override createEngineOptions(inputs: Inputs): Map<string, string> {
@@ -82,8 +82,8 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 }
 
 export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
-	public constructor(pathFactory: PathFactory) {
-		super(pathFactory);
+	public constructor(pathResolver: PathResolver) {
+		super(pathResolver);
 	}
 
 	public override createEngineOptions(inputs: Inputs): Map<string,string> {

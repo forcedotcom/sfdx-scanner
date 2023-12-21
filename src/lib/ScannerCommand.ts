@@ -6,19 +6,35 @@ import {Inputs} from '../types';
 import {Logger} from '@salesforce/core';
 import {Display, Displayable, UxDisplay} from "./Display";
 import {Bundle, getMessage} from "../MessageCatalog";
+import {Config} from "@oclif/core";
+import {InputValidatorFactory} from "./InputValidator";
 
 
 export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
 	protected logger: Logger;
 	protected display: Display;
+	private inputValidatorFactory: InputValidatorFactory;
+
+	protected constructor(argv: string[], config: Config, inputValidatorFactory: InputValidatorFactory) {
+		super(argv, config);
+		this.inputValidatorFactory = inputValidatorFactory;
+	}
+
+	protected async init(): Promise<void> {
+		await super.init();
+		initContainer();
+	}
 
 	public async run(): Promise<AnyJson> {
 		this.logger = await Logger.child(this.ctor.name);
 
 		const inputs: Inputs = (await this.parse(this.ctor)).flags;
 		this.display = new UxDisplay(this, this.spinner, inputs.verbose);
+		await this.inputValidatorFactory.createInputValidator(this.display).validate(inputs);
 
-		this.runCommonSteps();
+		this.display.displayWarning(getMessage(Bundle.Common, 'surveyRequestMessage'));
+		this.buildEventListeners();
+
 		return await this.runInternal(inputs);
 	}
 
@@ -28,22 +44,9 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 	 */
 	abstract runInternal(inputs: Inputs): Promise<AnyJson>;
 
-	/**
-	 * Common steps that should be run before every command
-	 */
-	protected runCommonSteps(): void {
-		this.display.displayWarning(getMessage(Bundle.Common, 'surveyRequestMessage'));
-		this.buildEventListeners();
-	}
-
-	protected async init(): Promise<void> {
-		await super.init();
-		initContainer();
-	}
-
 	// TODO: We should consider refactoring away from events and instead inject the "Display" as a dependency
 	// into all of the classes that emit events
-	protected buildEventListeners(): void {
+	private buildEventListeners(): void {
 		uxEvents.on(EVENTS.INFO_ALWAYS, (msg: string) => this.display.displayInfo(msg));
 		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => this.display.displayVerboseInfo(msg));
 		uxEvents.on(EVENTS.WARNING_ALWAYS, (msg: string) => this.display.displayWarning(msg));

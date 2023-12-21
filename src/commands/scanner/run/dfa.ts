@@ -1,12 +1,11 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
 import {Config} from "@oclif/core";
-import {RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
-import {RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
-import {RunDfaCommandInputValidatorFactory} from "../../../lib/InputValidatorFactory";
-import {PathFactory, PathFactoryImpl} from "../../../lib/PathFactory";
-import {RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
+import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
+import {PathResolver, PathResolverImpl} from "../../../lib/PathResolver";
+import {EngineOptionsFactory, RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
 import {Bundle, getMessage} from "../../../MessageCatalog";
+import {InputValidatorFactory, RunDfaCommandInputValidatorFactory} from "../../../lib/InputValidator";
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
@@ -72,13 +71,23 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Config-overrideable engine flags.
 	};
 
-	public constructor(argv: string[], config: Config) {
-		const pathFactory: PathFactory = new PathFactoryImpl();
-		super(argv, config,
-			new RunDfaCommandInputValidatorFactory(),
-			new RuleFilterFactoryImpl(),
-			new RunOptionsFactoryImpl(true, config.version),
-			pathFactory,
-			new RunDfaEngineOptionsFactory(pathFactory));
+	public constructor(argv: string[], config: Config,
+					   inputValidatorFactory?: InputValidatorFactory,
+					   pathResolver?: PathResolver,
+					   runOptionsFactory?: RunOptionsFactory,
+					   engineOptionsFactory?: EngineOptionsFactory) {
+		if (typeof inputValidatorFactory === 'undefined') {
+			inputValidatorFactory = new RunDfaCommandInputValidatorFactory();
+		}
+		if (typeof pathResolver === 'undefined') {
+			pathResolver = new PathResolverImpl();
+		}
+		if (typeof runOptionsFactory === 'undefined') {
+			runOptionsFactory = new RunOptionsFactoryImpl(true, config.version);
+		}
+		if (typeof engineOptionsFactory === 'undefined') {
+			engineOptionsFactory = new RunDfaEngineOptionsFactory(pathResolver);
+		}
+		super(argv, config, inputValidatorFactory, pathResolver, runOptionsFactory, engineOptionsFactory);
 	}
 }

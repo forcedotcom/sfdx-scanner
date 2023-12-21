@@ -1,13 +1,13 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
-import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
-import path = require('path');
-import untildify = require('untildify');
-import { ScannerCommand } from '../../../lib/ScannerCommand';
+import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Bundle, getMessage} from "../../../MessageCatalog";
 import {Inputs} from "../../../types";
+import {Config} from "@oclif/core";
+import {PathResolver, PathResolverImpl} from "../../../lib/PathResolver";
+
+import {InputValidatorFactory, RuleAddCommandInputValidatorFactory} from "../../../lib/InputValidator";
 
 export default class Add extends ScannerCommand {
 
@@ -35,11 +35,24 @@ export default class Add extends ScannerCommand {
 		})()
 	};
 
-	async runInternal(inputs: Inputs): Promise<AnyJson> {
-		this.validateFlags(inputs);
+	public readonly pathResolver: PathResolver;
 
+	public constructor(argv: string[], config: Config,
+					   inputValidatorFactory?: InputValidatorFactory,
+					   pathResolver?: PathResolver) {
+		if (typeof inputValidatorFactory === 'undefined') {
+			inputValidatorFactory = new RuleAddCommandInputValidatorFactory();
+		}
+		if (typeof pathResolver === 'undefined') {
+			pathResolver = new PathResolverImpl();
+		}
+		super(argv, config, inputValidatorFactory);
+		this.pathResolver = pathResolver;
+	}
+
+	async runInternal(inputs: Inputs): Promise<AnyJson> {
 		const language = inputs.language as string;
-		const paths = this.resolvePaths(inputs);
+		const paths = this.pathResolver.resolvePaths(inputs);
 
 		this.logger.trace(`Language: ${language}`);
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
@@ -47,24 +60,9 @@ export default class Add extends ScannerCommand {
 		// Add to Custom Classpath registry
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
+
 		this.display.displayInfo(`Successfully added rules for ${language}.`);
 		this.display.displayInfo(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
 		return {success: true, language, path: classpathEntries};
-	}
-
-	private validateFlags(inputs: Inputs): void {
-		if ((inputs.language as string).length === 0) {
-			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
-		}
-		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
-			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
-		}
-	}
-
-	private resolvePaths(inputs: Inputs): string[] {
-		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
-		// they'll be concatenated together. So we use .map() to call it on each path separately.
-		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 }
