@@ -1,4 +1,4 @@
-import {Logger, SfError, Messages} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../Controller';
 
@@ -8,13 +8,7 @@ import childProcess = require('child_process');
 import path = require('path');
 import {FileHandler} from './util/FileHandler';
 import {Config} from './util/Config';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'jreSetupManager');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
@@ -84,7 +78,7 @@ class JreSetupManager extends AsyncCreatable {
 		// So we'll just throw an error telling the user to set it themselves.
 		if (!javaHome) {
 			const errName = 'NoJavaHomeFound';
-			throw new SfError(messages.getMessage(errName, []), errName);
+			throw new SfError(getMessage(Bundle.JreSetupManager, errName, []), errName);
 		}
 
 		return javaHome;
@@ -114,7 +108,7 @@ class JreSetupManager extends AsyncCreatable {
 		} catch (e) {
 			const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
 			const errName = 'InvalidJavaHome';
-			throw new SfError(messages.getMessage(errName, [javaHome, error.code]), errName);
+			throw new SfError(getMessage(Bundle.JreSetupManager, errName, [javaHome, error.code]), errName);
 		}
 	}
 
@@ -132,7 +126,7 @@ class JreSetupManager extends AsyncCreatable {
 
 		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
 		if (!matchedParts || matchedParts.length < 4) {
-			throw new SfError(messages.getMessage('VersionNotFound', []));
+			throw new SfError(getMessage(Bundle.JreSetupManager, 'VersionNotFound', []));
 		}
 
 		const majorVersion = parseInt(matchedParts[1]);
@@ -151,7 +145,7 @@ class JreSetupManager extends AsyncCreatable {
 		} else {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
-			throw new SfError(messages.getMessage(errName, [version]), errName);
+			throw new SfError(getMessage(Bundle.JreSetupManager, errName, [version]), errName);
 		}
 
 		this.logger.trace(`Java version found as ${version}`);

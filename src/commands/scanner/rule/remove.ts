@@ -1,5 +1,5 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {Messages, SfError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
@@ -8,39 +8,32 @@ import {ScannerCommand} from '../../../lib/ScannerCommand';
 import {Rule} from '../../../types';
 import path = require('path');
 import untildify = require('untildify');
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'remove');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
+import {Bundle, getMessage} from "../../../MessageCatalog";
 
 export default class Remove extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is supplied.
-	public static summary = messages.getMessage('commandSummary');
-	public static description = messages.getMessage('commandDescription');
+	public static summary = getMessage(Bundle.Remove, 'commandSummary');
+	public static description = getMessage(Bundle.Remove, 'commandDescription');
 
 	public static examples = [
-		messages.getMessage('examples')
+		getMessage(Bundle.Remove, 'examples')
 	];
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
 	// is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: commonMessages.getMessage('flags.verboseSummary')
+			summary: getMessage(Bundle.Common, 'flags.verboseSummary')
 		}),
 		force: Flags.boolean({
 			char: 'f',
-			summary: messages.getMessage('flags.forceSummary'),
-			description: messages.getMessage('flags.forceDescription')
+			summary: getMessage(Bundle.Remove, 'flags.forceSummary'),
+			description: getMessage(Bundle.Remove, 'flags.forceDescription')
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
-			summary: messages.getMessage('flags.pathSummary'),
-			description: messages.getMessage('flags.pathDescription'),
+			summary: getMessage(Bundle.Remove, 'flags.pathSummary'),
+			description: getMessage(Bundle.Remove, 'flags.pathDescription'),
 			delimiter: ',',
 			multiple: true
 		})()
@@ -63,11 +56,11 @@ export default class Remove extends ScannerCommand {
 			// If the --path flag was used, then we couldn't find any paths matching their criteria, and we should throw
 			// and error saying as much.
 			if (paths) {
-				throw new SfError(messages.getMessage('errors.noMatchingPaths'));
+				throw new SfError(getMessage(Bundle.Remove, 'errors.noMatchingPaths'));
 			} else {
 				// If the flag wasn't used, then they're just doing a dry run. We should still let them know that they
 				// don't have anything, but it should be surfaced as a log instead of an error.
-				this.display.displayInfo(messages.getMessage('output.dryRunReturnedNoRules'));
+				this.display.displayInfo(getMessage(Bundle.Remove, 'output.dryRunReturnedNoRules'));
 				return [];
 			}
 		}
@@ -92,7 +85,7 @@ export default class Remove extends ScannerCommand {
 
 			// Step 6c: If any rules are found, ask the user to confirm that they actually want to delete them.
 			if (matchingRules.length > 0 && await this.confirm(this.generateConfirmationPrompt(matchingRules)) === false) {
-				this.display.displayInfo(messages.getMessage('output.aborted'));
+				this.display.displayInfo(getMessage(Bundle.Remove, 'output.aborted'));
 				return [];
 			}
 		}
@@ -102,14 +95,14 @@ export default class Remove extends ScannerCommand {
 
 		// Step 8: Output. We'll display a message indicating which entries were deleted, and we'll return that array for
 		// the --json flag.
-		this.display.displayInfo(messages.getMessage('output.resultSummary', [deletedPaths.join(', ')]));
+		this.display.displayInfo(getMessage(Bundle.Remove, 'output.resultSummary', [deletedPaths.join(', ')]));
 		return deletedPaths;
 	}
 
 	private validateFlags(): void {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
-			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty'));
+			throw new SfError(getMessage(Bundle.Remove, 'validations.pathCannotBeEmpty'));
 		}
 	}
 
@@ -122,13 +115,13 @@ export default class Remove extends ScannerCommand {
 	private generateConfirmationPrompt(rules: Rule[]): string {
 		// We'll want to create a list of short strings containing the name of each rule and where it's defined, so we
 		// can log that out to the user.
-		const ruleDescriptions: string[] = rules.map(rule => messages.getMessage('output.ruleTemplate', [rule.name, rule.sourcepackage]));
-		return messages.getMessage('output.deletionPrompt', [ruleDescriptions.join('\n')]);
+		const ruleDescriptions: string[] = rules.map(rule => getMessage(Bundle.Remove, 'output.ruleTemplate', [rule.name, rule.sourcepackage]));
+		return getMessage(Bundle.Remove, 'output.deletionPrompt', [ruleDescriptions.join('\n')]);
 	}
 
 	private generateDryRunOutput(paths: string[]): string {
-		const pathString = paths.map(p => messages.getMessage('output.dryRunRuleTemplate', [p])).join('\n');
-		return messages.getMessage('output.dryRunOutput', [paths.length, pathString]);
+		const pathString = paths.map(p => getMessage(Bundle.Remove, 'output.dryRunRuleTemplate', [p])).join('\n');
+		return getMessage(Bundle.Remove, 'output.dryRunOutput', [paths.length, pathString]);
 
 	}
 }

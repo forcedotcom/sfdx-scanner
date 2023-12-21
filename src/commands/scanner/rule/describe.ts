@@ -1,5 +1,4 @@
 import {Flags, Ux} from '@salesforce/sf-plugins-core';
-import {Messages} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {Controller} from '../../../Controller';
 import {Rule} from '../../../types';
@@ -9,14 +8,7 @@ import Run from '../run';
 import Dfa from '../run/dfa';
 import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
 import {RuleFilter} from "../../../lib/RuleFilter";
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'describe');
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
+import {Bundle, getMessage} from "../../../MessageCatalog";
 
 type DescribeStyledRule = Rule & {
 	runWith: string;
@@ -25,11 +17,11 @@ type DescribeStyledRule = Rule & {
 
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandSummary');
-	public static description = messages.getMessage('commandDescription');
+	public static summary = getMessage(Bundle.Describe, 'commandSummary');
+	public static description = getMessage(Bundle.Describe, 'commandDescription');
 
 	public static examples = [
-		messages.getMessage('examples.normalExample')
+		getMessage(Bundle.Describe, 'examples.normalExample')
 	];
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname, and description
@@ -37,12 +29,12 @@ export default class Describe extends ScannerCommand {
 	public static readonly flags = {
 		rulename: Flags.string({
 			char: 'n',
-			summary: messages.getMessage('flags.rulenameSummary'),
-			description: messages.getMessage('flags.rulenameDescription'),
+			summary: getMessage(Bundle.Describe, 'flags.rulenameSummary'),
+			description: getMessage(Bundle.Describe, 'flags.rulenameDescription'),
 			required: true
 		}),
 		verbose: Flags.boolean({
-			summary: commonMessages.getMessage('flags.verboseSummary')
+			summary: getMessage(Bundle.Common, 'flags.verboseSummary')
 		})
 	};
 
@@ -57,10 +49,10 @@ export default class Describe extends ScannerCommand {
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
 			// so it's immediately obvious.
-			this.display.displayWarning(messages.getMessage('output.noMatchingRules', [this.parsedFlags.rulename as string]));
+			this.display.displayWarning(getMessage(Bundle.Describe, 'output.noMatchingRules', [this.parsedFlags.rulename as string]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = messages.getMessage('output.multipleMatchingRules', [rules.length.toString(), this.parsedFlags.rulename as string]);
+			const msg = getMessage(Bundle.Describe, 'output.multipleMatchingRules', [rules.length.toString(), this.parsedFlags.rulename as string]);
 			this.display.displayWarning(msg);
 			rules.forEach((rule, idx) => {
 				this.styledHeader(`Rule #${idx + 1}`);

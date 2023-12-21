@@ -7,15 +7,15 @@ import {RunOptionsFactoryImpl} from "../../lib/RunOptionsFactory";
 import {RunCommandInputValidatorFactory} from "../../lib/InputValidatorFactory";
 import {RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
 import {PathFactory, PathFactoryImpl} from "../../lib/PathFactory";
-import {BUNDLE, getBundledMessage} from "../../MessageCatalog";
+import {Bundle, getMessage} from "../../MessageCatalog";
 
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = getBundledMessage(BUNDLE.RUN, 'commandSummary');
-	public static description = getBundledMessage(BUNDLE.RUN, 'commandDescription');
+	public static summary = getMessage(Bundle.Run, 'commandSummary');
+	public static description = getMessage(Bundle.Run, 'commandDescription');
 
 	public static examples = [
-		getBundledMessage(BUNDLE.RUN, 'examples')
+		getMessage(Bundle.Run, 'examples')
 	];
 
 	// This defines the flags accepted by this command.
@@ -26,17 +26,17 @@ export default class Run extends ScannerRunCommand {
 		ruleset: Flags.custom<string[]>({
 			char: 'r',
 			deprecated: {
-				message: getBundledMessage(BUNDLE.RUN, 'rulesetDeprecation')
+				message: getMessage(Bundle.Run, 'rulesetDeprecation')
 			},
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.rulesetSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.rulesetDescription'),
+			summary: getMessage(Bundle.Run, 'flags.rulesetSummary'),
+			description: getMessage(Bundle.Run, 'flags.rulesetDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		engine: Flags.custom<string[]>({
 			char: 'e',
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.engineSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.engineDescription'),
+			summary: getMessage(Bundle.Run, 'flags.engineSummary'),
+			description: getMessage(Bundle.Run, 'flags.engineDescription'),
 			options: [...PathlessEngineFilters],
 			delimiter: ',',
 			multiple: true
@@ -45,8 +45,8 @@ export default class Run extends ScannerRunCommand {
 		// BEGIN: Targeting-related flags.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.targetSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.targetDescription'),
+			summary: getMessage(Bundle.Run, 'flags.targetSummary'),
+			description: getMessage(Bundle.Run, 'flags.targetDescription'),
 			delimiter: ',',
 			multiple: true,
 			required: true
@@ -54,31 +54,31 @@ export default class Run extends ScannerRunCommand {
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
 		tsconfig: Flags.string({
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.tsconfigSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.tsconfigDescription')
+			summary: getMessage(Bundle.Run, 'flags.tsconfigSummary'),
+			description: getMessage(Bundle.Run, 'flags.tsconfigDescription')
 		}),
 		eslintconfig: Flags.string({
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.eslintConfigSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.eslintConfigDescription')
+			summary: getMessage(Bundle.Run, 'flags.eslintConfigSummary'),
+			description: getMessage(Bundle.Run, 'flags.eslintConfigDescription')
 		}),
 		pmdconfig: Flags.string({
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.pmdConfigSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.pmdConfigDescription')
+			summary: getMessage(Bundle.Run, 'flags.pmdConfigSummary'),
+			description: getMessage(Bundle.Run, 'flags.pmdConfigDescription')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
 		env: Flags.string({
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.envSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.envDescription'),
+			summary: getMessage(Bundle.Run, 'flags.envSummary'),
+			description: getMessage(Bundle.Run, 'flags.envDescription'),
 			deprecated: {
-				message: getBundledMessage(BUNDLE.RUN, 'flags.envParamDeprecationWarning')
+				message: getMessage(Bundle.Run, 'flags.envParamDeprecationWarning')
 			}
 		}),
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
 		"verbose-violations": Flags.boolean({
-			summary: getBundledMessage(BUNDLE.RUN, 'flags.verboseViolationsSummary'),
-			description: getBundledMessage(BUNDLE.RUN, 'flags.verboseViolationsDescription')
+			summary: getMessage(Bundle.Run, 'flags.verboseViolationsSummary'),
+			description: getMessage(Bundle.Run, 'flags.verboseViolationsDescription')
 		})
 		// END: Flags related to results processing.
 	};

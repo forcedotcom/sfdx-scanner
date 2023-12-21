@@ -2,13 +2,11 @@ import {LooseObject, SfgeConfig} from "../types";
 import {CUSTOM_CONFIG} from "../Constants";
 import {PathFactory} from "./PathFactory";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
-import {Messages, SfError} from "@salesforce/core";
+import {SfError} from "@salesforce/core";
 import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
 import normalize = require('normalize-path');
 import untildify = require("untildify");
-
-// TODO: Move this to some messages helper class
-const runMessages: Messages<string> = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 export interface EngineOptionsFactory {
 	createEngineOptions(inputs: LooseObject): Map<string,string>;
@@ -58,7 +56,7 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 				const parsedEnv: LooseObject = JSON.parse(inputs.env as string) as LooseObject;
 				options.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfError(runMessages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
+				throw new SfError(getMessage(Bundle.Run, 'output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 

@@ -1,5 +1,5 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel, Messages, SfError} from '@salesforce/core';
+import {Logger, LoggerLevel, SfError} from '@salesforce/core';
 import {isBoolean, isNumber} from '@salesforce/ts-types';
 import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
@@ -7,9 +7,8 @@ import { Controller } from '../../Controller';
 import { uxEvents, EVENTS } from '../ScannerEvents';
 import {deepCopy, stringArrayTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
+import {Bundle, getMessage} from "../../MessageCatalog";
 
-Messages.importMessagesDirectory(__dirname);
-const configMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "Config");
 type GenericTypeGuard<T> = (obj: unknown) => obj is T;
 
 export type ConfigContent = {
@@ -164,7 +163,7 @@ export class Config {
 
 			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
 			if (upgradeErrorMessage) {
-				throw new SfError(configMessages.getMessage('UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
+				throw new SfError(getMessage(Bundle.Config, 'UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
 			}
 		}
 	}
@@ -232,7 +231,7 @@ export class Config {
 			this.logger.trace(`Config property ${propertyName} for engine ${engine} has value ${String(propertyValue)}`);
 			return propertyValue;
 		} else {
-			throw new SfError(configMessages.getMessage(errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
+			throw new SfError(getMessage(Bundle.Config, errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
 		}
 	}
 
@@ -297,7 +296,7 @@ export class Config {
 			// the first time. To avoid unexpected behavior changes, we'll copy the pilot
 			// config as the source for the GA config.
 			this.logger.trace(`Creating GA config by copying pilot config`);
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, configMessages.getMessage("GeneratingConfigFromPilot", [
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(Bundle.Config, "GeneratingConfigFromPilot", [
 				this.configPilotFilePath
 			]));
 			const configFileContent = await this.fileHandler.readFile(this.configPilotFilePath);

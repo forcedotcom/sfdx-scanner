@@ -3,13 +3,9 @@ import {uxEvents, EVENTS} from './ScannerEvents';
 import {initContainer} from '../ioc.config';
 import {AnyJson} from '@salesforce/ts-types';
 import {LooseObject} from '../types';
-
-import {Logger, Messages} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {Display, Displayable, UxDisplay} from "./Display";
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-const commonMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'common');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 
 export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
@@ -42,14 +38,13 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 	 * Common steps that should be run before every command
 	 */
 	protected runCommonSteps(): void {
-		this.display.displayWarning(commonMessages.getMessage('surveyRequestMessage'));
-		initContainer();
+		this.display.displayWarning(getMessage(Bundle.Common, 'surveyRequestMessage'));
 		this.buildEventListeners();
 	}
 
 	protected async init(): Promise<void> {
 		await super.init();
-		this.buildEventListeners();
+		initContainer();
 	}
 
 	// TODO: We should consider refactoring away from events and instead inject the "Display" as a dependency

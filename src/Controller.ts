@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import {SfError, Messages} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
 import {DEFAULT_SCANNER_PATH, ENV_VAR_NAMES, Services, AllowedEngineFilters} from './Constants';
@@ -8,13 +8,7 @@ import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Controller');
+import {Bundle, getMessage} from "./MessageCatalog";
 
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
@@ -71,7 +65,7 @@ export const Controller = {
 		const engines = allEngines.filter(e => e.isEngineRequested(filteredNames, engineOptions));
 
 		if (engines.length == 0) {
-			const msg = messages.getMessage('NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
+			const msg = getMessage(Bundle.Controller, 'NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
 			throw new SfError(msg);
 		}
 
@@ -88,7 +82,7 @@ export const Controller = {
 			}
 		}
 		if (engines.length == 0) {
-			const msg = messages.getMessage('NoEnabledEnginesFound', [enginesToString(allEngines)]);
+			const msg = getMessage(Bundle.Controller, 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
 			throw new SfError(msg);
 		}
 

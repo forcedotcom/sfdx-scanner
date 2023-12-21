@@ -1,5 +1,5 @@
 import path = require('path');
-import {Messages, Logger} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {Controller} from '../../Controller';
 import {RuleType} from '../../Constants';
@@ -9,6 +9,7 @@ import {Rule, SfgeConfig, RuleTarget} from '../../types';
 import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
+import {Bundle, getMessage} from "../../MessageCatalog";
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/sfge
 const SFGE_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'sfge', 'lib');
@@ -17,13 +18,6 @@ const MAIN_CLASS = "com.salesforce.Main";
 const EXEC_ACTION = "execute";
 const CATALOG_ACTION = "catalog";
 const SFGE_LOG_FILE = 'sfge.log';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'SfgeEngine');
 
 /**
  * By fiat, an exit code of 0 indicates a successful SFGE run with no violations detected.
@@ -82,8 +76,8 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	public startSpinner(): void {
 		uxEvents.emit(
 			EVENTS.START_SPINNER,
-			messages.getMessage("messages.spinnerStart", [this.logFilePath]),
-			messages.getMessage("messages.pleaseWait")
+			getMessage(Bundle.SfgeEngine, "messages.spinnerStart", [this.logFilePath]),
+			getMessage(Bundle.SfgeEngine, "messages.pleaseWait")
 		);
 
 		// TODO: This timer logic should ideally live inside waitOnSpinner()

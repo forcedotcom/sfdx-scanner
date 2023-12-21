@@ -1,6 +1,6 @@
 import path = require('path');
 import { Stats } from 'fs';
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {injectable} from 'tsyringe';
 import {CUSTOM_PATHS_FILE} from '../Constants';
 import {RulePathManager} from './RulePathManager';
@@ -8,13 +8,7 @@ import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import * as PrettyPrinter from './util/PrettyPrinter';
 import { Controller } from '../Controller';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CustomRulePathManager');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 type RulePathJson = {
 	[engine: string]: {
@@ -62,7 +56,7 @@ export class CustomRulePathManager implements RulePathManager {
 			} else {
 				//  Any other error needs to be rethrown, and since it could be arcane or weird, we'll also prepend it with a
 				//  header, so it's clear where it came from.
-				throw new SfError(messages.getMessage('errors.readCustomRulePathFileFailed', [err.message]));
+				throw new SfError(getMessage(Bundle.CustomRulePathManager, 'errors.readCustomRulePathFileFailed', [err.message]));
 			}
 		}
 		// If file existed but was empty, replace the whitespace/blank with empty JSON
@@ -196,7 +190,7 @@ export class CustomRulePathManager implements RulePathManager {
 			// If the write failed, the error might be arcane or confusing, so we'll want to prepend the error with a header
 			// so it's at least obvious what failed, if not how or why.
 			const err: Error = e as Error;
-			throw new SfError(messages.getMessage('errors.writeCustomRulePathFileFailed', [err.message]));
+			throw new SfError(getMessage(Bundle.CustomRulePathManager, 'errors.writeCustomRulePathFileFailed', [err.message]));
 		}
 	}
 
@@ -255,7 +249,7 @@ export class CustomRulePathManager implements RulePathManager {
 				this.logger.trace(`Fetching stats for path ${p}`);
 				stats = await this.fileHandler.stats(p);
 			} catch (e) {
-				throw new SfError(messages.getMessage('errors.invalidFilePath', [p]));
+				throw new SfError(getMessage(Bundle.CustomRulePathManager, 'errors.invalidFilePath', [p]));
 			}
 			if (stats.isFile()) {
 				if (p.endsWith(".jar") || p.endsWith(".xml")) {

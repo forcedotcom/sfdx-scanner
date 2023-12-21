@@ -1,40 +1,33 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {Messages, SfError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {AnyJson} from '@salesforce/ts-types';
 import {stringArrayTypeGuard} from '../../../lib/util/Utils';
 import {Controller} from '../../../Controller';
 import path = require('path');
 import untildify = require('untildify');
 import { ScannerCommand } from '../../../lib/ScannerCommand';
-
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'add');
+import {Bundle, getMessage} from "../../../MessageCatalog";
 
 export default class Add extends ScannerCommand {
 
-	public static summary = messages.getMessage('commandSummary');
-	public static description = messages.getMessage('commandDescription');
+	public static summary = getMessage(Bundle.Add, 'commandSummary');
+	public static description = getMessage(Bundle.Add, 'commandDescription');
 
 	public static examples = [
-		messages.getMessage('examples')
+		getMessage(Bundle.Add, 'examples')
 	];
 
 	public static readonly flags = {
 		language: Flags.string({
 			char: 'l',
-			summary: messages.getMessage('flags.languageSummary'),
-			description: messages.getMessage('flags.languageDescription'),
+			summary: getMessage(Bundle.Add, 'flags.languageSummary'),
+			description: getMessage(Bundle.Add, 'flags.languageDescription'),
 			required: true
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
-			summary: messages.getMessage('flags.pathSummary'),
-			description: messages.getMessage('flags.pathDescription'),
+			summary: getMessage(Bundle.Add, 'flags.pathSummary'),
+			description: getMessage(Bundle.Add, 'flags.pathDescription'),
 			multiple: true,
 			delimiter: ',',
 			required: true
@@ -60,11 +53,11 @@ export default class Add extends ScannerCommand {
 
 	private validateFlags(): void {
 		if ((this.parsedFlags.language as string).length === 0) {
-			throw new SfError(messages.getMessage('validations.languageCannotBeEmpty', []));
+			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
 		}
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (this.parsedFlags.path && stringArrayTypeGuard(this.parsedFlags.path) && (!this.parsedFlags.path.length || this.parsedFlags.path.includes(''))) {
-			throw new SfError(messages.getMessage('validations.pathCannotBeEmpty', []));
+			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
 		}
 	}
 

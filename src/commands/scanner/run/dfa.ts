@@ -6,15 +6,15 @@ import {RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
 import {RunDfaCommandInputValidatorFactory} from "../../../lib/InputValidatorFactory";
 import {PathFactory, PathFactoryImpl} from "../../../lib/PathFactory";
 import {RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
-import {BUNDLE, getBundledMessage} from "../../../MessageCatalog";
+import {Bundle, getMessage} from "../../../MessageCatalog";
 
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = getBundledMessage(BUNDLE.RUN_DFA, 'commandSummary');
-	public static description = getBundledMessage(BUNDLE.RUN_DFA, 'commandDescription');
+	public static summary = getMessage(Bundle.RunDfa, 'commandSummary');
+	public static description = getMessage(Bundle.RunDfa, 'commandDescription');
 
 	public static examples = [
-		getBundledMessage(BUNDLE.RUN_DFA, 'examples')
+		getMessage(Bundle.RunDfa, 'examples')
 	];
 
 	// This defines the flags accepted by this command.
@@ -26,8 +26,8 @@ export default class Dfa extends ScannerRunCommand {
 		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
 		'with-pilot': Flags.boolean({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.withpilotSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.withpilotDescription')
+			summary: getMessage(Bundle.RunDfa, 'flags.withpilotSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.withpilotDescription')
 		}),
 		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
@@ -35,8 +35,8 @@ export default class Dfa extends ScannerRunCommand {
 		// and therefore different descriptions, so each command defines this flag separately.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.targetSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.targetDescription'),
+			summary: getMessage(Bundle.RunDfa, 'flags.targetSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.targetDescription'),
 			required: true,
 			delimiter: ',',
 			multiple: true
@@ -44,29 +44,29 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': Flags.integer({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.rulethreadcountSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.rulethreadcountDescription'),
+			summary: getMessage(Bundle.RunDfa, 'flags.rulethreadcountSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.rulethreadcountDescription'),
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
 		'rule-thread-timeout': Flags.integer({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.rulethreadtimeoutSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.rulethreadtimeoutDescription'),
+			summary: getMessage(Bundle.RunDfa, 'flags.rulethreadtimeoutSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.rulethreadtimeoutDescription'),
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
 		'rule-disable-warning-violation': Flags.boolean({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.ruledisablewarningviolationSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.ruledisablewarningviolationDescription')
+			summary: getMessage(Bundle.RunDfa, 'flags.ruledisablewarningviolationSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.ruledisablewarningviolationDescription')
 		}),
 		'sfgejvmargs': Flags.string({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.sfgejvmargsSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.sfgejvmargsDescription'),
+			summary: getMessage(Bundle.RunDfa, 'flags.sfgejvmargsSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.sfgejvmargsDescription'),
 			env: 'SFGE_JVM_ARGS'
 		}),
 		'pathexplimit': Flags.integer({
-			summary: getBundledMessage(BUNDLE.RUN_DFA, 'flags.pathexplimitSummary'),
-			description: getBundledMessage(BUNDLE.RUN_DFA, 'flags.pathexplimitDescription'),
+			summary: getMessage(Bundle.RunDfa, 'flags.pathexplimitSummary'),
+			description: getMessage(Bundle.RunDfa, 'flags.pathexplimitDescription'),
 			env: 'SFGE_PATH_EXPANSION_LIMIT'
 		})
 		// END: Config-overrideable engine flags.

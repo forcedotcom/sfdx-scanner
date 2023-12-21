@@ -1,10 +1,8 @@
 import {LooseObject} from "../types";
 import {OUTPUT_FORMAT, RunOptions} from "./RuleManager";
-import {Messages, SfError} from "@salesforce/core";
+import {SfError} from "@salesforce/core";
 import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
-
-// TODO: Consider wrapping message loading inside of a class
-const commonRunMessages: Messages<string> = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-common');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 export interface RunOptionsFactory {
 	createRunOptions(inputs: LooseObject): RunOptions;
@@ -46,7 +44,7 @@ function determineOutputFormat(format: string, outfile: string, json: boolean): 
 export function inferFormatFromOutfile(outfile: string): OUTPUT_FORMAT {
 	const lastPeriod: number = outfile.lastIndexOf('.');
 	if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-		throw new SfError(commonRunMessages.getMessage('validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
+		throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 	}
 	const fileExtension: string = outfile.slice(lastPeriod + 1).toLowerCase();
 	switch (fileExtension) {
@@ -57,6 +55,6 @@ export function inferFormatFromOutfile(outfile: string): OUTPUT_FORMAT {
 		case OUTPUT_FORMAT.XML:
 			return fileExtension;
 		default:
-			throw new SfError(commonRunMessages.getMessage('validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 	}
 }

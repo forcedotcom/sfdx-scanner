@@ -1,12 +1,6 @@
-import {Messages, SfError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import { Catalog, Rule, RuleGroup } from '../types';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Exceptions');
+import {Bundle, getMessage} from "../MessageCatalog";
 
 /**
  * Filter values preceded by this character are negated
@@ -122,7 +116,7 @@ abstract class PositiveRuleFilter extends RuleFilter {
     protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
 		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 		if (mapped.negative.length > 0) {
-			throw new SfError(messages.getMessage('RuleFilter.PositiveOnly', [filterDisplayName]));
+			throw new SfError(getMessage(Bundle.Exceptions, 'RuleFilter.PositiveOnly', [filterDisplayName]));
 		}
 		super(mapped.positive, false);
 	}
@@ -137,7 +131,7 @@ abstract class NegateableRuleFilter extends RuleFilter {
 
 		// Throw an exception if there are mixed types
 		if (mapped.positive.length > 0 && mapped.negative.length > 0) {
-			throw new SfError(messages.getMessage('RuleFilter.MixedTypes', [filterDisplayName]));
+			throw new SfError(getMessage(Bundle.Exceptions, 'RuleFilter.MixedTypes', [filterDisplayName]));
 		}
 
 		const negated = mapped.negative.length > 0;

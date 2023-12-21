@@ -1,13 +1,12 @@
-import {Logger, LoggerLevel, Messages} from '@salesforce/core';
+import {Logger, LoggerLevel} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {RuleEvent, TelemetryData} from '../../types';
 import {EVENTS, uxEvents} from '../ScannerEvents';
 import {v5 as uuidv5} from 'uuid';
 import * as TelemetryUtil from '../util/TelemetryUtil';
+import {Bundle, getMessage} from "../../MessageCatalog";
 
 
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 const genericMessageKey = 'error.external.genericErrorMessage';
 
 const MESSAGE_START_TAG = 'SF-START';
@@ -130,11 +129,11 @@ export class OutputProcessor extends AsyncCreatable {
 		let constructedMessage: string = null;
 		try {
 			// Do this in a try-block so we can fail safely.
-			constructedMessage = messages.getMessage(messageKey, args);
+			constructedMessage = getMessage(Bundle.EventKeyTemplates, messageKey, args);
 		} catch (e) {
 			// If we were somehow unable to generate a message, fall back on the generic one, since we know that's valid.
 			this.logger.trace(`Could not generate message for event key ${messageKey}. Defaulting to generic error message.`);
-			constructedMessage = messages.getMessage(genericMessageKey, []);
+			constructedMessage = getMessage(Bundle.EventKeyTemplates, genericMessageKey, []);
 		}
 		uxEvents.emit(eventType, constructedMessage);
 	}

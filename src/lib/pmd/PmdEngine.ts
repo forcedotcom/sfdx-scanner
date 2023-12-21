@@ -1,4 +1,4 @@
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
@@ -11,10 +11,7 @@ import {uxEvents, EVENTS} from "../ScannerEvents";
 import {FileHandler} from '../util/FileHandler';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-
-Messages.importMessagesDirectory(__dirname);
-const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
-const engineMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "PmdEngine");
+import {Bundle, getMessage} from "../../MessageCatalog";
 
 interface PmdViolation extends Element {
 	attributes: {
@@ -222,7 +219,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		// We're expecting the results to be a length-3 array, with the first item being the entire match, and the second
 		// and third being the capture groups we defined in the regex.
 		if (regexResult && regexResult.length === 3) {
-			return engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', regexResult.slice(1));
+			return getMessage(Bundle.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', regexResult.slice(1));
 		} else {
 			// If we weren't able to match the template, just return the log we were given. That way, at least we don't
 			// make it any worse.
@@ -263,7 +260,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 					// to the internal logs.
 					uxEvents.emit(
 						EVENTS.WARNING_VERBOSE,
-						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
+						getMessage(Bundle.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
 							node.name
 						])
 					);
@@ -328,7 +325,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 					// info-log about it.
 					uxEvents.emit(
 						EVENTS.INFO_VERBOSE,
-						eventMessages.getMessage("info.pmdRuleSkipped", [
+						getMessage(Bundle.EventKeyTemplates, "info.pmdRuleSkipped", [
 							violation.ruleName, this.SKIPPED_RULES_TO_REASON_MAP.get(ruleKey)
 						])
 					);
@@ -363,7 +360,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "error":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						eventMessages.getMessage("warning.pmdSkippedFile", [
+						getMessage(Bundle.EventKeyTemplates, "warning.pmdSkippedFile", [
 							attributes.filename,
 							attributes.msg
 						])
@@ -373,7 +370,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "suppressedviolation":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						eventMessages.getMessage("warning.pmdSuppressedViolation", [
+						getMessage(Bundle.EventKeyTemplates, "warning.pmdSuppressedViolation", [
 							attributes.filename,
 							attributes.msg,
 							attributes.suppressiontype,
@@ -385,7 +382,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "configerror":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						eventMessages.getMessage("warning.pmdConfigError", [
+						getMessage(Bundle.EventKeyTemplates, "warning.pmdConfigError", [
 							attributes.rule,
 							attributes.msg
 						])
@@ -395,7 +392,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				default:
 					uxEvents.emit(
 						EVENTS.WARNING_VERBOSE,
-						eventMessages.getMessage('warning.unexpectedPmdNodeType', [
+						getMessage(Bundle.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
 							node.name
 						])
 					);
@@ -523,7 +520,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
 		const fileHandler = new FileHandler();
 		if (!(await fileHandler.exists(configFile))) {
-			throw new SfError(engineMessages.getMessage('ConfigNotFound', [configFile]));
+			throw new SfError(getMessage(Bundle.PmdEngine, 'ConfigNotFound', [configFile]));
 		}
 
 		return configFile;

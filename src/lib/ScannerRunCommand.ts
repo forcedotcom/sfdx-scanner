@@ -15,7 +15,7 @@ import {Config} from "@oclif/core";
 import {InputValidatorFactory} from "./InputValidatorFactory";
 import {PathFactory} from "./PathFactory";
 import {EngineOptionsFactory} from "./EngineOptionsFactory";
-import {BUNDLE, getBundledMessage} from "../MessageCatalog";
+import {Bundle, getMessage} from "../MessageCatalog";
 
 // This code is used for internal errors.
 export const INTERNAL_ERROR_CODE = 1;
@@ -27,46 +27,46 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 */
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getBundledMessage(BUNDLE.COMMON, 'flags.verboseSummary')
+			summary: getMessage(Bundle.Common, 'flags.verboseSummary')
 		}),
 		// BEGIN: Filter-related flags.
 		category: Flags.custom<string[]>({
 			char: 'c',
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.categorySummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.categoryDescription'),
+			summary: getMessage(Bundle.CommonRun, 'flags.categorySummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.categoryDescription'),
 			delimiter: ',',
 			multiple: true
 		})(),
 		// BEGIN: Flags related to results processing.
 		format: Flags.custom<OUTPUT_FORMAT>({
 			char: 'f',
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.formatSummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.formatDescription'),
+			summary: getMessage(Bundle.CommonRun, 'flags.formatSummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.formatDescription'),
 			options: Object.values(OUTPUT_FORMAT)
 		})(),
 		outfile: Flags.string({
 			char: 'o',
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.outfileSummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.outfileDescription')
+			summary: getMessage(Bundle.CommonRun, 'flags.outfileSummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.outfileDescription')
 		}),
 		'severity-threshold': Flags.integer({
 			char: 's',
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.sevthresholdSummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.sevthresholdDescription'),
+			summary: getMessage(Bundle.CommonRun, 'flags.sevthresholdSummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.sevthresholdDescription'),
 			exclusive: ['json'],
 			min: 1,
 			max: 3
 		}),
 		'normalize-severity': Flags.boolean({
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.normalizesevSummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.normalizesevDescription')
+			summary: getMessage(Bundle.CommonRun, 'flags.normalizesevSummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.normalizesevDescription')
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
 		projectdir: Flags.custom<string[]>({
 			char: 'p',
-			summary: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.projectdirSummary'),
-			description: getBundledMessage(BUNDLE.COMMON_RUN, 'flags.projectdirDescription'),
+			summary: getMessage(Bundle.CommonRun, 'flags.projectdirSummary'),
+			description: getMessage(Bundle.CommonRun, 'flags.projectdirDescription'),
 			parse: val => Promise.resolve(val.split(',').map(d => normalize(untildify(d))))
 		})(),
 		// END: Flags related to targeting.
