@@ -1,9 +1,8 @@
 import {Inputs, LooseObject, SfgeConfig} from "../types";
-import {CUSTOM_CONFIG} from "../Constants";
+import {CUSTOM_CONFIG, INTERNAL_ERROR_CODE} from "../Constants";
 import {PathResolver} from "./PathResolver";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
 import {SfError} from "@salesforce/core";
-import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
 import normalize = require('normalize-path');
 import untildify = require("untildify");
 import {Bundle, getMessage} from "../MessageCatalog";

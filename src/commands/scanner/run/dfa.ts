@@ -1,17 +1,21 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
-import {Config} from "@oclif/core";
 import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
 import {PathResolver, PathResolverImpl} from "../../../lib/PathResolver";
 import {EngineOptionsFactory, RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
 import {Bundle, getMessage} from "../../../MessageCatalog";
-import {InputValidatorFactory, RunDfaCommandInputValidatorFactory} from "../../../lib/InputValidator";
+import {Logger} from "@salesforce/core";
+import {Display} from "../../../lib/Display";
+import {Action} from "../../../lib/ScannerCommand";
+import {RunDfaAction} from "../../../lib/actions/RunDfaAction";
 
+/**
+ * Defines the "run dfa" command for the "scanner" cli.
+ */
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
 	public static summary = getMessage(Bundle.RunDfa, 'commandSummary');
 	public static description = getMessage(Bundle.RunDfa, 'commandDescription');
-
 	public static examples = [
 		getMessage(Bundle.RunDfa, 'examples')
 	];
@@ -71,23 +75,10 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Config-overrideable engine flags.
 	};
 
-	public constructor(argv: string[], config: Config,
-					   inputValidatorFactory?: InputValidatorFactory,
-					   pathResolver?: PathResolver,
-					   runOptionsFactory?: RunOptionsFactory,
-					   engineOptionsFactory?: EngineOptionsFactory) {
-		if (typeof inputValidatorFactory === 'undefined') {
-			inputValidatorFactory = new RunDfaCommandInputValidatorFactory();
-		}
-		if (typeof pathResolver === 'undefined') {
-			pathResolver = new PathResolverImpl();
-		}
-		if (typeof runOptionsFactory === 'undefined') {
-			runOptionsFactory = new RunOptionsFactoryImpl(true, config.version);
-		}
-		if (typeof engineOptionsFactory === 'undefined') {
-			engineOptionsFactory = new RunDfaEngineOptionsFactory(pathResolver);
-		}
-		super(argv, config, inputValidatorFactory, pathResolver, runOptionsFactory, engineOptionsFactory);
+	protected createAction(_logger: Logger, display: Display): Action {
+		const pathResolver: PathResolver = new PathResolverImpl()
+		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(true, this.config.version);
+		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(pathResolver);
+		return new RunDfaAction(display, pathResolver, runOptionsFactory, engineOptionsFactory);
 	}
 }

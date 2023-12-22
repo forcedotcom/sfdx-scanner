@@ -1,24 +1,9 @@
-import {Flags, Ux} from '@salesforce/sf-plugins-core';
-import {SfError} from '@salesforce/core';
-import {AnyJson} from '@salesforce/ts-types';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerCommand} from './ScannerCommand';
-import {Inputs, RecombinedRuleResults} from '../types';
-import {RunOutputOptions, RunOutputProcessor} from './util/RunOutputProcessor';
-import {Controller} from '../Controller';
-import {OUTPUT_FORMAT, RuleManager, RunOptions} from './RuleManager';
+import {OUTPUT_FORMAT} from './RuleManager';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
-import {RuleFilter} from "./RuleFilter";
-import {RuleFilterFactoryImpl} from "./RuleFilterFactory";
-import {RunOptionsFactory} from "./RunOptionsFactory";
-import {Config} from "@oclif/core";
-import {PathResolver} from "./PathResolver";
-import {EngineOptionsFactory} from "./EngineOptionsFactory";
 import {Bundle, getMessage} from "../MessageCatalog";
-import {InputValidatorFactory} from "./InputValidator";
-
-// This code is used for internal errors.
-export const INTERNAL_ERROR_CODE = 1;
 
 export abstract class ScannerRunCommand extends ScannerCommand {
 	/**
@@ -63,7 +48,7 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
-		projectdir: Flags.custom<string[]>({
+		projectdir: Flags.custom<string[]>({ // TODO: FIGURE OUT WHY WE NEED THIS ON BOTH "run" AND "run dfa"
 			char: 'p',
 			summary: getMessage(Bundle.CommonRun, 'flags.projectdirSummary'),
 			description: getMessage(Bundle.CommonRun, 'flags.projectdirDescription'),
@@ -71,44 +56,4 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		})(),
 		// END: Flags related to targeting.
 	};
-
-	private readonly pathResolver: PathResolver;
-	private readonly runOptionsFactory: RunOptionsFactory;
-	private readonly engineOptionsFactory: EngineOptionsFactory;
-
-	protected constructor(argv: string[], config: Config,
-						  inputValidatorFactory: InputValidatorFactory,
-						  pathResolver: PathResolver,
-						  runOptionsFactory: RunOptionsFactory,
-						  enginOptionsFactory: EngineOptionsFactory) {
-		super(argv, config, inputValidatorFactory);
-		this.pathResolver = pathResolver;
-		this.runOptionsFactory = runOptionsFactory;
-		this.engineOptionsFactory = enginOptionsFactory;
-	}
-
-	async runInternal(inputs: Inputs): Promise<AnyJson> {
-		const filters: RuleFilter[] = new RuleFilterFactoryImpl().createRuleFilters(inputs);
-		const targetPaths: string[] = this.pathResolver.resolveTargetPaths(inputs);
-		const runOptions: RunOptions = this.runOptionsFactory.createRunOptions(inputs);
-		const engineOptions: Map<string, string> = this.engineOptionsFactory.createEngineOptions(inputs);
-
-		const ruleManager: RuleManager = await Controller.createRuleManager();
-		let output: RecombinedRuleResults = null;
-		try {
-			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
-		} catch (e) {
-			// Rethrow any errors as SF errors.
-			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
-		}
-
-		const outputOptions: RunOutputOptions = {
-			format: runOptions.format,
-			severityForError: inputs['severity-threshold'] as number,
-			outfile: inputs.outfile as string
-		};
-		return new RunOutputProcessor(outputOptions, new Ux({jsonEnabled: this.jsonEnabled()}))
-			.processRunOutput(output);
-	}
 }

@@ -1,63 +1,61 @@
-import {PrettyPrintableError} from "@oclif/core/lib/errors";
 import {Spinner} from "@salesforce/sf-plugins-core";
+import {Ux} from "@salesforce/sf-plugins-core/lib/ux";
 
 export interface Display {
 	/**
-	 * Output message to stdout (non-blocking) only if the "--json" flag is not present
+	 * Output message to stdout (non-blocking) only if the "--json" flag is not present.
 	 */
 	displayInfo(msg: string, ...args: any[]): void;
 
 	/**
-	 * Output message to stdout (non-blocking) only if the "--verbose" flag is present and the "--json" flag is not
+	 * Output message to stdout (non-blocking) only if the "--verbose" flag is present and the "--json" flag is not.
 	 */
 	displayVerboseInfo(msg: string): void;
 
 	/**
-	 * Display an error or message as a warning
+	 * Display confirmation prompt. Times out and throws after 10s.
+	 */
+	displayConfirmationPrompt(msg: string): Promise<boolean>;
+
+	/**
+	 * Output styled header to stdout only if the "--json" flag is not present.
+	 */
+	displayStyledHeader(headerText: string): void;
+
+	/**
+	 * Output table to stdout only if the "--json" flag is not present.
+	 */
+	displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void;
+
+	/**
+	 * Display an error or message as a warning.
 	 */
 	displayWarning(msg: Error | string): void;
 
 	/**
-	 * Display an error or message as a warning only if the "--verbose" flag is present
+	 * Display an error or message as a warning only if the "--verbose" flag is present.
 	 */
 	displayVerboseWarning(msg: Error | string): void;
 
 	/**
-	 * 	Display error and exit. Optionally add a code to error object or exit status.
-	 */
-	displayErrorAndExit(msg: Error | string, options?: {code?: string; exit?: number; } & PrettyPrintableError): never
-
-	/**
-	 * Adds a spinner to the display
+	 * Adds a spinner to the display.
 	 */
 	spinnerStart(msg: string, status?: string): void
 
 	/**
-	 * Updates the status of the spinner in the display
+	 * Updates the status of the spinner in the display.
 	 */
 	spinnerUpdate(status: string): void
 
 	/**
-	 * Appends a heartbeat signal (like a " .") to the existing status of the spinner in the display
+	 * Appends a heartbeat signal (like a " .") to the existing status of the spinner in the display.
 	 */
 	spinnerWait(): void
 
 	/**
-	 * Stops the spinner in the display
+	 * Stops the spinner in the display.
 	 */
 	spinnerStop(msg: string)
-}
-
-export interface Displayable {
-	// Display error and exit. Optionally add a code to error object or exit status
-	error(input: Error | string,
-		  options?: {code?: string; exit?: number; } & PrettyPrintableError): never;
-
-	// Output message to stdout (non-blocking) only when "--json" flag is not present
-	log(message?: string, ...args: any[]): void;
-
-	// Display an error or message as a warning
-	warn(input: Error | string): Error | string;
 }
 
 export class UxDisplay implements Display {
@@ -81,6 +79,18 @@ export class UxDisplay implements Display {
 		}
 	}
 
+	public async displayConfirmationPrompt(msg: string): Promise<boolean> {
+		return await this.displayable.confirm(msg);
+	}
+
+	public displayStyledHeader(headerText: string): void {
+		this.displayable.styledHeader(headerText);
+	}
+
+	public displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void {
+		this.displayable.table(data, columns);
+	}
+
 	public displayWarning(msg: Error | string): void {
 		this.displayable.warn(msg);
 	}
@@ -89,11 +99,6 @@ export class UxDisplay implements Display {
 		if (this.isVerboseSet) {
 			this.displayWarning(msg);
 		}
-	}
-
-	public displayErrorAndExit(msg: Error | string,
-								  options?: {code?: string; exit?: number; } & PrettyPrintableError): never {
-		this.displayable.error(msg, options);
 	}
 
 	public spinnerStart(msg: string, status?: string): void {
@@ -111,4 +116,23 @@ export class UxDisplay implements Display {
 	public spinnerStop(msg: string) {
 		this.spinner.stop(msg);
 	}
+}
+
+
+export interface Displayable {
+	// Output message to stdout (non-blocking) only when "--json" flag is not present.      [Implemented by Command]
+	log(message?: string, ...args: any[]): void;
+
+	// Display an error or message as a warning.                                            [Implemented by Command]
+	warn(input: Error | string): Error | string;
+
+
+	// Simplified prompt for single-question confirmation. Times out and throws after 10s.  [Implemented by SfCommand]
+	confirm(message: string, ms?: number, defaultAnswer?: boolean): Promise<boolean>;
+
+	// Output stylized header to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
+	styledHeader(headerText: string): void;
+
+	// Output table to stdout only when "--json" flag is not present.                       [Implemented by SfCommand]
+	table<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>, options?: Ux.Table.Options): void;
 }

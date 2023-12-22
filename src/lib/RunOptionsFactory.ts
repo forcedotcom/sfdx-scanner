@@ -1,8 +1,8 @@
 import {Inputs} from "../types";
 import {OUTPUT_FORMAT, RunOptions} from "./RuleManager";
 import {SfError} from "@salesforce/core";
-import {INTERNAL_ERROR_CODE} from "./ScannerRunCommand";
 import {Bundle, getMessage} from "../MessageCatalog";
+import {INTERNAL_ERROR_CODE} from "../Constants";
 
 export interface RunOptionsFactory {
 	createRunOptions(inputs: Inputs): RunOptions;

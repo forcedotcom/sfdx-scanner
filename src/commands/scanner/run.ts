@@ -1,23 +1,28 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {PathlessEngineFilters} from '../../Constants';
 import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
-import {Config} from "@oclif/core";
 import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../lib/RunOptionsFactory";
 import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
 import {PathResolver, PathResolverImpl} from "../../lib/PathResolver";
 import {Bundle, getMessage} from "../../MessageCatalog";
-import {InputValidatorFactory, RunCommandInputValidatorFactory} from "../../lib/InputValidator";
+import {Logger} from "@salesforce/core";
+import {Action} from "../../lib/ScannerCommand";
+import {Display} from "../../lib/Display";
+import {RunAction} from "../../lib/actions/RunAction";
 
+/**
+ * Defines the "run" command for the "scanner" cli.
+ */
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
 	public static summary = getMessage(Bundle.Run, 'commandSummary');
 	public static description = getMessage(Bundle.Run, 'commandDescription');
-
 	public static examples = [
 		getMessage(Bundle.Run, 'examples')
 	];
 
-	// This defines the flags accepted by this command.
+	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
+	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags= {
 		// Include all common flags from the super class.
 		...ScannerRunCommand.flags,
@@ -82,23 +87,10 @@ export default class Run extends ScannerRunCommand {
 		// END: Flags related to results processing.
 	};
 
-	public constructor(argv: string[], config: Config,
-					   inputValidatorFactory?: InputValidatorFactory,
-	                   pathResolver?: PathResolver,
-					   runOptionsFactory?: RunOptionsFactory,
-					   engineOptionsFactory?: EngineOptionsFactory) {
-		if (typeof inputValidatorFactory === 'undefined') {
-			inputValidatorFactory = new RunCommandInputValidatorFactory()
-		}
-		if (typeof pathResolver === 'undefined') {
-			pathResolver = new PathResolverImpl();
-		}
-		if (typeof runOptionsFactory === 'undefined') {
-			runOptionsFactory = new RunOptionsFactoryImpl(false, config.version);
-		}
-		if (typeof engineOptionsFactory === 'undefined') {
-			engineOptionsFactory = new RunEngineOptionsFactory(pathResolver);
-		}
-		super(argv, config, inputValidatorFactory, pathResolver, runOptionsFactory, engineOptionsFactory);
+	protected createAction(_logger: Logger, display: Display): Action {
+		const pathResolver: PathResolver = new PathResolverImpl()
+		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(false, this.config.version);
+		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(pathResolver);
+		return new RunAction(display, pathResolver, runOptionsFactory, engineOptionsFactory);
 	}
 }
