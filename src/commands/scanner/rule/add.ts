@@ -1,7 +1,7 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Action, ScannerCommand} from '../../../lib/ScannerCommand';
 import {Bundle, getMessage} from "../../../MessageCatalog";
-import {PathResolverImpl} from "../../../lib/PathResolver";
+import {InputsResolverImpl} from "../../../lib/InputsResolver";
 import {Display} from "../../../lib/Display";
 import {RuleAddAction} from "../../../lib/actions/RuleAddAction";
 import {Logger} from "@salesforce/core";
@@ -37,6 +37,6 @@ export default class Add extends ScannerCommand {
 	};
 
 	protected createAction(logger: Logger, display: Display): Action {
-		return new RuleAddAction(logger, display, new PathResolverImpl());
+		return new RuleAddAction(logger, display, new InputsResolverImpl());
 	}
 }

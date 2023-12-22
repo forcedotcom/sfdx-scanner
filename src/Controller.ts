@@ -9,7 +9,6 @@ import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
 import {Bundle, getMessage} from "./MessageCatalog";
-
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
@@ -18,7 +17,13 @@ function enginesToString(engines: RuleEngine[]): string {
 	return engines.map(e => e.getName()).sort().join(', ');
 }
 
-// TODO: This is probably more appropriately called a Factory
+
+// TODO: Refactor to effectively remove this entire file.
+//       We should favor proper constructor dependency injection over grabbing singletons in our business logic.
+//       See https://stackoverflow.com/questions/137975/what-are-drawbacks-or-disadvantages-of-singleton-pattern
+
+
+// This is probably more appropriately called a ProviderFactory (Salesforce Core folks know this code smell all too well)
 export const Controller = {
 	container,
 

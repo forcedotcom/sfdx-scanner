@@ -18,7 +18,7 @@ import {Logger} from "@salesforce/core";
  *
  * The responsibilities of each subclass is to:
  *   * Define the summary, description, examples, and flags for its command
- *   * Construct the Action associated with its command with all of its Runtime dependencies
+ *   * Construct the Action associated with its command with all of its runtime dependencies
  *
  * Implementations of ScannerCommand should ideally have zero business logic in them since they should simply serve as
  * runtime dependency injection points to their corresponding Action classes.
@@ -34,7 +34,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 	public async run(): Promise<AnyJson> {
 		const inputs: Inputs = (await this.parse(this.ctor)).flags;
 		const logger: Logger = await Logger.child(this.ctor.name);
-		const display: Display = new UxDisplay(this, this.spinner, inputs.verbose);
+		const display: Display = new UxDisplay(this, this.spinner, inputs.verbose as boolean);
 
 		display.displayWarning(getMessage(Bundle.Common, 'surveyRequestMessage'));
 		this.buildEventListeners(display);
@@ -44,8 +44,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		return await action.run(inputs);
 	}
 
-	// TODO: We should consider refactoring away from events and instead inject the "Display" as a dependency
-	// into all of the classes that emit events
+	// TODO: Refactor away from events and instead inject the "Display" as a dependency into all of the classes that emit events
 	private buildEventListeners(display: Display): void {
 		uxEvents.on(EVENTS.INFO_ALWAYS, (msg: string) => display.displayInfo(msg));
 		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => display.displayVerboseInfo(msg));
@@ -53,7 +52,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => display.displayVerboseWarning(msg));
 		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => display.spinnerStart(msg, status));
 		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => display.spinnerUpdate(msg));
-		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (msg: string) => display.spinnerWait());
+		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (_msg: string) => display.spinnerWait()); // eslint-disable-line @typescript-eslint/no-unused-vars
 		uxEvents.on(EVENTS.STOP_SPINNER, (msg: string) => display.spinnerStop(msg));
 	}
 }

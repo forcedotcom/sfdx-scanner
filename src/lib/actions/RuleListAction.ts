@@ -8,6 +8,37 @@ import {Controller} from "../../Controller";
 import {Display} from "../Display";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 
+/**
+ * The Action behind the "rule list" command
+ */
+export class RuleListAction implements Action {
+	private readonly display: Display;
+	private readonly ruleFilterFactory: RuleFilterFactory;
+
+	public constructor(display: Display, ruleFilterFactory: RuleFilterFactory) {
+		this.display = display;
+		this.ruleFilterFactory = ruleFilterFactory;
+	}
+
+	public validateInputs(_inputs: Inputs): Promise<void> { // eslint-disable-line @typescript-eslint/no-unused-vars
+		// Currently there is nothing to validate
+		return Promise.resolve();
+	}
+
+	public async run(inputs: Inputs): Promise<AnyJson> {
+		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
+
+		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
+		const ruleManager = await Controller.createRuleManager();
+
+		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
+		this.display.displayTable(rules, columns);
+		// If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
+		// just return the filtered list instead of the formatted list.
+		return rules;
+	}
+}
+
 const MSG_YES: string = getMessage(Bundle.List, 'yes');
 const MSG_NO: string = getMessage(Bundle.List, 'no');
 const columns: Ux.Table.Columns<Rule> = {
@@ -40,30 +71,3 @@ const columns: Ux.Table.Columns<Rule> = {
 		get: (rule: Rule): string => rule.isPilot ? MSG_YES : MSG_NO
 	}
 };
-
-export class RuleListAction implements Action {
-	private readonly display: Display;
-	private readonly ruleFilterFactory: RuleFilterFactory;
-
-	public constructor(display: Display, ruleFilterFactory: RuleFilterFactory) {
-		this.display = display;
-		this.ruleFilterFactory = ruleFilterFactory;
-	}
-
-	public async validateInputs(inputs: Inputs): Promise<void> {
-		// Currently there is nothing to validate
-	}
-
-	public async run(inputs: Inputs): Promise<AnyJson> {
-		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
-
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
-		// allow to boil over.
-		const ruleManager = await Controller.createRuleManager();
-		const rules = await ruleManager.getRulesMatchingCriteria(ruleFilters);
-		this.display.displayTable(rules, columns);
-		// If the --json flag was used, we need to return a JSON. Since we don't have to worry about displayability, we can
-		// just return the filtered list instead of the formatted list.
-		return rules;
-	}
-}

@@ -3,7 +3,7 @@ import {PathlessEngineFilters} from '../../Constants';
 import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
 import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../lib/RunOptionsFactory";
 import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
-import {PathResolver, PathResolverImpl} from "../../lib/PathResolver";
+import {InputsResolver, InputsResolverImpl} from "../../lib/InputsResolver";
 import {Bundle, getMessage} from "../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Action} from "../../lib/ScannerCommand";
@@ -88,9 +88,9 @@ export default class Run extends ScannerRunCommand {
 	};
 
 	protected createAction(_logger: Logger, display: Display): Action {
-		const pathResolver: PathResolver = new PathResolverImpl()
+		const inputsResolver: InputsResolver = new InputsResolverImpl()
 		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(false, this.config.version);
-		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(pathResolver);
-		return new RunAction(display, pathResolver, runOptionsFactory, engineOptionsFactory);
+		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputsResolver);
+		return new RunAction(display, inputsResolver, runOptionsFactory, engineOptionsFactory);
 	}
 }

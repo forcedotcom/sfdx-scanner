@@ -1,16 +1,19 @@
 import {AbstractRunAction} from "./AbstractRunAction";
 import {Display} from "../Display";
-import {PathResolver} from "../PathResolver";
+import {InputsResolver} from "../InputsResolver";
 import {RunOptionsFactory} from "../RunOptionsFactory";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {Inputs} from "../../types";
 import {SfError} from "@salesforce/core";
 import {Bundle, getMessage} from "../../MessageCatalog";
 
+/**
+ * The Action behind the "run" command
+ */
 export class RunAction extends AbstractRunAction {
-	public constructor(display: Display, pathResolver: PathResolver, runOptionsFactory: RunOptionsFactory,
-					   engineOptionsFactory: EngineOptionsFactory) {
-		super(display, pathResolver, runOptionsFactory, engineOptionsFactory);
+	public constructor(display: Display, inputsResolver: InputsResolver, runOptionsFactory: RunOptionsFactory,
+						engineOptionsFactory: EngineOptionsFactory) {
+		super(display, inputsResolver, runOptionsFactory, engineOptionsFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {

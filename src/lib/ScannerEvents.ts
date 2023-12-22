@@ -1,5 +1,7 @@
 import {EventEmitter} from 'events';
 
+// TODO: Refactor away from events and instead inject the "Display" as a dependency into all of the classes that emit events
+
 export const uxEvents = new EventEmitter();
 
 export enum EVENTS {

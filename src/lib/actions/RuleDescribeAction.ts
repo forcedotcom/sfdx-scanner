@@ -16,6 +16,9 @@ type DescribeStyledRule = Rule & {
 	enabled: boolean;
 };
 
+/**
+ * The Action behind the "rule describe" command
+ */
 export class RuleDescribeAction implements Action {
 	private readonly display: Display;
 	private readonly ruleFilterFactory: RuleFilterFactory;
@@ -25,18 +28,19 @@ export class RuleDescribeAction implements Action {
 		this.ruleFilterFactory = ruleFilterFactory;
 	}
 
-	public async validateInputs(inputs: Inputs): Promise<void> {
+	public async validateInputs(_inputs: Inputs): Promise<void> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		// Currently there is nothing to validate
+		return Promise.resolve();
 	}
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
-		const jsonEnabled: boolean = inputs.json;
+		const jsonEnabled: boolean = inputs.json as boolean;
 
 		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 
-		// It's possible for this line to throw an error, but that's fine because the error will be an SfError that we can
-		// allow to boil over.
+		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager = await Controller.createRuleManager();
+
 		const rules: DescribeStyledRule[] = await this.styleRules(ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters));
 		if (rules.length === 0) {
 			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
@@ -60,7 +64,10 @@ export class RuleDescribeAction implements Action {
 
 	private async styleRules(rules: Rule[]): Promise<DescribeStyledRule[]> {
 		// Opting to use .getAllEngines() instead of .getEnabledEngines() so we don't have to futz with the engineOptions param.
+
+		// TODO: Inject this as a dependency (maybe a factory) to improve testability by removing coupling to runtime implementation
 		const allEngines = await Controller.getAllEngines();
+
 		const enabledEngineNames: Set<string> = new Set();
 		for (const engine of allEngines) {
 			if (await engine.isEnabled()) {

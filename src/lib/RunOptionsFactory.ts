@@ -4,6 +4,9 @@ import {SfError} from "@salesforce/core";
 import {Bundle, getMessage} from "../MessageCatalog";
 import {INTERNAL_ERROR_CODE} from "../Constants";
 
+/**
+ * Service for processing inputs to create RunOptions
+ */
 export interface RunOptionsFactory {
 	createRunOptions(inputs: Inputs): RunOptions;
 }
@@ -19,7 +22,7 @@ export class RunOptionsFactoryImpl implements RunOptionsFactory {
 
 	public createRunOptions(inputs: Inputs): RunOptions {
 		const runOptions: RunOptions = {
-			format: determineOutputFormat(inputs.format, inputs.outfile, inputs.json),
+			format: determineOutputFormat(inputs.format as string, inputs.outfile as string, inputs.json as boolean),
 			normalizeSeverity: (inputs['normalize-severity'] || inputs['severity-threshold']) as boolean,
 			runDfa: this.isRunDfa,
 			withPilot: inputs['with-pilot'] as boolean,

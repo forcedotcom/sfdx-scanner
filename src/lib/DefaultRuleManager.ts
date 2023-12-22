@@ -4,7 +4,7 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {RuleManager, RunOptions} from './RuleManager';
+import {EngineOptions, RuleManager, RunOptions} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -67,7 +67,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];

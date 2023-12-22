@@ -24,6 +24,8 @@ import {MessageCatalog} from "./MessageCatalog";
  */
 export function registerAll(): void {
 	if (!container.isRegistered(Services.Config)) {
+
+		// TODO: We should revisit each of these and ask ourselves which ones we actually need as registered singletons.
 		container.registerSingleton(Services.Config, Config);
 		container.registerSingleton(Services.RuleManager, DefaultRuleManager);
 		container.registerSingleton(Services.RuleEngine, PmdEngine);
@@ -38,6 +40,7 @@ export function registerAll(): void {
 		container.registerSingleton(Services.RuleEngine, SfgePathlessEngine);
 		container.registerSingleton(Services.RuleCatalog, LocalCatalog);
 		container.registerSingleton(Services.RulePathManager, CustomRulePathManager);
+
 		container.registerSingleton(Services.MessageCatalog, MessageCatalog);
 	}
 }

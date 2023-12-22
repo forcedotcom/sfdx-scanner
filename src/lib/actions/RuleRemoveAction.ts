@@ -7,32 +7,37 @@ import {Bundle, getMessage} from "../../MessageCatalog";
 import {Controller} from "../../Controller";
 import {RuleFilter, SourcePackageFilter} from "../RuleFilter";
 import {Display} from "../Display";
-import {PathResolver} from "../PathResolver";
+import {InputsResolver} from "../InputsResolver";
 
+/**
+ * The Action behind the "rule remove" command
+ */
 export class RuleRemoveAction implements Action {
 	private readonly logger: Logger;
 	private readonly display: Display;
-	private readonly pathResolver: PathResolver;
+	private readonly inputsResolver: InputsResolver;
 
-	public constructor(logger: Logger, display: Display, pathResolver: PathResolver) {
+	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver) {
 		this.logger = logger;
 		this.display = display;
-		this.pathResolver = pathResolver;
+		this.inputsResolver = inputsResolver;
 	}
 
-	public async validateInputs(inputs: Inputs): Promise<void> {
+	public validateInputs(inputs: Inputs): Promise<void> {
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
 			throw new SfError(getMessage(Bundle.Remove, 'validations.pathCannotBeEmpty'));
 		}
+		return Promise.resolve();
 	}
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
 		// Step 2: Pull out and process our flag.
-		const paths = inputs.path ? this.pathResolver.resolvePaths(inputs) : null;
+		const paths = inputs.path ? this.inputsResolver.resolvePaths(inputs) : null;
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
 
 		// Step 3: Get all rule entries matching the criteria they provided.
+		// TODO: Inject RulePathManager as a dependency to improve testability by removing coupling to runtime implementation
 		const crpm = await Controller.createRulePathManager();
 		const deletablePaths: string[] = paths ? await crpm.getMatchingPaths(paths) : crpm.getAllPaths();
 
@@ -65,6 +70,7 @@ export class RuleRemoveAction implements Action {
 			filters.push(new SourcePackageFilter(deletablePaths));
 
 			// Step 6b: We'll want to retrieve the matching rules.
+			// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 			const rm = await Controller.createRuleManager();
 			const matchingRules: Rule[] = await rm.getRulesMatchingCriteria(filters);
 

@@ -4,7 +4,7 @@ import {Bundle, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Display} from "../../../lib/Display";
 import {RuleRemoveAction} from "../../../lib/actions/RuleRemoveAction";
-import {PathResolverImpl} from "../../../lib/PathResolver";
+import {InputsResolverImpl} from "../../../lib/InputsResolver";
 
 /**
  * Defines the "rule remove" command for the "scanner" cli.
@@ -39,6 +39,6 @@ export default class Remove extends ScannerCommand {
 	};
 
 	protected createAction(logger: Logger, display: Display): Action {
-		return new RuleRemoveAction(logger, display, new PathResolverImpl());
+		return new RuleRemoveAction(logger, display, new InputsResolverImpl());
 	}
 }

@@ -3,7 +3,10 @@ import normalize = require('normalize-path');
 import path = require('path');
 import untildify = require("untildify");
 
-export interface PathResolver {
+/**
+ * Service for processing inputs (like "--path", "--target", "--projectdir", etc) to get resolved/normalized outputs
+ */
+export interface InputsResolver {
 	resolvePaths(inputs: Inputs): string[];
 
 	resolveTargetPaths(inputs: Inputs): string[];
@@ -11,7 +14,7 @@ export interface PathResolver {
 	resolveProjectDirPaths(inputs: Inputs): string[];
 }
 
-export class PathResolverImpl implements PathResolver{
+export class InputsResolverImpl implements InputsResolver {
 	public resolvePaths(inputs: Inputs): string[] {
 		// path.resolve() turns relative paths into absolute paths. It accepts multiple strings, but this is a trap because
 		// they'll be concatenated together. So we use .map() to call it on each path separately.

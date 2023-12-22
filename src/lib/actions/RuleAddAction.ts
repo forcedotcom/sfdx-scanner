@@ -5,21 +5,24 @@ import {AnyJson} from "@salesforce/ts-types";
 import {Logger, SfError} from "@salesforce/core";
 import {Bundle, getMessage} from "../../MessageCatalog";
 import {stringArrayTypeGuard} from "../util/Utils";
-import {PathResolver} from "../PathResolver";
+import {InputsResolver} from "../InputsResolver";
 import {Controller} from "../../Controller";
 
+/**
+ * The Action behind the "rule add" command
+ */
 export class RuleAddAction implements Action {
 	private readonly logger: Logger;
 	private readonly display: Display;
-	private readonly pathResolver: PathResolver;
+	private readonly inputsResolver: InputsResolver;
 
-	public constructor(logger: Logger, display: Display, pathResolver: PathResolver) {
+	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver) {
 		this.logger = logger;
 		this.display = display;
-		this.pathResolver = pathResolver;
+		this.inputsResolver = inputsResolver;
 	}
 
-	public async validateInputs(inputs: Inputs): Promise<void> {
+	public validateInputs(inputs: Inputs): Promise<void> {
 		if ((inputs.language as string).length === 0) {
 			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
 		}
@@ -28,16 +31,18 @@ export class RuleAddAction implements Action {
 		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
 			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
 		}
+
+		return Promise.resolve();
 	}
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
 		const language = inputs.language as string;
-		const paths = this.pathResolver.resolvePaths(inputs);
+		const paths = this.inputsResolver.resolvePaths(inputs);
 
 		this.logger.trace(`Language: ${language}`);
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
 
-		// Add to Custom Classpath registry
+		// TODO: Inject RulePathManager as a dependency to improve testability by removing coupling to runtime implementation
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
 

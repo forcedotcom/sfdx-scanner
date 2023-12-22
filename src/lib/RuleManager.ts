@@ -19,6 +19,8 @@ export type RunOptions  = {
 	sfVersion: string;
 }
 
+export type EngineOptions = Map<string, string>;
+
 export interface RuleManager {
 	init(): Promise<void>;
 
@@ -37,5 +39,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults>;
 }

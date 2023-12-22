@@ -5,7 +5,7 @@ export interface Display {
 	/**
 	 * Output message to stdout (non-blocking) only if the "--json" flag is not present.
 	 */
-	displayInfo(msg: string, ...args: any[]): void;
+	displayInfo(msg: string): void;
 
 	/**
 	 * Output message to stdout (non-blocking) only if the "--verbose" flag is present and the "--json" flag is not.
@@ -28,14 +28,14 @@ export interface Display {
 	displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void;
 
 	/**
-	 * Display an error or message as a warning.
+	 * Display a message as a warning.
 	 */
-	displayWarning(msg: Error | string): void;
+	displayWarning(msg: string): void;
 
 	/**
-	 * Display an error or message as a warning only if the "--verbose" flag is present.
+	 * Display a message as a warning only if the "--verbose" flag is present.
 	 */
-	displayVerboseWarning(msg: Error | string): void;
+	displayVerboseWarning(msg: string): void;
 
 	/**
 	 * Adds a spinner to the display.
@@ -55,7 +55,7 @@ export interface Display {
 	/**
 	 * Stops the spinner in the display.
 	 */
-	spinnerStop(msg: string)
+	spinnerStop(msg: string): void
 }
 
 export class UxDisplay implements Display {
@@ -69,8 +69,8 @@ export class UxDisplay implements Display {
 		this.isVerboseSet = isVerboseSet;
 	}
 
-	public displayInfo(msg: string, ...args: any[]): void {
-		this.displayable.log(msg, ...args);
+	public displayInfo(msg: string): void {
+		this.displayable.log(msg);
 	}
 
 	public displayVerboseInfo(msg: string): void {
@@ -91,11 +91,11 @@ export class UxDisplay implements Display {
 		this.displayable.table(data, columns);
 	}
 
-	public displayWarning(msg: Error | string): void {
+	public displayWarning(msg: string): void {
 		this.displayable.warn(msg);
 	}
 
-	public displayVerboseWarning(msg: Error | string): void {
+	public displayVerboseWarning(msg: string): void {
 		if (this.isVerboseSet) {
 			this.displayWarning(msg);
 		}
@@ -113,7 +113,7 @@ export class UxDisplay implements Display {
 		this.spinner.status += ' .';
 	}
 
-	public spinnerStop(msg: string) {
+	public spinnerStop(msg: string): void {
 		this.spinner.stop(msg);
 	}
 }
@@ -121,14 +121,14 @@ export class UxDisplay implements Display {
 
 export interface Displayable {
 	// Output message to stdout (non-blocking) only when "--json" flag is not present.      [Implemented by Command]
-	log(message?: string, ...args: any[]): void;
+	log(message?: string): void;
 
 	// Display an error or message as a warning.                                            [Implemented by Command]
-	warn(input: Error | string): Error | string;
+	warn(input: string): void;
 
 
 	// Simplified prompt for single-question confirmation. Times out and throws after 10s.  [Implemented by SfCommand]
-	confirm(message: string, ms?: number, defaultAnswer?: boolean): Promise<boolean>;
+	confirm(message: string): Promise<boolean>;
 
 	// Output stylized header to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
 	styledHeader(headerText: string): void;

@@ -1,7 +1,7 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
 import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
-import {PathResolver, PathResolverImpl} from "../../../lib/PathResolver";
+import {InputsResolver, InputsResolverImpl} from "../../../lib/InputsResolver";
 import {EngineOptionsFactory, RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
 import {Bundle, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
@@ -76,9 +76,9 @@ export default class Dfa extends ScannerRunCommand {
 	};
 
 	protected createAction(_logger: Logger, display: Display): Action {
-		const pathResolver: PathResolver = new PathResolverImpl()
+		const inputsResolver: InputsResolver = new InputsResolverImpl()
 		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(true, this.config.version);
-		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(pathResolver);
-		return new RunDfaAction(display, pathResolver, runOptionsFactory, engineOptionsFactory);
+		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputsResolver);
+		return new RunDfaAction(display, inputsResolver, runOptionsFactory, engineOptionsFactory);
 	}
 }

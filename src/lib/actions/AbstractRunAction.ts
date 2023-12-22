@@ -4,7 +4,7 @@ import {AnyJson} from "@salesforce/ts-types";
 import {FileHandler} from "../util/FileHandler";
 import {SfError} from "@salesforce/core";
 import {Bundle, getMessage} from "../../MessageCatalog";
-import {OUTPUT_FORMAT, RuleManager, RunOptions} from "../RuleManager";
+import {EngineOptions, OUTPUT_FORMAT, RuleManager, RunOptions} from "../RuleManager";
 import {inferFormatFromOutfile, RunOptionsFactory} from "../RunOptionsFactory";
 import * as globby from "globby";
 import {Display} from "../Display";
@@ -13,20 +13,23 @@ import {RuleFilterFactoryImpl} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
 import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
 import {Ux} from "@salesforce/sf-plugins-core";
-import {PathResolver} from "../PathResolver";
+import {InputsResolver} from "../InputsResolver";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 
+/**
+ * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
+ */
 export abstract class AbstractRunAction implements Action {
 	protected readonly display: Display;
-	private readonly pathResolver: PathResolver;
+	private readonly inputsResolver: InputsResolver;
 	private readonly runOptionsFactory: RunOptionsFactory;
 	private readonly engineOptionsFactory: EngineOptionsFactory;
 
-	protected constructor(display: Display, pathResolver: PathResolver, runOptionsFactory: RunOptionsFactory,
-						  engineOptionsFactory: EngineOptionsFactory) {
+	protected constructor(display: Display, inputsResolver: InputsResolver, runOptionsFactory: RunOptionsFactory,
+							engineOptionsFactory: EngineOptionsFactory) {
 		this.display = display;
-		this.pathResolver = pathResolver;
+		this.inputsResolver = inputsResolver;
 		this.runOptionsFactory = runOptionsFactory;
 		this.engineOptionsFactory = engineOptionsFactory;
 	}
@@ -48,7 +51,7 @@ export abstract class AbstractRunAction implements Action {
 		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.
 		if (inputs.format && inputs.outfile) {
-			const inferredOutfileFormat: OUTPUT_FORMAT = inferFormatFromOutfile(inputs.outfile);
+			const inferredOutfileFormat: OUTPUT_FORMAT = inferFormatFromOutfile(inputs.outfile as string);
 			// For the purposes of this validation, we treat junit as xml.
 			const chosenFormat: string = inputs.format === 'junit' ? 'xml' : inputs.format as string;
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
@@ -66,11 +69,13 @@ export abstract class AbstractRunAction implements Action {
 
 	async run(inputs: Inputs): Promise<AnyJson> {
 		const filters: RuleFilter[] = new RuleFilterFactoryImpl().createRuleFilters(inputs);
-		const targetPaths: string[] = this.pathResolver.resolveTargetPaths(inputs);
+		const targetPaths: string[] = this.inputsResolver.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.runOptionsFactory.createRunOptions(inputs);
-		const engineOptions: Map<string, string> = this.engineOptionsFactory.createEngineOptions(inputs);
+		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);
 
+		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
+
 		let output: RecombinedRuleResults = null;
 		try {
 			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
@@ -85,7 +90,7 @@ export abstract class AbstractRunAction implements Action {
 			severityForError: inputs['severity-threshold'] as number,
 			outfile: inputs.outfile as string
 		};
-		return new RunOutputProcessor(outputOptions, new Ux({jsonEnabled: inputs.json}))
+		return new RunOutputProcessor(outputOptions, new Ux({jsonEnabled: inputs.json as boolean}))
 			.processRunOutput(output);
 	}
 }
