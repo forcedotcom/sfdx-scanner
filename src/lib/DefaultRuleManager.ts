@@ -2,10 +2,18 @@ import {Logger, SfError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
+import {
+	EngineExecutionDescriptor,
+	FormattedOutput,
+	RecombinedRuleResults,
+	Rule,
+	RuleGroup,
+	RuleResult,
+	RuleTarget,
+	TelemetryData
+} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
 import {EngineOptions, RuleManager, RunOptions} from './RuleManager';
-import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
@@ -17,6 +25,7 @@ import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
 import {BundleName, getMessage} from "../MessageCatalog";
+import {Results} from "./output/Results";
 
 type RunDescriptor = {
 	engine: RuleEngine;
@@ -156,7 +165,10 @@ export class DefaultRuleManager implements RuleManager {
 			this.logger.trace(`Received rule violations: ${JSON.stringify(ruleResults)}`);
 
 			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(ruleResults, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+
+			const results: Results = new Results(ruleResults, executedEngines);
+			const formattedOutput: FormattedOutput = await results.toFormattedOutput(runOptions.format, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+			return {minSev: results.getMinSev(), results: formattedOutput, summaryMap: results.getSummaryMap()};
 
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
