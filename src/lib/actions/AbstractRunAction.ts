@@ -12,7 +12,6 @@ import {RuleFilter} from "../RuleFilter";
 import {RuleFilterFactoryImpl} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
 import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
-import {Ux} from "@salesforce/sf-plugins-core";
 import {InputsResolver} from "../InputsResolver";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
@@ -90,7 +89,6 @@ export abstract class AbstractRunAction implements Action {
 			severityForError: inputs['severity-threshold'] as number,
 			outfile: inputs.outfile as string
 		};
-		return new RunOutputProcessor(outputOptions, new Ux({jsonEnabled: inputs.json as boolean}))
-			.processRunOutput(output);
+		return new RunOutputProcessor(this.display, outputOptions).processRunOutput(output);
 	}
 }

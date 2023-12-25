@@ -4,11 +4,11 @@ import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOut
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
 import {PATHLESS_COLUMNS} from '../../../src/lib/formatter/RuleResultRecombinator';
-import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
 import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {FakeDisplay} from "../FakeDisplay";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -80,18 +80,12 @@ const FAKE_JSON_OUTPUT = `[{
 
 describe('RunOutputProcessor', () => {
 	let fakeFiles: {path; data}[] = [];
-	let testUx: Ux = null;
-	let logSpy = null;
-	let tableSpy = null;
+	let display: FakeDisplay;
 
 	beforeEach(() => {
-		testUx = new Ux({jsonEnabled: false});
+		display = new FakeDisplay();
 
 		Sinon.createSandbox();
-
-		// Create spies for the various UX methods so we can see what's being passed to them.
-		logSpy = Sinon.spy(testUx, 'log');
-		tableSpy = Sinon.spy(testUx, 'table');
 
 		// Stub out fs.writeFileSync() so we can check what it's trying to do without letting it actually write anything.
 		fakeFiles = [];
@@ -110,7 +104,7 @@ describe('RunOutputProcessor', () => {
 				const opts: RunOutputOptions = {
 					format: OUTPUT_FORMAT.TABLE
 				};
-				const rop = new RunOutputProcessor(opts, testUx);
+				const rop = new RunOutputProcessor(display, opts);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -121,9 +115,7 @@ describe('RunOutputProcessor', () => {
 
 				// We expect that the message logged to the console and the message returned should both be the default
 				const expectedMsg = getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
-				Sinon.assert.callCount(logSpy, 1);
-				Sinon.assert.callCount(tableSpy, 0);
-				Sinon.assert.calledWith(logSpy, expectedMsg);
+				expect(display.getOutputText()).to.equal("[Info]: " + expectedMsg, 'Should have displayed expected message');
 				expect(output).to.equal(expectedMsg, 'Should have returned expected message');
 			});
 
@@ -134,7 +126,7 @@ describe('RunOutputProcessor', () => {
 					const opts: RunOutputOptions = {
 						format: OUTPUT_FORMAT.TABLE
 					};
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeTableResults);
@@ -143,10 +135,11 @@ describe('RunOutputProcessor', () => {
 ${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 
-					Sinon.assert.callCount(tableSpy, 1);
-					Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
-					Sinon.assert.callCount(logSpy, 1);
-					Sinon.assert.calledWith(logSpy, expectedTableSummary);
+					expect(display.getOutputArray()).length(2);
+					expect(display.getOutputArray()[0]).to.satisfy(msg => msg.startsWith("[Table]"));
+					expect(display.getLastTableColumns()).to.equal(FAKE_TABLE_OUTPUT.columns);
+					expect(display.getLastTableData()).to.equal(FAKE_TABLE_OUTPUT.rows);
+					expect(display.getOutputArray()[1]).to.equal("[Info]: " + expectedTableSummary);
 					expect(output).to.deep.equal(FAKE_TABLE_OUTPUT.rows, 'Should have returned the rows');
 				});
 
@@ -155,16 +148,16 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OUTPUT_FORMAT.TABLE,
 						severityForError: 1
 					};
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						const output: AnyJson = rop.processRunOutput(fakeTableResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 1);
-						Sinon.assert.calledWith(tableSpy, FAKE_TABLE_OUTPUT.rows, FAKE_TABLE_OUTPUT.columns);
-						Sinon.assert.callCount(logSpy, 0);
+						expect(display.getOutputText()).to.satisfy(msg => msg.startsWith("[Table]"));
+						expect(display.getLastTableColumns()).to.equal(FAKE_TABLE_OUTPUT.columns);
+						expect(display.getLastTableData()).to.equal(FAKE_TABLE_OUTPUT.rows);
 						const expectedTableSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
@@ -185,14 +178,11 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OUTPUT_FORMAT.CSV
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
-
-					Sinon.assert.callCount(tableSpy, 0);
-					Sinon.assert.callCount(logSpy, 1);
-					Sinon.assert.calledWith(logSpy, FAKE_CSV_OUTPUT);
+					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
 					expect(output).to.equal(FAKE_CSV_OUTPUT, 'CSV should be returned as a string');
 				});
 
@@ -202,16 +192,14 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 2
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 1);
-						Sinon.assert.calledWith(logSpy, FAKE_CSV_OUTPUT);
+						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
 						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
 					}
 				});
@@ -229,14 +217,12 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OUTPUT_FORMAT.JSON
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED
 					const output: AnyJson = rop.processRunOutput(fakeJsonResults);
 
-					Sinon.assert.callCount(tableSpy, 0);
-					Sinon.assert.callCount(logSpy, 1);
-					Sinon.assert.calledWith(logSpy, FAKE_JSON_OUTPUT);
+					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
 					expect(output).to.deep.equal(JSON.parse(FAKE_JSON_OUTPUT), 'JSON should be returned as a parsed object');
 				});
 
@@ -246,16 +232,14 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 1
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED
 					try {
 						const output: AnyJson = rop.processRunOutput(fakeJsonResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 1);
-						Sinon.assert.calledWith(logSpy, FAKE_JSON_OUTPUT);
+						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
 						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
 					}
 				});
@@ -269,7 +253,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 					format: OUTPUT_FORMAT.CSV,
 					outfile: fakeFilePath
 				};
-				const rop = new RunOutputProcessor(opts, testUx);
+				const rop = new RunOutputProcessor(display, opts);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -283,9 +267,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 ${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint', 0, 0])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 
-				Sinon.assert.callCount(logSpy, 1);
-				Sinon.assert.callCount(tableSpy, 0);
-				Sinon.assert.calledWith(logSpy, expectedMsg);
+				expect(display.getOutputText()).to.equal("[Info]: " + expectedMsg);
 				expect(fakeFiles.length).to.equal(1, 'A CSV file with only a header should be created');
 				expect(output).to.equal(expectedMsg, 'Should have returned expected message');
 			});
@@ -299,7 +281,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
@@ -307,9 +289,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath
 					const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
 ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
-					Sinon.assert.callCount(tableSpy, 0);
-					Sinon.assert.callCount(logSpy, 1);
-					Sinon.assert.calledWith(logSpy, expectedCsvSummary);
+					expect(display.getOutputText()).to.equal("[Info]: " + expectedCsvSummary);
 					expect(output).to.equal(expectedCsvSummary, 'Summary should be returned as final message');
 					expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 					expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
@@ -322,15 +302,14 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(opts, testUx);
+					const rop = new RunOutputProcessor(display, opts);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
-						Sinon.assert.callCount(tableSpy, 0);
-						Sinon.assert.callCount(logSpy, 0);
+						expect(display.getOutputText()).to.equal("");
 						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
 						const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
