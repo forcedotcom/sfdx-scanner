@@ -1,10 +1,10 @@
-import {OutputFormatter, Results} from "./Results";
+import {OutputFormatter, RunResults} from "./Results";
 import {FormattedOutput, RuleResult, RuleViolation} from "../../types";
 import {isPathlessViolation} from "../util/Utils";
 import {safeHtmlEscape} from "./XmlOutputFormatter";
 
 export class JunitOutputFormatter implements OutputFormatter {
-	public async format(results: Results): Promise<FormattedOutput> {
+	public async format(results: RunResults): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 
 		// Otherwise, we'll need to start constructing our JUnit XML. To do that, we'll need a map from file names to

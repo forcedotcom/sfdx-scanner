@@ -23,7 +23,7 @@ import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
 import {BundleName, getMessage} from "../MessageCatalog";
-import {Results} from "./output/Results";
+import {Results, RunResults} from "./output/Results";
 
 type RunDescriptor = {
 	engine: RuleEngine;
@@ -162,7 +162,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => ruleResults = ruleResults.concat(r));
 			this.logger.trace(`Received rule violations: ${JSON.stringify(ruleResults)}`);
 
-			return new Results(ruleResults, executedEngines);
+			return new RunResults(ruleResults, executedEngines);
 
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;

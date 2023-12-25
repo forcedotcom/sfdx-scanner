@@ -8,7 +8,7 @@ import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { PathlessEngineFilters, ENGINE, PMD_VERSION, SFGE_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
-import {Results} from "../../../src/lib/output/Results";
+import {Results, RunResults} from "../../../src/lib/output/Results";
 import { OutputFormat } from '../../../src/lib/output/OutputFormat';
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
@@ -393,7 +393,7 @@ describe('Results Formatting', () => {
 			// Create a subset of the fake results containing only one file and one violation.
 			const someFakeResults = [allFakePathlessRuleResults[0]];
 
-			const results: Results = new Results(someFakeResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(someFakeResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JUNIT, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -416,7 +416,7 @@ describe('Results Formatting', () => {
 			const someFakeResults = [allFakePathlessRuleResults[1]];
 
 			// Create our reformatted results.
-			const results: Results = new Results(someFakeResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(someFakeResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JUNIT, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -436,10 +436,10 @@ describe('Results Formatting', () => {
 
 		it('Properly handles multiple files with multiple violations', async () => {
 			// Create our reformatted results from the entire sample.
-			const results2: Results = new Results(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
-			const formattedOutput: FormattedOutput = await results2.toFormattedOutput(OutputFormat.JUNIT, false);
-			const minSev: number = results2.getMinSev();
-			const summaryMap: Map<string, EngineExecutionSummary> = results2.getSummaryMap();
+			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
+			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JUNIT, false);
+			const minSev: number = results.getMinSev();
+			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
 
 			// Split the results by newline character so we can make some interesting assertions.
 			if (!isString(formattedOutput)) {
@@ -611,7 +611,7 @@ describe('Results Formatting', () => {
 
 		it ('Happy Path - pathless rules', async () => {
 
-			const results: Results = new Results(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -639,7 +639,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - normalized pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -667,7 +667,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -692,7 +692,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - Normalized DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -717,7 +717,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('DFA with timeout error', async () => {
-			const results: Results = new Results(fakeDfaWithError, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(fakeDfaWithError, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -757,14 +757,14 @@ describe('Results Formatting', () => {
 						"url": "https://some/url.org"
 					}]
 				}];
-				const results: Results = new Results(ruleResults, new Set([engine]));
+				const results: Results = new RunResults(ruleResults, new Set([engine]));
 				await results.toFormattedOutput(OutputFormat.SARIF, false);
 				// should throw an error if the engine was not handled
 			}
 		});
 
 		it ('Run with no violations returns engines that were run', async () => {
-			const results: Results = new Results([], new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults([], new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const sarifResults: unknown[] = JSON.parse(formattedOutput as string);
 			expect(sarifResults['runs']).to.have.lengthOf(2, 'Runs');
@@ -790,7 +790,7 @@ describe('Results Formatting', () => {
 	describe('Output Format: JSON', () => {
 		const messageIsTrimmed = false;
 		it ('Happy Path - pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput( OutputFormat.JSON, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -820,7 +820,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - normalized pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -850,7 +850,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy path - DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -878,7 +878,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy path - normalized DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -906,7 +906,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Using --verbose-violations', async () => {
-			const results: Results = new Results(retireJsVerboseViolations, new Set(['retire-js']));
+			const results: Results = new RunResults(retireJsVerboseViolations, new Set(['retire-js']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JSON, true);
 
 			const ruleResults: RuleResult[] = JSON.parse(formattedOutput as string);
@@ -914,7 +914,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Edge Cases', async () => {
-			const results: Results = new Results(edgeCaseResults, new Set(['eslint']));
+			const results: Results = new RunResults(edgeCaseResults, new Set(['eslint']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
 
 			const ruleResults: RuleResult[] = JSON.parse(formattedOutput as string);
@@ -990,7 +990,7 @@ describe('Results Formatting', () => {
 		}
 
 		it ('Happy Path - pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.XML, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1021,7 +1021,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - normalized pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.XML, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1051,7 +1051,7 @@ describe('Results Formatting', () => {
 		});
 
 		it('Happy path - DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.XML, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1079,7 +1079,7 @@ describe('Results Formatting', () => {
 		});
 
 		it('Happy path - normalized DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.XML, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1107,7 +1107,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Edge Cases', async () => {
-			const results: Results = new Results(edgeCaseResults, new Set(['eslint']));
+			const results: Results = new RunResults(edgeCaseResults, new Set(['eslint']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.XML, false);
 
 			const ruleResults: RuleResult[] = await convertXmlToJson(formattedOutput as string, false);
@@ -1172,7 +1172,7 @@ describe('Results Formatting', () => {
 		}
 
 		it ('Happy Path - pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.CSV, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1216,7 +1216,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy Path - normalized pathless rules', async () => {
-			const results: Results = new Results(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
+			const results: Results = new RunResults(allFakePathlessRuleResultsNormalized, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.CSV, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1260,7 +1260,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Happy path - DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResults, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.CSV, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1302,7 +1302,7 @@ describe('Results Formatting', () => {
 		});
 
 		it('Happy path - Normalized DFA rules', async () => {
-			const results: Results = new Results(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
+			const results: Results = new RunResults(allFakeDfaRuleResultsNormalized, new Set([ENGINE.SFGE.valueOf()]));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.CSV, false);
 			const minSev: number = results.getMinSev();
 			const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
@@ -1344,7 +1344,7 @@ describe('Results Formatting', () => {
 		});
 
 		it ('Edge Cases', async () => {
-			const results: Results = new Results(edgeCaseResults, new Set(['eslint']));
+			const results: Results = new RunResults(edgeCaseResults, new Set(['eslint']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.CSV, false);
 
 			const records = await new Promise((resolve, reject) => {
@@ -1382,7 +1382,7 @@ describe('Results Formatting', () => {
 
 	describe('Output Format: HTML', () => {
 		it ('Using --verbose-violations', async () => {
-			const results: Results = new Results(retireJsVerboseViolations, new Set(['retire-js']));
+			const results: Results = new RunResults(retireJsVerboseViolations, new Set(['retire-js']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.HTML, true) as string;
 
 			const violationString = formattedOutput.split("const violations = [")[1].split("];")[0];

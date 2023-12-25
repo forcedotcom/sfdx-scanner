@@ -1,4 +1,4 @@
-import {OutputFormatter, Results} from "./Results";
+import {OutputFormatter, RunResults} from "./Results";
 import {FormattedOutput, ResultTableRow, RuleResult} from "../../types";
 import * as path from "path";
 import * as wrap from "word-wrap";
@@ -29,7 +29,7 @@ const DFA_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
 };
 
 export class TableOutputFormatter implements OutputFormatter {
-	public async format(results: Results): Promise<FormattedOutput> {
+	public async format(results: RunResults): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 
 		const columns = results.violationsAreDfa()

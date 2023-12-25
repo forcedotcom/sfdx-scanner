@@ -1,10 +1,10 @@
 import {FormattedOutput, RuleResult} from "../../types";
 import {isPathlessViolation} from "../util/Utils";
 import {stringify} from "csv-stringify";
-import {OutputFormatter, Results} from "./Results";
+import {OutputFormatter, RunResults} from "./Results";
 
 export class CsvOutputFormatter implements OutputFormatter {
-	public async format(results: Results): Promise<FormattedOutput> {
+	public async format(results: RunResults): Promise<FormattedOutput> {
 		const isDfa: boolean = results.violationsAreDfa();
 		const ruleResults: RuleResult[] = results.getRuleResults();
 		const normalizeSeverity: boolean = ruleResults[0]?.violations.length > 0 && !(ruleResults[0]?.violations[0].normalizedSeverity === undefined)

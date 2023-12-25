@@ -1,5 +1,5 @@
 import {FormattedOutput, RuleResult} from "../../types";
-import {OutputFormatter, Results} from "./Results";
+import {OutputFormatter, RunResults} from "./Results";
 import {isPathlessViolation} from "../util/Utils";
 import {ENGINE} from "../../Constants";
 import {FileHandler} from "../util/FileHandler";
@@ -13,7 +13,7 @@ export class HtmlOutputFormatter implements OutputFormatter {
 		this.verboseViolations = verboseViolations;
 	}
 
-	public async format(results: Results): Promise<FormattedOutput> {
+	public async format(results: RunResults): Promise<FormattedOutput> {
 		const isDfa = results.violationsAreDfa();
 		const ruleResults: RuleResult[] = results.getRuleResults();
 		const normalizeSeverity: boolean = ruleResults[0]?.violations.length > 0 && !(ruleResults[0]?.violations[0].normalizedSeverity === undefined);

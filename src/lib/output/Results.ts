@@ -11,10 +11,24 @@ import {SfError} from "@salesforce/core";
 import {OutputFormat} from "./OutputFormat";
 
 export interface OutputFormatter {
-	format(results: Results): Promise<FormattedOutput>;
+	format(results: RunResults): Promise<FormattedOutput>;
 }
 
-export class Results {
+export interface Results {
+	isEmpty(): boolean
+
+	getRuleResults(): RuleResult[];
+
+	getExecutedEngines(): Set<string>;
+
+	getMinSev(): number;
+
+	getSummaryMap(): Map<string, EngineExecutionSummary>;
+
+	toFormattedOutput(format: OutputFormat, verboseViolations: boolean): Promise<FormattedOutput>
+}
+
+export class RunResults {
 	private readonly ruleResults: RuleResult[];
 	private readonly executedEngines: Set<string>;
 
@@ -23,16 +37,16 @@ export class Results {
 		this.executedEngines = executedEngines;
 	}
 
+	public isEmpty(): boolean {
+		return !this.ruleResults || this.ruleResults.length === 0
+	}
+
 	public getRuleResults(): RuleResult[] {
 		return this.ruleResults
 	}
 
 	public getExecutedEngines(): Set<string> {
 		return this.executedEngines;
-	}
-
-	public isEmpty(): boolean {
-		return !this.ruleResults || this.ruleResults.length === 0
 	}
 
 	public getMinSev(): number {
