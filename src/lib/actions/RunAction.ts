@@ -4,7 +4,7 @@ import {InputsResolver} from "../InputsResolver";
 import {RunOptionsFactory} from "../RunOptionsFactory";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {Inputs} from "../../types";
-import {SfError} from "@salesforce/core";
+import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 
@@ -12,9 +12,9 @@ import {RuleFilterFactory} from "../RuleFilterFactory";
  * The Action behind the "run" command
  */
 export class RunAction extends AbstractRunAction {
-	public constructor(display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
+	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
 						runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
-		super(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		super(logger, display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {

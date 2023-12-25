@@ -76,11 +76,11 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Config-overrideable engine flags.
 	};
 
-	protected createAction(_logger: Logger, display: Display): Action {
+	protected createAction(logger: Logger, display: Display): Action {
 		const inputsResolver: InputsResolver = new InputsResolverImpl()
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
 		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(true, this.config.version);
 		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputsResolver);
-		return new RunDfaAction(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		return new RunDfaAction(logger, display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
 	}
 }

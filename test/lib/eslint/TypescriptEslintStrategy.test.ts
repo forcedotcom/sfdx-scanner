@@ -13,6 +13,7 @@ import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
+import {Results} from "../../../src/lib/output/Results";
 
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
@@ -276,10 +277,10 @@ See the typescript-eslint docs for more info: https://typescript-eslint.io/linti
 			});
 
 			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
-				const {results} = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false, withPilot: false, runDfa: false, sfVersion: 'test'}, EMPTY_ENGINE_OPTIONS);
+				const results: Results = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false, withPilot: false, runDfa: false, sfVersion: 'test'}, EMPTY_ENGINE_OPTIONS);
 				// Parse the json in order to make the string match easier.
 				// There should be a single violation with a single message
-				const ruleResults: RuleResult[] = JSON.parse(results.toString());
+				const ruleResults: RuleResult[] = results.getRuleResults();
 				expect(ruleResults).to.have.lengthOf(1);
 				const ruleResult: RuleResult = ruleResults[0];
 				expect(ruleResult.violations).to.have.lengthOf(1);

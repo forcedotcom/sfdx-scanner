@@ -4,8 +4,6 @@ import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {
 	EngineExecutionDescriptor,
-	FormattedOutput,
-	RecombinedRuleResults,
 	Rule,
 	RuleGroup,
 	RuleResult,
@@ -20,7 +18,7 @@ import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
 import {EVENTS, uxEvents} from './ScannerEvents';
-import {CONFIG_FILE, CUSTOM_CONFIG, ENGINE, TargetType} from '../Constants';
+import {CONFIG_FILE, ENGINE, TargetType} from '../Constants';
 import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
@@ -76,7 +74,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<Results> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let ruleResults: RuleResult[] = [];
@@ -156,7 +154,7 @@ export class DefaultRuleManager implements RuleManager {
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
-		// all of the results together from all engines into one report.
+		// all of the results together from all engines into one set of results.
 		try {
 			// Now that we're inside of a try-catch, we can turn the run descriptors into actual executions.
 			const ps: Promise<RuleResult[]>[] = runDescriptorList.map(({engine, descriptor}) => engine.runEngine(descriptor));
@@ -164,11 +162,7 @@ export class DefaultRuleManager implements RuleManager {
 			psResults.forEach(r => ruleResults = ruleResults.concat(r));
 			this.logger.trace(`Received rule violations: ${JSON.stringify(ruleResults)}`);
 
-			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
-
-			const results: Results = new Results(ruleResults, executedEngines);
-			const formattedOutput: FormattedOutput = await results.toFormattedOutput(runOptions.format, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
-			return {minSev: results.getMinSev(), results: formattedOutput, summaryMap: results.getSummaryMap()};
+			return new Results(ruleResults, executedEngines);
 
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;

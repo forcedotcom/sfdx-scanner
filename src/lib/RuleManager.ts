@@ -1,5 +1,6 @@
-import {RecombinedRuleResults, Rule} from '../types';
+import {Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
+import {Results} from "./output/Results";
 
 export enum OUTPUT_FORMAT {
 	CSV = 'csv',
@@ -39,5 +40,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<Results>;
 }

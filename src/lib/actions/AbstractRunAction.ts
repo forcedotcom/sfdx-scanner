@@ -1,8 +1,8 @@
 import {Action} from "../ScannerCommand";
-import {Inputs, RecombinedRuleResults} from "../../types";
+import {FormattedOutput, Inputs, RecombinedRuleResults} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {FileHandler} from "../util/FileHandler";
-import {SfError} from "@salesforce/core";
+import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {EngineOptions, OUTPUT_FORMAT, RuleManager, RunOptions} from "../RuleManager";
 import {inferFormatFromOutfile, RunOptionsFactory} from "../RunOptionsFactory";
@@ -14,20 +14,23 @@ import {Controller} from "../../Controller";
 import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
 import {InputsResolver} from "../InputsResolver";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
-import {INTERNAL_ERROR_CODE} from "../../Constants";
+import {CUSTOM_CONFIG, INTERNAL_ERROR_CODE} from "../../Constants";
+import {Results} from "../output/Results";
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
  */
 export abstract class AbstractRunAction implements Action {
+	private readonly logger: Logger;
 	protected readonly display: Display;
 	private readonly inputsResolver: InputsResolver;
 	private readonly ruleFilterFactory: RuleFilterFactory;
 	private readonly runOptionsFactory: RunOptionsFactory;
 	private readonly engineOptionsFactory: EngineOptionsFactory;
 
-	protected constructor(display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
+	protected constructor(logger: Logger, display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
 							runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
+		this.logger = logger;
 		this.display = display;
 		this.inputsResolver = inputsResolver;
 		this.ruleFilterFactory = ruleFilterFactory;
@@ -79,7 +82,12 @@ export abstract class AbstractRunAction implements Action {
 
 		let output: RecombinedRuleResults = null;
 		try {
-			output = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
+			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
+
+			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
+			const formattedOutput: FormattedOutput = await results.toFormattedOutput(runOptions.format, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+			output = {minSev: results.getMinSev(), results: formattedOutput, summaryMap: results.getSummaryMap()};
+
 		} catch (e) {
 			// Rethrow any errors as SF errors.
 			const message: string = e instanceof Error ? e.message : e as string;

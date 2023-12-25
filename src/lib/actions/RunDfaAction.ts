@@ -6,7 +6,7 @@ import {RunOptionsFactory} from "../RunOptionsFactory";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {Inputs} from "../../types";
 import {FileHandler} from "../util/FileHandler";
-import {SfError} from "@salesforce/core";
+import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import * as globby from "globby";
 
@@ -14,9 +14,9 @@ import * as globby from "globby";
  * The Action behind the "run dfa" command
  */
 export class RunDfaAction extends AbstractRunAction {
-	public constructor(display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
+	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
 						runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
-		super(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		super(logger, display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {

@@ -88,11 +88,11 @@ export default class Run extends ScannerRunCommand {
 		// END: Flags related to results processing.
 	};
 
-	protected createAction(_logger: Logger, display: Display): Action {
+	protected createAction(logger: Logger, display: Display): Action {
 		const inputsResolver: InputsResolver = new InputsResolverImpl()
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
 		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(false, this.config.version);
 		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputsResolver);
-		return new RunAction(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		return new RunAction(logger, display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
 	}
 }
