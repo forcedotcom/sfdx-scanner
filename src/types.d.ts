@@ -112,12 +112,6 @@ export type ResultTableRow = {
 // TODO: This is a bit of a smell. We should just return a string and treat all formatted output the same if possible.
 export type FormattedOutput = string | {columns: Ux.Table.Columns<ResultTableRow>; rows: ResultTableRow[]};
 
-export type RecombinedRuleResults = {
-	minSev: number;
-	results: FormattedOutput;
-	summaryMap: Map<string,EngineExecutionSummary>;
-};
-
 type BaseViolation = {
 	ruleName: string;
 	message: string;

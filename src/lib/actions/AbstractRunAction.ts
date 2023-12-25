@@ -1,5 +1,5 @@
 import {Action} from "../ScannerCommand";
-import {FormattedOutput, Inputs, RecombinedRuleResults} from "../../types";
+import {Inputs} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {FileHandler} from "../util/FileHandler";
 import {Logger, SfError} from "@salesforce/core";
@@ -13,7 +13,7 @@ import {Controller} from "../../Controller";
 import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
 import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
-import {CUSTOM_CONFIG, INTERNAL_ERROR_CODE} from "../../Constants";
+import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {Results} from "../output/Results";
 import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
 
@@ -81,20 +81,16 @@ export abstract class AbstractRunAction implements Action {
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
 
-		let output: RecombinedRuleResults = null;
 		try {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
-
-			// TODO: Move this inside of the RunOutputProcessor
-			this.logger.trace(`Recombining results into requested format ${outputOptions.format}`);
-			const formattedOutput: FormattedOutput = await results.toFormattedOutput(outputOptions.format, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
-			output = {minSev: results.getMinSev(), results: formattedOutput, summaryMap: results.getSummaryMap()};
+			this.logger.trace(`Processing output with format ${outputOptions.format}`);
+			return new RunOutputProcessor(this.display, outputOptions, inputs["verbose-violations"])
+				.processRunOutput(results);
 
 		} catch (e) {
 			// Rethrow any errors as SF errors.
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}
-		return new RunOutputProcessor(this.display, outputOptions).processRunOutput(output);
 	}
 }

@@ -1,11 +1,12 @@
 import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
 import fs = require('fs');
-import {RecombinedRuleResults, FormattedOutput} from '../../types';
+import {FormattedOutput, EngineExecutionSummary} from '../../types';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {OutputFormat} from "../output/OutputFormat";
+import {Results} from "../output/Results";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
@@ -16,14 +17,18 @@ export type RunOutputOptions = {
 export class RunOutputProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
+	private readonly verboseViolations: boolean;
 
-	public constructor(display: Display, opts: RunOutputOptions) {
+	public constructor(display: Display, opts: RunOutputOptions, verboseViolations: boolean) {
 		this.display = display;
 		this.opts = opts;
+		this.verboseViolations = verboseViolations;
 	}
 
-	public processRunOutput(rrr: RecombinedRuleResults): AnyJson {
-		const {minSev, results, summaryMap} = rrr;
+	public async processRunOutput(results: Results): Promise<AnyJson> {
+		const minSev: number = results.getMinSev();
+		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
+		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations)
 
 		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
 
@@ -44,9 +49,9 @@ export class RunOutputProcessor {
 		// message parts, and then log them all at the end.
 		let msgComponents: string[] = [];
 		// We need a summary of the information we were provided (blank/empty if no violations).
-		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(rrr)];
+		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(minSev, summaryMap)];
 		// We need to surface the results directly to the user, then add a message describing what we did.
-		msgComponents.push(this.opts.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
+		msgComponents.push(this.opts.outfile ? this.writeToOutfile(formattedOutput) : this.writeToConsole(formattedOutput));
 		// Now we need to decide what to do with these messages. We'll either throw them as an exception or log them to
 		// the user.
 		msgComponents = msgComponents.filter(cmp => cmp && cmp.length > 0);
@@ -64,14 +69,14 @@ export class RunOutputProcessor {
 		if (this.opts.outfile) {
 			// If we used an outfile, we should just return the summary message, since that says where the file is.
 			return msg;
-		} else if (typeof results === 'string') {
+		} else if (typeof formattedOutput === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OutputFormat.JSON ? JSON.parse(results) as AnyJson : results;
+			return this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
-			return results.rows;
+			return formattedOutput.rows;
 		}
 	}
 
@@ -90,8 +95,7 @@ export class RunOutputProcessor {
 		return false;
 	}
 
-	private buildRunSummaryMsgParts(rrr: RecombinedRuleResults): string[] {
-		const {summaryMap, minSev} = rrr;
+	private buildRunSummaryMsgParts(minSev: number, summaryMap: Map<string,EngineExecutionSummary>): string[] {
 		let msgParts: string[] = [];
 
 		// If we're outputting our results as a table, or we're writing the results to a file, then we'll want to output

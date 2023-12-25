@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 
 import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOutputProcessor';
-import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
+import {EngineExecutionSummary, FormattedOutput, RuleResult} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
@@ -9,6 +9,7 @@ import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {FakeDisplay} from "../FakeDisplay";
 import {PATHLESS_COLUMNS} from "../../../src/lib/output/TableOutputFormatter";
 import {OutputFormat} from "../../../src/lib/output/OutputFormat";
+import {Results} from "../../../src/lib/output/Results";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -77,6 +78,50 @@ const FAKE_JSON_OUTPUT = `[{
 	}]
 }]`;
 
+class FakeResults implements Results {
+	private minSev: number = 0;
+	private summaryMap: Map<string, EngineExecutionSummary>;
+	private formattedOutput: FormattedOutput;
+
+	withMinSev(minSev: number): FakeResults {
+		this.minSev = minSev;
+		return this;
+	}
+
+	withSummaryMap(summaryMap: Map<string, EngineExecutionSummary>): FakeResults {
+		this.summaryMap = summaryMap;
+		return this;
+	}
+
+	withFormattedOutput(formattedOutput: FormattedOutput): FakeResults {
+		this.formattedOutput = formattedOutput;
+		return this;
+	}
+
+	getExecutedEngines(): Set<string> {
+		throw new Error("Not implemented");
+	}
+
+	getMinSev(): number {
+		return this.minSev;
+	}
+
+	getRuleResults(): RuleResult[] {
+		throw new Error("Not implemented");
+	}
+
+	getSummaryMap(): Map<string, EngineExecutionSummary> {
+		return this.summaryMap;
+	}
+
+	isEmpty(): boolean {
+		throw new Error("Not implemented");
+	}
+
+	toFormattedOutput(_format: OutputFormat, _verboseViolations: boolean): Promise<FormattedOutput> {
+		return Promise.resolve(this.formattedOutput);
+	}
+}
 
 describe('RunOutputProcessor', () => {
 	let fakeFiles: {path; data}[] = [];
@@ -104,14 +149,15 @@ describe('RunOutputProcessor', () => {
 				const opts: RunOutputOptions = {
 					format: OutputFormat.TABLE
 				};
-				const rop = new RunOutputProcessor(display, opts);
+				const rop = new RunOutputProcessor(display, opts, false);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
-				const fakeRes: RecombinedRuleResults = {minSev: 0, summaryMap, results: ''};
+				const fakeResults: Results = new FakeResults()
+					.withMinSev(0).withSummaryMap(summaryMap).withFormattedOutput('');
 
 				// THIS IS THE PART BEING TESTED.
-				const output: AnyJson = rop.processRunOutput(fakeRes);
+				const output: AnyJson = await rop.processRunOutput(fakeResults);
 
 				// We expect that the message logged to the console and the message returned should both be the default
 				const expectedMsg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
@@ -120,16 +166,17 @@ describe('RunOutputProcessor', () => {
 			});
 
 			describe('Test Case: Table', () => {
-				const fakeTableResults: RecombinedRuleResults = {minSev: 1, results: FAKE_TABLE_OUTPUT, summaryMap: FAKE_SUMMARY_MAP};
+				const fakeTableResults: Results = new FakeResults()
+					.withMinSev(1).withSummaryMap(FAKE_SUMMARY_MAP).withFormattedOutput(FAKE_TABLE_OUTPUT);
 
 				it('Table-type output should be followed by summary', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.TABLE
 					};
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = rop.processRunOutput(fakeTableResults);
+					const output: AnyJson = await rop.processRunOutput(fakeTableResults);
 
 					const expectedTableSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -148,11 +195,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.TABLE,
 						severityForError: 1
 					};
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = rop.processRunOutput(fakeTableResults);
+						const output: AnyJson = await rop.processRunOutput(fakeTableResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.satisfy(msg => msg.startsWith("[Table]"));
@@ -168,7 +215,8 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 			});
 
 			describe('Test Case: CSV', () => {
-				const fakeCsvResults: RecombinedRuleResults = {minSev: 1, summaryMap: FAKE_SUMMARY_MAP, results: FAKE_CSV_OUTPUT};
+				const fakeCsvResults: Results = new FakeResults()
+					.withMinSev(1).withSummaryMap(FAKE_SUMMARY_MAP).withFormattedOutput(FAKE_CSV_OUTPUT);
 
 				// NOTE: This next test is based on the implementation of run-summary messages in W-8388246, which was known
 				// to be incomplete. When we flesh out that implementation with summaries for other formats, this test might
@@ -178,10 +226,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.CSV
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
+					const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
 					expect(output).to.equal(FAKE_CSV_OUTPUT, 'CSV should be returned as a string');
 				});
@@ -192,11 +240,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 2
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
+						const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
@@ -207,7 +255,8 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 			});
 
 			describe('Test Case: JSON', () => {
-				const fakeJsonResults: RecombinedRuleResults = {minSev: 1, summaryMap: FAKE_SUMMARY_MAP, results: FAKE_JSON_OUTPUT};
+				const fakeJsonResults: Results = new FakeResults()
+					.withMinSev(1).withSummaryMap(FAKE_SUMMARY_MAP).withFormattedOutput(FAKE_JSON_OUTPUT);
 
 				// NOTE: This next test is based on the implementation of run-summary messages in W-8388246, which was known
 				// to be incomplete. When we flesh out that implementation with summaries for other formats, this test might
@@ -217,10 +266,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.JSON
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED
-					const output: AnyJson = rop.processRunOutput(fakeJsonResults);
+					const output: AnyJson = await rop.processRunOutput(fakeJsonResults);
 
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
 					expect(output).to.deep.equal(JSON.parse(FAKE_JSON_OUTPUT), 'JSON should be returned as a parsed object');
@@ -232,11 +281,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 1
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED
 					try {
-						const output: AnyJson = rop.processRunOutput(fakeJsonResults);
+						const output: AnyJson = await rop.processRunOutput(fakeJsonResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
@@ -253,14 +302,15 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					format: OutputFormat.CSV,
 					outfile: fakeFilePath
 				};
-				const rop = new RunOutputProcessor(display, opts);
+				const rop = new RunOutputProcessor(display, opts, false);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
-				const fakeRes: RecombinedRuleResults = {minSev: 0, summaryMap, results: '"Problem","Severity","File","Line","Column","Rule","Description","URL","Category","Engine"'};
+				const fakeResults: Results = new FakeResults()
+					.withMinSev(0).withSummaryMap(summaryMap).withFormattedOutput('"Problem","Severity","File","Line","Column","Rule","Description","URL","Category","Engine"');
 
 				// THIS IS THE PART BEING TESTED.
-				const output: AnyJson = rop.processRunOutput(fakeRes);
+				const output: AnyJson = await rop.processRunOutput(fakeResults);
 
 				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
 				const expectedMsg = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
@@ -273,7 +323,8 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 			});
 
 			describe('Test Case: CSV', () => {
-				const fakeCsvResults: RecombinedRuleResults = {minSev: 1, summaryMap: FAKE_SUMMARY_MAP, results: FAKE_CSV_OUTPUT};
+				const fakeCsvResults: Results = new FakeResults()
+					.withMinSev(1).withSummaryMap(FAKE_SUMMARY_MAP).withFormattedOutput(FAKE_CSV_OUTPUT)
 
 				it('Results are properly written to file', async () => {
 					const opts: RunOutputOptions = {
@@ -281,10 +332,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
+					const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
 
 					const expectedCsvSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -302,11 +353,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(display, opts);
+					const rop = new RunOutputProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = rop.processRunOutput(fakeCsvResults);
+						const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("");
