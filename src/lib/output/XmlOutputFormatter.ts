@@ -1,11 +1,11 @@
-import {OutputFormatter, RunResults} from "./Results";
+import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, RuleResult} from "../../types";
 import * as path from "path";
 import {isPathlessViolation} from "../util/Utils";
 import htmlEscaper = require('html-escaper');
 
 export class XmlOutputFormatter implements OutputFormatter {
-	public async format(results: RunResults): Promise<FormattedOutput> {
+	public format(results: Results): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 
 		let resultXml = ``;
@@ -77,9 +77,9 @@ export class XmlOutputFormatter implements OutputFormatter {
       </result>`;
 		}
 
-		return `<results total="${ruleResults.length}" totalViolations="${problemCount}">
+		return Promise.resolve(`<results total="${ruleResults.length}" totalViolations="${problemCount}">
         ${resultXml}
-</results>`;
+</results>`);
 	}
 }
 

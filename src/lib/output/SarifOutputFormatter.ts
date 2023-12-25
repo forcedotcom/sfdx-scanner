@@ -1,4 +1,4 @@
-import {OutputFormatter, RunResults} from "./Results";
+import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, Rule, RuleResult, RuleViolation} from "../../types";
 import {Location, Log, Notification, Region, ReportingDescriptor, Result, Run} from "sarif";
 import {deepCopy, isPathlessViolation} from "../util/Utils";
@@ -19,7 +19,7 @@ export class SarifOutputFormatter implements OutputFormatter {
 	 * Convert an array of RuleResults to a sarif document. The rules are separated by engine name.
 	 * A new "run" object is created for each engine that was run
 	 */
-	public async format(results: RunResults): Promise<FormattedOutput> {
+	public async format(results: Results): Promise<FormattedOutput> {
 		// Obtain the catalog and pass it in, this avoids multiple initializations
 		// when waiting for promises in parallel
 		const catalog: RuleCatalog = await Controller.getCatalog();

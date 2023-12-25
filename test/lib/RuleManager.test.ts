@@ -249,13 +249,8 @@ describe('RuleManager', () => {
 
 					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-<<<<<<< HEAD
-					expect(results).to.equal('[]');
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
-=======
 					expect(results.getRuleResults()).to.be.an("array").that.has.length(0);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
->>>>>>> 0c580047 (@W-14716658@: Refactor part 3 - Move formatting out of rule manager)
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 

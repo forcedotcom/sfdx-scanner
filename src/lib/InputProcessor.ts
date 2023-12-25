@@ -3,7 +3,7 @@ import normalize = require('normalize-path');
 import path = require('path');
 import untildify = require("untildify");
 import {RunOptions} from "./RuleManager";
-import {RunOutputOptions} from "./util/RunOutputProcessor";
+import {RunOutputOptions} from "./util/RunResultsProcessor";
 import {inferFormatFromOutfile, OutputFormat} from "./output/OutputFormat";
 
 /**
@@ -72,7 +72,7 @@ function outputFormatFromInputs(inputs: Inputs): OutputFormat {
 	if (inputs.format) {
 		return inputs.format as OutputFormat;
 	} else if (inputs.outfile) {
-		return inferFormatFromOutfile(inputs.outfile);
+		return inferFormatFromOutfile(inputs.outfile as string);
 	} else if (inputs.json) {
 		return OutputFormat.JSON;
 	} else {

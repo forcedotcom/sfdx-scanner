@@ -11,7 +11,7 @@ import {SfError} from "@salesforce/core";
 import {OutputFormat} from "./OutputFormat";
 
 export interface OutputFormatter {
-	format(results: RunResults): Promise<FormattedOutput>;
+	format(results: Results): Promise<FormattedOutput>;
 }
 
 export interface Results {
@@ -25,10 +25,12 @@ export interface Results {
 
 	getSummaryMap(): Map<string, EngineExecutionSummary>;
 
+	violationsAreDfa(): boolean;
+
 	toFormattedOutput(format: OutputFormat, verboseViolations: boolean): Promise<FormattedOutput>
 }
 
-export class RunResults {
+export class RunResults implements Results {
 	private readonly ruleResults: RuleResult[];
 	private readonly executedEngines: Set<string>;
 

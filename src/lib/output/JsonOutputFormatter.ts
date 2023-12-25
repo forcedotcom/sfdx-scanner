@@ -1,4 +1,4 @@
-import {OutputFormatter, RunResults} from "./Results";
+import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, RuleResult} from "../../types";
 import {ENGINE} from "../../Constants";
 
@@ -9,7 +9,7 @@ export class JsonOutputFormatter implements OutputFormatter {
 		this.verboseViolations = verboseViolations;
 	}
 
-	public async format(results: RunResults): Promise<FormattedOutput> {
+	public format(results: Results): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 		if (this.verboseViolations) {
 			const resultsVerbose = JSON.parse(JSON.stringify(ruleResults)) as RuleResult[];
@@ -23,8 +23,8 @@ export class JsonOutputFormatter implements OutputFormatter {
 					}
 				}
 			}
-			return JSON.stringify(resultsVerbose.filter(r => r.violations.length > 0));
+			return Promise.resolve(JSON.stringify(resultsVerbose.filter(r => r.violations.length > 0)));
 		}
-		return JSON.stringify(ruleResults.filter(r => r.violations.length > 0));
+		return Promise.resolve(JSON.stringify(ruleResults.filter(r => r.violations.length > 0)));
 	}
 }

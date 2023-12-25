@@ -10,7 +10,7 @@ import {Display} from "../Display";
 import {RuleFilter} from "../RuleFilter";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
-import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
+import {RunOutputOptions, RunResultsProcessor} from "../util/RunResultsProcessor";
 import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
@@ -84,8 +84,8 @@ export abstract class AbstractRunAction implements Action {
 		try {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
-			return new RunOutputProcessor(this.display, outputOptions, inputs["verbose-violations"])
-				.processRunOutput(results);
+			return new RunResultsProcessor(this.display, outputOptions, inputs["verbose-violations"] as boolean)
+				.processResults(results);
 
 		} catch (e) {
 			// Rethrow any errors as SF errors.

@@ -1,5 +1,5 @@
 import {SfError} from "@salesforce/core";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 
 export enum OutputFormat {
@@ -15,7 +15,7 @@ export enum OutputFormat {
 export function inferFormatFromOutfile(outfile: string): OutputFormat {
 	const lastPeriod: number = outfile.lastIndexOf('.');
 	if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-		throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
+		throw new SfError(getMessage(BundleName.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 	}
 	const fileExtension: string = outfile.slice(lastPeriod + 1).toLowerCase();
 	switch (fileExtension) {
@@ -26,6 +26,6 @@ export function inferFormatFromOutfile(outfile: string): OutputFormat {
 		case OutputFormat.XML:
 			return fileExtension;
 		default:
-			throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(getMessage(BundleName.CommonRun, 'validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 	}
 }

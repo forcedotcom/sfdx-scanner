@@ -14,7 +14,7 @@ export type RunOutputOptions = {
 	outfile?: string;
 }
 
-export class RunOutputProcessor {
+export class RunResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
 	private readonly verboseViolations: boolean;
@@ -25,10 +25,10 @@ export class RunOutputProcessor {
 		this.verboseViolations = verboseViolations;
 	}
 
-	public async processRunOutput(results: Results): Promise<AnyJson> {
+	public async processResults(results: Results): Promise<AnyJson> {
 		const minSev: number = results.getMinSev();
 		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
-		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations)
+		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations);
 
 		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
 

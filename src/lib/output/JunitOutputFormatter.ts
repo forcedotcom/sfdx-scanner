@@ -1,10 +1,10 @@
-import {OutputFormatter, RunResults} from "./Results";
+import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, RuleResult, RuleViolation} from "../../types";
 import {isPathlessViolation} from "../util/Utils";
 import {safeHtmlEscape} from "./XmlOutputFormatter";
 
 export class JunitOutputFormatter implements OutputFormatter {
-	public async format(results: RunResults): Promise<FormattedOutput> {
+	public format(results: Results): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 
 		// Otherwise, we'll need to start constructing our JUnit XML. To do that, we'll need a map from file names to
@@ -28,7 +28,7 @@ export class JunitOutputFormatter implements OutputFormatter {
 			testsuiteTags.push(`<testsuite name="${escapedFileName}" tests="${failures.length}" errors="${failures.length}">\n${failures.join('\n')}\n</testsuite>`);
 		}
 
-		return `<testsuites>\n${testsuiteTags.join('\n')}\n</testsuites>`
+		return Promise.resolve(`<testsuites>\n${testsuiteTags.join('\n')}\n</testsuites>`);
 	}
 }
 

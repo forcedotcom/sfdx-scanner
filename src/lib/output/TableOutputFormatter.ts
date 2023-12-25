@@ -1,4 +1,4 @@
-import {OutputFormatter, RunResults} from "./Results";
+import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, ResultTableRow, RuleResult} from "../../types";
 import * as path from "path";
 import * as wrap from "word-wrap";
@@ -28,8 +28,10 @@ const DFA_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
 	...BASE_COLUMNS
 };
 
+
+// TODO: This is the only formatter that doesn't return a string. We may want to revisit this at some point.
 export class TableOutputFormatter implements OutputFormatter {
-	public async format(results: RunResults): Promise<FormattedOutput> {
+	public format(results: Results): Promise<FormattedOutput> {
 		const ruleResults: RuleResult[] = results.getRuleResults();
 
 		const columns = results.violationsAreDfa()
@@ -72,6 +74,6 @@ export class TableOutputFormatter implements OutputFormatter {
 				}
 			}
 		}
-		return {columns, rows};
+		return Promise.resolve({columns, rows});
 	}
 }

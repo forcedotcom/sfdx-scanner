@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 
-import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOutputProcessor';
+import {RunOutputOptions, RunResultsProcessor} from '../../../src/lib/util/RunResultsProcessor';
 import {EngineExecutionSummary, FormattedOutput, RuleResult} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
@@ -118,6 +118,10 @@ class FakeResults implements Results {
 		throw new Error("Not implemented");
 	}
 
+	violationsAreDfa(): boolean {
+		throw new Error("Not implemented");
+	}
+
 	toFormattedOutput(_format: OutputFormat, _verboseViolations: boolean): Promise<FormattedOutput> {
 		return Promise.resolve(this.formattedOutput);
 	}
@@ -149,7 +153,7 @@ describe('RunOutputProcessor', () => {
 				const opts: RunOutputOptions = {
 					format: OutputFormat.TABLE
 				};
-				const rop = new RunOutputProcessor(display, opts, false);
+				const rop = new RunResultsProcessor(display, opts, false);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -157,7 +161,7 @@ describe('RunOutputProcessor', () => {
 					.withMinSev(0).withSummaryMap(summaryMap).withFormattedOutput('');
 
 				// THIS IS THE PART BEING TESTED.
-				const output: AnyJson = await rop.processRunOutput(fakeResults);
+				const output: AnyJson = await rop.processResults(fakeResults);
 
 				// We expect that the message logged to the console and the message returned should both be the default
 				const expectedMsg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
@@ -173,10 +177,10 @@ describe('RunOutputProcessor', () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.TABLE
 					};
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = await rop.processRunOutput(fakeTableResults);
+					const output: AnyJson = await rop.processResults(fakeTableResults);
 
 					const expectedTableSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -195,11 +199,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.TABLE,
 						severityForError: 1
 					};
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = await rop.processRunOutput(fakeTableResults);
+						const output: AnyJson = await rop.processResults(fakeTableResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.satisfy(msg => msg.startsWith("[Table]"));
@@ -226,10 +230,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.CSV
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
+					const output: AnyJson = await rop.processResults(fakeCsvResults);
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
 					expect(output).to.equal(FAKE_CSV_OUTPUT, 'CSV should be returned as a string');
 				});
@@ -240,11 +244,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 2
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
+						const output: AnyJson = await rop.processResults(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
@@ -266,10 +270,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						format: OutputFormat.JSON
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED
-					const output: AnyJson = await rop.processRunOutput(fakeJsonResults);
+					const output: AnyJson = await rop.processResults(fakeJsonResults);
 
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
 					expect(output).to.deep.equal(JSON.parse(FAKE_JSON_OUTPUT), 'JSON should be returned as a parsed object');
@@ -281,11 +285,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 1
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED
 					try {
-						const output: AnyJson = await rop.processRunOutput(fakeJsonResults);
+						const output: AnyJson = await rop.processResults(fakeJsonResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
@@ -302,7 +306,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					format: OutputFormat.CSV,
 					outfile: fakeFilePath
 				};
-				const rop = new RunOutputProcessor(display, opts, false);
+				const rop = new RunResultsProcessor(display, opts, false);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -310,7 +314,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					.withMinSev(0).withSummaryMap(summaryMap).withFormattedOutput('"Problem","Severity","File","Line","Column","Rule","Description","URL","Category","Engine"');
 
 				// THIS IS THE PART BEING TESTED.
-				const output: AnyJson = await rop.processRunOutput(fakeResults);
+				const output: AnyJson = await rop.processResults(fakeResults);
 
 				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
 				const expectedMsg = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
@@ -332,10 +336,10 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
-					const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
+					const output: AnyJson = await rop.processResults(fakeCsvResults);
 
 					const expectedCsvSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -353,11 +357,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 
-					const rop = new RunOutputProcessor(display, opts, false);
+					const rop = new RunResultsProcessor(display, opts, false);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
-						const output: AnyJson = await rop.processRunOutput(fakeCsvResults);
+						const output: AnyJson = await rop.processResults(fakeCsvResults);
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("");
