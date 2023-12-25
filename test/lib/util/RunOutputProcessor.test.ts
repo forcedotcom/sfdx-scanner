@@ -3,12 +3,12 @@ import {expect} from 'chai';
 import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOutputProcessor';
 import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
-import {PATHLESS_COLUMNS} from '../../../src/lib/formatter/RuleResultRecombinator';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {FakeDisplay} from "../FakeDisplay";
+import {PATHLESS_COLUMNS} from "../../../lib/lib/output/TableOutputFormatter";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});

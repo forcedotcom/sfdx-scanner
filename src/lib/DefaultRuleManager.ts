@@ -70,7 +70,7 @@ export class DefaultRuleManager implements RuleManager {
 	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
-		let results: RuleResult[] = [];
+		let ruleResults: RuleResult[] = [];
 		const executedEngines: Set<string> = new Set();
 
 		// Derives rules from our filters to feed the engines.
@@ -152,10 +152,12 @@ export class DefaultRuleManager implements RuleManager {
 			// Now that we're inside of a try-catch, we can turn the run descriptors into actual executions.
 			const ps: Promise<RuleResult[]>[] = runDescriptorList.map(({engine, descriptor}) => engine.runEngine(descriptor));
 			const psResults: RuleResult[][] = await Promise.all(ps);
-			psResults.forEach(r => results = results.concat(r));
-			this.logger.trace(`Received rule violations: ${JSON.stringify(results)}`);
+			psResults.forEach(r => ruleResults = ruleResults.concat(r));
+			this.logger.trace(`Received rule violations: ${JSON.stringify(ruleResults)}`);
+
 			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+			return await RuleResultRecombinator.recombineAndReformatResults(ruleResults, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfError(message);

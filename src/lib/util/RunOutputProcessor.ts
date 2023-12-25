@@ -1,7 +1,7 @@
 import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
 import fs = require('fs');
-import {RecombinedRuleResults, RecombinedData} from '../../types';
+import {RecombinedRuleResults, FormattedOutput} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
@@ -126,7 +126,7 @@ export class RunOutputProcessor {
 		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}
 
-	private writeToConsole(results: RecombinedData): string {
+	private writeToConsole(results: FormattedOutput): string {
 		// Figure out what format we need.
 		const format: OUTPUT_FORMAT = this.opts.format;
 		// Prepare the format mismatch message in case we need it later.
