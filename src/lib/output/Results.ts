@@ -1,5 +1,4 @@
 import {EngineExecutionSummary, FormattedOutput, RuleResult} from "../../types";
-import {OUTPUT_FORMAT} from "../RuleManager";
 import {isPathlessViolation} from "../util/Utils";
 import {CsvOutputFormatter} from "./CsvOutputFormatter";
 import {HtmlOutputFormatter} from "./HtmlOutputFormatter";
@@ -9,6 +8,7 @@ import {SarifOutputFormatter} from "./SarifOutputFormatter";
 import {TableOutputFormatter} from "./TableOutputFormatter";
 import {XmlOutputFormatter} from "./XmlOutputFormatter";
 import {SfError} from "@salesforce/core";
+import {OutputFormat} from "./OutputFormat";
 
 export interface OutputFormatter {
 	format(results: Results): Promise<FormattedOutput>;
@@ -83,28 +83,28 @@ export class Results {
 		return false;
 	}
 
-	public async toFormattedOutput(format: OUTPUT_FORMAT, verboseViolations: boolean): Promise<FormattedOutput> {
+	public async toFormattedOutput(format: OutputFormat, verboseViolations: boolean): Promise<FormattedOutput> {
 		let outputFormatter: OutputFormatter;
 		switch (format) {
-			case OUTPUT_FORMAT.CSV:
+			case OutputFormat.CSV:
 				outputFormatter = new CsvOutputFormatter();
 				break;
-			case OUTPUT_FORMAT.HTML:
+			case OutputFormat.HTML:
 				outputFormatter = new HtmlOutputFormatter(verboseViolations);
 				break;
-			case OUTPUT_FORMAT.JSON:
+			case OutputFormat.JSON:
 				outputFormatter = new JsonOutputFormatter(verboseViolations);
 				break;
-			case OUTPUT_FORMAT.JUNIT:
+			case OutputFormat.JUNIT:
 				outputFormatter = new JunitOutputFormatter();
 				break;
-			case OUTPUT_FORMAT.SARIF:
+			case OutputFormat.SARIF:
 				outputFormatter = new SarifOutputFormatter();
 				break;
-			case OUTPUT_FORMAT.TABLE:
+			case OutputFormat.TABLE:
 				outputFormatter = new TableOutputFormatter();
 				break;
-			case OUTPUT_FORMAT.XML:
+			case OutputFormat.XML:
 				outputFormatter = new XmlOutputFormatter();
 				break;
 			default:

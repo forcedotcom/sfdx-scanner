@@ -7,7 +7,7 @@ import {ProcessRuleViolationType} from '../../../src/lib/eslint/EslintCommons';
 import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/lib/eslint/TypescriptEslintStrategy';
 import { FileHandler } from '../../../src/lib/util/FileHandler';
 import {Controller} from '../../../src/Controller';
-import {OUTPUT_FORMAT, RuleManager} from '../../../src/lib/RuleManager';
+import {RuleManager} from '../../../src/lib/RuleManager';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
@@ -277,7 +277,7 @@ See the typescript-eslint docs for more info: https://typescript-eslint.io/linti
 			});
 
 			it('The typescript engine should convert the eslint error to something more user friendly', async () => {
-				const results: Results = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], {format: OUTPUT_FORMAT.JSON, normalizeSeverity: false, withPilot: false, runDfa: false, sfVersion: 'test'}, EMPTY_ENGINE_OPTIONS);
+				const results: Results = await ruleManager.runRulesMatchingCriteria([], ['invalid-ts'], {normalizeSeverity: false, withPilot: false, runDfa: false, sfVersion: 'test'}, EMPTY_ENGINE_OPTIONS);
 				// Parse the json in order to make the string match easier.
 				// There should be a single violation with a single message
 				const ruleResults: RuleResult[] = results.getRuleResults();

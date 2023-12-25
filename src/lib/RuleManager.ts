@@ -2,18 +2,7 @@ import {Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
 import {Results} from "./output/Results";
 
-export enum OUTPUT_FORMAT {
-	CSV = 'csv',
-	HTML = 'html',
-	JSON = 'json',
-	JUNIT = 'junit',
-	SARIF = 'sarif',
-	TABLE = 'table',
-	XML = 'xml'
-}
-
 export type RunOptions  = {
-	format: OUTPUT_FORMAT;
 	normalizeSeverity: boolean;
 	runDfa: boolean;
 	withPilot: boolean;

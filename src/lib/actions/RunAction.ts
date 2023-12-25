@@ -1,7 +1,6 @@
 import {AbstractRunAction} from "./AbstractRunAction";
 import {Display} from "../Display";
-import {InputsResolver} from "../InputsResolver";
-import {RunOptionsFactory} from "../RunOptionsFactory";
+import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {Inputs} from "../../types";
 import {Logger, SfError} from "@salesforce/core";
@@ -12,9 +11,9 @@ import {RuleFilterFactory} from "../RuleFilterFactory";
  * The Action behind the "run" command
  */
 export class RunAction extends AbstractRunAction {
-	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
-						runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
-		super(logger, display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+	public constructor(logger: Logger, display: Display, inputProcessor: InputProcessor,
+						ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory) {
+		super(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {
@@ -33,5 +32,9 @@ export class RunAction extends AbstractRunAction {
 				throw new SfError(getMessage(BundleName.Run, 'validations.methodLevelTargetingDisallowed', [target]));
 			}
 		}
+	}
+
+	protected isDfa(): boolean {
+		return false;
 	}
 }

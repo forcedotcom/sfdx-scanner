@@ -1,6 +1,6 @@
 import {Inputs, LooseObject, SfgeConfig} from "../types";
 import {CUSTOM_CONFIG, INTERNAL_ERROR_CODE} from "../Constants";
-import {InputsResolver} from "./InputsResolver";
+import {InputProcessor} from "./InputProcessor";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
 import {SfError} from "@salesforce/core";
 import normalize = require('normalize-path');
@@ -16,17 +16,17 @@ export interface EngineOptionsFactory {
 }
 
 abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
-	private readonly inputsResolver: InputsResolver;
+	private readonly inputProcessor: InputProcessor;
 
-	protected constructor(inputsResolver: InputsResolver) {
-		this.inputsResolver = inputsResolver;
+	protected constructor(inputProcessor: InputProcessor) {
+		this.inputProcessor = inputProcessor;
 	}
 
 	createEngineOptions(inputs: Inputs): EngineOptions {
 		const options: Map<string,string> = new Map();
 
 		// We should only add a GraphEngine config if we were given a --projectdir flag.
-		const projectDirPaths: string[] = this.inputsResolver.resolveProjectDirPaths(inputs);
+		const projectDirPaths: string[] = this.inputProcessor.resolveProjectDirPaths(inputs);
 		if (projectDirPaths.length > 0) {
 			const sfgeConfig: SfgeConfig = {
 				projectDirs: projectDirPaths
@@ -40,8 +40,8 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 }
 
 export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
-	public constructor(inputsResolver: InputsResolver) {
-		super(inputsResolver);
+	public constructor(inputProcessor: InputProcessor) {
+		super(inputProcessor);
 	}
 
 	public override createEngineOptions(inputs: Inputs): EngineOptions {
@@ -85,8 +85,8 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 }
 
 export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
-	public constructor(inputsResolver: InputsResolver) {
-		super(inputsResolver);
+	public constructor(inputProcessor: InputProcessor) {
+		super(inputProcessor);
 	}
 
 	public override createEngineOptions(inputs: Inputs): EngineOptions {

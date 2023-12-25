@@ -2,13 +2,13 @@ import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
 import fs = require('fs');
 import {RecombinedRuleResults, FormattedOutput} from '../../types';
-import {OUTPUT_FORMAT} from '../RuleManager';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
+import {OutputFormat} from "../output/OutputFormat";
 
 export type RunOutputOptions = {
-	format: OUTPUT_FORMAT;
+	format: OutputFormat;
 	severityForError?: number;
 	outfile?: string;
 }
@@ -67,7 +67,7 @@ export class RunOutputProcessor {
 		} else if (typeof results === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OUTPUT_FORMAT.JSON ? JSON.parse(results) as AnyJson : results;
+			return this.opts.format === OutputFormat.JSON ? JSON.parse(results) as AnyJson : results;
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
@@ -96,7 +96,7 @@ export class RunOutputProcessor {
 
 		// If we're outputting our results as a table, or we're writing the results to a file, then we'll want to output
 		// a summary of what engines ran and what they found.
-		if ((this.opts.format === OUTPUT_FORMAT.TABLE) || this.opts.outfile) {
+		if ((this.opts.format === OutputFormat.TABLE) || this.opts.outfile) {
 			const summaryMsgs = [...summaryMap.entries()]
 				.map(([engine, summary]) => {
 					return getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
@@ -128,16 +128,16 @@ export class RunOutputProcessor {
 
 	private writeToConsole(results: FormattedOutput): string {
 		// Figure out what format we need.
-		const format: OUTPUT_FORMAT = this.opts.format;
+		const format: OutputFormat = this.opts.format;
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
-			case OUTPUT_FORMAT.CSV:
-			case OUTPUT_FORMAT.HTML:
-			case OUTPUT_FORMAT.JSON:
-			case OUTPUT_FORMAT.JUNIT:
-			case OUTPUT_FORMAT.SARIF:
-			case OUTPUT_FORMAT.XML:
+			case OutputFormat.CSV:
+			case OutputFormat.HTML:
+			case OutputFormat.JSON:
+			case OutputFormat.JUNIT:
+			case OutputFormat.SARIF:
+			case OutputFormat.XML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
@@ -145,7 +145,7 @@ export class RunOutputProcessor {
 				// We can just dump those giant strings to the console without anything special.
 				this.display.displayInfo(results);
 				break;
-			case OUTPUT_FORMAT.TABLE:
+			case OutputFormat.TABLE:
 				// This format should be a JSON with a `columns` property and a `rows` property, i.e. NOT a string.
 				if (typeof results === 'string') {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
@@ -157,6 +157,6 @@ export class RunOutputProcessor {
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
-		return format === OUTPUT_FORMAT.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
+		return format === OutputFormat.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
 	}
 }

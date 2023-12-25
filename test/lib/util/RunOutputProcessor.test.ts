@@ -1,14 +1,14 @@
 import {expect} from 'chai';
 
 import {RunOutputOptions, RunOutputProcessor} from '../../../src/lib/util/RunOutputProcessor';
-import {OUTPUT_FORMAT} from '../../../src/lib/RuleManager';
 import {EngineExecutionSummary, RecombinedRuleResults} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {FakeDisplay} from "../FakeDisplay";
-import {PATHLESS_COLUMNS} from "../../../lib/lib/output/TableOutputFormatter";
+import {PATHLESS_COLUMNS} from "../../../src/lib/output/TableOutputFormatter";
+import {OutputFormat} from "../../../src/lib/output/OutputFormat";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -102,7 +102,7 @@ describe('RunOutputProcessor', () => {
 		describe('Writing to console', () => {
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
-					format: OUTPUT_FORMAT.TABLE
+					format: OutputFormat.TABLE
 				};
 				const rop = new RunOutputProcessor(display, opts);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
@@ -124,7 +124,7 @@ describe('RunOutputProcessor', () => {
 
 				it('Table-type output should be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.TABLE
+						format: OutputFormat.TABLE
 					};
 					const rop = new RunOutputProcessor(display, opts);
 
@@ -145,7 +145,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.TABLE,
+						format: OutputFormat.TABLE,
 						severityForError: 1
 					};
 					const rop = new RunOutputProcessor(display, opts);
@@ -175,7 +175,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				// need to change.
 				it('CSV-type output should NOT be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV
+						format: OutputFormat.CSV
 					};
 
 					const rop = new RunOutputProcessor(display, opts);
@@ -188,7 +188,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
+						format: OutputFormat.CSV,
 						severityForError: 2
 					};
 
@@ -214,7 +214,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				// need to change.
 				it('JSON-type output with no violations should output be an empty violation set', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.JSON
+						format: OutputFormat.JSON
 					};
 
 					const rop = new RunOutputProcessor(display, opts);
@@ -228,7 +228,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.JSON,
+						format: OutputFormat.JSON,
 						severityForError: 1
 					};
 
@@ -250,7 +250,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 			const fakeFilePath = './some/path/to/a/file.csv';
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
-					format: OUTPUT_FORMAT.CSV,
+					format: OutputFormat.CSV,
 					outfile: fakeFilePath
 				};
 				const rop = new RunOutputProcessor(display, opts);
@@ -277,7 +277,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 
 				it('Results are properly written to file', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
+						format: OutputFormat.CSV,
 						outfile: fakeFilePath
 					};
 
@@ -297,7 +297,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
-						format: OUTPUT_FORMAT.CSV,
+						format: OutputFormat.CSV,
 						severityForError: 1,
 						outfile: fakeFilePath
 					};

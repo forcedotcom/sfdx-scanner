@@ -8,7 +8,7 @@ import {ENGINE, CONFIG_FILE, TargetType} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
-import {OUTPUT_FORMAT, RuleManager, RunOptions} from '../../src/lib/RuleManager';
+import {RuleManager, RunOptions} from '../../src/lib/RuleManager';
 import {EVENTS, uxEvents} from '../../src/lib/ScannerEvents';
 
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
@@ -23,6 +23,7 @@ import path = require('path');
 import Sinon = require('sinon');
 import {BundleName, getMessage} from "../../src/MessageCatalog";
 import {Results} from "../../src/lib/output/Results";
+import {OutputFormat} from "../../src/lib/output/OutputFormat";
 
 TestOverrides.initializeTestSetup();
 
@@ -188,7 +189,6 @@ describe('RuleManager', () => {
 				process.chdir("../../..");
 			});
 			const runOptions: RunOptions = {
-				format: OUTPUT_FORMAT.JSON,
 				normalizeSeverity: false,
 				runDfa: false,
 				withPilot: false,
@@ -361,7 +361,7 @@ describe('RuleManager', () => {
 					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 
 					// TODO: This verification step seems to be testing formatting. It should be not be in this file.
-					const formattedOutput = await results.toFormattedOutput(OUTPUT_FORMAT.JSON, false);
+					const formattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
 					expect(typeof formattedOutput).to.equal('string', `Output ${results} should have been a string`);
 					expect(formattedOutput).to.equal('[]', `Output ${results} should have been an empty summary (empty array)`);
 

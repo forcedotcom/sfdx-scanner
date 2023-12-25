@@ -7,7 +7,7 @@ import {BundleName, getMessage} from "../../MessageCatalog";
 import {Controller} from "../../Controller";
 import {RuleFilter, SourcePackageFilter} from "../RuleFilter";
 import {Display} from "../Display";
-import {InputsResolver} from "../InputsResolver";
+import {InputProcessor} from "../InputProcessor";
 
 /**
  * The Action behind the "rule remove" command
@@ -15,12 +15,12 @@ import {InputsResolver} from "../InputsResolver";
 export class RuleRemoveAction implements Action {
 	private readonly logger: Logger;
 	private readonly display: Display;
-	private readonly inputsResolver: InputsResolver;
+	private readonly inputProcessor: InputProcessor;
 
-	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver) {
+	public constructor(logger: Logger, display: Display, inputProcessor: InputProcessor) {
 		this.logger = logger;
 		this.display = display;
-		this.inputsResolver = inputsResolver;
+		this.inputProcessor = inputProcessor;
 	}
 
 	public validateInputs(inputs: Inputs): Promise<void> {
@@ -33,7 +33,7 @@ export class RuleRemoveAction implements Action {
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
 		// Pull out and process our flag.
-		const paths = inputs.path ? this.inputsResolver.resolvePaths(inputs) : null;
+		const paths = inputs.path ? this.inputProcessor.resolvePaths(inputs) : null;
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);
 
 		// Get all rule entries matching the criteria they provided.
