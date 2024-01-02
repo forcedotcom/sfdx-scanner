@@ -1,4 +1,4 @@
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {xml2js, Element} from 'xml-js';
 import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
@@ -10,11 +10,8 @@ import CpdWrapper from './CpdWrapper';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import crypto = require('crypto');
 import * as EnvVariable from '../util/EnvironmentVariable';
+import {BundleName, getMessage} from "../../MessageCatalog";
 
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CpdEngine');
-const eventMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "EventKeyTemplates");
 
 //  CPD supported languages: [apex, java, vf, xml]
 const FileExtToLanguage: Map<string, LANGUAGE> = new Map([
@@ -138,7 +135,7 @@ export class CpdEngine extends AbstractRuleEngine {
 
 		// Let user know about file paths that could not be matched
 		if (unmatchedPaths.length > 0) {
-			uxEvents.emit(EVENTS.INFO_VERBOSE, eventMessages.getMessage('info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
+			uxEvents.emit(EVENTS.INFO_VERBOSE, getMessage(BundleName.EventKeyTemplates, 'info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
 		}
 
 		return languageToPaths;
@@ -225,7 +222,7 @@ export class CpdEngine extends AbstractRuleEngine {
 					endColumn: occ.attributes.endcolumn as number,
 					ruleName: CpdRuleName,
 					severity: CpdViolationSeverity,
-					message: messages.getMessage("CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
+					message: getMessage(BundleName.CpdEngine, "CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
 					category: CpdRuleCategory,
 					url: CpdInfoUrl
 				};

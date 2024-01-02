@@ -2,7 +2,6 @@ import { expect } from 'chai';
 import Sinon = require('sinon');
 import * as path from 'path';
 import { fail } from 'assert';
-import {Messages} from '@salesforce/core';
 import {HARDCODED_RULES} from '../../../src/Constants';
 import {ProcessRuleViolationType} from '../../../src/lib/eslint/EslintCommons';
 import {TypescriptEslintStrategy, TYPESCRIPT_ENGINE_OPTIONS} from '../../../src/lib/eslint/TypescriptEslintStrategy';
@@ -13,9 +12,8 @@ import {RuleResult, RuleViolation} from '../../../src/types';
 import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
-Messages.importMessagesDirectory(__dirname);
-const strategyMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'TypescriptEslintStrategy');
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
 let ruleManager: RuleManager = null;
@@ -83,7 +81,7 @@ See the typescript-eslint docs for more info: https://typescript-eslint.io/linti
 			violationProcessor(fileName, unincludedFileError);
 
 			// We expect that the processor method modified the error message.
-			expect(unincludedFileError.message).to.equal(strategyMessages.getMessage('FileNotIncludedByTsConfig', [fileName, 'tsconfig.json']), 'Incorrect msg');
+			expect(unincludedFileError.message).to.equal(getMessage(BundleName.TypescriptEslintStrategy, 'FileNotIncludedByTsConfig', [fileName, 'tsconfig.json']), 'Incorrect msg');
 		});
 	});
 

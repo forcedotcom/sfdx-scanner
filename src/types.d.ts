@@ -31,6 +31,12 @@ export type LooseObject = {
 	[key: string]: any;
 }
 
+// TODO: We should really define our input type property for each command so that we can avoid all the castings: "as string", "as boolean", etc
+export type Inputs = {
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+	[key: string]: any;
+}
+
 /**
  * Alias for ESLint's{@link Linter.RuleEntry} type. Exported here to minimize the need to import directly from ESLint.
  */

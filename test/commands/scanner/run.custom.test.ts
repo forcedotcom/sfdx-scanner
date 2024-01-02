@@ -1,15 +1,10 @@
-import { Messages } from "@salesforce/core";
 // @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require('path');
 import { expect } from 'chai';
 import {ENGINE} from '../../../src/Constants';
 import normalize = require('normalize-path');
-
-
-Messages.importMessagesDirectory(__dirname);
-const eventMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
-
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 describe('scanner run with custom config E2E', () => {
 	const customPmdConfig =  path.join('.', 'test', 'code-fixtures', 'config', 'pmd_custom_config.xml');
@@ -22,7 +17,7 @@ describe('scanner run with custom config E2E', () => {
 		expect(stdout).to.not.be.empty;
 
 		// Verify that the expected warning is displayed.
-		const expectedMessage = eventMessages.getMessage('info.customPmdHeadsUp', [normalize(customPmdConfig)]);
+		const expectedMessage = getMessage(BundleName.EventKeyTemplates, 'info.customPmdHeadsUp', [normalize(customPmdConfig)]);
 		expect(stdout).to.contain(expectedMessage);
 
 		// Verify that the contents are correct.
@@ -41,7 +36,7 @@ describe('scanner run with custom config E2E', () => {
 		expect(stdout).to.not.be.empty;
 
 		// Verify that the expected warning is displayed.
-		const expectedMessage = eventMessages.getMessage('info.customEslintHeadsUp', [normalize(customEslintConfig)]);
+		const expectedMessage = getMessage(BundleName.EventKeyTemplates, 'info.customEslintHeadsUp', [normalize(customEslintConfig)]);
 		expect(stdout).to.contain(expectedMessage);
 
 		// Verify that the contents are correct.

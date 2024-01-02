@@ -1,15 +1,11 @@
-import {Ux} from '@salesforce/sf-plugins-core';
 import {AnyJson} from '@salesforce/ts-types';
-import {Messages, SfError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import fs = require('fs');
-
 import {RecombinedRuleResults, RecombinedData} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
-
-Messages.importMessagesDirectory(__dirname);
-
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'RunOutputProcessor');
-const INTERNAL_ERROR_CODE = 1;
+import {BundleName, getMessage} from "../../MessageCatalog";
+import {Display} from "../Display";
+import {INTERNAL_ERROR_CODE} from "../../Constants";
 
 export type RunOutputOptions = {
 	format: OUTPUT_FORMAT;
@@ -18,14 +14,13 @@ export type RunOutputOptions = {
 }
 
 export class RunOutputProcessor {
-	private opts: RunOutputOptions;
-	private ux: Ux;
+	private readonly display: Display;
+	private readonly opts: RunOutputOptions;
 
-	public constructor(opts: RunOutputOptions, ux: Ux) {
+	public constructor(display: Display, opts: RunOutputOptions) {
+		this.display = display;
 		this.opts = opts;
-		this.ux = ux;
 	}
-
 
 	public processRunOutput(rrr: RecombinedRuleResults): AnyJson {
 		const {minSev, results, summaryMap} = rrr;
@@ -38,9 +33,9 @@ export class RunOutputProcessor {
 		//       an empty outfile
 		if (!this.opts.outfile && !hasViolations) {
 			// Build a message indicating which engines were run...
-			const msg = messages.getMessage('output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
+			const msg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
 			// ...log it to the console...
-			this.ux.log(msg);
+			this.display.displayInfo(msg);
 			// ...and return it for use with the --json flag.
 			return msg;
 		}
@@ -62,7 +57,7 @@ export class RunOutputProcessor {
 			throw new SfError(msg, null, null, minSev);
 		} else if (msg && msg.length > 0) {
 			// No sense logging an empty message.
-			this.ux.log(msg);
+			this.display.displayInfo(msg);
 		}
 
 		// Finally, we need to return something for use by the --json flag.
@@ -104,14 +99,14 @@ export class RunOutputProcessor {
 		if ((this.opts.format === OUTPUT_FORMAT.TABLE) || this.opts.outfile) {
 			const summaryMsgs = [...summaryMap.entries()]
 				.map(([engine, summary]) => {
-					return messages.getMessage('output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
+					return getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
 				});
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
 		// Summary to print with --severity-threshold flag
 		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
-			msgParts.push(messages.getMessage('output.sevThresholdSummary', [this.opts.severityForError]));
+			msgParts.push(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [this.opts.severityForError]));
 		}
 
 		return msgParts;
@@ -128,7 +123,7 @@ export class RunOutputProcessor {
 			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
-		return messages.getMessage('output.writtenToOutFile', [this.opts.outfile]);
+		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}
 
 	private writeToConsole(results: RecombinedData): string {
@@ -148,20 +143,20 @@ export class RunOutputProcessor {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
 				// We can just dump those giant strings to the console without anything special.
-				this.ux.log(results);
+				this.display.displayInfo(results);
 				break;
 			case OUTPUT_FORMAT.TABLE:
 				// This format should be a JSON with a `columns` property and a `rows` property, i.e. NOT a string.
 				if (typeof results === 'string') {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 				}
-				this.ux.table(results.rows, results.columns);
+				this.display.displayTable(results.rows, results.columns);
 				break;
 			default:
 				throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
-		return format === OUTPUT_FORMAT.TABLE ? messages.getMessage('output.writtenToConsole') : '';
+		return format === OUTPUT_FORMAT.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
 	}
 }

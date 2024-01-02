@@ -1,10 +1,10 @@
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
 import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {RuleManager, RunOptions} from './RuleManager';
+import {EngineOptions, RuleManager, RunOptions} from './RuleManager';
 import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
@@ -16,9 +16,7 @@ import {CONFIG_FILE, CUSTOM_CONFIG, ENGINE, TargetType} from '../Constants';
 import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
+import {BundleName, getMessage} from "../MessageCatalog";
 
 type RunDescriptor = {
 	engine: RuleEngine;
@@ -69,7 +67,7 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<RecombinedRuleResults> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
 		let results: RuleResult[] = [];
@@ -134,7 +132,7 @@ export class DefaultRuleManager implements RuleManager {
 			if (pathsDoubleProcessed.length > numFilesShown) {
 				filesToDisplay.push(`and ${pathsDoubleProcessed.length - numFilesShown} more`)
 			}
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
 		}
 
 
@@ -145,7 +143,7 @@ export class DefaultRuleManager implements RuleManager {
 
 		if (unmatchedTargets.length > 0) {
 			const warningKey = unmatchedTargets.length === 1 ? 'warning.targetSkipped' : 'warning.targetsSkipped';
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage(warningKey, [`${unmatchedTargets.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, warningKey, [`${unmatchedTargets.join(', ')}`]));
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
@@ -169,7 +167,7 @@ export class DefaultRuleManager implements RuleManager {
 		const dfaEngines = runDescriptorList.filter(descriptor => descriptor.engine.isDfaEngine()).map(descriptor => descriptor.engine.getName());
 		const pathlessEngines = runDescriptorList.filter(descriptor => !(descriptor.engine.isDfaEngine())).map(descriptor => descriptor.engine.getName());
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
-			throw new SfError(messages.getMessage('error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
+			throw new SfError(getMessage(BundleName.DefaultRuleManager, 'error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
 		}
 	}
 

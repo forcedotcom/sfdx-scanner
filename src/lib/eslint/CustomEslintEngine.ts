@@ -2,17 +2,11 @@ import { Catalog, RuleGroup, Rule, RuleTarget, RuleResult, RuleViolation, Target
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, Severity, TargetType} from '../../Constants';
 import {EslintProcessHelper, StaticDependencies, ProcessRuleViolationType} from './EslintCommons';
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
 import {ESLint, Linter} from 'eslint';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'CustomEslintEngine');
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 export class CustomEslintEngine extends AbstractRuleEngine {
 
@@ -115,7 +109,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 		const fileHandler = this.dependencies.getFileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
-			throw new SfError(messages.getMessage('ConfigFileDoesNotExist', [configFile]));
+			throw new SfError(getMessage(BundleName.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFile]));
 		}
 
 		// At this point file exists. Convert content into JSON
@@ -129,7 +123,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			config = JSON.parse(configContent) as Linter.Config;
 		} catch (error) {
 			const message: string = error instanceof Error ? error.message : error as string;
-			throw new SfError(messages.getMessage('InvalidJson', [configFile, message]));
+			throw new SfError(getMessage(BundleName.CustomEslintEngine, 'InvalidJson', [configFile, message]));
 		}
 
 		return config;

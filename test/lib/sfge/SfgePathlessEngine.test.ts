@@ -1,15 +1,12 @@
 import 'reflect-metadata';
 import {expect} from 'chai';
-import {Messages} from '@salesforce/core';
 import {SfgeConfig} from '../../../src/types';
 import {CUSTOM_CONFIG} from '../../../src/Constants';
 import {SfgePathlessEngine} from '../../../src/lib/sfge/SfgePathlessEngine';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'SfgeEngine');
 
 describe('SfgePathlessEngine', () => {
 	describe('#isEngineRequested()', () => {
@@ -86,7 +83,7 @@ describe('SfgePathlessEngine', () => {
 				return engine.shouldEngineRun([], [], [], engineOptions);
 			};
 			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(messages.getMessage('errors.failedWithoutProjectDir', []));
+			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
 		});
 
 		it('Throws error when SfgeConfig lacks projectdirs array', async () => {
@@ -101,7 +98,7 @@ describe('SfgePathlessEngine', () => {
 				return engine.shouldEngineRun([], [], [], engineOptions);
 			};
 			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(messages.getMessage('errors.failedWithoutProjectDir', []));
+			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
 		});
 
 		it('Throws error when SfgeConfig is outright absent', async () => {
@@ -114,7 +111,7 @@ describe('SfgePathlessEngine', () => {
 				return engine.shouldEngineRun([], [], [], new Map());
 			};
 			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(messages.getMessage('errors.failedWithoutProjectDir', []));
+			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
 		});
 	});
 });

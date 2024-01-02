@@ -1,4 +1,4 @@
-import {Logger, Messages} from '@salesforce/core';
+import {Logger} from '@salesforce/core';
 import {Catalog} from '../../types';
 import {FileHandler} from '../util/FileHandler';
 import * as PrettyPrinter from '../util/PrettyPrinter';
@@ -11,9 +11,7 @@ import path = require('path');
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import { Controller } from '../../Controller';
 import { PMD_CATALOG_FILE, PMD_VERSION } from '../../Constants';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/pmd
 const PMD_CATALOGER_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'pmd-cataloger', 'lib');
@@ -121,7 +119,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 						pathSet.add(value);
 					} else {
 						// The catalog file may have been deleted or moved. Show the user a warning.
-						uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.customRuleFileNotFound', [value, lang]));
+						uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.EventKeyTemplates, 'warning.customRuleFileNotFound', [value, lang]));
 					}
 				}
 			}
@@ -161,7 +159,7 @@ export class PmdCatalogWrapper extends PmdSupport {
 			// If the process errored out, then one of the Messages logged by the parent class already indicates that.
 			// So rather than returning stderr (which will be confusing and likely unhelpful, just return a hardcoded
 			// string indicating that the cause was logged elsewhere.
-			args.rej(messages.getMessage('error.external.errorMessageAbove'));
+			args.rej(getMessage(BundleName.EventKeyTemplates, 'error.external.errorMessageAbove'));
 		}
 	}
 

@@ -16,6 +16,8 @@ export const ENV_VAR_NAMES = {
 	SCANNER_PATH_OVERRIDE: 'SCANNER_PATH_OVERRIDE'
 };
 
+export const INTERNAL_ERROR_CODE = 1;
+
 export enum ENGINE {
 	PMD = 'pmd',
 	PMD_CUSTOM = 'pmd-custom',

@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-import {Messages} from '@salesforce/core';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import path = require('path');
@@ -10,9 +9,7 @@ import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
-
-Messages.importMessagesDirectory(__dirname);
-const engineMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -65,7 +62,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			expect(stderr).to.not.be.null;
 
 			const simplifiedMessage = (testPmdEngine as any).processStdErr(stderr);
-			const expectedMessage = engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
+			const expectedMessage = getMessage(BundleName.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
 			expect(simplifiedMessage).to.equal(expectedMessage, 'Stderr not properly simplified');
 		});
 

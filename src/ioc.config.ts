@@ -20,8 +20,9 @@ import {CpdEngine} from "./lib/cpd/CpdEngine";
  * Initialize the ioc container with singletons common to test and prod
  */
 export function registerAll(): void {
-	// See #setupProd comment above
 	if (!container.isRegistered(Services.Config)) {
+
+		// TODO: We should revisit each of these and ask ourselves which ones we actually need as registered singletons.
 		container.registerSingleton(Services.Config, Config);
 		container.registerSingleton(Services.RuleManager, DefaultRuleManager);
 		container.registerSingleton(Services.RuleEngine, PmdEngine);

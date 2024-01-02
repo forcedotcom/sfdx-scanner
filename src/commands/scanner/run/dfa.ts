@@ -1,31 +1,24 @@
-import globby = require('globby');
 import {Flags} from '@salesforce/sf-plugins-core';
-import {Messages, SfError} from '@salesforce/core';
-import {CUSTOM_CONFIG} from '../../../Constants';
-import {SfgeConfig} from '../../../types';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
-import {FileHandler} from '../../../lib/util/FileHandler';
+import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
+import {InputsResolver, InputsResolverImpl} from "../../../lib/InputsResolver";
+import {EngineOptionsFactory, RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
+import {BundleName, getMessage} from "../../../MessageCatalog";
+import {Logger} from "@salesforce/core";
+import {Display} from "../../../lib/Display";
+import {Action} from "../../../lib/ScannerCommand";
+import {RunDfaAction} from "../../../lib/actions/RunDfaAction";
+import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
 
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-dfa');
-
-const RULE_DISABLE_WARNING_VIOLATION_FLAG = 'rule-disable-warning-violation';
-const RULE_DISABLE_WARNING_VIOLATION_ENVVAR = 'SFGE_RULE_DISABLE_WARNING_VIOLATION';
-const BOOLEAN_ENVARS_BY_FLAG: Map<string,string> = new Map([
-	[RULE_DISABLE_WARNING_VIOLATION_FLAG, RULE_DISABLE_WARNING_VIOLATION_ENVVAR]
-]);
-
+/**
+ * Defines the "run dfa" command for the "scanner" cli.
+ */
 export default class Dfa extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = messages.getMessage('commandSummary');
-	public static description = messages.getMessage('commandDescription');
-
+	public static summary = getMessage(BundleName.RunDfa, 'commandSummary');
+	public static description = getMessage(BundleName.RunDfa, 'commandDescription');
 	public static examples = [
-		messages.getMessage('examples')
+		getMessage(BundleName.RunDfa, 'examples')
 	];
 
 	// This defines the flags accepted by this command.
@@ -37,8 +30,8 @@ export default class Dfa extends ScannerRunCommand {
 		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
 		'with-pilot': Flags.boolean({
-			summary: messages.getMessage('flags.withpilotSummary'),
-			description: messages.getMessage('flags.withpilotDescription')
+			summary: getMessage(BundleName.RunDfa, 'flags.withpilotSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.withpilotDescription')
 		}),
 		// END: Filter-related flags.
 		// BEGIN: Flags for targeting files.
@@ -46,8 +39,8 @@ export default class Dfa extends ScannerRunCommand {
 		// and therefore different descriptions, so each command defines this flag separately.
 		target: Flags.custom<string[]>({
 			char: 't',
-			summary: messages.getMessage('flags.targetSummary'),
-			description: messages.getMessage('flags.targetDescription'),
+			summary: getMessage(BundleName.RunDfa, 'flags.targetSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.targetDescription'),
 			required: true,
 			delimiter: ',',
 			multiple: true
@@ -55,100 +48,39 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Flags for targeting files.
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': Flags.integer({
-			summary: messages.getMessage('flags.rulethreadcountSummary'),
-			description: messages.getMessage('flags.rulethreadcountDescription'),
+			summary: getMessage(BundleName.RunDfa, 'flags.rulethreadcountSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.rulethreadcountDescription'),
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
 		'rule-thread-timeout': Flags.integer({
-			summary: messages.getMessage('flags.rulethreadtimeoutSummary'),
-			description: messages.getMessage('flags.rulethreadtimeoutDescription'),
+			summary: getMessage(BundleName.RunDfa, 'flags.rulethreadtimeoutSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.rulethreadtimeoutDescription'),
 			env: 'SFGE_RULE_THREAD_TIMEOUT'
 		}),
 		// NOTE: This flag can't use the `env` property to inherit a value automatically, because OCLIF boolean flags
 		// don't support that. Instead, we check the env-var manually in a subsequent method.
-		[RULE_DISABLE_WARNING_VIOLATION_FLAG]: Flags.boolean({
-			summary: messages.getMessage('flags.ruledisablewarningviolationSummary'),
-			description: messages.getMessage('flags.ruledisablewarningviolationDescription')
+		'rule-disable-warning-violation': Flags.boolean({
+			summary: getMessage(BundleName.RunDfa, 'flags.ruledisablewarningviolationSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.ruledisablewarningviolationDescription')
 		}),
 		'sfgejvmargs': Flags.string({
-			summary: messages.getMessage('flags.sfgejvmargsSummary'),
-			description: messages.getMessage('flags.sfgejvmargsDescription'),
+			summary: getMessage(BundleName.RunDfa, 'flags.sfgejvmargsSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.sfgejvmargsDescription'),
 			env: 'SFGE_JVM_ARGS'
 		}),
 		'pathexplimit': Flags.integer({
-			summary: messages.getMessage('flags.pathexplimitSummary'),
-			description: messages.getMessage('flags.pathexplimitDescription'),
+			summary: getMessage(BundleName.RunDfa, 'flags.pathexplimitSummary'),
+			description: getMessage(BundleName.RunDfa, 'flags.pathexplimitDescription'),
 			env: 'SFGE_PATH_EXPANSION_LIMIT'
 		})
 		// END: Config-overrideable engine flags.
 	};
 
-	protected async validateVariantFlags(): Promise<void> {
-		const fh = new FileHandler();
-		// The superclass will validate that --projectdir is well-formed,
-		// but doesn't require that the flag actually be present.
-		// So we should make sure it exists here.
-		if (!this.parsedFlags.projectdir || (this.parsedFlags.projectdir as string[]).length === 0) {
-			throw new SfError(messages.getMessage('validations.projectdirIsRequired'));
-		}
-		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
-		for (const target of (this.parsedFlags.target as string[])) {
-			// The target specifies a method if it includes the `#` syntax.
-			if (target.indexOf('#') > -1) {
-				if( globby.hasMagic(target)) {
-					throw new SfError(messages.getMessage('validations.methodLevelTargetCannotBeGlob'));
-				}
-				const potentialFilePath = target.split('#')[0];
-				if (!(await fh.isFile(potentialFilePath))) {
-					throw new SfError(messages.getMessage('validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
-				}
-			}
-		}
-	}
-
-	/**
-	 * Gather engine options that are unique to each sub-variant.
-	 * @protected
-	 * @override
-	 */
-	protected mergeVariantEngineOptions(options: Map<string,string>): void {
-		// The flags have been validated by now, meaning --projectdir is confirmed as present,
-		// meaning we can assume the existence of a GraphEngine config in the common options.
-		const sfgeConfig: SfgeConfig = JSON.parse(options.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
-		if (this.parsedFlags['rule-thread-count'] != null) {
-			sfgeConfig.ruleThreadCount = this.parsedFlags['rule-thread-count'] as number;
-		}
-		if (this.parsedFlags['rule-thread-timeout'] != null) {
-			sfgeConfig.ruleThreadTimeout = this.parsedFlags['rule-thread-timeout'] as number;
-		}
-		if (this.parsedFlags['sfgejvmargs'] != null) {
-			sfgeConfig.jvmArgs = this.parsedFlags['sfgejvmargs'] as string;
-		}
-		if (this.parsedFlags['pathexplimit'] != null) {
-			sfgeConfig.pathexplimit = this.parsedFlags['pathexplimit'] as number;
-		}
-		sfgeConfig.ruleDisableWarningViolation = this.getBooleanEngineOption(RULE_DISABLE_WARNING_VIOLATION_FLAG);
-		options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
-	}
-
-	/**
-	 * Boolean flags cannot automatically inherit their value from environment variables. Instead, we use this
-	 * method to handle that inheritance if necessary.
-	 * @param flag - The name of a boolean flag associated with this command
-	 * @returns true if the flag is set or the associated env-var is set to "true"; else false.
-	 * @protected
-	 */
-	private getBooleanEngineOption(flag: string): boolean {
-		// Check the status of the flag first, since the flag being true should trump the environment variable's value.
-		if (this.parsedFlags[flag] != null) {
-			return this.parsedFlags[flag] as boolean;
-		}
-		// If the flag isn't set, get the name of the corresponding environment variable and check its value.
-		const envVar = BOOLEAN_ENVARS_BY_FLAG.get(flag);
-		return envVar in process.env && process.env[envVar].toLowerCase() === 'true';
-	}
-
-	protected pathBasedEngines(): boolean {
-		return true;
+	protected createAction(_logger: Logger, display: Display): Action {
+		const inputsResolver: InputsResolver = new InputsResolverImpl()
+		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
+		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(true, this.config.version);
+		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputsResolver);
+		return new RunDfaAction(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
 	}
 }

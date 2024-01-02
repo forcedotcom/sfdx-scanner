@@ -1,14 +1,11 @@
 import {expect} from 'chai';
 // @ts-ignore
 import {runCommand} from '../../TestUtils';
-import {Messages} from '@salesforce/core';
 import * as path from 'path';
-import Dfa from '../../../src/commands/scanner/run/dfa';
 import * as sinon from 'sinon';
+import {UxDisplay} from "../../../src/lib/Display";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
-
-Messages.importMessagesDirectory(__dirname);
-const sfgeMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 
 const dfaTarget = path.join('test', 'code-fixtures', 'projects', 'sfge-smoke-app', 'src');
 const projectdir = path.join('test', 'code-fixtures', 'projects', 'sfge-smoke-app', 'src');
@@ -20,13 +17,13 @@ const entryPointCount = '5';
 const pathCount = '6';
 const violationCount = '2';
 
-const customSettingsMessage = sfgeMessages.getMessage('info.sfgeMetaInfoCollected', ['Custom Settings', customSettingsStr]);
-const apexControllerMessage = sfgeMessages.getMessage('info.sfgeMetaInfoCollected', ['Apex Controllers', apexControllerStr]);
-const compiledMessage = sfgeMessages.getMessage('info.sfgeFinishedCompilingFiles', [fileCount]);
-const startGraphBuildMessage = sfgeMessages.getMessage('info.sfgeStartedBuildingGraph');
-const endGraphBuildMessage = sfgeMessages.getMessage('info.sfgeFinishedBuildingGraph');
-const identifiedEntryMessage = sfgeMessages.getMessage('info.sfgePathEntryPointsIdentified', [entryPointCount]);
-const completedAnalysisMessage = sfgeMessages.getMessage('info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
+const customSettingsMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Custom Settings', customSettingsStr]);
+const apexControllerMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Apex Controllers', apexControllerStr]);
+const compiledMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeFinishedCompilingFiles', [fileCount]);
+const startGraphBuildMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeStartedBuildingGraph');
+const endGraphBuildMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeFinishedBuildingGraph');
+const identifiedEntryMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgePathEntryPointsIdentified', [entryPointCount]);
+const completedAnalysisMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
 const experimentalRuleName = "RemoveUnusedMethod";
 
 function isSubstr(output: string, substring: string): boolean {
@@ -54,7 +51,7 @@ describe('scanner run dfa', function () {
 
 			before(() => {
 				sandbox = sinon.createSandbox();
-				spy = sandbox.spy(Dfa.prototype, "updateSpinner");
+				spy = sandbox.spy(UxDisplay.prototype, "spinnerUpdate");
 			})
 
 			after(() => {

@@ -1,5 +1,4 @@
 // ================= IMPORTS ======================
-import {Messages} from '@salesforce/core';
 import {expect} from 'chai';
 import Sinon = require('sinon');
 import path = require('path');
@@ -12,9 +11,8 @@ import { Controller } from '../../../src/Controller';
 import {deepCopy} from '../../../src/lib/util/Utils';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { uxEvents, EVENTS } from '../../../src/lib/ScannerEvents';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
 TestOverrides.initializeTestSetup();
 
 // ============== TYPES ===========================
@@ -34,7 +32,6 @@ const SFDX_SCANNER_PATH = Controller.getSfdxScannerPath();
 const CONFIG_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_FILE);
 const CONFIG_PILOT_PATH = path.join(SFDX_SCANNER_PATH, CONFIG_PILOT_FILE);
 const PACKAGE_VERSION = require('../../../package.json').version;
-const configMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Config');
 const BASE_CONFIG_GA = {
 	"engines": [{
 		"name": ENGINE.PMD,
@@ -233,7 +230,7 @@ describe('Config.ts', () => {
 				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config SHOULD be created');
 				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Pilot config SHOULD NOT be written to, because it already exists');
 				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be GA version');
-				const expectedWarning = configMessages.getMessage("GeneratingConfigFromPilot", [CONFIG_PILOT_PATH]);
+				const expectedWarning = getMessage(BundleName.Config, "GeneratingConfigFromPilot", [CONFIG_PILOT_PATH]);
 				expect(warnings).to.contain(expectedWarning, 'Warning about pilot config usage should be thrown');
 			});
 
@@ -422,28 +419,28 @@ describe('Config.ts', () => {
 					await config.isEngineEnabled(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'pmd', null]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
 					await config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'eslint-typescript', 15]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'eslint-typescript', 15]));
 				}
 
 				try {
 					await config.getTargetPatterns(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue', ['targetPatterns', config.getConfigFilePath(), 'pmd', null]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidStringArrayValue', ['targetPatterns', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
 					await config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(configMessages.getMessage('InvalidStringArrayValue',
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidStringArrayValue',
 						['targetPatterns', config.getConfigFilePath(), 'eslint-typescript', String([1, 2, 3])]));
 				}
 			});

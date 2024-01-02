@@ -4,13 +4,9 @@ import {Config} from '../../src/lib/util/Config';
 import Sinon = require('sinon');
 import {verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetupManager';
 import childProcess = require('child_process');
-import {Messages} from '@salesforce/core';
 import * as TestOverrides from '../test-related-lib/TestOverrides';
 
 TestOverrides.initializeTestSetup();
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
 
 describe('JreSetupManager #verifyJreSetup', () => {
 	const javaHomeValidPath = '/valid/java/home';

@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { fail } from 'assert';
 import { expect } from 'chai';
-import { Messages } from '@salesforce/core';
 import { isRuleGroupFilter, CategoryFilter, LanguageFilter, RuleFilter,
 	RulenameFilter, RulesetFilter, SourcePackageFilter, EngineFilter, isEngineFilter } from '../../src/lib/RuleFilter';
 import { ENGINE, LANGUAGE } from '../../src/Constants';
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Exceptions');
+import {BundleName, getMessage} from "../../src/MessageCatalog";
 
 const POSITIVE_FILTERS = ['val1 ', ' val2'];
 const NEGATIVE_FILTERS = ['!val1 ', ' !val2'];
@@ -20,7 +17,7 @@ const assertNegativeFilterThrows = (method: () => void, filterName: string): voi
 		method();
 		fail(`${filterName} should have thrown`);
 	} catch(err) {
-		expect(err.message).to.equal(messages.getMessage("RuleFilter.PositiveOnly", [filterName]));
+		expect(err.message).to.equal(getMessage(BundleName.Exceptions, "RuleFilter.PositiveOnly", [filterName]));
 	}
 };
 
@@ -29,7 +26,7 @@ const assertMixedFilterThrows = (method: () => void, filterName: string): void =
 		method();
 		fail(`${filterName} should have thrown`);
 	} catch(err) {
-		expect(err.message).to.equal(messages.getMessage("RuleFilter.MixedTypes", [filterName]));
+		expect(err.message).to.equal(getMessage(BundleName.Exceptions, "RuleFilter.MixedTypes", [filterName]));
 	}
 };
 

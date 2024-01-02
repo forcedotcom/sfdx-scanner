@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import {SfError, Messages} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {container} from "tsyringe";
 import {Config} from './lib/util/Config';
 import {DEFAULT_SCANNER_PATH, ENV_VAR_NAMES, Services, AllowedEngineFilters} from './Constants';
@@ -8,14 +8,7 @@ import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'Controller');
-
+import {BundleName, getMessage} from "./MessageCatalog";
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
@@ -24,7 +17,13 @@ function enginesToString(engines: RuleEngine[]): string {
 	return engines.map(e => e.getName()).sort().join(', ');
 }
 
-// TODO: This is probably more appropriately called a Factory
+
+// TODO: Refactor to effectively remove this entire file.
+//       We should favor proper constructor dependency injection over grabbing singletons in our business logic.
+//       See https://stackoverflow.com/questions/137975/what-are-drawbacks-or-disadvantages-of-singleton-pattern
+
+
+// This is probably more appropriately called a ProviderFactory (Salesforce Core folks know this code smell all too well)
 export const Controller = {
 	container,
 
@@ -71,7 +70,7 @@ export const Controller = {
 		const engines = allEngines.filter(e => e.isEngineRequested(filteredNames, engineOptions));
 
 		if (engines.length == 0) {
-			const msg = messages.getMessage('NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
+			const msg = getMessage(BundleName.Controller, 'NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
 			throw new SfError(msg);
 		}
 
@@ -88,7 +87,7 @@ export const Controller = {
 			}
 		}
 		if (engines.length == 0) {
-			const msg = messages.getMessage('NoEnabledEnginesFound', [enginesToString(allEngines)]);
+			const msg = getMessage(BundleName.Controller, 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
 			throw new SfError(msg);
 		}
 
