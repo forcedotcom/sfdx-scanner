@@ -4,7 +4,7 @@ import {Controller} from '../../Controller';
 import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {APPEXCHANGE_PMD_LIB, PMD_APPEXCHANGE_VERSION, CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
+import {APPEXCHANGE_PMD_LIB, PMD_APPEXCHANGE_RULES_VERSION, CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {EVENTS, uxEvents} from "../ScannerEvents";
@@ -596,7 +596,7 @@ export class AppExchangePmdEngine extends AbstractPmdEngine {
 	private createRuleMap(): Map<string, Set<string>> {
 		const rulePathsByLanguage = new Map<string, Set<string>>();
 		for (const language of AppExchangePmdEngine.SUPPORTED_LANGUAGES) {
-			const jarPath = path.join(`${APPEXCHANGE_PMD_LIB}`, `sfca-pmd-${language}-${PMD_APPEXCHANGE_VERSION}.jar`);
+			const jarPath = path.join(`${APPEXCHANGE_PMD_LIB}`, `sfca-pmd-${language}-${PMD_APPEXCHANGE_RULES_VERSION}.jar`);
 			rulePathsByLanguage.set(language, new Set<string>([jarPath]));
 		}
 		return rulePathsByLanguage;
