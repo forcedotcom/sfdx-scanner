@@ -8,7 +8,7 @@ import {RuleManager} from './lib/RuleManager';
 import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
-import {Bundle, getMessage} from "./MessageCatalog";
+import {BundleName, getMessage} from "./MessageCatalog";
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
@@ -70,7 +70,7 @@ export const Controller = {
 		const engines = allEngines.filter(e => e.isEngineRequested(filteredNames, engineOptions));
 
 		if (engines.length == 0) {
-			const msg = getMessage(Bundle.Controller, 'NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
+			const msg = getMessage(BundleName.Controller, 'NoFilteredEnginesFound', [filteredNames.join(','), AllowedEngineFilters.sort().join(', ')]);
 			throw new SfError(msg);
 		}
 
@@ -87,7 +87,7 @@ export const Controller = {
 			}
 		}
 		if (engines.length == 0) {
-			const msg = getMessage(Bundle.Controller, 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
+			const msg = getMessage(BundleName.Controller, 'NoEnabledEnginesFound', [enginesToString(allEngines)]);
 			throw new SfError(msg);
 		}
 

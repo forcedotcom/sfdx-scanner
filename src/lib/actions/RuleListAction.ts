@@ -2,11 +2,44 @@ import {Action} from "../ScannerCommand";
 import {Inputs, Rule} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {Ux} from "@salesforce/sf-plugins-core";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {RuleFilter} from "../RuleFilter";
 import {Controller} from "../../Controller";
 import {Display} from "../Display";
 import {RuleFilterFactory} from "../RuleFilterFactory";
+
+const MSG_YES: string = getMessage(BundleName.List, 'yes');
+const MSG_NO: string = getMessage(BundleName.List, 'no');
+const columns: Ux.Table.Columns<Rule> = {
+	name: {
+		header: getMessage(BundleName.List, 'columnNames.name')
+	},
+	languages: {
+		header: getMessage(BundleName.List, 'columnNames.languages'),
+		get: (rule: Rule): string => rule.languages.join(',')
+	},
+	categories: {
+		header: getMessage(BundleName.List, 'columnNames.categories'),
+		get: (rule: Rule): string => rule.categories.join(',')
+	},
+	rulesets: {
+		header: getMessage(BundleName.List, 'columnNames.rulesets'),
+		get: (rule: Rule): string => rule.rulesets
+			.map(ruleset => ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset)
+			.join(',')
+	},
+	engine: {
+		header: getMessage(BundleName.List, 'columnNames.engine')
+	},
+	isDfa: {
+		header: getMessage(BundleName.List, 'columnNames.is-dfa'),
+		get: (rule: Rule): string => rule.isDfa ? MSG_YES : MSG_NO
+	},
+	isPilot: {
+		header: getMessage(BundleName.List, 'columnNames.is-pilot'),
+		get: (rule: Rule): string => rule.isPilot ? MSG_YES : MSG_NO
+	}
+};
 
 /**
  * The Action behind the "rule list" command
@@ -38,36 +71,3 @@ export class RuleListAction implements Action {
 		return rules;
 	}
 }
-
-const MSG_YES: string = getMessage(Bundle.List, 'yes');
-const MSG_NO: string = getMessage(Bundle.List, 'no');
-const columns: Ux.Table.Columns<Rule> = {
-	name: {
-		header: getMessage(Bundle.List, 'columnNames.name')
-	},
-	languages: {
-		header: getMessage(Bundle.List, 'columnNames.languages'),
-		get: (rule: Rule): string => rule.languages.join(',')
-	},
-	categories: {
-		header: getMessage(Bundle.List, 'columnNames.categories'),
-		get: (rule: Rule): string => rule.categories.join(',')
-	},
-	rulesets: {
-		header: getMessage(Bundle.List, 'columnNames.rulesets'),
-		get: (rule: Rule): string => rule.rulesets
-			.map(ruleset => ruleset.length >= 20 ? ruleset.slice(0, 15) + '...' : ruleset)
-			.join(',')
-	},
-	engine: {
-		header: getMessage(Bundle.List, 'columnNames.engine')
-	},
-	isDfa: {
-		header: getMessage(Bundle.List, 'columnNames.is-dfa'),
-		get: (rule: Rule): string => rule.isDfa ? MSG_YES : MSG_NO
-	},
-	isPilot: {
-		header: getMessage(Bundle.List, 'columnNames.is-pilot'),
-		get: (rule: Rule): string => rule.isPilot ? MSG_YES : MSG_NO
-	}
-};

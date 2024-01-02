@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { isRuleGroupFilter, CategoryFilter, LanguageFilter, RuleFilter,
 	RulenameFilter, RulesetFilter, SourcePackageFilter, EngineFilter, isEngineFilter } from '../../src/lib/RuleFilter';
 import { ENGINE, LANGUAGE } from '../../src/Constants';
-import {Bundle, getMessage} from "../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../src/MessageCatalog";
 
 const POSITIVE_FILTERS = ['val1 ', ' val2'];
 const NEGATIVE_FILTERS = ['!val1 ', ' !val2'];
@@ -17,7 +17,7 @@ const assertNegativeFilterThrows = (method: () => void, filterName: string): voi
 		method();
 		fail(`${filterName} should have thrown`);
 	} catch(err) {
-		expect(err.message).to.equal(getMessage(Bundle.Exceptions, "RuleFilter.PositiveOnly", [filterName]));
+		expect(err.message).to.equal(getMessage(BundleName.Exceptions, "RuleFilter.PositiveOnly", [filterName]));
 	}
 };
 
@@ -26,7 +26,7 @@ const assertMixedFilterThrows = (method: () => void, filterName: string): void =
 		method();
 		fail(`${filterName} should have thrown`);
 	} catch(err) {
-		expect(err.message).to.equal(getMessage(Bundle.Exceptions, "RuleFilter.MixedTypes", [filterName]));
+		expect(err.message).to.equal(getMessage(BundleName.Exceptions, "RuleFilter.MixedTypes", [filterName]));
 	}
 };
 

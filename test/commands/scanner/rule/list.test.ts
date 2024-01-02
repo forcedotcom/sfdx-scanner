@@ -6,7 +6,7 @@ import {CATALOG_FILE, ENGINE} from '../../../../src/Constants';
 import fs = require('fs');
 import path = require('path');
 import { Controller } from '../../../../src/Controller';
-import {Bundle, getMessage} from "../../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../../src/MessageCatalog";
 
 function getCatalogJson(): { rules: Rule[] } {
 	const sfdxScannerPath = Controller.getSfdxScannerPath();
@@ -141,7 +141,7 @@ describe('scanner rule list', () => {
 
 			it('--ruleset option shows deprecation warning', () => {
 				const output = runCommand(`scanner rule list --ruleset Braces`);
-				expect(output.shellOutput.stderr).contains(getMessage(Bundle.List, 'rulesetDeprecation'));
+				expect(output.shellOutput.stderr).contains(getMessage(BundleName.List, 'rulesetDeprecation'));
 			});
 
 			it('Filtering by a single ruleset returns only the rules in that ruleset', () => {

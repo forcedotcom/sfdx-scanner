@@ -5,7 +5,7 @@ import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
 const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
@@ -48,7 +48,7 @@ describe('scanner run', function () {
 
 				it('When the file contains no violations, a message is logged to the console', () => {
 					const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format xml`);
-					expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+					expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 				});
 			});
 
@@ -116,7 +116,7 @@ describe('scanner run', function () {
 			describe('Test Case: Running multiple rulesets at once', () => {
 				it('Violations from each rule are logged as an XML', () => {
 					const output = runCommand(`scanner run --target ${pathToAnotherTestClass} --ruleset ApexUnit,Style --format xml`);
-					expect(output.shellOutput.stderr).contains(getMessage(Bundle.Run, 'rulesetDeprecation'), 'Expected ruleset deprecation message');
+					expect(output.shellOutput.stderr).contains(getMessage(BundleName.Run, 'rulesetDeprecation'), 'Expected ruleset deprecation message');
 					// We'll split the output by the <violation> tag, so we can get individual violations.
 					const violations = output.shellOutput.stdout.split('<violation');
 					// The first list item is going to be the header, so we need to pull that off.
@@ -162,7 +162,7 @@ describe('scanner run', function () {
 				if (expectSummary) {
 					expect(summary).to.not.equal(undefined, 'Expected summary to be not undefined');
 					expect(summary).to.not.equal(null, 'Expected summary to be not null');
-					expect(summary).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
+					expect(summary).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
 				}
 				// Since it's a CSV, the rows themselves are separated by newline characters, and there's a header row we
 				// need to discard.
@@ -187,7 +187,7 @@ describe('scanner run', function () {
 				if (expectSummary) {
 					expect(summary).to.not.equal(undefined, 'Expected summary to be not undefined');
 					expect(summary).to.not.equal(null, 'Expected summary to be not null');
-					expect(summary).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
+					expect(summary).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Summary should be correct');
 				}
 
 				// Since it's a CSV, the rows themselves are separated by newline characters.
@@ -212,8 +212,8 @@ describe('scanner run', function () {
 			it('Properly writes CSV to file', () => {
 				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout}`);
 				// Verify that the correct message is displayed to user
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
 
 				// Verify that the file we wanted was actually created.
 				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
@@ -223,12 +223,12 @@ describe('scanner run', function () {
 
 			it('When no violations are detected, a message is logged to the console', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format csv`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 			});
 
 			it('When --outfile is provided and no violations are detected, CSV file with no violations is created', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${testout}`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
 
 				const fileContents = fs.readFileSync(testout).toString();
 				expect(fs.existsSync(testout)).to.be.true;
@@ -277,7 +277,7 @@ describe('scanner run', function () {
 			it('Properly writes HTML to file', () => {
 				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${outputFile}`);
 				// Verify that the correct message is displayed to user
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [outputFile]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [outputFile]));
 
 				// Verify that the file we wanted was actually created.
 				expect(fs.existsSync(outputFile)).to.equal(true, 'The command should have created the expected output file');
@@ -287,12 +287,12 @@ describe('scanner run', function () {
 
 			it('When no violations are detected, a message is logged to the console', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format html`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 			});
 
 			it('When --outfile is provided and no violations are detected, HTML file with no violations should be created', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${outputFile}`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [outputFile]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [outputFile]));
 				expect(fs.existsSync(outputFile)).to.be.true;
 				const fileContents = fs.readFileSync(outputFile).toString();
 				validateNoViolationsHtmlOutput(fileContents);
@@ -333,8 +333,8 @@ describe('scanner run', function () {
 			it('Properly writes JSON to file', () => {
 				const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${testout}`);
 				// Verify that the correct message is displayed to user
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 2, 1]), 'Expected summary to be correct');
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
 
 				// Verify that the file we wanted was actually created.
 				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
@@ -344,12 +344,12 @@ describe('scanner run', function () {
 
 			it('When no violations are detected, a message is logged to the console', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format json`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 			});
 
 			it('When --outfile is provided and no violations are detected, a JSON file with no violations is created', () => {
 				const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --outfile ${testout}`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
 				expect(fs.existsSync(testout)).to.be.true;
 				const fileContents = fs.readFileSync(testout).toString();
 				validateNoViolationsJsonOutput(fileContents);
@@ -424,7 +424,7 @@ describe('scanner run', function () {
 				const output = JSON.parse(commandOutput.shellOutput.stdout);
 				expect(output.status).to.equal(0, 'Should finish properly');
 				const result = output.result;
-				expect(result).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
+				expect(result).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [testout]));
 				// Verify that the file we wanted was actually created.
 				expect(fs.existsSync(testout)).to.equal(true, 'The command should have created the expected output file');
 				const fileContents = fs.readFileSync(testout).toString();
@@ -443,7 +443,7 @@ describe('scanner run', function () {
 				const commandOutput = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --json`);
 				const output = JSON.parse(commandOutput.shellOutput.stdout);
 				expect(output.status).to.equal(0, 'Should have finished properly');
-				expect(output.result).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+				expect(output.result).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 			})
 		});
 
@@ -508,17 +508,17 @@ describe('scanner run', function () {
 
 			it('Error thrown when output file is malformed', () => {
 				const output = runCommand(`scanner run --target path/that/does/notmatter --ruleset ApexUnit --outfile NotAValidFileName`);
-				expect(output.shellOutput.stderr).to.contain(`Error (1): ${getMessage(Bundle.CommonRun, 'validations.outfileMustBeValid')}`);
+				expect(output.shellOutput.stderr).to.contain(`Error (1): ${getMessage(BundleName.CommonRun, 'validations.outfileMustBeValid')}`);
 			});
 
 			it('Error thrown when output file is unsupported type', () => {
 				const output = runCommand(`scanner run --target path/that/does/not/matter --ruleset ApexUnit --outfile badtype.pdf`);
-				expect(output.shellOutput.stderr).to.contain(`Error (1): ${getMessage(Bundle.CommonRun, 'validations.outfileMustBeSupportedType')}`);
+				expect(output.shellOutput.stderr).to.contain(`Error (1): ${getMessage(BundleName.CommonRun, 'validations.outfileMustBeSupportedType')}`);
 			})
 
 			it('Warning logged when output file format does not match format', () => {
 				const output = runCommand(`scanner run --target path/that/does/not/matter --format csv --outfile ${notcsv}`);
-				expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.CommonRun, 'validations.outfileFormatMismatch', ['csv', 'xml']));
+				expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.CommonRun, 'validations.outfileFormatMismatch', ['csv', 'xml']));
 			});
 		});
 	});
@@ -548,7 +548,7 @@ describe('scanner run', function () {
 		it('The baseConfig enables the usage of default Javascript Types', () => {
 			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')} --format csv`);
 			// There should be no violations.
-			expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint, retire-js']));
+			expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint, retire-js']));
 		});
 
 		// TODO: THIS TEST WAS IMPLEMENTED FOR W-7791882. THE FIX FOR THAT BUG WAS SUB-OPTIMAL, AND WE NEED TO CHANGE IT IN 4.0.
@@ -566,7 +566,7 @@ describe('scanner run', function () {
 		//       DON'T BE AFRAID TO CHANGE/DELETE THIS TEST AT THAT POINT.
 		it('Providing qunit in the --env override should resolve errors about that framework', () => {
 			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')} --format json --env "{\\"qunit\\": true}"`);
-			expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint, retire-js']));
+			expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint, retire-js']));
 		});
 	});
 
@@ -586,12 +586,12 @@ describe('scanner run', function () {
 
 		it('Handle --tsconfig and --eslintconfig as mutially exclusive flags and throw an informative error message', () => {
 			const output = runCommand(`scanner run --target /some/path --tsconfig /some/path/tsconfig.json --eslintconfig /some/path/.eslintrc.json`);
-			expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Run, 'validations.tsConfigEslintConfigExclusive'));
+			expect(output.shellOutput.stderr).to.contain(getMessage(BundleName.Run, 'validations.tsConfigEslintConfigExclusive'));
 		});
 
 		it('Display informative message when rule filters are provided along with custom config - pmdconfig', () => {
 			const output = runCommand(`scanner run --target /some/path --pmdconfig /somepath/ruleref.xml --category Security`);
-			expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.Run, 'output.filtersIgnoredCustom'));
+			expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.Run, 'output.filtersIgnoredCustom'));
 		});
 	});
 
@@ -603,7 +603,7 @@ describe('scanner run', function () {
 			// We'll split the output by the <violation> tag, so we can get individual violations.
 			const violations = output.shellOutput.stdout.split('<violation');
 			// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
-			const regex = new RegExp(getMessage(Bundle.EventKeyTemplates, 'info.categoryImplicitlyRun', ['.*', '.*']), 'g');
+			const regex = new RegExp(getMessage(BundleName.EventKeyTemplates, 'info.categoryImplicitlyRun', ['.*', '.*']), 'g');
 			const implicitMessages = violations[0].match(regex);
 			// if this test is not passing and the output seems very large, that's because the test reruns on failures,
 			// and the output accumulates each time, so the output on failure is not the true length of the output

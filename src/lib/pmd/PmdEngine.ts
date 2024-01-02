@@ -11,7 +11,7 @@ import {uxEvents, EVENTS} from "../ScannerEvents";
 import {FileHandler} from '../util/FileHandler';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 interface PmdViolation extends Element {
 	attributes: {
@@ -219,7 +219,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 		// We're expecting the results to be a length-3 array, with the first item being the entire match, and the second
 		// and third being the capture groups we defined in the regex.
 		if (regexResult && regexResult.length === 3) {
-			return getMessage(Bundle.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', regexResult.slice(1));
+			return getMessage(BundleName.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', regexResult.slice(1));
 		} else {
 			// If we weren't able to match the template, just return the log we were given. That way, at least we don't
 			// make it any worse.
@@ -260,7 +260,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 					// to the internal logs.
 					uxEvents.emit(
 						EVENTS.WARNING_VERBOSE,
-						getMessage(Bundle.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
+						getMessage(BundleName.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
 							node.name
 						])
 					);
@@ -325,7 +325,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 					// info-log about it.
 					uxEvents.emit(
 						EVENTS.INFO_VERBOSE,
-						getMessage(Bundle.EventKeyTemplates, "info.pmdRuleSkipped", [
+						getMessage(BundleName.EventKeyTemplates, "info.pmdRuleSkipped", [
 							violation.ruleName, this.SKIPPED_RULES_TO_REASON_MAP.get(ruleKey)
 						])
 					);
@@ -360,7 +360,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "error":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						getMessage(Bundle.EventKeyTemplates, "warning.pmdSkippedFile", [
+						getMessage(BundleName.EventKeyTemplates, "warning.pmdSkippedFile", [
 							attributes.filename,
 							attributes.msg
 						])
@@ -370,7 +370,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "suppressedviolation":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						getMessage(Bundle.EventKeyTemplates, "warning.pmdSuppressedViolation", [
+						getMessage(BundleName.EventKeyTemplates, "warning.pmdSuppressedViolation", [
 							attributes.filename,
 							attributes.msg,
 							attributes.suppressiontype,
@@ -382,7 +382,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				case "configerror":
 					uxEvents.emit(
 						EVENTS.WARNING_ALWAYS,
-						getMessage(Bundle.EventKeyTemplates, "warning.pmdConfigError", [
+						getMessage(BundleName.EventKeyTemplates, "warning.pmdConfigError", [
 							attributes.rule,
 							attributes.msg
 						])
@@ -392,7 +392,7 @@ abstract class BasePmdEngine extends AbstractRuleEngine {
 				default:
 					uxEvents.emit(
 						EVENTS.WARNING_VERBOSE,
-						getMessage(Bundle.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
+						getMessage(BundleName.EventKeyTemplates, 'warning.unexpectedPmdNodeType', [
 							node.name
 						])
 					);
@@ -520,7 +520,7 @@ export class CustomPmdEngine extends BasePmdEngine {
 		const configFile = engineOptions.get(CUSTOM_CONFIG.PmdConfig);
 		const fileHandler = new FileHandler();
 		if (!(await fileHandler.exists(configFile))) {
-			throw new SfError(getMessage(Bundle.PmdEngine, 'ConfigNotFound', [configFile]));
+			throw new SfError(getMessage(BundleName.PmdEngine, 'ConfigNotFound', [configFile]));
 		}
 
 		return configFile;

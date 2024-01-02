@@ -16,7 +16,7 @@ import {CONFIG_FILE, CUSTOM_CONFIG, ENGINE, TargetType} from '../Constants';
 import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 
 type RunDescriptor = {
 	engine: RuleEngine;
@@ -132,7 +132,7 @@ export class DefaultRuleManager implements RuleManager {
 			if (pathsDoubleProcessed.length > numFilesShown) {
 				filesToDisplay.push(`and ${pathsDoubleProcessed.length - numFilesShown} more`)
 			}
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
 		}
 
 
@@ -143,7 +143,7 @@ export class DefaultRuleManager implements RuleManager {
 
 		if (unmatchedTargets.length > 0) {
 			const warningKey = unmatchedTargets.length === 1 ? 'warning.targetSkipped' : 'warning.targetsSkipped';
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, warningKey, [`${unmatchedTargets.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, warningKey, [`${unmatchedTargets.join(', ')}`]));
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
@@ -167,7 +167,7 @@ export class DefaultRuleManager implements RuleManager {
 		const dfaEngines = runDescriptorList.filter(descriptor => descriptor.engine.isDfaEngine()).map(descriptor => descriptor.engine.getName());
 		const pathlessEngines = runDescriptorList.filter(descriptor => !(descriptor.engine.isDfaEngine())).map(descriptor => descriptor.engine.getName());
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
-			throw new SfError(getMessage(Bundle.DefaultRuleManager, 'error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
+			throw new SfError(getMessage(BundleName.DefaultRuleManager, 'error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
 		}
 	}
 

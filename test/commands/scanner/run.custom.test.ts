@@ -4,7 +4,7 @@ import path = require('path');
 import { expect } from 'chai';
 import {ENGINE} from '../../../src/Constants';
 import normalize = require('normalize-path');
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 describe('scanner run with custom config E2E', () => {
 	const customPmdConfig =  path.join('.', 'test', 'code-fixtures', 'config', 'pmd_custom_config.xml');
@@ -17,7 +17,7 @@ describe('scanner run with custom config E2E', () => {
 		expect(stdout).to.not.be.empty;
 
 		// Verify that the expected warning is displayed.
-		const expectedMessage = getMessage(Bundle.EventKeyTemplates, 'info.customPmdHeadsUp', [normalize(customPmdConfig)]);
+		const expectedMessage = getMessage(BundleName.EventKeyTemplates, 'info.customPmdHeadsUp', [normalize(customPmdConfig)]);
 		expect(stdout).to.contain(expectedMessage);
 
 		// Verify that the contents are correct.
@@ -36,7 +36,7 @@ describe('scanner run with custom config E2E', () => {
 		expect(stdout).to.not.be.empty;
 
 		// Verify that the expected warning is displayed.
-		const expectedMessage = getMessage(Bundle.EventKeyTemplates, 'info.customEslintHeadsUp', [normalize(customEslintConfig)]);
+		const expectedMessage = getMessage(BundleName.EventKeyTemplates, 'info.customEslintHeadsUp', [normalize(customEslintConfig)]);
 		expect(stdout).to.contain(expectedMessage);
 
 		// Verify that the contents are correct.

@@ -5,7 +5,7 @@ import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
 import {SfError} from "@salesforce/core";
 import normalize = require('normalize-path');
 import untildify = require("untildify");
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 import {EngineOptions} from "./RuleManager";
 
 /**
@@ -59,7 +59,7 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 				const parsedEnv: LooseObject = JSON.parse(inputs.env as string) as LooseObject;
 				engineOptions.set('env', JSON.stringify(parsedEnv));
 			} catch (e) {
-				throw new SfError(getMessage(Bundle.Run, 'output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
+				throw new SfError(getMessage(BundleName.Run, 'output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
 			}
 		}
 

@@ -8,7 +8,7 @@ import childProcess = require('child_process');
 import path = require('path');
 import {FileHandler} from './util/FileHandler';
 import {Config} from './util/Config';
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
@@ -78,7 +78,7 @@ class JreSetupManager extends AsyncCreatable {
 		// So we'll just throw an error telling the user to set it themselves.
 		if (!javaHome) {
 			const errName = 'NoJavaHomeFound';
-			throw new SfError(getMessage(Bundle.JreSetupManager, errName, []), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, []), errName);
 		}
 
 		return javaHome;
@@ -108,7 +108,7 @@ class JreSetupManager extends AsyncCreatable {
 		} catch (e) {
 			const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
 			const errName = 'InvalidJavaHome';
-			throw new SfError(getMessage(Bundle.JreSetupManager, errName, [javaHome, error.code]), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [javaHome, error.code]), errName);
 		}
 	}
 
@@ -126,7 +126,7 @@ class JreSetupManager extends AsyncCreatable {
 
 		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
 		if (!matchedParts || matchedParts.length < 4) {
-			throw new SfError(getMessage(Bundle.JreSetupManager, 'VersionNotFound', []));
+			throw new SfError(getMessage(BundleName.JreSetupManager, 'VersionNotFound', []));
 		}
 
 		const majorVersion = parseInt(matchedParts[1]);
@@ -145,7 +145,7 @@ class JreSetupManager extends AsyncCreatable {
 		} else {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
-			throw new SfError(getMessage(Bundle.JreSetupManager, errName, [version]), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [version]), errName);
 		}
 
 		this.logger.trace(`Java version found as ${version}`);

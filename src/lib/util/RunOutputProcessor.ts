@@ -3,7 +3,7 @@ import {SfError} from '@salesforce/core';
 import fs = require('fs');
 import {RecombinedRuleResults, RecombinedData} from '../../types';
 import {OUTPUT_FORMAT} from '../RuleManager';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 
@@ -33,7 +33,7 @@ export class RunOutputProcessor {
 		//       an empty outfile
 		if (!this.opts.outfile && !hasViolations) {
 			// Build a message indicating which engines were run...
-			const msg = getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
+			const msg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', [[...summaryMap.keys()].join(', ')]);
 			// ...log it to the console...
 			this.display.displayInfo(msg);
 			// ...and return it for use with the --json flag.
@@ -99,14 +99,14 @@ export class RunOutputProcessor {
 		if ((this.opts.format === OUTPUT_FORMAT.TABLE) || this.opts.outfile) {
 			const summaryMsgs = [...summaryMap.entries()]
 				.map(([engine, summary]) => {
-					return getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
+					return getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
 				});
 			msgParts = [...msgParts, ...summaryMsgs];
 		}
 		// If we're supposed to throw an exception in response to violations, we need an extra piece of summary.
 		// Summary to print with --severity-threshold flag
 		if (this.shouldErrorForSeverity(minSev, this.opts.severityForError)) {
-			msgParts.push(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [this.opts.severityForError]));
+			msgParts.push(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [this.opts.severityForError]));
 		}
 
 		return msgParts;
@@ -123,7 +123,7 @@ export class RunOutputProcessor {
 			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
 		}
 		// Return a message indicating the action we took.
-		return getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
+		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}
 
 	private writeToConsole(results: RecombinedData): string {
@@ -157,6 +157,6 @@ export class RunOutputProcessor {
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
-		return format === OUTPUT_FORMAT.TABLE ? getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole') : '';
+		return format === OUTPUT_FORMAT.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
 	}
 }

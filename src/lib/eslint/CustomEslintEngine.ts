@@ -6,7 +6,7 @@ import {Logger, SfError} from '@salesforce/core';
 import {EventCreator} from '../util/EventCreator';
 import * as engineUtils from '../util/CommonEngineUtils';
 import {ESLint, Linter} from 'eslint';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 export class CustomEslintEngine extends AbstractRuleEngine {
 
@@ -109,7 +109,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 
 		const fileHandler = this.dependencies.getFileHandler();
 		if (!configFile || !(await fileHandler.exists(configFile))) {
-			throw new SfError(getMessage(Bundle.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFile]));
+			throw new SfError(getMessage(BundleName.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFile]));
 		}
 
 		// At this point file exists. Convert content into JSON
@@ -123,7 +123,7 @@ export class CustomEslintEngine extends AbstractRuleEngine {
 			config = JSON.parse(configContent) as Linter.Config;
 		} catch (error) {
 			const message: string = error instanceof Error ? error.message : error as string;
-			throw new SfError(getMessage(Bundle.CustomEslintEngine, 'InvalidJson', [configFile, message]));
+			throw new SfError(getMessage(BundleName.CustomEslintEngine, 'InvalidJson', [configFile, message]));
 		}
 
 		return config;

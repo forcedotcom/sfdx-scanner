@@ -21,7 +21,7 @@ import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
 import path = require('path');
 import Sinon = require('sinon');
-import {Bundle, getMessage} from "../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -271,7 +271,7 @@ describe('RuleManager', () => {
 					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					expect(results).to.equal('[]');
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -282,7 +282,7 @@ describe('RuleManager', () => {
 					await ruleManager.runRulesMatchingCriteria(filters, targets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					const filename = path.join(__dirname, '..','code-fixtures', 'invalid-lwc', 'invalidApiDecorator', 'noLeadingUpperCase.js')
-					const warningMessage = getMessage(Bundle.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
+					const warningMessage = getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -297,7 +297,7 @@ describe('RuleManager', () => {
 					const baseConfigEnv = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')
 					const fileThatUsesQUnit = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')
 					const simpleYetWrong = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'simpleYetWrong.js')
-					const warningMessage = getMessage(Bundle.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
+					const warningMessage = getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -406,7 +406,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -421,7 +421,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -435,7 +435,7 @@ describe('RuleManager', () => {
 
 					expect(results).to.equal('[]');
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, "warning.targetsSkipped", [invalidTargets.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -455,7 +455,7 @@ describe('RuleManager', () => {
 					}
 					expect(parsedRes).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(Bundle.DefaultRuleManager, 'warning.targetsSkipped', [invalidTargets.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});

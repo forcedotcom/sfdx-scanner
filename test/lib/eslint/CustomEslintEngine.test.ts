@@ -8,7 +8,7 @@ import { StaticDependencies, ProcessRuleViolationType } from '../../../src/lib/e
 import { ESLint } from 'eslint';
 import { ENGINE, TargetType } from '../../../src/Constants';
 import {RuleTarget, RuleViolation, PathlessRuleViolation} from '../../../src/types';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 describe("Tests for CustomEslintEngine", () => {
 
@@ -161,7 +161,7 @@ describe("Tests for CustomEslintEngine", () => {
 
 				assert.fail('Expected exception');
 			} catch (err) {
-				expect(err.message).to.equal(getMessage(Bundle.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFilePath]));
+				expect(err.message).to.equal(getMessage(BundleName.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFilePath]));
 			}
 
 		});

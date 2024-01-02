@@ -4,7 +4,7 @@ import {runCommand} from '../../TestUtils';
 import * as path from 'path';
 import * as sinon from 'sinon';
 import {UxDisplay} from "../../../src/lib/Display";
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 
 const dfaTarget = path.join('test', 'code-fixtures', 'projects', 'sfge-smoke-app', 'src');
@@ -17,13 +17,13 @@ const entryPointCount = '5';
 const pathCount = '6';
 const violationCount = '2';
 
-const customSettingsMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Custom Settings', customSettingsStr]);
-const apexControllerMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Apex Controllers', apexControllerStr]);
-const compiledMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeFinishedCompilingFiles', [fileCount]);
-const startGraphBuildMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeStartedBuildingGraph');
-const endGraphBuildMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeFinishedBuildingGraph');
-const identifiedEntryMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgePathEntryPointsIdentified', [entryPointCount]);
-const completedAnalysisMessage = getMessage(Bundle.EventKeyTemplates, 'info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
+const customSettingsMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Custom Settings', customSettingsStr]);
+const apexControllerMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeMetaInfoCollected', ['Apex Controllers', apexControllerStr]);
+const compiledMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeFinishedCompilingFiles', [fileCount]);
+const startGraphBuildMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeStartedBuildingGraph');
+const endGraphBuildMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeFinishedBuildingGraph');
+const identifiedEntryMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgePathEntryPointsIdentified', [entryPointCount]);
+const completedAnalysisMessage = getMessage(BundleName.EventKeyTemplates, 'info.sfgeCompletedPathAnalysis', [pathCount, entryPointCount, violationCount]);
 const experimentalRuleName = "RemoveUnusedMethod";
 
 function isSubstr(output: string, substring: string): boolean {

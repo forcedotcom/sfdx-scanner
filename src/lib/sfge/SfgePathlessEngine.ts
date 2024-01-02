@@ -3,7 +3,7 @@ import {AbstractSfgeEngine, SfgeViolation} from "./AbstractSfgeEngine";
 import {Rule, RuleGroup, RuleTarget, RuleViolation, SfgeConfig} from '../../types';
 import {CUSTOM_CONFIG, RuleType} from '../../Constants';
 import * as EngineUtils from "../util/CommonEngineUtils";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 export class SfgePathlessEngine extends AbstractSfgeEngine {
 	/**
@@ -41,7 +41,7 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 		}
 		// If we're here, it's because we're missing the necessary info to run this engine.
 		// We should throw an error indicating this.
-		throw new SfError(getMessage(Bundle.SfgeEngine, 'errors.failedWithoutProjectDir'));
+		throw new SfError(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir'));
 	}
 
 	protected getSubVariantName(): string {

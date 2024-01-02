@@ -11,7 +11,7 @@ import { Controller } from '../../../src/Controller';
 import {deepCopy} from '../../../src/lib/util/Utils';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { uxEvents, EVENTS } from '../../../src/lib/ScannerEvents';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -230,7 +230,7 @@ describe('Config.ts', () => {
 				expect(writeFileStub.calledWith(CONFIG_PATH)).to.equal(true, 'GA config SHOULD be created');
 				expect(writeFileStub.calledWith(CONFIG_PILOT_PATH)).to.equal(false, 'Pilot config SHOULD NOT be written to, because it already exists');
 				expect(config.configContent.currentVersion).to.equal(PACKAGE_VERSION, 'Final config should be GA version');
-				const expectedWarning = getMessage(Bundle.Config, "GeneratingConfigFromPilot", [CONFIG_PILOT_PATH]);
+				const expectedWarning = getMessage(BundleName.Config, "GeneratingConfigFromPilot", [CONFIG_PILOT_PATH]);
 				expect(warnings).to.contain(expectedWarning, 'Warning about pilot config usage should be thrown');
 			});
 
@@ -419,28 +419,28 @@ describe('Config.ts', () => {
 					await config.isEngineEnabled(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(getMessage(Bundle.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'pmd', null]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
 					await config.isEngineEnabled(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(getMessage(Bundle.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'eslint-typescript', 15]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidBooleanValue', ['disabled', config.getConfigFilePath(), 'eslint-typescript', 15]));
 				}
 
 				try {
 					await config.getTargetPatterns(ENGINE.PMD);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(getMessage(Bundle.Config, 'InvalidStringArrayValue', ['targetPatterns', config.getConfigFilePath(), 'pmd', null]));
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidStringArrayValue', ['targetPatterns', config.getConfigFilePath(), 'pmd', null]));
 				}
 
 				try {
 					await config.getTargetPatterns(ENGINE.ESLINT_TYPESCRIPT);
 					fail('Expected error was not thrown');
 				} catch (e) {
-					expect(e.message).equals(getMessage(Bundle.Config, 'InvalidStringArrayValue',
+					expect(e.message).equals(getMessage(BundleName.Config, 'InvalidStringArrayValue',
 						['targetPatterns', config.getConfigFilePath(), 'eslint-typescript', String([1, 2, 3])]));
 				}
 			});

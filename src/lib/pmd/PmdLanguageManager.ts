@@ -4,7 +4,7 @@ import {LANGUAGE} from '../../Constants'
 import {Logger, SfError} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import { ENGINE } from '../../Constants';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 const VALID_LANGUAGES_BY_ALIAS: Map<string, string> = new Map([
 	['apex', 'apex'],
@@ -53,13 +53,13 @@ class PmdLanguageManager extends AsyncCreatable {
 			const lang = this.resolveLanguageAlias(alias);
 			if (lang) {
 				if (LANGUAGE.JAVASCRIPT === lang) {
-					throw new SfError(getMessage(Bundle.PmdLanguageManager, 'JavascriptNotSupported'));
+					throw new SfError(getMessage(BundleName.PmdLanguageManager, 'JavascriptNotSupported'));
 				} else {
 					langs.push(lang);
 				}
 			} else {
 				this.logger.trace(`Default-supported language alias ${alias} could not be resolved.`);
-				throw new SfError(getMessage(Bundle.PmdLanguageManager, 'InvalidLanguageAlias', [this.config.getConfigFilePath(), alias]));
+				throw new SfError(getMessage(BundleName.PmdLanguageManager, 'InvalidLanguageAlias', [this.config.getConfigFilePath(), alias]));
 			}
 		}
 		return langs;

@@ -9,7 +9,7 @@ import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -62,7 +62,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			expect(stderr).to.not.be.null;
 
 			const simplifiedMessage = (testPmdEngine as any).processStdErr(stderr);
-			const expectedMessage = getMessage(Bundle.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
+			const expectedMessage = getMessage(BundleName.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
 			expect(simplifiedMessage).to.equal(expectedMessage, 'Stderr not properly simplified');
 		});
 

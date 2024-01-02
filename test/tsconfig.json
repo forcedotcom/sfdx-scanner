@@ -6,6 +6,8 @@
 	"include": [
 		"../src/**/*",
 		"../test/**/*"
+	],
+	"exclude": [
+		"../test/code-fixtures/**/*"
 	]
 }
-

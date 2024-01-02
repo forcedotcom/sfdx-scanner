@@ -2,7 +2,7 @@ import {expect} from 'chai';
 // @ts-ignore
 import {runCommand} from '../../TestUtils';
 import path = require('path');
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 describe('scanner run', function () {
 
@@ -12,8 +12,8 @@ describe('scanner run', function () {
 			describe('Flag functionality', () => {
 				it('When no violations are found, no error is thrown', () => {
 					const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls')} --format json --severity-threshold 3`);
-					expect(output.shellOutput.stdout).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
-					expect(output.shellOutput.stderr).to.not.contain(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', ['3']), 'Error should not be present');
+					expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
+					expect(output.shellOutput.stderr).to.not.contain(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', ['3']), 'Error should not be present');
 				});
 
 				it('When no violations exceed the flag value, no error is thrown', () => {
@@ -27,7 +27,7 @@ describe('scanner run', function () {
 						}
 					}
 
-					expect(commandOutput.shellOutput.stderr).not.to.contain(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', ['1']));
+					expect(commandOutput.shellOutput.stderr).not.to.contain(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', ['1']));
 				});
 
 				it('When flag value is exceeded, an error is thrown', () => {
@@ -39,7 +39,7 @@ describe('scanner run', function () {
 							expect(output[i].violations[j].normalizedSeverity).to.equal(3);
 						}
 					}
-					expect(commandOutput.shellOutput.stderr).to.contain(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', ['3']));
+					expect(commandOutput.shellOutput.stderr).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', ['3']));
 				});
 			});
 

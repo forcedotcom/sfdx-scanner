@@ -3,13 +3,13 @@ import {Inputs, RecombinedRuleResults} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {FileHandler} from "../util/FileHandler";
 import {SfError} from "@salesforce/core";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {EngineOptions, OUTPUT_FORMAT, RuleManager, RunOptions} from "../RuleManager";
 import {inferFormatFromOutfile, RunOptionsFactory} from "../RunOptionsFactory";
 import * as globby from "globby";
 import {Display} from "../Display";
 import {RuleFilter} from "../RuleFilter";
-import {RuleFilterFactoryImpl} from "../RuleFilterFactory";
+import {RuleFilterFactory} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
 import {RunOutputOptions, RunOutputProcessor} from "../util/RunOutputProcessor";
 import {InputsResolver} from "../InputsResolver";
@@ -22,13 +22,15 @@ import {INTERNAL_ERROR_CODE} from "../../Constants";
 export abstract class AbstractRunAction implements Action {
 	protected readonly display: Display;
 	private readonly inputsResolver: InputsResolver;
+	private readonly ruleFilterFactory: RuleFilterFactory;
 	private readonly runOptionsFactory: RunOptionsFactory;
 	private readonly engineOptionsFactory: EngineOptionsFactory;
 
-	protected constructor(display: Display, inputsResolver: InputsResolver, runOptionsFactory: RunOptionsFactory,
-							engineOptionsFactory: EngineOptionsFactory) {
+	protected constructor(display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
+							runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
 		this.display = display;
 		this.inputsResolver = inputsResolver;
+		this.ruleFilterFactory = ruleFilterFactory;
 		this.runOptionsFactory = runOptionsFactory;
 		this.engineOptionsFactory = engineOptionsFactory;
 	}
@@ -40,11 +42,11 @@ export abstract class AbstractRunAction implements Action {
 			// TODO: MOVE AWAY FROM ALLOWING AN ARRAY OF DIRECTORIES HERE AND ERROR IF THERE IS MORE THAN ONE DIRECTORY
 			for (const dir of (inputs.projectdir as string[])) {
 				if (globby.hasMagic(dir)) {
-					throw new SfError(getMessage(Bundle.CommonRun, 'validations.projectdirCannotBeGlob'));
+					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
 				} else if (!(await fh.exists(dir))) {
-					throw new SfError(getMessage(Bundle.CommonRun, 'validations.projectdirMustExist'));
+					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
 				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw new SfError(getMessage(Bundle.CommonRun, 'validations.projectdirMustBeDir'));
+					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
 				}
 			}
 		}
@@ -56,18 +58,18 @@ export abstract class AbstractRunAction implements Action {
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OUTPUT_FORMAT.TABLE) {
-				throw new SfError(getMessage(Bundle.CommonRun, 'validations.cannotWriteTableToFile', []));
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.cannotWriteTableToFile', []));
 			}
 			// Otherwise, we want to be liberal with the user. If the chosen format doesn't match the outfile's extension,
 			// just log a message saying so.
 			if (chosenFormat !== inferredOutfileFormat) {
-				this.display.displayInfo(getMessage(Bundle.CommonRun, 'validations.outfileFormatMismatch', [inputs.format as string, inferredOutfileFormat]));
+				this.display.displayInfo(getMessage(BundleName.CommonRun, 'validations.outfileFormatMismatch', [inputs.format as string, inferredOutfileFormat]));
 			}
 		}
 	}
 
 	async run(inputs: Inputs): Promise<AnyJson> {
-		const filters: RuleFilter[] = new RuleFilterFactoryImpl().createRuleFilters(inputs);
+		const filters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 		const targetPaths: string[] = this.inputsResolver.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.runOptionsFactory.createRunOptions(inputs);
 		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);

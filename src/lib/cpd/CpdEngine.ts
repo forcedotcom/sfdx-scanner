@@ -10,7 +10,7 @@ import CpdWrapper from './CpdWrapper';
 import {uxEvents, EVENTS} from '../ScannerEvents';
 import crypto = require('crypto');
 import * as EnvVariable from '../util/EnvironmentVariable';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 
 //  CPD supported languages: [apex, java, vf, xml]
@@ -135,7 +135,7 @@ export class CpdEngine extends AbstractRuleEngine {
 
 		// Let user know about file paths that could not be matched
 		if (unmatchedPaths.length > 0) {
-			uxEvents.emit(EVENTS.INFO_VERBOSE, getMessage(Bundle.EventKeyTemplates, 'info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
+			uxEvents.emit(EVENTS.INFO_VERBOSE, getMessage(BundleName.EventKeyTemplates, 'info.unmatchedPathExtensionCpd', [unmatchedPaths.join(",")]));
 		}
 
 		return languageToPaths;
@@ -222,7 +222,7 @@ export class CpdEngine extends AbstractRuleEngine {
 					endColumn: occ.attributes.endcolumn as number,
 					ruleName: CpdRuleName,
 					severity: CpdViolationSeverity,
-					message: getMessage(Bundle.CpdEngine, "CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
+					message: getMessage(BundleName.CpdEngine, "CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),
 					category: CpdRuleCategory,
 					url: CpdInfoUrl
 				};

@@ -6,7 +6,7 @@ import * as PmdLanguageManager from '../../../src/lib/pmd/PmdLanguageManager';
 import { ENGINE } from '../../../src/Constants';
 import { Controller } from '../../../src/Controller';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -68,7 +68,7 @@ describe('PmdLanguageManager', () => {
 					await PmdLanguageManager.getSupportedLanguages();
 					expect(true).to.equal(false, 'Error should have thrown');
 				} catch (e) {
-					expect(e.message).to.include(getMessage(Bundle.PmdLanguageManager, 'InvalidLanguageAlias', [(await Controller.getConfig()).getConfigFilePath(), 'NotRealLang']));
+					expect(e.message).to.include(getMessage(BundleName.PmdLanguageManager, 'InvalidLanguageAlias', [(await Controller.getConfig()).getConfigFilePath(), 'NotRealLang']));
 				}
 			});
 		});

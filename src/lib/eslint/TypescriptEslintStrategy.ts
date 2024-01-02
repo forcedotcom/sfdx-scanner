@@ -10,7 +10,7 @@ import { rules } from '@typescript-eslint/eslint-plugin';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import {ESLint} from 'eslint';
 import {configs} from '@eslint/js';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 export enum TYPESCRIPT_ENGINE_OPTIONS {
 	// Specify the location of the tsconfig.json file
@@ -181,7 +181,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 
 			const inclusionRegex = /^Parsing error: ESLint was configured to run on `.*` using `parserOptions.project`:.*\nHowever, (that TSConfig does not|none of those TSConfigs) include this file./;
 			if (inclusionRegex.test(message)) {
-				ruleViolation.message = getMessage(Bundle.TypescriptEslintStrategy, 'FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
+				ruleViolation.message = getMessage(BundleName.TypescriptEslintStrategy, 'FileNotIncludedByTsConfig', [fileName, TS_CONFIG]);
 				ruleViolation.exception = true;
 			} else if (message.startsWith('Parsing error:')) {
 				ruleViolation.ruleName = HARDCODED_RULES.FILES_MUST_COMPILE.name;
@@ -203,7 +203,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		if (!foundTsConfig) {
 			const cwd = path.resolve();
 			// Not specified in engineOptions and not found in the current directory
-			throw new SfError(getMessage(Bundle.TypescriptEslintStrategy, 'MissingTsConfigFromCwd', [TS_CONFIG, cwd, TS_CONFIG]));
+			throw new SfError(getMessage(BundleName.TypescriptEslintStrategy, 'MissingTsConfigFromCwd', [TS_CONFIG, cwd, TS_CONFIG]));
 		}
 
 		this.logger.trace(`Using ${TS_CONFIG} from ${foundTsConfig}`);
@@ -222,10 +222,10 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		if (tsConfigFromOptions != null) {
 			if (!(await this.fileHandler.exists(tsConfigFromOptions))) {
 				// Specified in the engineOptions but it isn't a file
-				throw new SfError(getMessage(Bundle.TypescriptEslintStrategy, 'NotAFileTsConfigFromOptions', [TS_CONFIG, tsConfigFromOptions]));
+				throw new SfError(getMessage(BundleName.TypescriptEslintStrategy, 'NotAFileTsConfigFromOptions', [TS_CONFIG, tsConfigFromOptions]));
 			} else if (path.basename(tsConfigFromOptions).toLowerCase() !== TS_CONFIG) {
 				// Found the file, but it's not named tsconfig.json
-				throw new SfError(getMessage(Bundle.TypescriptEslintStrategy, 'InvalidNameTsConfigFromOptions', [tsConfigFromOptions, TS_CONFIG]));
+				throw new SfError(getMessage(BundleName.TypescriptEslintStrategy, 'InvalidNameTsConfigFromOptions', [tsConfigFromOptions, TS_CONFIG]));
 			} else {
 				return tsConfigFromOptions;
 			}

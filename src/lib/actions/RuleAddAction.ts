@@ -3,7 +3,7 @@ import {Display} from "../Display";
 import {Inputs} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {Logger, SfError} from "@salesforce/core";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {stringArrayTypeGuard} from "../util/Utils";
 import {InputsResolver} from "../InputsResolver";
 import {Controller} from "../../Controller";
@@ -24,12 +24,12 @@ export class RuleAddAction implements Action {
 
 	public validateInputs(inputs: Inputs): Promise<void> {
 		if ((inputs.language as string).length === 0) {
-			throw new SfError(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty', []));
+			throw new SfError(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
 		}
 
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
 		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
-			throw new SfError(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty', []));
+			throw new SfError(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
 		}
 
 		return Promise.resolve();

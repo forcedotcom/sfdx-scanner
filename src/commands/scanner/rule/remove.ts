@@ -1,6 +1,6 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Action, ScannerCommand} from '../../../lib/ScannerCommand';
-import {Bundle, getMessage} from "../../../MessageCatalog";
+import {BundleName, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Display} from "../../../lib/Display";
 import {RuleRemoveAction} from "../../../lib/actions/RuleRemoveAction";
@@ -11,28 +11,28 @@ import {InputsResolverImpl} from "../../../lib/InputsResolver";
  */
 export default class Remove extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = getMessage(Bundle.Remove, 'commandSummary');
-	public static description = getMessage(Bundle.Remove, 'commandDescription');
+	public static summary = getMessage(BundleName.Remove, 'commandSummary');
+	public static description = getMessage(BundleName.Remove, 'commandDescription');
 
 	public static examples = [
-		getMessage(Bundle.Remove, 'examples')
+		getMessage(BundleName.Remove, 'examples')
 	];
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
 	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(Bundle.Common, 'flags.verboseSummary')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		}),
 		force: Flags.boolean({
 			char: 'f',
-			summary: getMessage(Bundle.Remove, 'flags.forceSummary'),
-			description: getMessage(Bundle.Remove, 'flags.forceDescription')
+			summary: getMessage(BundleName.Remove, 'flags.forceSummary'),
+			description: getMessage(BundleName.Remove, 'flags.forceDescription')
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
-			summary: getMessage(Bundle.Remove, 'flags.pathSummary'),
-			description: getMessage(Bundle.Remove, 'flags.pathDescription'),
+			summary: getMessage(BundleName.Remove, 'flags.pathSummary'),
+			description: getMessage(BundleName.Remove, 'flags.pathDescription'),
 			delimiter: ',',
 			multiple: true
 		})()

@@ -9,7 +9,7 @@ import {Rule, SfgeConfig, RuleTarget} from '../../types';
 import {CommandLineSupport, ResultHandlerArgs} from '../services/CommandLineSupport';
 import {SpinnerManager, NoOpSpinnerManager} from '../services/SpinnerManager';
 import {FileHandler} from '../util/FileHandler';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src/lib/sfge
 const SFGE_LIB = path.join(__dirname, '..', '..', '..', 'dist', 'sfge', 'lib');
@@ -76,8 +76,8 @@ class SfgeSpinnerManager extends AsyncCreatable implements SpinnerManager {
 	public startSpinner(): void {
 		uxEvents.emit(
 			EVENTS.START_SPINNER,
-			getMessage(Bundle.SfgeEngine, "messages.spinnerStart", [this.logFilePath]),
-			getMessage(Bundle.SfgeEngine, "messages.pleaseWait")
+			getMessage(BundleName.SfgeEngine, "messages.spinnerStart", [this.logFilePath]),
+			getMessage(BundleName.SfgeEngine, "messages.pleaseWait")
 		);
 
 		// TODO: This timer logic should ideally live inside waitOnSpinner()

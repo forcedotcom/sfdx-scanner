@@ -1,6 +1,6 @@
 import {SfError} from '@salesforce/core';
 import { Catalog, Rule, RuleGroup } from '../types';
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 
 /**
  * Filter values preceded by this character are negated
@@ -116,7 +116,7 @@ abstract class PositiveRuleFilter extends RuleFilter {
     protected constructor(filterDisplayName: FilterDisplayName, filterValues: string[]) {
 		const mapped = RuleFilter.processForPosAndNegFilterValues(filterValues);
 		if (mapped.negative.length > 0) {
-			throw new SfError(getMessage(Bundle.Exceptions, 'RuleFilter.PositiveOnly', [filterDisplayName]));
+			throw new SfError(getMessage(BundleName.Exceptions, 'RuleFilter.PositiveOnly', [filterDisplayName]));
 		}
 		super(mapped.positive, false);
 	}
@@ -131,7 +131,7 @@ abstract class NegateableRuleFilter extends RuleFilter {
 
 		// Throw an exception if there are mixed types
 		if (mapped.positive.length > 0 && mapped.negative.length > 0) {
-			throw new SfError(getMessage(Bundle.Exceptions, 'RuleFilter.MixedTypes', [filterDisplayName]));
+			throw new SfError(getMessage(BundleName.Exceptions, 'RuleFilter.MixedTypes', [filterDisplayName]));
 		}
 
 		const negated = mapped.negative.length > 0;

@@ -1,12 +1,12 @@
 import {expect} from 'chai';
 // @ts-ignore
 import {runCommand} from '../../../TestUtils';
-import {getMessage, Bundle} from '../../../../src/MessageCatalog';
+import {getMessage, BundleName} from '../../../../src/MessageCatalog';
 
 describe('scanner rule describe', () => {
 	describe('E2E', () => {
 		describe('Test Case: No matching rules', () => {
-			const formattedWarning = getMessage(Bundle.Describe, 'output.noMatchingRules', ['DefinitelyFakeRule']);
+			const formattedWarning = getMessage(BundleName.Describe, 'output.noMatchingRules', ['DefinitelyFakeRule']);
 			it('Correct warning is displayed', () => {
 				const output = runCommand(`scanner rule describe --rulename DefinitelyFakeRule`);
 				expect(output.shellOutput.stderr.toLowerCase()).to.contain(`WARNING: ${formattedWarning}`.toLowerCase(), 'Warning message should match');
@@ -51,7 +51,7 @@ describe('scanner rule describe', () => {
 
 		describe('Test Case: Multiple matching rules', () => {
 			// Both tests will test for the presence of this warning string in the output, so we might as well format it up here.
-			const formattedWarning = getMessage(Bundle.Describe, 'output.multipleMatchingRules', ['3', 'constructor-super']);
+			const formattedWarning = getMessage(BundleName.Describe, 'output.multipleMatchingRules', ['3', 'constructor-super']);
 
 			it('Displayed output matches expectations', () => {
 				const output = runCommand(`scanner rule describe --rulename constructor-super`);

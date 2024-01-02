@@ -1,7 +1,7 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Action, ScannerCommand} from '../../../lib/ScannerCommand';
 import {RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
-import {Bundle, getMessage} from "../../../MessageCatalog";
+import {BundleName, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Display} from "../../../lib/Display";
 import {RuleDescribeAction} from "../../../lib/actions/RuleDescribeAction";
@@ -11,10 +11,10 @@ import {RuleDescribeAction} from "../../../lib/actions/RuleDescribeAction";
  */
 export default class Describe extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = getMessage(Bundle.Describe, 'commandSummary');
-	public static description = getMessage(Bundle.Describe, 'commandDescription');
+	public static summary = getMessage(BundleName.Describe, 'commandSummary');
+	public static description = getMessage(BundleName.Describe, 'commandDescription');
 	public static examples = [
-		getMessage(Bundle.Describe, 'examples.normalExample')
+		getMessage(BundleName.Describe, 'examples.normalExample')
 	];
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
@@ -22,12 +22,12 @@ export default class Describe extends ScannerCommand {
 	public static readonly flags = {
 		rulename: Flags.string({
 			char: 'n',
-			summary: getMessage(Bundle.Describe, 'flags.rulenameSummary'),
-			description: getMessage(Bundle.Describe, 'flags.rulenameDescription'),
+			summary: getMessage(BundleName.Describe, 'flags.rulenameSummary'),
+			description: getMessage(BundleName.Describe, 'flags.rulenameDescription'),
 			required: true
 		}),
 		verbose: Flags.boolean({
-			summary: getMessage(Bundle.Common, 'flags.verboseSummary')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
 		})
 	};
 

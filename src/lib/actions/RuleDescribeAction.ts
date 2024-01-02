@@ -3,7 +3,7 @@ import {Inputs, Rule} from "../../types";
 import {AnyJson} from "@salesforce/ts-types";
 import {RuleFilter} from "../RuleFilter";
 import {Controller} from "../../Controller";
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 import {deepCopy} from "../util/Utils";
 import Dfa from "../../commands/scanner/run/dfa";
 import Run from "../../commands/scanner/run";
@@ -28,7 +28,7 @@ export class RuleDescribeAction implements Action {
 		this.ruleFilterFactory = ruleFilterFactory;
 	}
 
-	public async validateInputs(_inputs: Inputs): Promise<void> { // eslint-disable-line @typescript-eslint/no-unused-vars
+	public validateInputs(_inputs: Inputs): Promise<void> { // eslint-disable-line @typescript-eslint/no-unused-vars
 		// Currently there is nothing to validate
 		return Promise.resolve();
 	}
@@ -43,12 +43,12 @@ export class RuleDescribeAction implements Action {
 
 		const rules: DescribeStyledRule[] = await this.styleRules(ruleManager.getRulesMatchingOnlyExplicitCriteria(ruleFilters));
 		if (rules.length === 0) {
-			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .warn() instead of .log()
-			// so it's immediately obvious.
-			this.display.displayWarning(getMessage(Bundle.Describe, 'output.noMatchingRules', [inputs.rulename as string]));
+			// If we couldn't find any rules that fit the criteria, we'll let the user know. We'll use .displayWarning()
+			// instead of .displayInfo() so it's immediately obvious.
+			this.display.displayWarning(getMessage(BundleName.Describe, 'output.noMatchingRules', [inputs.rulename as string]));
 		} else if (rules.length > 1) {
 			// If there was more than one matching rule, we'll let the user know, but we'll still output all the rules.
-			const msg = getMessage(Bundle.Describe, 'output.multipleMatchingRules', [rules.length.toString(), inputs.rulename as string]);
+			const msg = getMessage(BundleName.Describe, 'output.multipleMatchingRules', [rules.length.toString(), inputs.rulename as string]);
 			this.display.displayWarning(msg);
 			rules.forEach((rule, idx) => {
 				this.display.displayStyledHeader(`Rule #${idx + 1}`);
@@ -88,6 +88,7 @@ export class RuleDescribeAction implements Action {
 	}
 
 	private displayStyledRule(rule: DescribeStyledRule, jsonEnabled: boolean): void {
+		// TODO: We should remove this instantiation of new Ux in favor of possibly a new method on Display
 		new Ux({jsonEnabled: jsonEnabled})
 			.styledObject(rule, ['name', 'engine', 'runWith', 'isPilot', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
 	}

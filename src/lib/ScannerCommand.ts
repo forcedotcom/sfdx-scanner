@@ -4,7 +4,7 @@ import {initContainer} from '../ioc.config';
 import {AnyJson} from '@salesforce/ts-types';
 import {Inputs} from '../types';
 import {Display, Displayable, UxDisplay} from "./Display";
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 import {Logger} from "@salesforce/core";
 
 
@@ -36,7 +36,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		const logger: Logger = await Logger.child(this.ctor.name);
 		const display: Display = new UxDisplay(this, this.spinner, inputs.verbose as boolean);
 
-		display.displayWarning(getMessage(Bundle.Common, 'surveyRequestMessage'));
+		display.displayWarning(getMessage(BundleName.Common, 'surveyRequestMessage'));
 		this.buildEventListeners(display);
 
 		const action: Action = this.createAction(logger, display);

@@ -1,13 +1,11 @@
 import {Messages} from "@salesforce/core";
-import {getSingleton} from "./ioc.config";
-import {Services} from "./Constants";
 import {Tokens} from "@salesforce/core/lib/messages";
 
 
 // Initialize Messages with the current plugin directory
 Messages.importMessagesDirectory(__dirname);
 
-export enum Bundle {
+export enum BundleName {
 	Add = "add",
 	Config = "Config",
 	Controller = 'Controller',
@@ -34,14 +32,14 @@ export enum Bundle {
 	VersionUpgradeManager = "VersionUpgradeManager"
 }
 
-export class MessageCatalog {
-	private readonly bundleMap: Map<Bundle, Messages<string>> = new Map();
+class MessageCatalog {
+	private readonly bundleMap: Map<BundleName, Messages<string>> = new Map();
 
-	public getMessage(bundle: Bundle, messageKey: string, tokens?: Tokens): string {
+	public getMessage(bundle: BundleName, messageKey: string, tokens?: Tokens): string {
 		return this.getBundle(bundle).getMessage(messageKey, tokens);
 	}
 
-	private getBundle(bundle: Bundle): Messages<string> {
+	private getBundle(bundle: BundleName): Messages<string> {
 		if (!this.bundleMap.has(bundle)) {
 			this.bundleMap.set(bundle, Messages.loadMessages('@salesforce/sfdx-scanner', bundle.toString()));
 		}
@@ -49,9 +47,12 @@ export class MessageCatalog {
 	}
 }
 
+let INSTANCE: MessageCatalog = null;
+
 /**
  * This is a convenience method to get a message from a message bundle from the registered MessageCatalog
  */
-export function getMessage(bundle: Bundle, messageKey: string, tokens?: Tokens): string {
-	return getSingleton<MessageCatalog>(Services.MessageCatalog).getMessage(bundle, messageKey, tokens);
+export function getMessage(bundle: BundleName, messageKey: string, tokens?: Tokens): string {
+	INSTANCE = INSTANCE || new MessageCatalog();
+	return INSTANCE.getMessage(bundle, messageKey, tokens);
 }

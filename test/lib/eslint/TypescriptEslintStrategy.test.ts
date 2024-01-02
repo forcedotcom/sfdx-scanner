@@ -12,7 +12,7 @@ import {RuleResult, RuleViolation} from '../../../src/types';
 import * as DataGenerator from './EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 const EMPTY_ENGINE_OPTIONS = new Map<string, string>();
 
@@ -81,7 +81,7 @@ See the typescript-eslint docs for more info: https://typescript-eslint.io/linti
 			violationProcessor(fileName, unincludedFileError);
 
 			// We expect that the processor method modified the error message.
-			expect(unincludedFileError.message).to.equal(getMessage(Bundle.TypescriptEslintStrategy, 'FileNotIncludedByTsConfig', [fileName, 'tsconfig.json']), 'Incorrect msg');
+			expect(unincludedFileError.message).to.equal(getMessage(BundleName.TypescriptEslintStrategy, 'FileNotIncludedByTsConfig', [fileName, 'tsconfig.json']), 'Incorrect msg');
 		});
 	});
 

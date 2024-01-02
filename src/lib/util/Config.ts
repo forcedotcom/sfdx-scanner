@@ -7,7 +7,7 @@ import { Controller } from '../../Controller';
 import { uxEvents, EVENTS } from '../ScannerEvents';
 import {deepCopy, stringArrayTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
-import {Bundle, getMessage} from "../../MessageCatalog";
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 type GenericTypeGuard<T> = (obj: unknown) => obj is T;
 
@@ -163,7 +163,7 @@ export class Config {
 
 			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
 			if (upgradeErrorMessage) {
-				throw new SfError(getMessage(Bundle.Config, 'UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
+				throw new SfError(getMessage(BundleName.Config, 'UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
 			}
 		}
 	}
@@ -231,7 +231,7 @@ export class Config {
 			this.logger.trace(`Config property ${propertyName} for engine ${engine} has value ${String(propertyValue)}`);
 			return propertyValue;
 		} else {
-			throw new SfError(getMessage(Bundle.Config, errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
+			throw new SfError(getMessage(BundleName.Config, errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
 		}
 	}
 
@@ -296,7 +296,7 @@ export class Config {
 			// the first time. To avoid unexpected behavior changes, we'll copy the pilot
 			// config as the source for the GA config.
 			this.logger.trace(`Creating GA config by copying pilot config`);
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(Bundle.Config, "GeneratingConfigFromPilot", [
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.Config, "GeneratingConfigFromPilot", [
 				this.configPilotFilePath
 			]));
 			const configFileContent = await this.fileHandler.readFile(this.configPilotFilePath);

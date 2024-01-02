@@ -4,7 +4,7 @@ import {runCommand} from '../../../TestUtils';
 import * as os from 'os';
 import fs = require('fs');
 import path = require('path');
-import {Bundle, getMessage } from '../../../../src/MessageCatalog';
+import {BundleName, getMessage } from '../../../../src/MessageCatalog';
 
 
 describe('scanner rule add', () => {
@@ -129,7 +129,7 @@ describe('scanner rule add', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			it('should complain about empty language entry', () => {
 				const output = runCommand(`scanner rule add --language "" --path /some/local/path`);
-				expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Add, 'validations.languageCannotBeEmpty'));
+				expect(output.shellOutput.stderr).to.contain(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty'));
 			});
 		});
 
@@ -143,7 +143,7 @@ describe('scanner rule add', () => {
 			// Test for failure scenario doesn't need to do any special setup or cleanup.
 			it('should complain about empty path', () => {
 				const output = runCommand(`scanner rule add --language apex --path ''`);
-				expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Add, 'validations.pathCannotBeEmpty'));
+				expect(output.shellOutput.stderr).to.contain(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty'));
 			});
 		});
 	});

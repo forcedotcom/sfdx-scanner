@@ -1,6 +1,6 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Action, ScannerCommand} from '../../../lib/ScannerCommand';
-import {Bundle, getMessage} from "../../../MessageCatalog";
+import {BundleName, getMessage} from "../../../MessageCatalog";
 import {InputsResolverImpl} from "../../../lib/InputsResolver";
 import {Display} from "../../../lib/Display";
 import {RuleAddAction} from "../../../lib/actions/RuleAddAction";
@@ -11,10 +11,10 @@ import {Logger} from "@salesforce/core";
  */
 export default class Add extends ScannerCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static summary = getMessage(Bundle.Add, 'commandSummary');
-	public static description = getMessage(Bundle.Add, 'commandDescription');
+	public static summary = getMessage(BundleName.Add, 'commandSummary');
+	public static description = getMessage(BundleName.Add, 'commandDescription');
 	public static examples = [
-		getMessage(Bundle.Add, 'examples')
+		getMessage(BundleName.Add, 'examples')
 	];
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
@@ -22,14 +22,14 @@ export default class Add extends ScannerCommand {
 	public static readonly flags = {
 		language: Flags.string({
 			char: 'l',
-			summary: getMessage(Bundle.Add, 'flags.languageSummary'),
-			description: getMessage(Bundle.Add, 'flags.languageDescription'),
+			summary: getMessage(BundleName.Add, 'flags.languageSummary'),
+			description: getMessage(BundleName.Add, 'flags.languageDescription'),
 			required: true
 		}),
 		path: Flags.custom<string[]>({
 			char: 'p',
-			summary: getMessage(Bundle.Add, 'flags.pathSummary'),
-			description: getMessage(Bundle.Add, 'flags.pathDescription'),
+			summary: getMessage(BundleName.Add, 'flags.pathSummary'),
+			description: getMessage(BundleName.Add, 'flags.pathDescription'),
 			multiple: true,
 			delimiter: ',',
 			required: true

@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {runCommand} from '../../TestUtils';
 import path = require('path');
 import * as TestUtils from '../../TestUtils';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 describe('scanner run tests that result in the use of RuleFilters', function () {
 	describe('Single filter', () => {
@@ -70,14 +70,14 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 			it('Case: Negate non-negatable filter (--ruleset)', () => {
 				const ruleset = `'!some-value'`;
 				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --ruleset ${ruleset}`);
-				expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Exceptions, 'RuleFilter.PositiveOnly', ['Ruleset']), '--ruleset should not be negateable');
+				expect(output.shellOutput.stderr).to.contain(getMessage(BundleName.Exceptions, 'RuleFilter.PositiveOnly', ['Ruleset']), '--ruleset should not be negateable');
 			});
 		});
 
 		it('Case: Mixing positive and negative constraints', () => {
 			const category = `!Code Style,Security`;
 			const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'apex')} --format json --category "${category}"`);
-			expect(output.shellOutput.stderr).to.contain(getMessage(Bundle.Exceptions, 'RuleFilter.MixedTypes', ['Category']), 'Cannot mix positive and negative constraints');
+			expect(output.shellOutput.stderr).to.contain(getMessage(BundleName.Exceptions, 'RuleFilter.MixedTypes', ['Category']), 'Cannot mix positive and negative constraints');
 		});
 	});
 

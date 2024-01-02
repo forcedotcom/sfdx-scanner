@@ -1,7 +1,7 @@
 import {Inputs} from "../types";
 import {OUTPUT_FORMAT, RunOptions} from "./RuleManager";
 import {SfError} from "@salesforce/core";
-import {Bundle, getMessage} from "../MessageCatalog";
+import {BundleName, getMessage} from "../MessageCatalog";
 import {INTERNAL_ERROR_CODE} from "../Constants";
 
 /**
@@ -47,7 +47,7 @@ function determineOutputFormat(format: string, outfile: string, json: boolean): 
 export function inferFormatFromOutfile(outfile: string): OUTPUT_FORMAT {
 	const lastPeriod: number = outfile.lastIndexOf('.');
 	if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
-		throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
+		throw new SfError(getMessage(BundleName.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);
 	}
 	const fileExtension: string = outfile.slice(lastPeriod + 1).toLowerCase();
 	switch (fileExtension) {
@@ -58,6 +58,6 @@ export function inferFormatFromOutfile(outfile: string): OUTPUT_FORMAT {
 		case OUTPUT_FORMAT.XML:
 			return fileExtension;
 		default:
-			throw new SfError(getMessage(Bundle.CommonRun, 'validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
+			throw new SfError(getMessage(BundleName.CommonRun, 'validations.outfileMustBeSupportedType'), null, null, INTERNAL_ERROR_CODE);
 	}
 }

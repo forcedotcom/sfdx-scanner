@@ -7,7 +7,7 @@ import {PATHLESS_COLUMNS} from '../../../src/lib/formatter/RuleResultRecombinato
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {FakeDisplay} from "../FakeDisplay";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
@@ -114,7 +114,7 @@ describe('RunOutputProcessor', () => {
 				const output: AnyJson = rop.processRunOutput(fakeRes);
 
 				// We expect that the message logged to the console and the message returned should both be the default
-				const expectedMsg = getMessage(Bundle.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
+				const expectedMsg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
 				expect(display.getOutputText()).to.equal("[Info]: " + expectedMsg, 'Should have displayed expected message');
 				expect(output).to.equal(expectedMsg, 'Should have returned expected message');
 			});
@@ -131,9 +131,9 @@ describe('RunOutputProcessor', () => {
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeTableResults);
 
-					const expectedTableSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
+					const expectedTableSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 					expect(display.getOutputArray()).length(2);
 					expect(display.getOutputArray()[0]).to.satisfy(msg => msg.startsWith("[Table]"));
@@ -158,10 +158,10 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						expect(display.getOutputText()).to.satisfy(msg => msg.startsWith("[Table]"));
 						expect(display.getLastTableColumns()).to.equal(FAKE_TABLE_OUTPUT.columns);
 						expect(display.getLastTableData()).to.equal(FAKE_TABLE_OUTPUT.rows);
-						const expectedTableSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
+						const expectedTableSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						expect(e.message).to.equal(expectedTableSummary, 'Exception message incorrectly formed');
 					}
 				});
@@ -200,7 +200,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
-						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [2]), 'Exception message incorrectly formed');
 					}
 				});
 
@@ -240,7 +240,7 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
-						expect(e.message).to.equal(getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
+						expect(e.message).to.equal(getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [1]), 'Exception message incorrectly formed');
 					}
 				});
 			});
@@ -263,9 +263,9 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToConsole')}`;
 				const output: AnyJson = rop.processRunOutput(fakeRes);
 
 				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
-				const expectedMsg = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
-${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint', 0, 0])}
-${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
+				const expectedMsg = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
+${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint', 0, 0])}
+${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 
 				expect(display.getOutputText()).to.equal("[Info]: " + expectedMsg);
 				expect(fakeFiles.length).to.equal(1, 'A CSV file with only a header should be created');
@@ -286,9 +286,9 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath
 					// THIS IS THE PART BEING TESTED.
 					const output: AnyJson = rop.processRunOutput(fakeCsvResults);
 
-					const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
+					const expectedCsvSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 					expect(display.getOutputText()).to.equal("[Info]: " + expectedCsvSummary);
 					expect(output).to.equal(expectedCsvSummary, 'Summary should be returned as final message');
 					expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
@@ -312,10 +312,10 @@ ${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath
 						expect(display.getOutputText()).to.equal("");
 						expect(fakeFiles.length).to.equal(1, 'Should have tried to create one file');
 						expect(fakeFiles[0]).to.deep.equal({path: fakeFilePath, data: FAKE_CSV_OUTPUT}, 'File-write expectations defied');
-						const expectedCsvSummary = `${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
-${getMessage(Bundle.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
+						const expectedCsvSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.sevThresholdSummary', [1])}
+${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFilePath])}`;
 						expect(e.message).to.equal(expectedCsvSummary, 'Summary was wrong');
 					}
 				});

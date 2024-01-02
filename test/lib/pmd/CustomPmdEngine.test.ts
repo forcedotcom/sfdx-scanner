@@ -6,7 +6,7 @@ import {CustomPmdEngine}  from '../../../src/lib/pmd/PmdEngine'
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import {Bundle, getMessage} from "../../../src/MessageCatalog";
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -134,7 +134,7 @@ describe('Tests for CustomPmdEngine implementation', () => {
 				);
 				//TODO: fail when no error is thrown
 			} catch (error) {
-				expect(error.message).equals(getMessage(Bundle.PmdEngine, 'ConfigNotFound', [configFilePath]));
+				expect(error.message).equals(getMessage(BundleName.PmdEngine, 'ConfigNotFound', [configFilePath]));
 			}
 
 		});
