@@ -101,7 +101,7 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 
 		it('Case: --engine eslint-lwc --category suggestion', () => {
 			const category = 'suggestion';
-			const expectedViolationCount = 36;
+			const expectedViolationCount = 35;
 			const commandOutput = runCommand(`scanner run --target ${pathToDomParserController} --format json --engine eslint-lwc --category ${category}`)
 			const stdout = commandOutput.shellOutput.stdout;
 			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));

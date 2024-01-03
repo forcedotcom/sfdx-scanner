@@ -121,7 +121,9 @@
 		"devPlugins": [
 			"@oclif/plugin-help"
 		],
-		"additionalHelpFlags": ["-h"],
+		"additionalHelpFlags": [
+			"-h"
+		],
 		"topicSeparator": " ",
 		"flexibleTaxonomy": true
 	},
