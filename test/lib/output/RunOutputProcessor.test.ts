@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 
-import {RunOutputOptions, RunResultsProcessor} from '../../../src/lib/util/RunResultsProcessor';
+import {RunOutputOptions, RunResultsProcessor} from '../../../src/lib/output/RunResultsProcessor';
 import {EngineExecutionSummary, FormattedOutput, RuleResult} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');

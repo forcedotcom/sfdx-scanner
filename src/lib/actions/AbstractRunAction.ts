@@ -10,7 +10,7 @@ import {Display} from "../Display";
 import {RuleFilter} from "../RuleFilter";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
-import {RunOutputOptions, RunResultsProcessor} from "../util/RunResultsProcessor";
+import {RunOutputOptions, RunResultsProcessor} from "../output/RunResultsProcessor";
 import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
