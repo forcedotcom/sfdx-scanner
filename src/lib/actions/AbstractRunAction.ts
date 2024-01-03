@@ -16,6 +16,7 @@ import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {Results} from "../output/Results";
 import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
+import {CompositeResultsProcessor, ResultsProcessor} from "../output/ResultsProcessor";
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
@@ -80,13 +81,17 @@ export abstract class AbstractRunAction implements Action {
 		const outputOptions: RunOutputOptions = this.inputProcessor.createRunOutputOptions(inputs);
 		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, inputs["verbose-violations"] as boolean);
 
+		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor([
+			runResultsProcessor
+		]);
+
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
 
 		try {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
-			await runResultsProcessor.processResults(results);
+			await compositeResultsProcessor.processResults(results);
 			return runResultsProcessor.getJsonReturnValue();
 
 		} catch (e) {

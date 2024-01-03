@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 
 import {RunOutputOptions, RunResultsProcessor} from '../../../src/lib/output/RunResultsProcessor';
-import {EngineExecutionSummary, FormattedOutput, RuleResult} from '../../../src/types';
+import {EngineExecutionSummary} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
 import fs = require('fs');
@@ -10,6 +10,7 @@ import {FakeDisplay} from "../FakeDisplay";
 import {PATHLESS_COLUMNS} from "../../../src/lib/output/TableOutputFormatter";
 import {OutputFormat} from "../../../src/lib/output/OutputFormat";
 import {Results} from "../../../src/lib/output/Results";
+import {FakeResults} from "./FakeResults";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -77,55 +78,6 @@ const FAKE_JSON_OUTPUT = `[{
 		"url": "Who cares"
 	}]
 }]`;
-
-class FakeResults implements Results {
-	private minSev: number = 0;
-	private summaryMap: Map<string, EngineExecutionSummary>;
-	private formattedOutput: FormattedOutput;
-
-	withMinSev(minSev: number): FakeResults {
-		this.minSev = minSev;
-		return this;
-	}
-
-	withSummaryMap(summaryMap: Map<string, EngineExecutionSummary>): FakeResults {
-		this.summaryMap = summaryMap;
-		return this;
-	}
-
-	withFormattedOutput(formattedOutput: FormattedOutput): FakeResults {
-		this.formattedOutput = formattedOutput;
-		return this;
-	}
-
-	getExecutedEngines(): Set<string> {
-		throw new Error("Not implemented");
-	}
-
-	getMinSev(): number {
-		return this.minSev;
-	}
-
-	getRuleResults(): RuleResult[] {
-		throw new Error("Not implemented");
-	}
-
-	getSummaryMap(): Map<string, EngineExecutionSummary> {
-		return this.summaryMap;
-	}
-
-	isEmpty(): boolean {
-		throw new Error("Not implemented");
-	}
-
-	violationsAreDfa(): boolean {
-		throw new Error("Not implemented");
-	}
-
-	toFormattedOutput(_format: OutputFormat, _verboseViolations: boolean): Promise<FormattedOutput> {
-		return Promise.resolve(this.formattedOutput);
-	}
-}
 
 describe('RunOutputProcessor', () => {
 	let fakeFiles: {path; data}[] = [];

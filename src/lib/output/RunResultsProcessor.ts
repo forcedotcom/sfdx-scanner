@@ -7,6 +7,7 @@ import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {OutputFormat} from "../output/OutputFormat";
 import {Results} from "../output/Results";
+import {ResultsProcessor} from "./ResultsProcessor";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
@@ -14,7 +15,9 @@ export type RunOutputOptions = {
 	outfile?: string;
 }
 
-export class RunResultsProcessor {
+// TODO: We should consider separating this into multiple ResultProcessor classes:
+//       --> 1 for processing the json return value, 1 for creating the users outfile, and 1 for creating console output
+export class RunResultsProcessor implements ResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
 	private readonly verboseViolations: boolean;
