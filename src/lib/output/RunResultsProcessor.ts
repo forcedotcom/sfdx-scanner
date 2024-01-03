@@ -18,6 +18,7 @@ export class RunResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
 	private readonly verboseViolations: boolean;
+	private jsonReturnValue: AnyJson = [];
 
 	public constructor(display: Display, opts: RunOutputOptions, verboseViolations: boolean) {
 		this.display = display;
@@ -25,7 +26,11 @@ export class RunResultsProcessor {
 		this.verboseViolations = verboseViolations;
 	}
 
-	public async processResults(results: Results): Promise<AnyJson> {
+	public getJsonReturnValue(): AnyJson {
+		return this.jsonReturnValue;
+	}
+
+	public async processResults(results: Results): Promise<void> {
 		const minSev: number = results.getMinSev();
 		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
 		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations);
@@ -42,7 +47,8 @@ export class RunResultsProcessor {
 			// ...log it to the console...
 			this.display.displayInfo(msg);
 			// ...and return it for use with the --json flag.
-			return msg;
+			this.jsonReturnValue = msg;
+			return;
 		}
 
 		// If we have violations (or an outfile but no violations), we'll build an array of
@@ -68,15 +74,15 @@ export class RunResultsProcessor {
 		// Finally, we need to return something for use by the --json flag.
 		if (this.opts.outfile) {
 			// If we used an outfile, we should just return the summary message, since that says where the file is.
-			return msg;
+			this.jsonReturnValue = msg;
 		} else if (typeof formattedOutput === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
+			this.jsonReturnValue = this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
-			return formattedOutput.rows;
+			this.jsonReturnValue = formattedOutput.rows;
 		}
 	}
 

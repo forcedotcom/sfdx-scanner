@@ -76,7 +76,9 @@ export abstract class AbstractRunAction implements Action {
 		const targetPaths: string[] = this.inputProcessor.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.inputProcessor.createRunOptions(inputs, this.isDfa());
 		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);
+
 		const outputOptions: RunOutputOptions = this.inputProcessor.createRunOutputOptions(inputs);
+		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, inputs["verbose-violations"] as boolean);
 
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
@@ -84,8 +86,8 @@ export abstract class AbstractRunAction implements Action {
 		try {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
-			return new RunResultsProcessor(this.display, outputOptions, inputs["verbose-violations"] as boolean)
-				.processResults(results);
+			await runResultsProcessor.processResults(results);
+			return runResultsProcessor.getJsonReturnValue();
 
 		} catch (e) {
 			// Rethrow any errors as SF errors.
