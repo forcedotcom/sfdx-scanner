@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-// @ts-ignore
 import {runCommand} from '../../TestUtils';
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import * as os from "os";
@@ -591,12 +590,13 @@ describe('scanner run', function () {
 			// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
 			// The following categories are implicitly included:
 			// - 8 PMD categories
+			// - 1 PMD-AppExchange category
 			// - 3 ESLint categories
 			// - 3 ESLint-Typescript categories
 			// - 1 RetireJS category
-			// For a total of 15
+			// For a total of 16
 			// TODO: revisit test, should be improved because of issue above
-			expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+			expect(implicitMessages || []).to.have.lengthOf(16, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 
 		});
 	});
