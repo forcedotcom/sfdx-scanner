@@ -1,29 +1,34 @@
 import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
 import fs = require('fs');
-import {RecombinedRuleResults, RecombinedData} from '../../types';
-import {OUTPUT_FORMAT} from '../RuleManager';
+import {FormattedOutput, EngineExecutionSummary} from '../../types';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
+import {OutputFormat} from "../output/OutputFormat";
+import {Results} from "../output/Results";
 
 export type RunOutputOptions = {
-	format: OUTPUT_FORMAT;
+	format: OutputFormat;
 	severityForError?: number;
 	outfile?: string;
 }
 
-export class RunOutputProcessor {
+export class RunResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
+	private readonly verboseViolations: boolean;
 
-	public constructor(display: Display, opts: RunOutputOptions) {
+	public constructor(display: Display, opts: RunOutputOptions, verboseViolations: boolean) {
 		this.display = display;
 		this.opts = opts;
+		this.verboseViolations = verboseViolations;
 	}
 
-	public processRunOutput(rrr: RecombinedRuleResults): AnyJson {
-		const {minSev, results, summaryMap} = rrr;
+	public async processResults(results: Results): Promise<AnyJson> {
+		const minSev: number = results.getMinSev();
+		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
+		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations);
 
 		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
 
@@ -44,9 +49,9 @@ export class RunOutputProcessor {
 		// message parts, and then log them all at the end.
 		let msgComponents: string[] = [];
 		// We need a summary of the information we were provided (blank/empty if no violations).
-		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(rrr)];
+		msgComponents = [...msgComponents, ...this.buildRunSummaryMsgParts(minSev, summaryMap)];
 		// We need to surface the results directly to the user, then add a message describing what we did.
-		msgComponents.push(this.opts.outfile ? this.writeToOutfile(results) : this.writeToConsole(results));
+		msgComponents.push(this.opts.outfile ? this.writeToOutfile(formattedOutput) : this.writeToConsole(formattedOutput));
 		// Now we need to decide what to do with these messages. We'll either throw them as an exception or log them to
 		// the user.
 		msgComponents = msgComponents.filter(cmp => cmp && cmp.length > 0);
@@ -64,14 +69,14 @@ export class RunOutputProcessor {
 		if (this.opts.outfile) {
 			// If we used an outfile, we should just return the summary message, since that says where the file is.
 			return msg;
-		} else if (typeof results === 'string') {
+		} else if (typeof formattedOutput === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OUTPUT_FORMAT.JSON ? JSON.parse(results) as AnyJson : results;
+			return this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
-			return results.rows;
+			return formattedOutput.rows;
 		}
 	}
 
@@ -90,13 +95,12 @@ export class RunOutputProcessor {
 		return false;
 	}
 
-	private buildRunSummaryMsgParts(rrr: RecombinedRuleResults): string[] {
-		const {summaryMap, minSev} = rrr;
+	private buildRunSummaryMsgParts(minSev: number, summaryMap: Map<string,EngineExecutionSummary>): string[] {
 		let msgParts: string[] = [];
 
 		// If we're outputting our results as a table, or we're writing the results to a file, then we'll want to output
 		// a summary of what engines ran and what they found.
-		if ((this.opts.format === OUTPUT_FORMAT.TABLE) || this.opts.outfile) {
+		if ((this.opts.format === OutputFormat.TABLE) || this.opts.outfile) {
 			const summaryMsgs = [...summaryMap.entries()]
 				.map(([engine, summary]) => {
 					return getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', [engine, summary.violationCount, summary.fileCount]);
@@ -126,18 +130,18 @@ export class RunOutputProcessor {
 		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}
 
-	private writeToConsole(results: RecombinedData): string {
+	private writeToConsole(results: FormattedOutput): string {
 		// Figure out what format we need.
-		const format: OUTPUT_FORMAT = this.opts.format;
+		const format: OutputFormat = this.opts.format;
 		// Prepare the format mismatch message in case we need it later.
 		const msg = `Invalid combination of format ${format} and output type ${typeof results}`;
 		switch (format) {
-			case OUTPUT_FORMAT.CSV:
-			case OUTPUT_FORMAT.HTML:
-			case OUTPUT_FORMAT.JSON:
-			case OUTPUT_FORMAT.JUNIT:
-			case OUTPUT_FORMAT.SARIF:
-			case OUTPUT_FORMAT.XML:
+			case OutputFormat.CSV:
+			case OutputFormat.HTML:
+			case OutputFormat.JSON:
+			case OutputFormat.JUNIT:
+			case OutputFormat.SARIF:
+			case OutputFormat.XML:
 				// All of these formats should be represented as giant strings.
 				if (typeof results !== 'string') {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
@@ -145,7 +149,7 @@ export class RunOutputProcessor {
 				// We can just dump those giant strings to the console without anything special.
 				this.display.displayInfo(results);
 				break;
-			case OUTPUT_FORMAT.TABLE:
+			case OutputFormat.TABLE:
 				// This format should be a JSON with a `columns` property and a `rows` property, i.e. NOT a string.
 				if (typeof results === 'string') {
 					throw new SfError(msg, null, null, INTERNAL_ERROR_CODE);
@@ -157,6 +161,6 @@ export class RunOutputProcessor {
 		}
 		// If the output format is table, then we should return a message indicating that the output was logged above.
 		// Otherwise, just return an empty string so the output remains machine-readable.
-		return format === OUTPUT_FORMAT.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
+		return format === OutputFormat.TABLE ? getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole') : '';
 	}
 }

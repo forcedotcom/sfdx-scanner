@@ -1,17 +1,55 @@
-import { deepCopy } from '../util/Utils';
-import { ENGINE, PMD_VERSION, SFGE_VERSION } from '../../Constants';
-import {Rule, RuleResult, RuleViolation} from '../../types';
-import * as url from 'url';
-import { RuleCatalog } from '../services/RuleCatalog';
-import { Controller } from '../../Controller';
-import {isPathlessViolation} from '../util/Utils';
-import { ESLint } from 'eslint';
+import {OutputFormatter, Results} from "./Results";
+import {FormattedOutput, Rule, RuleResult, RuleViolation} from "../../types";
+import {Location, Log, Notification, Region, ReportingDescriptor, Result, Run} from "sarif";
+import {deepCopy, isPathlessViolation} from "../util/Utils";
+import * as url from "url";
+import {RuleCatalog} from "../services/RuleCatalog";
+import {ESLint} from "eslint";
+import {ENGINE, PMD_VERSION, SFGE_VERSION} from "../../Constants";
+import {Controller} from "../../Controller";
 import * as retire from 'retire';
-import {Location, Log, Notification, Region, Result, Run, ReportingDescriptor} from 'sarif';
 
 const ERROR = 'error';
 const WARNING = 'warning';
 const SINK_VERTEX_MESSAGE = "Sink vertex found here.";
+
+export class SarifOutputFormatter implements OutputFormatter {
+
+	/**
+	 * Convert an array of RuleResults to a sarif document. The rules are separated by engine name.
+	 * A new "run" object is created for each engine that was run
+	 */
+	public async format(results: Results): Promise<FormattedOutput> {
+		// Obtain the catalog and pass it in, this avoids multiple initializations
+		// when waiting for promises in parallel
+		const catalog: RuleCatalog = await Controller.getCatalog();
+		const sarif: Log = {
+			version: '2.1.0',
+			$schema: 'http://json.schemastore.org/sarif-2.1.0',
+			runs: [
+			]
+		};
+
+		// Partition the RuleResults by the engine that generated them. Certain engines may
+		// have multiple RuleResults depending on how the targets were provided to the run command.
+		// Some engines may have no results, these engines should still generate a "run" node
+		const filteredResults: Map<string, RuleResult[]> = new Map<string, RuleResult[]>();
+		for (const engine of results.getExecutedEngines()) {
+			filteredResults.set(engine, []);
+		}
+		for (const r of results.getRuleResults()) {
+			filteredResults.get(r.engine).push(r);
+		}
+
+		// Create a new run object for each engine/results pair
+		for (const [engine, ruleResults] of filteredResults.entries()) {
+			const formatter: SarifFormatter = getSarifFormatter(engine);
+			sarif.runs.push(formatter.format(catalog, ruleResults));
+		}
+
+		return JSON.stringify(sarif);
+	}
+}
 
 /**
  * Formatter based on https://docs.oasis-open.org/sarif/sarif/v2.0/csprd02/sarif-v2.0-csprd02.html
@@ -86,10 +124,10 @@ abstract class SarifFormatter {
 							text: description.trim().replace(/^\n/, '').replace(/\n$/, '')
 						},
 						properties: {
-						category: v.category,
-						severity: v.severity,
-						normalizedSeverity: (normalizeSeverity ? v.normalizedSeverity : undefined) // when set to undefined, normalizedSeverity will not appear in output
-					}
+							category: v.category,
+							severity: v.severity,
+							normalizedSeverity: (normalizeSeverity ? v.normalizedSeverity : undefined) // when set to undefined, normalizedSeverity will not appear in output
+						}
 					};
 					if (v.url) {
 						rule['helpUri'] = v.url;
@@ -233,7 +271,7 @@ class PMDSarifFormatter extends SarifFormatter {
 }
 
 
- class CPDSarifFormatter extends SarifFormatter {
+class CPDSarifFormatter extends SarifFormatter {
 	constructor(engine: string) {
 		super(engine,
 			{
@@ -324,41 +362,3 @@ const getSarifFormatter = (engine: string): SarifFormatter => {
 		throw new Error(`Developer error. Unknown engine '${engine}'`);
 	}
 }
-
-/**
- * Convert an array of RuleResults to a sarif document. The rules are separated by engine name.
- * A new "run" object is created for each engine that was run
- */
-const constructSarif = async (results: RuleResult[], executedEngines: Set<string>): Promise<string> => {
-	// Obtain the catalog and pass it in, this avoids multiple initializations
-	// when waiting for promises in parallel
-	const catalog: RuleCatalog = await Controller.getCatalog();
-	const sarif: Log = {
-		version: '2.1.0',
-		$schema: 'http://json.schemastore.org/sarif-2.1.0',
-		runs: [
-		]
-	};
-
-	// Partition the RuleResults by the engine that generated them. Certain engines may
-	// have multiple RuleResults depending on how the targets were provided to the run command.
-	// Some engines may have no results, these engines should still generate a "run" node
-	const filteredResults: Map<string, RuleResult[]> = new Map<string, RuleResult[]>();
-	for (const engine of executedEngines) {
-		filteredResults.set(engine, []);
-	}
-	for (const r of results) {
-		filteredResults.get(r.engine).push(r);
-	}
-
-	// Create a new run object for each engine/results pair
-	for (const [engine, ruleResults] of filteredResults.entries()) {
-		const formatter: SarifFormatter = getSarifFormatter(engine);
-		sarif.runs.push(formatter.format(catalog, ruleResults));
-	}
-
-	return JSON.stringify(sarif);
-}
-
-
-export { constructSarif };

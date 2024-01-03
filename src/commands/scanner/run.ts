@@ -1,9 +1,8 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {PathlessEngineFilters} from '../../Constants';
 import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
-import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../lib/RunOptionsFactory";
 import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
-import {InputsResolver, InputsResolverImpl} from "../../lib/InputsResolver";
+import {InputProcessor, InputProcessorImpl} from "../../lib/InputProcessor";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Action} from "../../lib/ScannerCommand";
@@ -88,11 +87,10 @@ export default class Run extends ScannerRunCommand {
 		// END: Flags related to results processing.
 	};
 
-	protected createAction(_logger: Logger, display: Display): Action {
-		const inputsResolver: InputsResolver = new InputsResolverImpl()
+	protected createAction(logger: Logger, display: Display): Action {
+		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
-		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(false, this.config.version);
-		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputsResolver);
-		return new RunAction(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputProcessor);
+		return new RunAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
 	}
 }

@@ -1,4 +1,4 @@
-import {Display} from "../../lib/lib/Display";
+import {Display} from "../../src/lib/Display";
 import {Ux} from "@salesforce/sf-plugins-core";
 
 export class FakeDisplay implements Display {

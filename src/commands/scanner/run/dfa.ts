@@ -1,7 +1,6 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerRunCommand} from '../../../lib/ScannerRunCommand';
-import {RunOptionsFactory, RunOptionsFactoryImpl} from "../../../lib/RunOptionsFactory";
-import {InputsResolver, InputsResolverImpl} from "../../../lib/InputsResolver";
+import {InputProcessor, InputProcessorImpl} from "../../../lib/InputProcessor";
 import {EngineOptionsFactory, RunDfaEngineOptionsFactory} from "../../../lib/EngineOptionsFactory";
 import {BundleName, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
@@ -76,11 +75,10 @@ export default class Dfa extends ScannerRunCommand {
 		// END: Config-overrideable engine flags.
 	};
 
-	protected createAction(_logger: Logger, display: Display): Action {
-		const inputsResolver: InputsResolver = new InputsResolverImpl()
+	protected createAction(logger: Logger, display: Display): Action {
+		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
-		const runOptionsFactory: RunOptionsFactory = new RunOptionsFactoryImpl(true, this.config.version);
-		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputsResolver);
-		return new RunDfaAction(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputProcessor);
+		return new RunDfaAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
 	}
 }

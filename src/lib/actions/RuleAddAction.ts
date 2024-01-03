@@ -5,7 +5,7 @@ import {AnyJson} from "@salesforce/ts-types";
 import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {stringArrayTypeGuard} from "../util/Utils";
-import {InputsResolver} from "../InputsResolver";
+import {InputProcessor} from "../InputProcessor";
 import {Controller} from "../../Controller";
 
 /**
@@ -14,12 +14,12 @@ import {Controller} from "../../Controller";
 export class RuleAddAction implements Action {
 	private readonly logger: Logger;
 	private readonly display: Display;
-	private readonly inputsResolver: InputsResolver;
+	private readonly inputProcessor: InputProcessor;
 
-	public constructor(logger: Logger, display: Display, inputsResolver: InputsResolver) {
+	public constructor(logger: Logger, display: Display, inputProcessor: InputProcessor) {
 		this.logger = logger;
 		this.display = display;
-		this.inputsResolver = inputsResolver;
+		this.inputProcessor = inputProcessor;
 	}
 
 	public validateInputs(inputs: Inputs): Promise<void> {
@@ -37,7 +37,7 @@ export class RuleAddAction implements Action {
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
 		const language = inputs.language as string;
-		const paths = this.inputsResolver.resolvePaths(inputs);
+		const paths = this.inputProcessor.resolvePaths(inputs);
 
 		this.logger.trace(`Language: ${language}`);
 		this.logger.trace(`Rule path: ${JSON.stringify(paths)}`);

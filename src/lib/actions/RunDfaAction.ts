@@ -1,12 +1,11 @@
 import {AbstractRunAction} from "./AbstractRunAction";
 import {Display} from "../Display";
-import {InputsResolver} from "../InputsResolver";
+import {InputProcessor} from "../InputProcessor";
 import {RuleFilterFactory} from "../RuleFilterFactory";
-import {RunOptionsFactory} from "../RunOptionsFactory";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {Inputs} from "../../types";
 import {FileHandler} from "../util/FileHandler";
-import {SfError} from "@salesforce/core";
+import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import * as globby from "globby";
 
@@ -14,9 +13,9 @@ import * as globby from "globby";
  * The Action behind the "run dfa" command
  */
 export class RunDfaAction extends AbstractRunAction {
-	public constructor(display: Display, inputsResolver: InputsResolver, ruleFilterFactory: RuleFilterFactory,
-						runOptionsFactory: RunOptionsFactory, engineOptionsFactory: EngineOptionsFactory) {
-		super(display, inputsResolver, ruleFilterFactory, runOptionsFactory, engineOptionsFactory);
+	public constructor(logger: Logger, display: Display, inputProcessor: InputProcessor,
+						ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory) {
+		super(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {
@@ -42,5 +41,9 @@ export class RunDfaAction extends AbstractRunAction {
 				}
 			}
 		}
+	}
+
+	protected isDfa(): boolean {
+		return true;
 	}
 }

@@ -1,9 +1,9 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerCommand} from './ScannerCommand';
-import {OUTPUT_FORMAT} from './RuleManager';
 import untildify = require('untildify');
 import normalize = require('normalize-path');
 import {BundleName, getMessage} from "../MessageCatalog";
+import {OutputFormat} from "./output/OutputFormat";
 
 export abstract class ScannerRunCommand extends ScannerCommand {
 	/**
@@ -23,11 +23,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 			multiple: true
 		})(),
 		// BEGIN: Flags related to results processing.
-		format: Flags.custom<OUTPUT_FORMAT>({
+		format: Flags.custom<OutputFormat>({
 			char: 'f',
 			summary: getMessage(BundleName.CommonRun, 'flags.formatSummary'),
 			description: getMessage(BundleName.CommonRun, 'flags.formatDescription'),
-			options: Object.values(OUTPUT_FORMAT)
+			options: Object.values(OutputFormat)
 		})(),
 		outfile: Flags.string({
 			char: 'o',

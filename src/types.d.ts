@@ -62,6 +62,7 @@ export type RuleTarget = {
 	paths: string[];
 	methods?: string[];
 }
+
 export type RuleResult = {
 	engine: string;
 	fileName: string;
@@ -108,13 +109,8 @@ export type ResultTableRow = {
 	sinkLocation?: string;
 }
 
-export type RecombinedData = string | {columns: Ux.Table.Columns<ResultTableRow>; rows: ResultTableRow[]};
-
-export type RecombinedRuleResults = {
-	minSev: number;
-	results: RecombinedData;
-	summaryMap: Map<string,EngineExecutionSummary>;
-};
+// TODO: This is a bit of a smell. We should just return a string and treat all formatted output the same if possible.
+export type FormattedOutput = string | {columns: Ux.Table.Columns<ResultTableRow>; rows: ResultTableRow[]};
 
 type BaseViolation = {
 	ruleName: string;
