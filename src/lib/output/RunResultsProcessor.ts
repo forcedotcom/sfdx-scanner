@@ -4,8 +4,8 @@ import {FormattedOutput, EngineExecutionSummary} from '../../types';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
-import {OutputFormat} from "../output/OutputFormat";
-import {Results} from "../output/Results";
+import {OutputFormat} from "./OutputFormat";
+import {Results} from "./Results";
 import {ResultsProcessor} from "./ResultsProcessor";
 import {writeToFile} from "./OutputUtils";
 

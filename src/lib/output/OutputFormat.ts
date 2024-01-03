@@ -24,7 +24,7 @@ export function inferFormatFromInternalOutfile(outfile: string): OutputFormat {
 		getMessage(BundleName.CommonRun, 'internal.outfileMustBeSupportedType', [ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE]));
 }
 
-function determineOutputFormat(outfile: string, invalidFileMsg: string, invalidExtensionMsg): OutputFormat {
+function determineOutputFormat(outfile: string, invalidFileMsg: string, invalidExtensionMsg: string): OutputFormat {
 	const lastPeriod: number = outfile.lastIndexOf('.');
 	if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
 		throw new SfError(invalidFileMsg, null, null, INTERNAL_ERROR_CODE);
