@@ -1,6 +1,5 @@
 import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
-import fs = require('fs');
 import {FormattedOutput, EngineExecutionSummary} from '../../types';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
@@ -8,6 +7,7 @@ import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {OutputFormat} from "../output/OutputFormat";
 import {Results} from "../output/Results";
 import {ResultsProcessor} from "./ResultsProcessor";
+import {writeToFile} from "./OutputUtils";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
@@ -126,15 +126,10 @@ export class RunResultsProcessor implements ResultsProcessor {
 	}
 
 	private writeToOutfile(results: string | {columns; rows}): string {
-		try {
-			// At this point, we can cast `results` to a string, since it being an object would indicate that the format
-			// is `table`, and we already have validations preventing tables from being written to files.
-			fs.writeFileSync(this.opts.outfile, results as string);
-		} catch (e) {
-			// Rethrow any errors as SfdxErrors.
-			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
-		}
+		// At this point, we can cast `results` to a string, since it being an object would indicate that the format
+		// is `table`, and we already have validations preventing tables from being written to files.
+		writeToFile(this.opts.outfile, results as string);
+
 		// Return a message indicating the action we took.
 		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}

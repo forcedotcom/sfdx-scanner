@@ -5,7 +5,7 @@ import {OutputFormat} from "../../../src/lib/output/OutputFormat";
 export class FakeResults implements Results {
 	private minSev: number = 0;
 	private summaryMap: Map<string, EngineExecutionSummary>;
-	private formattedOutput: FormattedOutput;
+	private formattedOutputMap: Map<string, FormattedOutput> = new Map();
 
 	withMinSev(minSev: number): FakeResults {
 		this.minSev = minSev;
@@ -18,7 +18,12 @@ export class FakeResults implements Results {
 	}
 
 	withFormattedOutput(formattedOutput: FormattedOutput): FakeResults {
-		this.formattedOutput = formattedOutput;
+		this.formattedOutputMap.set("default", formattedOutput);
+		return this;
+	}
+
+	withFormattedOutputForFormat(format: OutputFormat, formattedOutput: FormattedOutput): FakeResults {
+		this.formattedOutputMap.set(format as string, formattedOutput);
 		return this;
 	}
 
@@ -46,7 +51,10 @@ export class FakeResults implements Results {
 		throw new Error("Not implemented");
 	}
 
-	toFormattedOutput(_format: OutputFormat, _verboseViolations: boolean): Promise<FormattedOutput> {
-		return Promise.resolve(this.formattedOutput);
+	toFormattedOutput(format: OutputFormat, _verboseViolations: boolean): Promise<FormattedOutput> {
+		if(this.formattedOutputMap.has(format as string)) {
+			return Promise.resolve(this.formattedOutputMap.get(format as string));
+		}
+		return Promise.resolve(this.formattedOutputMap.get("default"));
 	}
 }

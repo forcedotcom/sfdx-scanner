@@ -13,10 +13,11 @@ import {Controller} from "../../Controller";
 import {RunOutputOptions, RunResultsProcessor} from "../output/RunResultsProcessor";
 import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
-import {INTERNAL_ERROR_CODE} from "../../Constants";
+import {ENV_VAR_NAMES, INTERNAL_ERROR_CODE} from "../../Constants";
 import {Results} from "../output/Results";
 import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
 import {CompositeResultsProcessor, ResultsProcessor} from "../output/ResultsProcessor";
+import {OutfileResultsProcessor} from "../output/OutfileResultsProcessor";
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
@@ -79,11 +80,16 @@ export abstract class AbstractRunAction implements Action {
 		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);
 
 		const outputOptions: RunOutputOptions = this.inputProcessor.createRunOutputOptions(inputs);
-		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, inputs["verbose-violations"] as boolean);
+		const verboseViolations: boolean = inputs["verbose-violations"] as boolean;
 
-		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor([
-			runResultsProcessor
-		]);
+		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, verboseViolations);
+		const resultsProcessors: ResultsProcessor[] = [runResultsProcessor];
+		const internalOutfile: string = process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
+		if (internalOutfile && internalOutfile.length > 0) {
+			const internalOutputFormat: OutputFormat = inferFormatFromOutfile(internalOutfile);
+			resultsProcessors.push(new OutfileResultsProcessor(internalOutputFormat, internalOutfile, verboseViolations));
+		}
+		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor(resultsProcessors);
 
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();

@@ -13,6 +13,9 @@ export enum OutputFormat {
 }
 
 export function inferFormatFromOutfile(outfile: string): OutputFormat {
+	// TODO: Since the this is being used now for both the --outfile and the internal outfile, we should move where
+	//  validation takes place for --outfile and make these messages more generic.
+
 	const lastPeriod: number = outfile.lastIndexOf('.');
 	if (lastPeriod < 1 || lastPeriod + 1 === outfile.length) {
 		throw new SfError(getMessage(BundleName.CommonRun, 'validations.outfileMustBeValid'), null, null, INTERNAL_ERROR_CODE);

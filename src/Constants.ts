@@ -13,7 +13,8 @@ export const PMD_CATALOG_FILE = 'PmdCatalog.json';
 // TODO: We should flesh this one-off solution out into one that handles all the various env vars we use.
 //       E.g., the ones defined in `EnvironmentVariable.ts` and `dfa.ts`.
 export const ENV_VAR_NAMES = {
-	SCANNER_PATH_OVERRIDE: 'SCANNER_PATH_OVERRIDE'
+	SCANNER_PATH_OVERRIDE: 'SCANNER_PATH_OVERRIDE',
+	SCANNER_INTERNAL_OUTFILE: 'SCANNER_INTERNAL_OUTFILE'
 };
 
 export const INTERNAL_ERROR_CODE = 1;

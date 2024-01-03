@@ -1,6 +1,6 @@
 import {CompositeResultsProcessor, ResultsProcessor} from "../../../src/lib/output/ResultsProcessor";
 import {FakeResults} from "./FakeResults";
-import {Results} from "../../../lib/lib/output/Results";
+import {Results} from "../../../src/lib/output/Results";
 import {expect} from "chai";
 
 describe('CompositeResultsProcessor Tests', () => {
