@@ -1,13 +1,13 @@
 import {expect} from 'chai';
 // @ts-ignore
 import {runCommand} from '../../TestUtils';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
+import * as os from "os";
+import {ENV_VAR_NAMES} from "../../../src/Constants";
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
-import {BundleName, getMessage} from "../../../src/MessageCatalog";
-import * as os from "os";
-import {ENV_VAR_NAMES} from "../../../src/Constants";
 
 const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
 const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
@@ -601,19 +601,19 @@ describe('scanner run', function () {
 		});
 	});
 
-	describe('We can create internal outfile with SCANNER_INTERNAL_OUTFILE environment variable', () => {
+	describe('Create internal outfile with SCANNER_INTERNAL_OUTFILE environment variable', () => {
 		let tmpDir: string = null;
-		let internalOutfile: string = null;
 		beforeEach(() => {
 			tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'InternalOutfileTest-'));
-			internalOutfile = path.join(tmpDir, "internalOutfile.json");
-			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
 		});
 		afterEach(() => {
 			fs.rmSync(tmpDir, {recursive: true, force: true});
 			delete process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
 		});
+
 		it('Can write a user file and an internal file with different formats at same time', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.json");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
 			const userOutfile = path.join(tmpDir, "userOutfile.xml");
 			runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${userOutfile}`);
 
@@ -621,9 +621,32 @@ describe('scanner run', function () {
 			const userFileContents = fs.readFileSync(userOutfile).toString();
 			validateXmlOutput(userFileContents);
 
-			expect(fs.existsSync(userOutfile)).to.equal(true, 'The command should have created the expected internal output file');
+			expect(fs.existsSync(internalOutfile)).to.equal(true, 'The command should have created the expected internal output file');
 			const internalFileContents = fs.readFileSync(internalOutfile).toString();
 			validateJsonOutput(internalFileContents);
+		});
+
+
+		it('Can write to internal file and write to console', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.json");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
+			const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format xml`);
+
+			validateXmlOutput(output.shellOutput.stdout);
+
+			expect(fs.existsSync(internalOutfile)).to.equal(true, 'The command should have created the expected internal output file');
+			const internalFileContents = fs.readFileSync(internalOutfile).toString();
+			validateJsonOutput(internalFileContents);
+		});
+
+		it('Invalid internal file name gives appropriate error', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.notSupported");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
+			const userOutfile = path.join(tmpDir, "userOutfile.xml");
+			const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${userOutfile}`);
+
+			expect(output.shellOutput.stderr).contains(
+				getMessage(BundleName.CommonRun, 'internal.outfileMustBeSupportedType', [ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE]));
 		});
 	});
 });

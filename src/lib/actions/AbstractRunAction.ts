@@ -15,7 +15,7 @@ import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
 import {ENV_VAR_NAMES, INTERNAL_ERROR_CODE} from "../../Constants";
 import {Results} from "../output/Results";
-import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
+import {inferFormatFromInternalOutfile, inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
 import {CompositeResultsProcessor, ResultsProcessor} from "../output/ResultsProcessor";
 import {OutfileResultsProcessor} from "../output/OutfileResultsProcessor";
 
@@ -86,7 +86,7 @@ export abstract class AbstractRunAction implements Action {
 		const resultsProcessors: ResultsProcessor[] = [runResultsProcessor];
 		const internalOutfile: string = process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
 		if (internalOutfile && internalOutfile.length > 0) {
-			const internalOutputFormat: OutputFormat = inferFormatFromOutfile(internalOutfile);
+			const internalOutputFormat: OutputFormat = inferFormatFromInternalOutfile(internalOutfile);
 			resultsProcessors.push(new OutfileResultsProcessor(internalOutputFormat, internalOutfile, verboseViolations));
 		}
 		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor(resultsProcessors);
