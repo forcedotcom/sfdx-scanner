@@ -1,5 +1,8 @@
-import {Stats, promises as fs, constants as fsConstants} from 'fs';
+import {Stats, promises as fsp, constants as fsConstants} from 'fs';
+import fs = require('fs');
 import tmp = require('tmp');
+import {SfError} from "@salesforce/core";
+import {INTERNAL_ERROR_CODE} from "../../Constants";
 
 type DuplicationFn = (src: string, target: string) => Promise<void>;
 
@@ -10,7 +13,7 @@ type DuplicationFn = (src: string, target: string) => Promise<void>;
 export class FileHandler {
 	async exists(filename: string): Promise<boolean> {
 		try {
-			await fs.access(filename, fsConstants.F_OK);
+			await fsp.access(filename, fsConstants.F_OK);
 			return true;
 		} catch (e) {
 			return false;
@@ -18,7 +21,7 @@ export class FileHandler {
 	}
 
 	stats(filename: string): Promise<Stats> {
-		return fs.stat(filename);
+		return fsp.stat(filename);
 	}
 
 	async isDir(filename: string): Promise<boolean> {
@@ -30,24 +33,34 @@ export class FileHandler {
 	}
 
 	readDir(filename: string): Promise<string[]> {
-		return fs.readdir(filename);
+		return fsp.readdir(filename);
 	}
 
 	readFileAsBuffer(filename: string): Promise<Buffer> {
-		return fs.readFile(filename);
+		return fsp.readFile(filename);
 	}
 
 	readFile(filename: string): Promise<string> {
-		return fs.readFile(filename, 'utf-8');
+		return fsp.readFile(filename, 'utf-8');
 	}
 
 	async mkdirIfNotExists(dir: string): Promise<void> {
-		await fs.mkdir(dir, {recursive: true});
+		await fsp.mkdir(dir, {recursive: true});
 		return;
 	}
 
 	writeFile(filename: string, fileContent: string): Promise<void> {
-		return fs.writeFile(filename, fileContent);
+		return fsp.writeFile(filename, fileContent);
+	}
+
+	writeFileSync(filename: string, fileContent: string): void {
+		try {
+			fs.writeFileSync(filename, fileContent);
+		} catch (e) {
+			// Rethrow any errors as SfError.
+			const message: string = e instanceof Error ? e.message : e as string;
+			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
+		}
 	}
 
 	// Create a temp file that will automatically be cleaned up when the process exits.
@@ -86,7 +99,7 @@ export class FileHandler {
 		// at the moment. So we'll go with this semi-naive implementation, aware that it performs SLIGHTLY worse than
 		// an optimal one, and prepared to address it if there's somehow a problem.
 		// These are the file duplication functions available to us, in order of preference.
-		const dupFns: DuplicationFn[] = [fs.symlink, fs.link, fs.copyFile];
+		const dupFns: DuplicationFn[] = [fsp.symlink, fsp.link, fsp.copyFile];
 		const errMsgs: string[] = [];
 
 		// Iterate over the potential duplication methods....

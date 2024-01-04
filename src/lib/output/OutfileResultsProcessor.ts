@@ -1,8 +1,8 @@
 import {ResultsProcessor} from "./ResultsProcessor";
 import {Results} from "./Results";
 import {OutputFormat} from "./OutputFormat";
-import {writeToFile} from "./OutputUtils";
 import {FormattedOutput} from "../../types";
+import {FileHandler} from "../util/FileHandler";
 
 /**
  * Processes results to produce an output file
@@ -19,6 +19,6 @@ export class OutfileResultsProcessor implements ResultsProcessor {
 
 	public async processResults(results: Results): Promise<void> {
 		const fileContents: FormattedOutput = await results.toFormattedOutput(this.outputFormat, this.verboseViolations);
-		writeToFile(this.outfile, fileContents as string);
+		(new FileHandler()).writeFileSync(this.outfile, fileContents as string);
 	}
 }

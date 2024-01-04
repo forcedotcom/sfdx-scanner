@@ -7,8 +7,8 @@ import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {OutputFormat} from "./OutputFormat";
 import {Results} from "./Results";
 import {ResultsProcessor} from "./ResultsProcessor";
-import {writeToFile} from "./OutputUtils";
 import {JsonReturnValueHolder} from "./JsonReturnValueHolder";
+import {FileHandler} from "../util/FileHandler";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
@@ -134,7 +134,7 @@ export class RunResultsProcessor implements ResultsProcessor {
 	private writeToOutfile(results: string | {columns; rows}): string {
 		// At this point, we can cast `results` to a string, since it being an object would indicate that the format
 		// is `table`, and we already have validations preventing tables from being written to files.
-		writeToFile(this.opts.outfile, results as string);
+		(new FileHandler()).writeFileSync(this.opts.outfile, results as string);
 
 		// Return a message indicating the action we took.
 		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
