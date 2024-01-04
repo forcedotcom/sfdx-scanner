@@ -19,7 +19,7 @@ In addition to the base PMD engine, Code Analyzer also includes a custom PMD var
 
 The `pmd-appexchange` engine is disabled by default. To run a PMD scan with the AppExchange-specific ruleset, run `sf scanner run` with the `--engine pmd-appexchange` flag.
 
-** Example:
+**Example:**
 
 `sf scanner run --engine pmd-appexchange --target ./`
 
@@ -27,7 +27,7 @@ For more information on the `pmd-appexchange` rules, read the [pmd-appexchange c
 
 If you’re an AppExchange partner submitting your managed package for security review, you must scan it with Salesforce Code Analyzer and provide test results in your solution’s AppExchange Security Review submission. To run the required PMD scan with the AppExchange-specific ruleset, and produce the required scan report, run `sf scanner run --engine pmd-appexchange`, and name the output file CodeAnalyzerPmdAppExchange.csv.
 
-** Example:
+**Example:**
 
 `sf scanner run --engine pmd-appexchange --format=csv --outfile=CodeAnalyzerPmdAppExchange.csv --target="./"`
 
