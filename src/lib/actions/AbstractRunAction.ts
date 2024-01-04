@@ -10,14 +10,14 @@ import {Display} from "../Display";
 import {RuleFilter} from "../RuleFilter";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 import {Controller} from "../../Controller";
-import {RunOutputOptions, RunResultsProcessor} from "../output/RunResultsProcessor";
+import {RunOutputOptions} from "../output/RunResultsProcessor";
 import {InputProcessor} from "../InputProcessor";
 import {EngineOptionsFactory} from "../EngineOptionsFactory";
-import {ENV_VAR_NAMES, INTERNAL_ERROR_CODE} from "../../Constants";
+import {INTERNAL_ERROR_CODE} from "../../Constants";
 import {Results} from "../output/Results";
-import {inferFormatFromInternalOutfile, inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
-import {CompositeResultsProcessor, ResultsProcessor} from "../output/ResultsProcessor";
-import {OutfileResultsProcessor} from "../output/OutfileResultsProcessor";
+import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
+import {ResultsProcessor} from "../output/ResultsProcessor";
+import {ResultsProcessorFactory} from "../output/ResultsProcessorFactory";
 import {JsonReturnValueHolder} from "../output/JsonReturnValueHolder";
 
 /**
@@ -29,14 +29,17 @@ export abstract class AbstractRunAction implements Action {
 	private readonly inputProcessor: InputProcessor;
 	private readonly ruleFilterFactory: RuleFilterFactory;
 	private readonly engineOptionsFactory: EngineOptionsFactory;
+	private readonly resultsProcessorFactory: ResultsProcessorFactory;
 
 	protected constructor(logger: Logger, display: Display, inputProcessor: InputProcessor,
-							ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory) {
+							ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory,
+							resultsProcessorFactory: ResultsProcessorFactory) {
 		this.logger = logger;
 		this.display = display;
 		this.inputProcessor = inputProcessor;
 		this.ruleFilterFactory = ruleFilterFactory;
 		this.engineOptionsFactory = engineOptionsFactory;
+		this.resultsProcessorFactory = resultsProcessorFactory;
 	}
 
 	protected abstract isDfa(): boolean;
@@ -80,16 +83,10 @@ export abstract class AbstractRunAction implements Action {
 		const runOptions: RunOptions = this.inputProcessor.createRunOptions(inputs, this.isDfa());
 		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);
 		const outputOptions: RunOutputOptions = this.inputProcessor.createRunOutputOptions(inputs);
-		const jsonReturnValueHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
 
-		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, jsonReturnValueHolder);
-		const resultsProcessors: ResultsProcessor[] = [runResultsProcessor];
-		const internalOutfile: string = process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
-		if (internalOutfile && internalOutfile.length > 0) {
-			const internalOutputFormat: OutputFormat = inferFormatFromInternalOutfile(internalOutfile);
-			resultsProcessors.push(new OutfileResultsProcessor(internalOutputFormat, internalOutfile, outputOptions.verboseViolations));
-		}
-		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor(resultsProcessors);
+		const jsonReturnValueHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+		const resultsProcessor: ResultsProcessor = this.resultsProcessorFactory.createResultsProcessor(
+			this.display, outputOptions, jsonReturnValueHolder);
 
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
 		const ruleManager: RuleManager = await Controller.createRuleManager();
@@ -97,7 +94,7 @@ export abstract class AbstractRunAction implements Action {
 		try {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
-			await compositeResultsProcessor.processResults(results);
+			await resultsProcessor.processResults(results);
 			return jsonReturnValueHolder.get();
 
 		} catch (e) {

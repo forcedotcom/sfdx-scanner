@@ -8,14 +8,16 @@ import {FileHandler} from "../util/FileHandler";
 import {Logger, SfError} from "@salesforce/core";
 import {BundleName, getMessage} from "../../MessageCatalog";
 import * as globby from "globby";
+import {ResultsProcessorFactory} from "../output/ResultsProcessorFactory";
 
 /**
  * The Action behind the "run dfa" command
  */
 export class RunDfaAction extends AbstractRunAction {
 	public constructor(logger: Logger, display: Display, inputProcessor: InputProcessor,
-						ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory) {
-		super(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
+						ruleFilterFactory: RuleFilterFactory, engineOptionsFactory: EngineOptionsFactory,
+						resultsProcessorFactory: ResultsProcessorFactory) {
+		super(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory, resultsProcessorFactory);
 	}
 
 	public override async validateInputs(inputs: Inputs): Promise<void> {

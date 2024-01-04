@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 
-import {RunOutputOptions, RunResultsProcessor} from '../../../src/lib/output/RunResultsProcessor';
+import {RunOutputOptions} from '../../../src/lib/output/RunResultsProcessor';
 import {EngineExecutionSummary} from '../../../src/types';
 import {AnyJson} from '@salesforce/ts-types';
 import Sinon = require('sinon');
@@ -12,6 +12,9 @@ import {OutputFormat} from "../../../src/lib/output/OutputFormat";
 import {Results} from "../../../src/lib/output/Results";
 import {FakeResults} from "./FakeResults";
 import {JsonReturnValueHolder} from "../../../src/lib/output/JsonReturnValueHolder";
+import {ResultsProcessor} from "../../../src/lib/output/ResultsProcessor";
+import {ResultsProcessorFactoryImpl} from "../../../src/lib/output/ResultsProcessorFactory";
+import {Display} from "../../../src/lib/Display";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -108,7 +111,7 @@ describe('RunOutputProcessor', () => {
 					verboseViolations: false
 				};
 				const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-				const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+				const rrp = createResultsProcessor(display, opts, jsonHolder);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -135,7 +138,7 @@ describe('RunOutputProcessor', () => {
 						verboseViolations: false
 					};
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeTableResults);
@@ -160,7 +163,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 						severityForError: 1
 					};
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
@@ -194,7 +197,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					};
 
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeCsvResults);
@@ -211,7 +214,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					};
 
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
@@ -240,7 +243,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					};
 
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED
 					await rrp.processResults(fakeJsonResults);
@@ -258,7 +261,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					};
 
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED
 					try {
@@ -282,7 +285,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 					outfile: fakeFilePath
 				};
 				const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-				const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+				const rrp = createResultsProcessor(display, opts, jsonHolder);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -314,7 +317,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeCsvResults);
@@ -337,7 +340,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 						outfile: fakeFilePath
 					};
 					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
-					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
+					const rrp = createResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
@@ -359,3 +362,8 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 		});
 	});
 });
+
+function createResultsProcessor(display: Display, runOutputOptions: RunOutputOptions,
+								jsonReturnValueHolder: JsonReturnValueHolder): ResultsProcessor {
+	return (new ResultsProcessorFactoryImpl()).createResultsProcessor(display, runOutputOptions, jsonReturnValueHolder);
+}

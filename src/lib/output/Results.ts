@@ -101,7 +101,7 @@ export class RunResults implements Results {
 	}
 
 	public async toFormattedOutput(format: OutputFormat, verboseViolations: boolean): Promise<FormattedOutput> {
-		const cacheKey: string = String(OutputFormat) + '_' + String(verboseViolations);
+		const cacheKey: string = String(format) + '_' + String(verboseViolations);
 		if (this.formattedResultsCache.has(cacheKey)) {
 			return Promise.resolve(this.formattedResultsCache.get(cacheKey));
 		}

@@ -9,6 +9,7 @@ import {Action} from "../../lib/ScannerCommand";
 import {Display} from "../../lib/Display";
 import {RunAction} from "../../lib/actions/RunAction";
 import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../lib/RuleFilterFactory";
+import {ResultsProcessorFactory, ResultsProcessorFactoryImpl} from "../../lib/output/ResultsProcessorFactory";
 
 /**
  * Defines the "run" command for the "scanner" cli.
@@ -91,6 +92,8 @@ export default class Run extends ScannerRunCommand {
 		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
 		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputProcessor);
-		return new RunAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
+		const resultsProcessorFactory: ResultsProcessorFactory = new ResultsProcessorFactoryImpl();
+		return new RunAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory,
+			resultsProcessorFactory);
 	}
 }

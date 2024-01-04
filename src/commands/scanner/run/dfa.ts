@@ -8,6 +8,7 @@ import {Display} from "../../../lib/Display";
 import {Action} from "../../../lib/ScannerCommand";
 import {RunDfaAction} from "../../../lib/actions/RunDfaAction";
 import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../../lib/RuleFilterFactory";
+import {ResultsProcessorFactory, ResultsProcessorFactoryImpl} from "../../../lib/output/ResultsProcessorFactory";
 
 /**
  * Defines the "run dfa" command for the "scanner" cli.
@@ -79,6 +80,8 @@ export default class Dfa extends ScannerRunCommand {
 		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
 		const engineOptionsFactory: EngineOptionsFactory = new RunDfaEngineOptionsFactory(inputProcessor);
-		return new RunDfaAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory);
+		const resultsProcessorFactory: ResultsProcessorFactory = new ResultsProcessorFactoryImpl();
+		return new RunDfaAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory,
+			resultsProcessorFactory);
 	}
 }
