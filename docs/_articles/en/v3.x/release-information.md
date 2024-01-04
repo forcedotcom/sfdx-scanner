@@ -20,15 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (CodeAnalyzer): Our documentation now displays Salesforce CLI `sf-`style instead of `sfdx-`style commands. We recommend that you update your scripts and CI/CD processes to use `sf-`style commands. For more information, read [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_top.htm).
-* NEW (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution.
-
-	To submit your managed package for AppExchange security review, you’re now required to scan your solution three times:
-
-	1. Scan your solution with `sf scanner run --category="Security"`
-	2. Scan your solution with `sf scanner run --engine=”pmd-appexchange”`
-	3. Scan your solution with `sf scanner run dfa --category="Security"`
-
-	For more information on using Salesforce Code Analyzer in the AppExchange security review process, read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) in the ISVforce Guide.
+* NEW (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution. For more information on using Salesforce Code Analyzer in the AppExchange security review process, read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) in the ISVforce Guide.
 
 ## [v3.19.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.19.0) (12-05-2023)
 
