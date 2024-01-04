@@ -20,7 +20,7 @@ We publish the latest Code Analyzer monthly.
 
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * NEW (CodeAnalyzer): Our documentation now displays Salesforce CLI `sf-`style instead of `sfdx-`style commands. We recommend that you update your scripts and CI/CD processes to use `sf-`style commands. For more information, read [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_top.htm).
-* CHANGE (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution.
+* NEW (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution.
 
 	To submit your managed package for AppExchange security review, you’re now required to scan your solution three times:
 
