@@ -11,6 +11,7 @@ import {PATHLESS_COLUMNS} from "../../../src/lib/output/TableOutputFormatter";
 import {OutputFormat} from "../../../src/lib/output/OutputFormat";
 import {Results} from "../../../src/lib/output/Results";
 import {FakeResults} from "./FakeResults";
+import {JsonReturnValueHolder} from "../../../src/lib/output/JsonReturnValueHolder";
 
 const FAKE_SUMMARY_MAP: Map<string, EngineExecutionSummary> = new Map();
 FAKE_SUMMARY_MAP.set('pmd', {fileCount: 1, violationCount: 1});
@@ -103,9 +104,11 @@ describe('RunOutputProcessor', () => {
 		describe('Writing to console', () => {
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
-					format: OutputFormat.TABLE
+					format: OutputFormat.TABLE,
+					verboseViolations: false
 				};
-				const rrp = new RunResultsProcessor(display, opts, false);
+				const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+				const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -114,7 +117,7 @@ describe('RunOutputProcessor', () => {
 
 				// THIS IS THE PART BEING TESTED.
 				await rrp.processResults(fakeResults);
-				const output: AnyJson = rrp.getJsonReturnValue();
+				const output: AnyJson = jsonHolder.get();
 
 				// We expect that the message logged to the console and the message returned should both be the default
 				const expectedMsg = getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, eslint']);
@@ -128,13 +131,15 @@ describe('RunOutputProcessor', () => {
 
 				it('Table-type output should be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OutputFormat.TABLE
+						format: OutputFormat.TABLE,
+						verboseViolations: false
 					};
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeTableResults);
-					const output: AnyJson = rrp.getJsonReturnValue();
+					const output: AnyJson = jsonHolder.get();
 
 					const expectedTableSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -151,14 +156,16 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.TABLE,
+						verboseViolations: false,
 						severityForError: 1
 					};
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						await rrp.processResults(fakeTableResults);
-						const output: AnyJson = rrp.getJsonReturnValue();
+						const output: AnyJson = jsonHolder.get();
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.satisfy(msg => msg.startsWith("[Table]"));
@@ -182,14 +189,16 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				// need to change.
 				it('CSV-type output should NOT be followed by summary', async () => {
 					const opts: RunOutputOptions = {
-						format: OutputFormat.CSV
+						format: OutputFormat.CSV,
+						verboseViolations: false
 					};
 
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeCsvResults);
-					const output: AnyJson = rrp.getJsonReturnValue();
+					const output: AnyJson = jsonHolder.get();
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
 					expect(output).to.equal(FAKE_CSV_OUTPUT, 'CSV should be returned as a string');
 				});
@@ -197,15 +206,17 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.CSV,
+						verboseViolations: false,
 						severityForError: 2
 					};
 
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						await rrp.processResults(fakeCsvResults);
-						const output: AnyJson = rrp.getJsonReturnValue();
+						const output: AnyJson = jsonHolder.get();
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_CSV_OUTPUT);
@@ -224,14 +235,16 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				// need to change.
 				it('JSON-type output with no violations should output be an empty violation set', async () => {
 					const opts: RunOutputOptions = {
-						format: OutputFormat.JSON
+						format: OutputFormat.JSON,
+						verboseViolations: false
 					};
 
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED
 					await rrp.processResults(fakeJsonResults);
-					const output: AnyJson = rrp.getJsonReturnValue();
+					const output: AnyJson = jsonHolder.get();
 
 					expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
 					expect(output).to.deep.equal(JSON.parse(FAKE_JSON_OUTPUT), 'JSON should be returned as a parsed object');
@@ -240,15 +253,17 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.JSON,
+						verboseViolations: false,
 						severityForError: 1
 					};
 
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED
 					try {
 						await rrp.processResults(fakeJsonResults);
-						const output: AnyJson = rrp.getJsonReturnValue();
+						const output: AnyJson = jsonHolder.get();
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("[Info]: " + FAKE_JSON_OUTPUT);
@@ -263,9 +278,11 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 			it('Empty results yield expected message', async () => {
 				const opts: RunOutputOptions = {
 					format: OutputFormat.CSV,
+					verboseViolations: false,
 					outfile: fakeFilePath
 				};
-				const rrp = new RunResultsProcessor(display, opts, false);
+				const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+				const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 				const summaryMap: Map<string, EngineExecutionSummary> = new Map();
 				summaryMap.set('pmd', {fileCount: 0, violationCount: 0});
 				summaryMap.set('eslint', {fileCount: 0, violationCount: 0});
@@ -274,7 +291,7 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToConsole')}`;
 
 				// THIS IS THE PART BEING TESTED.
 				await rrp.processResults(fakeResults);
-				const output: AnyJson = rrp.getJsonReturnValue();
+				const output: AnyJson = jsonHolder.get();
 
 				// We expect the empty CSV output followed by the default engine summary and written-to-file messages are logged to the console
 				const expectedMsg = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 0, 0])}
@@ -293,14 +310,15 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 				it('Results are properly written to file', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.CSV,
+						verboseViolations: false,
 						outfile: fakeFilePath
 					};
-
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					await rrp.processResults(fakeCsvResults);
-					const output: AnyJson = rrp.getJsonReturnValue();
+					const output: AnyJson = jsonHolder.get();
 
 					const expectedCsvSummary = `${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['pmd', 1, 1])}
 ${getMessage(BundleName.RunOutputProcessor, 'output.engineSummaryTemplate', ['eslint-typescript', 2, 1])}
@@ -314,16 +332,17 @@ ${getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [fakeFile
 				it('Throws severity-based exception on request', async () => {
 					const opts: RunOutputOptions = {
 						format: OutputFormat.CSV,
+						verboseViolations: false,
 						severityForError: 1,
 						outfile: fakeFilePath
 					};
-
-					const rrp = new RunResultsProcessor(display, opts, false);
+					const jsonHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
+					const rrp = new RunResultsProcessor(display, opts, jsonHolder);
 
 					// THIS IS THE PART BEING TESTED.
 					try {
 						await rrp.processResults(fakeCsvResults);
-						const output: AnyJson = rrp.getJsonReturnValue();
+						const output: AnyJson = jsonHolder.get();
 						expect(true).to.equal(false, `Unexpectedly returned ${output} instead of throwing error`);
 					} catch (e) {
 						expect(display.getOutputText()).to.equal("");

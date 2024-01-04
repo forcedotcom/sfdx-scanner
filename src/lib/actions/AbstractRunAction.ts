@@ -18,6 +18,7 @@ import {Results} from "../output/Results";
 import {inferFormatFromInternalOutfile, inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
 import {CompositeResultsProcessor, ResultsProcessor} from "../output/ResultsProcessor";
 import {OutfileResultsProcessor} from "../output/OutfileResultsProcessor";
+import {JsonReturnValueHolder} from "../output/JsonReturnValueHolder";
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
@@ -78,16 +79,15 @@ export abstract class AbstractRunAction implements Action {
 		const targetPaths: string[] = this.inputProcessor.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.inputProcessor.createRunOptions(inputs, this.isDfa());
 		const engineOptions: EngineOptions = this.engineOptionsFactory.createEngineOptions(inputs);
-
 		const outputOptions: RunOutputOptions = this.inputProcessor.createRunOutputOptions(inputs);
-		const verboseViolations: boolean = inputs["verbose-violations"] as boolean;
+		const jsonReturnValueHolder: JsonReturnValueHolder = new JsonReturnValueHolder();
 
-		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, verboseViolations);
+		const runResultsProcessor: RunResultsProcessor = new RunResultsProcessor(this.display, outputOptions, jsonReturnValueHolder);
 		const resultsProcessors: ResultsProcessor[] = [runResultsProcessor];
 		const internalOutfile: string = process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
 		if (internalOutfile && internalOutfile.length > 0) {
 			const internalOutputFormat: OutputFormat = inferFormatFromInternalOutfile(internalOutfile);
-			resultsProcessors.push(new OutfileResultsProcessor(internalOutputFormat, internalOutfile, verboseViolations));
+			resultsProcessors.push(new OutfileResultsProcessor(internalOutputFormat, internalOutfile, outputOptions.verboseViolations));
 		}
 		const compositeResultsProcessor: ResultsProcessor = new CompositeResultsProcessor(resultsProcessors);
 
@@ -98,7 +98,7 @@ export abstract class AbstractRunAction implements Action {
 			const results: Results = await ruleManager.runRulesMatchingCriteria(filters, targetPaths, runOptions, engineOptions);
 			this.logger.trace(`Processing output with format ${outputOptions.format}`);
 			await compositeResultsProcessor.processResults(results);
-			return runResultsProcessor.getJsonReturnValue();
+			return jsonReturnValueHolder.get();
 
 		} catch (e) {
 			// Rethrow any errors as SF errors.

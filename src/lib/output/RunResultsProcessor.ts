@@ -8,9 +8,11 @@ import {OutputFormat} from "./OutputFormat";
 import {Results} from "./Results";
 import {ResultsProcessor} from "./ResultsProcessor";
 import {writeToFile} from "./OutputUtils";
+import {JsonReturnValueHolder} from "./JsonReturnValueHolder";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
+	verboseViolations: boolean;
 	severityForError?: number;
 	outfile?: string;
 }
@@ -20,23 +22,18 @@ export type RunOutputOptions = {
 export class RunResultsProcessor implements ResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
-	private readonly verboseViolations: boolean;
-	private jsonReturnValue: AnyJson = [];
+	private readonly jsonReturnValueHolder: JsonReturnValueHolder;
 
-	public constructor(display: Display, opts: RunOutputOptions, verboseViolations: boolean) {
+	public constructor(display: Display, opts: RunOutputOptions, jsonReturnValueHolder: JsonReturnValueHolder) {
 		this.display = display;
 		this.opts = opts;
-		this.verboseViolations = verboseViolations;
-	}
-
-	public getJsonReturnValue(): AnyJson {
-		return this.jsonReturnValue;
+		this.jsonReturnValueHolder = jsonReturnValueHolder;
 	}
 
 	public async processResults(results: Results): Promise<void> {
 		const minSev: number = results.getMinSev();
 		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
-		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations);
+		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.opts.verboseViolations);
 
 		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
 
@@ -50,7 +47,7 @@ export class RunResultsProcessor implements ResultsProcessor {
 			// ...log it to the console...
 			this.display.displayInfo(msg);
 			// ...and return it for use with the --json flag.
-			this.jsonReturnValue = msg;
+			this.jsonReturnValueHolder.set(msg);
 			return;
 		}
 
@@ -77,15 +74,16 @@ export class RunResultsProcessor implements ResultsProcessor {
 		// Finally, we need to return something for use by the --json flag.
 		if (this.opts.outfile) {
 			// If we used an outfile, we should just return the summary message, since that says where the file is.
-			this.jsonReturnValue = msg;
+			this.jsonReturnValueHolder.set(msg);
 		} else if (typeof formattedOutput === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			this.jsonReturnValue = this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
+			this.jsonReturnValueHolder.set(
+				this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput);
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
-			this.jsonReturnValue = formattedOutput.rows;
+			this.jsonReturnValueHolder.set(formattedOutput.rows);
 		}
 	}
 
