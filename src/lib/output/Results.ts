@@ -33,6 +33,7 @@ export interface Results {
 export class RunResults implements Results {
 	private readonly ruleResults: RuleResult[];
 	private readonly executedEngines: Set<string>;
+	private readonly formattedResultsCache: Map<string, FormattedOutput> = new Map;
 
 	constructor(ruleResults: RuleResult[], executedEngines: Set<string>, ) {
 		this.ruleResults = ruleResults;
@@ -100,6 +101,11 @@ export class RunResults implements Results {
 	}
 
 	public async toFormattedOutput(format: OutputFormat, verboseViolations: boolean): Promise<FormattedOutput> {
+		const cacheKey: string = String(format) + '_' + String(verboseViolations);
+		if (this.formattedResultsCache.has(cacheKey)) {
+			return Promise.resolve(this.formattedResultsCache.get(cacheKey));
+		}
+
 		let outputFormatter: OutputFormatter;
 		switch (format) {
 			case OutputFormat.CSV:
@@ -126,6 +132,8 @@ export class RunResults implements Results {
 			default:
 				throw new SfError('Unrecognized output format.');
 		}
-		return await outputFormatter.format(this);
+		const formattedOutput: FormattedOutput = await outputFormatter.format(this);
+		this.formattedResultsCache.set(cacheKey, formattedOutput);
+		return formattedOutput;
 	}
 }

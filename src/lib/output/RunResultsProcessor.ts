@@ -1,34 +1,47 @@
 import {AnyJson} from '@salesforce/ts-types';
 import {SfError} from '@salesforce/core';
-import fs = require('fs');
 import {FormattedOutput, EngineExecutionSummary} from '../../types';
 import {BundleName, getMessage} from "../../MessageCatalog";
 import {Display} from "../Display";
 import {INTERNAL_ERROR_CODE} from "../../Constants";
-import {OutputFormat} from "../output/OutputFormat";
-import {Results} from "../output/Results";
+import {OutputFormat} from "./OutputFormat";
+import {Results} from "./Results";
+import {ResultsProcessor} from "./ResultsProcessor";
+import {JsonReturnValueHolder} from "./JsonReturnValueHolder";
+import {FileHandler} from "../util/FileHandler";
 
 export type RunOutputOptions = {
 	format: OutputFormat;
+	verboseViolations: boolean;
 	severityForError?: number;
 	outfile?: string;
 }
 
-export class RunResultsProcessor {
+/**
+ * The primary ResultsProcessor used in production
+ *
+ * Note: We should consider separating this into multiple ResultProcessor classes to separate the responsibilities:
+ *       --> creating the json return value
+ *       --> creating the users outfile (where we can reuse the OutfileResultsProcessor)
+ *       --> creating console output
+ *       --> checking and throwing an exception if over severity threshold
+ *       Right now all of these are entangled with one another below and a design change would be needed to do this.
+ */
+export class RunResultsProcessor implements ResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
-	private readonly verboseViolations: boolean;
+	private jsonReturnValueHolder: JsonReturnValueHolder;
 
-	public constructor(display: Display, opts: RunOutputOptions, verboseViolations: boolean) {
+	public constructor(display: Display, opts: RunOutputOptions, jsonReturnValueHolder: JsonReturnValueHolder) {
 		this.display = display;
 		this.opts = opts;
-		this.verboseViolations = verboseViolations;
+		this.jsonReturnValueHolder = jsonReturnValueHolder;
 	}
 
-	public async processResults(results: Results): Promise<AnyJson> {
+	public async processResults(results: Results): Promise<void> {
 		const minSev: number = results.getMinSev();
 		const summaryMap: Map<string, EngineExecutionSummary> = results.getSummaryMap();
-		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.verboseViolations);
+		const formattedOutput = await results.toFormattedOutput(this.opts.format, this.opts.verboseViolations);
 
 		const hasViolations = [...summaryMap.values()].some(summary => summary.violationCount !== 0);
 
@@ -42,7 +55,8 @@ export class RunResultsProcessor {
 			// ...log it to the console...
 			this.display.displayInfo(msg);
 			// ...and return it for use with the --json flag.
-			return msg;
+			this.jsonReturnValueHolder.set(msg);
+			return;
 		}
 
 		// If we have violations (or an outfile but no violations), we'll build an array of
@@ -68,15 +82,16 @@ export class RunResultsProcessor {
 		// Finally, we need to return something for use by the --json flag.
 		if (this.opts.outfile) {
 			// If we used an outfile, we should just return the summary message, since that says where the file is.
-			return msg;
+			this.jsonReturnValueHolder.set(msg);
 		} else if (typeof formattedOutput === 'string') {
 			// If the specified output format was JSON, then the results are a huge stringified JSON that we should parse
 			// before returning. Otherwise, we should just return the result string.
-			return this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput;
+			this.jsonReturnValueHolder.set(
+				this.opts.format === OutputFormat.JSON ? JSON.parse(formattedOutput) as AnyJson : formattedOutput);
 		} else {
 			// If the results are a JSON, return the `rows` property, since that's all of the data that would be displayed
 			// in the table.
-			return formattedOutput.rows;
+			this.jsonReturnValueHolder.set(formattedOutput.rows);
 		}
 	}
 
@@ -117,15 +132,10 @@ export class RunResultsProcessor {
 	}
 
 	private writeToOutfile(results: string | {columns; rows}): string {
-		try {
-			// At this point, we can cast `results` to a string, since it being an object would indicate that the format
-			// is `table`, and we already have validations preventing tables from being written to files.
-			fs.writeFileSync(this.opts.outfile, results as string);
-		} catch (e) {
-			// Rethrow any errors as SfdxErrors.
-			const message: string = e instanceof Error ? e.message : e as string;
-			throw new SfError(message, null, null, INTERNAL_ERROR_CODE);
-		}
+		// At this point, we can cast `results` to a string, since it being an object would indicate that the format
+		// is `table`, and we already have validations preventing tables from being written to files.
+		(new FileHandler()).writeFileSync(this.opts.outfile, results as string);
+
 		// Return a message indicating the action we took.
 		return getMessage(BundleName.RunOutputProcessor, 'output.writtenToOutFile', [this.opts.outfile]);
 	}

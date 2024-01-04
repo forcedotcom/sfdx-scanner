@@ -3,7 +3,7 @@ import normalize = require('normalize-path');
 import path = require('path');
 import untildify = require("untildify");
 import {RunOptions} from "./RuleManager";
-import {RunOutputOptions} from "./util/RunResultsProcessor";
+import {RunOutputOptions} from "./output/RunResultsProcessor";
 import {inferFormatFromOutfile, OutputFormat} from "./output/OutputFormat";
 
 /**
@@ -62,6 +62,7 @@ export class InputProcessorImpl implements InputProcessor {
 	public createRunOutputOptions(inputs: Inputs): RunOutputOptions {
 		return {
 			format: outputFormatFromInputs(inputs),
+			verboseViolations: inputs["verbose-violations"] as boolean,
 			severityForError: inputs['severity-threshold'] as number,
 			outfile: inputs.outfile as string
 		};

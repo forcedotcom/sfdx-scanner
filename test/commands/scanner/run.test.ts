@@ -1,11 +1,13 @@
 import {expect} from 'chai';
 // @ts-ignore
 import {runCommand} from '../../TestUtils';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
+import * as os from "os";
+import {ENV_VAR_NAMES} from "../../../src/Constants";
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
 import tildify = require('tildify');
-import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
 const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
@@ -16,18 +18,6 @@ const pathToYetAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'Ye
 describe('scanner run', function () {
 	describe('E2E', () => {
 		describe('Output Type: XML', () => {
-			function validateXmlOutput(xml: string): void {
-				// We'll split the output by the <violation> tag, so we can get individual violations.
-				const violations = xml.split('<violation');
-				// The first list item is going to be the header, so we need to pull that off.
-				violations.shift();
-				// There should be two violations.
-				expect(violations.length).to.equal(2, `Should be two violations detected in the file:\n ${xml}`);
-				// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-				// expected order.
-				expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-				expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-			}
 
 			function validateNoViolationsXmlOutput(xml: string): void {
 				// We'll split the output by the <violation> tag, so we can get individual violations.
@@ -300,17 +290,6 @@ describe('scanner run', function () {
 		});
 
 		describe('Output Type: JSON', () => {
-			function validateJsonOutput(json: string): void {
-				const output = JSON.parse(json);
-				// Only PMD rules should have run.
-				expect(output.length).to.equal(1, 'Should only be violations from one engine');
-				expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
-
-				expect(output[0].violations.length).to.equal(2, 'Should be 2 violations');
-				expect(output[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
-				expect(output[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
-			}
-
 			function validateNoViolationsJsonOutput(json: string): void {
 				const output = JSON.parse(json);
 				// There should be no violations.
@@ -621,4 +600,77 @@ describe('scanner run', function () {
 
 		});
 	});
+
+	describe('Create internal outfile with SCANNER_INTERNAL_OUTFILE environment variable', () => {
+		let tmpDir: string = null;
+		beforeEach(() => {
+			tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'InternalOutfileTest-'));
+		});
+		afterEach(() => {
+			fs.rmSync(tmpDir, {recursive: true, force: true});
+			delete process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE];
+		});
+
+		it('Can write a user file and an internal file with different formats at same time', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.json");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
+			const userOutfile = path.join(tmpDir, "userOutfile.xml");
+			runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${userOutfile}`);
+
+			expect(fs.existsSync(userOutfile)).to.equal(true, 'The command should have created the expected user output file');
+			const userFileContents = fs.readFileSync(userOutfile).toString();
+			validateXmlOutput(userFileContents);
+
+			expect(fs.existsSync(internalOutfile)).to.equal(true, 'The command should have created the expected internal output file');
+			const internalFileContents = fs.readFileSync(internalOutfile).toString();
+			validateJsonOutput(internalFileContents);
+		});
+
+
+		it('Can write to internal file and write to console', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.json");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
+			const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --format xml`);
+
+			validateXmlOutput(output.shellOutput.stdout);
+
+			expect(fs.existsSync(internalOutfile)).to.equal(true, 'The command should have created the expected internal output file');
+			const internalFileContents = fs.readFileSync(internalOutfile).toString();
+			validateJsonOutput(internalFileContents);
+		});
+
+		it('Invalid internal file name gives appropriate error', () => {
+			const internalOutfile = path.join(tmpDir, "internalOutfile.notSupported");
+			process.env[ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE] = internalOutfile;
+			const userOutfile = path.join(tmpDir, "userOutfile.xml");
+			const output = runCommand(`scanner run --target ${pathToSomeTestClass} --ruleset ApexUnit --outfile ${userOutfile}`);
+
+			expect(output.shellOutput.stderr).contains(
+				getMessage(BundleName.CommonRun, 'internal.outfileMustBeSupportedType', [ENV_VAR_NAMES.SCANNER_INTERNAL_OUTFILE]));
+		});
+	});
 });
+
+function validateXmlOutput(xml: string): void {
+	// We'll split the output by the <violation> tag, so we can get individual violations.
+	const violations = xml.split('<violation');
+	// The first list item is going to be the header, so we need to pull that off.
+	violations.shift();
+	// There should be two violations.
+	expect(violations.length).to.equal(2, `Should be two violations detected in the file:\n ${xml}`);
+	// We'll check each violation in enough depth to be confident that the expected violations were returned in the
+	// expected order.
+	expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+	expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
+}
+
+function validateJsonOutput(json: string): void {
+	const output = JSON.parse(json);
+	// Only PMD rules should have run.
+	expect(output.length).to.equal(1, 'Should only be violations from one engine');
+	expect(output[0].engine).to.equal('pmd', 'Engine should be PMD');
+
+	expect(output[0].violations.length).to.equal(2, 'Should be 2 violations');
+	expect(output[0].violations[0].line).to.equal(11, 'Violation #1 should occur on the expected line');
+	expect(output[0].violations[1].line).to.equal(19, 'Violation #2 should occur on the expected line');
+}

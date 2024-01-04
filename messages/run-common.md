@@ -46,6 +46,14 @@ throw an error when a violation threshold is reached, the --normalize-severity i
 
 Throws an error when violations are found with equal or greater severity than the provided value. Values are 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation. Using this flag also invokes the --normalize-severity flag.
 
+# internal.outfileMustBeValid
+
+The %s environment variable must be a well-formed filepath.
+
+# internal.outfileMustBeSupportedType
+
+The %s environment variable must be of a supported type: .csv; .xml; .json; .html; .sarif.
+
 # validations.cannotWriteTableToFile
 
 Format 'table' can't be written to a file. Specify a different format.
