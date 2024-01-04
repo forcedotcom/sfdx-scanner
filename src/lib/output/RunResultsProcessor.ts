@@ -17,12 +17,20 @@ export type RunOutputOptions = {
 	outfile?: string;
 }
 
-// TODO: We should consider separating this into multiple ResultProcessor classes:
-//       --> 1 for processing the json return value, 1 for creating the users outfile, and 1 for creating console output
+/**
+ * The primary ResultsProcessor used in production
+ *
+ * Note: We should consider separating this into multiple ResultProcessor classes to separate the responsibilities:
+ *       --> creating the json return value
+ *       --> creating the users outfile (where we can reuse the OutfileResultsProcessor)
+ *       --> creating console output
+ *       --> checking and throwing an exception if over severity threshold
+ *       Right now all of these are entangled with one another below and a design change would be needed to do this.
+ */
 export class RunResultsProcessor implements ResultsProcessor {
 	private readonly display: Display;
 	private readonly opts: RunOutputOptions;
-	private readonly jsonReturnValueHolder: JsonReturnValueHolder;
+	private jsonReturnValueHolder: JsonReturnValueHolder;
 
 	public constructor(display: Display, opts: RunOutputOptions, jsonReturnValueHolder: JsonReturnValueHolder) {
 		this.display = display;

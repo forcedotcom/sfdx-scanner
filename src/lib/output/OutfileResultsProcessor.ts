@@ -4,6 +4,9 @@ import {OutputFormat} from "./OutputFormat";
 import {writeToFile} from "./OutputUtils";
 import {FormattedOutput} from "../../types";
 
+/**
+ * Processes results to produce an output file
+ */
 export class OutfileResultsProcessor implements ResultsProcessor {
 	private readonly outputFormat: OutputFormat;
 	private readonly outfile: string;

@@ -1,9 +1,15 @@
 import {Results} from "./Results";
 
+/**
+ * Interface to process run results
+ */
 export interface ResultsProcessor {
 	processResults(results: Results): Promise<void>;
 }
 
+/**
+ * A composite results processor
+ */
 export class CompositeResultsProcessor implements ResultsProcessor {
 	private readonly delegates: ResultsProcessor[];
 
