@@ -12,6 +12,16 @@ We publish the latest Code Analyzer monthly.
 * Run `sf plugins update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.20.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.20.0) (1-10-2024)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.20.0...v3.19.0)
+
+### Release Summary
+
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* NEW (CodeAnalyzer): Our documentation now displays Salesforce CLI `sf-`style instead of `sfdx-`style commands. We recommend that you update your scripts and CI/CD processes to use `sf-`style commands. For more information, read [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_top.htm).
+* NEW (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution. For more information on using Salesforce Code Analyzer in the AppExchange security review process, read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) in the ISVforce Guide.
+
 ## [v3.19.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.19.0) (12-05-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.19.0...v3.18.0)
