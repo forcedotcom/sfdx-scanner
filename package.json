@@ -91,6 +91,7 @@
 		"/messages",
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json",
+		"/pmd-appexchange",
 		"/html-templates",
 		"/retire-js",
 		"/oclif.lock"

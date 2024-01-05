@@ -18,12 +18,13 @@ describe('Controller.ts tests', () => {
 			const engines: RuleEngine[] = await Controller.getAllEngines();
 			const names: string[] = engines.map(e => e.constructor.name);
 
-			expect(engines.length, names + '').to.equal(10);
+			expect(engines.length, names + '').to.equal(11);
 			expect(names).to.contain('JavascriptEslintEngine');
 			expect(names).to.contain('LWCEslintEngine');
 			expect(names).to.contain('TypescriptEslintEngine');
 			expect(names).to.contain('CustomEslintEngine');
 			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('AppExchangePmdEngine');
 			expect(names).to.contain('CustomPmdEngine');
 			expect(names).to.contain('RetireJsEngine');
 			expect(names).to.contain('CpdEngine');
@@ -117,11 +118,12 @@ describe('Controller.ts tests', () => {
 			const engines: RuleEngine[] = await Controller.getFilteredEngines([]);
 			const names: string[] = engines.map(e => e.constructor.name);
 
-			expect(engines.length).to.equal(6);
+			expect(engines.length).to.equal(7);
 			expect(names).to.contain('JavascriptEslintEngine');
 			expect(names).to.contain('LWCEslintEngine');
 			expect(names).to.contain('TypescriptEslintEngine');
 			expect(names).to.contain('PmdEngine');
+			expect(names).to.contain('AppExchangePmdEngine');
 			expect(names).to.contain('RetireJsEngine');
 			expect(names).to.contain('SfgeDfaEngine');
 		})
@@ -152,7 +154,7 @@ describe('Controller.ts tests', () => {
 				await Controller.getFilteredEngines(['invalid-engine']);
 				fail('getFilteredEngines should have thrown');
 			} catch (e) {
-				expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, retire-js, sfge.`);
+				expect(e.message).to.equal(`The filter doesn't match any engines. Filter 'invalid-engine'. Engines: cpd, eslint, eslint-lwc, eslint-typescript, pmd, pmd-appexchange, retire-js, sfge.`);
 			}
 		});
 	});

@@ -16,6 +16,7 @@ public class PmdCatalogJsonTest {
     private static final String RULE_PATH = "rule path";
     private static final String CATEGORY_NAME = "category name";
     private static final String CATEGORY_PATH = "category path";
+    private static final String MOCKED_ENGINE_NAME = "MockedEngineName";
 
     @Test
     public void testConstructJson() {
@@ -27,7 +28,7 @@ public class PmdCatalogJsonTest {
         categories.add(getPmdCatalogCategoryMock(CATEGORY_NAME, CATEGORY_PATH));
         rulesets.add(getPmdCatalogRulesetMock(RULE_NAME, RULE_PATH));
 
-        final PmdCatalogJson catalogJson = new PmdCatalogJson(rules, categories, rulesets);
+        final PmdCatalogJson catalogJson = new PmdCatalogJson(rules, categories, rulesets, MOCKED_ENGINE_NAME);
 
         // Execute
         final JSONObject jsonObject = catalogJson.constructJson();
@@ -35,11 +36,11 @@ public class PmdCatalogJsonTest {
         // Verify
         //[{"paths":["rule path"],"name":"rule name"}]
         final String expectedRulesetJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
-            PmdCatalogJson.PMD_ENGINE_NAME, RULE_PATH, RULE_NAME);
+            MOCKED_ENGINE_NAME, RULE_PATH, RULE_NAME);
         assertEquals(expectedRulesetJson, jsonObject.get(PmdCatalogJson.JSON_RULESETS).toString());
 
         final String expectedCategoryJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
-            PmdCatalogJson.PMD_ENGINE_NAME, CATEGORY_PATH, CATEGORY_NAME);
+            MOCKED_ENGINE_NAME, CATEGORY_PATH, CATEGORY_NAME);
         assertEquals(expectedCategoryJson, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString());
 
         // Rules json has its own test where we verify the Json contents. Here, we only confirm that it exists

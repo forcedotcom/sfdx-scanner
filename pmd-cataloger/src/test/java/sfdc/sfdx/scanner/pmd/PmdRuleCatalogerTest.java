@@ -34,6 +34,7 @@ import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogJson;
 public class PmdRuleCatalogerTest {
 	private static final String TEST_CATALOG_DIR = "./test/path/to/a/directory";
 	private static final String TEST_CATALOG_FILE = "PmdCatalog.json";
+    private static final String TEST_ENGINE_NAME = "MockedEngineName";
 
 	public ArgumentCaptor<String> jsonContentsCaptor;
 	public ArgumentCaptor<Path> directoryPathCaptor;
@@ -41,19 +42,11 @@ public class PmdRuleCatalogerTest {
 
 	@BeforeEach
 	public void setup() {
-		System.setProperty("catalogHome", TEST_CATALOG_DIR);
-		System.setProperty("catalogName", TEST_CATALOG_FILE);
 		CliMessager.getInstance().resetMessages();
 	}
 
-	@AfterEach
-	public void teardown() {
-		System.clearProperty("catalogHome");
-		System.clearProperty("catalogName");
-	}
-
 	public PmdRuleCataloger createPmdRuleCatalogerSpy(Map<String,List<String>> rulePathEntries) {
-		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
+		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries, TEST_CATALOG_DIR, TEST_CATALOG_FILE, TEST_ENGINE_NAME);
 		PmdRuleCataloger pmdRuleCatalogerSpy = Mockito.spy(pmdRuleCataloger);
 
 		jsonContentsCaptor = ArgumentCaptor.forClass(String.class);
@@ -144,7 +137,7 @@ public class PmdRuleCatalogerTest {
 
 		rulePathEntries.put(APEX, Arrays.asList(COLLISION_JAR_1.toAbsolutePath().toString(),
 				COLLISION_JAR_2.toAbsolutePath().toString()));
-		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries);
+		PmdRuleCataloger pmdRuleCataloger = new PmdRuleCataloger(rulePathEntries, TEST_CATALOG_DIR, TEST_CATALOG_FILE, TEST_ENGINE_NAME);
 
         MessagePassableException ex = assertThrows(MessagePassableException.class,
             () -> pmdRuleCataloger.catalogRules());

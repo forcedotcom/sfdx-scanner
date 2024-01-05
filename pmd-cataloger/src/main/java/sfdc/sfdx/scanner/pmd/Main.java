@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.salesforce.messaging.EventKey;
 import com.salesforce.messaging.MessagePassableException;
 import com.salesforce.messaging.CliMessager;
+import sfdc.sfdx.scanner.Constants;
 
 public class Main {
 
@@ -111,7 +112,10 @@ public class Main {
 	static class Dependencies {
 
 		PmdRuleCataloger getPmdRuleCataloger(Map<String, List<String>> rulePathEntries) {
-			return new PmdRuleCataloger(rulePathEntries);
+            String catalogHome = System.getProperty(Constants.SystemProperty.CATALOG_HOME);
+            String catalogName = System.getProperty(Constants.SystemProperty.CATALOG_NAME);
+            String catalogedEngineName = System.getProperty(Constants.SystemProperty.CATALOGED_ENGINE_NAME);
+			return new PmdRuleCataloger(rulePathEntries, catalogHome, catalogName, catalogedEngineName);
 		}
 	}
 }

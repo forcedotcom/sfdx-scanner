@@ -1,5 +1,4 @@
 import {expect} from 'chai';
-// @ts-ignore
 import {runCommand} from '../../TestUtils';
 import path = require('path');
 import * as TestUtils from '../../TestUtils';
@@ -9,7 +8,7 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 	describe('Single filter', () => {
 		describe('Positive constraints', () => {
 			it('Case: --engine eslint-lwc against clean LWC code', () => {
-				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'lwc')} --format csv --engine eslint-lwc`);
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'lwc')} --format csv --engine eslint-lwc`);
 				const stdout = output.shellOutput.stdout;
 				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
 				const [csv, _] = stdout.trim().split(/\n\r?\n/);
@@ -29,6 +28,31 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 				const messages = results[0].violations.map(v => v.message);
 				const expectedMessages = ['Invalid public property initialization for "foo". Boolean public properties should not be initialized to "true", consider initializing the property to "false".',
 					`'Foo' is defined but never used.`];
+				for (const expectedMessage of expectedMessages) {
+					expect(messages).to.contain(expectedMessage);
+				}
+			});
+
+			it('Case: --engine pmd-appexchange against clean code', () => {
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'pmd-appexchange-test-app', 'objects', 'clean.object')} --format csv --engine pmd-appexchange`);
+				const stdout = output.shellOutput.stdout;
+				// If there's a summary, then it'll be separated from the CSV by an empty line. Throw it away.
+				const [csv, _] = stdout.trim().split(/\n\r?\n/);
+
+				// Confirm there are no violations.
+				// Since it's a CSV, the rows themselves are separated by newline characters.
+				// The header should not have any newline characters after it. There should be no violation rows.
+				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
+			});
+
+			it('Case: --engine pmd-appexchange against unclean code', () => {
+				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'pmd-appexchange-test-app', 'objects', 'unclean.object')} --format json --engine pmd-appexchange`);
+				const stdout = output.shellOutput.stdout;
+				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
+				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
+					.to.be.an('Array').that.has.length(1);
+				const messages = results[0].violations.map(v => v.message.trim());
+				const expectedMessages = ['Use Lightning Message Channel with isExposed set to false.'];
 				for (const expectedMessage of expectedMessages) {
 					expect(messages).to.contain(expectedMessage);
 				}
