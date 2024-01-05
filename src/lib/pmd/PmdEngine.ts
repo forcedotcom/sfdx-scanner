@@ -584,6 +584,7 @@ export class AppExchangePmdEngine extends AbstractPmdEngine {
 		return !isCustomRun(engineOptions) && engineUtils.isFilterEmptyOrNameInFilter(this.getName(), filterValues);
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	public async run(ruleGroups: RuleGroup[], rules: Rule[], targets: RuleTarget[], engineOptions: Map<string, string>): Promise<RuleResult[]> {
 		const selectedRules = ruleGroups.map(np => np.paths).join(',');
 		return await this.runInternal(selectedRules, targets, this.createRuleMap(), [`${APPEXCHANGE_PMD_LIB}/*`]);
