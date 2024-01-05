@@ -51,8 +51,8 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
 					.to.be.an('Array').that.has.length(1);
-				const messages = results[0].violations.map(v => v.message);
-				const expectedMessages = ['\nUse Lightning Message Channel with isExposed set to false.\n'];
+				const messages = results[0].violations.map(v => v.message.trim());
+				const expectedMessages = ['Use Lightning Message Channel with isExposed set to false.'];
 				for (const expectedMessage of expectedMessages) {
 					expect(messages).to.contain(expectedMessage);
 				}
