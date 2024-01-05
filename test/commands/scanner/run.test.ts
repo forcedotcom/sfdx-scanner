@@ -583,20 +583,16 @@ describe('scanner run', function () {
 			// Before the violations are logged, there should be 16 log runMessages about implicitly included PMD categories.
 			const regex = new RegExp(getMessage(BundleName.EventKeyTemplates, 'info.categoryImplicitlyRun', ['.*', '.*']), 'g');
 			const implicitMessages = violations[0].match(regex);
-			// if this test is not passing and the output seems very large, that's because the test reruns on failures,
-			// and the output accumulates each time, so the output on failure is not the true length of the output
-			// from individual runs. To get what the actual value is, divide the value in the test failure by 6, since
-			// there are five retries in addition to the initial run.
 			// Note: Please keep this up-to-date. It will make it way easier to debug if needed.
-			// The following categories are implicitly included:
+			// The following categories are implicitly included, because they come from default-enabled engines:
 			// - 8 PMD categories
-			// - 1 PMD-AppExchange category
 			// - 3 ESLint categories
 			// - 3 ESLint-Typescript categories
 			// - 1 RetireJS category
-			// For a total of 16
+			// For a total of 15
 			// TODO: revisit test, should be improved because of issue above
-			expect(implicitMessages || []).to.have.lengthOf(16, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
+			console.log(`${JSON.stringify(implicitMessages)}`);
+			expect(implicitMessages || []).to.have.lengthOf(15, `Entries for implicitly added categories from all engines:\n ${JSON.stringify(implicitMessages)}`);
 
 		});
 	});
