@@ -22,6 +22,26 @@ We publish the latest Code Analyzer monthly.
 * NEW (CodeAnalyzer): Our documentation now displays Salesforce CLI `sf-`style instead of `sfdx-`style commands. We recommend that you update your scripts and CI/CD processes to use `sf-`style commands. For more information, read [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference_top.htm).
 * NEW (CodeAnalyzer): To prepare your solution for AppExchange security review, we created an AppExchange-specific PMD rule engine, `pmd-appexchange`. This new engine contains rules that help you identify common security review failure points, and fix them before you submit your solution. For more information on using Salesforce Code Analyzer in the AppExchange security review process, read [Scan Your Solution with Salesforce Code Analyzer](https://developer.salesforce.com/docs/atlas.en-us.packagingGuide.meta/packagingGuide/security_review_code_analyzer_scan.htm) in the ISVforce Guide.
 
+**Closed Issues:**
+* New rule [Graph Engine]: Use With Sharing On Database Operation [\#1301](https://github.com/forcedotcom/sfdx-scanner/issues/1301)
+* New rule [Graph Engine]: Avoid Database Operation In Loop [\#1300](https://github.com/forcedotcom/sfdx-scanner/issues/1300)
+* New rule [Graph Engine]: Perform Null Check On SOQL Variables [\#1299](https://github.com/forcedotcom/sfdx-scanner/issues/1299)
+* Support for CLI sf command [\#1298](https://github.com/forcedotcom/sfdx-scanner/issues/1298)
+* Scanner Bug when using Zippex 3rd party class [\#1251](https://github.com/forcedotcom/sfdx-scanner/issues/1251)
+* [Question] Is the Scanner using the latest PMD 7 RC? [\#1273](https://github.com/forcedotcom/sfdx-scanner/issues/1273)
+* [BUG] Invalid deprecation warning about DomXPathRule for language xml [\#1246](https://github.com/forcedotcom/sfdx-scanner/issues/1246)
+* [False Result] Inconsistency in "Validate CRUD permission before SOQL/DML operation" rule related to SOQL queries on custom metadata Objects. [\#1262](https://github.com/forcedotcom/sfdx-scanner/issues/1262)
+
+**Merged Pull Requests:**
+* NEW (PMD): @W-13222948@: Added AppExchange PMD subvariant [\#1309](https://github.com/forcedotcom/sfdx-scanner/pull/1309)
+* CHANGE (Other): @W-14689342@: Add environment variable to output to an internal outfile [\#1307](https://github.com/forcedotcom/sfdx-scanner/pull/1307)
+* CHANGE (Other): @W-14635578@: Updated node dependencies for engines [\#1306](https://github.com/forcedotcom/sfdx-scanner/pull/1306)
+* CHANGE (Other): @W-14716658@: Refactored run/runDfa output handling [\#1304](https://github.com/forcedotcom/sfdx-scanner/pull/1304)
+* CHANGE (Other): @W-14702830@: Refactored run/runDfa input handling and decoupled commands from cli [\#1302](https://github.com/forcedotcom/sfdx-scanner/pull/1302)
+* CHANGE (Other): @W-14633315@: Converted pmd-cataloger tests to junit 5 and normalized test dependencies/tasks [\#1270](https://github.com/forcedotcom/sfdx-scanner/pull/1270)
+* CHANGE (CodeAnalyzer): @W-14329763@: Migrated commands from `SfdxCommand` to `SfCommand` [\#1271](https://github.com/forcedotcom/sfdx-scanner/pull/1271)
+* CHANGE (CodeAnalyzer): @W-14237678@: Allow RemoveUnusedMethod to run against constructors [\#1268](https://github.com/forcedotcom/sfdx-scanner/pull/1268)
+
 ## [v3.19.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.19.0) (12-05-2023)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.19.0...v3.18.0)
