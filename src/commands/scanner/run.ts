@@ -53,8 +53,7 @@ export default class Run extends ScannerRunCommand {
 			summary: getMessage(BundleName.Run, 'flags.targetSummary'),
 			description: getMessage(BundleName.Run, 'flags.targetDescription'),
 			delimiter: ',',
-			multiple: true,
-			required: true
+			multiple: true
 		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.

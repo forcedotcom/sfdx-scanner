@@ -31,15 +31,17 @@ export class RunDfaAction extends AbstractRunAction {
 			throw new SfError(getMessage(BundleName.RunDfa, 'validations.projectdirIsRequired'));
 		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
-		for (const target of (inputs.target as string[])) {
-			// The target specifies a method if it includes the `#` syntax.
-			if (target.indexOf('#') > -1) {
-				if(globby.hasMagic(target)) {
-					throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
-				}
-				const potentialFilePath = target.split('#')[0];
-				if (!(await fh.isFile(potentialFilePath))) {
-					throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
+		if (inputs.target) {
+			for (const target of (inputs.target as string[])) {
+				// The target specifies a method if it includes the `#` syntax.
+				if (target.indexOf('#') > -1) {
+					if (globby.hasMagic(target)) {
+						throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
+					}
+					const potentialFilePath = target.split('#')[0];
+					if (!(await fh.isFile(potentialFilePath))) {
+						throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
+					}
 				}
 			}
 		}

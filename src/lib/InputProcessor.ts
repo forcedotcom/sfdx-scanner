@@ -44,8 +44,9 @@ export class InputProcessorImpl implements InputProcessor {
 	public resolveTargetPaths(inputs: Inputs): string[] {
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
-		const target: string[] = (inputs.target || []) as string[];
-		return target.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
+		// Note that we do not do a path.resolve since the target input can be globby (which we handle elsewhere).
+		const targetPaths: string[] = (inputs.target || ['.']) as string[];
+		return targetPaths.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 	}
 
 

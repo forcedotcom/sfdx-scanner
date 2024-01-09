@@ -33,7 +33,7 @@ Specifies number of rule evaluation threads, or how many entrypoints can be eval
 
 # flags.rulethreadtimeoutSummary
 
-specify timeout for individual rule threads in milliseconds. Alternatively, set the timeout value using environment variable `SFGE_RULE_THREAD_TIMEOUT`. Default: 90000 ms
+specify timeout for individual rule threads in milliseconds. Alternatively, set the timeout value using environment variable `SFGE_RULE_THREAD_TIMEOUT`. Default: 900000 ms
 
 # flags.rulethreadtimeoutDescription
 
@@ -49,11 +49,11 @@ Specifies Java Virtual Machine arguments to override system defaults while execu
 
 # flags.targetSummary
 
-return location of source code
+source code location
 
 # flags.targetDescription
 
-Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list.
+Source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list. Default is ".".
 
 # flags.withpilotSummary
 

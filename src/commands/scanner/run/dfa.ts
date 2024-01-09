@@ -41,7 +41,6 @@ export default class Dfa extends ScannerRunCommand {
 			char: 't',
 			summary: getMessage(BundleName.RunDfa, 'flags.targetSummary'),
 			description: getMessage(BundleName.RunDfa, 'flags.targetDescription'),
-			required: true,
 			delimiter: ',',
 			multiple: true
 		})(),

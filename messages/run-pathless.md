@@ -20,7 +20,7 @@ source code location
 
 # flags.targetDescription
 
-Source code location. May use glob patterns. Specify multiple values as a comma-separated list.
+Source code location. May use glob patterns. Specify multiple values as a comma-separated list. Default is ".".
 
 # flags.envSummary
 
