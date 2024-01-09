@@ -26,10 +26,10 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		const options: Map<string,string> = new Map();
 
 		// We should only add a GraphEngine config if we were given a --projectdir flag.
-		const projectDirPaths: string[] = this.inputProcessor.resolveProjectDirPaths(inputs);
-		if (projectDirPaths.length > 0) {
+		const projectDirPath: string = this.inputProcessor.resolveProjectDirPath(inputs);
+		if (projectDirPath.length > 0) {
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: projectDirPaths
+				projectDir: projectDirPath
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}

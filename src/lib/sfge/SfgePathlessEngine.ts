@@ -34,8 +34,8 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 		// for `scanner run`.
 		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
 			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
-			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {
-				// If we've got a config with projectDirs, we're set.
+			if (sfgeConfig.projectDir && sfgeConfig.projectDir.length > 0) {
+				// If we've got a config with projectDir, we're set.
 				return true;
 			}
 		}

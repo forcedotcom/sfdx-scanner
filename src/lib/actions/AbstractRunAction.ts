@@ -48,15 +48,12 @@ export abstract class AbstractRunAction implements Action {
 		const fh = new FileHandler();
 		// If there's a --projectdir flag, its entries must be non-glob paths pointing to existing directories.
 		if (inputs.projectdir) {
-			// TODO: MOVE AWAY FROM ALLOWING AN ARRAY OF DIRECTORIES HERE AND ERROR IF THERE IS MORE THAN ONE DIRECTORY
-			for (const dir of (inputs.projectdir as string[])) {
-				if (globby.hasMagic(dir)) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
-				} else if (!(await fh.exists(dir))) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
-				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
-				}
+			if (globby.hasMagic(inputs.projectdir)) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
+			} else if (!(await fh.exists(inputs.projectdir))) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
+			} else if (!(await fh.stats(inputs.projectdir)).isDirectory()) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
 			}
 		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.

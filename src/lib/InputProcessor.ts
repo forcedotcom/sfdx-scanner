@@ -14,7 +14,7 @@ export interface InputProcessor {
 
 	resolveTargetPaths(inputs: Inputs): string[];
 
-	resolveProjectDirPaths(inputs: Inputs): string[];
+	resolveProjectDirPath(inputs: Inputs): string;
 
 	createRunOptions(inputs: Inputs, isDfa: boolean): RunOptions;
 
@@ -34,12 +34,11 @@ export class InputProcessorImpl implements InputProcessor {
 		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 
-	public resolveProjectDirPaths(inputs: Inputs): string[] {
-		// TODO: Stop allowing an array of paths - move towards only 1 path (to resolve into 1 output path)
-		if (inputs.projectdir && (inputs.projectdir as string[]).length > 0) {
-			return (inputs.projectdir as string[]).map(p => path.resolve(p));
+	public resolveProjectDirPath(inputs: Inputs): string {
+		if (inputs.projectdir && (inputs.projectdir as string).length > 0) {
+			return path.resolve(normalize(untildify(inputs.projectdir as string)))
 		}
-		return [];
+		return '';
 	}
 
 	public resolveTargetPaths(inputs: Inputs): string[] {

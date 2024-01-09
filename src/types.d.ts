@@ -197,7 +197,7 @@ export type TargetMatchingFunction = (t: string) => Promise<boolean>;
 export type BasicTargetPattern = string;
 
 export type SfgeConfig = {
-	projectDirs: string[];
+	projectDir: string;
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
 	ruleDisableWarningViolation?: boolean;

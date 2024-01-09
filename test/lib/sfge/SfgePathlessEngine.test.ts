@@ -52,12 +52,12 @@ describe('SfgePathlessEngine', () => {
 	});
 
 	describe('#shouldEngineRun()', () => {
-		it('Returns true when SfgeConfig has non-empty projectdirs array', async () => {
+		it('Returns true when SfgeConfig has non-empty projectdir string', async () => {
 			// ==== SETUP ====
 			const engine = new SfgePathlessEngine();
 			await engine.init();
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: ['specific/value/is/irrelevant']
+				projectDir: 'specific/value/is/irrelevant'
 			};
 			const engineOptions: Map<string,string> = new Map();
 			engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
@@ -68,12 +68,12 @@ describe('SfgePathlessEngine', () => {
 			expect(shouldEngineRun).to.be.true;
 		});
 
-		it('Throws error when SfgeConfig has empty projectdirs array', async () => {
+		it('Throws error when SfgeConfig has empty projectdir string', async () => {
 			// ==== SETUP ====
 			const engine = new SfgePathlessEngine();
 			await engine.init();
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: []
+				projectDir: ''
 			};
 			const engineOptions: Map<string,string> = new Map();
 			engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
@@ -86,7 +86,7 @@ describe('SfgePathlessEngine', () => {
 			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
 		});
 
-		it('Throws error when SfgeConfig lacks projectdirs array', async () => {
+		it('Throws error when SfgeConfig lacks projectdir string', async () => {
 			// ==== SETUP ====
 			const engine = new SfgePathlessEngine();
 			await engine.init();
