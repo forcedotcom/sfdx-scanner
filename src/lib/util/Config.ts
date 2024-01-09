@@ -29,9 +29,11 @@ export type EngineConfigContent = {
 
 /**
  * An array of file extensions that can theoretically correspond to XML files when scanning a Salesforce Managed Package.
+ * NOTE: {@code .app} and {@code .md} technically belong on this list, but are being omitted since they're popular
+ *       file extensions in their own right and are likely to just cause parse errors.
  */
 const APPEXCHANGE_XML_EXTENSIONS = [
-	"app", "authprovider", "bot", "brandingSet", "cachePartition", "callCenter", "communityTemplateDefinition",
+	"authprovider", "bot", "brandingSet", "cachePartition", "callCenter", "communityTemplateDefinition",
 	"communityThemeDefinition", "connectedApp", "ConversationVendorInformation", "corsWhitelistOrigin",
 	"cspTrustedSite", "customHelpMenuSection", "customPermission", "dashboard", "dataConnectorIngestApi",
 	"dataPackageKitDefinition", "DataPackageKitObject", "dataSource", "dataSourceBundleDefinition",
@@ -39,7 +41,7 @@ const APPEXCHANGE_XML_EXTENSIONS = [
 	"duplicateRule", "externalDataConnector", "featureParameterBoolean", "featureParameterInteger",
 	"flexipage", "flow", "globalValueSet", "globalValueSetTranslation", "homePageComponent",
 	"homePageLayout", "indx", "labels", "layout", "letter", "lightningBolt", "lightningExperienceTheme",
-	"marketingappextension", "matchingRule", "md", "messageChannel", "mktDataTranObject", "mlDomain",
+	"marketingappextension", "matchingRule", "messageChannel", "mktDataTranObject", "mlDomain",
 	"namedCredential", "navigationMenu", "notiftype", "object", "objectSourceTargetMap", "objectTranslation",
 	"pathAssistant", "permissionset", "permissionsetgroup", "profile", "prompt", "quickAction", "remoteSite",
 	"report", "reportType", "sharingSet", "snapshot", "tab", "translation", "wapp", "wds", "weblink", "workflow",
