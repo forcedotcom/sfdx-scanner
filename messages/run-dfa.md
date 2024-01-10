@@ -71,10 +71,6 @@ Method-level targets supplied to --target cannot be globs
 
 Method-level target %s must be a real file
 
-# validations.projectdirIsRequired
-
---projectdir is required for this command.
-
 # examples
 
 The paths specified for --projectdir must contain all files specified through --target cumulatively.

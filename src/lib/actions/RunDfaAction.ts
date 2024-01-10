@@ -24,12 +24,6 @@ export class RunDfaAction extends AbstractRunAction {
 		await super.validateInputs(inputs);
 
 		const fh = new FileHandler();
-		// The superclass will validate that --projectdir is well-formed,
-		// but doesn't require that the flag actually be present.
-		// So we should make sure it exists here.
-		if (!inputs.projectdir || (inputs.projectdir as string[]).length === 0) {
-			throw new SfError(getMessage(BundleName.RunDfa, 'validations.projectdirIsRequired'));
-		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
 		if (inputs.target) {
 			for (const target of (inputs.target as string[])) {

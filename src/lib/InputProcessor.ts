@@ -1,10 +1,16 @@
 import {Inputs} from "../types";
-import normalize = require('normalize-path');
-import path = require('path');
-import untildify = require("untildify");
 import {RunOptions} from "./RuleManager";
 import {RunOutputOptions} from "./output/RunResultsProcessor";
 import {inferFormatFromOutfile, OutputFormat} from "./output/OutputFormat";
+import {SfError} from "@salesforce/core";
+import {BundleName, getMessage} from "../MessageCatalog";
+import {INTERNAL_ERROR_CODE} from "../Constants";
+import {Display} from "./Display";
+import normalize = require('normalize-path');
+import path = require('path');
+import fs = require('fs');
+import untildify = require("untildify");
+import globby = require('globby');
 
 /**
  * Service for processing inputs
@@ -23,9 +29,11 @@ export interface InputProcessor {
 
 export class InputProcessorImpl implements InputProcessor {
 	private readonly sfVersion: string;
+	private readonly display: Display;
 
-	public constructor(sfVersion: string) {
+	public constructor(sfVersion: string, display: Display) {
 		this.sfVersion = sfVersion;
+		this.display = display
 	}
 
 	public resolvePaths(inputs: Inputs): string[] {
@@ -35,16 +43,31 @@ export class InputProcessorImpl implements InputProcessor {
 	}
 
 	public resolveProjectDirPath(inputs: Inputs): string {
+		// If projectdir is provided, then return it since at this point it has already been validated to exist
 		if (inputs.projectdir && (inputs.projectdir as string).length > 0) {
 			return path.resolve(normalize(untildify(inputs.projectdir as string)))
 		}
-		return '';
+
+		// If projectdir is not provided then:
+		// * We calculate the first common parent directory that includes all the target files.
+		// --> If none of its parent folders contain a sfdx-project.json file, then we return this first common parent.
+		// --> Otherwise we return the folder that contains the sfdx-project.json file.
+		const commonParentFolder = getFirstCommonParentFolder(this.getAllTargetFiles(inputs));
+		let projectFolder: string = findFolderThatContainsSfdxProjectFile(commonParentFolder);
+		projectFolder = projectFolder.length > 0 ? projectFolder : commonParentFolder
+		this.display.displayVerboseInfo(getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [projectFolder]))
+		return projectFolder;
 	}
 
 	public resolveTargetPaths(inputs: Inputs): string[] {
 		// Turn the paths into normalized Unix-formatted paths and strip out any single- or double-quotes, because
 		// sometimes shells are stupid and will leave them in there.
 		// Note that we do not do a path.resolve since the target input can be globby (which we handle elsewhere).
+
+		// If possible, in the future we should resolve all globs here instead of in the DefaultRuleManager.
+		// Also, I would recommend that we eventually resolve globs based on the projectdir (since it acts as a
+		// root directory) instead of the present working directory.
+
 		const targetPaths: string[] = (inputs.target || ['.']) as string[];
 		return targetPaths.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 	}
@@ -62,10 +85,19 @@ export class InputProcessorImpl implements InputProcessor {
 	public createRunOutputOptions(inputs: Inputs): RunOutputOptions {
 		return {
 			format: outputFormatFromInputs(inputs),
-			verboseViolations: inputs["verbose-violations"] as boolean,
+			verboseViolations: inputs['verbose-violations'] as boolean,
 			severityForError: inputs['severity-threshold'] as number,
 			outfile: inputs.outfile as string
 		};
+	}
+
+	private getAllTargetFiles(inputs: Inputs): string[] {
+		const targetPaths: string[] = this.resolveTargetPaths(inputs).map(p => trimMethodSpecifier(p))
+		const allAbsoluteTargetFiles: string[] = globby.sync(targetPaths).map(p => path.resolve(p));
+		if (allAbsoluteTargetFiles.length == 0) {
+			throw new SfError(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'), null, null, INTERNAL_ERROR_CODE);
+		}
+		return allAbsoluteTargetFiles;
 	}
 }
 
@@ -79,4 +111,39 @@ function outputFormatFromInputs(inputs: Inputs): OutputFormat {
 	} else {
 		return OutputFormat.TABLE;
 	}
+}
+
+function trimMethodSpecifier(targetPath: string): string {
+	return targetPath.split('#')[0];
+}
+
+function getFirstCommonParentFolder(targetFiles: string[]) {
+	const longestCommonStr: string = getLongestCommonPrefix(targetFiles);
+	const commonParentFolder = getParentFolderOf(longestCommonStr);
+	return commonParentFolder.length == 0 ? '/' : commonParentFolder;
+}
+
+function getLongestCommonPrefix(strs: string[]): string {
+	const shortestStr = strs.reduce((s1, s2) => s1.length <= s2.length ? s1 : s2);
+	for (let i = 0; i < shortestStr.length; i++) {
+		if(!strs.every(str => str[i] === shortestStr[i])) {
+			return shortestStr.substring(0, i)
+		}
+	}
+	return shortestStr;
+}
+
+function findFolderThatContainsSfdxProjectFile(folder: string): string {
+	let folderToCheck: string = folder;
+	while (folderToCheck.length > 0) {
+		if (fs.existsSync(path.resolve(folderToCheck, 'sfdx-project.json'))) {
+			return folderToCheck;
+		}
+		folderToCheck = getParentFolderOf(folderToCheck);
+	}
+	return '';
+}
+
+function getParentFolderOf(path: string): string {
+	return path.substring(0, path.lastIndexOf('/'))
 }

@@ -4,7 +4,6 @@ import {SfgeConfig} from '../../../src/types';
 import {CUSTOM_CONFIG} from '../../../src/Constants';
 import {SfgePathlessEngine} from '../../../src/lib/sfge/SfgePathlessEngine';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
 
@@ -66,52 +65,6 @@ describe('SfgePathlessEngine', () => {
 			const shouldEngineRun = engine.shouldEngineRun([], [], [], engineOptions);
 			// ==== ASSERTIONS ====
 			expect(shouldEngineRun).to.be.true;
-		});
-
-		it('Throws error when SfgeConfig has empty projectdir string', async () => {
-			// ==== SETUP ====
-			const engine = new SfgePathlessEngine();
-			await engine.init();
-			const sfgeConfig: SfgeConfig = {
-				projectDir: ''
-			};
-			const engineOptions: Map<string,string> = new Map();
-			engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
-			// ==== TESTED METHOD ====
-			const invocationOfShouldEngineRun = () => {
-				// The only parameter that matters should be the engine options.
-				return engine.shouldEngineRun([], [], [], engineOptions);
-			};
-			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
-		});
-
-		it('Throws error when SfgeConfig lacks projectdir string', async () => {
-			// ==== SETUP ====
-			const engine = new SfgePathlessEngine();
-			await engine.init();
-			const engineOptions: Map<string,string> = new Map();
-			engineOptions.set(CUSTOM_CONFIG.SfgeConfig, "{}");
-			// ==== TESTED METHOD ====
-			const invocationOfShouldEngineRun = () => {
-				// The only parameter that matters should be the engine options.
-				return engine.shouldEngineRun([], [], [], engineOptions);
-			};
-			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
-		});
-
-		it('Throws error when SfgeConfig is outright absent', async () => {
-			// ==== SETUP ====
-			const engine = new SfgePathlessEngine();
-			await engine.init();
-			// ==== TESTED METHOD ====
-			const invocationOfShouldEngineRun = () => {
-				// The only parameter that matters should be the engine options.
-				return engine.shouldEngineRun([], [], [], new Map());
-			};
-			// ==== ASSERTIONS ====
-			expect(invocationOfShouldEngineRun).to.throw(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir', []));
 		});
 	});
 });

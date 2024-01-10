@@ -81,3 +81,11 @@ The selected output format doesn't match the output file type. Output format: %s
 # validations.projectdirMustExist
 
 --projectdir must specify existing paths
+
+# validations.noFilesFoundInTarget
+
+No files found in target. --target must contain at least one file.
+
+# info.resolvedProjectDir
+
+No project directory was specified by --projectdir. Therefore, the following project directory will be used: %s

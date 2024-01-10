@@ -295,6 +295,8 @@ export class DefaultRuleManager implements RuleManager {
 			if (globby.hasMagic(target)) {
 				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
 				// our pattern matcher.
+				// NOTE: We should consider in the future to resolve target paths based off of the projectdir instead of
+				// the present working directory.
 				const matchingTargets = await globby(targetPath);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
