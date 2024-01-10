@@ -1,6 +1,5 @@
 // ================ IMPORTS ===================
 import semver = require('semver');
-import {Messages} from '@salesforce/core';
 import path = require('path');
 import {ConfigContent, EngineConfigContent} from './Config';
 import {ENGINE, CONFIG_PILOT_FILE} from '../../Constants';
@@ -8,17 +7,13 @@ import {RetireJsEngine} from '../retire-js/RetireJsEngine';
 import {deepCopy} from './Utils';
 import {FileHandler} from './FileHandler';
 import { Controller } from '../../Controller';
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 // ================ TYPES =====================
 type VersionUpgradeScript = (config?: ConfigContent) => Promise<void>;
 
 
 // ================ CONSTANTS =================
-
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'VersionUpgradeManager');
 
 // RULES FOR WRITING UPGRADE SCRIPTS:
 // - Ideally, your script should require no parameters beyond the ConfigContent object. If more parameters must be added,
@@ -143,7 +138,7 @@ export class VersionUpgradeManager {
 				// If the script failed, prefix the error so it's clear where it came from, then throw a new error with
 				// the prefixed message and the last safe configuration.
 				const message: string = e instanceof Error ? e.message : e as string;
-				throw new VersionUpgradeError(messages.getMessage('upgradeFailed', [version, message]), existingConfig);
+				throw new VersionUpgradeError(getMessage(BundleName.VersionUpgradeManager, 'upgradeFailed', [version, message]), existingConfig);
 			}
 			// If we're here, we're considered to have successfully upgraded to this version. So we'll update the config
 			// to reflect that.

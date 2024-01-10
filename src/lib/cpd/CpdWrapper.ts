@@ -32,15 +32,11 @@ export default class CpdWrapper extends CommandLineSupport {
 		this.initialized = true;
 	}
 
-	protected buildClasspath(): Promise<string[]> {
-		return Promise.resolve([`${PMD_LIB}/*`]);
-	}
-
 	protected async buildCommandArray(): Promise<[string, string[]]> {
 		const javaHome = await JreSetupManager.verifyJreSetup();
 		const command = path.join(javaHome, 'bin', 'java');
 
-		const classpath = await this.buildClasspath();
+		const classpath = [`${PMD_LIB}/*`];
 
 		const fileHandler = new FileHandler();
 		const tmpPath = await fileHandler.tmpFileWithCleanup();

@@ -5,12 +5,10 @@ import Sinon = require('sinon');
 import {CustomPmdEngine}  from '../../../src/lib/pmd/PmdEngine'
 import { CUSTOM_CONFIG } from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
-import { Messages } from '@salesforce/core';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
 
 TestOverrides.initializeTestSetup();
-
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
 
 const configFilePath = '/some/file/path/rule-ref.xml';
 const engineOptionsWithPmdCustom = new Map<string, string>([
@@ -136,7 +134,7 @@ describe('Tests for CustomPmdEngine implementation', () => {
 				);
 				//TODO: fail when no error is thrown
 			} catch (error) {
-				expect(error.message).equals(messages.getMessage('ConfigNotFound', [configFilePath]));
+				expect(error.message).equals(getMessage(BundleName.PmdEngine, 'ConfigNotFound', [configFilePath]));
 			}
 
 		});

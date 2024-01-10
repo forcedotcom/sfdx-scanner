@@ -1,26 +1,29 @@
 package sfdc.sfdx.scanner.pmd;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.salesforce.messaging.CliMessager;
-import com.salesforce.messaging.Message;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
-import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.salesforce.messaging.CliMessager;
+import com.salesforce.messaging.Message;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogCategory;
+import sfdc.sfdx.scanner.pmd.catalog.PmdCatalogRule;
 
 public class Pmd7CompatibilityCheckerTest {
 
@@ -28,12 +31,13 @@ public class Pmd7CompatibilityCheckerTest {
     private static final String NONSTANDARD_JAR = "/Users/me/some/path/to/MyRules.jar";
     private static final String STANDARD_CATPATH = "category/apex/bestpractices.xml";
     private static final String NONSTANDARD_CATPATH = "category/apex/somewildcat.xml";
+    private static final String MOCKED_ENGINE_NAME = "MockedEngineName";
 
     /**
      * Before and after each test, reset the CLI messages.
      */
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearMessages() {
         CliMessager.getInstance().resetMessages();
     }
@@ -68,6 +72,7 @@ public class Pmd7CompatibilityCheckerTest {
         // Use that category to create some good custom rules.
         List<PmdCatalogRule> rules = Arrays.asList(
             createXpathRule(nonstandardCategory, "net.sourceforge.pmd.lang.rule.XPathRule", true),
+            createXpathRule(nonstandardCategory, "net.sourceforge.pmd.lang.xml.rule.DomXPathRule", true),
             createJavaBasedRule(nonstandardCategory, true)
         );
 
@@ -131,7 +136,7 @@ public class Pmd7CompatibilityCheckerTest {
         String classProp = "net.sourceforge.pmd.lang.apex.rule.codestyle.ClassNamingConventionsRule";
         String ruleXml = createRuleXml(classProp, hasLangProp, "");
         Element ruleElement = createRuleElement(ruleXml);
-        return new PmdCatalogRule(ruleElement, category, "apex");
+        return new PmdCatalogRule(ruleElement, category, "apex", MOCKED_ENGINE_NAME);
     }
 
     private PmdCatalogRule createXpathRule(PmdCatalogCategory category, String classProp, boolean hasLangProp) {
@@ -149,7 +154,7 @@ public class Pmd7CompatibilityCheckerTest {
                 + "</properties>";
         String ruleXml = createRuleXml(classProp, hasLangProp, propertiesTags);
         Element ruleElement = createRuleElement(ruleXml);
-        return new PmdCatalogRule(ruleElement, category, "apex");
+        return new PmdCatalogRule(ruleElement, category, "apex", MOCKED_ENGINE_NAME);
     }
 
     private String createRuleXml(String classProp, boolean hasLangProp, String innerXml) {

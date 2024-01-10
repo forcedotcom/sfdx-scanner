@@ -46,7 +46,7 @@ public class MainTest {
     private static final String EXECUTE_ACTION = CliArgParser.CLI_ACTION.EXECUTE.name();
     private static final Violation.StaticRuleViolation DUMMY_VIOLATION =
             new Violation.StaticRuleViolation("dummy message", new DummyVertex("dummy label"));
-    private static final String CLI_MESSAGES = "SFDX-START[]SFDX-END";
+    private static final String CLI_MESSAGES = "SF-START[]SF-END";
     private static final String DUMMY_VIOLATION_JSON =
             "VIOLATIONS_START[{\"message\":\"dummy message\",\"sourceFileName\":\"dummy\",\"sourceType\":\"dummy\",\"sourceVertexName\":\"\",\"sourceLineNumber\":0,\"sourceColumnNumber\":0,\"severity\":0}]VIOLATIONS_END";
     private static final OutOfMemoryError DUMMY_ERROR =

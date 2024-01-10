@@ -1,18 +1,18 @@
 import 'reflect-metadata';
-import {Messages} from '@salesforce/core';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import {RuleResult, RuleViolation} from '../../../src/types';
 import path = require('path');
 import {expect} from 'chai';
 import Sinon = require('sinon');
-import {PmdEngine}  from '../../../src/lib/pmd/PmdEngine'
+import {PmdEngine, _PmdRuleMapper}  from '../../../src/lib/pmd/PmdEngine'
 import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { CUSTOM_CONFIG } from '../../../src/Constants';
+import {CUSTOM_CONFIG, ENGINE, LANGUAGE, PMD_VERSION} from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
-
-Messages.importMessagesDirectory(__dirname);
-const engineMessages = Messages.loadMessages('@salesforce/sfdx-scanner', 'PmdEngine');
+import {BundleName, getMessage} from "../../../src/MessageCatalog";
+import {Config} from "../../../src/lib/util/Config";
+import {CustomRulePathManager} from "../../../src/lib/CustomRulePathManager";
+import {after} from "mocha";
 
 TestOverrides.initializeTestSetup();
 
@@ -65,7 +65,7 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			expect(stderr).to.not.be.null;
 
 			const simplifiedMessage = (testPmdEngine as any).processStdErr(stderr);
-			const expectedMessage = engineMessages.getMessage('errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
+			const expectedMessage = getMessage(BundleName.PmdEngine, 'errorTemplates.rulesetNotFoundTemplate', ['category/apex/bestprctices.xml', 'ApexUnitTestClassShouldHaveAsserts']);
 			expect(simplifiedMessage).to.equal(expectedMessage, 'Stderr not properly simplified');
 		});
 
@@ -324,6 +324,130 @@ describe('Tests for BasePmdEngine and PmdEngine implementation', () => {
 			const isEngineRequested = engine.isEngineRequested(filteredNames, emptyEngineOptions);
 
 			expect(isEngineRequested).to.be.true;
+		});
+	});
+});
+
+describe('_PmdRuleMapper', () => {
+	const irrelevantPath = path.join('this', 'path', 'does', 'not', 'actually', 'matter');
+	describe('When Custom PMD JARs have been registered for a language whose default PMD rules are off...', () => {
+		before(() => {
+			Sinon.createSandbox();
+			// Spoof a config that claims that only Apex's default PMD JAR is enabled.
+			Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
+			// Spoof a CustomPathManager that claims that a custom JAR exists for Java.
+			const customJars: Map<string, Set<string>> = new Map<string, Set<string>>();
+			customJars.set(LANGUAGE.JAVA, new Set([irrelevantPath]));
+			Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).returns(customJars);
+			Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+		});
+
+		after(() => {
+			Sinon.restore();
+		});
+
+		it('Custom PMD JARs are included', async () => {
+			// Get our parameters.
+			const target = await _PmdRuleMapper.create({});
+			const ruleMap = await target.createStandardRuleMap();
+
+			expect(ruleMap).to.include.keys(LANGUAGE.JAVA);
+			expect(ruleMap.get(LANGUAGE.JAVA)).to.have.key(irrelevantPath);
+		});
+	});
+
+	describe('When Custom PMD JARs have been registered for a language under a weird alias...', () => {
+		before(() => {
+			Sinon.createSandbox();
+			// Spoof a config that claims that only Apex's default PMD JAR is enabled.
+			Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
+			// Spoof a CustomPathManager that claims that a custom JAR exists for plsql, using a weird alias for that language.
+			const customJars: Map<string, Set<string>> = new Map();
+			customJars.set('ViSuAlFoRcE', new Set([irrelevantPath]));
+			Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).returns(customJars);
+			Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+		});
+
+		after(() => {
+			Sinon.restore();
+		});
+
+		it('Custom PMD JARs are included', async () => {
+			// Get our parameters.
+			const target = await _PmdRuleMapper.create({});
+			const ruleMap = await target.createStandardRuleMap();
+
+			expect(ruleMap).to.include.keys(LANGUAGE.VISUALFORCE);
+			expect(ruleMap.get(LANGUAGE.VISUALFORCE)).to.have.key(irrelevantPath);
+		});
+	});
+
+	describe("When not all supported languages have an associated PMD JAR", () => {
+		before(() => {
+			Sinon.createSandbox();
+			// Spoof a config that claims that only apex is the supported language
+			Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.APEX]);
+			const customJars: Map<string, Set<string>> = new Map();
+			customJars.set('visualforce', new Set([irrelevantPath]));
+			customJars.set(LANGUAGE.JAVA, new Set());
+			Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).returns(customJars);
+			Sinon.stub(FileHandler.prototype, 'exists').resolves(true);
+		});
+
+		after(() => {
+			Sinon.restore();
+		});
+
+		it('should not include a supported language as input to PmdCataloger if the language has no associated path', async () => {
+			// Get our parameters.
+			const target = await _PmdRuleMapper.create({});
+			const ruleMap = await target.createStandardRuleMap();
+
+			// Since Java had no JAR, it should not be included in map
+			expect(ruleMap).to.not.have.key(LANGUAGE.JAVA);
+		});
+	});
+
+	describe('Missing Rule Files are Handled Gracefully', () => {
+		const validJar = 'jar-that-exists.jar';
+		const missingJar = 'jar-that-is-missing.jar';
+		// This jar is automatically included by the PmdCatalogWrapper
+		const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', `pmd-java-${PMD_VERSION}.jar`));
+		let uxSpy = null;
+
+		before(() => {
+			Sinon.createSandbox();
+			Sinon.stub(Config.prototype, 'getSupportedLanguages').withArgs(ENGINE.PMD).resolves([LANGUAGE.JAVA]);
+			const customJars: Map<string, Set<string>> = new Map();
+			// Simulate CustomPaths.json contains a jar that has been deleted or moved
+			customJars.set(LANGUAGE.JAVA, new Set([validJar, missingJar]));
+			Sinon.stub(CustomRulePathManager.prototype, 'getRulePathEntries').withArgs(PmdEngine.ENGINE_NAME).returns(customJars);
+			const stub = Sinon.stub(FileHandler.prototype, 'exists');
+			stub.withArgs(validJar).resolves(true);
+			stub.withArgs(missingJar).resolves(false);
+			uxSpy = Sinon.spy(uxEvents, 'emit');
+		});
+
+		after(() => {
+			Sinon.restore();
+		});
+
+		it('Missing file should be filtered out and display warning', async () => {
+			const target = await _PmdRuleMapper.create({});
+			const ruleMap = await target.createStandardRuleMap();
+
+			// The rule path entries should only include the jar that exists
+			expect(ruleMap.size).to.equal(1);
+			const jars = ruleMap.get(LANGUAGE.JAVA);
+			const jarsErrorMessage =  `Jars: ${Array.from(jars)}`;
+			expect(jars.size).to.equal(2, jarsErrorMessage);
+			expect(jars).to.contain(validJar, jarsErrorMessage);
+			expect(jars).to.contain(pmdJar, jarsErrorMessage);
+			expect(jars).to.not.contain(missingJar, jarsErrorMessage);
+
+			// A warning should be displayed
+			Sinon.assert.calledOnce(uxSpy);
+			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Custom rule file path [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
 		});
 	});
 });

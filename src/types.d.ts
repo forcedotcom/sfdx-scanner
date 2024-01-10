@@ -1,5 +1,6 @@
 import {JSONSchema4} from 'json-schema';
 import {Linter} from 'eslint';
+import {Ux} from '@salesforce/sf-plugins-core';
 import {TargetType} from './Constants';
 
 export type Rule = {
@@ -30,6 +31,12 @@ export type LooseObject = {
 	[key: string]: any;
 }
 
+// TODO: We should really define our input type property for each command so that we can avoid all the castings: "as string", "as boolean", etc
+export type Inputs = {
+	/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+	[key: string]: any;
+}
+
 /**
  * Alias for ESLint's{@link Linter.RuleEntry} type. Exported here to minimize the need to import directly from ESLint.
  */
@@ -55,6 +62,7 @@ export type RuleTarget = {
 	paths: string[];
 	methods?: string[];
 }
+
 export type RuleResult = {
 	engine: string;
 	fileName: string;
@@ -82,13 +90,27 @@ export type EngineExecutionSummary = {
 	violationCount: number;
 };
 
-export type RecombinedData = string | {columns: string[]; rows: {[key: string]: string|number}[]};
+export type ResultTableRow = {
+	description: string;
+	category: string;
+	url: string;
+	/**
+	 * {@code location} applies solely to non-DFA violations, which are considered to occur
+	 * at only a single point.
+	 */
+	location?: string;
+	/**
+	 * {@code sourceLocation} applies solely to DFA violations.
+	 */
+	sourceLocation?: string;
+	/**
+	 * {@code sinkLocation} applies solely to DFA violations.
+	 */
+	sinkLocation?: string;
+}
 
-export type RecombinedRuleResults = {
-	minSev: number;
-	results: RecombinedData;
-	summaryMap: Map<string,EngineExecutionSummary>;
-};
+// TODO: This is a bit of a smell. We should just return a string and treat all formatted output the same if possible.
+export type FormattedOutput = string | {columns: Ux.Table.Columns<ResultTableRow>; rows: ResultTableRow[]};
 
 type BaseViolation = {
 	ruleName: string;

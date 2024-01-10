@@ -1,11 +1,11 @@
 ---
-name: Report a scanner:run:dfa False Result
-about: Report false results returned in scanner:run:dfa scan reports. If you’re submitting for AppExchange security review, include documentation of your false results with your submission.
+name: Report a scanner run dfa False Result
+about: Report false results returned in scanner run dfa scan reports. If you’re submitting for AppExchange security review, include documentation of your false results with your submission.
 title: "[False Result]"
 labels: ''
 assignees: ''
 ---
-### `scanner:run:dfa` False Positives Template
+### `scanner run dfa` False Positives Template
 
 **Description:**
 <!--Provide a clear and concise description of what the bug is.-->

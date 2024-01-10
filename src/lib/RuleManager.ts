@@ -1,23 +1,15 @@
-import {RecombinedRuleResults, Rule} from '../types';
+import {Rule} from '../types';
 import {RuleFilter} from './RuleFilter';
-
-export enum OUTPUT_FORMAT {
-	CSV = 'csv',
-	HTML = 'html',
-	JSON = 'json',
-	JUNIT = 'junit',
-	SARIF = 'sarif',
-	TABLE = 'table',
-	XML = 'xml'
-}
+import {Results} from "./output/Results";
 
 export type RunOptions  = {
-	format: OUTPUT_FORMAT;
 	normalizeSeverity: boolean;
 	runDfa: boolean;
 	withPilot: boolean;
-	sfdxVersion: string;
+	sfVersion: string;
 }
+
+export type EngineOptions = Map<string, string>;
 
 export interface RuleManager {
 	init(): Promise<void>;
@@ -37,5 +29,5 @@ export interface RuleManager {
 	/**
 	 * @param engineOptions - see RuleEngine#run
 	 */
-	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults>;
+	runRulesMatchingCriteria(filters: RuleFilter[], target: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<Results>;
 }

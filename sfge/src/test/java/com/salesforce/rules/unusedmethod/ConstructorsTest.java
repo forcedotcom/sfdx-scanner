@@ -39,7 +39,7 @@ public class ConstructorsTest extends BaseUnusedMethodTest {
           + "    }\n"
           + "}";
         // spotless:on
-        assertNoUsage(new String[] {sourceCode}, "MyClass", "entrypoint", "MyClass#<init>#2");
+        assertNoUsage(new String[] {sourceCode}, "MyClass", "entrypoint", "MyClass#<init>@2");
     }
 
     /**

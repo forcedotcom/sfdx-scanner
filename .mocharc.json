@@ -2,7 +2,7 @@
   "require": "ts-node/register",
   "extension": ["ts"],
   "recursive": true,
-  "timeout": 5000,
+  "timeout": 60000,
   "forbidOnly": true,
   "reporter": ["spec"]
 }

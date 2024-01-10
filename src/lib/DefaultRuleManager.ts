@@ -1,24 +1,29 @@
-import {Logger, Messages, SfError} from '@salesforce/core';
+import {Logger, SfError} from '@salesforce/core';
 import * as assert from 'assert';
 import {Stats} from 'fs';
 import {inject, injectable} from 'tsyringe';
-import {EngineExecutionDescriptor, RecombinedRuleResults, Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../types';
+import {
+	EngineExecutionDescriptor,
+	Rule,
+	RuleGroup,
+	RuleResult,
+	RuleTarget,
+	TelemetryData
+} from '../types';
 import {isEngineFilter, RuleFilter} from './RuleFilter';
-import {RuleManager, RunOptions} from './RuleManager';
-import {RuleResultRecombinator} from './formatter/RuleResultRecombinator';
+import {EngineOptions, RuleManager, RunOptions} from './RuleManager';
 import {RuleCatalog} from './services/RuleCatalog';
 import {RuleEngine} from './services/RuleEngine';
 import {FileHandler} from './util/FileHandler';
 import {PathMatcher} from './util/PathMatcher';
 import {Controller} from '../Controller';
 import {EVENTS, uxEvents} from './ScannerEvents';
-import {CONFIG_FILE, CUSTOM_CONFIG, ENGINE, TargetType} from '../Constants';
+import {CONFIG_FILE, ENGINE, TargetType} from '../Constants';
 import * as TelemetryUtil from './util/TelemetryUtil';
 import globby = require('globby');
 import path = require('path');
-
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
+import {BundleName, getMessage} from "../MessageCatalog";
+import {Results, RunResults} from "./output/Results";
 
 type RunDescriptor = {
 	engine: RuleEngine;
@@ -69,10 +74,10 @@ export class DefaultRuleManager implements RuleManager {
 		return this.catalog.getRulesMatchingFilters(filters);
 	}
 
-	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: Map<string, string>): Promise<RecombinedRuleResults> {
+	async runRulesMatchingCriteria(filters: RuleFilter[], targets: string[], runOptions: RunOptions, engineOptions: EngineOptions): Promise<Results> {
 		// Declare a variable that we can later use to store the engine results, as well as something to help us track
 		// which engines actually ran.
-		let results: RuleResult[] = [];
+		let ruleResults: RuleResult[] = [];
 		const executedEngines: Set<string> = new Set();
 
 		// Derives rules from our filters to feed the engines.
@@ -134,30 +139,31 @@ export class DefaultRuleManager implements RuleManager {
 			if (pathsDoubleProcessed.length > numFilesShown) {
 				filesToDisplay.push(`and ${pathsDoubleProcessed.length - numFilesShown} more`)
 			}
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filesToDisplay.join(', ')}`]));
 		}
 
 
 		this.validateRunDescriptors(runDescriptorList);
-		await this.emitRunTelemetry(runDescriptorList, runOptions.sfdxVersion);
+		await this.emitRunTelemetry(runDescriptorList, runOptions.sfVersion);
 		// Warn the user if any positive targets were skipped
 		const unmatchedTargets = targets.filter(t => !t.startsWith('!') && !matchedTargets.has(t));
 
 		if (unmatchedTargets.length > 0) {
 			const warningKey = unmatchedTargets.length === 1 ? 'warning.targetSkipped' : 'warning.targetsSkipped';
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, messages.getMessage(warningKey, [`${unmatchedTargets.join(', ')}`]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, warningKey, [`${unmatchedTargets.join(', ')}`]));
 		}
 
 		// Execute all run promises, each of which returns an array of RuleResults, then concatenate
-		// all of the results together from all engines into one report.
+		// all of the results together from all engines into one set of results.
 		try {
 			// Now that we're inside of a try-catch, we can turn the run descriptors into actual executions.
 			const ps: Promise<RuleResult[]>[] = runDescriptorList.map(({engine, descriptor}) => engine.runEngine(descriptor));
 			const psResults: RuleResult[][] = await Promise.all(ps);
-			psResults.forEach(r => results = results.concat(r));
-			this.logger.trace(`Received rule violations: ${JSON.stringify(results)}`);
-			this.logger.trace(`Recombining results into requested format ${runOptions.format}`);
-			return await RuleResultRecombinator.recombineAndReformatResults(results, runOptions.format, executedEngines, engineOptions.has(CUSTOM_CONFIG.VerboseViolations));
+			psResults.forEach(r => ruleResults = ruleResults.concat(r));
+			this.logger.trace(`Received rule violations: ${JSON.stringify(ruleResults)}`);
+
+			return new RunResults(ruleResults, executedEngines);
+
 		} catch (e) {
 			const message: string = e instanceof Error ? e.message : e as string;
 			throw new SfError(message);
@@ -169,11 +175,11 @@ export class DefaultRuleManager implements RuleManager {
 		const dfaEngines = runDescriptorList.filter(descriptor => descriptor.engine.isDfaEngine()).map(descriptor => descriptor.engine.getName());
 		const pathlessEngines = runDescriptorList.filter(descriptor => !(descriptor.engine.isDfaEngine())).map(descriptor => descriptor.engine.getName());
 		if (dfaEngines.length > 0 && pathlessEngines.length > 0) {
-			throw new SfError(messages.getMessage('error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
+			throw new SfError(getMessage(BundleName.DefaultRuleManager, 'error.cannotRunDfaAndNonDfaConcurrently', [JSON.stringify(dfaEngines), JSON.stringify(pathlessEngines)]));
 		}
 	}
 
-	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfdxVersion: string): Promise<void> {
+	protected async emitRunTelemetry(runDescriptorList: RunDescriptor[], sfVersion: string): Promise<void> {
 		// Get the name of every engine being executed.
 		const executedEngineNames: Set<string> = new Set(runDescriptorList.map(d => d.engine.getName().toLowerCase()));
 		// Build the base telemetry data.
@@ -185,7 +191,7 @@ export class DefaultRuleManager implements RuleManager {
 			// Creating a string of all the executed engines would yield data useful for metrics.
 			// Note: Calling `.sort()` without an argument causes a simple less-than to be used.
 			executedEnginesString: JSON.stringify([...executedEngineNames.values()].sort()),
-			sfdxVersion
+			sfVersion
 		};
 
 		const allEngines: RuleEngine[] = await Controller.getAllEngines();
@@ -199,7 +205,7 @@ export class DefaultRuleManager implements RuleManager {
 		// by default:
 		// - node version
 		// - plugin version
-		// - executed command (e.g., `scanner:run`)
+		// - executed command (e.g., `scanner run`)
 		await TelemetryUtil.emitTelemetry(runTelemetryObject);
 	}
 

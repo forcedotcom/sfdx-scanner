@@ -1,6 +1,6 @@
 ---
-name: Report a scanner:run False Result
-about: Report false results in scanner:run scan reports. If you’re submitting your managed package for AppExchange security review, include documentation of your false results with your submission.
+name: Report a scanner run False Result
+about: Report false results in scanner run scan reports. If you’re submitting your managed package for AppExchange security review, include documentation of your false results with your submission.
 title: "[False Result]"
 labels: ''
 assignees: ''

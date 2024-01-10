@@ -54,8 +54,10 @@ public class PmdCatalogRule {
 
     private final Element element;
 
+    private final String engineName;
 
-	public PmdCatalogRule(Element element, PmdCatalogCategory category, String language) {
+
+	public PmdCatalogRule(Element element, PmdCatalogCategory category, String language, String engineName) {
         this.element = element;
 		this.name = element.getAttribute(ATTR_NAME);
 		this.message = element.getAttribute(ATTR_MESSAGE);
@@ -63,11 +65,8 @@ public class PmdCatalogRule {
 		this.category = category;
 		this.description = getDescription(element);
 		this.sourceJar = category.getSourceJar();
+        this.engineName = engineName;
 	}
-
-    public String getLanguage() {
-        return language;
-    }
 
 	String getFullName() {
 		return getCategoryPath() + "/" + getName();
@@ -153,7 +152,7 @@ public class PmdCatalogRule {
 	 */
 	JSONObject toJson() {
 		Map<String, Object> m = new HashMap<>();
-		m.put(JSON_ENGINE, PMD_ENGINE_NAME);
+		m.put(JSON_ENGINE, this.engineName);
 		m.put(JSON_NAME, this.name);
 		m.put(JSON_MESSAGE, this.message);
 		m.put(JSON_DESCRIPTION, this.description);

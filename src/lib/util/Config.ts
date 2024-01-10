@@ -1,14 +1,14 @@
 import {FileHandler} from './FileHandler';
-import {Logger, LoggerLevel, Messages, SfError} from '@salesforce/core';
+import {Logger, LoggerLevel, SfError} from '@salesforce/core';
+import {isBoolean, isNumber} from '@salesforce/ts-types';
 import {ENGINE, CONFIG_PILOT_FILE, CONFIG_FILE} from '../../Constants';
 import path = require('path');
 import { Controller } from '../../Controller';
 import { uxEvents, EVENTS } from '../ScannerEvents';
-import {deepCopy, booleanTypeGuard, numberTypeGuard, stringArrayTypeGuard} from './Utils';
+import {deepCopy, stringArrayTypeGuard} from './Utils';
 import {VersionUpgradeError, VersionUpgradeManager} from './VersionUpgradeManager';
+import {BundleName, getMessage} from "../../MessageCatalog";
 
-Messages.importMessagesDirectory(__dirname);
-const configMessages = Messages.loadMessages("@salesforce/sfdx-scanner", "Config");
 type GenericTypeGuard<T> = (obj: unknown) => obj is T;
 
 export type ConfigContent = {
@@ -27,6 +27,28 @@ export type EngineConfigContent = {
 	minimumTokens?: number;
 }
 
+/**
+ * An array of file extensions that can theoretically correspond to XML files when scanning a Salesforce Managed Package.
+ * NOTE: {@code .app} and {@code .md} technically belong on this list, but are being omitted since they're popular
+ *       file extensions in their own right and are likely to just cause parse errors.
+ */
+const APPEXCHANGE_XML_EXTENSIONS = [
+	"authprovider", "bot", "brandingSet", "cachePartition", "callCenter", "communityTemplateDefinition",
+	"communityThemeDefinition", "connectedApp", "ConversationVendorInformation", "corsWhitelistOrigin",
+	"cspTrustedSite", "customHelpMenuSection", "customPermission", "dashboard", "dataConnectorIngestApi",
+	"dataPackageKitDefinition", "DataPackageKitObject", "dataSource", "dataSourceBundleDefinition",
+	"dataSourceObject", "dataSrcDataModelFieldMap", "dataStreamDefinition", "dataStreamTemplate",
+	"duplicateRule", "externalDataConnector", "featureParameterBoolean", "featureParameterInteger",
+	"flexipage", "flow", "globalValueSet", "globalValueSetTranslation", "homePageComponent",
+	"homePageLayout", "indx", "labels", "layout", "letter", "lightningBolt", "lightningExperienceTheme",
+	"marketingappextension", "matchingRule", "messageChannel", "mktDataTranObject", "mlDomain",
+	"namedCredential", "navigationMenu", "notiftype", "object", "objectSourceTargetMap", "objectTranslation",
+	"pathAssistant", "permissionset", "permissionsetgroup", "profile", "prompt", "quickAction", "remoteSite",
+	"report", "reportType", "sharingSet", "snapshot", "tab", "translation", "wapp", "wds", "weblink", "workflow",
+	"xmd"
+];
+
+
 const DEFAULT_CONFIG: ConfigContent = {
 	// It's typically bad practice to use `require` instead of `import`, but the former is much more straightforward
 	// in this case.
@@ -41,6 +63,21 @@ const DEFAULT_CONFIG: ConfigContent = {
 			],
 			supportedLanguages: ['apex', 'vf'],
 			disabled: false
+		},
+		{
+			name: ENGINE.PMD_APPEXCHANGE,
+			targetPatterns: [
+				// By default, the App Exchange PMD variant targets all the same patterns as the base PMD engine.
+				"**/*.cls","**/*.trigger","**/*.java","**/*.page","**/*.component","**/*.xml",
+				"!**/node_modules/**",
+				// It also targets JS files, since there are JS-specific rules.
+				"**/*.js",
+				// It also targets all the various extensions that, in a managed package, can represent XML files.
+				...(APPEXCHANGE_XML_EXTENSIONS.map(s => `**/*.${s}`)),
+			],
+			// The App Exchange PMD variant is disabled by default, since it's only relevant to users submitting
+			// for security review.
+			disabled: true
 		},
 		{
 			name: ENGINE.ESLINT,
@@ -163,7 +200,7 @@ export class Config {
 
 			// If an error was thrown during the upgrade, we'll want to modify the error message and rethrow it.
 			if (upgradeErrorMessage) {
-				throw new SfError(configMessages.getMessage('UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
+				throw new SfError(getMessage(BundleName.Config, 'UpgradeFailureTroubleshooting', [upgradeErrorMessage, backupFileName, this.configFilePath]));
 			}
 		}
 	}
@@ -203,11 +240,11 @@ export class Config {
 	}
 
 	protected getBooleanConfigValue(propertyName: string, engine: ENGINE): Promise<boolean> {
-		return this.getConfigValue<boolean>(propertyName, engine, booleanTypeGuard, 'InvalidBooleanValue');
+		return this.getConfigValue<boolean>(propertyName, engine, isBoolean, 'InvalidBooleanValue');
 	}
 
 	protected getNumberConfigValue(propertyName: string, engine: ENGINE): Promise<number> {
-		return this.getConfigValue<number>(propertyName, engine, numberTypeGuard, 'InvalidNumberValue');
+		return this.getConfigValue<number>(propertyName, engine, isNumber, 'InvalidNumberValue');
 	}
 
 	protected getStringArrayConfigValue(propertyName: string, engine: ENGINE): Promise<string[]> {
@@ -231,7 +268,7 @@ export class Config {
 			this.logger.trace(`Config property ${propertyName} for engine ${engine} has value ${String(propertyValue)}`);
 			return propertyValue;
 		} else {
-			throw new SfError(configMessages.getMessage(errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
+			throw new SfError(getMessage(BundleName.Config, errTemplate, [propertyName, this.configFilePath, engine.valueOf(), String(propertyValue)]));
 		}
 	}
 
@@ -296,7 +333,7 @@ export class Config {
 			// the first time. To avoid unexpected behavior changes, we'll copy the pilot
 			// config as the source for the GA config.
 			this.logger.trace(`Creating GA config by copying pilot config`);
-			uxEvents.emit(EVENTS.WARNING_ALWAYS, configMessages.getMessage("GeneratingConfigFromPilot", [
+			uxEvents.emit(EVENTS.WARNING_ALWAYS, getMessage(BundleName.Config, "GeneratingConfigFromPilot", [
 				this.configPilotFilePath
 			]));
 			const configFileContent = await this.fileHandler.readFile(this.configPilotFilePath);

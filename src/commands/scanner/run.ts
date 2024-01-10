@@ -1,144 +1,99 @@
-import {flags} from '@salesforce/command';
-import {Messages, SfError} from '@salesforce/core';
-import {LooseObject} from '../../types';
+import {Flags} from '@salesforce/sf-plugins-core';
 import {PathlessEngineFilters} from '../../Constants';
-import {CUSTOM_CONFIG} from '../../Constants';
-import {ScannerRunCommand, INTERNAL_ERROR_CODE} from '../../lib/ScannerRunCommand';
-import {TYPESCRIPT_ENGINE_OPTIONS} from '../../lib/eslint/TypescriptEslintStrategy';
-import untildify = require('untildify');
-import normalize = require('normalize-path');
+import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
+import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
+import {InputProcessor, InputProcessorImpl} from "../../lib/InputProcessor";
+import {BundleName, getMessage} from "../../MessageCatalog";
+import {Logger} from "@salesforce/core";
+import {Action} from "../../lib/ScannerCommand";
+import {Display} from "../../lib/Display";
+import {RunAction} from "../../lib/actions/RunAction";
+import {RuleFilterFactory, RuleFilterFactoryImpl} from "../../lib/RuleFilterFactory";
+import {ResultsProcessorFactory, ResultsProcessorFactoryImpl} from "../../lib/output/ResultsProcessorFactory";
 
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'run-pathless');
-
+/**
+ * Defines the "run" command for the "scanner" cli.
+ */
 export default class Run extends ScannerRunCommand {
 	// These determine what's displayed when the --help/-h flag is provided.
-	public static description = messages.getMessage('commandDescription');
-	public static longDescription = messages.getMessage('commandDescriptionLong');
-
+	public static summary = getMessage(BundleName.Run, 'commandSummary');
+	public static description = getMessage(BundleName.Run, 'commandDescription');
 	public static examples = [
-		messages.getMessage('examples')
+		getMessage(BundleName.Run, 'examples')
 	];
 
-	// This defines the flags accepted by this command.
-	protected static flagsConfig = {
+	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
+	// and summary and description is what's printed when the -h/--help flag is supplied.
+	public static readonly flags= {
 		// Include all common flags from the super class.
-		...ScannerRunCommand.flagsConfig,
+		...ScannerRunCommand.flags,
 		// BEGIN: Filter-related flags.
-		ruleset: flags.array({
+		ruleset: Flags.custom<string[]>({
 			char: 'r',
 			deprecated: {
-				messageOverride: messages.getMessage('rulesetDeprecation')
+				message: getMessage(BundleName.Run, 'rulesetDeprecation')
 			},
-			description: messages.getMessage('flags.rulesetDescription'),
-			longDescription: messages.getMessage('flags.rulesetDescriptionLong')
-		}),
-		engine: flags.array({
+			summary: getMessage(BundleName.Run, 'flags.rulesetSummary'),
+			description: getMessage(BundleName.Run, 'flags.rulesetDescription'),
+			delimiter: ',',
+			multiple: true
+		})(),
+		engine: Flags.custom<string[]>({
 			char: 'e',
-			description: messages.getMessage('flags.engineDescription'),
-			longDescription: messages.getMessage('flags.engineDescriptionLong'),
-			options: [...PathlessEngineFilters]
-		}),
+			summary: getMessage(BundleName.Run, 'flags.engineSummary'),
+			description: getMessage(BundleName.Run, 'flags.engineDescription'),
+			options: [...PathlessEngineFilters],
+			delimiter: ',',
+			multiple: true
+		})(),
 		// END: Filter-related flags.
 		// BEGIN: Targeting-related flags.
-		target: flags.array({
+		target: Flags.custom<string[]>({
 			char: 't',
-			description: messages.getMessage('flags.targetDescription'),
-			longDescription: messages.getMessage('flags.targetDescriptionLong'),
+			summary: getMessage(BundleName.Run, 'flags.targetSummary'),
+			description: getMessage(BundleName.Run, 'flags.targetDescription'),
+			delimiter: ',',
+			multiple: true,
 			required: true
-		}),
+		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
-		tsconfig: flags.string({
-			description: messages.getMessage('flags.tsconfigDescription'),
-			longDescription: messages.getMessage('flags.tsconfigDescriptionLong')
+		tsconfig: Flags.string({
+			summary: getMessage(BundleName.Run, 'flags.tsconfigSummary'),
+			description: getMessage(BundleName.Run, 'flags.tsconfigDescription')
 		}),
-		eslintconfig: flags.string({
-			description: messages.getMessage('flags.eslintConfigDescription'),
-			longDescription: messages.getMessage('flags.eslintConfigDescriptionLong')
+		eslintconfig: Flags.string({
+			summary: getMessage(BundleName.Run, 'flags.eslintConfigSummary'),
+			description: getMessage(BundleName.Run, 'flags.eslintConfigDescription')
 		}),
-		pmdconfig: flags.string({
-			description: messages.getMessage('flags.pmdConfigDescription'),
-			longDescription: messages.getMessage('flags.pmdConfigDescriptionLong')
+		pmdconfig: Flags.string({
+			summary: getMessage(BundleName.Run, 'flags.pmdConfigSummary'),
+			description: getMessage(BundleName.Run, 'flags.pmdConfigDescription')
 		}),
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
-		env: flags.string({
-			description: messages.getMessage('flags.envDescription'),
-			longDescription: messages.getMessage('flags.envDescriptionLong'),
+		env: Flags.string({
+			summary: getMessage(BundleName.Run, 'flags.envSummary'),
+			description: getMessage(BundleName.Run, 'flags.envDescription'),
 			deprecated: {
-				messageOverride: messages.getMessage('flags.envParamDeprecationWarning')
+				message: getMessage(BundleName.Run, 'flags.envParamDeprecationWarning')
 			}
 		}),
 		// END: Engine config flags.
 		// BEGIN: Flags related to results processing.
-		"verbose-violations": flags.boolean({
-			description: messages.getMessage('flags.verboseViolationsDescription'),
-			longDescription: messages.getMessage('flags.verboseViolationsDescriptionLong')
+		"verbose-violations": Flags.boolean({
+			summary: getMessage(BundleName.Run, 'flags.verboseViolationsSummary'),
+			description: getMessage(BundleName.Run, 'flags.verboseViolationsDescription')
 		})
 		// END: Flags related to results processing.
 	};
 
-	protected validateVariantFlags(): Promise<void> {
-		if (this.flags.tsconfig && this.flags.eslintconfig) {
-			throw new SfError(messages.getMessage('validations.tsConfigEslintConfigExclusive'));
-		}
-
-		if ((this.flags.pmdconfig || this.flags.eslintconfig) && (this.flags.category || this.flags.ruleset)) {
-			this.ux.log(messages.getMessage('output.filtersIgnoredCustom', []));
-		}
-		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
-		for (const target of (this.flags.target as string[])) {
-			if (target.indexOf('#') > -1) {
-				throw new SfError(messages.getMessage('validations.methodLevelTargetingDisallowed', [target]));
-			}
-		}
-		return Promise.resolve();
-	}
-
-	/**
-	 * Gather engine options that are unique to each sub-variant.
-	 */
-	protected mergeVariantEngineOptions(options: Map<string,string>): void {
-		if (this.flags.tsconfig) {
-			const tsconfig = normalize(untildify(this.flags.tsconfig as string));
-			options.set(TYPESCRIPT_ENGINE_OPTIONS.TSCONFIG, tsconfig);
-		}
-
-		// TODO: This fix for W-7791882 is suboptimal, because it leaks our abstractions and pollutes the command with
-		//  engine-specific flags. Replace it in 3.0.
-		if (this.flags.env) {
-			try {
-				const parsedEnv: LooseObject = JSON.parse(this.flags.env as string) as LooseObject;
-				options.set('env', JSON.stringify(parsedEnv));
-			} catch (e) {
-				throw new SfError(messages.getMessage('output.invalidEnvJson'), null, null, INTERNAL_ERROR_CODE);
-			}
-		}
-
-		// Capturing eslintconfig value, if provided
-		if (this.flags.eslintconfig) {
-			const eslintConfig = normalize(untildify(this.flags.eslintconfig as string));
-			options.set(CUSTOM_CONFIG.EslintConfig, eslintConfig);
-		}
-
-		// Capturing pmdconfig value, if provided
-		if (this.flags.pmdconfig) {
-			const pmdConfig = normalize(untildify(this.flags.pmdconfig as string));
-			options.set(CUSTOM_CONFIG.PmdConfig, pmdConfig);
-		}
-
-		// Capturing verbose-violations flag value (used for RetireJS output)
-		if (this.flags["verbose-violations"]) {
-			options.set(CUSTOM_CONFIG.VerboseViolations, "true");
-		}
-	}
-
-	protected pathBasedEngines(): boolean {
-		return false;
+	protected createAction(logger: Logger, display: Display): Action {
+		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
+		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
+		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputProcessor);
+		const resultsProcessorFactory: ResultsProcessorFactory = new ResultsProcessorFactoryImpl();
+		return new RunAction(logger, display, inputProcessor, ruleFilterFactory, engineOptionsFactory,
+			resultsProcessorFactory);
 	}
 }

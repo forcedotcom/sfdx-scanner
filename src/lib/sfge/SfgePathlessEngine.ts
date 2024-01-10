@@ -1,15 +1,9 @@
-import {Messages, SfError} from '@salesforce/core';
+import {SfError} from '@salesforce/core';
 import {AbstractSfgeEngine, SfgeViolation} from "./AbstractSfgeEngine";
 import {Rule, RuleGroup, RuleTarget, RuleViolation, SfgeConfig} from '../../types';
 import {CUSTOM_CONFIG, RuleType} from '../../Constants';
 import * as EngineUtils from "../util/CommonEngineUtils";
-
-// Initialize Messages with the current plugin directory
-Messages.importMessagesDirectory(__dirname);
-
-// Load the specific messages for this file. Messages from @salesforce/command, @salesforce/core,
-// or any library that is using the messages framework can also be loaded this way.
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'SfgeEngine');
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 export class SfgePathlessEngine extends AbstractSfgeEngine {
 	/**
@@ -37,7 +31,7 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 	public shouldEngineRun(ruleGroups: RuleGroup[], rules: Rule[], target: RuleTarget[], engineOptions: Map<string,string>): boolean {
 		// For the non-DFA Graph Engine variant, we need to make sure that we have the
 		// necessary info to run the engine, since the relevant flags aren't required
-		// for `scanner:run`.
+		// for `scanner run`.
 		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
 			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
 			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {
@@ -47,7 +41,7 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 		}
 		// If we're here, it's because we're missing the necessary info to run this engine.
 		// We should throw an error indicating this.
-		throw new SfError(messages.getMessage('errors.failedWithoutProjectDir'));
+		throw new SfError(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir'));
 	}
 
 	protected getSubVariantName(): string {

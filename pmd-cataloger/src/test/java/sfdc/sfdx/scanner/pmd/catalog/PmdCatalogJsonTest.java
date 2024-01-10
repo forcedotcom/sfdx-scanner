@@ -1,75 +1,76 @@
 package sfdc.sfdx.scanner.pmd.catalog;
 
-import org.json.simple.JSONObject;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import org.json.simple.JSONObject;
+import org.junit.jupiter.api.Test;
 
 public class PmdCatalogJsonTest {
-	private static final String RULE_NAME = "rule name";
-	private static final String RULE_PATH = "rule path";
-	private static final String CATEGORY_NAME = "category name";
-	private static final String CATEGORY_PATH = "category path";
+    private static final String RULE_NAME = "rule name";
+    private static final String RULE_PATH = "rule path";
+    private static final String CATEGORY_NAME = "category name";
+    private static final String CATEGORY_PATH = "category path";
+    private static final String MOCKED_ENGINE_NAME = "MockedEngineName";
 
-	@Test
-	public void testConstructJson() {
+    @Test
+    public void testConstructJson() {
 
-		final List<PmdCatalogRule> rules = new ArrayList<>();
-		final List<PmdCatalogCategory> categories = new ArrayList<>();
-		final List<PmdCatalogRuleset> rulesets = new ArrayList<>();
-		rules.add(getPmdCatalogRuleMock());
-		categories.add(getPmdCatalogCategoryMock(CATEGORY_NAME, CATEGORY_PATH));
-		rulesets.add(getPmdCatalogRulesetMock(RULE_NAME, RULE_PATH));
+        final List<PmdCatalogRule> rules = new ArrayList<>();
+        final List<PmdCatalogCategory> categories = new ArrayList<>();
+        final List<PmdCatalogRuleset> rulesets = new ArrayList<>();
+        rules.add(getPmdCatalogRuleMock());
+        categories.add(getPmdCatalogCategoryMock(CATEGORY_NAME, CATEGORY_PATH));
+        rulesets.add(getPmdCatalogRulesetMock(RULE_NAME, RULE_PATH));
 
-		final PmdCatalogJson catalogJson = new PmdCatalogJson(rules, categories, rulesets);
+        final PmdCatalogJson catalogJson = new PmdCatalogJson(rules, categories, rulesets, MOCKED_ENGINE_NAME);
 
-		// Execute
-		final JSONObject jsonObject = catalogJson.constructJson();
+        // Execute
+        final JSONObject jsonObject = catalogJson.constructJson();
 
-		// Verify
-		//[{"paths":["rule path"],"name":"rule name"}]
-		final String expectedRulesetJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
-			PmdCatalogJson.PMD_ENGINE_NAME, RULE_PATH, RULE_NAME);
-		assertEquals(expectedRulesetJson, jsonObject.get(PmdCatalogJson.JSON_RULESETS).toString());
+        // Verify
+        //[{"paths":["rule path"],"name":"rule name"}]
+        final String expectedRulesetJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
+            MOCKED_ENGINE_NAME, RULE_PATH, RULE_NAME);
+        assertEquals(expectedRulesetJson, jsonObject.get(PmdCatalogJson.JSON_RULESETS).toString());
 
-		final String expectedCategoryJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
-			PmdCatalogJson.PMD_ENGINE_NAME, CATEGORY_PATH, CATEGORY_NAME);
-		assertEquals(expectedCategoryJson, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString());
+        final String expectedCategoryJson = String.format("[{\"engine\":\"%s\",\"paths\":[\"%s\"],\"name\":\"%s\"}]",
+            MOCKED_ENGINE_NAME, CATEGORY_PATH, CATEGORY_NAME);
+        assertEquals(expectedCategoryJson, jsonObject.get(PmdCatalogJson.JSON_CATEGORIES).toString());
 
-		// Rules json has its own test where we verify the Json contents. Here, we only confirm that it exists
-		assertTrue("JSON should contain 'rules' element", jsonObject.containsKey(PmdCatalogJson.JSON_RULES));
-	}
+        // Rules json has its own test where we verify the Json contents. Here, we only confirm that it exists
+        assertTrue(jsonObject.containsKey(PmdCatalogJson.JSON_RULES), "JSON should contain 'rules' element");
+    }
 
-	private PmdCatalogRule getPmdCatalogRuleMock() {
-		final PmdCatalogRule catalogRule = mock(PmdCatalogRule.class);
-		final JSONObject jsonObject = mock(JSONObject.class);
+    private PmdCatalogRule getPmdCatalogRuleMock() {
+        final PmdCatalogRule catalogRule = mock(PmdCatalogRule.class);
+        final JSONObject jsonObject = mock(JSONObject.class);
 
-		doReturn(jsonObject).when(catalogRule).toJson();
+        doReturn(jsonObject).when(catalogRule).toJson();
 
-		return catalogRule;
-	}
+        return catalogRule;
+    }
 
-	private PmdCatalogCategory getPmdCatalogCategoryMock(String name, String path) {
-		final PmdCatalogCategory category = mock(PmdCatalogCategory.class);
+    private PmdCatalogCategory getPmdCatalogCategoryMock(String name, String path) {
+        final PmdCatalogCategory category = mock(PmdCatalogCategory.class);
 
-		doReturn(name).when(category).getName();
-		doReturn(path).when(category).getPath();
+        doReturn(name).when(category).getName();
+        doReturn(path).when(category).getPath();
 
-		return category;
-	}
+        return category;
+    }
 
-	private PmdCatalogRuleset getPmdCatalogRulesetMock(String name, String path) {
-		final PmdCatalogRuleset ruleset = mock(PmdCatalogRuleset.class);
+    private PmdCatalogRuleset getPmdCatalogRulesetMock(String name, String path) {
+        final PmdCatalogRuleset ruleset = mock(PmdCatalogRuleset.class);
 
-		doReturn(name).when(ruleset).getName();
-		doReturn(path).when(ruleset).getPath();
+        doReturn(name).when(ruleset).getName();
+        doReturn(path).when(ruleset).getPath();
 
-		return ruleset;
-	}
+        return ruleset;
+    }
 }

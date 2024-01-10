@@ -61,10 +61,7 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     private static final Logger LOGGER = LogManager.getLogger(ApexValueBuilder.class);
 
     // This is the default since it is the most common.
-    // TODO: Consider setting to null and require all callers to decide on the correct status.
     private static final ValueStatus DEFAULT_STATUS = ValueStatus.INITIALIZED;
-    private static final String USE_NO_ARGS_VERSION = "Use no-args version";
-    private static final String USE_SINGLE_ARGS_VERSION = "Use single-args version";
 
     private final SymbolProvider symbolProvider;
     private ValueStatus status;
@@ -182,9 +179,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
      * #withStatus(ValueStatus)} if you need an indeterminant value.
      */
     public ApexBooleanValue buildBoolean(Boolean value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexBooleanValue(value, this));
     }
@@ -212,16 +206,10 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexEnumValue buildEnum(ApexEnum apexEnum, String value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_SINGLE_ARGS_VERSION);
-        }
         return buildEnum(apexEnum, apexEnum.getValue(value));
     }
 
     public ApexEnumValue buildEnum(ApexEnum apexEnum, ApexEnum.Value value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_SINGLE_ARGS_VERSION);
-        }
         return registerResult(new ApexEnumValue(apexEnum, value, this));
     }
 
@@ -329,9 +317,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexDecimalValue buildDecimal(BigDecimal value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexDecimalValue(value, this));
     }
@@ -346,9 +331,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexDoubleValue buildDouble(Double value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexDoubleValue(value, this));
     }
@@ -363,9 +345,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexIntegerValue buildInteger(Integer value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexIntegerValue(value, this));
     }
@@ -380,9 +359,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexLongValue buildLong(Long value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexLongValue(value, this));
     }
@@ -435,9 +411,6 @@ public class ApexValueBuilder implements DeepCloneable<ApexValueBuilder> {
     }
 
     public ApexStringValue buildString(String value) {
-        if (value == null) {
-            throw new UnexpectedException(USE_NO_ARGS_VERSION);
-        }
         this.status = ValueStatus.INITIALIZED;
         return registerResult(new ApexStringValue(value, this));
     }

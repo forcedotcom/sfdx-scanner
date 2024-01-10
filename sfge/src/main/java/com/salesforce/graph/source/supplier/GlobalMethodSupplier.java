@@ -22,8 +22,7 @@ public class GlobalMethodSupplier extends AbstractSourceSupplier {
                         .filter(
                                 __.and(
                                         // If a method has at least one block statement, then it
-                                        // is
-                                        // definitely actually declared, as
+                                        // is not definitely undeclared, as
                                         // opposed to being an implicit method.
                                         out(Schema.CHILD)
                                                 .hasLabel(ASTConstants.NodeType.BLOCK_STATEMENT)
@@ -42,6 +41,6 @@ public class GlobalMethodSupplier extends AbstractSourceSupplier {
 
     @Override
     public boolean isPotentialSource(MethodVertex methodVertex) {
-        return methodVertex.getModifierNode().isGlobal();
+        return methodVertex.getModifierNode().isGlobal() && !methodVertex.isImplicit();
     }
 }

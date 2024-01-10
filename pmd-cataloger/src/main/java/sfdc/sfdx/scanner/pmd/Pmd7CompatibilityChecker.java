@@ -12,8 +12,11 @@ import java.util.*;
  * rules that are incompatible with PMD 7, so they can avoid getting sandbagged.
  */
 public class Pmd7CompatibilityChecker {
-    private static final String BAD_PROP_TEMPLATE = "%s tag requires property '%s' to be %s";
-    private static final String EXPECTED_XPATH_CLASS = "net.sourceforge.pmd.lang.rule.XPathRule";
+    private static final String BAD_PROP_SINGLE_OPTION_TEMPLATE = "%s tag requires property '%s' to be %s";
+    private static final String BAD_PROP_MUTLI_OPTION_TEMPLATE = "%s tag requires property '%s' to be one of the following: %s";
+    private static final List<String> EXPECTED_XPATH_CLASSES = Arrays.asList(
+        "net.sourceforge.pmd.lang.rule.XPathRule", "net.sourceforge.pmd.lang.xml.rule.DomXPathRule"
+        );
     private static final String RULE_TAG = "<rule>";
     private static final String NON_NULL = "non-null";
 
@@ -36,10 +39,11 @@ public class Pmd7CompatibilityChecker {
             // Check for missing/wrong properties.
             Set<String> propWarningSet = new HashSet<>();
             if (ruleLacksLanguageProp(rule)) {
-                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_LANGUAGE, NON_NULL));
+                propWarningSet.add(String.format(BAD_PROP_SINGLE_OPTION_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_LANGUAGE, NON_NULL));
             }
             if (ruleIsBadXpath(rule)) {
-                propWarningSet.add(String.format(BAD_PROP_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_CLASS, "'" + EXPECTED_XPATH_CLASS + "'"));
+                propWarningSet.add(String.format(BAD_PROP_MUTLI_OPTION_TEMPLATE, RULE_TAG, PmdCatalogRule.ATTR_CLASS,
+                    String.join(",", EXPECTED_XPATH_CLASSES)));
             }
             // If any properties are bad, throw a warning about it and increment our total.
             if (!propWarningSet.isEmpty()) {
@@ -72,7 +76,7 @@ public class Pmd7CompatibilityChecker {
             return false;
         }
         String classProp = rule.getElement().getAttribute(PmdCatalogRule.ATTR_CLASS);
-        return !classProp.equalsIgnoreCase(EXPECTED_XPATH_CLASS);
+        return !EXPECTED_XPATH_CLASSES.contains(classProp);
     }
 
     private boolean ruleLacksLanguageProp(PmdCatalogRule rule) {

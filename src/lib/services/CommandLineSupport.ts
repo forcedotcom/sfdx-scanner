@@ -24,6 +24,20 @@ export class CommandLineResultHandler {
 	}
 }
 
+/**
+ * Parent class for wrappers around CLI child processes.
+ *
+ * This class handles spawning and monitoring a child process, processing its real-time output, and invoking
+ * a handler on its final output.
+ *
+ * Subclasses must handle;
+ * - Creating an array of arguments to be used for spawning the process
+ * - Indicating whether a given status code is a successful or failed run
+ *
+ * TODO: The extension of {@link AsyncCreatable} imposes undesirable constraints on subclasses. If possible,
+ *       we should seek to migrate away from {@link AsyncCreatable}, and either towards a fully synchronous
+ *       model or towards a more flexible alternative (possibly one we write ourselves).
+ */
 export abstract class CommandLineSupport extends AsyncCreatable {
 
 	private parentLogger: Logger;
@@ -40,8 +54,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 		this.outputProcessor = await OutputProcessor.create({});
 		this.parentInitialized = true;
 	}
-
-	protected abstract buildClasspath(): Promise<string[]>;
 
 	/**
 	 * Returns a {@link SpinnerManager} implementation to be used while waiting for the child process to complete. This
@@ -85,7 +97,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 						// hold onto data only if it was not processed
 						stdout += data;
 					}
-					
 				})();
 			});
 			cp.stderr.on('data', data => {
@@ -95,7 +106,6 @@ export abstract class CommandLineSupport extends AsyncCreatable {
 						// hold onto data only if it was not processed
 						stderr += data;
 					}
-					
 				})();
 			});
 

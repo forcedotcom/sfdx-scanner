@@ -1,17 +1,16 @@
-import {Logger, LoggerLevel, Messages} from '@salesforce/core';
+import {Logger, LoggerLevel} from '@salesforce/core';
 import {AsyncCreatable} from '@salesforce/kit';
 import {RuleEvent, TelemetryData} from '../../types';
 import {EVENTS, uxEvents} from '../ScannerEvents';
 import {v5 as uuidv5} from 'uuid';
 import * as TelemetryUtil from '../util/TelemetryUtil';
+import {BundleName, getMessage} from "../../MessageCatalog";
 
 
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'EventKeyTemplates');
 const genericMessageKey = 'error.external.genericErrorMessage';
 
-const MESSAGE_START_TAG = 'SFDX-START';
-const MESSAGE_END_TAG = 'SFDX-END';
+const MESSAGE_START_TAG = 'SF-START';
+const MESSAGE_END_TAG = 'SF-END';
 const REALTIME_MESSAGE_START_TAG = 'SFCA-REALTIME-START';
 const REALTIME_MESSAGE_END_TAG = 'SFCA-REALTIME-END';
 
@@ -61,7 +60,7 @@ export class OutputProcessor extends AsyncCreatable {
 	}
 
 	// We want to find any events that were dumped into stdout or stderr and turn them back into events that can be thrown.
-	// As per the convention outlined in SfdxMessager.java, SFDX-relevant messages will be stored in the outputs as JSONs
+	// As per the convention outlined in SfdxMessager.java, CLI-relevant messages will be stored in the outputs as JSONs
 	// sandwiched between a given start tag and end tag. So we'll find all instances of that.
 	private async processAllOutput(out: string, startTag: string, endTag: string): Promise<boolean> {
 		this.logger.trace(`stdout: ${out}`);
@@ -114,7 +113,7 @@ export class OutputProcessor extends AsyncCreatable {
 		// by default:
 		// - node version
 		// - plugin version
-		// - executed command (e.g., `scanner:run`)
+		// - executed command (e.g., `scanner run`)
 		await TelemetryUtil.emitTelemetry(telemetryObject);
 	}
 
@@ -130,11 +129,11 @@ export class OutputProcessor extends AsyncCreatable {
 		let constructedMessage: string = null;
 		try {
 			// Do this in a try-block so we can fail safely.
-			constructedMessage = messages.getMessage(messageKey, args);
+			constructedMessage = getMessage(BundleName.EventKeyTemplates, messageKey, args);
 		} catch (e) {
 			// If we were somehow unable to generate a message, fall back on the generic one, since we know that's valid.
 			this.logger.trace(`Could not generate message for event key ${messageKey}. Defaulting to generic error message.`);
-			constructedMessage = messages.getMessage(genericMessageKey, []);
+			constructedMessage = getMessage(BundleName.EventKeyTemplates, genericMessageKey, []);
 		}
 		uxEvents.emit(eventType, constructedMessage);
 	}

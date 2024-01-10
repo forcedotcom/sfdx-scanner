@@ -1,24 +1,16 @@
-import { EnvOverridable } from "../../src/Constants";
+import { ENV_VAR_NAMES} from "../../src/Constants";
 import os = require('os');
 import path = require('path');
-import { Services } from "../../src/Constants";
 import { Controller } from "../../src/Controller";
 import { registerAll } from "../../src/ioc.config";
 
-export class TestOverrides implements EnvOverridable {
-	public getSfdxScannerPath(): string {
-		return path.join(os.homedir(), '.sfdx-scanner-test');
-	}
-}
+export const TEST_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner-test');
 
 const container = Controller.container;
 
-function setupTestAlternatives(): void {
-	container.register(Services.EnvOverridable, TestOverrides);
-}
-
 export function initializeTestSetup(): void {
+	// Pretty much every test expects to use the Test config folder instead of the real one.
+	process.env[ENV_VAR_NAMES.SCANNER_PATH_OVERRIDE] = TEST_SCANNER_PATH;
 	container.reset();
-	setupTestAlternatives();
 	registerAll();
 }

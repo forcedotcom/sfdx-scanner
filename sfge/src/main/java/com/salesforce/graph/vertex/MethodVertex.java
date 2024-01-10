@@ -58,6 +58,10 @@ public abstract class MethodVertex extends FieldWithModifierVertex implements Na
         return getBoolean(Schema.CONSTRUCTOR);
     }
 
+    public boolean isImplicit() {
+        return getBoolean(Schema.IS_IMPLICIT);
+    }
+
     public int getArity() {
         return getInteger(Schema.ARITY);
     }

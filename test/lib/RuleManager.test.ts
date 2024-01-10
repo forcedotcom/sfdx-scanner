@@ -3,12 +3,12 @@ import {expect} from 'chai';
 import {Lifecycle} from '@salesforce/core';
 
 import {Controller} from '../../src/Controller';
-import {Rule, RuleGroup, RuleTarget, TelemetryData} from '../../src/types';
+import {Rule, RuleGroup, RuleResult, RuleTarget, TelemetryData} from '../../src/types';
 import {ENGINE, CONFIG_FILE, TargetType} from '../../src/Constants';
 
 import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../src/lib/RuleFilter';
 import {DefaultRuleManager} from '../../src/lib/DefaultRuleManager';
-import {OUTPUT_FORMAT, RuleManager, RunOptions} from '../../src/lib/RuleManager';
+import {RuleManager, RunOptions} from '../../src/lib/RuleManager';
 import {EVENTS, uxEvents} from '../../src/lib/ScannerEvents';
 
 import {RuleCatalog} from '../../src/lib/services/RuleCatalog';
@@ -21,10 +21,9 @@ import * as TestOverrides from '../test-related-lib/TestOverrides';
 import * as TestUtils from '../TestUtils';
 import path = require('path');
 import Sinon = require('sinon');
-
-import {Messages} from '@salesforce/core';
-Messages.importMessagesDirectory(__dirname);
-const messages = Messages.loadMessages('@salesforce/sfdx-scanner', 'DefaultRuleManager');
+import {BundleName, getMessage} from "../../src/MessageCatalog";
+import {Results} from "../../src/lib/output/Results";
+import {OutputFormat} from "../../src/lib/output/OutputFormat";
 
 TestOverrides.initializeTestSetup();
 
@@ -190,25 +189,18 @@ describe('RuleManager', () => {
 				process.chdir("../../..");
 			});
 			const runOptions: RunOptions = {
-				format: OUTPUT_FORMAT.JSON,
 				normalizeSeverity: false,
 				runDfa: false,
 				withPilot: false,
-				sfdxVersion: 'test'
+				sfVersion: 'test'
 			};
 			describe('Test Case: Run without filters', () => {
 				it('JS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['js'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
+					const results: Results = await ruleManager.runRulesMatchingCriteria([], ['js'], runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(parsedRes, '' + results).to.be.an("array").that.has.length(1);
-					for (const res of parsedRes) {
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(1);
+					for (const res of results.getRuleResults()) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -216,16 +208,10 @@ describe('RuleManager', () => {
 
 				it('TS project files', async () => {
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['ts'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
+					const results: Results = await ruleManager.runRulesMatchingCriteria([], ['ts'], runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(parsedRes).to.be.an("array").that.has.length(1);
-					for (const res of parsedRes) {
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(1);
+					for (const res of results.getRuleResults()) {
 						expect(res.violations[0], `Message is ${res.violations[0].message}`).to.have.property("ruleName").that.is.not.null;
 					}
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -234,15 +220,10 @@ describe('RuleManager', () => {
 				it('App project files', async () => {
 
 					// If we pass an empty list into the method, that's treated as the absence of filter criteria.
-					const {results} = await ruleManager.runRulesMatchingCriteria([], ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
-					expect(parsedRes).to.be.an("array").that.has.length(8);
-					for (const res of parsedRes) {
+					const results: Results = await ruleManager.runRulesMatchingCriteria([], ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
+
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(8);
+					for (const res of results.getRuleResults()) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 					}
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -254,14 +235,9 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, validTargets, runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
-					expect(parsedRes).to.be.an("array").that.has.length(1);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, validTargets, runOptions, EMPTY_ENGINE_OPTIONS);
+
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 0);
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
@@ -271,10 +247,10 @@ describe('RuleManager', () => {
 					// No filters
 					const filters = [];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('[]');
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetSkipped', [invalidTarget.join(', ')]));
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(0);
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetSkipped', [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -285,7 +261,7 @@ describe('RuleManager', () => {
 					await ruleManager.runRulesMatchingCriteria(filters, targets, runOptions, EMPTY_ENGINE_OPTIONS);
 
 					const filename = path.join(__dirname, '..','code-fixtures', 'invalid-lwc', 'invalidApiDecorator', 'noLeadingUpperCase.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
+					const warningMessage = getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${filename}`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -300,7 +276,7 @@ describe('RuleManager', () => {
 					const baseConfigEnv = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'baseConfigEnv.js')
 					const fileThatUsesQUnit = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'fileThatUsesQUnit.js')
 					const simpleYetWrong = path.join(__dirname, '..','code-fixtures', 'projects', 'js', 'src', 'simpleYetWrong.js')
-					const warningMessage = messages.getMessage('warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
+					const warningMessage = getMessage(BundleName.DefaultRuleManager, 'warning.pathsDoubleProcessed', [`${Controller.getSfdxScannerPath()}/${CONFIG_FILE}`, `${baseConfigEnv}, ${fileThatUsesQUnit}, ${simpleYetWrong}, and 1 more`])
 
 					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, warningMessage);
 					Sinon.assert.callCount(telemetrySpy, 1);
@@ -315,16 +291,10 @@ describe('RuleManager', () => {
 					const filters = [
 						new CategoryFilter([category])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(parsedRes, JSON.stringify(parsedRes)).to.be.an("array").that.has.length(3);
-					for (const res of parsedRes) {
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(3);
+					for (const res of results.getRuleResults()) {
 						for (const violation of res.violations) {
 							expect(violation, `Message is ${violation['message']}`).to.have.property("ruleName").that.is.not.null;
 							expect(violation.category).to.equal(category);
@@ -338,16 +308,10 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
+					const results: Results  = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(parsedRes).to.be.an("array").that.has.length(6);
-					for (const res of parsedRes) {
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(6);
+					for (const res of results.getRuleResults()) {
 						expect(res.violations[0], `Message is ${res.violations[0]['message']}`).to.have.property("ruleName").that.is.not.null;
 						expect(res.violations[0].category).to.be.oneOf(categories);
 					}
@@ -360,17 +324,13 @@ describe('RuleManager', () => {
 					const engines = [ENGINE.RETIRE_JS, ENGINE.ESLINT];
 					const filters = [new EngineFilter(engines)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== 'string') {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
+
 					// This result indicates that not all executed engines found violations, which is what we expected. That's fine.
-					expect(parsedRes).to.be.an('array').that.has.length(1, 'Wrong number of engines returned violations');
-					expect(parsedRes[0].engine).to.equal(ENGINE.ESLINT.valueOf(), 'Wrong engine returned results');
-					expect(parsedRes[0].violations.length).to.equal(1, 'Wrong number of violations found');
+					let ruleResults: RuleResult[] = results.getRuleResults();
+					expect(ruleResults).to.be.an('array').that.has.length(1, 'Wrong number of engines returned violations');
+					expect(ruleResults[0].engine).to.equal(ENGINE.ESLINT.valueOf(), 'Wrong engine returned results');
+					expect(ruleResults[0].violations.length).to.equal(1, 'Wrong number of violations found');
 					Sinon.assert.callCount(telemetrySpy, 1);
 					const telemetryArg: TelemetryData = telemetrySpy.args[0][0];
 					expect(telemetryArg.eventName).to.equal('ENGINE_EXECUTION');
@@ -393,9 +353,13 @@ describe('RuleManager', () => {
 					// Define our preposterous filter array.
 					const filters = [new CategoryFilter(['beebleborp'])];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
-					expect(typeof results).to.equal('string', `Output ${results} should have been a string`);
-					expect(results).to.equal('[]', `Output ${results} should have been an empty summary (empty array)`);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, ['app'], runOptions, EMPTY_ENGINE_OPTIONS);
+
+					// TODO: This verification step seems to be testing formatting. It should be not be in this file.
+					const formattedOutput = await results.toFormattedOutput(OutputFormat.JSON, false);
+					expect(typeof formattedOutput).to.equal('string', `Output ${results} should have been a string`);
+					expect(formattedOutput).to.equal('[]', `Output ${results} should have been an empty summary (empty array)`);
+
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -405,11 +369,11 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('[]');
+					expect(results.isEmpty()).to.equal(true);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -420,11 +384,11 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
+					const results: Results= await ruleManager.runRulesMatchingCriteria(filters, invalidTarget, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('[]');
+					expect(results.isEmpty()).to.equal(true);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetSkipped", [invalidTarget.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetSkipped", [invalidTarget.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -434,11 +398,11 @@ describe('RuleManager', () => {
 					const categories = ['Best Practices', 'Error Prone'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, invalidTargets, runOptions, EMPTY_ENGINE_OPTIONS);
 
-					expect(results).to.equal('[]');
+					expect(results.isEmpty()).to.equal(true);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage("warning.targetsSkipped", [invalidTargets.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, "warning.targetsSkipped", [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 
@@ -449,16 +413,11 @@ describe('RuleManager', () => {
 					const categories = ['Possible Errors'];
 					const filters = [new CategoryFilter(categories)];
 
-					const {results} = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], runOptions, EMPTY_ENGINE_OPTIONS);
-					let parsedRes = null;
-					if (typeof results !== "string") {
-						expect(false, `Invalid output: ${results}`);
-					} else {
-						parsedRes = JSON.parse(results);
-					}
-					expect(parsedRes).to.be.an("array").that.has.length(1);
+					const results: Results = await ruleManager.runRulesMatchingCriteria(filters, [...invalidTargets, ...validTargets], runOptions, EMPTY_ENGINE_OPTIONS);
+
+					expect(results.getRuleResults()).to.be.an("array").that.has.length(1);
 					Sinon.assert.callCount(uxSpy, 1);
-					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, messages.getMessage('warning.targetsSkipped', [invalidTargets.join(', ')]));
+					Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, getMessage(BundleName.DefaultRuleManager, 'warning.targetsSkipped', [invalidTargets.join(', ')]));
 					Sinon.assert.callCount(telemetrySpy, 1);
 				});
 			});
