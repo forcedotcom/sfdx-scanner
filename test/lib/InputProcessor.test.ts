@@ -4,6 +4,7 @@ import * as path from "path";
 import {Inputs} from "../../src/types";
 import {BundleName, getMessage} from "../../src/MessageCatalog";
 import untildify = require("untildify");
+import normalize = require("normalize-path");
 import {FakeDisplay} from "./FakeDisplay";
 
 describe("InputProcessorImpl Tests", async () => {
@@ -25,7 +26,7 @@ describe("InputProcessorImpl Tests", async () => {
 			expect(resolvedTargetPaths).to.have.length(3);
 			expect(resolvedTargetPaths).to.contain('test/**/*.page');
 			expect(resolvedTargetPaths).to.contain('!test/code-fixtures/cpd');
-			expect(resolvedTargetPaths).to.contain(untildify('~/*.class'))
+			expect(resolvedTargetPaths).to.contain(normalize(untildify('~/*.class')))
 		})
 
 		it("Specified target with method specifier", async () => {
@@ -67,7 +68,7 @@ describe("InputProcessorImpl Tests", async () => {
 				projectdir: '~/someFolder'
 			};
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(untildify('~/someFolder'))
+			expect(resolvedProjectDir).to.equal(normalize(untildify('~/someFolder')))
 		})
 
 		it("Unspecified projectdir and unspecified target", async() => {

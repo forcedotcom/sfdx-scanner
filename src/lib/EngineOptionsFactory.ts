@@ -91,7 +91,8 @@ export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
 		super(inputProcessor);
 	}
 
-	protected shouldSfgeRun(ignored: Inputs): boolean {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	protected shouldSfgeRun(_inputs: Inputs): boolean {
 		return true;
 	}
 
