@@ -14,14 +14,14 @@ Code Analyzer is powered by multiple static analyzers, also known as rule engine
 
 ### Available Engines
 
-| Rule Engine    | Description | Version |
-| -------- | ------- | ------- |
-| [Salesforce Graph Engine](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/salesforce-graph-engine/introduction/)  | Detects security and quality issues in code, as an open-source Salesforce tool | {{ site.data.versions-v3.scanner}} |
-| [PMD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/pmd-engine/) | Allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce    | {{ site.data.versions-v3.pmd}}	|
-| [CPD](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/cpd-engine/)    | Identifies blocks of duplication across files   | {{ site.data.versions-v3.cpd}}	|
-| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Lightning Web Component (LWC) Plug-In)| Evaluates Salesforce Lightning Web Components | {{ site.data.versions-v3.eslint}}		|
-| [ESLint](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/eslint-engine/) Typescript plug-in | Evaluates any targeted TypeScript (.ts) files	| {{ site.data.versions-v3.eslint}}	|
-| [RetireJS](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/architecture/retire-js-engine/) | Analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities | {{ site.data.versions-v3.retirejs}}	|
+| Rule Engine                                                                            | Description | Version |
+|----------------------------------------------------------------------------------------| ------- | ------- |
+| [Salesforce Graph Engine](./en/v3.x/salesforce-graph-engine/introduction/)             | Detects security and quality issues in code, as an open-source Salesforce tool | {{ site.data.versions-v3.scanner}} |
+| [PMD](./en/v3.x/architecture/pmd-engine/)                                              | Allows for static analysis of code written in a number of supported languages, including Java, Apex, and Visualforce    | {{ site.data.versions-v3.pmd}}	|
+| [CPD](./en/v3.x/architecture/cpd-engine/)                                              | Identifies blocks of duplication across files   | {{ site.data.versions-v3.cpd}}	|
+| [ESLint](./en/v3.x/architecture/eslint-engine/) Lightning Web Component (LWC) Plug-In) | Evaluates Salesforce Lightning Web Components | {{ site.data.versions-v3.eslint}}		|
+| [ESLint](./en/v3.x/architecture/eslint-engine/) Typescript plug-in                     | Evaluates any targeted TypeScript (.ts) files	| {{ site.data.versions-v3.eslint}}	|
+| [RetireJS](./en/v3.x/architecture/retire-js-engine/)                                   | Analyzes a project’s third-party JavaScript dependencies and identifies security vulnerabilities | {{ site.data.versions-v3.retirejs}}	|
 
 -------
 
@@ -37,7 +37,7 @@ To provide a uniform experience while using multiple rule engines, Code Analyzer
 
 Each rule engine has a different set of rules and different formats for representing them. Code Analyzer communicates with each rule engine separately to pull the default rules that they offer and to populate them together into a rule catalog. This catalog contains the name of a rule, a short description, its classification category, and the code source language that the rule can analyze.
 
-Run the ```scanner:rule:list``` command to view the rule catalog. The command’s output includes the rule engine name that a particular rule belongs to.
+Run the ```scanner rule list``` command to view the rule catalog. The command’s output includes the rule engine name that a particular rule belongs to.
 
 Example:
 

@@ -17,7 +17,7 @@ Files representing vulnerable dependencies are detected in three ways:
 For example, this command scans MyProject for vulnerable third-party libraries.
 
 ```bash
-$ sfdx scanner:run --engine retire-js --target '/path/to/MyProject' --format csv
+$ sf scanner run --engine retire-js --target '/path/to/MyProject' --format csv
 ```
 If `MyProject` contains `MyProject/lorem/ipsum/jquery-3.1.0.min.js`, it’s identified as a vulnerability.
 

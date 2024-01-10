@@ -19,43 +19,43 @@ Salesforce Graph Engine includes path-based and data-flow analysis rules.
 ## Running Graph Engine GA Rules
 Run all Graph Engine rules against your code, or run a subset of rules by type or by category.
 
-To run the path-based rules run: `scanner:run:dfa --projectdir MyDirectory`.
+To run the path-based rules run: `scanner run dfa --projectdir MyDirectory`.
 
 **Example:**
   
-```sfdx scanner:run:dfa --projectdir /project/dir --target /project/dir/target1```
+```sf scanner run dfa --projectdir /project/dir --target /project/dir/target1```
 
 <br>
-To run graph-based analysis rules run: `scanner:run --engine sfge --projectdir MyDirectory`.
+To run graph-based analysis rules run: `scanner run --engine sfge --projectdir MyDirectory`.
 
 **Example:**
   
-```sfdx scanner:run --engine sfge --projectdir /project/dir --target /project/dir/target1```
+```sf scanner run --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
 <br>
 To run a specific category of rules, include the category.
   
 **Example:**
   
-```sfdx scanner:run:dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
+```sf scanner run dfa --category "Security" --projectdir /project/dir --target /project/dir/target```
 <br>
 
 ## Running Graph Engine Pilot Rules
 
 To run each Graph Engine pilot rule, include the ```--with-pilot``` flag in your request. 
 
-To run all Graph Engine rules and all pilot rules, run: ```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir MyDirectory```.
+To run all Graph Engine rules and all pilot rules, run: ```sf scanner run dfa --with-pilot --engine sfge --projectdir MyDirectory```.
 
 **Example**:
 
-```sfdx scanner:run:dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+```sf scanner run dfa --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
 <br>
-To run a specific category of rules including the pilot rules in that category, include the category and the `--with-pilot` flag.
+To run a specific category of rules including the pilot rules in that category, include the category and the ```--with-pilot``` flag.
 
 **Example**:
   
-```sfdx scanner:run:dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
+```sf scanner run dfa --category “Performance” --with-pilot --engine sfge --projectdir /project/dir --target /project/dir/target1```
 
 ## Generally Available Rules
 

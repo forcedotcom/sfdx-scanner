@@ -8,17 +8,17 @@ redirect_from: /en/custom-config/eslint
 
 To bring in the power of any ESLint capabilities that aren’t supported by default in Salesforce Code Analyzer (Code Analyzer), use your own customized ```.eslintrc.json```. You have the flexibility to use different parsers or plug-ins, and you can define your own custom ESLint ruleset. 
 
-To invoke a customized ESLint file, pass in your config file filepath as a value to ```--eslintconfig``` flag in ```scanner:run command```. 
+To invoke a customized ESLint file, pass in your config file filepath as a value to ```--eslintconfig``` flag in ```scanner run``` command. 
 
 For example:
 
-```$ sfdx scanner:run --target "/path/to/your/target" --eslintconfig "/path/to/.eslintrc.json"```
+```$ sf scanner run --target "/path/to/your/target" --eslintconfig "/path/to/.eslintrc.json"```
 
 ## Your ESLint Custom Configuration Responsibilities
 
 Before setting up your custom configuration with ESLint through Code Analyzer, make sure that you understand your responsibilities.
 
-* All npm dependencies, including ESLint, must be installed in the directory where you run the ```scanner:run``` command.
+* All npm dependencies, including ESLint, must be installed in the directory where you run the ```scanner run``` command.
 * Your custom configuration cascades into your other project configurations as though you ran ESLint directly with the ```-c | –config``` flag. Your custom configuration must perform all necessary overrides.
 * Your ```.eslintrc.json``` file must be in ```.eslintrc``` format. However, there are no restrictions on the filename.
 * The ```.eslintignore``` flag isn’t evaluated. Instead, use the ```--target``` flag to define the targets that you want Code Analyzer to scan. ```--target``` accepts a comma-separated list of any combination of files, directories, positive patterns, and negations.
@@ -46,7 +46,7 @@ ESLint usage in Code Analyzer has these restrictions.
 	Example:
 
 	```
-	$ sfdx scanner:run --engine "pmd,eslint-lwc" --eslintconfig "/path/to/.eslintrc.json" --target "/target/path"
+	$ sf scanner run --engine "pmd,eslint-lwc" --eslintconfig "/path/to/.eslintrc.json" --target "/target/path"
 	```
 
 ## See Also

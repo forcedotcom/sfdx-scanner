@@ -8,9 +8,9 @@ Shipped with PMD, CPD helps identify blocks of duplication across files.
 
 ## How can you use CPD through Salesforce Code Analyzer?
 
-By default, the CPD engine isn’t enabled and isn’t run with a generic ```scanner:run command```. To specifically invoke CPD, you use the ```--engine``` option, like this:
+By default, the CPD engine isn’t enabled and isn’t run with a generic ```scanner run``` command. To specifically invoke CPD, you use the ```--engine``` option, like this:
 
-`sfdx scanner:run --target "/some/path" --engine cpd`
+`sf scanner run --target "/some/path" --engine cpd`
 
 ## Understanding the violation message
 Because CPD returns duplicated code fragments, meaningful output contains more than one file as a part of a group. Salesforce Code Analyzer (Code Analyzer) represents each group by a short checksum of the corresponding code fragment. Every violation message contains this checksum, the number of tokens in the checksum, the total number of occurrences of this duplicated code, and the index of the current occurrence. This information can help you understand the impact of the duplication.

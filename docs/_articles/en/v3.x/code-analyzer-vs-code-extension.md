@@ -24,7 +24,7 @@ You can also [enable](./en/v3.x/faq/#q-how-do-i-enable-engine-xs-default-rules-f
 ## Set Up
 
 * Install [Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_install_cli.htm).
-* In your terminal, run `sfdx plugins:install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
+* In your terminal, run `sf plugins install @salesforce/sfdx-scanner`. Make sure that you're running Code Analyzer version {{site.data.versions-v3.extensioncompatiblescanner}} or later.
 * Install [Code Analyzer (beta)](https://marketplace.visualstudio.com/items?itemName=salesforce.sfdx-code-analyzer-vscode).
 
 ## Contribute to Code Analyzer (beta)
@@ -50,13 +50,13 @@ Complete one of these options to perform a Code Analyzer (beta) scan.
 * To scan selected files or folders:
 
 1. Select a group of files or folders.
-2. Right click in the VS Code Explorer and select **SFDX: Scan selected files or folders with Code Analyzer**.
+2. Right click in the VS Code Explorer and select **SF: Scan selected files or folders with Code Analyzer**.
 
 * To scan a single code file:
 
 1. Open a code file in the VS Code Editor.
-2. From the VS Code Command Palette, choose **SFDX: Scan current file with Code Analyzer**.
-3. Alternatively, right click in the VS Code Editor and select **SFDX: Scan current file with Code Analyzer**.
+2. From the VS Code Command Palette, choose **SF: Scan current file with Code Analyzer**.
+3. Alternatively, right click in the VS Code Editor and select **SF: Scan current file with Code Analyzer**.
 
 Regardless of which option you chose, the progress bar notifies you that the scan of your current file is active.
 
@@ -125,7 +125,7 @@ To perform a Graph Engine path-based analysis on a single method complete these 
 
 1. Open a file in the VS Code Editor.
 2. Right-click on the method that you want to scan.
-3. Select **SFDX: Scan selected method with Graph Engine path-based analysis**.
+3. Select **SF: Scan selected method with Graph Engine path-based analysis**.
 
 The progress bar notifies you that the scan of your current file is active.
 
