@@ -52,15 +52,15 @@ describe("InputProcessorImpl Tests", async () => {
 				projectdir: 'test/code-fixtures'
 			};
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(path.resolve('test/code-fixtures'))
+			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'))
 		})
 
 		it("Specified absolute projectdir", async () => {
 			const inputs: Inputs = {
-				projectdir: path.resolve('test/code-fixtures')
+				projectdir: toAbsPath('test/code-fixtures')
 			};
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(path.resolve('test/code-fixtures'))
+			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'))
 		})
 
 		it("Specified tildified projectdir", async () => {
@@ -68,13 +68,13 @@ describe("InputProcessorImpl Tests", async () => {
 				projectdir: '~/someFolder'
 			};
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(normalize(untildify('~/someFolder')))
+			expect(resolvedProjectDir).to.equal(toAbsPath(normalize(untildify('~/someFolder'))))
 		})
 
 		it("Unspecified projectdir and unspecified target", async() => {
 			const inputs: Inputs = {}
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(path.resolve('.'));
+			expect(resolvedProjectDir).to.equal(toAbsPath('.'));
 		})
 
 		it("Unspecified projectdir with non-glob relative targets supplied", async () => {
@@ -82,10 +82,10 @@ describe("InputProcessorImpl Tests", async () => {
 				target: ['test/code-fixtures/apex', 'test/catalog-fixtures/DefaultCatalogFixture.json']
 			};
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(path.resolve('test'));
+			expect(resolvedProjectDir).to.equal(toAbsPath('test'));
 
 			expect(display.getOutputText()).to.equal('[VerboseInfo]: ' +
-				getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [path.resolve('test')]))
+				getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [toAbsPath('test')]))
 		})
 
 		it("Unspecified projectdir with glob targets supplied (with sfdx-project.json in parents)", async () => {
@@ -94,14 +94,14 @@ describe("InputProcessorImpl Tests", async () => {
 			});
 			// Note that test/code-fixtures/projects/app/force-app/main/default/pages is the first most common parent
 			// but test/code-fixtures/projects/app contains a sfdx-project.json and so we return this instead
-			expect(resolvedProjectDir).to.equal(path.resolve('test/code-fixtures/projects/app'));
+			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures/projects/app'));
 		})
 
 		it("Unspecified projectdir with glob targets supplied (with no sfdx-project.json in parents)", async () => {
 			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath({
 				target: ['test/code-fixtures/**/*.cls']
 			});
-			expect(resolvedProjectDir).to.equal(path.resolve('test/code-fixtures'));
+			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'));
 		})
 
 		it("Unspecified projectdir with target containing method specifiers", async () => {
@@ -111,7 +111,7 @@ describe("InputProcessorImpl Tests", async () => {
 					'test/code-fixtures/apex/SomeOtherTestClass.cls#someTestMethodWithoutAsserts',
 				]
 			});
-			expect(resolvedProjectDir).to.equal(path.resolve('test/code-fixtures/apex'));
+			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures/apex'));
 		})
 
 		it("Unspecified projectdir with non-glob target that resolves to no files", async () => {
@@ -139,3 +139,7 @@ describe("InputProcessorImpl Tests", async () => {
 		})
 	})
 })
+
+function toAbsPath(fileOrFolder: string): string {
+	return path.resolve(fileOrFolder)
+}

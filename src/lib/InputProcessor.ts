@@ -114,19 +114,24 @@ function outputFormatFromInputs(inputs: Inputs): OutputFormat {
 }
 
 function trimMethodSpecifier(targetPath: string): string {
-	return targetPath.split('#')[0];
+	const lastHashPos: number = targetPath.lastIndexOf('#');
+	return lastHashPos < 0 ? targetPath : targetPath.substring(0, lastHashPos)
 }
 
 function getFirstCommonParentFolder(targetFiles: string[]) {
 	const longestCommonStr: string = getLongestCommonPrefix(targetFiles);
 	const commonParentFolder = getParentFolderOf(longestCommonStr);
-	return commonParentFolder.length == 0 ? '/' : commonParentFolder;
+	return commonParentFolder.length == 0 ? path.sep : commonParentFolder;
 }
 
 function getLongestCommonPrefix(strs: string[]): string {
+	// To find the longest common prefix, we first get the select the shortest string from our list of strings
 	const shortestStr = strs.reduce((s1, s2) => s1.length <= s2.length ? s1 : s2);
+
+	// Then we check that each string's ith character is the same as the shortest strings ith character
 	for (let i = 0; i < shortestStr.length; i++) {
 		if(!strs.every(str => str[i] === shortestStr[i])) {
+			// If we find a string that doesn't match the ith character, we return the common prefix from [0,i)
 			return shortestStr.substring(0, i)
 		}
 	}
@@ -144,6 +149,6 @@ function findFolderThatContainsSfdxProjectFile(folder: string): string {
 	return '';
 }
 
-function getParentFolderOf(path: string): string {
-	return path.substring(0, path.lastIndexOf('/'))
+function getParentFolderOf(fileOrFolder: string): string {
+	return fileOrFolder.substring(0, fileOrFolder.lastIndexOf(path.sep))
 }
