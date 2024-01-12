@@ -142,7 +142,6 @@ public class InstanceMethodsTest extends BaseUnusedMethodTest {
      * used.
      */
     @Test
-    @Disabled // TODO: FIX AND ENABLE THIS TEST
     public void instanceInvokedByOverridingSubclass_expectNoViolation() {
         // Fill in the source code template.
         String[] sourceCodes =

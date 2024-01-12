@@ -645,38 +645,66 @@ public final class MethodUtil {
                 // current class or a static
                 // method on a another class
                 String definingType;
-                final String methodName = methodCallExpression.getMethodName();
-                String fullMethodName = methodCallExpression.getFullMethodName();
-                if (methodName.equals(fullMethodName)) {
-                    // The method is being called on a class onto itself
-                    definingType = vertex.getDefiningType();
+                List<String> potentialDefiningTypes = new ArrayList<>();
+                if (methodCallExpression.isThisReference()) {
+                    // A call to `this.someMethod()` means the method must be on the defining type.
+                    definingType = methodCallExpression.getDefiningType();
+                    potentialDefiningTypes.add(
+                            ApexStandardLibraryUtil.getCanonicalName(definingType));
+                } else if (methodCallExpression.isEmptyReference()) {
+                    // For an empty reference (e.g., `someMethod()` as opposed to
+                    // `whatever.someMethod()`), the first place we should look is
+                    // the call's own defining type.
+                    definingType = methodCallExpression.getDefiningType();
+                    potentialDefiningTypes.add(
+                            ApexStandardLibraryUtil.getCanonicalName(definingType));
+                    // Inner classes can also invoke their outer class's static methods with an
+                    // empty reference, so if this is an inner class, we should check the outer
+                    // class too.
+                    if (definingType.contains(".")) {
+                        potentialDefiningTypes.add(definingType.split("\\.")[0]);
+                    }
+                } else if (methodCallExpression.isSuperVariableReference()) {
+                    // A call to `super.someMethod()` definitely means that the method is on the
+                    // super-type.
+                    definingType =
+                            ((ReferenceExpressionVertex)
+                                            (methodCallExpression.getReferenceExpression()))
+                                    .getSuperVariableExpression()
+                                    .orElseThrow(
+                                            () ->
+                                                    new UnexpectedException(
+                                                            "Missing SuperVariableExpression"))
+                                    .getCanonicalType();
+                    potentialDefiningTypes.add(
+                            ApexStandardLibraryUtil.getCanonicalName(definingType));
                 } else {
                     // TODO: Pass information to #getInvoked that this needs to be a static method
-                    definingType = String.join(".", vertex.getChainedNames());
+                    // A method call on a non-empty, non-this reference (e.g.,
+                    // `whatever.someMethod()`) lives on the thing being referenced.
+                    definingType = String.join(".", methodCallExpression.getChainedNames());
+                    potentialDefiningTypes.add(
+                            ApexStandardLibraryUtil.getCanonicalName(definingType));
+                    // A defining type without a period might be an aliased reference to a local
+                    // inner class.
+                    if (!definingType.contains(".")) {
+                        // Check if an inner class exists, and if so, then check that before
+                        // checking the outer class.
+                        String potentialInnerClassDefType =
+                                ClassUtil.getMoreSpecificClassName(vertex, definingType)
+                                        .orElse(null);
+                        if (potentialInnerClassDefType != null) {
+                            potentialDefiningTypes.add(0, potentialInnerClassDefType);
+                        }
+                    }
                 }
-                // The defining type could be an aliased reference to an inner class, so check that
-                // first.
-                String potentialInnerClassDefType =
-                        ClassUtil.getMoreSpecificClassName(vertex, definingType).orElse(null);
-                if (potentialInnerClassDefType != null) {
+                for (String potentialDefiningType : potentialDefiningTypes) {
                     invoked =
-                            getInvoked(
-                                            g,
-                                            potentialInnerClassDefType,
-                                            (MethodCallExpressionVertex) vertex,
-                                            symbols)
+                            getInvoked(g, potentialDefiningType, methodCallExpression, symbols)
                                     .orElse(null);
-                }
-                // If we found no inner classes, check outer classes.
-                if (invoked == null) {
-                    definingType = ApexStandardLibraryUtil.getCanonicalName(definingType);
-                    invoked =
-                            getInvoked(
-                                            g,
-                                            definingType,
-                                            (MethodCallExpressionVertex) vertex,
-                                            symbols)
-                                    .orElse(null);
+                    if (invoked != null) {
+                        break;
+                    }
                 }
             }
         } else if (vertex instanceof NewObjectExpressionVertex) {
