@@ -38,7 +38,7 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
       Writes output to a file.
 
   -p, --projectdir=_projectdir_
-      (required) Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.
+      Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.
 
   --rule-thread-count=_rule-thread-count_
       Specifies number of rule evaluation threads, or how many entrypoints can be evaluated concurrently. Inherits value from SFGE_RULE_THREAD_COUNT env-var, if set. Default is 4.
@@ -53,7 +53,7 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
       Specifies Java Virtual Machine arguments to override system defaults while executing Salesforce Graph Engine. For multiple arguments, add them to the same string separated by space.
 
   -t, --target=_target_
-      (required) Returns the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list.
+      Specifies the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list. Default is ".".
 
   --verbose
       Emits additional command output to stdout.
