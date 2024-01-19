@@ -32,11 +32,11 @@ Writes output to a file.
 
 # flags.projectdirSummary
 
-provide root directory of project
+root directory of project
 
 # flags.projectdirDescription
 
-Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.
+Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. If --projectdir isn’t specified, a default value is calculated. The default value is a directory that contains all the target files.
 
 # flags.sevthresholdSummary
 
@@ -81,3 +81,11 @@ The selected output format doesn't match the output file type. Output format: %s
 # validations.projectdirMustExist
 
 --projectdir must specify existing paths
+
+# validations.noFilesFoundInTarget
+
+No files were found in the target. --target must contain at least one file.
+
+# info.resolvedProjectDir
+
+The --projectdir flag wasn’t specified so the calculated project directory is: %s

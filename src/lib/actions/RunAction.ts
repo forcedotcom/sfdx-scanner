@@ -29,9 +29,11 @@ export class RunAction extends AbstractRunAction {
 			this.display.displayInfo(getMessage(BundleName.Run, 'output.filtersIgnoredCustom', []));
 		}
 		// None of the pathless engines support method-level targeting, so attempting to use it should result in an error.
-		for (const target of (inputs.target as string[])) {
-			if (target.indexOf('#') > -1) {
-				throw new SfError(getMessage(BundleName.Run, 'validations.methodLevelTargetingDisallowed', [target]));
+		if (inputs.target) {
+			for (const target of (inputs.target as string[])) {
+				if (target.indexOf('#') > -1) {
+					throw new SfError(getMessage(BundleName.Run, 'validations.methodLevelTargetingDisallowed', [target]));
+				}
 			}
 		}
 	}
