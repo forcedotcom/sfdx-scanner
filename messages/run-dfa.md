@@ -53,7 +53,7 @@ source code location
 
 # flags.targetDescription
 
-Source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list. Default is ".".
+Specifies the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list. Default is ".".
 
 # flags.withpilotSummary
 
