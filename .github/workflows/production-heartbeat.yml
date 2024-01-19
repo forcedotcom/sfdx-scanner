@@ -64,9 +64,9 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "retry_count=0" >> $GITHUB_OUTPUT && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
-          (echo "retry_count=1" >> $GITHUB_OUTPUT && sleep 60 && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
-          (echo "retry_count=2" >> $GITHUB_OUTPUT && sleep 300 && npm install -g @salesforce/cli${{ env.CLI_VERSION }})
+          (echo "retry_count=0" >> "$GITHUB_OUTPUT" && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
+          (echo "retry_count=1" >> "$GITHUB_OUTPUT" && sleep 60 && npm install -g @salesforce/cli${{ env.CLI_VERSION }}) ||
+          (echo "retry_count=2" >> "$GITHUB_OUTPUT" && sleep 300 && npm install -g @salesforce/cli${{ env.CLI_VERSION }})
 
       # === Make three attempts to install the scanner plugin through sf ===
       - name: Install Scanner Plugin
@@ -74,9 +74,9 @@ jobs:
         # If the first attempt fails, wait a minute and try again. After a second failure, wait 5 minutes then try again. Then give up.
         # Set an output parameter, `retry_count`, indicating the number of retry attempts that were made.
         run: |
-          (echo "retry_count=0" >> $GITHUB_OUTPUT && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
-          (echo "retry_count=1" >> $GITHUB_OUTPUT && sleep 60 && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
-          (echo "retry_count=2" >> $GITHUB_OUTPUT && sleep 300 && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }})
+          (echo "retry_count=0" >> "$GITHUB_OUTPUT" && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "retry_count=1" >> "$GITHUB_OUTPUT" && sleep 60 && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }}) ||
+          (echo "retry_count=2" >> "$GITHUB_OUTPUT" && sleep 300 && sf plugins install @salesforce/sfdx-scanner${{ env.SCANNER_VERSION }})
 
       # === Log the installed plugins for easier debugging ===
       - name: Log plugins
