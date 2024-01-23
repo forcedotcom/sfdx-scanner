@@ -16,13 +16,19 @@ public class ReferenceExpressionVertex extends AbstractReferenceExpressionVertex
      * Presence of this vertex indicates that the reference was qualified with a 'this' reference
      */
     private final LazyOptionalVertex<ThisVariableExpressionVertex> thisVariableExpression;
+    /**
+     * Presence of this vertex indicates that the reference was qualified with a {@code super}
+     * reference.
+     */
+    private final LazyOptionalVertex<SuperVariableExpressionVertex> superVariableExpression;
 
     ReferenceExpressionVertex(Map<Object, Object> properties) {
         super(properties);
-        // TODO: Efficiency. This does 2 queries, is it safe to get the child and then look at the
+        // TODO: Efficiency. This does 3 queries, is it safe to get the child and then look at the
         // type?
         this.classRefExpressionVertex = _getClassRefExpression();
         this.thisVariableExpression = _getThisVariableExpression();
+        this.superVariableExpression = _getSuperVariableExpression();
     }
 
     @Override
@@ -49,8 +55,12 @@ public class ReferenceExpressionVertex extends AbstractReferenceExpressionVertex
         return thisVariableExpression.get();
     }
 
-    public Optional<ClassRefExpressionVertex> gtClassRefExpression() {
+    public Optional<ClassRefExpressionVertex> getClassRefExpression() {
         return classRefExpressionVertex.get();
+    }
+
+    public Optional<SuperVariableExpressionVertex> getSuperVariableExpression() {
+        return superVariableExpression.get();
     }
 
     public String getReferenceType() {
@@ -76,5 +86,13 @@ public class ReferenceExpressionVertex extends AbstractReferenceExpressionVertex
                         g().V(getId())
                                 .out(Schema.CHILD)
                                 .hasLabel(ASTConstants.NodeType.CLASS_REF_EXPRESSION));
+    }
+
+    private LazyOptionalVertex<SuperVariableExpressionVertex> _getSuperVariableExpression() {
+        return new LazyOptionalVertex<>(
+                () ->
+                        g().V(getId())
+                                .out(Schema.CHILD)
+                                .hasLabel(ASTConstants.NodeType.SUPER_VARIABLE_EXPRESSION));
     }
 }

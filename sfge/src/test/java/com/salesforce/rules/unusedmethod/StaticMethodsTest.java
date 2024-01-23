@@ -75,9 +75,9 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      */
     @CsvSource({
         // Every combination of private/public tested method and implicit/explicit type reference.
-        // "public, testedMethod()", // TODO: FIX AND ENABLE THIS TEST
+        "public, testedMethod()",
         "public, MyClass.testedMethod()",
-        // "private, testedMethod()", // TODO: FIX AND ENABLE TEST
+        "private, testedMethod()",
         "private, MyClass.testedMethod()",
     })
     @ParameterizedTest(name = "{displayName}: {0} static invoked as {1}")
@@ -176,11 +176,7 @@ public class StaticMethodsTest extends BaseUnusedMethodTest {
      *     references to outer type.
      */
     @ValueSource(
-            strings = {
-                // "testedMethod()", // TODO: FIX AND ENABLE THIS TEST
-                "ParentClass.testedMethod()",
-                "ChildClass.testedMethod()"
-            })
+            strings = {"testedMethod()", "ParentClass.testedMethod()", "ChildClass.testedMethod()"})
     @ParameterizedTest(name = "{displayName}: Invoked as {0}")
     public void staticInvokedByInnerOfSubclass_expectNoViolation(String invocation) {
         // spotless:off

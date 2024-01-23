@@ -102,7 +102,7 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex
         if (abstractReferenceExpression instanceof ReferenceExpressionVertex) {
             ReferenceExpressionVertex referenceExpression =
                     (ReferenceExpressionVertex) abstractReferenceExpression;
-            return referenceExpression.gtClassRefExpression();
+            return referenceExpression.getClassRefExpression();
         }
         return Optional.empty();
     }
@@ -309,6 +309,20 @@ public class MethodCallExpressionVertex extends InvocableWithParametersVertex
      */
     public boolean isEmptyReference() {
         return referenceExpression.get() instanceof EmptyReferenceExpressionVertex;
+    }
+
+    /**
+     * @return - True if the method is qualified by a super expression. i.e., returns true for
+     *     {@code super.someMethod()} but not {@code this.someMethod()}.
+     */
+    public boolean isSuperVariableReference() {
+        if (referenceExpression.get() instanceof ReferenceExpressionVertex) {
+            return ((ReferenceExpressionVertex) referenceExpression.get())
+                    .getSuperVariableExpression()
+                    .isPresent();
+        } else {
+            return false;
+        }
     }
 
     private LazyVertex<AbstractReferenceExpressionVertex> _getReferenceVertex() {
