@@ -37,6 +37,6 @@ export default class Add extends ScannerCommand {
 	};
 
 	protected createAction(logger: Logger, display: Display): Action {
-		return new RuleAddAction(logger, display, new InputProcessorImpl(this.config.version));
+		return new RuleAddAction(logger, display, new InputProcessorImpl(this.config.version, display));
 	}
 }

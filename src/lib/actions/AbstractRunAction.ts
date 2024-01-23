@@ -19,6 +19,8 @@ import {inferFormatFromOutfile, OutputFormat} from "../output/OutputFormat";
 import {ResultsProcessor} from "../output/ResultsProcessor";
 import {ResultsProcessorFactory} from "../output/ResultsProcessorFactory";
 import {JsonReturnValueHolder} from "../output/JsonReturnValueHolder";
+import untildify = require('untildify');
+import normalize = require('normalize-path');
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
@@ -48,15 +50,13 @@ export abstract class AbstractRunAction implements Action {
 		const fh = new FileHandler();
 		// If there's a --projectdir flag, its entries must be non-glob paths pointing to existing directories.
 		if (inputs.projectdir) {
-			// TODO: MOVE AWAY FROM ALLOWING AN ARRAY OF DIRECTORIES HERE AND ERROR IF THERE IS MORE THAN ONE DIRECTORY
-			for (const dir of (inputs.projectdir as string[])) {
-				if (globby.hasMagic(dir)) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
-				} else if (!(await fh.exists(dir))) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
-				} else if (!(await fh.stats(dir)).isDirectory()) {
-					throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
-				}
+			const projectDir: string = normalize(untildify(inputs.projectdir as string))
+			if (globby.hasMagic(projectDir)) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
+			} else if (!(await fh.exists(projectDir))) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
+			} else if (!(await fh.stats(projectDir)).isDirectory()) {
+				throw new SfError(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
 			}
 		}
 		// If the user explicitly specified both a format and an outfile, we need to do a bit of validation there.

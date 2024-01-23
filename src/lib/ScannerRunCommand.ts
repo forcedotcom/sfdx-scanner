@@ -1,7 +1,5 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {ScannerCommand} from './ScannerCommand';
-import untildify = require('untildify');
-import normalize = require('normalize-path');
 import {BundleName, getMessage} from "../MessageCatalog";
 import {OutputFormat} from "./output/OutputFormat";
 
@@ -48,12 +46,11 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
-		projectdir: Flags.custom<string[]>({ // TODO: FIGURE OUT WHY WE NEED THIS ON BOTH "run" AND "run dfa"
+		projectdir: Flags.string({
 			char: 'p',
 			summary: getMessage(BundleName.CommonRun, 'flags.projectdirSummary'),
-			description: getMessage(BundleName.CommonRun, 'flags.projectdirDescription'),
-			parse: val => Promise.resolve(val.split(',').map(d => normalize(untildify(d))))
-		})(),
+			description: getMessage(BundleName.CommonRun, 'flags.projectdirDescription')
+		}),
 		// END: Flags related to targeting.
 	};
 }

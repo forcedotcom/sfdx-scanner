@@ -1,5 +1,5 @@
 import {Inputs, LooseObject, SfgeConfig} from "../types";
-import {CUSTOM_CONFIG, INTERNAL_ERROR_CODE} from "../Constants";
+import {CUSTOM_CONFIG, ENGINE, INTERNAL_ERROR_CODE} from "../Constants";
 import {InputProcessor} from "./InputProcessor";
 import {TYPESCRIPT_ENGINE_OPTIONS} from "./eslint/TypescriptEslintStrategy";
 import {SfError} from "@salesforce/core";
@@ -22,18 +22,16 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		this.inputProcessor = inputProcessor;
 	}
 
+	protected abstract shouldSfgeRun(inputs: Inputs): boolean;
+
 	createEngineOptions(inputs: Inputs): EngineOptions {
 		const options: Map<string,string> = new Map();
-
-		// We should only add a GraphEngine config if we were given a --projectdir flag.
-		const projectDirPaths: string[] = this.inputProcessor.resolveProjectDirPaths(inputs);
-		if (projectDirPaths.length > 0) {
+		if (this.shouldSfgeRun(inputs)) {
 			const sfgeConfig: SfgeConfig = {
-				projectDirs: projectDirPaths
+				projectDir: this.inputProcessor.resolveProjectDirPath(inputs)
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}
-
 		return options;
 	}
 
@@ -42,6 +40,10 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 	public constructor(inputProcessor: InputProcessor) {
 		super(inputProcessor);
+	}
+
+	protected shouldSfgeRun(inputs: Inputs): boolean {
+		return inputs.engine && (inputs.engine as string[]).includes(ENGINE.SFGE);
 	}
 
 	public override createEngineOptions(inputs: Inputs): EngineOptions {
@@ -87,6 +89,11 @@ export class RunEngineOptionsFactory extends CommonEngineOptionsFactory {
 export class RunDfaEngineOptionsFactory extends CommonEngineOptionsFactory {
 	public constructor(inputProcessor: InputProcessor) {
 		super(inputProcessor);
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	protected shouldSfgeRun(_inputs: Inputs): boolean {
+		return true;
 	}
 
 	public override createEngineOptions(inputs: Inputs): EngineOptions {

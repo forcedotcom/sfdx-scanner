@@ -289,12 +289,14 @@ export class DefaultRuleManager implements RuleManager {
 			const ruleTargetsInitialLength: number = ruleTargets.length;
 			// Positive patterns might use method-level targeting. We only want to do path evaluation against the part
 			// that's actually a path.
-			const targetPortions = target.split('#');
+			const targetPortions = splitOnMethodSpecifier(target)
 			// The array will always have at least one entry, since if there's no '#' then it will return a singleton array.
 			const targetPath = targetPortions[0];
 			if (globby.hasMagic(target)) {
 				// The target is a magic glob. Retrieve paths in the working directory that match it, and then filter against
 				// our pattern matcher.
+				// NOTE: We should consider in the future to resolve target paths based off of the projectdir instead of
+				// the present working directory.
 				const matchingTargets = await globby(targetPath);
 				// Map relative files to absolute paths. This solves ambiguity of current working directory
 				const absoluteMatchingTargets = matchingTargets.map(t => path.resolve(t));
@@ -345,4 +347,10 @@ export class DefaultRuleManager implements RuleManager {
 		}
 		return ruleTargets;
 	}
+}
+
+function splitOnMethodSpecifier(targetPath: string): string[] {
+	// Unlike targetPath.split('#'), this solution only splits on the last '#' instead of all of them
+	const lastHashPos: number = targetPath.lastIndexOf('#');
+	return lastHashPos < 0 ? [targetPath] : [targetPath.substring(0, lastHashPos), targetPath.substring(lastHashPos+1)]
 }
