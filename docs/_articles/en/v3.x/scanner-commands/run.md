@@ -61,7 +61,7 @@ Specifies one or more engines to run. Submit multiple values as a comma-separate
  Throws an error when violations are found with equal or greater severity than the provided value. –normalize-severity is invoked and severity levels are reset to the baseline. Normalized severity values are: 1 (high), 2 (moderate), and 3 (low). Exit code is the most severe violation.
 
  -t, --target=_target_
- Specifies the source code location. Use glob patterns or specify individual methods with #-syntax. Multiple values are specified as a comma-separated list. Default is ".".
+ Specifies the source code location. May use glob patterns. Specify multiple values as a comma-separated list. Default is ".".
 
  --tsconfig=_tsconfig_
  Location of tsconfig.json file used by eslint-typescript engine.
