@@ -38,7 +38,7 @@ Important: If your codebase is complex, increase the Java heap space to avoid Ou
       Writes output to a file.
 
   -p, --projectdir=_projectdir_
-      Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. Specify multiple values as a comma-separated list.
+      Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. If --projectdir isn’t specified, a default value is calculated. The default value is a directory that contains all the target files.
 
   --rule-thread-count=_rule-thread-count_
       Specifies number of rule evaluation threads, or how many entrypoints can be evaluated concurrently. Inherits value from SFGE_RULE_THREAD_COUNT env-var, if set. Default is 4.
