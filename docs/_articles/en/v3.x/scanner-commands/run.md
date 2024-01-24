@@ -51,6 +51,9 @@ Specifies one or more engines to run. Submit multiple values as a comma-separate
  --pmdconfig=_pmdconfig_
  Specifies the location of PMD rule reference XML file to customize rule selection.
 
+ --projectdir=_projectdir_
+ Provides the relative or absolute root project directory used to set the context for Graph Engine's analysis. Project directory must be a path, not a glob. If --projectdir isn’t specified, a default value is calculated. The default value is a directory that contains all the target files.
+
  -r, --ruleset=_ruleset_
  [deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
 
