@@ -36,6 +36,8 @@ describe("InputProcessorImpl Tests", async () => {
 			const resolvedTargetPaths: string[] = inputProcessor.resolveTargetPaths(inputs);
 			expect(resolvedTargetPaths).to.have.length(1);
 			expect(resolvedTargetPaths).to.contain('test/code-fixtures/apex/SomeTestClass.cls#testMethodWithoutAsserts');
+
+			expect(display.getOutputText()).to.equal('')
 		})
 
 		it("Unspecified target resolves to current directory", async () => {
@@ -43,75 +45,84 @@ describe("InputProcessorImpl Tests", async () => {
 			const resolvedTargetPaths: string[] = inputProcessor.resolveTargetPaths(inputs);
 			expect(resolvedTargetPaths).to.have.length(1);
 			expect(resolvedTargetPaths).to.contain('.');
+
+			expect(display.getOutputText()).to.equal('[Info]: ' +
+				getMessage(BundleName.CommonRun, 'info.resolvedTarget'))
 		})
 	})
 
 	describe("resolveProjectDirPath Tests", async () => {
 		it("Specified relative projectdir", async () => {
 			const inputs: Inputs = {
-				projectdir: 'test/code-fixtures'
+				projectdir: ['test/code-fixtures']
 			};
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'))
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test/code-fixtures'))
 		})
 
 		it("Specified absolute projectdir", async () => {
 			const inputs: Inputs = {
-				projectdir: toAbsPath('test/code-fixtures')
+				projectdir: [toAbsPath('test/code-fixtures')]
 			};
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'))
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test/code-fixtures'))
 		})
 
 		it("Specified tildified projectdir", async () => {
 			const inputs: Inputs = {
-				projectdir: '~/someFolder'
+				projectdir: ['~/someFolder']
 			};
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(toAbsPath(normalize(untildify('~/someFolder'))))
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(resolvedProjectDirs).to.contain(toAbsPath(normalize(untildify('~/someFolder'))))
 		})
 
 		it("Unspecified projectdir and unspecified target", async() => {
 			const inputs: Inputs = {}
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(toAbsPath('.'));
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(resolvedProjectDirs).to.contain(toAbsPath('.'));
+
+			expect(display.getOutputArray()).to.have.length(2)
+			expect(display.getOutputArray()).to.contain('[Info]: ' +
+				getMessage(BundleName.CommonRun, 'info.resolvedTarget'))
+			expect(display.getOutputArray()).to.contain('[Info]: ' +
+				getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [toAbsPath('')]))
 		})
 
 		it("Unspecified projectdir with non-glob relative targets supplied", async () => {
 			const inputs: Inputs = {
 				target: ['test/code-fixtures/apex', 'test/catalog-fixtures/DefaultCatalogFixture.json']
 			};
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath(inputs);
-			expect(resolvedProjectDir).to.equal(toAbsPath('test'));
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths(inputs);
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test'));
 
-			expect(display.getOutputText()).to.equal('[VerboseInfo]: ' +
+			expect(display.getOutputText()).to.equal('[Info]: ' +
 				getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [toAbsPath('test')]))
 		})
 
 		it("Unspecified projectdir with glob targets supplied (with sfdx-project.json in parents)", async () => {
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath({
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths({
 				target: ['test/**/*.page', '!test/code-fixtures/cpd']
 			});
 			// Note that test/code-fixtures/projects/app/force-app/main/default/pages is the first most common parent
 			// but test/code-fixtures/projects/app contains a sfdx-project.json and so we return this instead
-			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures/projects/app'));
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test/code-fixtures/projects/app'));
 		})
 
 		it("Unspecified projectdir with glob targets supplied (with no sfdx-project.json in parents)", async () => {
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath({
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths({
 				target: ['test/code-fixtures/**/*.cls']
 			});
-			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures'));
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test/code-fixtures'));
 		})
 
 		it("Unspecified projectdir with target containing method specifiers", async () => {
-			const resolvedProjectDir: string = inputProcessor.resolveProjectDirPath({
+			const resolvedProjectDirs: string[] = inputProcessor.resolveProjectDirPaths({
 				target: [
 					'test/code-fixtures/apex/SomeTestClass.cls#testMethodWithoutAsserts',
 					'test/code-fixtures/apex/SomeOtherTestClass.cls#someTestMethodWithoutAsserts',
 				]
 			});
-			expect(resolvedProjectDir).to.equal(toAbsPath('test/code-fixtures/apex'));
+			expect(resolvedProjectDirs).to.contain(toAbsPath('test/code-fixtures/apex'));
 		})
 
 		it("Unspecified projectdir with non-glob target that resolves to no files", async () => {
@@ -119,7 +130,7 @@ describe("InputProcessorImpl Tests", async () => {
 				target: ['thisFileDoesNotExist.xml', 'thisFileAlsoDoesNotExist.json']
 			};
 			try {
-				inputProcessor.resolveProjectDirPath(inputs);
+				inputProcessor.resolveProjectDirPaths(inputs);
 				assert.fail("Expected error to be thrown")
 			} catch (e) {
 				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
@@ -131,7 +142,7 @@ describe("InputProcessorImpl Tests", async () => {
 				target: ['**.filesOfThisTypeShouldNotExist']
 			};
 			try {
-				inputProcessor.resolveProjectDirPath(inputs);
+				inputProcessor.resolveProjectDirPaths(inputs);
 				assert.fail("Expected error to be thrown")
 			} catch (e) {
 				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));

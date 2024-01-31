@@ -41,7 +41,7 @@ type SfgeCatalogOptions = SfgeWrapperOptions & {
 
 type SfgeExecuteOptions = SfgeWrapperOptions & {
 	targets: RuleTarget[];
-	projectDir: string;
+	projectDirs: string[];
 	rules: Rule[];
 	ruleThreadCount?: number;
 	ruleThreadTimeout?: number;
@@ -204,7 +204,7 @@ export class SfgeCatalogWrapper extends AbstractSfgeWrapper {
 
 export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	private targets: RuleTarget[];
-	private projectDir: string;
+	private projectDirs: string[];
 	private rules: Rule[];
 	private ruleThreadCount: number;
 	private ruleThreadTimeout: number;
@@ -213,7 +213,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	constructor(options: SfgeExecuteOptions) {
 		super(options);
 		this.targets = options.targets;
-		this.projectDir = options.projectDir;
+		this.projectDirs = options.projectDirs;
 		this.rules = options.rules;
 		this.ruleThreadCount = options.ruleThreadCount;
 		this.ruleThreadTimeout = options.ruleThreadTimeout;
@@ -238,7 +238,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 		const inputObject: SfgeInput = this.createInputJson();
 		const inputFile = await this.createInputFile(inputObject);
 
-		this.logger.trace(`Stored the names of ${this.targets.length} targeted files and 1 source directory in ${inputFile}`);
+		this.logger.trace(`Stored the names of ${this.targets.length} targeted files and ${this.projectDirs.length} source directories in ${inputFile}`);
 		this.logger.trace(`Rules to be executed: ${JSON.stringify(inputObject.rulesToRun)}`);
 		return [inputFile];
 	}
@@ -246,9 +246,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	private createInputJson(): SfgeInput {
 		const inputJson: SfgeInput = {
 			targets: [],
-			// We should consider changing this to just a string by updating the java side.
-			// The java side current takes in an array, but we only ever supply a single directory (i.e. array of length 1).
-			projectDirs: [this.projectDir],
+			projectDirs: this.projectDirs,
 			rulesToRun: this.rules.map(rule => rule.name)
 		};
 		this.targets.forEach(t => {
@@ -284,7 +282,7 @@ export class SfgeExecuteWrapper extends AbstractSfgeWrapper {
 	public static async runSfge(targets: RuleTarget[], rules: Rule[], sfgeConfig: SfgeConfig): Promise<string> {
 		const wrapper = await SfgeExecuteWrapper.create({
 			targets,
-			projectDir: sfgeConfig.projectDir,
+			projectDirs: sfgeConfig.projectDirs,
 			action: EXEC_ACTION,
 			rules: rules,
 			// Running rules could take quite a while, so we should use a functional spinner.
