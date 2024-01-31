@@ -46,11 +46,13 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 		}),
 		// END: Flags related to results processing.
 		// BEGIN: Flags related to targeting.
-		projectdir: Flags.string({
+		projectdir: Flags.custom<string[]>({
 			char: 'p',
 			summary: getMessage(BundleName.CommonRun, 'flags.projectdirSummary'),
-			description: getMessage(BundleName.CommonRun, 'flags.projectdirDescription')
-		}),
+			description: getMessage(BundleName.CommonRun, 'flags.projectdirDescription'),
+			delimiter: ',',
+			multiple: true
+		})(),
 		// END: Flags related to targeting.
 	};
 }

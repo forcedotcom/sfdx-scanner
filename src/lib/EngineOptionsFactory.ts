@@ -28,7 +28,7 @@ abstract class CommonEngineOptionsFactory implements EngineOptionsFactory {
 		const options: Map<string,string> = new Map();
 		if (this.shouldSfgeRun(inputs)) {
 			const sfgeConfig: SfgeConfig = {
-				projectDir: this.inputProcessor.resolveProjectDirPath(inputs)
+				projectDirs: this.inputProcessor.resolveProjectDirPaths(inputs)
 			};
 			options.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
 		}

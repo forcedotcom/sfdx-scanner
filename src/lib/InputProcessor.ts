@@ -11,6 +11,7 @@ import path = require('path');
 import fs = require('fs');
 import untildify = require("untildify");
 import globby = require('globby');
+import {Tokens} from "@salesforce/core/lib/messages";
 
 /**
  * Service for processing inputs
@@ -20,7 +21,7 @@ export interface InputProcessor {
 
 	resolveTargetPaths(inputs: Inputs): string[];
 
-	resolveProjectDirPath(inputs: Inputs): string;
+	resolveProjectDirPaths(inputs: Inputs): string[];
 
 	createRunOptions(inputs: Inputs, isDfa: boolean): RunOptions;
 
@@ -30,10 +31,12 @@ export interface InputProcessor {
 export class InputProcessorImpl implements InputProcessor {
 	private readonly sfVersion: string;
 	private readonly display: Display;
+	private readonly displayedKeys: Set<string>;
 
 	public constructor(sfVersion: string, display: Display) {
 		this.sfVersion = sfVersion;
 		this.display = display
+		this.displayedKeys = new Set();
 	}
 
 	public resolvePaths(inputs: Inputs): string[] {
@@ -42,10 +45,10 @@ export class InputProcessorImpl implements InputProcessor {
 		return (inputs.path as string[]).map(p => path.resolve(untildify(p)));
 	}
 
-	public resolveProjectDirPath(inputs: Inputs): string {
+	public resolveProjectDirPaths(inputs: Inputs): string[] {
 		// If projectdir is provided, then return it since at this point it has already been validated to exist
-		if (inputs.projectdir && (inputs.projectdir as string).length > 0) {
-			return path.resolve(normalize(untildify(inputs.projectdir as string)))
+		if (inputs.projectdir && (inputs.projectdir as string[]).length > 0) {
+			return (inputs.projectdir as string[]).map(p => path.resolve(normalize(untildify(p))))
 		}
 
 		// If projectdir is not provided then:
@@ -55,8 +58,8 @@ export class InputProcessorImpl implements InputProcessor {
 		const commonParentFolder = getFirstCommonParentFolder(this.getAllTargetFiles(inputs));
 		let projectFolder: string = findFolderThatContainsSfdxProjectFile(commonParentFolder);
 		projectFolder = projectFolder.length > 0 ? projectFolder : commonParentFolder
-		this.display.displayVerboseInfo(getMessage(BundleName.CommonRun, 'info.resolvedProjectDir', [projectFolder]))
-		return projectFolder;
+		this.displayInfoOnlyOnce('info.resolvedProjectDir', [projectFolder])
+		return [projectFolder];
 	}
 
 	public resolveTargetPaths(inputs: Inputs): string[] {
@@ -67,7 +70,9 @@ export class InputProcessorImpl implements InputProcessor {
 		// If possible, in the future we should resolve all globs here instead of in the DefaultRuleManager.
 		// Also, I would recommend that we eventually resolve globs based on the projectdir (since it acts as a
 		// root directory) instead of the present working directory.
-
+		if (!inputs.target) {
+			this.displayInfoOnlyOnce('info.resolvedTarget')
+		}
 		const targetPaths: string[] = (inputs.target || ['.']) as string[];
 		return targetPaths.map(path => normalize(untildify(path)).replace(/['"]/g, ''));
 	}
@@ -98,6 +103,13 @@ export class InputProcessorImpl implements InputProcessor {
 			throw new SfError(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'), null, null, INTERNAL_ERROR_CODE);
 		}
 		return allAbsoluteTargetFiles;
+	}
+
+	private displayInfoOnlyOnce(messageKey: string, tokens?: Tokens) {
+		if (!this.displayedKeys.has(messageKey)) {
+			this.display.displayInfo(getMessage(BundleName.CommonRun, messageKey, tokens));
+			this.displayedKeys.add(messageKey);
+		}
 	}
 }
 

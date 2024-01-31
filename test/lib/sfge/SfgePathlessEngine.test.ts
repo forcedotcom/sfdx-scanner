@@ -51,12 +51,12 @@ describe('SfgePathlessEngine', () => {
 	});
 
 	describe('#shouldEngineRun()', () => {
-		it('Returns true when SfgeConfig has non-empty projectdir string', async () => {
+		it('Returns true when SfgeConfig has non-empty projectdir array', async () => {
 			// ==== SETUP ====
 			const engine = new SfgePathlessEngine();
 			await engine.init();
 			const sfgeConfig: SfgeConfig = {
-				projectDir: 'specific/value/is/irrelevant'
+				projectDirs: ['specific/value/is/irrelevant']
 			};
 			const engineOptions: Map<string,string> = new Map();
 			engineOptions.set(CUSTOM_CONFIG.SfgeConfig, JSON.stringify(sfgeConfig));
