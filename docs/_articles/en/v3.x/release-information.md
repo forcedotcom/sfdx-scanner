@@ -16,7 +16,7 @@ We publish the latest Code Analyzer monthly.
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.20.0...v3.19.0)
 
-* NEW (CodeAnalyzer): To accelerate your continuous integration/continuous development (CI/CD) development, use our `run-code-analyzer` GitHub Action in your pipeline. For more info, read our Accelerate Your CI/CD Integration documentation and access [`run-code-analyzer`](https://github.com/marketplace/actions/run-salesforce-code-analyzer) directly from the [GitHub Actions Marketplace](https://github.com/marketplace). If you’re using DevOps Center, use our GitHub Action to run Salesforce Code Analyzer as you promote changes.
+* NEW (CodeAnalyzer): To accelerate your continuous integration/continuous development (CI/CD) development, use our `run-code-analyzer` GitHub Action in your pipeline. For more info, read our [Accelerate Your CI/CD Integration](https://forcedotcom.github.io/sfdx-scanner/en/v3.x/ci-cd-integration/#accelerate-your-cicd-integration) documentation and access [`run-code-analyzer`](https://github.com/marketplace/actions/run-salesforce-code-analyzer) directly from the [GitHub Actions Marketplace](https://github.com/marketplace). If you’re using DevOps Center, use our GitHub Action to run Salesforce Code Analyzer as you promote changes.
 * NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
 * CHANGE (CodeAnalyzer and GraphEngine): We made some updates to two sf scanner run and scanner run dfa flags: 
 	-	`--projectdir` now attempts to calculate a default when no value is provided
