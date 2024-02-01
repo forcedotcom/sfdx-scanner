@@ -19,7 +19,7 @@ Follow these CI/CD best practices
 * Use the `-o/--outfile=<name>.xml` flag to write your results to a file and produce a results artifact that can be used by the CI/CD tool.
 * Use the `-s/–severity-threshold` flag to cause a non-zero exit code when any violations meet or exceed the provided value. Many CI/CD tools require thresholds.
 
-## Accelerate Your CI/CD Integration #
+## Accelerate Your CI/CD Integration
 
 ### Run Code Analyzer GitHub Action
 
@@ -33,7 +33,7 @@ With the `run-code-analyzer` Action, you can customize:
 * What arguments to pass with your scan
 * The name of the results artifact
 
-With `run-code-analyzer`, these outputs are included in the results file.
+With `run-code-analyzer`, take control of your workflow’s next steps with these outputs:
 
 * The Salesforce Code Analyzer execution exit code
 * The total number of violations found
