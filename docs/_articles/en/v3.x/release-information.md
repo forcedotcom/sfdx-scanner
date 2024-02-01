@@ -12,6 +12,18 @@ We publish the latest Code Analyzer monthly.
 * Run `sf plugins update` to update Code Analyzer and help to the latest version.
 * Follow these [instructions](./en/v3.x/getting-started/install/#upgrade-plug-in) to update Code Analyzer
 
+## [v3.21.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.21.0) (02-07-2024)
+
+[Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.20.0...v3.19.0)
+
+* NEW (CodeAnalyzer): To accelerate your continuous integration/continuous development (CI/CD) development, use our `run-code-analyzer` GitHub Action in your pipeline. For more info, read our Accelerate Your CI/CD Integration documentation and access [`run-code-analyzer`](https://github.com/marketplace/actions/run-salesforce-code-analyzer) directly from the [GitHub Actions Marketplace](https://github.com/marketplace). If you’re using DevOps Center, use our GitHub Action to run Salesforce Code Analyzer as you promote changes.
+* NEW (CodeAnalyzer): We made some updates to the RetireJS vulnerability database.
+* CHANGE (CodeAnalyzer and GraphEngine): We made some updates to two sf scanner run and scanner run dfa flags: 
+	-	`--projectdir` now attempts to calculate a default when no value is provided
+	-	`--target` now has a default of `.` 
+
+### Release Summary
+
 ## [v3.20.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.20.0) (1-10-2024)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.20.0...v3.19.0)
