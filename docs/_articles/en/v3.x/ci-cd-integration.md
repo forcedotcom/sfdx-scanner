@@ -19,7 +19,7 @@ Follow these CI/CD best practices
 * Use the `-o/--outfile=<name>.xml` flag to write your results to a file and produce a results artifact that can be used by the CI/CD tool.
 * Use the `-s/–severity-threshold` flag to cause a non-zero exit code when any violations meet or exceed the provided value. Many CI/CD tools require thresholds.
 
-## Accelerate Your CI/CD Integration#
+## Accelerate Your CI/CD Integration
 
 ### Run Code Analyzer GitHub Action
 
