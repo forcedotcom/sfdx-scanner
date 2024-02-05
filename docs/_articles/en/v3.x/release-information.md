@@ -24,6 +24,19 @@ We publish the latest Code Analyzer monthly.
 
 ### Release Summary
 
+**Closed Issues:**
+* 32 new PMD rules for AppExchange Security Review [\#1295](https://github.com/forcedotcom/sfdx-scanner/issues/1295)
+* Salesforce Code Analyzer GitHub Actions [\#1297](https://github.com/forcedotcom/sfdx-scanner/issues/1297)
+* [BUG] Scanner run taking more than 30minutes [\#1317](https://github.com/forcedotcom/sfdx-scanner/issues/1317)
+* [BUG] sfdx installation error [\#1325](https://github.com/forcedotcom/sfdx-scanner/issues/1325)
+
+**Merged Pull Requests:**
+
+* NEW (CodeAnalyzer): @W-14689261@: The --target and --projectdir flags are no longer required. Defaults are provided. [\#1318](https://github.com/forcedotcom/sfdx-scanner/pull/1318)
+* CHANGE (GraphEngine): @W-13015046@: GraphEngine properly handles static and super calls. [\#1322](https://github.com/forcedotcom/sfdx-scanner/pull/1322)
+* CHANGE (CodeAnalyzer): @W-14689261@: Restore --projectdir to allow multiple dirs again [\#1342](https://github.com/forcedotcom/sfdx-scanner/pull/1342)
+
+
 ## [v3.20.0](https://github.com/forcedotcom/sfdx-scanner/tree/v3.20.0) (1-10-2024)
 
 [Full Changelog](https://github.com/forcedotcom/sfdx-scanner/compare/v3.20.0...v3.19.0)
