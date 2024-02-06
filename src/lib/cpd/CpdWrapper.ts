@@ -2,11 +2,9 @@ import {Logger} from '@salesforce/core';
 import {FileHandler} from '../util/FileHandler';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
-import { PMD_LIB } from '../../Constants';
 import { CommandLineSupport} from '../services/CommandLineSupport';
-
-const MAIN_CLASS = 'net.sourceforge.pmd.cpd.CPD';
-const HEAP_SIZE = '-Xmx1024m';
+import {Controller} from "../../Controller";
+import {PmdCommandInfo} from "../pmd/PmdCommandInfo";
 
 interface CpdWrapperOptions {
 	path: string;
@@ -36,14 +34,12 @@ export default class CpdWrapper extends CommandLineSupport {
 		const javaHome = await JreSetupManager.verifyJreSetup();
 		const command = path.join(javaHome, 'bin', 'java');
 
-		const classpath = [`${PMD_LIB}/*`];
-
 		const fileHandler = new FileHandler();
 		const tmpPath = await fileHandler.tmpFileWithCleanup();
 		await fileHandler.writeFile(tmpPath, this.path);
 
-		const args = ['-cp', classpath.join(path.delimiter), HEAP_SIZE, MAIN_CLASS, '--filelist', tmpPath,
-			'--format', 'xml', '--minimum-tokens', String(this.minimumTokens), '--language', this.language];
+		const pmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo();
+		const args: string[] = pmdCommandInfo.constructJavaCommandArgsForCpd(tmpPath, this.minimumTokens, this.language)
 
 		this.logger.trace(`Preparing to execute CPD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];
