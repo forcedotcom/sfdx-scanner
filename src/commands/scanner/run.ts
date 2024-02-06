@@ -53,8 +53,7 @@ export default class Run extends ScannerRunCommand {
 			summary: getMessage(BundleName.Run, 'flags.targetSummary'),
 			description: getMessage(BundleName.Run, 'flags.targetDescription'),
 			delimiter: ',',
-			multiple: true,
-			required: true
+			multiple: true
 		})(),
 		// END: Targeting-related flags.
 		// BEGIN: Engine config flags.
@@ -89,7 +88,7 @@ export default class Run extends ScannerRunCommand {
 	};
 
 	protected createAction(logger: Logger, display: Display): Action {
-		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version);
+		const inputProcessor: InputProcessor = new InputProcessorImpl(this.config.version, display);
 		const ruleFilterFactory: RuleFilterFactory = new RuleFilterFactoryImpl();
 		const engineOptionsFactory: EngineOptionsFactory = new RunEngineOptionsFactory(inputProcessor);
 		const resultsProcessorFactory: ResultsProcessorFactory = new ResultsProcessorFactoryImpl();

@@ -28,6 +28,7 @@ import apex.jorje.semantic.ast.expression.ReferenceExpression;
 import apex.jorje.semantic.ast.expression.SoqlExpression;
 import apex.jorje.semantic.ast.expression.SoslExpression;
 import apex.jorje.semantic.ast.expression.SuperMethodCallExpression;
+import apex.jorje.semantic.ast.expression.SuperVariableExpression;
 import apex.jorje.semantic.ast.expression.ThisMethodCallExpression;
 import apex.jorje.semantic.ast.expression.ThisVariableExpression;
 import apex.jorje.semantic.ast.expression.TriggerVariableExpression;
@@ -148,6 +149,8 @@ public final class ASTConstants {
         public static final String STANDARD_CONDITION = getVertexLabel(StandardCondition.class);
         public static final String SUPER_METHOD_CALL_EXPRESSION =
                 getVertexLabel(SuperMethodCallExpression.class);
+        public static final String SUPER_VARIABLE_EXPRESSION =
+                getVertexLabel(SuperVariableExpression.class);
         public static final String THIS_METHOD_CALL_EXPRESSION =
                 getVertexLabel(ThisMethodCallExpression.class);
         public static final String THIS_VARIABLE_EXPRESSION =

@@ -1,9 +1,7 @@
-import {SfError} from '@salesforce/core';
 import {AbstractSfgeEngine, SfgeViolation} from "./AbstractSfgeEngine";
-import {Rule, RuleGroup, RuleTarget, RuleViolation, SfgeConfig} from '../../types';
+import {Rule, RuleGroup, RuleTarget, RuleViolation} from '../../types';
 import {CUSTOM_CONFIG, RuleType} from '../../Constants';
 import * as EngineUtils from "../util/CommonEngineUtils";
-import {BundleName, getMessage} from "../../MessageCatalog";
 
 export class SfgePathlessEngine extends AbstractSfgeEngine {
 	/**
@@ -32,16 +30,7 @@ export class SfgePathlessEngine extends AbstractSfgeEngine {
 		// For the non-DFA Graph Engine variant, we need to make sure that we have the
 		// necessary info to run the engine, since the relevant flags aren't required
 		// for `scanner run`.
-		if (engineOptions.has(CUSTOM_CONFIG.SfgeConfig)) {
-			const sfgeConfig: SfgeConfig = JSON.parse(engineOptions.get(CUSTOM_CONFIG.SfgeConfig)) as SfgeConfig;
-			if (sfgeConfig.projectDirs && sfgeConfig.projectDirs.length > 0) {
-				// If we've got a config with projectDirs, we're set.
-				return true;
-			}
-		}
-		// If we're here, it's because we're missing the necessary info to run this engine.
-		// We should throw an error indicating this.
-		throw new SfError(getMessage(BundleName.SfgeEngine, 'errors.failedWithoutProjectDir'));
+		return engineOptions.has(CUSTOM_CONFIG.SfgeConfig);
 	}
 
 	protected getSubVariantName(): string {

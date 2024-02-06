@@ -39,6 +39,6 @@ export default class Remove extends ScannerCommand {
 	};
 
 	protected createAction(logger: Logger, display: Display): Action {
-		return new RuleRemoveAction(logger, display, new InputProcessorImpl(this.config.version));
+		return new RuleRemoveAction(logger, display, new InputProcessorImpl(this.config.version, display));
 	}
 }

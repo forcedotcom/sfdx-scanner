@@ -24,22 +24,18 @@ export class RunDfaAction extends AbstractRunAction {
 		await super.validateInputs(inputs);
 
 		const fh = new FileHandler();
-		// The superclass will validate that --projectdir is well-formed,
-		// but doesn't require that the flag actually be present.
-		// So we should make sure it exists here.
-		if (!inputs.projectdir || (inputs.projectdir as string[]).length === 0) {
-			throw new SfError(getMessage(BundleName.RunDfa, 'validations.projectdirIsRequired'));
-		}
 		// Entries in the target array may specify methods, but only if the entry is neither a directory nor a glob.
-		for (const target of (inputs.target as string[])) {
-			// The target specifies a method if it includes the `#` syntax.
-			if (target.indexOf('#') > -1) {
-				if(globby.hasMagic(target)) {
-					throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
-				}
-				const potentialFilePath = target.split('#')[0];
-				if (!(await fh.isFile(potentialFilePath))) {
-					throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
+		if (inputs.target) {
+			for (const target of (inputs.target as string[])) {
+				// The target specifies a method if it includes the `#` syntax.
+				if (target.indexOf('#') > -1) {
+					if (globby.hasMagic(target)) {
+						throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
+					}
+					const potentialFilePath = target.split('#')[0];
+					if (!(await fh.isFile(potentialFilePath))) {
+						throw new SfError(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [potentialFilePath]));
+					}
 				}
 			}
 		}

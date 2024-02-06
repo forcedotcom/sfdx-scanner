@@ -37,7 +37,7 @@ public class IndeterminantTest {
      */
     @ValueSource(
             strings = {"Boolean", "Id", "Integer", "List<String>", "Map<String, String>", "String"})
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "{displayName}: variableType = {0}")
     public void testUnresolvedUserMethodReturnIsIndeterminant(String variableType) {
         String sourceCode =
                 "public class MyClass {\n"
@@ -61,7 +61,7 @@ public class IndeterminantTest {
     /** Method parameters have their type synthesized based on the variable declaration. */
     @ValueSource(
             strings = {"Boolean", "Id", "Integer", "List<String>", "Map<String, String>", "String"})
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "{displayName}: variableType = {0}")
     public void testUnresolvedUserMethodParameterIsIndeterminant(String variableType) {
         String sourceCode =
                 "public class MyClass {\n"
@@ -94,7 +94,7 @@ public class IndeterminantTest {
      * return type of the method
      */
     @MethodSource("systemMethodSource")
-    @ParameterizedTest(name = "variableType=({0}):method=({1})")
+    @ParameterizedTest(name = "{displayName}: variableType=({0}):method=({1})")
     public void testUnresolvedSystemMethodReturnAssignmentIsIndeterminant(
             String variableType, String method) {
         String sourceCode =
@@ -124,7 +124,7 @@ public class IndeterminantTest {
      * return type of the method
      */
     @MethodSource("systemMethodSource")
-    @ParameterizedTest(name = "variableType=({0}):method=({1})")
+    @ParameterizedTest(name = "{displayName}: variableType=({0}):method=({1})")
     public void testUnresolvedSystemMethodReturnPassAsParameterIsIndeterminant(
             String variableType, String method) {
         String sourceCode =
