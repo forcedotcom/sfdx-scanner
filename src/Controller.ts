@@ -9,6 +9,7 @@ import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
 import {BundleName, getMessage} from "./MessageCatalog";
+import {Pmd6CommandInfo, PmdCommandInfo} from "./lib/pmd/PmdCommandInfo";
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
@@ -22,6 +23,14 @@ function enginesToString(engines: RuleEngine[]): string {
 //       We should favor proper constructor dependency injection over grabbing singletons in our business logic.
 //       See https://stackoverflow.com/questions/137975/what-are-drawbacks-or-disadvantages-of-singleton-pattern
 
+
+// We all should hate global state. But our team agreed that we have a bit of refactoring to do before we can more
+// easily swap out the pmd version. So this is meant to be a temporary solution until we do that refactoring.
+declare global {
+	// eslint-disable-next-line no-var
+	var _activePmdCommandInfo: PmdCommandInfo;
+}
+globalThis._activePmdCommandInfo = new Pmd6CommandInfo();
 
 // This is probably more appropriately called a ProviderFactory (Salesforce Core folks know this code smell all too well)
 export const Controller = {
@@ -92,5 +101,13 @@ export const Controller = {
 		}
 
 		return engines;
+	},
+
+	setActivePmdCommandInfo(pmdCommandInfo: PmdCommandInfo): void {
+		globalThis._activePmdCommandInfo = pmdCommandInfo;
+	},
+
+	getActivePmdCommandInfo: (): PmdCommandInfo => {
+		return globalThis._activePmdCommandInfo;
 	}
 };

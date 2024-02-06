@@ -7,7 +7,7 @@ import Sinon = require('sinon');
 import {PmdEngine, _PmdRuleMapper}  from '../../../src/lib/pmd/PmdEngine'
 import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import {CUSTOM_CONFIG, ENGINE, LANGUAGE, PMD_VERSION} from '../../../src/Constants';
+import {CUSTOM_CONFIG, ENGINE, LANGUAGE, PMD6_VERSION} from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {Config} from "../../../src/lib/util/Config";
@@ -412,7 +412,7 @@ describe('_PmdRuleMapper', () => {
 		const validJar = 'jar-that-exists.jar';
 		const missingJar = 'jar-that-is-missing.jar';
 		// This jar is automatically included by the PmdCatalogWrapper
-		const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', `pmd-java-${PMD_VERSION}.jar`));
+		const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', `pmd-java-${PMD6_VERSION}.jar`));
 		let uxSpy = null;
 
 		before(() => {

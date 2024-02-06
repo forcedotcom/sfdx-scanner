@@ -5,7 +5,7 @@ import {deepCopy, isPathlessViolation} from "../util/Utils";
 import * as url from "url";
 import {RuleCatalog} from "../services/RuleCatalog";
 import {ESLint} from "eslint";
-import {ENGINE, PMD_VERSION, SFGE_VERSION} from "../../Constants";
+import {ENGINE, SFGE_VERSION} from "../../Constants";
 import {Controller} from "../../Controller";
 import * as retire from 'retire';
 
@@ -256,7 +256,7 @@ class PMDSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: ENGINE.PMD,
-						version: PMD_VERSION,
+						version: Controller.getActivePmdCommandInfo().getVersion(),
 						informationUri: 'https://pmd.github.io/pmd',
 						rules: []
 					}
@@ -278,7 +278,7 @@ class CPDSarifFormatter extends SarifFormatter {
 				tool: {
 					driver: {
 						name: ENGINE.CPD,
-						version: PMD_VERSION, /*CPD would use the same PMD version*/
+						version: Controller.getActivePmdCommandInfo().getVersion(), /*CPD would use the same PMD version*/
 						informationUri: 'https://pmd.github.io/latest/pmd_userdocs_cpd.html',
 						rules: []
 					}

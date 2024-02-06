@@ -6,7 +6,7 @@ import path = require('path');
 import * as csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { PathlessEngineFilters, ENGINE, PMD_VERSION, SFGE_VERSION } from '../../../src/Constants';
+import { PathlessEngineFilters, ENGINE, PMD6_VERSION, SFGE_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
 import {Results, RunResults} from "../../../src/lib/output/Results";
 import { OutputFormat } from '../../../src/lib/output/OutputFormat';
@@ -517,7 +517,7 @@ describe('Results Formatting', () => {
 		function validatePMDSarif(run: unknown, normalizeSeverity: boolean): void {
 			const driver = run['tool']['driver'];
 			expect(driver.name).to.equal('pmd');
-			expect(driver.version).to.equal(PMD_VERSION);
+			expect(driver.version).to.equal(PMD6_VERSION);
 			expect(driver.informationUri).to.equal('https://pmd.github.io/pmd');
 
 			// tool.driver.rules
