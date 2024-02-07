@@ -1,9 +1,11 @@
 import {OutputFormatter, Results} from "./Results";
 import {FormattedOutput, ResultTableRow, RuleResult} from "../../types";
 import * as path from "path";
-import * as wrap from "word-wrap";
+import * as wordwrap from "wordwrap";
 import {isPathlessViolation} from "../util/Utils";
 import {Ux} from "@salesforce/sf-plugins-core";
+
+const WORDWRAP_LIMIT = 50;
 
 const BASE_COLUMNS: Ux.Table.Columns<ResultTableRow> = {
 	description: {},
@@ -47,7 +49,7 @@ export class TableOutputFormatter implements OutputFormatter {
 				const relativeFile = path.relative(process.cwd(), fileName);
 				// Instantiate our Row object.
 				const baseRow: ResultTableRow = {
-					description: wrap(message),
+					description: wordwrap.hard(WORDWRAP_LIMIT)(message),
 					category: violation.category,
 					url: violation.url
 				};

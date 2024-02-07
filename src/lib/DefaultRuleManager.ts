@@ -251,7 +251,7 @@ export class DefaultRuleManager implements RuleManager {
 		const ruleTargets: RuleTarget[] = [];
 		// Ask engines for their desired target patterns.
 		const engineTargets = await engine.getTargetPatterns();
-		assert(engineTargets);
+		assert.ok(engineTargets);
 		// We also need to do a bit of processing on the patterns we were given.
 		const positivePatterns: string[] = [];
 		const negativePatterns: string[] = [];

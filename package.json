@@ -14,6 +14,7 @@
 		"@salesforce/eslint-config-lwc": "^3.2.1",
 		"@salesforce/eslint-plugin-lightning": "^1.0.0",
 		"@salesforce/sf-plugins-core": "^5.0.4",
+		"@types/wordwrap": "^1.0.3",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"cross-spawn": "^7.0.3",
@@ -40,7 +41,6 @@
 		"typescript": "~5.1.0",
 		"untildify": "^4.0.0",
 		"uuid": "^9.0.0",
-		"word-wrap": "^1.2.3",
 		"xml-js": "^1.6.11"
 	},
 	"resolutions": {
