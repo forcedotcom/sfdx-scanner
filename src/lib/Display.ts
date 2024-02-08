@@ -1,5 +1,6 @@
 import {Spinner} from "@salesforce/sf-plugins-core";
 import {Ux} from "@salesforce/sf-plugins-core/lib/ux";
+import {AnyJson} from "@salesforce/ts-types";
 
 export interface Display {
 	/**
@@ -26,6 +27,11 @@ export interface Display {
 	 * Output table to stdout only if the "--json" flag is not present.
 	 */
 	displayTable<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>): void;
+
+	/**
+	 * Output object to stdout only if the "--json" flag is not present.
+	 */
+	displayStyledObject(obj: AnyJson): void;
 
 	/**
 	 * Display a message as a warning.
@@ -91,6 +97,10 @@ export class UxDisplay implements Display {
 		this.displayable.table(data, columns);
 	}
 
+	public displayStyledObject(obj: AnyJson): void {
+		this.displayable.styledObject(obj);
+	}
+
 	public displayWarning(msg: string): void {
 		this.displayable.warn(msg);
 	}
@@ -126,12 +136,14 @@ export interface Displayable {
 	// Display an error or message as a warning.                                            [Implemented by Command]
 	warn(input: string): void;
 
-
 	// Simplified prompt for single-question confirmation. Times out and throws after 10s.  [Implemented by SfCommand]
 	confirm(message: string): Promise<boolean>;
 
 	// Output stylized header to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
 	styledHeader(headerText: string): void;
+
+	// Output stylized object to stdout only when "--json" flag is not present.             [Implemented by SfCommand]
+	styledObject(obj: AnyJson): void;
 
 	// Output table to stdout only when "--json" flag is not present.                       [Implemented by SfCommand]
 	table<R extends Ux.Table.Data>(data: R[], columns: Ux.Table.Columns<R>, options?: Ux.Table.Options): void;

@@ -1,8 +1,9 @@
-import {PMD6_LIB, PMD6_VERSION} from "../../Constants";
+import {PMD6_LIB, PMD6_VERSION, PMD7_LIB, PMD7_VERSION} from "../../Constants";
 import * as path from 'path';
 
 const PMD6_MAIN_CLASS = 'net.sourceforge.pmd.PMD';
 const CPD6_MAIN_CLASS = 'net.sourceforge.pmd.cpd.CPD';
+const PMD7_CLI_CLASS = 'net.sourceforge.pmd.cli.PmdCli';
 const HEAP_SIZE = '-Xmx1024m';
 
 export interface PmdCommandInfo {
@@ -40,6 +41,33 @@ export class Pmd6CommandInfo implements PmdCommandInfo {
 	constructJavaCommandArgsForCpd(fileList: string, minimumTokens: number, language: string): string[] {
 		const classpath = `${PMD6_LIB}/*`;
 		return ['-cp', classpath, HEAP_SIZE, CPD6_MAIN_CLASS, '--filelist', fileList,
-			'--format', 'xml', '--minimum-tokens', String(minimumTokens), '--language', language];
+			'--format', 'xml', '--minimum-tokens', minimumTokens.toString(), '--language', language];
+	}
+}
+
+export class Pmd7CommandInfo implements PmdCommandInfo {
+	getVersion(): string {
+		return PMD7_VERSION;
+	}
+
+	getJarPathForLanguage(language: string): string {
+		return path.join(PMD7_LIB, `pmd-${language}-${this.getVersion()}.jar`);
+	}
+
+	constructJavaCommandArgsForPmd(fileList: string, classPathsForExternalRules: string[], rulesets: string): string[] {
+		const classpath =  classPathsForExternalRules.concat([`${PMD7_LIB}/*`]).join(path.delimiter);
+		const args = ['-cp', classpath, HEAP_SIZE, PMD7_CLI_CLASS, 'check', '--file-list', fileList,
+			'--format', 'xml'];
+		if (rulesets.length > 0) {
+			args.push('--rulesets', rulesets);
+		}
+		return args;
+	}
+
+	constructJavaCommandArgsForCpd(fileList: string, minimumTokens: number, language: string): string[] {
+		const classpath = `${PMD7_LIB}/*`;
+		const resolvedLanguage = language === 'visualforce' ? 'vf' : language;
+		return ['-cp', classpath, HEAP_SIZE, PMD7_CLI_CLASS, 'cpd', '--file-list', fileList, '--format', 'xml',
+			'--minimum-tokens', minimumTokens.toString(), '--language', resolvedLanguage, '--skip-lexical-errors'];
 	}
 }
