@@ -8,17 +8,15 @@ import {Inputs, PathlessRuleViolation, RuleResult} from "../../../src/types";
 import * as path from "path";
 import {initContainer} from '../../../src/ioc.config';
 import {expect} from "chai";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {Controller} from "../../../src/Controller";
-import {after} from "mocha";
 import {Results} from "../../../src/lib/output/Results";
 import {PMD6_VERSION, PMD7_VERSION} from "../../../src/Constants";
 import {FakeResultsProcessorFactory, RawResultsProcessor} from "./fakes";
+import {Controller} from "../../../lib/Controller";
+import {Pmd6CommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
 
 const codeFixturesDir = path.join(__dirname, '..', '..', 'code-fixtures');
 const pathToSomeTestClass = path.join(codeFixturesDir, 'apex', 'SomeTestClass.cls');
 const pathToCodeForCpd = path.join(codeFixturesDir, 'cpd');
-
 
 describe("Tests for RunAction", () => {
 	let display: FakeDisplay;
@@ -42,21 +40,17 @@ describe("Tests for RunAction", () => {
 	});
 
 	describe("Tests to confirm that PMD7 binary files are invoked when choosing PMD7", () => {
-
-		// TODO: Soon we will have an input flag to control this. Once we do, we can update this to use that instead
-		const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
-		before(() => {
-			Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
-		});
-		after(() => {
-			Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
-		});
+		afterEach(() => {
+			// Until we remove global state, we should cleanup after ourselves to prevent other tests from being impacted
+			Controller.setActivePmdCommandInfo(new Pmd6CommandInfo())
+		})
 
 		it("When using PMD7, the pmd engine actually uses PMD7 instead of PMD6", async () => {
 			const inputs: Inputs = {
 				target: [pathToSomeTestClass],
 				engine: ['pmd'],
-				'normalize-severity': true
+				'normalize-severity': true,
+				"preview-pmd7": true
 			}
 			await runAction.run(inputs);
 
@@ -89,7 +83,8 @@ describe("Tests for RunAction", () => {
 			const inputs: Inputs = {
 				target: [pathToCodeForCpd],
 				engine: ['cpd'],
-				'normalize-severity': true
+				'normalize-severity': true,
+				"preview-pmd7": true
 			}
 			await runAction.run(inputs);
 

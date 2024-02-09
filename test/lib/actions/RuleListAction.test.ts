@@ -2,13 +2,12 @@ import {FakeDisplay} from "../FakeDisplay";
 import {initContainer} from "../../../src/ioc.config";
 import {RuleFilterFactoryImpl} from "../../../src/lib/RuleFilterFactory";
 import {RuleListAction} from "../../../src/lib/actions/RuleListAction";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {Controller} from "../../../src/Controller";
-import {after} from "mocha";
 import {Inputs} from "../../../src/types";
 import {expect} from "chai";
 import {Ux} from "@salesforce/sf-plugins-core";
 import {PMD7_LIB} from "../../../src/Constants";
+import {Controller} from "../../../lib/Controller";
+import {Pmd6CommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
 
 describe("Tests for RuleListAction", () => {
 	let display: FakeDisplay;
@@ -22,19 +21,15 @@ describe("Tests for RuleListAction", () => {
 	});
 
 	describe("Tests to confirm that PMD7 binary files are invoked when choosing PMD7", () => {
-
-		// TODO: Soon we will have an input flag to control this. Once we do, we can update this to use that instead
-		const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
-		before(() => {
-			Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
-		});
-		after(() => {
-			Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
-		});
+		afterEach(() => {
+			// Until we remove global state, we should cleanup after ourselves to prevent other tests from being impacted
+			Controller.setActivePmdCommandInfo(new Pmd6CommandInfo())
+		})
 
 		it("When using PMD7, the rule list for the pmd engine should give back rules for PMD 7", async () => {
 			const inputs: Inputs = {
-				engine: ['pmd']
+				engine: ['pmd'],
+				"preview-pmd7": true
 			}
 			await ruleListAction.run(inputs);
 
@@ -53,7 +48,8 @@ describe("Tests for RuleListAction", () => {
 
 		it("When using PMD7, the rule list for the cpd engine should give back the copy-paste-detected rule", async () => {
 			const inputs: Inputs = {
-				engine: ['cpd']
+				engine: ['cpd'],
+				"preview-pmd7": true
 			}
 			await ruleListAction.run(inputs);
 
