@@ -1,13 +1,12 @@
 import {FakeDisplay} from "../FakeDisplay";
 import {initContainer} from "../../../src/ioc.config";
 import {RuleFilterFactoryImpl} from "../../../src/lib/RuleFilterFactory";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {Controller} from "../../../src/Controller";
-import {after} from "mocha";
 import {Inputs} from "../../../src/types";
 import {expect} from "chai";
 import {RuleDescribeAction} from "../../../src/lib/actions/RuleDescribeAction";
 import {AnyJson} from "@salesforce/ts-types";
+import {Pmd6CommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
+import {Controller} from "../../../lib/Controller";
 
 describe("Tests for RuleDescribeAction", () => {
 	let display: FakeDisplay;
@@ -21,19 +20,15 @@ describe("Tests for RuleDescribeAction", () => {
 	});
 
 	describe("Tests to confirm that PMD7 binary files are invoked when choosing PMD7 with pmd engine", () => {
-
-		// TODO: Soon we will have an input flag to control this. Once we do, we can update this to use that instead
-		const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
-		before(() => {
-			Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
-		});
-		after(() => {
-			Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
-		});
+		afterEach(() => {
+			// Until we remove global state, we should cleanup after ourselves to prevent other tests from being impacted
+			Controller.setActivePmdCommandInfo(new Pmd6CommandInfo())
+		})
 
 		it("When using PMD7, the rule description for a pmd rule should give correct info from PMD 7", async () => {
 			const inputs: Inputs = {
-				rulename: 'ApexCRUDViolation'
+				rulename: 'ApexCRUDViolation',
+				"preview-pmd7": true
 			}
 			await ruleDescribeAction.run(inputs);
 

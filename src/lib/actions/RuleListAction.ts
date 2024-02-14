@@ -7,6 +7,7 @@ import {RuleFilter} from "../RuleFilter";
 import {Controller} from "../../Controller";
 import {Display} from "../Display";
 import {RuleFilterFactory} from "../RuleFilterFactory";
+import {Pmd6CommandInfo, Pmd7CommandInfo} from "../pmd/PmdCommandInfo";
 
 const MSG_YES: string = getMessage(BundleName.List, 'yes');
 const MSG_NO: string = getMessage(BundleName.List, 'no');
@@ -59,6 +60,7 @@ export class RuleListAction implements Action {
 	}
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
+		Controller.setActivePmdCommandInfo(inputs['preview-pmd7'] ? new Pmd7CommandInfo() : new Pmd6CommandInfo());
 		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
