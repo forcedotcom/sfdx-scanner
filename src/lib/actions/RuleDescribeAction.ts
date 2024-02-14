@@ -7,7 +7,6 @@ import {BundleName, getMessage} from "../../MessageCatalog";
 import {deepCopy} from "../util/Utils";
 import Dfa from "../../commands/scanner/run/dfa";
 import Run from "../../commands/scanner/run";
-import {Ux} from "@salesforce/sf-plugins-core";
 import {Display} from "../Display";
 import {RuleFilterFactory} from "../RuleFilterFactory";
 
@@ -34,8 +33,6 @@ export class RuleDescribeAction implements Action {
 	}
 
 	public async run(inputs: Inputs): Promise<AnyJson> {
-		const jsonEnabled: boolean = inputs.json as boolean;
-
 		const ruleFilters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 
 		// TODO: Inject RuleManager as a dependency to improve testability by removing coupling to runtime implementation
@@ -52,11 +49,11 @@ export class RuleDescribeAction implements Action {
 			this.display.displayWarning(msg);
 			rules.forEach((rule, idx) => {
 				this.display.displayStyledHeader(`Rule #${idx + 1}`);
-				this.displayStyledRule(rule, jsonEnabled);
+				this.displayStyledRule(rule);
 			});
 		} else {
 			// If there's exactly one rule, we don't need to do anything special, and can just log the rule.
-			this.displayStyledRule(rules[0], jsonEnabled);
+			this.displayStyledRule(rules[0]);
 		}
 		// We need to return something for when the --json flag is used, so we'll just return the list of rules.
 		return deepCopy(rules);
@@ -87,9 +84,18 @@ export class RuleDescribeAction implements Action {
 		});
 	}
 
-	private displayStyledRule(rule: DescribeStyledRule, jsonEnabled: boolean): void {
-		// TODO: We should remove this instantiation of new Ux in favor of possibly a new method on Display
-		new Ux({jsonEnabled: jsonEnabled})
-			.styledObject(rule, ['name', 'engine', 'runWith', 'isPilot', 'enabled', 'categories', 'rulesets', 'languages', 'description', 'message']);
+	private displayStyledRule(rule: DescribeStyledRule): void {
+		this.display.displayStyledObject({
+			name: rule.name,
+			engine: rule.engine,
+			runWith: rule.runWith,
+			isPilot: rule.isPilot,
+			enabled: rule.enabled,
+			categories: rule.categories,
+			rulesets: rule.rulesets,
+			languages: rule.languages,
+			description: rule.description,
+			message: rule.message
+		})
 	}
 }

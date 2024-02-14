@@ -1,11 +1,13 @@
 import {Display} from "../../src/lib/Display";
 import {Ux} from "@salesforce/sf-plugins-core";
+import {AnyJson} from "@salesforce/ts-types";
 
 export class FakeDisplay implements Display {
 	private outputs: string[] = [];
 	private confirmationPromptResponse: boolean = true;
 	private lastTableColumns: Ux.Table.Columns<Ux.Table.Data>;
 	private lastTableData: Ux.Table.Data[];
+	private lastStyledObject: AnyJson;
 
 	public getOutputArray(): string[] {
 		return this.outputs;
@@ -25,6 +27,10 @@ export class FakeDisplay implements Display {
 
 	public getLastTableData(): Ux.Table.Data[] {
 		return this.lastTableData;
+	}
+
+	public getLastStyledObject(): AnyJson {
+		return this.lastStyledObject;
 	}
 
 
@@ -57,6 +63,11 @@ export class FakeDisplay implements Display {
 		this.lastTableColumns = columns;
 		this.lastTableData = data;
 		this.outputs.push("[Table][" + JSON.stringify(columns) + "]: " + JSON.stringify(data));
+	}
+
+	displayStyledObject(obj: AnyJson): void {
+		this.lastStyledObject = obj;
+		this.outputs.push(JSON.stringify(obj))
 	}
 
 	spinnerStart(msg: string, status?: string): void {
