@@ -76,19 +76,17 @@ tasks.register<Copy>("installPmd6") {
   from(zipTree("$buildDir/$pmd6File"))
 
   // I went to https://github.com/pmd/pmd/tree/pmd_releases/6.55.0 and for each of the languages that we support
-  // (apex, java, visualforce, xml), I took a look at its pom file (like pmd-apex/src/pom.xml for example).
-  // That pom said what other modules it depends on and I listed these dependencies (besides test-scoped and  optional
-  // modules). I did this recursively for any dependent pmd-* modules and put it all here.
-  // For completeness, I listed the modules and all their dependencies. Duplicates don't matter since we use setOf.
+  // (apex, java, visualforce, xml), I took a look at its direct and indirect dependencies at
+  //     https://central.sonatype.com/artifact/net.sourceforge.pmd/pmd-apex/dependencies
+  // by selecting the 6.55.0 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
+  // For completeness, I listed the modules and all their compile time dependencies (direct and indirect).
+  // Duplicates don't matter since we use setOf.
   val pmd6ModulesToInclude = setOf(
-    // LANGUAGE MODULE     DEPENDENCIES
-    "pmd-apex",            "pmd-core", "antlr-runtime", "pmd-apex-jorje", "commons-lang3",
-    "pmd-java",            "pmd-core", "saxon", "asm", "commons-lang3",
-    "pmd-visualforce",     "pmd-core", "pmd-apex",
-    "pmd-xml",             "pmd-core", "antlr4-runtime", "saxon",
-    // DEPENDENT MODULE    DEPENDENCIES
-    "pmd-core",            "antlr4-runtime", "jcommander", "saxon", "commons-lang3", "asm", "gson",
-    "pmd-apex-jorje",      "cglib", "logback-classic", "logback-core", "jsr305", "gson", "error_prone_annotations", "guava", "j2objc-annotations", "antlr-runtime", "stringtemplate", "common-lang3", "animal-sniffer-annotations", "jol-core", "slf4j-api", "snakeyaml", "aopalliance", "javax.inject", "asm"
+    // LANGUAGE MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-apex",            "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "asm", "cglib", "commons-lang3", "error_prone_annotations", "gson", "j2objc-annotations", "javax.inject", "jcommander", "jol-core", "jsr305", "logback-classic", "logback-core", "pmd-apex-jorje", "pmd-core", "saxon", "slf4j-api", "stringtemplate",
+    "pmd-java",            "antlr4-runtime", "asm", "commons-lang3", "gson", "jcommander", "pmd-core", "saxon",
+    "pmd-visualforce",     "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "asm", "cglib", "commons-lang3", "error_prone_annotations", "gson", "j2objc-annotations", "javax.inject", "jcommander", "jol-core", "jsr305", "logback-classic", "logback-core", "pmd-apex", "pmd-apex-jorje", "pmd-core", "saxon", "slf4j-api", "stringtemplate",
+    "pmd-xml",             "antr4-runtime", "asm", "commons-lang3", "gson", "jcommander", "pmd-core", "saxon"
   )
 
   val pmd6JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
@@ -126,26 +124,19 @@ tasks.register<Copy>("installPmd7") {
   from(zipTree("$buildDir/$pmd7File"))
 
   // I went to https://github.com/pmd/pmd/tree/pmd_releases/7.0.0-rc4 and for each of the languages that we support
-  // (apex, java, visualforce, xml), I took a look at its pom file (like pmd-apex/src/pom.xml for example).
-  // That pom said what other modules it depends on and I took these dependencies (besides test-scoped and  optional
-  // modules). I did this recursively for any dependent pmd-* modules and put it all here.
-  // For completeness, I listed the modules and all their dependencies except for pmd-ui (since it isn't needed) and
-  // the dependencies of pmd-languages-deps (since it contains all language modules). I also had to add in pmd-cli.
-  // Note that "pkgforce_2.13" was missing from pmd-apex, so I added it in and that unfortunately required me to pull
-  // in all of its dependencies listed at https://central.sonatype.com/artifact/com.github.nawforce/pkgforce_2.13/dependencies.
+  // (apex, java, visualforce, xml), I took a look at its direct and indirect dependencies at
+  //     https://central.sonatype.com/artifact/net.sourceforge.pmd/pmd-apex/dependencies
+  // by selecting the 7.0.0-rc4 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
+  // For completeness, I listed the modules and all their compile time dependencies (direct and indirect).
   // Duplicates don't matter since we use setOf.
   val pmd7ModulesToInclude = setOf(
-    // LANGUAGE MODULE     DEPENDENCIES
-    "pmd-apex",            "pmd-core", "antlr-runtime", "pmd-apex-jorje", "apex-link", "commons-lang3", "guava", "pkgforce_2.13",
-    "pmd-java",            "pmd-core", "asm", "commons-lang3", "checker-qual", "Saxon-HE", "pcollections",
-    "pmd-visualforce",     "pmd-core", "pmd-apex",
-    "pmd-xml",             "pmd-core", "antlr4-runtime",
-    // MAIN CLI MODULE     DEPENDENCIES
-    "pmd-cli",             "pmd-languages-deps", "slf4j-api", "slf4j-simple", "picocli", "progressbar", "checker-qual",
-    // DEPENDENT MODULE    DEPENDENCIES
-    "pmd-core",            "slf4j-api", "jul-to-slf4j", "antlr4-runtime", "Saxon-HE", "commons-lang3", "asm", "gson", "checker-qual", "pcollections", "nice-xml-messages",
-    "pmd-apex-jorje",      "cglib", "jsr305", "gson", "error_prone_annotations", "guava", "j2objc-annotations", "antlr-runtime", "stringtemplate", "commons-lang3", "animal-sniffer-annotations", "slf4j-api", "aopalliance", "javax.inject", "asm",
-    "pkgforce_2.13",       "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "geny_2.13", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13", "apex-parser", "antlr4-runtime", "scala-collection-compat_2.13", "scala-xml_2.13", "scala-library", "scala-reflect"
+    // LANGUAGE MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-apex",            "Saxon-HE", "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "apex-parser", "apexlink", "asm", "cglib", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "geny_2.13", "gson", "guava", "j2objc-annotations", "javax.inject", "jsr305", "jul-to-slf4j", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-apex-jorje", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "stringtemplate", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13",
+    "pmd-java",            "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jul-to-slf4j", "nice-xml-messages", "pcollections", "pmd-core", "slf4j-api",
+    "pmd-visualforce",     "Saxon-HE", "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "apex-parser", "apexlink", "asm", "cglib", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "geny_2.13", "gson", "guava", "j2objc-annotations", "javax.inject", "jsr305", "jul-to-slf4j", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-apex", "pmd-apex-jorje", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "stringtemplate", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13",
+    "pmd-xml",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jul-to-slf4j", "nice-xml-messages", "pcollections", "pmd-core", "slf4j-api",
+    // MAIN CLI MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-cli",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jline", "jul-to-slf4j", "nice-xml-messages", "pcollections", "picocli", "pmd-core", "pmd-ui", "progressbar", "slf4j-api", "slf4j-simple",
   )
   val pmd7JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
   pmd7ModulesToInclude.forEach {

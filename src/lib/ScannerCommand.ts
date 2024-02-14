@@ -24,6 +24,10 @@ import {Logger} from "@salesforce/core";
  * runtime dependency injection points to their corresponding Action classes.
  */
 export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
+
+	// It appears we need to explicitly set this in order for the global --json flag to show up in the generated help text
+	public static readonly enableJsonFlag = true;
+
 	protected async init(): Promise<void> {
 		await super.init();
 		initContainer();
