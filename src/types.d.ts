@@ -18,6 +18,7 @@ export type Rule = {
 	// be OR'd together in this property.
 	defaultConfig?: ESRuleConfigValue;
 	url?: string;
+	message?: string;
 }
 
 export type TelemetryData = {

@@ -216,10 +216,10 @@ export class CpdEngine extends AbstractRuleEngine {
 			for (const occ of occurences) {
 				// create a violation for each occurence of the code fragment
 				const violation: RuleViolation = {
-					line: occ.attributes.line as number,
-					column: occ.attributes.column as number,
-					endLine: occ.attributes.endline as number,
-					endColumn: occ.attributes.endcolumn as number,
+					line: Number(occ.attributes.line),
+					column: Number(occ.attributes.column),
+					endLine: Number(occ.attributes.endline),
+					endColumn: Number(occ.attributes.endcolumn),
 					ruleName: CpdRuleName,
 					severity: CpdViolationSeverity,
 					message: getMessage(BundleName.CpdEngine, "CpdViolationMessage", [codeFragmentID, occCount, occurences.length, duplication.attributes.lines, duplication.attributes.tokens]),

@@ -1,10 +1,18 @@
 import {Logger, SfError} from '@salesforce/core';
 import {Element, xml2js} from 'xml-js';
 import {Controller} from '../../Controller';
-import {Catalog, Rule, RuleGroup, RuleResult, RuleTarget, RuleViolation, TargetPattern} from '../../types';
+import {
+	Catalog,
+	Rule,
+	RuleGroup,
+	RuleResult,
+	RuleTarget,
+	RuleViolation,
+	TargetPattern
+} from '../../types';
 import {AbstractRuleEngine} from '../services/RuleEngine';
 import {Config} from '../util/Config';
-import {APPEXCHANGE_PMD_LIB, PMD_APPEXCHANGE_RULES_VERSION, CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, PMD_LIB, PMD_VERSION, Severity} from '../../Constants';
+import {APPEXCHANGE_PMD_LIB, PMD_APPEXCHANGE_RULES_VERSION, CUSTOM_CONFIG, ENGINE, EngineBase, HARDCODED_RULES, Severity} from '../../Constants';
 import {PmdCatalogWrapper} from './PmdCatalogWrapper';
 import PmdWrapper from './PmdWrapper';
 import {EVENTS, uxEvents} from "../ScannerEvents";
@@ -628,10 +636,12 @@ export class _PmdRuleMapper extends AsyncCreatable {
 		const rulePathsByLanguage = new Map<string, Set<string>>();
 		// Add the default PMD jar for each activated language.
 		(await PmdLanguageManager.getSupportedLanguages()).forEach(language => {
-			const pmdJarPath = path.join(PMD_LIB, `pmd-${language}-${PMD_VERSION}.jar`);
 			const rulePaths = rulePathsByLanguage.get(language) || new Set<string>();
+
+			const pmdJarPath = Controller.getActivePmdCommandInfo().getJarPathForLanguage(language);
 			rulePaths.add(pmdJarPath);
 			this.logger.trace(`Adding JAR ${pmdJarPath}, the default PMD JAR for language ${language}`);
+
 			rulePathsByLanguage.set(language, rulePaths);
 		});
 

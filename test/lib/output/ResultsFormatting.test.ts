@@ -6,10 +6,13 @@ import path = require('path');
 import * as csvParse from 'csv-parse';
 import {parseString} from 'xml2js';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import { PathlessEngineFilters, ENGINE, PMD_VERSION, SFGE_VERSION } from '../../../src/Constants';
+import { PathlessEngineFilters, ENGINE, PMD6_VERSION, SFGE_VERSION } from '../../../src/Constants';
 import { fail } from 'assert';
 import {Results, RunResults} from "../../../src/lib/output/Results";
 import { OutputFormat } from '../../../src/lib/output/OutputFormat';
+import {Controller} from "../../../lib/Controller";
+import {Pmd7CommandInfo, PmdCommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
+import {PMD7_VERSION} from "../../../lib/Constants";
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
 const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js');
@@ -303,6 +306,22 @@ const retireJsVerboseViolations: RuleResult[] = [
 	}
 ];
 
+function createSampleRuleResultsForEngine(engine: string): RuleResult[] {
+	return [{
+		engine: engine,
+		fileName: sampleFile1,
+		violations: [{
+			"line": 2,
+			"column": 11,
+			"severity": 2,
+			"message": "A generic message",
+			"ruleName": "rule-name",
+			"category": "category-name",
+			"url": "https://some/url.org"
+		}]
+	}];
+}
+
 function isString(x: string | {columns; rows}): x is string {
 	return typeof x === 'string';
 }
@@ -517,7 +536,7 @@ describe('Results Formatting', () => {
 		function validatePMDSarif(run: unknown, normalizeSeverity: boolean): void {
 			const driver = run['tool']['driver'];
 			expect(driver.name).to.equal('pmd');
-			expect(driver.version).to.equal(PMD_VERSION);
+			expect(driver.version).to.equal(PMD6_VERSION);
 			expect(driver.informationUri).to.equal('https://pmd.github.io/pmd');
 
 			// tool.driver.rules
@@ -610,7 +629,6 @@ describe('Results Formatting', () => {
 		}
 
 		it ('Happy Path - pathless rules', async () => {
-
 			const results: Results = new RunResults(allFakePathlessRuleResults, new Set(['eslint', 'pmd']));
 			const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
 			const minSev: number = results.getMinSev();
@@ -744,20 +762,7 @@ describe('Results Formatting', () => {
 		it('Handles all pathless engines', async () => {
 			const allEngines = PathlessEngineFilters.map(engine => engine.valueOf());
 			for (const engine of allEngines) {
-				const ruleResults: RuleResult[] = [{
-					engine: engine,
-					fileName: sampleFile1,
-					violations: [{
-						"line": 2,
-						"column": 11,
-						"severity": 2,
-						"message": "A generic message",
-						"ruleName": "rule-name",
-						"category": "category-name",
-						"url": "https://some/url.org"
-					}]
-				}];
-				const results: Results = new RunResults(ruleResults, new Set([engine]));
+				const results: Results = new RunResults(createSampleRuleResultsForEngine(engine), new Set([engine]));
 				await results.toFormattedOutput(OutputFormat.SARIF, false);
 				// should throw an error if the engine was not handled
 			}
@@ -785,6 +790,22 @@ describe('Results Formatting', () => {
 				}
 			}
 		});
+
+		it ('Switching to PMD7 is reflected in sarif output for pmd and cpd engines', async () => {
+			const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
+			try {
+				Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
+				for (const engine of ['pmd', 'cpd']) {
+					const results: Results = new RunResults(createSampleRuleResultsForEngine(engine), new Set([engine]));
+					const formattedOutput: FormattedOutput = await results.toFormattedOutput(OutputFormat.SARIF, false);
+					const sarifResults: unknown[] = JSON.parse(formattedOutput as string);
+					expect(sarifResults['runs']).to.have.lengthOf(1);
+					expect(sarifResults['runs'][0]['tool']['driver']['version']).to.equal(PMD7_VERSION);
+				}
+			} finally {
+				Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
+			}
+		})
 	});
 
 	describe('Output Format: JSON', () => {

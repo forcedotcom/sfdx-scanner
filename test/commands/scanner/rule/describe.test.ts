@@ -60,7 +60,7 @@ describe('scanner rule describe', () => {
 				expect(ctx.stderr.toLowerCase()).to.contain(`WARNING: ${formattedWarning}`.toLowerCase(), 'Warning message should be formatted correctly');
 
 				// Next, verify that there are rule descriptions that are distinctly identified.
-				const regex = /=== Rule #1\n\nname:\s+constructor-super(.*\n)*=== Rule #2\n\nname:\s+constructor-super(.*\n)*=== Rule #3\n\nname:\s+constructor-super/g;
+				const regex = /=== Rule #1\n(.*\n)*name:\s+constructor-super(.*\n)*=== Rule #2\n(.*\n)*name:\s+constructor-super(.*\n)*=== Rule #3\n(.*\n)*name:\s+constructor-super/g;
 				expect(ctx.stdout).to.match(regex, 'Output should contain three rules named constructor-super for each eslint based engine');
 			});
 
