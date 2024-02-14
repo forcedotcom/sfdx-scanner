@@ -57,7 +57,7 @@ tasks.named<Sync>("installDist") {
 }
 
 tasks.register<Delete>("deletePmdCatalogerDist") {
-	delete(pmdCatalogerDistDir)
+  delete(pmdCatalogerDistDir)
 }
 
 // ======== DEFINE/UPDATE PMD6 DIST RELATED TASKS  =====================================================================
@@ -75,23 +75,29 @@ tasks.register<Copy>("installPmd6") {
   dependsOn("downloadPmd6")
   from(zipTree("$buildDir/$pmd6File"))
 
-  val skippablePmd6JarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
-    """^fastparse.*\.jar""".toRegex(),
-    """^groovy.*\.jar""".toRegex(),
-    """^lenses.*\.jar""".toRegex(),
-    """^parsers.*\.jar""".toRegex(),
-    """^pmd-(cpp|cs|dart|fortran|go|groovy|jsp|kotlin|lua|matlab|modelica|objectivec|perl|php|plsql|python|ruby|scala|swift|ui)[-_\d\.]*\.jar""".toRegex(),
-    """^protobuf-java-[\d\.]*\.jar""".toRegex(),
-    """^scala.*\.jar""".toRegex(),
-    """^sourcecode_[\d\.-]*\.jar""".toRegex(),
-    """^trees_[\d\.-]*\.jar""".toRegex()
+  // I went to https://github.com/pmd/pmd/tree/pmd_releases/6.55.0 and for each of the languages that we support
+  // (apex, java, visualforce, xml), I took a look at its pom file (like pmd-apex/src/pom.xml for example).
+  // That pom said what other modules it depends on and I listed these dependencies (besides test-scoped and  optional
+  // modules). I did this recursively for any dependent pmd-* modules and put it all here.
+  // For completeness, I listed the modules and all their dependencies. Duplicates don't matter since we use setOf.
+  val pmd6ModulesToInclude = setOf(
+    // LANGUAGE MODULE     DEPENDENCIES
+    "pmd-apex",            "pmd-core", "antlr-runtime", "pmd-apex-jorje", "commons-lang3",
+    "pmd-java",            "pmd-core", "saxon", "asm", "commons-lang3",
+    "pmd-visualforce",     "pmd-core", "pmd-apex",
+    "pmd-xml",             "pmd-core", "antlr4-runtime", "saxon",
+    // DEPENDENT MODULE    DEPENDENCIES
+    "pmd-core",            "antlr4-runtime", "jcommander", "saxon", "commons-lang3", "asm", "gson",
+    "pmd-apex-jorje",      "cglib", "logback-classic", "logback-core", "jsr305", "gson", "error_prone_annotations", "guava", "j2objc-annotations", "antlr-runtime", "stringtemplate", "common-lang3", "animal-sniffer-annotations", "jol-core", "slf4j-api", "snakeyaml", "aopalliance", "javax.inject", "asm"
   )
-  exclude { details: FileTreeElement ->
-    skippablePmd6JarRegexes.any {it.containsMatchIn(details.file.name)}
+
+  val pmd6JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
+  pmd6ModulesToInclude.forEach {
+    pmd6JarsToIncludeRegexes.add("""^$it-.*\.jar""".toRegex())
   }
 
+  include { details: FileTreeElement -> pmd6JarsToIncludeRegexes.any { it.containsMatchIn(details.file.name) } }
   into(pmd6DistDir)
-  // TODO include("just the *.jars etc. we care about")
   includeEmptyDirs = false
   eachFile {
     // We drop the parent "pmd-bin-6.55.0" folder and put files directly into our "pmd" folder
@@ -118,7 +124,35 @@ tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd7") {
 tasks.register<Copy>("installPmd7") {
   dependsOn("downloadPmd7")
   from(zipTree("$buildDir/$pmd7File"))
-  // TODO: We will soon optimize this with W-14980337 by reducing the dist down to only the jars we care about.
+
+  // I went to https://github.com/pmd/pmd/tree/pmd_releases/7.0.0-rc4 and for each of the languages that we support
+  // (apex, java, visualforce, xml), I took a look at its pom file (like pmd-apex/src/pom.xml for example).
+  // That pom said what other modules it depends on and I took these dependencies (besides test-scoped and  optional
+  // modules). I did this recursively for any dependent pmd-* modules and put it all here.
+  // For completeness, I listed the modules and all their dependencies except for pmd-ui (since it isn't needed) and
+  // the dependencies of pmd-languages-deps (since it contains all language modules). I also had to add in pmd-cli.
+  // Note that "pkgforce_2.13" was missing from pmd-apex, so I added it in and that unfortunately required me to pull
+  // in all of its dependencies listed at https://central.sonatype.com/artifact/com.github.nawforce/pkgforce_2.13/dependencies.
+  // Duplicates don't matter since we use setOf.
+  val pmd7ModulesToInclude = setOf(
+    // LANGUAGE MODULE     DEPENDENCIES
+    "pmd-apex",            "pmd-core", "antlr-runtime", "pmd-apex-jorje", "apex-link", "commons-lang3", "guava", "pkgforce_2.13",
+    "pmd-java",            "pmd-core", "asm", "commons-lang3", "checker-qual", "Saxon-HE", "pcollections",
+    "pmd-visualforce",     "pmd-core", "pmd-apex",
+    "pmd-xml",             "pmd-core", "antlr4-runtime",
+    // MAIN CLI MODULE     DEPENDENCIES
+    "pmd-cli",             "pmd-languages-deps", "slf4j-api", "slf4j-simple", "picocli", "progressbar", "checker-qual",
+    // DEPENDENT MODULE    DEPENDENCIES
+    "pmd-core",            "slf4j-api", "jul-to-slf4j", "antlr4-runtime", "Saxon-HE", "commons-lang3", "asm", "gson", "checker-qual", "pcollections", "nice-xml-messages",
+    "pmd-apex-jorje",      "cglib", "jsr305", "gson", "error_prone_annotations", "guava", "j2objc-annotations", "antlr-runtime", "stringtemplate", "commons-lang3", "animal-sniffer-annotations", "slf4j-api", "aopalliance", "javax.inject", "asm",
+    "pkgforce_2.13",       "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "geny_2.13", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13", "apex-parser", "antlr4-runtime", "scala-collection-compat_2.13", "scala-xml_2.13", "scala-library", "scala-reflect"
+  )
+  val pmd7JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
+  pmd7ModulesToInclude.forEach {
+    pmd7JarsToIncludeRegexes.add("""^$it-.*\.jar""".toRegex())
+  }
+
+  include { details: FileTreeElement -> pmd7JarsToIncludeRegexes.any { it.containsMatchIn(details.file.name) } }
   into(pmd7DistDir)
   includeEmptyDirs = false
   eachFile {
@@ -140,7 +174,7 @@ tasks.assemble {
 }
 
 tasks.clean {
-	dependsOn("deletePmdCatalogerDist")
+  dependsOn("deletePmdCatalogerDist")
   dependsOn("deletePmd6Dist")
   dependsOn("deletePmd7Dist")
 }
