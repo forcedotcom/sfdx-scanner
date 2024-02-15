@@ -9,6 +9,7 @@ import path = require('path');
 import {FileHandler} from './util/FileHandler';
 import {Config} from './util/Config';
 import {BundleName, getMessage} from "../MessageCatalog";
+import {uxEvents, EVENTS} from './ScannerEvents';
 
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
@@ -142,6 +143,7 @@ class JreSetupManager extends AsyncCreatable {
 		} else if (majorVersion === 1 && minorVersion === 8) {
 			// Accommodating 1.8
 			version = `${majorVersion}.${minorVersion}`;
+			uxEvents.emit(EVENTS.WARNING_ALWAYS_UNIQUE, getMessage(BundleName.JreSetupManager, 'warning.JavaV8Deprecated', [path.join(Controller.getSfdxScannerPath(), "Config.json")]));
 		} else {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
@@ -157,7 +159,7 @@ class JreSetupManager extends AsyncCreatable {
 	private async fetchJavaVersion(javaHome: string): Promise<string> {
 		const javaWithFullPath = path.join(javaHome, 'bin', 'java');
 		// Run java -version and examine stderr for version
-		return new Promise((resolve, reject) => {
+		return new Promise<string>((resolve, reject) => {
 			childProcess.execFile(javaWithFullPath, ['-version'], {},
 				(error, _stdout, stderr) => {
 					if (error) {
