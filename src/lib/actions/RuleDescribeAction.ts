@@ -76,7 +76,7 @@ export class RuleDescribeAction implements Action {
 		return rules.map(r => {
 			const styledRule: DescribeStyledRule = {
 				...r,
-				runWith: r.isDfa ? Dfa.id : Run.id,
+				runWith: r.isDfa ? Dfa.invocation : Run.invocation,
 				isPilot: r.isPilot,
 				enabled: enabledEngineNames.has(r.engine)
 			};
