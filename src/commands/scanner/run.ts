@@ -21,6 +21,7 @@ export default class Run extends ScannerRunCommand {
 	public static examples = [
 		getMessage(BundleName.Run, 'examples')
 	];
+	public static readonly invocation = 'scanner run';
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
 	// and summary and description is what's printed when the -h/--help flag is supplied.

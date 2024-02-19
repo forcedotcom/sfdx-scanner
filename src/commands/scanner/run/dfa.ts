@@ -20,6 +20,7 @@ export default class Dfa extends ScannerRunCommand {
 	public static examples = [
 		getMessage(BundleName.RunDfa, 'examples')
 	];
+	public static readonly invocation = 'scanner run dfa';
 
 	// This defines the flags accepted by this command.
 	// NOTE: Unlike the other classes that extend ScannerCommand, this class has no flags for specifying rules. This is
