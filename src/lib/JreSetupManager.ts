@@ -8,6 +8,7 @@ import childProcess = require('child_process');
 import path = require('path');
 import {FileHandler} from './util/FileHandler';
 import {Config} from './util/Config';
+import {CONFIG_FILE} from '../Constants';
 import {BundleName, getMessage} from "../MessageCatalog";
 import {uxEvents, EVENTS} from './ScannerEvents';
 
@@ -143,7 +144,7 @@ class JreSetupManager extends AsyncCreatable {
 		} else if (majorVersion === 1 && minorVersion === 8) {
 			// Accommodating 1.8
 			version = `${majorVersion}.${minorVersion}`;
-			uxEvents.emit(EVENTS.WARNING_ALWAYS_UNIQUE, getMessage(BundleName.JreSetupManager, 'warning.JavaV8Deprecated', [path.join(Controller.getSfdxScannerPath(), "Config.json")]));
+			uxEvents.emit(EVENTS.WARNING_ALWAYS_UNIQUE, getMessage(BundleName.JreSetupManager, 'warning.JavaV8Deprecated', [path.join(Controller.getSfdxScannerPath(), CONFIG_FILE)]));
 		} else {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
