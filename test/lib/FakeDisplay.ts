@@ -55,6 +55,10 @@ export class FakeDisplay implements Display {
 		this.outputs.push("[VerboseWarning]: " + msg);
 	}
 
+	displayUniqueWarning(msg: string): void {
+		this.outputs.push("[UniqueWarning]: " + msg);
+	}
+
 	displayStyledHeader(headerText: string): void {
 		this.outputs.push("[StyledHeader]: " + headerText);
 	}

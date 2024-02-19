@@ -44,6 +44,11 @@ export interface Display {
 	displayVerboseWarning(msg: string): void;
 
 	/**
+	 * Display a message as a warning, unless it's been displayed using this method before.
+	 */
+	displayUniqueWarning(msg: string): void;
+
+	/**
 	 * Adds a spinner to the display.
 	 */
 	spinnerStart(msg: string, status?: string): void
@@ -68,11 +73,13 @@ export class UxDisplay implements Display {
 	private readonly displayable: Displayable;
 	private readonly spinner: Spinner;
 	private readonly isVerboseSet: boolean;
+	private uniqueMessageSet: Set<string>;
 
 	public constructor(displayable: Displayable, spinner: Spinner, isVerboseSet: boolean) {
 		this.displayable = displayable;
 		this.spinner = spinner;
 		this.isVerboseSet = isVerboseSet;
+		this.uniqueMessageSet = new Set();
 	}
 
 	public displayInfo(msg: string): void {
@@ -107,6 +114,13 @@ export class UxDisplay implements Display {
 
 	public displayVerboseWarning(msg: string): void {
 		if (this.isVerboseSet) {
+			this.displayWarning(msg);
+		}
+	}
+
+	public displayUniqueWarning(msg: string): void {
+		if (!this.uniqueMessageSet.has(msg)) {
+			this.uniqueMessageSet.add(msg);
 			this.displayWarning(msg);
 		}
 	}

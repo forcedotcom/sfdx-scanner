@@ -54,6 +54,7 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => display.displayVerboseInfo(msg));
 		uxEvents.on(EVENTS.WARNING_ALWAYS, (msg: string) => display.displayWarning(msg));
 		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => display.displayVerboseWarning(msg));
+		uxEvents.on(EVENTS.WARNING_ALWAYS_UNIQUE, (msg: string) => display.displayUniqueWarning(msg));
 		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => display.spinnerStart(msg, status));
 		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => display.spinnerUpdate(msg));
 		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (_msg: string) => display.spinnerWait()); // eslint-disable-line @typescript-eslint/no-unused-vars

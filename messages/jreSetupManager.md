@@ -19,3 +19,7 @@ If the problem persists, please manually add a 'javaHome' property to your Confi
 # InvalidVersion
 
 Java version %s isn't supported. Install Java 1.8 or later.
+
+# warning.JavaV8Deprecated
+
+Code Analyzer requires Java v11 or later. Update to Java v11 and update the `javaHome` property in your `%s` file.
