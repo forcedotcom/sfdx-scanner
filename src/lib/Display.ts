@@ -34,6 +34,11 @@ export interface Display {
 	displayStyledObject(obj: AnyJson): void;
 
 	/**
+	 * Display a message as an error.
+	 */
+	displayError(msg: string): void;
+
+	/**
 	 * Display a message as a warning.
 	 */
 	displayWarning(msg: string): void;
@@ -108,6 +113,10 @@ export class UxDisplay implements Display {
 		this.displayable.styledObject(obj);
 	}
 
+	public displayError(msg: string): void {
+		this.displayable.error(msg);
+	}
+
 	public displayWarning(msg: string): void {
 		this.displayable.warn(msg);
 	}
@@ -149,6 +158,9 @@ export interface Displayable {
 
 	// Display an error or message as a warning.                                            [Implemented by Command]
 	warn(input: string): void;
+
+	// Display an error or message as an error.                                             [Implemented by Command]
+	error(message: string): void;
 
 	// Simplified prompt for single-question confirmation. Times out and throws after 10s.  [Implemented by SfCommand]
 	confirm(message: string): Promise<boolean>;
