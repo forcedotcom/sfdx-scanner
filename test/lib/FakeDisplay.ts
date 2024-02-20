@@ -59,6 +59,10 @@ export class FakeDisplay implements Display {
 		this.outputs.push("[UniqueWarning]: " + msg);
 	}
 
+	displayError(msg: string): void {
+		this.outputs.push("[Error]: " + msg);
+	}
+
 	displayStyledHeader(headerText: string): void {
 		this.outputs.push("[StyledHeader]: " + headerText);
 	}
