@@ -23,12 +23,12 @@ export class RuleAddAction implements Action {
 	}
 
 	public validateInputs(inputs: Inputs): Promise<void> {
-		if ((inputs.language as string).length === 0) {
+		if (!inputs.language || (inputs.language as string).length === 0) {
 			throw new SfError(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
 		}
 
 		// --path '' results in different values depending on the OS. On Windows it is [], on *nix it is [""]
-		if (inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
+		if (!inputs.path || inputs.path && stringArrayTypeGuard(inputs.path) && (!inputs.path.length || inputs.path.includes(''))) {
 			throw new SfError(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
 		}
 
@@ -46,8 +46,8 @@ export class RuleAddAction implements Action {
 		const manager = await Controller.createRulePathManager();
 		const classpathEntries = await manager.addPathsForLanguage(language, paths);
 
-		this.display.displayInfo(`Successfully added rules for ${language}.`);
-		this.display.displayInfo(`${classpathEntries.length} Path(s) added: ${classpathEntries.toString()}`);
+		this.display.displayInfo(getMessage(BundleName.Add, 'output.successfullyAddedRules', [language]));
+		this.display.displayInfo(getMessage(BundleName.Add, 'output.resultSummary', [classpathEntries.length, classpathEntries.toString()]));
 		return {success: true, language, path: classpathEntries};
 	}
 }
