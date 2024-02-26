@@ -136,8 +136,8 @@
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
 		"build": "./gradlew build -x test",
-		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock",
-		"postpack": "rm -f oclif.manifest.json",
+		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock && npm-shrinkwrap",
+		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
 		"lint-typescript": "eslint ./src --ext .ts --max-warnings 0",
 		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
