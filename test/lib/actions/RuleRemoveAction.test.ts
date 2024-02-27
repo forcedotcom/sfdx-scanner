@@ -145,10 +145,10 @@ describe('RuleRemoveAction', () => {
 
 					// ==== ASSERTIONS ====
 					// The JAR we removed should be gone.
-					expect(writtenFile).to.not.contain(FAKE_PATH_1, 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_1), 'JAR should have been removed');
 					// The other JARs should still be there.
-					expect(writtenFile).to.contain(FAKE_PATH_2, 'JAR should NOT have been removed');
-					expect(writtenFile).to.contain(FAKE_PATH_3, 'JAR should NOT have been removed');
+					expect(writtenFile).to.contain(JSON.stringify(FAKE_PATH_2), 'JAR should NOT have been removed');
+					expect(writtenFile).to.contain(JSON.stringify(FAKE_PATH_3), 'JAR should NOT have been removed');
 				});
 
 				it('Test Case: Can remove a list of JARs', async () => {
@@ -161,10 +161,10 @@ describe('RuleRemoveAction', () => {
 
 					// ==== ASSERTIONS ====
 					// The JARs we removed should be gone.
-					expect(writtenFile).to.not.contain(FAKE_PATH_1, 'JAR should have been removed');
-					expect(writtenFile).to.not.contain(FAKE_PATH_2, 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_1), 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_2), 'JAR should have been removed');
 					// The other JAR should still be there.
-					expect(writtenFile).to.contain(FAKE_PATH_3, 'JAR should NOT have been removed');
+					expect(writtenFile).to.contain(JSON.stringify(FAKE_PATH_3), 'JAR should NOT have been removed');
 				});
 
 				it('Test Case: Can remove a folder', async () => {
@@ -177,9 +177,9 @@ describe('RuleRemoveAction', () => {
 
 					// ==== ASSERTIONS ====
 					// All JARs should be gone.
-					expect(writtenFile).to.not.contain(FAKE_PATH_1, 'JAR should have been removed');
-					expect(writtenFile).to.not.contain(FAKE_PATH_2, 'JAR should have been removed');
-					expect(writtenFile).to.not.contain(FAKE_PATH_3, 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_1), 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_2), 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_3), 'JAR should have been removed');
 				});
 
 				it('Test Case: Throws error for unregistered path', async () => {
@@ -233,10 +233,10 @@ describe('RuleRemoveAction', () => {
 
 					// ==== ASSERTIONS ====
 					// The JAR we removed should be gone.
-					expect(writtenFile).to.not.contain(FAKE_PATH_1, 'JAR should have been removed');
+					expect(writtenFile).to.not.contain(JSON.stringify(FAKE_PATH_1), 'JAR should have been removed');
 					// The other JARs should still be there.
-					expect(writtenFile).to.contain(FAKE_PATH_2, 'JAR should NOT have been removed');
-					expect(writtenFile).to.contain(FAKE_PATH_3, 'JAR should NOT have been removed');
+					expect(writtenFile).to.contain(JSON.stringify(FAKE_PATH_2), 'JAR should NOT have been removed');
+					expect(writtenFile).to.contain(JSON.stringify(FAKE_PATH_3), 'JAR should NOT have been removed');
 				});
 
 				it('Test Case: Throws error for unregistered path', async () => {

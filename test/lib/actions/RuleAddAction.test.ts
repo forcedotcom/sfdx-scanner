@@ -137,9 +137,9 @@ describe('RuleAddAction', () => {
 		let controllerStub;
 		const language = 'apex';
 		const inputPaths = [
-			'~/this/path/is/tildified',
-			'/This/Path/Is/Absolute',
-			'./This/Path/Is/Relative'
+			path.join('~', 'this', 'path', 'is', 'tildified'),
+			path.resolve('.', 'this', 'path', 'is', 'absolute'),
+			path.join('.', 'this', 'path', 'is', 'relative')
 		];
 		const expectedOutputPaths = [
 			untildify(inputPaths[0]),
