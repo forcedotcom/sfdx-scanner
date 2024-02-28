@@ -30,6 +30,14 @@ Specify a language
 
 Specify a path
 
+# output.successfullyAddedRules
+
+Successfully added rules for %s.
+
+# output.resultSummary
+
+%s Path(s) added: %s
+
 # examples
 
 Bundle custom PMD rules in JAR files. Follow PMD conventions, such as defining the custom rules in XML files under a `/category/` directory.

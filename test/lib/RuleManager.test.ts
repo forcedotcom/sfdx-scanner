@@ -96,6 +96,39 @@ describe('RuleManager', () => {
 					}
 				}
 			});
+
+			it('Excluding one category excludes all rules from that category', async () => {
+				// Set up our filter array.
+				const categories = ['!Best Practices'];
+				const filters = [new CategoryFilter(categories)];
+
+				// Pass the filter array into the manager.
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+
+				// Expect the right number of rules to be returned.
+				expect(matchingRules).to.have.lengthOf(9, 'Wrong number of rules returned');
+				for (const rule of matchingRules) {
+					expect(rule.categories).to.not.contain('Best Practices', 'Excluded category should not be present');
+				}
+			});
+
+			it('Excluding by multiple categories excludes all rules from those categories', async () => {
+				// Set up our filter array.
+				const positiveCategories = ['Best Practices', 'Design'];
+				const categories = ['!Best Practices', '!Design'];
+				const filters = [new CategoryFilter(categories)];
+
+				// Pass the filter array into the manager.
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+
+				// Expect the right number of rules to be returned.
+				expect(matchingRules).to.have.lengthOf(7, 'Wrong number of rules returned');
+				for (const rule of matchingRules) {
+					expect(rule).to.satisfy(rule => {
+						return !positiveCategories.some(c => rule.categories.includes(c));
+					}, `Rule ${rule.name} with categories ${rule.categories} was wrongly included`);
+				}
+			});
 		});
 
 		describe('Test Case: Filtering by ruleset only', () => {
@@ -107,7 +140,10 @@ describe('RuleManager', () => {
 				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
 
 				// Expect the right number of rules to be returned.
-				expect(matchingRules).to.have.lengthOf(3, 'Exactly 8 rules are in the "Braces" ruleset');
+				expect(matchingRules).to.have.lengthOf(3, 'Wrong number of rules returned');
+				for (const rule of matchingRules) {
+					expect(rule.rulesets).to.contain('Braces', `Rule ${rule.name} wrongly included`);
+				}
 			});
 
 			it('Filtering by multiple rulesets returns any rule in either ruleset', async () => {
@@ -132,6 +168,9 @@ describe('RuleManager', () => {
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(2, 'There are 2 rules that target Apex');
+				for (const rule of matchingRules) {
+					expect(rule.languages).to.contain('apex', `Rule ${rule.name} wrongly included`);
+				}
 			});
 
 			it('Filtering by multiple languages returns any rule targeting either language', async () => {
@@ -143,6 +182,37 @@ describe('RuleManager', () => {
 
 				// Expect the right number of rules to be returned.
 				expect(matchingRules).to.have.lengthOf(11, 'There are 11 rules targeting either Apex or JS');
+			});
+		});
+
+		describe('Test Case: Filtering by engine only', () => {
+			it('Filtering by a single engine returns only rules applied to that engine', async () => {
+				// Set up our filter array.
+				const filters = [new EngineFilter(['pmd'])];
+
+				// Pass the filter array into the manager.
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+
+				// Expect the right number of rules to be returned.
+				expect(matchingRules).to.have.lengthOf(7, 'Wrong number of rules returned');
+				for (const rule of matchingRules) {
+					expect(rule.engine).to.equal('pmd', `Rule ${rule.name} wrongly included`);
+				}
+			});
+
+			it('Filtering by multiple engines returns any rule for either engine', async () => {
+				// Set up our filter array.
+				const engines = ['pmd', 'eslint']
+				const filters = [new EngineFilter(engines)];
+
+				// Pass the filter array into the manager.
+				const matchingRules = await ruleManager.getRulesMatchingCriteria(filters);
+
+				// Expect the right number of rules to be returned.
+				expect(matchingRules).to.have.lengthOf(11, 'Wrong number of rules returned');
+				for (const rule of matchingRules) {
+					expect(engines).to.contain(rule.engine, `Rule ${rule.name} wrongly included`);
+				}
 			});
 		});
 
