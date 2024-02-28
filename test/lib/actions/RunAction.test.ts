@@ -6,13 +6,13 @@ import {FakeDisplay} from "../FakeDisplay";
 import {Logger} from "@salesforce/core";
 import {Inputs, PathlessRuleViolation, RuleResult} from "../../../src/types";
 import * as path from "path";
-import {initContainer} from '../../../src/ioc.config';
+import {initializeTestSetup} from "../../test-related-lib/TestOverrides";
 import {expect} from "chai";
 import {Results} from "../../../src/lib/output/Results";
 import {PMD6_VERSION, PMD7_VERSION} from "../../../src/Constants";
 import {FakeResultsProcessorFactory, RawResultsProcessor} from "./fakes";
-import {Controller} from "../../../lib/Controller";
-import {Pmd6CommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
+import {Controller} from "../../../src/Controller";
+import {Pmd6CommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
 
 const codeFixturesDir = path.join(__dirname, '..', '..', 'code-fixtures');
 const pathToSomeTestClass = path.join(codeFixturesDir, 'apex', 'SomeTestClass.cls');
@@ -22,10 +22,8 @@ describe("Tests for RunAction", () => {
 	let display: FakeDisplay;
 	let resultsProcessor: RawResultsProcessor;
 	let runAction: RunAction;
-	before(() => {
-		initContainer();
-	});
 	beforeEach(() => {
+		initializeTestSetup();
 		display = new FakeDisplay();
 		resultsProcessor = new RawResultsProcessor();
 
