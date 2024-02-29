@@ -157,3 +157,5 @@ oclif.lock
 pmd-cataloger/bin
 
 sfge*.log.gz
+
+npm-shrinkwrap.json
