@@ -14,7 +14,7 @@ import LocalCatalog from '../src/lib/services/LocalCatalog';
 
 
 const CATALOG_FIXTURE_PATH = path.join('test', 'catalog-fixtures', 'DefaultCatalogFixture.json');
-export const CATALOG_FIXTURE_RULE_COUNT = 15;
+export const CATALOG_FIXTURE_RULE_COUNT = 16;
 export const CATALOG_FIXTURE_DEFAULT_ENABLED_RULE_COUNT = 11;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
