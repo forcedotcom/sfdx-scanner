@@ -2,6 +2,7 @@
 title: PMD Custom Configuration
 lang: en
 redirect_from: /en/custom-config/pmd
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/pmd-config.html
 ---
 
 ## PMD Custom Configuration
