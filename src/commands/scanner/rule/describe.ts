@@ -28,7 +28,8 @@ export default class Describe extends ScannerCommand {
 			required: true
 		}),
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
+			description: getMessage(BundleName.Common, 'flags.verboseDescription')
 		}),
 		"preview-pmd7": Flags.boolean({
 			summary: getMessage(BundleName.Describe, 'flags.previewPmd7Summary', [PMD7_VERSION]),

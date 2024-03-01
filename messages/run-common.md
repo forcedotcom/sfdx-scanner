@@ -12,7 +12,7 @@ specify results output format
 
 # flags.formatDescription
 
-Specifies results output format written directly to the console.
+Specifies the output format for results written directly to the console.
 
 # flags.normalizesevSummary
 

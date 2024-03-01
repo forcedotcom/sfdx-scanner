@@ -8,11 +8,11 @@ Scans a codebase with a selection of rules. You can scan the codebase with all t
 
 # flags.rulesetSummary
 
-[deprecated] rulesets to run
+[Deprecated] rulesets to run
 
 # flags.rulesetDescription
 
-[deprecated] One or more rulesets to run. Specify multiple values as a comma-separated list.
+Deprecated. Use category instead. One or more rulesets to run. Specify multiple values as a comma-separated list.
 
 # flags.targetSummary
 
@@ -20,15 +20,15 @@ source code location
 
 # flags.targetDescription
 
-Specifies the source code location. May use glob patterns. Specify multiple values as a comma-separated list. Default is ".".
+Specifies the source code location. Can use glob patterns. Specify multiple values as a comma-separated list. Default is ".".
 
 # flags.envSummary
 
-[deprecated] override ESLint's default environment variables, in JSON-formatted string
+[Deprecated] override ESLint's default environment variables, in JSON-formatted string
 
 # flags.envDescription
 
-[deprecated] Overrides ESLint's default environmental variables, in JSON-formatted string.
+Deprecated. Overrides ESLint's default environmental variables, in JSON-formatted string.
 
 # flags.envParamDeprecationWarning
 
@@ -40,7 +40,7 @@ location of tsconfig.json file
 
 # flags.tsconfigDescription
 
-Location of tsconfig.json file used by eslint-typescript engine.
+The location of the tsconfig.json file used by the eslint-typescript engine. The --tsconfig flag can’t be used with --eslintconfig flag.
 
 # flags.engineSummary
 
@@ -56,7 +56,7 @@ specify the location of eslintrc config to customize eslint engine
 
 # flags.eslintConfigDescription
 
-Specifies the location of eslintrc config to customize eslint engine.
+Specifies the location of eslintrc config to customize ESLint engine. The --tsconfig flag can’t be used with --eslintconfig flag.
 
 # flags.pmdConfigSummary
 
@@ -64,7 +64,7 @@ specify location of PMD rule reference XML file to customize rule selection
 
 # flags.pmdConfigDescription
 
-Specifies the location of PMD rule reference XML file to customize rule selection.
+Specifies the location of the PMD rule reference XML file to customize rule selection.
 
 # flags.previewPmd7Summary
 
@@ -80,7 +80,7 @@ return retire-js violation message details
 
 # flags.verboseViolationsDescription
 
-Returns retire-js violation messages details about each vulnerability, including summary, Common Vulnerabilities and Exposures (CVE), and URLs.
+Returns retire-js violation-message details about each vulnerability, including summary, common vulnerabilities and exposures (CVE), and URLs.
 
 # validations.methodLevelTargetingDisallowed
 
