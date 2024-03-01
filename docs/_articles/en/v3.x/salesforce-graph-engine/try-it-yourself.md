@@ -1,6 +1,7 @@
 ---
 title: 'Try it Yourself'
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/try-graph-engine.html
 ---
 
 
