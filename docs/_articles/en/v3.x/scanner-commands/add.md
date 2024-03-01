@@ -2,6 +2,7 @@
 title: Salesforce Code Analyzer Command Reference
 lang: en
 redirect_from: /en/scanner-commands/add
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/add.html
 ---
 
 ## sf scanner rule add
