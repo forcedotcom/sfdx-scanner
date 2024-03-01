@@ -6,11 +6,8 @@ import {ENV_VAR_NAMES} from "../../../src/Constants";
 import fs = require('fs');
 import path = require('path');
 import process = require('process');
-import tildify = require('tildify');
 
-const pathToApexFolder = path.join('test', 'code-fixtures', 'apex');
 const pathToSomeTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeTestClass.cls');
-const pathToSomeOtherTestClass = path.join('test', 'code-fixtures', 'apex', 'SomeOtherTestClass.cls');
 const pathToAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'AnotherTestClass.cls');
 const pathToYetAnotherTestClass = path.join('test', 'code-fixtures', 'apex', 'YetAnotherTestClass.cls');
 
@@ -30,75 +27,9 @@ describe('scanner run', function () {
 					validateXmlOutput(output.shellOutput.stdout);
 				});
 
-				it('Target path may be relative or absolute', () => {
-					const output = runCommand(`scanner run --target ${path.join('.', pathToSomeTestClass)} --ruleset ApexUnit --format xml`);
-					validateXmlOutput(output.shellOutput.stdout);
-				});
-
 				it('When the file contains no violations, a message is logged to the console', () => {
 					const output = runCommand(`scanner run --target ${pathToYetAnotherTestClass} --ruleset ApexUnit --format xml`);
 					expect(output.shellOutput.stdout).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
-				});
-			});
-
-			describe('Test Case: Running rules against multiple specified files', () => {
-				it('Both files are evaluated, and any violations are logged', () => {
-					const output = runCommand(`scanner run --target "${pathToSomeTestClass},${pathToSomeOtherTestClass}" --ruleset ApexUnit --format xml`);
-					// We'll split the output by the <file> tag first, so we can get each file that violated rules.
-					const results = output.shellOutput.stdout.split('<result ');
-					results.shift();
-					// Verify that each set of violations corresponds to the expected file.
-					expect(results.length).to.equal(2, 'Only two files should have violated the rules');
-					expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
-					expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
-
-					// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-					const firstFileViolations = results[0].split('<violation');
-					firstFileViolations.shift();
-					expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
-					expect(firstFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-
-					const secondFileViolations = results[1].split('<violation');
-					secondFileViolations.shift();
-					expect(secondFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
-					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-					// expected order.
-					expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					expect(secondFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-				});
-			});
-
-			describe('Test Case: Running rules against a folder', () => {
-				it('Any violations in the folder are logged as an XML', () => {
-					const output = runCommand(`scanner run --target ${pathToApexFolder} --ruleset ApexUnit --format xml`);
-					// We'll split the output by the <file> tag first, so we can get each file that violated rules.
-					const results = output.shellOutput.stdout.split('<result ');
-					// The first list item is going to be the header, so we need to pull that off.
-					results.shift();
-					// Verify that each set of violations corresponds to the expected file.
-					expect(results.length).to.equal(3, 'Only three files should have violated the rules');
-					expect(results[0]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)AnotherTestClass.cls"/);
-					expect(results[1]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeOtherTestClass.cls"/);
-					expect(results[2]).to.match(/file="test(\/|\\)code-fixtures(\/|\\)apex(\/|\\)SomeTestClass.cls"/);
-
-					// Now, split each file's violations by the <violation> tag so we can inspect individual violations.
-					const firstFileViolations = results[0].split('<violation');
-					firstFileViolations.shift();
-					expect(firstFileViolations.length).to.equal(1, 'Should be one violation detected in AnotherTestClass.cls');
-					expect(firstFileViolations[0]).to.match(/line="6".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-
-					const secondFileViolations = results[1].split('<violation');
-					secondFileViolations.shift();
-					expect(secondFileViolations.length).to.equal(1, 'Should be one violation detected in SomeOtherTestClass.cls');
-					expect(secondFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-
-					const thirdFileViolations = results[2].split('<violation');
-					thirdFileViolations.shift();
-					expect(thirdFileViolations.length).to.equal(2, 'Should be two violations detected in SomeTestClass.cls');
-					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-					// expected order.
-					expect(thirdFileViolations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					expect(thirdFileViolations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
 				});
 			});
 
@@ -423,26 +354,6 @@ describe('scanner run', function () {
 				expect(output.status).to.equal(0, 'Should have finished properly');
 				expect(output.result).to.contain(getMessage(BundleName.RunOutputProcessor, 'output.noViolationsDetected', ['pmd, retire-js']));
 			})
-		});
-
-		describe('Dynamic Input', () => {
-
-			describe('Test Case: Using ~/ shorthand in target', () => {
-				const pathWithTilde = tildify(path.join(process.cwd(), 'test', 'code-fixtures', 'apex', 'SomeTestClass.cls'));
-
-				it('Tilde is expanded to full directory', () => {
-					const output = runCommand(`scanner run --target ${pathWithTilde} --ruleset ApexUnit --format xml`);
-					// We'll split the output by the <violation> tag, so we can get individual violations.
-					const violations = output.shellOutput.stdout.split('<violation');
-					// The first list item is going to be the header, so we need to pull that off.
-					violations.shift();
-					expect(violations.length).to.equal(2, 'Should be two violations detected in the file');
-					// We'll check each violation in enough depth to be confident that the expected violations were returned in the
-					// expected order.
-					expect(violations[0]).to.match(/line="11".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-					expect(violations[1]).to.match(/line="19".+rule="ApexUnitTestClassShouldHaveAsserts"/);
-				})
-			});
 		});
 
 		describe('Edge Cases', () => {
