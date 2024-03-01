@@ -2,6 +2,7 @@
 title: 'ESLint'
 lang: en
 redirect_from: /en/architecture/eslint-engine
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/eslint-engine.html
 ---
 ## What is ESLint?
 ESLint is a popular linting tool for JavaScript. It provides numerous static analysis rules that help developers write quality code.
