@@ -1,6 +1,7 @@
 ---
 title: What's new in v3.x?
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer-3x.html
 ---
 
 ## What’s new in v3.x
