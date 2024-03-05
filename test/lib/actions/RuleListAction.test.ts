@@ -26,20 +26,29 @@ describe("Tests for RuleListAction", () => {
 	describe('Filtering logic', () => {
 
 		beforeEach(() => {
-			sinon.stub(Config.prototype, 'isEngineEnabled').callThrough().withArgs(ENGINE.ESLINT_LWC).resolves(false);
+			sinon.stub(Config.prototype, 'isEngineEnabled')
+				.callThrough()
+				.withArgs(ENGINE.ESLINT_LWC).resolves(false)
+				.withArgs(ENGINE.CPD).resolves(true);
 		});
 
 		afterEach(() => {
 			sinon.restore();
 		});
 
-		it('Test Case: Without filters, all rules for enabled engines are returned', async () => {
+		it('Test Case: Without filters, all rules for enabled and default-runnable engines are returned', async () => {
 			await ruleListAction.run([]);
 
 			let tableData: Ux.Table.Data[] = display.getLastTableData();
 
 			for (const rowData of tableData) {
 				expect(rowData.engine).to.not.equal('eslint-lwc', 'Should not return rules for disabled engine');
+				// NOTE: Currently, CPD has the unique behavior of only running/listing rules when it's explicitly
+				//       requested via the --engine parameter, even if it's listed as enabled. So since it wasn't
+				//       explicitly requested, it shouldn't be included.
+				//       This behavior is something of an anomaly, and should not be taken as ironclad. If it becomes
+				//       advantageous or convenient to change it, we should take the opportunity to do so.
+				expect(rowData.engine).to.not.equal('cpd', 'Should not return rule for unrequested CPD engine');
 			}
 		});
 
@@ -55,6 +64,26 @@ describe("Tests for RuleListAction", () => {
 
 			for (const rowData of tableData) {
 				expect(rowData.engine).to.equal('eslint-lwc');
+			}
+		});
+
+		// NOTE: Currently, CPD has the unique behavior of only running/listing rules when it's explicitly requested via
+		//       the --engine parameter, even if it's listed as enabled. So since it's explicitly requested here, it should
+		//       be included.
+		//       This behavior is something of an anomaly, and should not be taken as ironclad. If it becomes
+		//       advantageous or convenient to change it, we should take the opportunity to do so.
+		it('Test Case: Filtering explicitly for a default non-runnable engine will return its rules', async () => {
+			const inputs: Inputs = {
+				engine: ['cpd']
+			};
+
+			await ruleListAction.run(inputs);
+
+			let tableData: Ux.Table.Data[] = display.getLastTableData();
+			expect(tableData).to.have.length(1);
+
+			for (const rowData of tableData) {
+				expect(rowData.engine).to.equal('cpd');
 			}
 		});
 

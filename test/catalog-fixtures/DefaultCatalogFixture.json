@@ -53,6 +53,11 @@
 			"paths": [
 				"https://eslint.org/docs/rules/no-inner-declarations"
 			]
+		},
+		{
+			"name": "Copy/Paste Detected",
+			"engine": "cpd",
+			"paths": []
 		}
 	],
 	"rulesets": [
@@ -332,6 +337,24 @@
 			],
 			"message": "Avoid using if statements without curly braces",
 			"engine": "pmd"
+		},
+		{
+			"rulesets": [],
+			"defaultEnabled": true,
+			"sourcepackage": "cpd",
+			"languages": [
+				"apex",
+				"java",
+				"visualforce",
+				"xml"
+			],
+			"name": "copy-paste-detected",
+			"description": "Identify duplicate code blocks.",
+			"categories": [
+				"Copy/Paste Detected"
+			],
+			"message": "",
+			"engine": "cpd"
 		}
 	]
 }

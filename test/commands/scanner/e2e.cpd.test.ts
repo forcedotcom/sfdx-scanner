@@ -1,10 +1,9 @@
 import { expect } from "chai";
-// @ts-ignore
 import { runCommand } from "../../TestUtils";
 import path = require("path");
 import { ENGINE } from "../../../src/Constants";
 import { RuleResult } from "../../../src/types";
-import { CpdLanguagesSupported, CpdRuleCategory, CpdRuleDescription, CpdRuleName, CpdViolationSeverity } from "../../../src/lib/cpd/CpdEngine";
+import {CpdRuleCategory, CpdRuleName, CpdViolationSeverity } from "../../../src/lib/cpd/CpdEngine";
 
 const Cpd_Test_Code_Path = path.join("test", "code-fixtures", "cpd");
 const Vf_File1 = path.join(Cpd_Test_Code_Path, "myVfPage1.page");
@@ -111,35 +110,6 @@ describe("End to end tests for CPD engine", () => {
 				});
 			});
 		});
-	});
-
-	describe("Integration with `scanner rule list` command", () => {
-			describe("Invoking CPD engine", () => {
-				it("CPD engine rules should not be displayed by default", () => {
-					const output = runCommand(`scanner rule list --json`);
-					const results = output.jsonOutput.result as any[];
-					expect(results.length).to.be.greaterThan(0);
-
-					const cpdCatalogs = results.filter(row => row.engine === ENGINE.CPD);
-					expect(cpdCatalogs).to.have.lengthOf(0);
-				});
-
-				it("CPD engine rules should be displayed when using `--engine cpd`", () => {
-					const output = runCommand(`scanner rule list --engine cpd --json`);
-					const results = output.jsonOutput.result as any[];
-					expect(results.length).equals(1);
-
-					// Verify properties of rule.
-					const rule = results[0];
-					expect(rule.engine).equals(ENGINE.CPD);
-					expect(rule.sourcepackage).equals(ENGINE.CPD);
-					expect(rule.name).equals(CpdRuleName);
-					expect(rule.description).equals(CpdRuleDescription);
-					expect(rule.categories).contains(CpdRuleCategory);
-					expect(rule.languages).has.same.members(CpdLanguagesSupported);
-					expect(rule.defaultEnabled).equals(true);
-				});
-			});
 	});
 });
 function verifyEnvVarIsUsedForMinimumTokens(ctx) {

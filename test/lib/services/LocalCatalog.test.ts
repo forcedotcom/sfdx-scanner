@@ -1,12 +1,12 @@
 import Sinon = require('sinon');
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import * as TestUtils from '../../TestUtils';
-import { RuleCatalog } from '../../../src/lib/services/RuleCatalog';
-import { CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter } from '../../../src/lib/RuleFilter';
-import { ENGINE, LANGUAGE } from '../../../src/Constants';
-import { Rule, RuleGroup } from '../../../src/types';
+import {RuleCatalog} from '../../../src/lib/services/RuleCatalog';
+import {CategoryFilter, EngineFilter, LanguageFilter, RuleFilter, RulesetFilter} from '../../../src/lib/RuleFilter';
+import {ENGINE, LANGUAGE} from '../../../src/Constants';
+import {Rule, RuleGroup} from '../../../src/types';
 import LocalCatalog from '../../../src/lib/services/LocalCatalog';
-import { expect } from 'chai';
+import {expect} from 'chai';
 import {Controller} from '../../../src/Controller';
 
 TestOverrides.initializeTestSetup();
@@ -62,6 +62,14 @@ describe('LocalCatalog', () => {
 		const validatePmdCategory = (mappedRuleGroups: Map<string, RuleGroup>, name: string, languages: string[]): void => {
 			validatePmdRuleGroup(mappedRuleGroups, name, languages, 'category');
 		};
+
+		const validateCpdCategory = (mappedRuleGroups: Map<string, RuleGroup>, name: string, languages: string[]): void => {
+			const ruleGroup = mappedRuleGroups.get(`${ENGINE.CPD}:${name}`);
+			expect(ruleGroup).to.not.be.undefined;
+			expect(ruleGroup.name).to.equal(name);
+			expect(ruleGroup.engine).to.equal(ENGINE.CPD);
+			expect(ruleGroup.paths, TestUtils.prettyPrint(ruleGroup.paths)).to.be.lengthOf(0);
+		}
 
 		const validateEslintBestPractices = (mappedRuleGroups: Map<string, RuleGroup>): void => {
 			for (const engine of [ENGINE.ESLINT, ENGINE.ESLINT_TYPESCRIPT]) {
@@ -174,12 +182,13 @@ describe('LocalCatalog', () => {
 
 					// ASSERTIONS
 					// ESLint and ESLint-typescript should both have one category, and PMD should have two.
-					expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(4);
+					expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(5);
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 					validateEslintPossibleErrors(mappedRuleGroups);
 					validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
 					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
+					validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 
 				it('Correctly filters by multiple values', async () => {
@@ -193,11 +202,12 @@ describe('LocalCatalog', () => {
 
 					// ASSERTIONS
 					// ESLint, ESLint-Typescript, and PMD should each have one category.
-					expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(3);
+					expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(4);
 					const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 					validateEslintPossibleErrors(mappedRuleGroups);
 					validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE.APEX, LANGUAGE_ECMASCRIPT]);
+					validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 			});
 		});
@@ -226,7 +236,7 @@ describe('LocalCatalog', () => {
 
 		describe('Edge Cases', () => {
 			const validateRuleGroups = (ruleGroups: RuleGroup[]) => {
-				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(7);
+				expect(ruleGroups, TestUtils.prettyPrint(ruleGroups)).to.be.lengthOf(8);
 				const mappedRuleGroups = mapRuleGroups(ruleGroups);
 
 				validateEslintBestPractices(mappedRuleGroups);
@@ -234,6 +244,7 @@ describe('LocalCatalog', () => {
 				validatePmdCategory(mappedRuleGroups, 'Best Practices', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
 				validatePmdCategory(mappedRuleGroups, 'Design', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
 				validatePmdCategory(mappedRuleGroups, 'Error Prone', [LANGUAGE_ECMASCRIPT, LANGUAGE.APEX]);
+				validateCpdCategory(mappedRuleGroups, 'Copy/Paste Detected', [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 			}
 
 			it('Returns all categories for eligible engines when given no filters', async () => {
@@ -293,6 +304,11 @@ describe('LocalCatalog', () => {
 			validateRule(mappedRules, names, categories, languages, [ENGINE.PMD]);
 		};
 
+		const validateCpdRule = (mappedRules: Map<string, Rule>, names: string[], categories: string[], languages: string[]): void => {
+			validateRule(mappedRules, names, categories, languages, [ENGINE.CPD]);
+		}
+
+
 		const validateEslintRule = (mappedRules: Map<string, Rule>, names: string[], categories: string[], engines=[ENGINE.ESLINT, ENGINE.ESLINT_TYPESCRIPT]): void => {
 			for (const engine of engines) {
 				const languages = engine === ENGINE.ESLINT ? [LANGUAGE.JAVASCRIPT] : [LANGUAGE.TYPESCRIPT];
@@ -330,22 +346,24 @@ describe('LocalCatalog', () => {
 				it ('Single Value', async () => {
 					const filter: RuleFilter = new CategoryFilter(['!Possible Errors']);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
-					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(7);
+					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(8);
 					const mappedRules = mapRules(rules);
 
 					validatePmdRule(mappedRules, ['AvoidDeeplyNestedIfStmts', 'ExcessiveClassLength'], ['Design'], [LANGUAGE.APEX]);
 					validatePmdRule(mappedRules, ['AvoidWithStatement', 'ConsistentReturn'], ['Best Practices'], [LANGUAGE.JAVASCRIPT]);
 					validatePmdRule(mappedRules, ['ForLoopsMustUseBraces', 'IfElseStmtsMustUseBraces', 'IfStmtsMustUseBraces'], ['Code Style'], [LANGUAGE.JAVASCRIPT]);
+					validateCpdRule(mappedRules, ['copy-paste-detected'], ['Copy/Paste Detected'], [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 
 				it ('Multiple Values', async () => {
 					const filter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style']);
 					const rules: Rule[] = catalog.getRulesMatchingFilters([filter]);
-					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(4);
+					expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(5);
 					const mappedRules = mapRules(rules);
 
 					validatePmdRule(mappedRules, ['AvoidDeeplyNestedIfStmts', 'ExcessiveClassLength'], ['Design'], [LANGUAGE.APEX]);
 					validatePmdRule(mappedRules, ['AvoidWithStatement', 'ConsistentReturn'], ['Best Practices'], [LANGUAGE.JAVASCRIPT]);
+					validateCpdRule(mappedRules, ['copy-paste-detected'], ['Copy/Paste Detected'], [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 				});
 			});
 		});
@@ -434,10 +452,11 @@ describe('LocalCatalog', () => {
 				const categoryFilter: RuleFilter = new CategoryFilter(['!Possible Errors', '!Code Style']);
 				const languageFilter: RuleFilter = new LanguageFilter([LANGUAGE.APEX]);
 				const rules: Rule[] = catalog.getRulesMatchingFilters([categoryFilter, languageFilter]);
-				expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(2);
+				expect(rules, TestUtils.prettyPrint(rules)).to.be.lengthOf(3);
 				const mappedRules = mapRules(rules);
 
 				validatePmdRule(mappedRules, ['AvoidDeeplyNestedIfStmts', 'ExcessiveClassLength'], ['Design'], [LANGUAGE.APEX]);
+				validateCpdRule(mappedRules, ['copy-paste-detected'], ['Copy/Paste Detected'], [LANGUAGE.APEX, LANGUAGE.JAVA, LANGUAGE.VISUALFORCE, LANGUAGE.XML]);
 			});
 		});
 	});
