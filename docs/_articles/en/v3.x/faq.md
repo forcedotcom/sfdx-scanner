@@ -2,6 +2,7 @@
 title: 'Frequently Asked Questions'
 lang: en
 redirect_from: /en/faq
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/faq.html
 ---
 ## Salesforce Code Analyzer FAQ
 

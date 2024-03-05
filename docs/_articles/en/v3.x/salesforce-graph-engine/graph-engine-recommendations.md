@@ -1,6 +1,7 @@
 ---
 title: 'Writing Graph Engine-Friendly Code'
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/graph-engine-friendly-code.html
 ---
 	  
 ## Writing Graph Engine-Friendly Code

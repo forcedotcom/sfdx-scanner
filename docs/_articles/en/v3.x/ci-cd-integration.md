@@ -2,6 +2,7 @@
 title: CI/CD Integration
 lang: en
 redirect_from: /en/ci-cd-integration
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/ci-cd-integration.html
 ---
 ## CI/CD Integration
 We recommend that you integrate Salesforce Code Analyzer into your development process to scan your code regularly for potential problems. Code Analyzer makes it easier to identify issues ahead of submitting your code for the AppExchange Security Review.

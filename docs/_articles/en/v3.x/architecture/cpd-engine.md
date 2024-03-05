@@ -2,6 +2,7 @@
 title: 'CPD'
 lang: en
 redirect_from: /en/architecture/cpd-engine
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/cpd-engine.html
 ---
 ## What is Copy/Paste Detector (CPD)?
 Shipped with PMD, CPD helps identify blocks of duplication across files. 

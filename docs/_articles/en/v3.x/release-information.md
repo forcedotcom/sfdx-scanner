@@ -2,6 +2,7 @@
 title: Release Information
 lang: en
 redirect_from: /en/release-information
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/release-notes.html
 ---
 
 Here are the new and changed features in recent updates of Salesforce Code Analyzer (Code Analyzer) and the Salesforce Code Analyzer (beta) Visual Studio (VS) Code extension.

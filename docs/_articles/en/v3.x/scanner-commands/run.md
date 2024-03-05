@@ -2,6 +2,7 @@
 title: Salesforce Code Analyzer Command Reference
 lang: en
 redirect_from: /en/scanner-commands/run
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/run.html
 ---
 
 ## sf scanner run

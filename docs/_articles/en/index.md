@@ -2,6 +2,7 @@
 title: Salesforce Code Analyzer
 permalink: /
 redirect_from: /en/v3.x/
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/overview
 lang: en
 ---
 

@@ -1,6 +1,7 @@
 ---
 title: 'Salesforce Graph Engine'
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/salesforce-graph-engine.html
 ---
 ## What is Salesforce Graph Engine?
 [Salesforce Graph Engine (Graph Engine)](./en/v3.x/salesforce-graph-engine/introduction/) is an open-source Salesforce tool that performs complex analysis on Apex language, and identifies security vulnerabilities and code issues.

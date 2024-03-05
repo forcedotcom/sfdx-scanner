@@ -2,6 +2,7 @@
 title: Managing Custom Rules
 lang: en
 redirect_from: /en/custom-rules/manage
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/custom-config.html
 ---
 
 ## Different approaches for PMD and ESLint

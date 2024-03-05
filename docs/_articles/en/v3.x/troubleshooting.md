@@ -2,6 +2,7 @@
 title: Troubleshooting Common Issues
 lang: en
 redirect_from: /en/troubleshooting
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/troubleshooting.html
 ---
 
 Follow these tips to fix common Salesforce Code Analyzer (Code Analyzer) issues.
