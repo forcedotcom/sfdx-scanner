@@ -13,7 +13,7 @@ specify a path expansion  upper boundary to limit the complexity of code that Gr
 
 # flags.pathexplimitDescription
 
-Specifies a path expansion upper boundary to limit the complexity of code Graph Engine analyzes  before failing fast. Set the value to -1 to remove any upper boundary. --pathexplimit inherits value from SFGE_PATH_EXPANSION_LIMIT env-var, if set. Its default value is derived from JVM heap space allocation.
+Specifies a path expansion upper boundary to limit the complexity of code Graph Engine analyzes before failing fast. Set the value to -1 to remove any upper boundary. --pathexplimit inherits value from SFGE_PATH_EXPANSION_LIMIT env-var, if set. Its default value is derived from JVM heap space allocation.
 
 # flags.ruledisablewarningviolationSummary
 
@@ -29,7 +29,7 @@ specify number of threads that evaluate DFA rules. Alternatively, set value usin
 
 # flags.rulethreadcountDescription
 
-Specifies number of rule evaluation threads, or how many entrypoints can be evaluated concurrently. Inherits value from SFGE_RULE_THREAD_COUNT env-var, if set. Default is 4.
+Specifies the number of rule-evaluation threads or how many entry points can be evaluated concurrently. Inherits its value from the SFGE_RULE_THREAD_COUNT environment variable, if set. The default is 4.
 
 # flags.rulethreadtimeoutSummary
 
@@ -37,7 +37,7 @@ specify timeout for individual rule threads in milliseconds. Alternatively, set 
 
 # flags.rulethreadtimeoutDescription
 
-Specifies time limit for evaluating a single entrypoint in milliseconds. Inherits value from SFGE_RULE_THREAD_TIMEOUT env-var if set. Default is 900,000 ms, or 15 minutes.
+Specifies the time limit for evaluating a single entry point in milliseconds. Inherits its value from the SFGE_RULE_THREAD_TIMEOUT environment variable, if set. The default is 900,000 ms or 15 minutes.
 
 # flags.sfgejvmargsSummary
 

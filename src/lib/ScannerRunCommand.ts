@@ -10,7 +10,8 @@ export abstract class ScannerRunCommand extends ScannerCommand {
 	 */
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
+			description: getMessage(BundleName.Common, 'flags.verboseDescription')
 		}),
 		// BEGIN: Filter-related flags.
 		category: Flags.custom<string[]>({
