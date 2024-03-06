@@ -108,10 +108,13 @@
 		"bin": "sf",
 		"topics": {
 			"scanner": {
-				"description": "scan code to detect code quality issues and security vulnerabilities",
+				"description": "Scan code to detect code quality issues and security vulnerabilities.",
 				"subtopics": {
 					"rule": {
-						"description": "view or add rules to scan code"
+						"description": "View or add rules to scan code."
+					},
+					"run": {
+						"description": "Scan code."
 					}
 				}
 			},
