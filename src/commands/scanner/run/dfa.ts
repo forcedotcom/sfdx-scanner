@@ -49,7 +49,6 @@ export default class Dfa extends ScannerRunCommand {
 		// BEGIN: Config-overrideable engine flags.
 		'rule-thread-count': Flags.integer({
 			summary: getMessage(BundleName.RunDfa, 'flags.rulethreadcountSummary'),
-			description: getMessage(BundleName.RunDfa, 'flags.rulethreadcountDescription'),
 			default: 4,
 			env: 'SFGE_RULE_THREAD_COUNT'
 		}),
