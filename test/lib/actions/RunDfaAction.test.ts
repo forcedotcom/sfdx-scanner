@@ -1,5 +1,5 @@
 import {Logger} from '@salesforce/core';
-import {assert, expect} from 'chai';
+import {expect} from 'chai';
 import path = require('path');
 
 import {FakeDisplay} from '../FakeDisplay';
@@ -42,12 +42,17 @@ describe('RunDfaAction', () => {
 				'projectdir': ['./**/*.cls']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirCannotBeGlob'));
 		});
 
 		it('--projectdir must be real', async () => {
@@ -55,12 +60,17 @@ describe('RunDfaAction', () => {
 				'projectdir': ['./not/a/real/file.txt']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirMustExist'));
 		});
 
 		it('--projectdir must be directory', async () => {
@@ -69,12 +79,17 @@ describe('RunDfaAction', () => {
 				'projectdir': [path.resolve('./src/Controller.ts')]
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.projectdirMustBeDir'));
 		});
 
 		it('--outfile cannot be used if --format is "table"', async () => {
@@ -83,12 +98,17 @@ describe('RunDfaAction', () => {
 				'format': 'table'
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.cannotWriteTableToFile'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.cannotWriteTableToFile'));
 		});
 
 		it('If --outfile and --format conflict, message is logged', async () => {
@@ -106,12 +126,17 @@ describe('RunDfaAction', () => {
 				'target': ['./**/*.cls#beep']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetCannotBeGlob'));
 		});
 
 		it('Method-level --target values must be a real file', async () => {
@@ -120,12 +145,17 @@ describe('RunDfaAction', () => {
 				'target': [`${file}#beep`]
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await runDfaAction.validateInputs(inputs);
-				assert.fail('Error should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [file]));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.RunDfa, 'validations.methodLevelTargetMustBeRealFile', [file]));
 		});
 	});
 

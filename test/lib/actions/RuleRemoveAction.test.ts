@@ -1,5 +1,5 @@
 import {Logger} from '@salesforce/core';
-import {assert, expect} from 'chai';
+import {expect} from 'chai';
 import {FileHandler} from '../../../src/lib/util/FileHandler';
 import sinon = require('sinon');
 import path = require('path');
@@ -34,12 +34,17 @@ describe('RuleRemoveAction', () => {
 				path: []
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Remove, 'validations.pathCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.Remove, 'validations.pathCannotBeEmpty', []));
 		});
 
 		it('rejects `.path` containing empty string', async () => {
@@ -47,12 +52,17 @@ describe('RuleRemoveAction', () => {
 				path: ['']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Remove, 'validations.pathCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.Remove, 'validations.pathCannotBeEmpty', []));
 		});
 	});
 
@@ -97,13 +107,19 @@ describe('RuleRemoveAction', () => {
 				const inputs: Inputs = {
 					path: [FAKE_PATH_1]
 				};
+				let errorThrown: boolean;
+				let message: string;
 				try {
 					await testAction.run(inputs);
-					assert.fail('Error should have been thrown');
+					errorThrown = false;
 				} catch (e) {
-					// ==== ASSERTIONS ====
-					expect(e.message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths'));
+					errorThrown = true;
+					message = e.message;
 				}
+
+				// ==== ASSERTIONS ====
+				expect(errorThrown).to.equal(true, 'Error should have been thrown');
+				expect(message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths'));
 			});
 		});
 
@@ -188,12 +204,17 @@ describe('RuleRemoveAction', () => {
 					const inputs = {
 						path: [FAKE_PATH_4]
 					};
+					let errorThrown: boolean;
+					let message: string;
 					try {
 						await testAction.run(inputs);
-						assert.fail('Error should have thrown');
+						errorThrown = false;
 					} catch (e) {
-						expect(e.message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths', []));
+						errorThrown = true;
+						message = e.message;
 					}
+					expect(errorThrown).to.equal(true, 'Error should have been thrown');
+					expect(message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths', []));
 				});
 
 				it('Test Case: Action can be aborted during confirmation prompt', async () => {
@@ -246,12 +267,17 @@ describe('RuleRemoveAction', () => {
 						path: [FAKE_PATH_4],
 						force: true
 					};
+					let errorThrown: boolean;
+					let message: string;
 					try {
 						await testAction.run(inputs);
-						assert.fail('Error should have thrown');
+						errorThrown = false;
 					} catch (e) {
-						expect(e.message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths', []));
+						errorThrown = true;
+						message = e.message;
 					}
+					expect(errorThrown).to.equal(true, 'Error should have been thrown');
+					expect(message).to.equal(getMessage(BundleName.Remove, 'errors.noMatchingPaths', []));
 				});
 			});
 		});

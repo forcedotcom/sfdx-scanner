@@ -4,7 +4,7 @@ import * as TestOverrides from '../../test-related-lib/TestOverrides';
 import Sinon = require('sinon');
 import path = require('path');
 import fs = require('fs');
-import {assert, expect} from 'chai';
+import {expect} from 'chai';
 
 import {RuleResult} from '../../../src/types';
 import {SfgeDfaEngine} from '../../../src/lib/sfge/SfgeDfaEngine';
@@ -118,15 +118,18 @@ describe('SfgeDfaEngine', () => {
 			const expectedError = spoofedOutput.split('\n').slice(21).join('\n').trimStart();
 
 			// ==== TESTED METHOD ====
+			let errorThrown: boolean;
 			let err: string = null;
 			try {
-				const results = await testEngine.processExecutionFailure(spoofedOutput);
-				assert.fail(`Expected error, received ${JSON.stringify(results)}`);
+				await testEngine.processExecutionFailure(spoofedOutput);
+				errorThrown = false;
 			} catch (e) {
+				errorThrown = true;
 				err = e instanceof Error ? e.message : e as string;
 			}
 
 			// ==== ASSERTIONS ====
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
 			expect(err).to.equal(expectedError, 'Wrong error returned');
 			Sinon.assert.callCount(uxSpy, 0);
 		});

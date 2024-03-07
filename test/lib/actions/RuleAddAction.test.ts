@@ -1,5 +1,5 @@
 import {Logger} from '@salesforce/core';
-import {assert, expect} from 'chai';
+import {expect} from 'chai';
 import sinon = require('sinon');
 import path = require('path');
 import untildify = require('untildify');
@@ -68,12 +68,17 @@ describe('RuleAddAction', () => {
 				path: ['this/does/not/matter']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
 		});
 
 		it('Rejects empty `.language` property', async () => {
@@ -82,12 +87,17 @@ describe('RuleAddAction', () => {
 				path: ['this/does/not/matter']
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.Add, 'validations.languageCannotBeEmpty', []));
 		});
 
 		it('Rejects missing `.path` property', async () => {
@@ -95,12 +105,17 @@ describe('RuleAddAction', () => {
 				language: 'apex'
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
 		});
 
 		it('Rejects empty `.path` property', async () => {
@@ -109,12 +124,17 @@ describe('RuleAddAction', () => {
 				path: []
 			};
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
 		});
 
 		it('Rejects `.path` containing empty string', async () => {
@@ -123,12 +143,17 @@ describe('RuleAddAction', () => {
 				path: [""]
 			}
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await testAction.validateInputs(inputs);
-				assert.fail('Exception should have been thrown');
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.Add, 'validations.pathCannotBeEmpty', []));
 		});
 	});
 
