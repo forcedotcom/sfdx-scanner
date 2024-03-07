@@ -1,4 +1,4 @@
-import {assert, expect} from 'chai';
+import {expect} from 'chai';
 import {FileHandler} from '../../src/lib/util/FileHandler';
 import {Config} from '../../src/lib/util/Config';
 import Sinon = require('sinon');
@@ -196,13 +196,19 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const statStub = Sinon.stub(FileHandler.prototype, 'stats').throws(error);
 
 			// Execute and verify
+			let errorThrown: boolean;
+			let errName: string;
 			try {
 				await verifyJreSetup();
-				assert.fail('Should have failed');
+				errorThrown = false;
 			} catch (err) {
-				expect(err.name).equals('InvalidJavaHome');
-				expect(uniqueWarningCounter).to.equal(0);
+				errorThrown = true;
+				errName = err.name;
 			}
+			expect(errorThrown).to.equal(true, 'Should have failed');
+			expect(errName).equals('InvalidJavaHome');
+			expect(uniqueWarningCounter).to.equal(0);
+
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();
@@ -216,13 +222,19 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, invalidVersion);
 
 			// Execute and verify
+			let errorThrown: boolean;
+			let errName: string;
 			try {
 				await verifyJreSetup();
-				assert.fail('Should have failed');
+				errorThrown = false;
 			} catch (err) {
-				expect(err.name).equals('InvalidVersion');
-				expect(uniqueWarningCounter).to.equal(0);
+				errorThrown = true;
+				errName = err.name;
 			}
+			expect(errorThrown).to.equal(true, 'Should have failed');
+			expect(errName).equals('InvalidVersion');
+			expect(uniqueWarningCounter).to.equal(0);
+
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();
