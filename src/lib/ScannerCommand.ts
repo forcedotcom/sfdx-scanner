@@ -24,6 +24,10 @@ import {Logger} from "@salesforce/core";
  * runtime dependency injection points to their corresponding Action classes.
  */
 export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displayable {
+
+	// It appears we need to explicitly set this in order for the global --json flag to show up in the generated help text
+	public static readonly enableJsonFlag = true;
+
 	protected async init(): Promise<void> {
 		await super.init();
 		initContainer();
@@ -50,6 +54,8 @@ export abstract class ScannerCommand extends SfCommand<AnyJson> implements Displ
 		uxEvents.on(EVENTS.INFO_VERBOSE, (msg: string) => display.displayVerboseInfo(msg));
 		uxEvents.on(EVENTS.WARNING_ALWAYS, (msg: string) => display.displayWarning(msg));
 		uxEvents.on(EVENTS.WARNING_VERBOSE, (msg: string) => display.displayVerboseWarning(msg));
+		uxEvents.on(EVENTS.WARNING_ALWAYS_UNIQUE, (msg: string) => display.displayUniqueWarning(msg));
+		uxEvents.on(EVENTS.ERROR_ALWAYS, (msg: string) => display.displayError(msg));
 		uxEvents.on(EVENTS.START_SPINNER, (msg: string, status: string) => display.spinnerStart(msg, status));
 		uxEvents.on(EVENTS.UPDATE_SPINNER, (msg: string) => display.spinnerUpdate(msg));
 		uxEvents.on(EVENTS.WAIT_ON_SPINNER, (_msg: string) => display.spinnerWait()); // eslint-disable-line @typescript-eslint/no-unused-vars

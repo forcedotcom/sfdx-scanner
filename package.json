@@ -1,7 +1,7 @@
 {
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
-	"version": "3.21.0",
+	"version": "3.22.0",
 	"author": "ISV SWAT",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
@@ -14,6 +14,7 @@
 		"@salesforce/eslint-config-lwc": "^3.2.1",
 		"@salesforce/eslint-plugin-lightning": "^1.0.0",
 		"@salesforce/sf-plugins-core": "^5.0.4",
+		"@types/wordwrap": "^1.0.3",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"cross-spawn": "^7.0.3",
@@ -40,7 +41,6 @@
 		"typescript": "~5.1.0",
 		"untildify": "^4.0.0",
 		"uuid": "^9.0.0",
-		"word-wrap": "^1.2.3",
 		"xml-js": "^1.6.11"
 	},
 	"resolutions": {
@@ -69,6 +69,7 @@
 		"@types/picomatch": "^2.3.0",
 		"@types/sarif": "^2.1.4",
 		"@types/semver": "^7.3.9",
+		"@types/sinon": "^17.0.3",
 		"@types/tmp": "^0.2.3",
 		"@types/uuid": "^8.3.4",
 		"chai": "^4",
@@ -78,7 +79,7 @@
 		"mocha-junit-reporter": "^2.0.0",
 		"nyc": "^15.0.0",
 		"oclif": "^4.0.3",
-		"sinon": "^13",
+		"sinon": "^17",
 		"tildify": "^2.0.0",
 		"ts-mockito": "^2.6.1"
 	},
@@ -128,16 +129,16 @@
 		"flexibleTaxonomy": true
 	},
 	"nyc": {
-		"branches": "60",
-		"lines": "75",
-		"functions": "75",
-		"statements": "75"
+		"branches": "75",
+		"lines": "85",
+		"functions": "85",
+		"statements": "85"
 	},
 	"repository": "forcedotcom/sfdx-scanner",
 	"scripts": {
 		"build": "./gradlew build -x test",
-		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock",
-		"postpack": "rm -f oclif.manifest.json",
+		"prepack": "rm -rf lib && tsc -b && oclif manifest && oclif readme && oclif lock && npm shrinkwrap",
+		"postpack": "rm -f oclif.manifest.json oclif.lock npm-shrinkwrap.json",
 		"lint-typescript": "eslint ./src --ext .ts --max-warnings 0",
 		"test": "./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",
 		"test-quiet": "cross-env SFGE_LOGGING=false ./gradlew test jacocoTestCoverageVerification && nyc mocha --timeout 10000 --retries 5 \"./test/**/*.test.ts\"",

@@ -5,6 +5,7 @@ import Sinon = require('sinon');
 import {verifyJreSetup, JreSetupManagerDependencies} from '../../src/lib/JreSetupManager';
 import childProcess = require('child_process');
 import * as TestOverrides from '../test-related-lib/TestOverrides';
+import {uxEvents, EVENTS} from '../../src/lib/ScannerEvents';
 
 TestOverrides.initializeTestSetup();
 
@@ -18,6 +19,14 @@ describe('JreSetupManager #verifyJreSetup', () => {
 	const validVersion8 = 'openjdk version "1.8.0_172"\nOpenJDK Runtime Environment (Zulu 8.30.0.2-macosx) (build 1.8.0_172-b01)\nOpenJDK 64-Bit Server VM (Zulu 8.30.0.2-macosx) (build 25.172-b01, mixed mode)\n';
 	const validVersion14Win = 'openjdk 14 2020-03-17\r\nOpenJDK Runtime Environment (build 14+36-1461)\r\nOpenJDK 64-Bit Server VM (build 14+36-1461, mixed mode, sharing)\r\n';
 	const invalidVersion = 'openjdk version "1.5.0_188"\nOpenJDK Runtime Environment';
+	let uniqueWarningCounter = 0;
+	uxEvents.on(EVENTS.WARNING_ALWAYS_UNIQUE, (_msg) => {
+		uniqueWarningCounter += 1;
+	});
+
+	beforeEach(() => {
+		uniqueWarningCounter = 0;
+	});
 
 	describe('With valid javaHome path in Config and an accepted Java version', () => {
 
@@ -48,6 +57,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			expect(javaHomeValue).equals(javaHomeValidPath);
 			expect(setJavaHomeStub.calledOnce).to.be.true;
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(1);
 		});
 
 	});
@@ -83,6 +93,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 			// Verify
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(1);
 		});
 
 		it('should check JRE_HOME for path', async () => {
@@ -93,6 +104,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 			// Verify
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(1);
 		});
 
 		it('should check JDK_HOME for path', async () => {
@@ -103,6 +115,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 			// Verify
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(1);
 		});
 	});
 
@@ -140,6 +153,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			// Verify
 			expect(findJavaHomeStub.calledOnce).to.be.true;
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(1);
 
 			findJavaHomeStub.restore();
 
@@ -156,6 +170,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			}
 
 			expect(findJavaHomeStub.calledOnce).to.be.true;
+			expect(uniqueWarningCounter).to.equal(0);
 
 			findJavaHomeStub.restore();
 
@@ -181,11 +196,19 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const statStub = Sinon.stub(FileHandler.prototype, 'stats').throws(error);
 
 			// Execute and verify
+			let errorThrown: boolean;
+			let errName: string;
 			try {
 				await verifyJreSetup();
+				errorThrown = false;
 			} catch (err) {
-				expect(err.name).equals('InvalidJavaHome');
+				errorThrown = true;
+				errName = err.name;
 			}
+			expect(errorThrown).to.equal(true, 'Should have failed');
+			expect(errName).equals('InvalidJavaHome');
+			expect(uniqueWarningCounter).to.equal(0);
+
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();
@@ -199,11 +222,19 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, invalidVersion);
 
 			// Execute and verify
+			let errorThrown: boolean;
+			let errName: string;
 			try {
 				await verifyJreSetup();
+				errorThrown = false;
 			} catch (err) {
-				expect(err.name).equals('InvalidVersion');
+				errorThrown = true;
+				errName = err.name;
 			}
+			expect(errorThrown).to.equal(true, 'Should have failed');
+			expect(errName).equals('InvalidVersion');
+			expect(uniqueWarningCounter).to.equal(0);
+
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();
@@ -221,6 +252,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 			// Verify
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(0);
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();
@@ -238,6 +270,7 @@ describe('JreSetupManager #verifyJreSetup', () => {
 
 			// Verify
 			expect(javaHome).equals(javaHomeValidPath);
+			expect(uniqueWarningCounter).to.equal(0);
 
 			configGetJavaHomeStub.restore();
 			statStub.restore();

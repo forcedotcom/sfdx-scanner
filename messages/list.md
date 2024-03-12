@@ -24,11 +24,11 @@ Selects rules by category. Enter multiple values as a comma-separated list.
 
 # flags.rulesetSummary
 
-[deprecated] select rules by ruleset
+[Deprecated] select rules by ruleset
 
 # flags.rulesetDescription
 
-[deprecated] Selects rules by ruleset. Enter multiple values as a comma-separated list.
+Deprecated. Use category instead. Selects rules by ruleset. Enter multiple values as a comma-separated list.
 
 # flags.engineSummary
 
@@ -37,6 +37,14 @@ select rules by engine
 # flags.engineDescription
 
 Selects rules by engine. Enter multiple engines as a comma-separated list.
+
+# flags.previewPmd7Summary
+
+use PMD version %s to list PMD and CPD rules
+
+# flags.previewPmd7Description
+
+Uses PMD version %s instead of %s to list PMD and CPD rules.
 
 # rulesetDeprecation
 

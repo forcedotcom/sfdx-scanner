@@ -233,7 +233,8 @@
         "atOrAbove": "3.0.0-rc.1",
         "below": "3.0.0",
         "cwe": [
-          "CWE-400"
+          "CWE-400",
+          "CWE-674"
         ],
         "severity": "high",
         "identifiers": {
@@ -319,12 +320,14 @@
         "/\\*!? jQuery v(§§version§§)",
         "\\* jQuery JavaScript Library v(§§version§§)",
         "\\* jQuery (§§version§§) - New Wave Javascript",
+        "/\\*![\\s]+\\* jQuery JavaScript Library v(§§version§§)",
         "// \\$Id: jquery.js,v (§§version§§)",
         "/\\*! jQuery v(§§version§§)",
         "[^a-z]f=\"(§§version§§)\",.*[^a-z]jquery:f,",
         "[^a-z]m=\"(§§version§§)\",.*[^a-z]jquery:m,",
         "[^a-z.]jquery:[ ]?\"(§§version§§)\"",
-        "\\$\\.documentElement,Q=e.jQuery,Z=e\\.\\$,ee=\\{\\},te=\\[\\],ne=\"(§§version§§)\""
+        "\\$\\.documentElement,Q=e.jQuery,Z=e\\.\\$,ee=\\{\\},te=\\[\\],ne=\"(§§version§§)\"",
+        "=\"(§§version§§)\",.{50,300}(.)\\.fn=(\\2)\\.prototype=\\{jquery:"
       ],
       "filecontentreplace": [
         "/var [a-z]=[a-z]\\.document,([a-z])=\"(§§version§§)\",([a-z])=.{130,160};\\3\\.fn=\\3\\.prototype=\\{jquery:\\1/$2/"
@@ -2336,6 +2339,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2361,6 +2365,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2385,6 +2390,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Affected versions of dojo are susceptible to a cross-site scripting vulnerability in the dijit.Editor and textarea components, which execute their contents as Javascript, even when sanitized.",
           "CVE": [
             "CVE-2008-6681"
           ],
@@ -2402,6 +2408,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2427,6 +2434,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2452,6 +2460,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2476,6 +2485,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Cross-site scripting (XSS) vulnerability in dijit/tests/_testCommon.js in Dojo Toolkit SDK before 1.4.2 allows remote attackers to inject arbitrary web script or HTML via the theme parameter, as demonstrated by an attack against dijit/tests/form/test_Button.html",
           "CVE": [
             "CVE-2010-2275"
           ]
@@ -2492,6 +2502,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2516,6 +2527,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.2.0 are vulnerable to Cross-Site Scripting (XSS). The package fails to sanitize HTML code in user-controlled input, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "CVE": [
             "CVE-2015-5654"
           ],
@@ -2533,6 +2545,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2558,6 +2571,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2584,6 +2598,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2602,6 +2617,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2629,6 +2645,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2647,6 +2664,7 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "Versions of dojo prior to 1.4.2 are vulnerable to DOM-based Cross-Site Scripting (XSS). The package does not sanitize URL parameters in the _testCommon.js and runner.html test files, allowing attackers to execute arbitrary JavaScript in the victim's browser.",
           "PR": "307",
           "CVE": [
             "CVE-2010-2273"
@@ -2674,6 +2692,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2691,9 +2710,11 @@
           "CWE-79"
         ],
         "identifiers": {
+          "summary": "In Dojo Toolkit before 1.14.0, there is unescaped string injection in dojox/Grid/DataGrid.",
           "CVE": [
             "CVE-2018-15494"
-          ]
+          ],
+          "githubID": "GHSA-84cm-x2q5-8225"
         },
         "info": [
           "https://dojotoolkit.org/blog/dojo-1-14-released"
@@ -2709,6 +2730,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2729,6 +2751,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2749,6 +2772,7 @@
           "CWE-94"
         ],
         "identifiers": {
+          "summary": "Prototype pollution in dojo",
           "CVE": [
             "CVE-2020-5258"
           ],
@@ -2779,13 +2803,14 @@
     ],
     "extractors": {
       "uri": [
-        "/(?:dojo-)?(§§version§§)/dojo(\\.min)?\\.js"
+        "/(?:dojo-)?(§§version§§)(?:/dojo)?/dojo(\\.min)?\\.js"
       ],
       "filename": [
         "dojo-(§§version§§)(\\.min)?\\.js"
       ],
       "filecontentreplace": [
-        "/dojo.version=\\{major:([0-9]+),minor:([0-9]+),patch:([0-9]+)/$1.$2.$3/"
+        "/dojo.version=\\{major:([0-9]+),minor:([0-9]+),patch:([0-9]+)/$1.$2.$3/",
+        "/\"dojox\"[\\s\\S]{1,350}\\.version=\\{major:([0-9]+),minor:([0-9]+),patch:([0-9]+)/$1.$2.$3/"
       ],
       "hashes": {
         "73cdd262799aab850abbe694cd3bfb709ea23627": "1.4.1",
@@ -2989,7 +3014,7 @@
           "CWE-1104"
         ],
         "identifiers": {
-          "summary": "End-of-Life: Long term support for AngularJS has been discontinued",
+          "summary": "End-of-Life: Long term support for AngularJS has been discontinued as of December 31, 2021",
           "retid": "54"
         },
         "info": [
@@ -3062,6 +3087,30 @@
         },
         "info": [
           "https://github.com/advisories/GHSA-qwqh-hm9m-p5hr"
+        ]
+      },
+      {
+        "atOrAbove": "1.3.0",
+        "below": "999",
+        "cwe": [
+          "CWE-1333"
+        ],
+        "severity": "high",
+        "identifiers": {
+          "summary": "angular vulnerable to super-linear runtime due to backtracking",
+          "CVE": [
+            "CVE-2024-21490"
+          ],
+          "githubID": "GHSA-4w4v-5hc9-xrr2"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-4w4v-5hc9-xrr2",
+          "https://nvd.nist.gov/vuln/detail/CVE-2024-21490",
+          "https://github.com/angular/angular.js",
+          "https://security.snyk.io/vuln/SNYK-JAVA-ORGWEBJARSBOWER-6241746",
+          "https://security.snyk.io/vuln/SNYK-JAVA-ORGWEBJARSNPM-6241747",
+          "https://security.snyk.io/vuln/SNYK-JS-ANGULAR-6091113",
+          "https://stackblitz.com/edit/angularjs-vulnerability-ng-srcset-redos"
         ]
       },
       {
@@ -3660,7 +3709,8 @@
         "this.Handlebars=\\{\\};[\n\r \t]+\\(function\\([a-z]\\)\\{[a-z].VERSION=(?:'|\")(§§version§§)(?:'|\")",
         "exports.HandlebarsEnvironment=[\\s\\S]{70,120}exports.VERSION=(?:'|\")(§§version§§)(?:'|\")",
         "/\\*+![\\s]+(?:@license)?[\\s]+handlebars v+(§§version§§)",
-        "window\\.Handlebars=.,.\\.VERSION=\"(§§version§§)\""
+        "window\\.Handlebars=.,.\\.VERSION=\"(§§version§§)\"",
+        ".\\.HandlebarsEnvironment=.;var .=.\\(.\\),.=.\\(.\\),.=\"(§§version§§)\";.\\.VERSION="
       ],
       "hashes": {}
     }
@@ -4285,7 +4335,7 @@
       "filecontent": [
         "/\\*\\*\n +\\* React \\(with addons\\) ?v(§§version§§)",
         "/\\*\\*\n +\\* React v(§§version§§)",
-        "/\\*\\* @license React v(§§version§§)[\\s]*\\* react\\.",
+        "/\\*\\* @license React v(§§version§§)[\\s]*\\* react(-jsx-runtime)?\\.",
         "\"\\./ReactReconciler\":[0-9]+,\"\\./Transaction\":[0-9]+,\"fbjs/lib/invariant\":[0-9]+\\}\\],[0-9]+:\\[function\\(require,module,exports\\)\\{\"use strict\";module\\.exports=\"(§§version§§)\"\\}",
         "ReactVersion\\.js[\\*! \\\\/\n\r]{0,100}function\\(e,t\\)\\{\"use strict\";e\\.exports=\"(§§version§§)\"",
         "expected a ReactNode.[\\s\\S]{0,1800}?function\\(e,t\\)\\{\"use strict\";e\\.exports=\"(§§version§§)\""
@@ -4402,6 +4452,22 @@
       "filecontent": [
         "version:\"(§§version§§)[a-z0-9\\-]*\"[\\s,]*rendererPackageName:\"react-dom\"",
         "/\\*\\* @license React v(§§version§§)[\\s]*\\* react-dom\\."
+      ]
+    }
+  },
+  "react-is": {
+    "vulnerabilities": [],
+    "extractors": {
+      "filecontent": [
+        "/\\*\\* @license React v(§§version§§)[\\s]*\\* react-is\\."
+      ]
+    }
+  },
+  "scheduler": {
+    "vulnerabilities": [],
+    "extractors": {
+      "filecontent": [
+        "/\\*\\* @license React v(§§version§§)[\\s]*\\* scheduler\\."
       ]
     }
   },
@@ -5541,6 +5607,31 @@
       },
       {
         "atOrAbove": "0.8.1",
+        "below": "0.28.0",
+        "cwe": [
+          "CWE-352"
+        ],
+        "severity": "medium",
+        "identifiers": {
+          "summary": "Axios Cross-Site Request Forgery Vulnerability",
+          "CVE": [
+            "CVE-2023-45857"
+          ],
+          "githubID": "GHSA-wf5p-g6vw-rhxx"
+        },
+        "info": [
+          "https://github.com/advisories/GHSA-wf5p-g6vw-rhxx",
+          "https://nvd.nist.gov/vuln/detail/CVE-2023-45857",
+          "https://github.com/axios/axios/issues/6006",
+          "https://github.com/axios/axios/issues/6022",
+          "https://github.com/axios/axios/pull/6028",
+          "https://github.com/axios/axios/commit/96ee232bd3ee4de2e657333d4d2191cd389e14d0",
+          "https://github.com/axios/axios/releases/tag/v1.6.0",
+          "https://security.snyk.io/vuln/SNYK-JS-AXIOS-6032459"
+        ]
+      },
+      {
+        "atOrAbove": "1.0.0",
         "below": "1.6.0",
         "cwe": [
           "CWE-352"

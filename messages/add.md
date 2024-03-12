@@ -20,7 +20,7 @@ one or more paths (such as a directory or JAR file) to custom rule definitions
 
 # flags.pathDescription
 
-One or more paths (such as a directory or JAR file) to  custom rule definitions. Specify multiple values as a comma-separated list.
+One or more paths (such as a directory or JAR file) to custom rule definitions. Specify multiple values as a comma-separated list.
 
 # validations.languageCannotBeEmpty
 
@@ -29,6 +29,14 @@ Specify a language
 # validations.pathCannotBeEmpty
 
 Specify a path
+
+# output.successfullyAddedRules
+
+Successfully added rules for %s.
+
+# output.resultSummary
+
+%s Path(s) added: %s
 
 # examples
 

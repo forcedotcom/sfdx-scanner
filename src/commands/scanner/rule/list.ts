@@ -1,6 +1,6 @@
 import {Flags} from '@salesforce/sf-plugins-core';
 import {Action, ScannerCommand} from '../../../lib/ScannerCommand';
-import {AllowedEngineFilters} from '../../../Constants';
+import {AllowedEngineFilters, PMD6_VERSION, PMD7_VERSION} from '../../../Constants';
 import {BundleName, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Display} from "../../../lib/Display";
@@ -23,7 +23,8 @@ export default class List extends ScannerCommand {
 	// and summary and description is what's printed when the -h/--help flag is supplied.
 	public static readonly flags = {
 		verbose: Flags.boolean({
-			summary: getMessage(BundleName.Common, 'flags.verboseSummary')
+			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
+			description: getMessage(BundleName.Common, 'flags.verboseDescription')
 		}),
 		category: Flags.custom<string[]>({
 			char: 'c',
@@ -56,7 +57,11 @@ export default class List extends ScannerCommand {
 			options: [...AllowedEngineFilters],
 			delimiter: ',',
 			multiple: true
-		})()
+		})(),
+		"preview-pmd7": Flags.boolean({
+			summary: getMessage(BundleName.List, 'flags.previewPmd7Summary', [PMD7_VERSION]),
+			description: getMessage(BundleName.List, 'flags.previewPmd7Description', [PMD7_VERSION, PMD6_VERSION])
+		}),
 	};
 
 	protected createAction(_logger: Logger, display: Display): Action {

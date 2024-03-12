@@ -1,5 +1,5 @@
 import {InputProcessor, InputProcessorImpl} from "../../src/lib/InputProcessor";
-import {assert, expect} from "chai";
+import {expect} from "chai";
 import * as path from "path";
 import {Inputs} from "../../src/types";
 import {BundleName, getMessage} from "../../src/MessageCatalog";
@@ -129,24 +129,34 @@ describe("InputProcessorImpl Tests", async () => {
 			const inputs: Inputs = {
 				target: ['thisFileDoesNotExist.xml', 'thisFileAlsoDoesNotExist.json']
 			};
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				inputProcessor.resolveProjectDirPaths(inputs);
-				assert.fail("Expected error to be thrown")
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
 		})
 
 		it("Unspecified projectdir with glob target that resolves to no files", async () => {
 			const inputs: Inputs = {
 				target: ['**.filesOfThisTypeShouldNotExist']
 			};
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				inputProcessor.resolveProjectDirPaths(inputs);
-				assert.fail("Expected error to be thrown")
+				errorThrown = false;
 			} catch (e) {
-				expect(e.message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
+				errorThrown = true;
+				message = e.message;
 			}
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).to.equal(getMessage(BundleName.CommonRun, 'validations.noFilesFoundInTarget'));
 		})
 	})
 })

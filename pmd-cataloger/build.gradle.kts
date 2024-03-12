@@ -10,49 +10,9 @@ plugins {
 group = "sfdx"
 version = "1.0"
 
-val distDir = "$buildDir/../../dist"
-val pmdVersion = "6.55.0"
-val pmdFile = "pmd-bin-$pmdVersion.zip"
-val pmdUrl = "https://github.com/pmd/pmd/releases/download/pmd_releases%2F${pmdVersion}/${pmdFile}"
-val skippableJarRegexes = setOf("""^common_[\d\.-]*\.jar""".toRegex(),
-  """^fastparse.*\.jar""".toRegex(),
-  """^groovy.*\.jar""".toRegex(),
-  """^lenses.*\.jar""".toRegex(),
-  """^parsers.*\.jar""".toRegex(),
-  """^pmd-(cpp|cs|dart|fortran|go|groovy|jsp|kotlin|lua|matlab|modelica|objectivec|perl|php|plsql|python|ruby|scala|swift|ui)[-_\d\.]*\.jar""".toRegex(),
-  """^protobuf-java-[\d\.]*\.jar""".toRegex(),
-  """^scala.*\.jar""".toRegex(),
-  """^sourcecode_[\d\.-]*\.jar""".toRegex(),
-  """^trees_[\d\.-]*\.jar""".toRegex()
-)
-
 repositories {
   mavenCentral()
   google()
-}
-
-jacoco {
-  toolVersion = "0.8.7"
-}
-
-tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd") {
-  src(pmdUrl)
-  dest(buildDir)
-  overwrite(false)
-}
-
-tasks.register<Copy>("installPmd") {
-  dependsOn("downloadPmd")
-  from(zipTree("$buildDir/$pmdFile"))
-  exclude { details: FileTreeElement ->
-    skippableJarRegexes.any {it.containsMatchIn(details.file.name)}
-  }
-  into("$distDir/pmd")
-  // TODO include("just the *.jars etc. we care about")
-  includeEmptyDirs = false
-  eachFile {
-    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
-  }
 }
 
 dependencies {
@@ -73,25 +33,145 @@ dependencies {
   testImplementation(files("$buildDir/../../test/test-jars/apex/testjar-categories-and-rulesets-1.jar"))
 }
 
+
+// ======== MODIFY PLUGIN PROPERTIES ===================================================================================
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 application {
   mainClass.set("sfdc.sfdx.scanner.pmd.Main");
 }
 
-// Running the cli locally needs the dist exploded, so just do that
-// automatically with build for ease of use.
+jacoco {
+  toolVersion = "0.8.7"
+}
+
+val distDir = "$buildDir/../../dist"
+
+
+// ======== DEFINE/UPDATE PMD-CATALOGER DIST RELATED TASKS =============================================================
+val pmdCatalogerDistDir = "$distDir/pmd-cataloger"
+
 tasks.named<Sync>("installDist") {
-  into("$distDir/pmd-cataloger")
+  // The installDist task comes with the distribution plugin which comes with the applciation plugin. We modify it here:
+  into(pmdCatalogerDistDir)
 }
 
-tasks.named("assemble") {
+tasks.register<Delete>("deletePmdCatalogerDist") {
+  delete(pmdCatalogerDistDir)
+}
 
-  // TODO: These currently do not get cleaned with ./gradlew clean which can cause a lot of confusion.
+// ======== DEFINE/UPDATE PMD6 DIST RELATED TASKS  =====================================================================
+val pmd6DistDir = "$distDir/pmd"
+val pmd6Version = "6.55.0"
+val pmd6File = "pmd-bin-$pmd6Version.zip"
+
+tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd6") {
+  src("https://github.com/pmd/pmd/releases/download/pmd_releases%2F${pmd6Version}/${pmd6File}")
+  dest(buildDir)
+  overwrite(false)
+}
+
+tasks.register<Copy>("installPmd6") {
+  dependsOn("downloadPmd6")
+  from(zipTree("$buildDir/$pmd6File"))
+
+  // I went to https://github.com/pmd/pmd/tree/pmd_releases/6.55.0 and for each of the languages that we support
+  // (apex, java, visualforce, xml), I took a look at its direct and indirect dependencies at
+  //     https://central.sonatype.com/artifact/net.sourceforge.pmd/pmd-apex/dependencies
+  // by selecting the 6.55.0 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
+  // For completeness, I listed the modules and all their compile time dependencies (direct and indirect).
+  // Duplicates don't matter since we use setOf.
+  val pmd6ModulesToInclude = setOf(
+    // LANGUAGE MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-apex",            "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "asm", "cglib", "commons-lang3", "error_prone_annotations", "gson", "j2objc-annotations", "javax.inject", "jcommander", "jol-core", "jsr305", "logback-classic", "logback-core", "pmd-apex-jorje", "pmd-core", "saxon", "slf4j-api", "stringtemplate",
+    "pmd-java",            "antlr4-runtime", "asm", "commons-lang3", "gson", "jcommander", "pmd-core", "saxon",
+    "pmd-visualforce",     "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "asm", "cglib", "commons-lang3", "error_prone_annotations", "gson", "j2objc-annotations", "javax.inject", "jcommander", "jol-core", "jsr305", "logback-classic", "logback-core", "pmd-apex", "pmd-apex-jorje", "pmd-core", "saxon", "slf4j-api", "stringtemplate",
+    "pmd-xml",             "antr4-runtime", "asm", "commons-lang3", "gson", "jcommander", "pmd-core", "saxon"
+  )
+
+  val pmd6JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
+  pmd6ModulesToInclude.forEach {
+    pmd6JarsToIncludeRegexes.add("""^$it-.*\.jar""".toRegex())
+  }
+
+  include { details: FileTreeElement -> pmd6JarsToIncludeRegexes.any { it.containsMatchIn(details.file.name) } }
+  into(pmd6DistDir)
+  includeEmptyDirs = false
+  eachFile {
+    // We drop the parent "pmd-bin-6.55.0" folder and put files directly into our "pmd" folder
+    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+  }
+}
+
+tasks.register<Delete>("deletePmd6Dist") {
+  delete(pmd6DistDir)
+}
+
+
+// ======== DEFINE/UPDATE PMD7 DIST RELATED TASKS  =====================================================================
+val pmd7DistDir = "$distDir/pmd7"
+val pmd7Version = "7.0.0-rc4"
+val pmd7File = "pmd-dist-$pmd7Version-bin.zip"
+
+tasks.register<de.undercouch.gradle.tasks.download.Download>("downloadPmd7") {
+  src("https://github.com/pmd/pmd/releases/download/pmd_releases%2F${pmd7Version}/${pmd7File}")
+  dest(buildDir)
+  overwrite(false)
+}
+
+tasks.register<Copy>("installPmd7") {
+  dependsOn("downloadPmd7")
+  from(zipTree("$buildDir/$pmd7File"))
+
+  // I went to https://github.com/pmd/pmd/tree/pmd_releases/7.0.0-rc4 and for each of the languages that we support
+  // (apex, java, visualforce, xml), I took a look at its direct and indirect dependencies at
+  //     https://central.sonatype.com/artifact/net.sourceforge.pmd/pmd-apex/dependencies
+  // by selecting the 7.0.0-rc4 dropdown and clicking on "Dependencies" and selecting "All Dependencies".
+  // For completeness, I listed the modules and all their compile time dependencies (direct and indirect).
+  // Duplicates don't matter since we use setOf.
+  val pmd7ModulesToInclude = setOf(
+    // LANGUAGE MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-apex",            "Saxon-HE", "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "apex-parser", "apexlink", "asm", "cglib", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "geny_2.13", "gson", "guava", "j2objc-annotations", "javax.inject", "jsr305", "jul-to-slf4j", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-apex-jorje", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "stringtemplate", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13",
+    "pmd-java",            "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jul-to-slf4j", "nice-xml-messages", "pcollections", "pmd-core", "slf4j-api",
+    "pmd-visualforce",     "Saxon-HE", "animal-sniffer-annotations", "antlr", "antlr-runtime", "antlr4-runtime", "aopalliance", "apex-parser", "apexlink", "asm", "cglib", "checker-qual", "commons-lang3", "error_prone_annotations", "failureaccess", "geny_2.13", "gson", "guava", "j2objc-annotations", "javax.inject", "jsr305", "jul-to-slf4j", "listenablefuture", "nice-xml-messages", "pcollections", "pkgforce_2.13", "pmd-apex", "pmd-apex-jorje", "pmd-core", "runforce", "scala-collection-compat_2.13", "scala-json-rpc-upickle-json-serializer_2.13", "scala-json-rpc_2.13", "scala-library", "scala-parallel-collections_2.13", "scala-reflect", "scala-xml_2.13", "slf4j-api", "stringtemplate", "ujson_2.13", "upack_2.13", "upickle-core_2.13", "upickle-implicits_2.13", "upickle_2.13",
+    "pmd-xml",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jul-to-slf4j", "nice-xml-messages", "pcollections", "pmd-core", "slf4j-api",
+    // MAIN CLI MODULE     DEPENDENCIES (direct and indirect)
+    "pmd-cli",             "Saxon-HE", "antlr4-runtime", "asm", "checker-qual", "commons-lang3", "gson", "jline", "jul-to-slf4j", "nice-xml-messages", "pcollections", "picocli", "pmd-core", "pmd-ui", "progressbar", "slf4j-api", "slf4j-simple",
+  )
+  val pmd7JarsToIncludeRegexes = mutableSetOf("""^LICENSE""".toRegex())
+  pmd7ModulesToInclude.forEach {
+    pmd7JarsToIncludeRegexes.add("""^$it-.*\.jar""".toRegex())
+  }
+
+  include { details: FileTreeElement -> pmd7JarsToIncludeRegexes.any { it.containsMatchIn(details.file.name) } }
+  into(pmd7DistDir)
+  includeEmptyDirs = false
+  eachFile {
+    // We drop the parent "pmd-bin-7.0.0-rc4" folder and put files directly into our "pmd7" folder
+    relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray())
+  }
+}
+
+tasks.register<Delete>("deletePmd7Dist") {
+  delete(pmd7DistDir)
+}
+
+
+// ======== ATTACH TASKS TO ASSEMBLE AND CLEAN  ========================================================================
+tasks.assemble {
   dependsOn("installDist")
-  dependsOn("installPmd")
+  dependsOn("installPmd6")
+  dependsOn("installPmd7")
 }
 
+tasks.clean {
+  dependsOn("deletePmdCatalogerDist")
+  dependsOn("deletePmd6Dist")
+  dependsOn("deletePmd7Dist")
+}
+
+
+// ======== TEST RELATED TASKS =========================================================================================
 tasks.test {
   // Use JUnit 5
   useJUnitPlatform()

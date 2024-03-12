@@ -1,12 +1,10 @@
 import {Logger} from '@salesforce/core';
-import {PMD_LIB} from '../../Constants';
 import {PmdSupport, PmdSupportOptions} from './PmdSupport';
 import * as JreSetupManager from './../JreSetupManager';
 import path = require('path');
 import {FileHandler} from '../util/FileHandler';
-
-const MAIN_CLASS = 'net.sourceforge.pmd.PMD';
-const HEAP_SIZE = '-Xmx1024m';
+import {Controller} from "../../Controller";
+import {PmdCommandInfo} from "./PmdCommandInfo";
 
 type PmdWrapperOptions = PmdSupportOptions & {
 	targets: string[];
@@ -49,21 +47,16 @@ export default class PmdWrapper extends PmdSupport {
 		const javaHome = await JreSetupManager.verifyJreSetup();
 		const command = path.join(javaHome, 'bin', 'java');
 
-		// The classpath needs PMD's lib folder. There may be redundancy with the shared classpath, but having the
-		// same JAR in the classpath twice is fine. Also note that the classpath is not wrapped in quotes like how it
-		// would be if we invoked directly through the CLI, because child_process.spawn() hates that.
-		const classpath = [...this.supplementalClasspath, `${PMD_LIB}/*`, ...this.buildSharedClasspath()].join(path.delimiter);
 		// Operating systems impose limits on the maximum length of a command line invocation. This can be problematic
 		// when scanning a large number of files. Store the list of files to scan in a temp file. Pass the location
 		// of the temp file to PMD. The temp file is cleaned up when the process exits.
 		const fileHandler = new FileHandler();
 		const tmpPath = await fileHandler.tmpFileWithCleanup();
 		await fileHandler.writeFile(tmpPath, this.targets.join(','));
-		const args = ['-cp', classpath, HEAP_SIZE, MAIN_CLASS, '-filelist', tmpPath,
-			'-format', 'xml'];
-		if (this.rules.length > 0) {
-			args.push('-rulesets', this.rules);
-		}
+
+		const pmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo();
+		const classPathsForExternalRules: string[] = this.buildSharedClasspath().concat(this.supplementalClasspath);
+		const args: string[] = pmdCommandInfo.constructJavaCommandArgsForPmd(tmpPath, classPathsForExternalRules, this.rules);
 
 		this.logger.trace(`Preparing to execute PMD with command: "${command}", args: "${JSON.stringify(args)}"`);
 		return [command, args];

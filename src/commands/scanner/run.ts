@@ -1,5 +1,5 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {PathlessEngineFilters} from '../../Constants';
+import {PathlessEngineFilters, PMD6_VERSION, PMD7_VERSION} from '../../Constants';
 import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
 import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
 import {InputProcessor, InputProcessorImpl} from "../../lib/InputProcessor";
@@ -21,6 +21,7 @@ export default class Run extends ScannerRunCommand {
 	public static examples = [
 		getMessage(BundleName.Run, 'examples')
 	];
+	public static readonly invocation = 'scanner run';
 
 	// This defines the flags accepted by this command. The key is the longname, the char property is the shortname,
 	// and summary and description is what's printed when the -h/--help flag is supplied.
@@ -69,6 +70,11 @@ export default class Run extends ScannerRunCommand {
 			summary: getMessage(BundleName.Run, 'flags.pmdConfigSummary'),
 			description: getMessage(BundleName.Run, 'flags.pmdConfigDescription')
 		}),
+		"preview-pmd7": Flags.boolean({
+			summary: getMessage(BundleName.Run, 'flags.previewPmd7Summary', [PMD7_VERSION]),
+			description: getMessage(BundleName.Run, 'flags.previewPmd7Description', [PMD7_VERSION, PMD6_VERSION])
+		}),
+
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.
 		//   It should be replaced during the 3.0 release cycle.
 		env: Flags.string({

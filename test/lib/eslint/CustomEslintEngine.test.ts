@@ -1,4 +1,4 @@
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import { CustomEslintEngine } from '../../../src/lib/eslint/CustomEslintEngine';
 import * as DataGenerator from './EslintTestDataGenerator';
 import { CUSTOM_CONFIG, HARDCODED_RULES } from '../../../src/Constants';
@@ -152,18 +152,21 @@ describe("Tests for CustomEslintEngine", () => {
 
 			const customEslintEngine = await getCustomEslintEngine(fileHandlerMock);
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 				await customEslintEngine.run(
 					[],
 					[],
 					[DataGenerator.getDummyTarget()],
 					engineOptionsWithEslintCustom);
-
-				assert.fail('Expected exception');
+				errorThrown = false;
 			} catch (err) {
-				expect(err.message).to.equal(getMessage(BundleName.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFilePath]));
+				errorThrown = true;
+				message = err.message;
 			}
-
+			expect(errorThrown).to.equal(true, 'Error should be thrown');
+			expect(message).to.equal(getMessage(BundleName.CustomEslintEngine, 'ConfigFileDoesNotExist', [configFilePath]));
 		});
 
 		it('Throws error when JSON in config file cannot be parsed', async () => {
@@ -172,6 +175,8 @@ describe("Tests for CustomEslintEngine", () => {
 			const fileHandlerMock = mockFileHandlerToReturnContentForFile(configFilePath, invalidJsonContent);
 			const customEslintEngine = await getCustomEslintEngine(fileHandlerMock);
 
+			let errorThrown: boolean;
+			let message: string;
 			try {
 
 				await customEslintEngine.run(
@@ -179,12 +184,13 @@ describe("Tests for CustomEslintEngine", () => {
 					[],
 					[target],
 					engineOptionsWithEslintCustom);
-
-				assert.fail('Expected exception');
+				errorThrown = false;
 			} catch (err) {
-				expect(err.message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}`);
+				errorThrown = true;
+				message = err.message;
 			}
-
+			expect(errorThrown).to.equal(true, 'Error should have been thrown');
+			expect(message).contains(`Something in the ESLint config JSON is invalid. Check ESLint's JSON specifications: ${configFilePath}`);
 		});
 
 		it('Invokes Eslint when config can be fetched', async () => {
