@@ -1,6 +1,7 @@
 ---
 title: What's new in v3.x?
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/code-analyzer-3x.html
 ---
 
 ## What’s new in v3.x
@@ -22,4 +23,4 @@ RetireJS is a default engine along with PMD, ESLint, and ESLint-Typescript. To p
 We replaced the  `-v/--violations-cause-error` flag on `scanner run` with the `-s/--severity-threshold`.
 
 ## Installing version v3.x
-Follow [these](./en/v3.x/getting-started/install) steps to install the latest features in version{{ site.data.versions-v3.scanner }}.
+Follow [these](./en/v3.x/getting-started/install) steps to install the latest features in version {{ site.data.versions-v3.scanner }}.

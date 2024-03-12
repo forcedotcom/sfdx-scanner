@@ -2,6 +2,7 @@
 title: ESLint Custom Configuration
 lang: en
 redirect_from: /en/custom-config/eslint
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/eslint-config.html
 ---
 
 ## ESLint Custom Configuration

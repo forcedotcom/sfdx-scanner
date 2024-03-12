@@ -2,6 +2,7 @@
 title: Design
 lang: en
 redirect_from: /en/architecture/architecture
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/architecture.html
 ---
 
 ## Salesforce Code Analyzer Architecture

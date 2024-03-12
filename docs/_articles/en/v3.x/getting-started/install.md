@@ -2,6 +2,7 @@
 title: Install and Update Salesforce Code Analyzer
 lang: en
 redirect_from: /en/getting-started/install
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/setup.html#install-salesforce-code-analyzer-v3x
 ---
 
 ## Install Salesforce Code Analyzer v3.x

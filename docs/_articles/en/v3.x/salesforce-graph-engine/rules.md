@@ -1,6 +1,7 @@
 ---
 title: 'Rules'
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/rules.html
 ---
 
 Salesforce Graph Engine includes path-based and data-flow analysis rules.

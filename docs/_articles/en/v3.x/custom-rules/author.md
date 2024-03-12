@@ -2,6 +2,7 @@
 title: Authoring Custom Rules
 lang: en
 redirect_from: /en/custom-rules/author
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/custom-config.html
 ---
 
 ## What are Custom Rules?

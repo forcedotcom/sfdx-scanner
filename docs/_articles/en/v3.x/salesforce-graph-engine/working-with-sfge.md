@@ -1,6 +1,7 @@
 ---
 title: 'Working with Salesforce Graph Engine'
 lang: en
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/working-with-graph-engine.html
 ---
 
 ## Background

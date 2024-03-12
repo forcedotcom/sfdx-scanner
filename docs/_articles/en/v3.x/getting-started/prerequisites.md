@@ -2,6 +2,7 @@
 title: Prerequisites
 lang: en
 redirect_from: /en/getting-started/prerequisites
+redirect_to: https://developer.salesforce.com/docs/platform/salesforce-code-analyzer/guide/setup.html#prerequisites
 ---
 
 ## Prerequisites
