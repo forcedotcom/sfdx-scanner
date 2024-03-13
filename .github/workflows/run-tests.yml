@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '8' # Always use Java v1.8 for building dependencies.
+          java-version: '11' # Always use Java v11 for building dependencies.
       # Install/build dependencies.
       - run: yarn
       - run: yarn build
@@ -249,7 +249,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '8' # Always use Java v1.8 for building dependencies.
+          java-version: '11' # Always use Java v11 for building dependencies.
       # Install/build dependencies.
       - run: yarn
       - run: yarn build

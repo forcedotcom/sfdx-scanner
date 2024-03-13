@@ -10,7 +10,6 @@ import {FileHandler} from './util/FileHandler';
 import {Config} from './util/Config';
 import {CONFIG_FILE} from '../Constants';
 import {BundleName, getMessage} from "../MessageCatalog";
-import {uxEvents, EVENTS} from './ScannerEvents';
 
 const JAVA_HOME_SYSTEM_VARIABLES = ['JAVA_HOME', 'JRE_HOME', 'JDK_HOME'];
 
@@ -30,6 +29,7 @@ export class JreSetupManagerDependencies {
 class JreSetupManager extends AsyncCreatable {
 	private logger!: Logger;
 	private config!: Config;
+	private configFile: string;
 	private dependencies: JreSetupManagerDependencies;
 	private initialized: boolean;
 
@@ -40,6 +40,7 @@ class JreSetupManager extends AsyncCreatable {
 		this.logger = await Logger.child('verifyJRE');
 
 		this.config = await Controller.getConfig();
+		this.configFile = path.join(Controller.getSfdxScannerPath(), CONFIG_FILE)
 		this.dependencies = new JreSetupManagerDependencies();
 
 		this.initialized = true;
@@ -80,7 +81,7 @@ class JreSetupManager extends AsyncCreatable {
 		// So we'll just throw an error telling the user to set it themselves.
 		if (!javaHome) {
 			const errName = 'NoJavaHomeFound';
-			throw new SfError(getMessage(BundleName.JreSetupManager, errName, []), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [this.configFile]), errName);
 		}
 
 		return javaHome;
@@ -110,7 +111,7 @@ class JreSetupManager extends AsyncCreatable {
 		} catch (e) {
 			const error: NodeJS.ErrnoException = e as NodeJS.ErrnoException;
 			const errName = 'InvalidJavaHome';
-			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [javaHome, error.code]), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [javaHome, error.code, this.configFile]), errName);
 		}
 	}
 
@@ -128,24 +129,19 @@ class JreSetupManager extends AsyncCreatable {
 
 		// matchedParts should have four groups: "11.0", "11", ".0", "0" or "14", "14", undefined, undefined
 		if (!matchedParts || matchedParts.length < 4) {
-			throw new SfError(getMessage(BundleName.JreSetupManager, 'VersionNotFound', []));
+			throw new SfError(getMessage(BundleName.JreSetupManager, 'VersionNotFound', [this.configFile]));
 		}
 
+		// Up to JDK8, the version scheme is 1.blah
+		// Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
 		const majorVersion = parseInt(matchedParts[1]);
 		const minorVersion = matchedParts[3] ? parseInt(matchedParts[3]) : '';
 		const version = `${majorVersion}${minorVersion ? `.${minorVersion}` : ''}`;
 
-		// We want to allow 1.8 and greater.
-		// Up to JDK8, the version scheme is 1.blah
-		// Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
-		// If either version part clicks, we should be good.
-		if (majorVersion === 1 && minorVersion === 8) {
-			// Accommodating 1.8
-			uxEvents.emit(EVENTS.WARNING_ALWAYS_UNIQUE, getMessage(BundleName.JreSetupManager, 'warning.JavaV8Deprecated', [path.join(Controller.getSfdxScannerPath(), CONFIG_FILE)]));
-		} else if (majorVersion < 9) {
+		if (majorVersion < 11) {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
-			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [version]), errName);
+			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [version, this.configFile]), errName);
 		}
 
 		this.logger.trace(`Java version found as ${version}`);

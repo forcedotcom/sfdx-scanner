@@ -38,7 +38,7 @@ dependencies {
 group = "com.salesforce.apex"
 version = "1.0.1-pilot"
 description = "Salesforce Graph Engine"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 
 // TODO: This directory should point to dist directory of CLI Scanner

@@ -35,7 +35,7 @@ dependencies {
 
 
 // ======== MODIFY PLUGIN PROPERTIES ===================================================================================
-java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.sourceCompatibility = JavaVersion.VERSION_11
 
 application {
   mainClass.set("sfdc.sfdx.scanner.pmd.Main");
