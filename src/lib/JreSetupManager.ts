@@ -133,19 +133,16 @@ class JreSetupManager extends AsyncCreatable {
 
 		const majorVersion = parseInt(matchedParts[1]);
 		const minorVersion = matchedParts[3] ? parseInt(matchedParts[3]) : '';
-		let version = '';
+		const version = `${majorVersion}${minorVersion ? `.${minorVersion}` : ''}`;
+
 		// We want to allow 1.8 and greater.
-		// Upto JDK8, the version scheme is 1.blah
+		// Up to JDK8, the version scheme is 1.blah
 		// Starting JDK 9, the version scheme is 9.blah for 9, 10.blah for 10, etc.
 		// If either version part clicks, we should be good.
-		if (majorVersion >= 9) {
-			// Accept if Major version is greater than or equal to 9
-			version = `${majorVersion}${minorVersion ? `.${minorVersion}` : ''}`;
-		} else if (majorVersion === 1 && minorVersion === 8) {
+		if (majorVersion === 1 && minorVersion === 8) {
 			// Accommodating 1.8
-			version = `${majorVersion}.${minorVersion}`;
 			uxEvents.emit(EVENTS.WARNING_ALWAYS_UNIQUE, getMessage(BundleName.JreSetupManager, 'warning.JavaV8Deprecated', [path.join(Controller.getSfdxScannerPath(), CONFIG_FILE)]));
-		} else {
+		} else if (majorVersion < 9) {
 			// Not matching what we are looking for
 			const errName = 'InvalidVersion';
 			throw new SfError(getMessage(BundleName.JreSetupManager, errName, [version]), errName);
@@ -153,8 +150,6 @@ class JreSetupManager extends AsyncCreatable {
 
 		this.logger.trace(`Java version found as ${version}`);
 		return;
-
-
 	}
 
 	private async fetchJavaVersion(javaHome: string): Promise<string> {
