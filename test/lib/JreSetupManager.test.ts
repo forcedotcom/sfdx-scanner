@@ -222,17 +222,13 @@ describe('JreSetupManager #verifyJreSetup', () => {
 			const execStub = Sinon.stub(childProcess, 'execFile').yields(noError, emptyStdout, invalidVersion);
 
 			// Execute and verify
-			let errorThrown: boolean;
-			let errName: string;
 			try {
 				await verifyJreSetup();
-				errorThrown = false;
+				expect.fail('Should have thrown an exception');
 			} catch (err) {
-				errorThrown = true;
-				errName = err.name;
+				expect(err.name).equals('InvalidVersion');
+				expect(err.message).contains('1.5');
 			}
-			expect(errorThrown).to.equal(true, 'Should have failed');
-			expect(errName).equals('InvalidVersion');
 			expect(uniqueWarningCounter).to.equal(0);
 
 
