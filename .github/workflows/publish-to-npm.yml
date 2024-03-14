@@ -18,7 +18,7 @@ jobs:
       # Check out the release branch, and get its head commit as output for later.
       - uses: actions/checkout@v3
         with:
-          ref: 'release'
+          ref: 'release-3'
       - run: echo "COMMIT_ID=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
         id: get-branch-commit
       # Checkout the tag we want to release, and get its head commit as output for later.
@@ -31,8 +31,14 @@ jobs:
       - name: Fail non-matching commits
         if: ${{ steps.get-branch-commit.outputs.COMMIT_ID != steps.get-tag-commit.outputs.COMMIT_ID }}
         run: |
-          echo "Tag commit must match latest commit in release. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
+          echo "Tag commit must match latest commit in release-3. Branch is ${{ steps.get-branch-commit.outputs.COMMIT_ID }}. Tag is ${{ steps.get-tag-commit.outputs.COMMIT_ID }}"
           exit 1
+      # Verify that the `package.json`'s version property is 3.Y.Z, as we want to restrict the `dev-3` and `release-3`
+      # branches to publishing v3.x.
+      - name: Verify major version
+        run: |
+          MAJOR_VERSION=`cat package.json | jq '.version | split(".") | .[0]' | xargs`
+          [[ ${MAJOR_VERSION} == 3 ]] || (echo "package.json version must be 3.x" && exit 1)
       # Verify that the tag is of the format "vX.Y.Z", where the X, Y, and Z exactly match the corresponding values in
       # `package.json`'s version property.
       - name: Compare tag to package.json
@@ -47,7 +53,7 @@ jobs:
     with:
       ctc: false # We've been told we don't have to care about this until someone makes us care.
       sign: true
-      tag: latest-rc # Publish as a release candidate, so we can do our validations against it.
+      tag: latest-rc-v3 # Publish as a release candidate, so we can do our validations against it.
       githubTag: ${{ github.event.release.tag_name || inputs.tag }}
     secrets: inherit
   # Step 3: Run smoke tests against the release candidate.
@@ -75,7 +81,7 @@ jobs:
           java-version: '11' # For now, Java version is hardcoded.
       # Install SF, and the release candidate version.
       - run: npm install -g @salesforce/cli
-      - run: sf plugins install @salesforce/sfdx-scanner@latest-rc
+      - run: sf plugins install @salesforce/sfdx-scanner@latest-rc-v3
       # Log the installed plugins for easier debugging.
       - run: sf plugins
       # Attempt to run the smoke tests.
@@ -96,4 +102,4 @@ jobs:
           node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest
+          npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest-v3
