@@ -2,7 +2,7 @@
 	"name": "@salesforce/sfdx-scanner",
 	"description": "Static code scanner that applies quality and security rules to Apex code, and provides feedback.",
 	"version": "3.22.0",
-	"author": "ISV SWAT",
+	"author": "Salesforce Code Analyzer Team",
 	"bugs": "https://github.com/forcedotcom/sfdx-scanner/issues",
 	"dependencies": {
 		"@babel/core": "^7.11.0",
@@ -32,7 +32,7 @@
 		"normalize-path": "^3.0.0",
 		"picomatch": "^2.2.2",
 		"reflect-metadata": "^0.1.13",
-		"retire": "^3",
+		"retire": "^4.4.2",
 		"semver": "^7.3.4",
 		"tmp": "^0.2.0",
 		"ts-node": "^10",
