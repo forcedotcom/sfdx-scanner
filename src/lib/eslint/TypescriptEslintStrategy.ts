@@ -75,7 +75,7 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 		this.untypedConfig = (await import(pathToUntypedRecommendedConfig)) as ESRuleConfig;
 
 		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
-			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.js'));
+			.replace('index.js', path.join('configs', 'recommended-type-checked.js'));
 		this.typedConfig = (await import(pathToTypedRecommendedConfig)) as ESRuleConfig;
 
 		this.initialized = true;
