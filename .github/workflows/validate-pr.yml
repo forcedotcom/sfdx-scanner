@@ -4,6 +4,15 @@ on:
     types: [edited, opened, reopened, synchronize]
 
 jobs:
+  # We want to prevent cross-contamination between the 3.x and 4.x pipelines. So we should prevent PRs
+  # based on this flow to merge into `dev-3` or `release-3`.
+  verify_target_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ github.base_ref == "dev-3" || github.base_ref == "release-3" }}
+        run: |
+          echo "Forbidden to merge this branch into dev-3 or release-3"
+          exit 1
   # We need to verify that the Pull Request's title matches the desired format.
   verify_pr_title:
     runs-on: ubuntu-latest
