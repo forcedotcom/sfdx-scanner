@@ -304,7 +304,7 @@ class RetireJsSarifFormatter extends SarifFormatter {
 					driver: {
 						name: 'Retire.js',
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-						version: retire.version as string,
+						version: retire.version,
 						informationUri: 'https://retirejs.github.io/retire.js',
 						rules: []
 					}
@@ -341,22 +341,22 @@ class SfgeSarifFormatter extends SarifFormatter {
 }
 
 const getSarifFormatter = (engine: string): SarifFormatter => {
-	if (engine === ENGINE.ESLINT_CUSTOM) {
+	if (engine === ENGINE.ESLINT_CUSTOM.toString()) {
 		// Expose the eslint-custom engine as eslint, the users don't need to know it
 		// was the custom implementation
 		return new ESLintSarifFormatter(ENGINE.ESLINT);
-	} else if (engine.startsWith(ENGINE.ESLINT)) {
+	} else if (engine.startsWith(ENGINE.ESLINT.toString())) {
 		// All other eslint engines are exposed as-is
 		return new ESLintSarifFormatter(engine);
-	} else if (engine.startsWith(ENGINE.PMD)) {
+	} else if (engine.startsWith(ENGINE.PMD.toString())) {
 		// Use the same formatter for pmd and pmd-custom, the users don't need to know it
 		// was the custom implementation
 		return new PMDSarifFormatter(ENGINE.PMD);
-	} else if (engine === ENGINE.RETIRE_JS) {
+	} else if (engine === ENGINE.RETIRE_JS.toString()) {
 		return new RetireJsSarifFormatter(engine);
-	} else if (engine === ENGINE.CPD) {
+	} else if (engine === ENGINE.CPD.toString()) {
 		return new CPDSarifFormatter(engine);
-	} else if (engine === ENGINE.SFGE) {
+	} else if (engine === ENGINE.SFGE.toString()) {
 		return new SfgeSarifFormatter(engine);
 	} else {
 		throw new Error(`Developer error. Unknown engine '${engine}'`);

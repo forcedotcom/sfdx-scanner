@@ -31,12 +31,12 @@ function determineOutputFormat(outfile: string, invalidFileMsg: string, invalidE
 	}
 	const fileExtension: string = outfile.slice(lastPeriod + 1).toLowerCase();
 	switch (fileExtension) {
-		case OutputFormat.CSV:
-		case OutputFormat.HTML:
-		case OutputFormat.JSON:
-		case OutputFormat.SARIF:
-		case OutputFormat.XML:
-			return fileExtension;
+		case OutputFormat.CSV.toString():
+		case OutputFormat.HTML.toString():
+		case OutputFormat.JSON.toString():
+		case OutputFormat.SARIF.toString():
+		case OutputFormat.XML.toString():
+			return fileExtension as OutputFormat;
 		default:
 			throw new SfError(invalidExtensionMsg, null, null, INTERNAL_ERROR_CODE);
 	}

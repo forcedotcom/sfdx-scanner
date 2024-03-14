@@ -12,8 +12,6 @@ import path = require('path');
 import StreamZip = require('node-stream-zip');
 import {CUSTOM_CONFIG} from '../../Constants';
 
-
-
 // Unlike the other engines we use, RetireJS doesn't really have "rules" per se. So we sorta have to synthesize a
 // "catalog" out of RetireJS's normal behavior and its permutations.
 const INSECURE_BUNDLED_DEPS = 'insecure-bundled-dependencies';
@@ -78,14 +76,7 @@ type RetireJsOutput = {
 export class RetireJsEngine extends AbstractRuleEngine {
 	public static ENGINE_ENUM: ENGINE = ENGINE.RETIRE_JS;
 	public static ENGINE_NAME: string = ENGINE.RETIRE_JS.valueOf();
-	// RetireJS isn't really built to be invoked programmatically, so we need to invoke it as a CLI command. However, we
-	// can't assume that the user has `retire` globally installed. So we identify the path to the locally-scoped `retire`
-	// module, and then use that to derive a path to the CLI-executable JS script.
-	private static RETIRE_JS_PATH: string = require.resolve('retire').replace(path.join('lib', 'retire.js'), path.join('bin', 'retire'));
-	// We also can't assume that the user actually has Node globally installed on their machine. So we need to figure out
-	// the version of node that's being executed right now (which may or may not be the version bundled with Salesforce CLI), so we
-	// can use that.
-	private static NODE_EXEC_PATH: string = process.execPath;
+
 	// RetireJS typically loads a JSON of all vulnerabilities from the Github repo. We want to override that, using this
 	// local path instead.
 	private static VULN_JSON_PATH: string = require.resolve(path.join('..', '..', '..', 'retire-js', 'RetireJsVulns.json'));
@@ -174,7 +165,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		// RetireJS doesn't accept individual files. It only accepts directories. So we need to resolve all of the files
 		// we were given into a directory that we can pass into RetireJS.
 		const tmpDir = await this.createTmpDirWithDuplicatedTargets(target);
-		const invocationArray: RetireJsInvocation[] = this.buildCliInvocations(rules, tmpDir);
+		const invocationArray: RetireJsInvocation[] = this.buildRetireJsInvocations(rules, tmpDir);
 
 		const retireJsPromises: Promise<RuleResult[]>[] = [];
 		for (const invocation of invocationArray) {
@@ -185,16 +176,17 @@ export class RetireJsEngine extends AbstractRuleEngine {
 		return (await Promise.all(retireJsPromises)).reduce((all, next) => [...all, ...next], []);
 	}
 
-	private buildCliInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
+	private buildRetireJsInvocations(rules: Rule[], target: string): RetireJsInvocation[] {
 		const invocationArray: RetireJsInvocation[] = [];
 		for (const rule of rules) {
 			switch (rule.name) {
 				case INSECURE_BUNDLED_DEPS:
 					// This rule is looking for files that contain insecure libraries, e.g. .min.js or similar.
-					// So we use --js and --jspath to make retire-js only examine JS files and skip node modules.
-					// We also hardcode a locally-stored vulnerability repo instead of allowing use of the default one.
+					// With version 4.x we use --jspath instead of --path to make retire-js only examine JS files and
+					// skip node modules. We also hardcode a locally-stored vulnerability repo instead of allowing use
+					// of the default one.
 					invocationArray.push({
-						args: [RetireJsEngine.RETIRE_JS_PATH, '--js', '--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
+						args: ['--jspath', target, '--outputformat', 'json', '--jsrepo', RetireJsEngine.VULN_JSON_PATH],
 						rule: rule.name
 					});
 					break;
@@ -207,7 +199,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 
 	private async executeRetireJs(invocation: RetireJsInvocation, verboseViolations: boolean): Promise<RuleResult[]> {
 		return new Promise<RuleResult[]>((res, rej) => {
-			const cp = cspawn(RetireJsEngine.NODE_EXEC_PATH, invocation.args);
+			const cp = cspawn('npx', ['retire'].concat(invocation.args));
 
 			// Initialize both stdout and stderr as empty strings to which we can append data as we receive it.
 			let stdout = '';
@@ -223,7 +215,7 @@ export class RetireJsEngine extends AbstractRuleEngine {
 			});
 
 			cp.on('exit', code => {
-				this.logger.trace(`executeRetireJs has received exit code ${code}`);
+				this.logger.trace(`"npx retire" has received exit code ${code}`);
 				if (code === 0) {
 					// If RetireJS exits with code 0, then it ran successfully and found no vulnerabilities. We can resolve
 					// to an empty array.

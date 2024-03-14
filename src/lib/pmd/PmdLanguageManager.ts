@@ -52,7 +52,7 @@ class PmdLanguageManager extends AsyncCreatable {
 		for (const alias of aliases) {
 			const lang = this.resolveLanguageAlias(alias);
 			if (lang) {
-				if (LANGUAGE.JAVASCRIPT === lang) {
+				if (LANGUAGE.JAVASCRIPT.toString() === lang) {
 					throw new SfError(getMessage(BundleName.PmdLanguageManager, 'JavascriptNotSupported'));
 				} else {
 					langs.push(lang);

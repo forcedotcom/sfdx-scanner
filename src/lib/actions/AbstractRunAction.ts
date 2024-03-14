@@ -66,7 +66,7 @@ export abstract class AbstractRunAction implements Action {
 		if (inputs.format && inputs.outfile) {
 			const inferredOutfileFormat: OutputFormat = inferFormatFromOutfile(inputs.outfile as string);
 			// For the purposes of this validation, we treat junit as xml.
-			const chosenFormat: string = inputs.format === 'junit' ? 'xml' : inputs.format as string;
+			const chosenFormat: OutputFormat = inputs.format === 'junit' ? OutputFormat.XML : inputs.format as OutputFormat;
 			// If the chosen format is TABLE, we immediately need to exit. There's no way to sensibly write the output
 			// of TABLE to a file.
 			if (chosenFormat === OutputFormat.TABLE) {
