@@ -10,9 +10,9 @@ import { PathlessEngineFilters, ENGINE, PMD6_VERSION, SFGE_VERSION } from '../..
 import { fail } from 'assert';
 import {Results, RunResults} from "../../../src/lib/output/Results";
 import { OutputFormat } from '../../../src/lib/output/OutputFormat';
-import {Controller} from "../../../lib/Controller";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../lib/lib/pmd/PmdCommandInfo";
-import {PMD7_VERSION} from "../../../lib/Constants";
+import {Controller} from "../../../src/Controller";
+import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
+import {PMD7_VERSION} from "../../../src/Constants";
 
 const sampleFile1 = path.join('Users', 'SomeUser', 'samples', 'sample-file1.js');
 const sampleFile2 = path.join('Users', 'SomeUser', 'samples', 'sample-file2.js');

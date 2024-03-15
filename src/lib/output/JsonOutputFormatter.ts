@@ -14,7 +14,7 @@ export class JsonOutputFormatter implements OutputFormatter {
 		if (this.verboseViolations) {
 			const resultsVerbose = JSON.parse(JSON.stringify(ruleResults)) as RuleResult[];
 			for (const result of resultsVerbose) {
-				if (result.engine === ENGINE.RETIRE_JS) {
+				if ((result.engine as ENGINE) === ENGINE.RETIRE_JS) {
 					for (const violation of result.violations) {
 						// in the json format we need to replace new lines in the message
 						// for the first line (ending with a colon) we will replace it with a space

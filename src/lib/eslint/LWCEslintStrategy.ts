@@ -5,6 +5,7 @@ import { Logger } from '@salesforce/core';
 import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from './EslintCommons';
 import { rules } from '@lwc/eslint-plugin-lwc';
 import {ESLint} from 'eslint';
+import {pathToFileURL} from "url";
 
 const LWC_RULES = rules as {[ruleName: string]: ESRule};
 
@@ -46,7 +47,8 @@ export class LWCEslintStrategy implements EslintStrategy {
 		this.logger = await Logger.child(this.getEngine().valueOf());
 		const pathToRecommendedConfig = require.resolve('@salesforce/eslint-config-lwc')
 			.replace('index.js', 'base.js');
-		this.recommendedConfig = (await import(pathToRecommendedConfig)) as ESRuleConfig
+		const rawRecommendedConfig = (await import(pathToFileURL(pathToRecommendedConfig).href)) as {default: ESRuleConfig}
+		this.recommendedConfig = rawRecommendedConfig.default
 		this.initialized = true;
 	}
 

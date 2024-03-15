@@ -1,6 +1,13 @@
 {
-	"extends": "./node_modules/@salesforce/dev-config/tsconfig",
 	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es2021",
+		"lib": ["es2021"],
+		"sourceMap": true,
+		"declaration": true,
+		"moduleResolution": "node16",
+		"alwaysStrict": true,
+		"noUnusedLocals": true,
 		"outDir": "./lib",
 		"rootDir": "./src",
 		"allowJs": false,

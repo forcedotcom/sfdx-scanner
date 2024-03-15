@@ -292,7 +292,7 @@ export class Config {
 			// We don't know what the type of the property we're setting is, nor do we particularly care in this moment.
 			const defaultValue = defaultConfig[propertyName] as unknown;
 			ecc[propertyName] = defaultValue;
-			this.logger.warn(`Persisting default values ${defaultValue.toString()} for engine ${engine}`);
+			this.logger.warn(`Persisting default values ${JSON.stringify(defaultValue)} for engine ${engine}`);
 		} else {
 			// if we are here, this is a developer problem
 			throw new Error(`Developer error: no default value set for ${propertyName} of ${engine} engine. Or invalid property call.`);
@@ -311,7 +311,7 @@ export class Config {
 	}
 
 	private getEngineConfig(name: ENGINE): EngineConfigContent {
-		return this.configContent.engines.find(e => e.name === name);
+		return this.configContent.engines.find(e => e.name === name.toString());
 	}
 
 	private async writeConfig(): Promise<void> {

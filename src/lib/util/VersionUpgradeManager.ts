@@ -25,7 +25,7 @@ upgradeScriptsByVersion.set('v2.7.0', (config: ConfigContent): Promise<void> => 
 	// v2.7.0 adds advanced target patterns and generally enhances the RetireJS integration, and some of the patterns
 	// that used to be in the config are now hardcoded into the engine. The config's targetPatterns array should be
 	// scoured of any such patterns. Other patterns should be permitted to stay, since they might be meaningful.
-	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS);
+	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS.toString());
 	if (retireJsConfig) {
 		const hardcodedPatterns: Set<string> = new Set(RetireJsEngine.getSimpleTargetPatterns());
 		retireJsConfig.targetPatterns = retireJsConfig.targetPatterns.filter(s => !hardcodedPatterns.has(s));
@@ -35,7 +35,7 @@ upgradeScriptsByVersion.set('v2.7.0', (config: ConfigContent): Promise<void> => 
 upgradeScriptsByVersion.set('v3.0.0', (config: ConfigContent): Promise<void> => {
 	// In v3.0.0, we're changing RetireJS from a supplemental engine that must be manually enabled to an enabled-by-default
 	// engine. So we need to change its `disabled` config value from true to false.
-	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS);
+	const retireJsConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.RETIRE_JS.toString());
 	if (retireJsConfig) {
 		retireJsConfig.disabled = false;
 	}
@@ -62,7 +62,7 @@ upgradeScriptsByVersion.set('v3.17.0', (config: ConfigContent): Promise<void> =>
 	// In v3.17.0, we're changing PMD's config so that it no longer excludes Salesforce metadata
 	// files by default. This will automatically apply to any newly-generated configs, but we also
 	// want to retroactively remove this exclusion for existing users.
-	const pmdConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.PMD);
+	const pmdConfig: EngineConfigContent = config.engines.find(e => e.name === ENGINE.PMD.toString());
 	if (pmdConfig) {
 		pmdConfig.targetPatterns = pmdConfig.targetPatterns.filter(s => s !== '!**/*-meta.xml');
 	}

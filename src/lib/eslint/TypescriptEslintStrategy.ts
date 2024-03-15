@@ -11,6 +11,7 @@ import {EslintStrategyHelper, ProcessRuleViolationType, RuleDefaultStatus} from 
 import {ESLint} from 'eslint';
 import {configs} from '@eslint/js';
 import {BundleName, getMessage} from "../../MessageCatalog";
+import {pathToFileURL} from "url";
 
 export enum TYPESCRIPT_ENGINE_OPTIONS {
 	// Specify the location of the tsconfig.json file
@@ -67,16 +68,18 @@ export class TypescriptEslintStrategy implements EslintStrategy {
 			.replace('index.js', path.join('configs', 'eslint-recommended.js'));
 		// The extended base config has an `overrides` property which is a singleton array of the rule configs object
 		// we actually want.
-		const rawExtendedConfig = (await import(pathToExtendedBaseConfig)) as {overrides: ESRuleConfig[]};
-		this.extendedEslintConfig = rawExtendedConfig.overrides[0];
+		const rawExtendedConfig = (await import(pathToFileURL(pathToExtendedBaseConfig).href)) as {default: {overrides: ESRuleConfig[]}};
+		this.extendedEslintConfig = rawExtendedConfig.default.overrides[0];
 
 		const pathToUntypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
 			.replace('index.js', path.join('configs', 'recommended.js'));
-		this.untypedConfig = (await import(pathToUntypedRecommendedConfig)) as ESRuleConfig;
+		const rawUntypedConfig = (await import(pathToFileURL(pathToUntypedRecommendedConfig).href)) as {default: ESRuleConfig};
+		this.untypedConfig = rawUntypedConfig.default;
 
 		const pathToTypedRecommendedConfig = require.resolve('@typescript-eslint/eslint-plugin')
-			.replace('index.js', path.join('configs', 'recommended-requiring-type-checking.js'));
-		this.typedConfig = (await import(pathToTypedRecommendedConfig)) as ESRuleConfig;
+			.replace('index.js', path.join('configs', 'recommended-type-checked.js'));
+		const rawTypedConfig = (await import(pathToFileURL(pathToTypedRecommendedConfig).href)) as {default: ESRuleConfig};
+		this.typedConfig = rawTypedConfig.default;
 
 		this.initialized = true;
 	}

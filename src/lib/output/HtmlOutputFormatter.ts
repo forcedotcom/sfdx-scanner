@@ -30,7 +30,7 @@ export class HtmlOutputFormatter implements OutputFormatter {
 						ruleName: v.ruleName,
 						category: v.category,
 						url: v.url,
-						message: this.verboseViolations && result.engine === ENGINE.RETIRE_JS ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
+						message: this.verboseViolations && (result.engine as ENGINE) === ENGINE.RETIRE_JS ? v.message.replace(/\n/g, '<br>') : v.message, // <br> used for line breaks in html
 						line: v.line,
 						column: v.column,
 						endLine: v.endLine || null,
