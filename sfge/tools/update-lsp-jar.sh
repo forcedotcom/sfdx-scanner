@@ -74,24 +74,24 @@ echo "*** Creating ${SFGE_JAR_DIR} ***"
 mkdir "${SFGE_JAR_DIR}"
 
 echo "*** Copying Apex messages file ***"
-cp --archive --verbose "${UNZIPPED_DIR}/messages_en_US.properties" "${SFGE_JAR_DIR}"
+cp -a -v "${UNZIPPED_DIR}/messages_en_US.properties" "${SFGE_JAR_DIR}"
 
 echo "*** Copying Apex files ***"
-cp --archive --verbose "${UNZIPPED_DIR}/apex" "${SFGE_JAR_DIR}"
+cp -a -v "${UNZIPPED_DIR}/apex" "${SFGE_JAR_DIR}"
 
 echo "*** Copying common.collect files ***"
-mkdir --parents "${SFGE_JAR_DIR}/com/google/common/collect"
+mkdir -p "${SFGE_JAR_DIR}/com/google/common/collect"
 
 for class in "${CUSTOM_COLLECT_CLASSES[@]}"
 do
     # Copy the outer class file
-    cp --archive --verbose "${UNZIPPED_COLLECT_DIR}/${class}.class" "${SFGE_JAR_COLLECT_DIR}"
+    cp -a -v "${UNZIPPED_COLLECT_DIR}/${class}.class" "${SFGE_JAR_COLLECT_DIR}"
 
     # Copy any inner classes if they exist
     # -r do not allow backslashes to escape any characters
     find "${UNZIPPED_COLLECT_DIR}" -name "${class}\$*.class" | while read -r full_file_path
     do
-        cp --archive --verbose "${full_file_path}" "${SFGE_JAR_COLLECT_DIR}"
+        cp -a -v "${full_file_path}" "${SFGE_JAR_COLLECT_DIR}"
     done
 done
 
