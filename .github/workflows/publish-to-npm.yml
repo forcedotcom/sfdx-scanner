@@ -37,7 +37,7 @@ jobs:
       # branches to publishing v4.x.
       - name: Verify major version
         run: |
-          MAJOR_VERSION=`cat package.json | jq '.version | split(".") | .[0]'`
+          MAJOR_VERSION=`cat package.json | jq '.version | split(".") | .[0]' | xargs`
           [[ ${MAJOR_VERSION} == 4 ]] || (echo "package.json version must be 4.x" && exit 1)
       # Verify that the tag is of the format "vX.Y.Z", where the X, Y, and Z exactly match the corresponding values in
       # `package.json`'s version property.
