@@ -5,7 +5,6 @@ import {BundleName, getMessage} from "../../../MessageCatalog";
 import {Logger} from "@salesforce/core";
 import {Display} from "../../../lib/Display";
 import {RuleDescribeAction} from "../../../lib/actions/RuleDescribeAction";
-import {PMD6_VERSION, PMD7_VERSION} from "../../../Constants";
 
 /**
  * Defines the "rule describe" command for the "scanner" cli.
@@ -30,10 +29,6 @@ export default class Describe extends ScannerCommand {
 		verbose: Flags.boolean({
 			summary: getMessage(BundleName.Common, 'flags.verboseSummary'),
 			description: getMessage(BundleName.Common, 'flags.verboseDescription')
-		}),
-		"preview-pmd7": Flags.boolean({
-			summary: getMessage(BundleName.Describe, 'flags.previewPmd7Summary', [PMD7_VERSION]),
-			description: getMessage(BundleName.Describe, 'flags.previewPmd7Description', [PMD7_VERSION, PMD6_VERSION])
 		}),
 	};
 

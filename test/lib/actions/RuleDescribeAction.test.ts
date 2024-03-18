@@ -7,8 +7,6 @@ import {initializeTestSetup} from "../../test-related-lib/TestOverrides";
 import {RuleFilterFactoryImpl} from "../../../src/lib/RuleFilterFactory";
 import {Inputs} from "../../../src/types";
 import {RuleDescribeAction} from "../../../src/lib/actions/RuleDescribeAction";
-import {Pmd6CommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {Controller} from "../../../src/Controller";
 import {getMessage, BundleName} from '../../../src/MessageCatalog';
 
 describe("RuleDescribeAction", () => {
@@ -93,50 +91,6 @@ describe("RuleDescribeAction", () => {
 				expect(displayedRule['categories']).to.deep.equal(['problem'], 'Wrong categories in displayed output');
 				expect(displayedRule['languages']).to.deep.equal(['typescript'], 'Wrong language in displayed output');
 				expect(displayedRule['description']).to.equal('Require `super()` calls in constructors', 'Wrong description in displayed output');
-			});
-		});
-
-		describe('When PMD7 binary is invoked...', () => {
-			afterEach(() => {
-				// Until we remove global state, we should clean up after ourselves to prevent other tests from being impacted
-				Controller.setActivePmdCommandInfo(new Pmd6CommandInfo());
-			})
-
-			it('PMD7 pmd rule is returned', async () => {
-				const inputs: Inputs = {
-					rulename: 'ApexCRUDViolation',
-					"preview-pmd7": true
-				}
-				await ruleDescribeAction.run(inputs);
-
-				const rule: AnyJson  = display.getLastStyledObject();
-				expect(rule['name']).to.equal('ApexCRUDViolation');
-				expect(rule['engine']).to.equal('pmd');
-				expect(rule['isPilot']).to.equal(false);
-				expect(rule['enabled']).to.equal(true);
-				expect(rule['categories']).to.deep.equal(['Security']);
-				expect(rule['rulesets']).to.contain('quickstart');
-				expect(rule['languages']).to.deep.equal(['apex']);
-				expect(rule['description']).to.have.length.greaterThan(0);
-				expect(rule['message']).to.have.length.greaterThan(0);
-			});
-
-			it('PMD7 cpd rule is returned', async () => {
-				const inputs: Inputs = {
-					rulename: 'copy-paste-detected',
-					"preview-pmd7": true
-				};
-				await ruleDescribeAction.run(inputs);
-
-				const rule: AnyJson  = display.getLastStyledObject();
-				expect(rule['name']).to.equal('copy-paste-detected');
-				expect(rule['engine']).to.equal('cpd');
-				expect(rule['isPilot']).to.equal(false);
-				expect(rule['enabled']).to.equal(false);
-				expect(rule['categories']).to.deep.equal(['Copy/Paste Detected']);
-				expect(rule['rulesets']).to.deep.equal([]);
-				expect(rule['languages']).to.deep.equal(['apex', 'java', 'visualforce', 'xml']);
-				expect(rule['description']).to.have.length.greaterThan(0);
 			});
 		});
 	});

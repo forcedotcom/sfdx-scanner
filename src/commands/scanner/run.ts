@@ -1,5 +1,5 @@
 import {Flags} from '@salesforce/sf-plugins-core';
-import {PathlessEngineFilters, PMD6_VERSION, PMD7_VERSION} from '../../Constants';
+import {PathlessEngineFilters} from '../../Constants';
 import {ScannerRunCommand} from '../../lib/ScannerRunCommand';
 import {EngineOptionsFactory, RunEngineOptionsFactory} from "../../lib/EngineOptionsFactory";
 import {InputProcessor, InputProcessorImpl} from "../../lib/InputProcessor";
@@ -69,10 +69,6 @@ export default class Run extends ScannerRunCommand {
 		pmdconfig: Flags.string({
 			summary: getMessage(BundleName.Run, 'flags.pmdConfigSummary'),
 			description: getMessage(BundleName.Run, 'flags.pmdConfigDescription')
-		}),
-		"preview-pmd7": Flags.boolean({
-			summary: getMessage(BundleName.Run, 'flags.previewPmd7Summary', [PMD7_VERSION]),
-			description: getMessage(BundleName.Run, 'flags.previewPmd7Description', [PMD7_VERSION, PMD6_VERSION])
 		}),
 
 		// TODO: This flag was implemented for W-7791882, and it's suboptimal. It leaks the abstraction and pollutes the command.

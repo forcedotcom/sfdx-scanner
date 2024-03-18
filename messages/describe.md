@@ -14,14 +14,6 @@ the name of the rule
 
 The name of the rule.
 
-# flags.previewPmd7Summary
-
-use PMD version %s to describe PMD and CPD rules
-
-# flags.previewPmd7Description
-
-Uses PMD version %s instead of %s to describe PMD and CPD rules.
-
 # output.noMatchingRules
 
 No rules were found with the name '%s'.

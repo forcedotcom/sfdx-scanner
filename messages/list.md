@@ -38,14 +38,6 @@ select rules by engine
 
 Selects rules by engine. Enter multiple engines as a comma-separated list.
 
-# flags.previewPmd7Summary
-
-use PMD version %s to list PMD and CPD rules
-
-# flags.previewPmd7Description
-
-Uses PMD version %s instead of %s to list PMD and CPD rules.
-
 # rulesetDeprecation
 
 The 'ruleset' command parameter is deprecated. Use 'category' instead

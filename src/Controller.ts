@@ -9,7 +9,7 @@ import {RuleEngine} from './lib/services/RuleEngine';
 import {RulePathManager} from './lib/RulePathManager';
 import {RuleCatalog} from './lib/services/RuleCatalog';
 import {BundleName, getMessage} from "./MessageCatalog";
-import {Pmd6CommandInfo, PmdCommandInfo} from "./lib/pmd/PmdCommandInfo";
+import {Pmd7CommandInfo, PmdCommandInfo} from "./lib/pmd/PmdCommandInfo";
 /**
  * Converts an array of RuleEngines to a sorted, comma delimited
  * string of their names.
@@ -30,7 +30,7 @@ declare global {
 	// eslint-disable-next-line no-var
 	var _activePmdCommandInfo: PmdCommandInfo;
 }
-globalThis._activePmdCommandInfo = new Pmd6CommandInfo();
+globalThis._activePmdCommandInfo = new Pmd7CommandInfo();
 
 // This is probably more appropriately called a ProviderFactory (Salesforce Core folks know this code smell all too well)
 export const Controller = {

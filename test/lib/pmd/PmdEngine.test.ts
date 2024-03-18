@@ -7,14 +7,12 @@ import Sinon = require('sinon');
 import {PmdEngine, _PmdRuleMapper}  from '../../../src/lib/pmd/PmdEngine'
 import {uxEvents, EVENTS} from '../../../src/lib/ScannerEvents';
 import * as TestOverrides from '../../test-related-lib/TestOverrides';
-import {CUSTOM_CONFIG, ENGINE, LANGUAGE, PMD6_VERSION, PMD7_LIB, PMD7_VERSION} from '../../../src/Constants';
+import {CUSTOM_CONFIG, ENGINE, LANGUAGE, PMD7_LIB, PMD7_VERSION} from '../../../src/Constants';
 import * as DataGenerator from '../eslint/EslintTestDataGenerator';
 import {BundleName, getMessage} from "../../../src/MessageCatalog";
 import {Config} from "../../../src/lib/util/Config";
 import {CustomRulePathManager} from "../../../src/lib/CustomRulePathManager";
 import {after} from "mocha";
-import {Pmd7CommandInfo, PmdCommandInfo} from "../../../src/lib/pmd/PmdCommandInfo";
-import {Controller} from "../../../src/Controller";
 
 TestOverrides.initializeTestSetup();
 
@@ -414,7 +412,7 @@ describe('_PmdRuleMapper', () => {
 		const validJar = 'jar-that-exists.jar';
 		const missingJar = 'jar-that-is-missing.jar';
 		// This jar is automatically included by the PmdCatalogWrapper
-		const pmdJar = path.resolve(path.join('dist', 'pmd', 'lib', `pmd-java-${PMD6_VERSION}.jar`));
+		const pmdJar = path.resolve(path.join(PMD7_LIB, `pmd-java-${PMD7_VERSION}.jar`));
 		let uxSpy = null;
 
 		before(() => {
@@ -451,25 +449,5 @@ describe('_PmdRuleMapper', () => {
 			Sinon.assert.calledOnce(uxSpy);
 			Sinon.assert.calledWith(uxSpy, EVENTS.WARNING_ALWAYS, `Custom rule file path [${missingJar}] for language [${LANGUAGE.JAVA}] was not found.`);
 		});
-	});
-
-	describe('Using PMD7', async () => {
-		const originalPmdCommandInfo: PmdCommandInfo = Controller.getActivePmdCommandInfo()
-		before(() => {
-			Controller.setActivePmdCommandInfo(new Pmd7CommandInfo());
-		});
-		after(() => {
-			Controller.setActivePmdCommandInfo(originalPmdCommandInfo);
-		})
-
-		it('PMD7 lib jar files are found correctly', async () => {
-			const mapper = await _PmdRuleMapper.create({});
-			const ruleMap = await mapper.createStandardRuleMap();
-			expect(ruleMap.size).to.greaterThan(0);
-			ruleMap.forEach((jars: Set<string>, language: string) => {
-				expect(jars.size).to.equal(1);
-				expect(jars).to.contain(path.join(PMD7_LIB, `pmd-${language}-${PMD7_VERSION}.jar`));
-			})
-		})
 	});
 });

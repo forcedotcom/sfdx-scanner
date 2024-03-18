@@ -21,7 +21,6 @@ import {ResultsProcessorFactory} from "../output/ResultsProcessorFactory";
 import {JsonReturnValueHolder} from "../output/JsonReturnValueHolder";
 import untildify = require('untildify');
 import normalize = require('normalize-path');
-import {Pmd6CommandInfo, Pmd7CommandInfo} from "../pmd/PmdCommandInfo";
 
 /**
  * Abstract Action to share a common implementation behind the "run" and "run dfa" commands
@@ -81,7 +80,6 @@ export abstract class AbstractRunAction implements Action {
 	}
 
 	async run(inputs: Inputs): Promise<AnyJson> {
-		Controller.setActivePmdCommandInfo(inputs['preview-pmd7'] ? new Pmd7CommandInfo() : new Pmd6CommandInfo());
 		const filters: RuleFilter[] = this.ruleFilterFactory.createRuleFilters(inputs);
 		const targetPaths: string[] = this.inputProcessor.resolveTargetPaths(inputs);
 		const runOptions: RunOptions = this.inputProcessor.createRunOptions(inputs, this.isDfa());
