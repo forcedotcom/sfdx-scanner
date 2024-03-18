@@ -66,10 +66,6 @@ Overall, analyzed %s path(s) from %s entry point(s). Detected %s violation(s).
 
 This message is unused.
 
-# warning.pmd7IncompatibleRule
-
-PMD rule [%s] isn't compatible with PMD 7.0: %s. Resolve these issues to future-proof your rule. If you need help, log an issue on github.com/forcedotcom/sfdx-scanner
-
 # warning.invalidCategorySkipped
 
 Cataloger: Skipping invalid PMD Category file '%s'.
