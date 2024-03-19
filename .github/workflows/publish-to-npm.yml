@@ -53,7 +53,7 @@ jobs:
     with:
       ctc: false # We've been told we don't have to care about this until someone makes us care.
       sign: true
-      tag: latest-rc-v3 # Publish as a release candidate, so we can do our validations against it.
+      tag: latest-rc # Publish as a release candidate, so we can do our validations against it.
       githubTag: ${{ github.event.release.tag_name || inputs.tag }}
     secrets: inherit
   # Step 3: Run smoke tests against the release candidate.
@@ -81,7 +81,7 @@ jobs:
           java-version: '11' # For now, Java version is hardcoded.
       # Install SF, and the release candidate version.
       - run: npm install -g @salesforce/cli
-      - run: sf plugins install @salesforce/sfdx-scanner@latest-rc-v3
+      - run: sf plugins install @salesforce/sfdx-scanner@latest-rc
       # Log the installed plugins for easier debugging.
       - run: sf plugins
       # Attempt to run the smoke tests.
@@ -102,4 +102,4 @@ jobs:
           node-version: 'lts/*'
       - run: |
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-          npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest-v3
+          npm dist-tag add @salesforce/sfdx-scanner@${{ github.event.release.tag_name || inputs.tag }} latest
