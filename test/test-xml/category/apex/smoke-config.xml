@@ -13,7 +13,7 @@
           language="apex"
           message="The {0} name ''{1}'' doesn''t match ''{2}''"
           class="net.sourceforge.pmd.lang.apex.rule.codestyle.ClassNamingConventionsRule"
-          externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_codestyle.html#classnamingconventions">
+          externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.0.0/pmd_rules_apex_codestyle.html#classnamingconventions">
         <description>
             Configurable naming conventions for type declarations. This rule reports
             type declarations which do not match the regex that applies to their
@@ -36,7 +36,7 @@ public class fooClass { } // THis will be reported unless you change the regex
           language="apex"
           message="ApexDoc comment is missing or incorrect"
           class="net.sourceforge.pmd.lang.apex.rule.documentation.ApexDocRule"
-          externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_documentation.html#apexdoc">
+          externalInfoUrl="https://docs.pmd-code.org/pmd-doc-7.0.0/pmd_rules_apex_documentation.html#apexdoc">
         <description>
 This rule validates that:
 
