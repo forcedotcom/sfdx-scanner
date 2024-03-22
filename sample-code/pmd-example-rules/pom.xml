@@ -23,25 +23,8 @@ a JAR containing everything needed to register and run a custom rule.
 	<dependencies>
 		<dependency>
 			<groupId>net.sourceforge.pmd</groupId>
-			<artifactId>pmd</artifactId>
-			<version>6.55.0</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.pmd</groupId>
 			<artifactId>pmd-apex</artifactId>
-			<version>6.55.0</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.pmd</groupId>
-			<artifactId>pmd-apex-jorje</artifactId>
-			<version>6.55.0</version>
-			<type>pom</type>
-		</dependency>
-		<dependency>
-			<groupId>org.ow2.asm</groupId>
-			<artifactId>asm</artifactId>
-			<version>9.4</version>
+			<version>7.0.0</version>
 		</dependency>
 	</dependencies>
 

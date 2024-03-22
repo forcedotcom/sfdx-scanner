@@ -1,8 +1,7 @@
 import os = require('os');
 import path = require('path');
 
-export const PMD6_VERSION = '6.55.0';
-export const PMD7_VERSION = '7.0.0-rc4';
+export const PMD7_VERSION = '7.0.0';
 export const PMD_APPEXCHANGE_RULES_VERSION = '0.12';
 export const SFGE_VERSION = '1.0.1-pilot';
 export const DEFAULT_SCANNER_PATH = path.join(os.homedir(), '.sfdx-scanner');
@@ -133,7 +132,6 @@ export enum Severity {
 }
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src
-export const PMD6_LIB = path.join(__dirname, '..', 'dist', 'pmd', 'lib');
 export const PMD7_LIB = path.join(__dirname, '..', 'dist', 'pmd7', 'lib');
 
 // Here, current dir __dirname = <base_dir>/sfdx-scanner/src

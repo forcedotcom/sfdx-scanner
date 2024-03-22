@@ -66,14 +66,6 @@ specify location of PMD rule reference XML file to customize rule selection
 
 Specifies the location of the PMD rule reference XML file to customize rule selection.
 
-# flags.previewPmd7Summary
-
-use PMD version %s when running PMD and CPD
-
-# flags.previewPmd7Description
-
-Uses PMD version %s instead of %s when running PMD and CPD engines.
-
 # flags.verboseViolationsSummary
 
 return retire-js violation message details
