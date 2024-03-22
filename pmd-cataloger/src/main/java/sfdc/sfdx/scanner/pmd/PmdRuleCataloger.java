@@ -33,18 +33,18 @@ class PmdRuleCataloger {
 	private final List<PmdCatalogRule> masterRuleList = new ArrayList<>();
 	private final List<PmdCatalogRuleset> masterRulesetList = new ArrayList<>();
 
-    /**
-     * The directory in which the catalog file will be placed.
-     */
-    private final String catalogHome;
-    /**
-     * The name that the catalog file will be given.
-     */
-    private final String catalogName;
-    /**
-     * The specific PMD variant whose rules are being cataloged. (E.g., "pmd" vs "pmd-appexchange")
-     */
-    private final String engineSubvariant;
+	/**
+	 * The directory in which the catalog file will be placed.
+	 */
+	private final String catalogHome;
+	/**
+	 * The name that the catalog file will be given.
+	 */
+	private final String catalogName;
+	/**
+	 * The specific PMD variant whose rules are being cataloged. (E.g., "pmd" vs "pmd-appexchange")
+	 */
+	private final String engineSubvariant;
 
 
 	/**
@@ -52,9 +52,9 @@ class PmdRuleCataloger {
 	 */
 	PmdRuleCataloger(Map<String, List<String>> rulePathEntries, String catalogHome, String catalogName, String engineSubvariant) {
 		this.rulePathEntries = rulePathEntries;
-        this.catalogHome = catalogHome;
-        this.catalogName = catalogName;
-        this.engineSubvariant = engineSubvariant;
+		this.catalogHome = catalogHome;
+		this.catalogName = catalogName;
+		this.engineSubvariant = engineSubvariant;
 	}
 
 
@@ -68,7 +68,7 @@ class PmdRuleCataloger {
 		// Identify all the ruleset and category files for each language we're looking at.
 		extractRules();
 
-		// STEP: Process the category files to derive category and rule representations.
+		//  Process the category files to derive category and rule representations.
 		final Map<String, Set<String>> categoryPathsByLanguage = this.languageXmlFileMapping.getCategoryPaths();
 		for (String language : categoryPathsByLanguage.keySet()) {
 			final Set<String> categoryPaths = categoryPathsByLanguage.get(language);
