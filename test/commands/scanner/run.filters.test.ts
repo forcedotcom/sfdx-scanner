@@ -47,6 +47,7 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 
 			it('Case: --engine pmd-appexchange against unclean code', () => {
 				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'pmd-appexchange-test-app', 'objects', 'unclean.object')} --format json --engine pmd-appexchange`);
+				assertNoError(output);
 				const stdout = output.shellOutput.stdout;
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
@@ -173,3 +174,9 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 		});
 	});
 });
+
+function assertNoError(output) {
+	if (output.shellOutput.stderr.includes("Error")) {
+		expect.fail("Found error in stderr output:\n" + output.shellOutput.stderr);
+	}
+}
