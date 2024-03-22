@@ -10,7 +10,8 @@ AvoidJavaScriptHomePageComponent[](#avoidjavascripthomepagecomponent)
 
 **Description:**
 
-   Detects use of custom JavaScript actions in home page components.
+   Detects use of custom JavaScript actions in home page
+		components.
 
 **Example(s):**
 

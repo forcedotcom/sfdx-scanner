@@ -1,4 +1,4 @@
-AvoidJsLinksInWebLinks[](#avoidjslinksinweblinks)
+AvoidJsLinksInCustomObjectInternalOnly[](#avoidjslinksincustomobjectinternalonly)
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Violation:**

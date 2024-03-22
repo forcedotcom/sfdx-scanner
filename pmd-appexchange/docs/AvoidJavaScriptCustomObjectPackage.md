@@ -1,17 +1,16 @@
-AvoidLmcIsExposedTrue[](#avoidlmcisexposedtrue)
+AvoidJavaScriptCustomObjectPackage[](#avoidjavascriptcustomobjectpackage)
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Violation:**
 
-   Use Lightning Message Channel with isExposed set to false.
+   Avoid using JavaScript to execute custom button actions.
 
 
 **Priority:** High (2)
 
 **Description:**
 
-   Detects a Lightning Message Channel with isExposed=true,
-		which isn’t allowed in managed packages.
+   Detects use of custom JavaScript actions in custom rules.
 
 **Example(s):**
 

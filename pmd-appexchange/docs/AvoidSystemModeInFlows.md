@@ -10,7 +10,8 @@ AvoidSystemModeInFlows[](#avoidsystemmodeinflows)
 
 **Description:**
 
-   Detects where default mode must be used in flows instead of system mode.
+   Detects where default mode must be used in flows instead
+		of system mode.
 
 **Example(s):**
 
