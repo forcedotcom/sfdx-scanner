@@ -34,7 +34,7 @@ public class Something {
     </rule>
 
     <rule name="fakerule2"
-		  language="apex"
+          language="apex"
           message="Avoid Soql queries inside loops"
           class="net.sourceforge.pmd.lang.apex.rule.performance.AvoidSoqlInLoopsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_performance.html#avoidsoqlinloops">
@@ -56,7 +56,7 @@ public class Something {
     </rule>
 
     <rule name="fakerule3"
-		  language="apex"
+          language="apex"
           message="Avoid Sosl queries inside loops"
           class="net.sourceforge.pmd.lang.apex.rule.performance.AvoidSoslInLoopsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_performance.html#avoidsoslinloops">
