@@ -35,8 +35,7 @@ export class Pmd7CommandInfo implements PmdCommandInfo {
 
 	constructJavaCommandArgsForCpd(fileList: string, minimumTokens: number, language: string): string[] {
 		const classpath = `${PMD7_LIB}/*`;
-		const resolvedLanguage = language === 'visualforce' ? 'vf' : language;
 		return ['-cp', classpath, HEAP_SIZE, PMD7_CLI_CLASS, 'cpd', '--file-list', fileList, '--format', 'xml',
-			'--minimum-tokens', minimumTokens.toString(), '--language', resolvedLanguage, '--skip-lexical-errors'];
+			'--minimum-tokens', minimumTokens.toString(), '--language', language, '--skip-lexical-errors'];
 	}
 }

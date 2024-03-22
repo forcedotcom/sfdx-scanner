@@ -13,6 +13,7 @@ describe('scanner run with custom config E2E', () => {
 	it('Can use custom PMD config to detect violations', () => {
 		const targetPath = path.join('.', 'test', 'code-fixtures', 'projects', 'app', 'force-app', 'main', 'default', 'pages', 'testSELECT2.page');
 		const output = runCommand(`scanner run --target ${targetPath} --pmdconfig ${customPmdConfig} --format json`);
+		assertNoError(output);
 		const stdout = output.shellOutput.stdout;
 		expect(stdout).to.not.be.empty;
 
@@ -32,6 +33,7 @@ describe('scanner run with custom config E2E', () => {
 	it('Can use custom ESLint config to detect violations', () => {
 		const targetPath = path.join('.', 'test', 'code-fixtures', 'projects', 'ts', 'src', 'simpleYetWrong.ts');
 		const output = runCommand(`scanner run --target ${targetPath} --eslintconfig ${customEslintConfig} --format json`);
+		assertNoError(output);
 		const stdout = output.shellOutput.stdout;
 		expect(stdout).to.not.be.empty;
 
@@ -51,6 +53,7 @@ describe('scanner run with custom config E2E', () => {
 	it('Default engine and custom variant are mutually exclusive', () => {
 		const targetPath = path.join('.', 'test', 'code-fixtures', 'projects', 'app', 'force-app');
 		const output = runCommand(`scanner run --target ${targetPath} --pmdconfig ${customPmdConfig} --format json`);
+		assertNoError(output);
 		const stdout = output.shellOutput.stdout;
 		const jsonOutput = stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1);
 		expect(jsonOutput).to.not.be.empty;
@@ -64,3 +67,9 @@ describe('scanner run with custom config E2E', () => {
 		expect(parsedOutput.length).to.equal(onlyCustomPmdAndDefaultEslint.length, 'Violations should be only from Custom PMD and Default ESLint');
 	});
 });
+
+function assertNoError(output) {
+	if (output.shellOutput.stderr.includes("Error")) {
+		expect.fail("Found error in stderr output:\n" + output.shellOutput.stderr);
+	}
+}

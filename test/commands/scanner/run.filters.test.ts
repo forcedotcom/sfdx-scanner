@@ -166,7 +166,7 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 			const output = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 			expect(output.length).to.equal(1, 'Should only be violations from one file');
 			expect(output[0].engine).to.equal('pmd');
-			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(2);
+			expect(output[0].violations, TestUtils.prettyPrint(output[0].violations)).to.be.lengthOf(1);
 
 			// Make sure only violations are returned for the requested category
 			for (const v of output[0].violations) {
