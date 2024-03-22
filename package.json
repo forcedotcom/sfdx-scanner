@@ -97,6 +97,7 @@
 		"/retire-js",
 		"/oclif.lock"
 	],
+	"types": "/src/types.d.ts",
 	"homepage": "https://forcedotcom.github.io/sfdx-scanner",
 	"keywords": [
 		"sfdx-plugin",
