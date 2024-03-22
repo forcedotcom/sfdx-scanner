@@ -10,7 +10,7 @@
 	</description>
 <!-- This is just a copy-paste of the declaration of PMD's own ClassNamingConventions rule. -->
 	<rule name="fakeNamingConvention"
-		  since="6.55.0"
+		  language="apex"
 		  message="The {0} name ''{1}'' doesn''t match ''{2}''"
 		  class="net.sourceforge.pmd.lang.apex.rule.codestyle.ClassNamingConventionsRule"
 		  externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_codestyle.html#classnamingconventions">
@@ -33,7 +33,7 @@ public class fooClass { } // THis will be reported unless you change the regex
 	</rule>
 <!-- This is just a copy-paste of the declaration of PMD's own ApexDoc rule. -->
 	<rule name="fakeApexDoc"
-		  since="6.55.0"
+		  language="apex"
 		  message="ApexDoc comment is missing or incorrect"
 		  class="net.sourceforge.pmd.lang.apex.rule.documentation.ApexDocRule"
 		  externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_documentation.html#apexdoc">

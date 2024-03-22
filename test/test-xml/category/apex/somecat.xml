@@ -10,7 +10,7 @@ Rules that flag suboptimal code.
     </description>
 
     <rule name="fakerule1"
-          since="5.5.0"
+          language="apex"
           message="Avoid DML statements inside loops"
           class="net.sourceforge.pmd.lang.apex.rule.performance.AvoidDmlStatementsInLoopsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_performance.html#avoiddmlstatementsinloops">
@@ -21,7 +21,7 @@ Avoid DML statements inside loops to avoid hitting the DML governor limit. Inste
         <example>
 <![CDATA[
 public class Something {
-    public void foo() {  
+    public void foo() {
         for (Integer i = 0; i < 151; i++) {
             Account account;
             // ...
@@ -34,7 +34,7 @@ public class Something {
     </rule>
 
     <rule name="fakerule2"
-          since="5.5.0"
+		  language="apex"
           message="Avoid Soql queries inside loops"
           class="net.sourceforge.pmd.lang.apex.rule.performance.AvoidSoqlInLoopsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_performance.html#avoidsoqlinloops">
@@ -56,7 +56,7 @@ public class Something {
     </rule>
 
     <rule name="fakerule3"
-          since="6.0.0"
+		  language="apex"
           message="Avoid Sosl queries inside loops"
           class="net.sourceforge.pmd.lang.apex.rule.performance.AvoidSoslInLoopsRule"
           externalInfoUrl="${pmd.website.baseurl}/pmd_rules_apex_performance.html#avoidsoslinloops">
