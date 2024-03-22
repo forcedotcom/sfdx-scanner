@@ -1,17 +1,16 @@
-AvoidLmcIsExposedTrue[](#avoidlmcisexposedtrue)
+AvoidApiSessionIdInXML[](#avoidapisessionidinxml)
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **Violation:**
 
-   Use Lightning Message Channel with isExposed set to false.
+   Session ID use is not approved.
 
 
 **Priority:** High (2)
 
 **Description:**
 
-   Detects a Lightning Message Channel with isExposed=true,
-		which isn’t allowed in managed packages.
+   Detects use of Api.Session_ID to retrieve a session ID.
 
 **Example(s):**
 

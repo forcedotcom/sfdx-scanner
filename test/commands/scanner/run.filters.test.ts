@@ -45,10 +45,9 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 				expect(csv.indexOf('\n')).to.equal(-1, "Should be no violations detected");
 			});
 
-			// Currently this test fails because the pmd-appexchange jar files depend on classes that only exist in PMD6
-			// TODO: Turn this test back on as soon as we get the new jar files for pmd-appexchange that work with PMD7
-			xit('Case: --engine pmd-appexchange against unclean code', () => {
+			it('Case: --engine pmd-appexchange against unclean code', () => {
 				const output = runCommand(`scanner run --target ${path.join('test', 'code-fixtures', 'projects', 'pmd-appexchange-test-app', 'objects', 'unclean.object')} --format json --engine pmd-appexchange`);
+				assertNoError(output);
 				const stdout = output.shellOutput.stdout;
 				const results = JSON.parse(stdout.slice(stdout.indexOf('['), stdout.lastIndexOf(']') + 1));
 				expect(results, `results does not have expected length. ${results.map(r => r.fileName).join(',')}`)
@@ -175,3 +174,9 @@ describe('scanner run tests that result in the use of RuleFilters', function () 
 		});
 	});
 });
+
+function assertNoError(output) {
+	if (output.shellOutput.stderr.includes("Error")) {
+		expect.fail("Found error in stderr output:\n" + output.shellOutput.stderr);
+	}
+}
